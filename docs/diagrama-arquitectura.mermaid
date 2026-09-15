@@ -1,0 +1,26 @@
+graph TD
+    subgraph Monorepo["Monorepo (pnpm + Turborepo)"]
+        WEB["App web<br/>Next.js, PWA<br/>usuario final"]
+        BACKOFFICE["App backoffice<br/>Next.js<br/>Admin, Discipuladores, Líderes"]
+        API["API<br/>NestJS<br/>REST + lógica de negocio"]
+        SHARED["packages/shared-types<br/>tipos Prisma + DTOs"]
+        UI["packages/ui<br/>componentes shadcn/ui"]
+    end
+
+    DB[("PostgreSQL<br/>vía Prisma")]
+    SSO["SSO<br/>Google / Facebook<br/>(NextAuth.js)"]
+    PUSH["Web Push<br/>notificaciones PWA"]
+    STORAGE["Almacenamiento de archivos<br/>local en dev, S3-compatible después"]
+
+    WEB -->|HTTPS / REST| API
+    BACKOFFICE -->|HTTPS / REST| API
+    API --> DB
+    API --> SSO
+    API --> PUSH
+    API --> STORAGE
+
+    WEB -.usa.-> SHARED
+    BACKOFFICE -.usa.-> SHARED
+    API -.usa.-> SHARED
+    WEB -.usa.-> UI
+    BACKOFFICE -.usa.-> UI
