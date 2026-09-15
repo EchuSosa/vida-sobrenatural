@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: vida-sobrenatural-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vidasobrenatural
+      POSTGRES_PASSWORD: vidasobrenatural_dev
+      POSTGRES_DB: vidasobrenatural
+    ports:
+      - "5432:5432"
+    volumes:
+      - vida_sobrenatural_db_data:/var/lib/postgresql/data
+
+volumes:
+  vida_sobrenatural_db_data:
