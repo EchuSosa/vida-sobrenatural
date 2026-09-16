@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Turborepo
+.turbo/
+
+# Env files (each app's own .gitignore also covers this)
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+
+# Logs
+*.log
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Prisma's auto-generated AI-agent skill docs (regenerated on `pnpm install`, not project content)
+apps/api/.claude/
+apps/api/.cursor/
+apps/api/.windsurf/
+apps/api/.agents/
+apps/api/.devin/
+apps/api/skills-lock.json
