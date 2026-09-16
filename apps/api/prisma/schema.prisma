@@ -5,9 +5,101 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  // Dentro de src/ para que tsc (rootDir: ./src en tsconfig.build.json) pueda
+  // compilarlo junto con el resto del código de la app.
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// --- Fase de Bienvenida (specs/001-fase-bienvenida) ---
+// Nombres de campo alineados con docs/04-dominio-entidades.md (Constitución, Principio II).
+// Ninguna entidad se borra físicamente — ambas usan `activo` (Principio III).
+
+model Sede {
+  id                    String  @id @default(uuid())
+  // Único "entre Sedes activas" es una regla de negocio (SedeService), no un
+  // constraint de base de datos — ver data-model.md.
+  nombre                String
+  direccion             String
+  contactoTelefono      String?
+  contactoEmail         String?
+  horarios              String
+  descripcionBienvenida String?
+  activo                Boolean @default(true)
+
+  personas Persona[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sedes")
+}
+
+enum Genero {
+  masculino
+  femenino
+}
+
+enum EstadoCivil {
+  soltero_a
+  casado_a
+  en_concubinato
+  viudo_a
+  divorciado_a
+  separado_a
+}
+
+enum TiempoCongregacion {
+  menos_6_meses
+  de_6_meses_a_1_anio @map("6_meses_a_1_anio")
+  de_1_a_3_anios      @map("1_a_3_anios")
+  de_3_a_5_anios      @map("3_a_5_anios")
+  mas_5_anios
+}
+
+enum EstadoPersona {
+  activa
+  pendiente_tutor
+}
+
+model Persona {
+  id     String @id @default(uuid())
+  // Único dato de contacto con constraint de unicidad (FR-009) — el teléfono
+  // explícitamente no lo es (ver Clarifications en spec.md).
+  email  String @unique
+  nombre String
+  apellido String
+
+  genero             Genero
+  fechaNacimiento    DateTime
+  telefono           String
+  direccion          String
+  estadoCivil        EstadoCivil
+  profesion          String
+  tiempoCongregacion TiempoCongregacion
+
+  sedeId String
+  sede   Sede   @relation(fields: [sedeId], references: [id])
+
+  estado              EstadoPersona
+  // Soft delete (Principio III) — independiente de `estado`. Se pone en
+  // `false` cuando un pendiente_tutor no se autoriza (FR-014).
+  activo              Boolean       @default(true)
+  consentimientoDatos Boolean       @default(false)
+
+  // Solo se completan al activar un pendiente_tutor (Flujo 7, FR-008).
+  tutorNombre   String?
+  tutorTelefono String?
+
+  // Roles acumulativos (docs/03-roles-permisos.md). Vacío hasta que la
+  // Persona pasa a `activa`.
+  rol String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("personas")
 }

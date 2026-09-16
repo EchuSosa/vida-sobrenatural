@@ -1,0 +1,148 @@
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { EstadoPersona } from '../generated/prisma/enums.js';
+import { calcularEdad } from './calcular-edad.js';
+import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
+import type { ActivarPersonaDto } from './dto/activar-persona.dto.js';
+
+const EDAD_MINIMA = 18;
+
+const PENDIENTE_TUTOR_SELECT = {
+  id: true,
+  nombre: true,
+  apellido: true,
+  telefono: true,
+  fechaNacimiento: true,
+  sedeId: true,
+} as const;
+
+@Injectable()
+export class PersonaService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /** GET /personas/by-email — uso interno, ver contracts/auth-integration.md. */
+  async findByEmail(email: string) {
+    const persona = await this.prisma.persona.findUnique({
+      where: { email },
+      select: { id: true, estado: true, activo: true, rol: true },
+    });
+    if (!persona) {
+      throw new NotFoundException('No existe una Persona con ese email.');
+    }
+    return persona;
+  }
+
+  /** POST /personas — FR-005 a FR-009, FR-013 (Historia 2 y 2b). */
+  async create(dto: RegistroPersonaDto, emailDeSesion: string) {
+    const sede = await this.prisma.sede.findFirst({
+      where: { id: dto.sedeId, activo: true },
+    });
+    if (!sede) {
+      throw new BadRequestException('La Sede indicada no existe o no está activa.');
+    }
+
+    const fechaNacimiento = new Date(dto.fechaNacimiento);
+    const esMayorDeEdad = calcularEdad(fechaNacimiento) >= EDAD_MINIMA;
+
+    if (esMayorDeEdad && !dto.consentimientoDatos) {
+      // FR-013: el consentimiento del propio adulto es obligatorio en el formulario.
+      throw new BadRequestException(
+        'Se requiere el consentimiento de almacenamiento de datos para completar el registro.',
+      );
+    }
+
+    try {
+      return await this.prisma.persona.create({
+        data: {
+          email: emailDeSesion,
+          nombre: dto.nombre,
+          apellido: dto.apellido,
+          genero: dto.genero,
+          fechaNacimiento,
+          telefono: dto.telefono,
+          direccion: dto.direccion,
+          sedeId: dto.sedeId,
+          estadoCivil: dto.estadoCivil,
+          profesion: dto.profesion,
+          tiempoCongregacion: dto.tiempoCongregacion,
+          estado: esMayorDeEdad ? EstadoPersona.activa : EstadoPersona.pendiente_tutor,
+          // El menor no autoconsiente (FR-013) — su consentimiento llega recién
+          // al activar, vía el tutor (ver `activar` más abajo).
+          consentimientoDatos: esMayorDeEdad ? dto.consentimientoDatos : false,
+          rol: esMayorDeEdad ? ['miembro_registrado'] : [],
+        },
+        select: { id: true, estado: true },
+      });
+    } catch (error) {
+      // FR-009: además del chequeo previo (evitado aquí a propósito para no
+      // duplicar una consulta), el constraint único de `email` es la fuente de
+      // verdad ante un registro simultáneo con el mismo email (condición de
+      // carrera — ver spec.md, Edge Cases).
+      if (isUniqueConstraintViolation(error, 'email')) {
+        throw new ConflictException('Ya existe una Persona registrada con este email.');
+      }
+      throw error;
+    }
+  }
+
+  /** GET /personas/pendientes-tutor — Historia 2b, Acceptance Scenario 3. */
+  findPendientesTutor() {
+    return this.prisma.persona.findMany({
+      where: { estado: EstadoPersona.pendiente_tutor, activo: true },
+      select: PENDIENTE_TUTOR_SELECT,
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  /** PATCH /personas/:id/activar — FR-008, Flujo 7 camino A únicamente. */
+  async activar(id: string, dto: ActivarPersonaDto) {
+    const persona = await this.buscarPendienteTutorActivoOFallar(id);
+
+    return this.prisma.persona.update({
+      where: { id: persona.id },
+      data: {
+        estado: EstadoPersona.activa,
+        tutorNombre: dto.tutorNombre,
+        tutorTelefono: dto.tutorTelefono,
+        // El consentimiento definitivo lo da el tutor en este paso, no el
+        // menor en el formulario (FR-013; ver data-model.md).
+        consentimientoDatos: true,
+        rol: ['miembro_registrado'],
+      },
+      select: { id: true, estado: true },
+    });
+  }
+
+  /** PATCH /personas/:id/marcar-inactiva — FR-014. */
+  async marcarInactiva(id: string) {
+    const persona = await this.buscarPendienteTutorActivoOFallar(id);
+
+    return this.prisma.persona.update({
+      where: { id: persona.id },
+      data: { activo: false },
+      select: { id: true, activo: true },
+    });
+  }
+
+  private async buscarPendienteTutorActivoOFallar(id: string) {
+    const persona = await this.prisma.persona.findUnique({ where: { id } });
+    if (!persona || persona.estado !== EstadoPersona.pendiente_tutor || !persona.activo) {
+      throw new ConflictException('La Persona no está en estado pendiente_tutor.');
+    }
+    return persona;
+  }
+}
+
+/**
+ * Prisma 7 + driver adapters ya no exponen `meta.target` para P2002 — el
+ * detalle real viene en `meta.driverAdapterError.cause.constraint.index`
+ * (el nombre del índice/constraint de Postgres, ej. "personas_email_key").
+ */
+function isUniqueConstraintViolation(error: unknown, field: string): boolean {
+  if (typeof error !== 'object' || error === null || (error as { code?: unknown }).code !== 'P2002') {
+    return false;
+  }
+  const meta = (error as { meta?: { driverAdapterError?: { cause?: { constraint?: { index?: string } } } } }).meta;
+  const constraintIndex = meta?.driverAdapterError?.cause?.constraint?.index ?? '';
+  return constraintIndex.includes(field);
+}
