@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 async function getSedesActivas(): Promise<Sede[]> {
-  const baseUrl = process.env.API_BASE_URL ?? 'http://localhost:3000';
+  const baseUrl = process.env.API_BASE_URL ?? 'http://localhost:3333';
   const response = await fetch(`${baseUrl}/sedes`, { cache: 'no-store' });
   if (!response.ok) {
     throw new Error(`GET /sedes respondió ${response.status}`);

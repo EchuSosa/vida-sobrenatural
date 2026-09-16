@@ -15,7 +15,7 @@ interface PersonaLookup {
 }
 
 async function buscarPersonaPorEmail(email: string): Promise<PersonaLookup | null> {
-  const baseUrl = process.env.API_BASE_URL ?? 'http://localhost:3000';
+  const baseUrl = process.env.API_BASE_URL ?? 'http://localhost:3333';
   const response = await fetch(
     `${baseUrl}/personas/by-email?email=${encodeURIComponent(email)}`,
     { headers: { 'X-Internal-Secret': process.env.INTERNAL_API_SECRET ?? '' } },

@@ -16,7 +16,7 @@ detalles de contratos o modelo de datos — ver `contracts/` y `data-model.md`.
 ## Levantar las apps
 
 ```bash
-pnpm --filter api start:dev        # http://localhost:3000 (o el puerto libre)
+pnpm --filter api start:dev        # http://localhost:3333 (PORT en apps/api/.env)
 pnpm --filter web dev              # Visitante
 pnpm --filter backoffice dev       # Admin/Discipulador
 ```

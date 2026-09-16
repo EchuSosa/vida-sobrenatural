@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import type { Genero, EstadoCivil, TiempoCongregacion, Sede } from '@vida-sobrenatural/shared-types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
 const OPCIONES_GENERO: { value: Genero; label: string }[] = [
   { value: 'femenino', label: 'Femenino' },

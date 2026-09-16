@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import type { PersonaPendienteTutor } from '@vida-sobrenatural/shared-types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
 export default function PendientesTutorPage() {
   const { data: session, status } = useSession();
