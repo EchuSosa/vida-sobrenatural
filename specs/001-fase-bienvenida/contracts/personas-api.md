@@ -2,6 +2,15 @@
 
 Base path: `/personas`.
 
+## Formato de errores *(actualización 2026-09-17, FR-018, D101)*
+
+Todos los errores de este contrato (400/403/404/409 descritos abajo) siguen el formato Problem
+Details + `code` del catálogo compartido ya implementado por 002-base-transversal (ver
+`specs/002-base-transversal/contracts/errores.md`) — no se define un formato de error propio para
+esta fase. Los `code` usados por este contrato: `VALIDACION` (400, con `errors` por campo),
+`EMAIL_DUPLICADO` (409, FR-009), `SEDE_INVALIDA` (400), `CONSENTIMIENTO_REQUERIDO` (400),
+`PERSONA_NO_PENDIENTE_TUTOR` (409), `NO_ENCONTRADO` (404), `SIN_PERMISO` (403).
+
 ## GET /personas/by-email
 
 **Uso interno, no llamado por el navegador**: lo invoca el callback server-side de NextAuth.js
@@ -63,6 +72,10 @@ Registro inicial — Historia 2 / Historia 2b, FR-005 a FR-009, FR-013.
   - Si `edad < 18`: ignora `consentimientoDatos` del body (el menor no autoconsiente); crea la
     Persona con `estado: "pendiente_tutor"`, `activo: true`, sin `rol` operativo (no puede iniciar
     sesión hasta activarse).
+  - *(actualización 2026-09-17, FR-013, FR-015)* Campos que el servidor setea, **nunca** tomados
+    del body: si `consentimientoDatos=true`, setea `consentimientoDatosFecha=now()` y
+    `consentimientoDatosOrigen='app'`; siempre setea `origenAlta='autorregistro'` y `altaPor=null`
+    (el alta por Admin es una feature propia, todavía sin endpoint — ver `data-model.md`).
 - **Response 201**:
   ```json
   { "id": "uuid", "estado": "activa" }
@@ -102,7 +115,8 @@ Decisión 4) — no crea Personas nuevas, solo activa una `pendiente_tutor` exis
   `rol: ["miembro_registrado"]`. Setea `consentimientoDatos=true` (ver `data-model.md`). El
   consentimiento de datos (FR-013) se considera dado por el tutor en este paso — no requiere un
   campo adicional en el body (queda registrado implícitamente por la presencia de
-  `tutorNombre`/`tutorTelefono` y la acción del Admin/Discipulador).
+  `tutorNombre`/`tutorTelefono` y la acción del Admin/Discipulador). *(actualización 2026-09-17)*
+  También setea `consentimientoDatosFecha=now()` y `consentimientoDatosOrigen='presencial'`.
 - **Response 200**: `{ "id": "uuid", "estado": "activa" }`.
 - **Response 409**: la Persona no está en `pendiente_tutor` (ya activada, o inactiva).
 - **Response 403/401**: sin rol Admin/Discipulador o sin sesión.

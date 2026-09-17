@@ -160,6 +160,61 @@ Visitante), `apps/backoffice` (Next.js, Admin/Discipulador), `packages/shared-ty
 
 ---
 
+## Phase 8: Actualización post-decisiones D91–D105 (2026-09-17)
+
+**Purpose**: alinear la Fase de Bienvenida con las decisiones D91–D105 y la Constitución v1.1.0,
+ahora que `002-base-transversal` ya está implementado y commiteado. No modifica ni retoca las
+tareas T001–T041 ya completadas — son historial de lo que se construyó en su momento.
+
+**Contexto**: las rutas `/bienvenida`/`/sede` ya pasaron a `/primeros-pasos`/`/visitanos` (hecho en
+002-base-transversal); esta fase cubre lo que falta puntualmente de 001: contenido real (D98),
+registro por pasos (D94), vínculo SSO con email verificado (Constitución Principio V), el modelo
+de datos de consentimiento/alta (D97), el catálogo de errores aplicado a esta fase (D101), y dos
+correcciones de lint diferidas desde 002-base-transversal.
+
+**Etiquetado**: esta fase no se organiza por User Story (`spec.md` ya no gana historias nuevas)
+sino por grupo de trabajo dentro de la actualización — `[Grupo A]`...`[Grupo E]` reemplaza a
+`[Story]` únicamente en esta fase, con el mismo sentido de agrupación/trazabilidad.
+
+### Grupo A — Modelo de datos: consentimiento y origen del alta (FR-013, FR-015, D97)
+
+- [X] T042 [P] Agregar a `apps/api/prisma/schema.prisma`: `enum OrigenConsentimiento { app presencial }`, `enum OrigenAlta { autorregistro admin }`, y en `model Persona`: `consentimientoDatosFecha DateTime?`, `consentimientoDatosOrigen OrigenConsentimiento?`, `origenAlta OrigenAlta @default(autorregistro)`, `altaPor String?` (sin relación FK activa todavía — se define cuando exista el flujo de alta por Admin). Correr la migración de Prisma (`data-model.md`).
+- [X] T043 [P] Agregar `EMAIL_NO_VERIFICADO` al `type ErrorCode` de `packages/shared-types/src/error-code.ts` (D101, `contracts/auth-integration.md`).
+- [X] T044 [Grupo A] Actualizar `PersonaService.create()` y `PersonaService.activar()` en `apps/api/src/persona/persona.service.ts`: `create()` setea `consentimientoDatosFecha=now()`/`consentimientoDatosOrigen='app'` cuando `consentimientoDatos=true`, y siempre `origenAlta='autorregistro'`/`altaPor=null`; `activar()` setea `consentimientoDatosFecha=now()`/`consentimientoDatosOrigen='presencial'` (`contracts/personas-api.md` actualizado; depende de T042).
+- [X] T045 [P] [Grupo A] Unit test (Jest) en `apps/api/test/unit/persona-consentimiento.spec.ts`: verifica que `create()` (mayor de edad) y `activar()` setean `consentimientoDatosFecha`/`consentimientoDatosOrigen` correctos, y que `origenAlta` siempre queda `autorregistro` con `altaPor=null` (depende de T044 en rojo).
+
+### Grupo B — Vínculo SSO solo con email verificado (Constitución Principio V, FR-017)
+
+- [X] T046 [Grupo B] En `apps/web/src/auth.ts`: el `profile()` de `googleProvider` captura `email_verified` (expone `emailVerificadoPorProveedor: boolean`); el proveedor `test-login` acepta un credential opcional `emailVerified` (default `"true"`) para poder simular el caso negativo en E2E; el callback `signIn` rechaza con redirect a `/email-no-verificado` **antes** de llamar `buscarPersonaPorEmail` cuando `emailVerificadoPorProveedor !== true` (`contracts/auth-integration.md`).
+- [X] T047 [P] [Grupo B] En `apps/backoffice/src/auth.ts`: mismo chequeo de `email_verified` en `profile()`/`signIn`, con el mismo patrón ya usado para `pendiente_tutor` (`return false`, sin página propia — el backoffice no tiene rutas públicas para este mensaje).
+- [X] T048 [P] [Grupo B] Agregar `emailVerificadoPorProveedor?: boolean` a la interfaz `User` de `apps/web/src/types/next-auth.d.ts` (depende de T046).
+- [X] T049 [P] [Grupo B] Crear `apps/web/src/app/email-no-verificado/page.tsx`: explica que no se pudo confirmar el email con el proveedor (mensaje distinto de `/error-verificacion` — esto no es una falla transitoria, no invita a "reintentar en un momento"), con `id="contenido"` para el skip-link.
+- [X] T050 [P] [Grupo B] Agregar `EMAIL_NO_VERIFICADO` al namespace `errors` de `apps/web/src/messages/es.json` y `apps/backoffice/src/messages/es.json`.
+- [X] T051 [Grupo B] Extender `apps/web/e2e/registro-bienvenida.spec.ts` (o un spec nuevo) con el caso de email no verificado usando el `test-login` extendido (T046): verifica el redirect a `/email-no-verificado` y que no se crea ninguna Persona (Historia 2, Acceptance Scenario 7; depende de T046, T049).
+
+### Grupo C — Registro por pasos (D94, `docs/15-guia-ux-ui.md`)
+
+- [X] T052 [P] [Grupo C] Crear `packages/ui/src/components/paso-indicador.tsx` (`PasoIndicador`: texto "Paso X de Y" + barra de progreso accesible, `role="progressbar"` con `aria-valuenow`/`aria-valuemin`/`aria-valuemax`/`aria-label`), exportado desde `packages/ui/src/index.ts` — reutilizable por futuros formularios largos, no solo este.
+- [X] T053 [Grupo C] Reescribir `apps/web/src/app/registro/page.tsx` como formulario de 4 pasos (Paso 1 "Datos personales": apellido/nombre/género/fecha de nacimiento; Paso 2 "Contacto": teléfono/dirección/Sede; Paso 3 "Sobre vos": estado civil/profesión(+detalle)/tiempo congregándote; Paso 4 "Resumen": muestra todos los datos ya cargados + checkbox de consentimiento + enviar), con el estado del formulario en un único objeto de React que persiste entre pasos (nunca se pierde al volver), botón "Atrás" habilitado desde el Paso 2, y `PasoIndicador` visible en todos los pasos (FR-016; depende de T052).
+- [X] T054 [Grupo C] Migrar los textos restantes de `apps/web/src/app/registro/page.tsx` (labels de cada campo, placeholders, textos de los pasos, botones "Atrás"/"Siguiente"/"Registrarme") al namespace `registro` de `apps/web/src/messages/es.json` vía `useTranslations` — completa T082 de `002-base-transversal/tasks.md` (Constitución Principio IX).
+- [X] T055 [Grupo C] Actualizar `apps/web/e2e/registro-bienvenida.spec.ts` a los selectores y la navegación del formulario por pasos (T053): completar cada paso, tocar "Siguiente", verificar el resumen del Paso 4 antes de enviar; mantener `@axe-core/playwright` en modo claro y oscuro sobre **cada paso**, no solo la pantalla inicial (Constitución Principio VII; depende de T053, T054).
+
+### Grupo D — Catálogo de errores aplicado a esta fase (D101, FR-018)
+
+- [X] T056 [P] [Grupo D] Verificar que las respuestas de error de `POST /personas`, `PATCH /personas/:id/activar`, `PATCH /personas/:id/marcar-inactiva`, `POST /sedes` y `PATCH /sedes/:id` siguen el catálogo/Problem Details ya implementado por `002-base-transversal` (`AllExceptionsFilter`) sin regresiones, y que `apps/web/src/app/registro/page.tsx` (T053) sigue traduciendo cada `code` con `api-client.ts`; ajustar solo si se detecta alguna respuesta que no siga el formato — no se reimplementa el mecanismo, ya existe.
+
+### Grupo E — Correcciones diferidas y cierre
+
+- [X] T057 [P] [Grupo E] Corregir `react-hooks/set-state-in-effect` en `apps/backoffice/src/app/sedes/page.tsx`: envolver la llamada a `cargarSedes()` dentro del `useEffect` en una función `async` declarada localmente en el cuerpo del efecto (no llamar la función de `useCallback` directamente desde el efecto).
+- [X] T058 [P] [Grupo E] Mismo fix en `apps/backoffice/src/app/pendientes-tutor/page.tsx` (`cargarPendientes()`).
+- [X] T059 [Grupo E] Correr `pnpm --filter api test`, `pnpm --filter api test:e2e` y `pnpm --filter web test:e2e` completos, y `pnpm --filter web lint` / `pnpm --filter backoffice lint` — confirmar todo en verde, sin modificar aserciones de tests ya existentes fuera de lo que T055/T056 requieren.
+- [X] T060 [Grupo E] Recorrer manualmente los escenarios actualizados de `quickstart.md` (Escenario 1 con el contenido real, Escenario 2 con el formulario por pasos y el caso de email no verificado) antes de dar la actualización por terminada.
+
+**Checkpoint**: la Fase de Bienvenida queda alineada con D91–D105 y la Constitución v1.1.0, sin
+tocar el trabajo ya entregado en T001–T041.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -170,6 +225,11 @@ Visitante), `apps/backoffice` (Next.js, Admin/Discipulador), `packages/shared-ty
   independientes. **US2b depende de US2** (comparte `PersonaService`/`PersonaController` y el
   callback de NextAuth) — no tiene sentido implementarla antes que la Historia 2 exista.
 - **Polish (Phase 7)**: depende de las User Stories que se quieran incluir en el release.
+- **Actualización post-decisiones (Phase 8)**: depende de que `002-base-transversal` esté
+  implementado (ya lo está — packages/ui, catálogo de errores, AllExceptionsFilter, next-intl).
+  Dentro de la fase: Grupo A (modelo) bloquea Grupo D (verificación de errores, que asume los
+  campos nuevos ya existen); Grupo B y Grupo C son independientes entre sí; Grupo E (lint + cierre)
+  va al final, después de A-D.
 
 ### User Story Dependencies
 

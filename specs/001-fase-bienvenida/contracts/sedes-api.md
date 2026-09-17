@@ -4,6 +4,15 @@ Base path: `/sedes`. Documentado también vía Swagger/OpenAPI (`@nestjs/swagger
 implementados los controllers — este archivo es el contrato de referencia para el frontend
 mientras tanto.
 
+## Formato de errores *(actualización 2026-09-17, FR-018, D101)*
+
+Todos los errores de este contrato (401/403/404 descritos abajo) siguen el mismo formato Problem
+Details + `code` del catálogo compartido que `personas-api.md` (ver
+`specs/002-base-transversal/contracts/errores.md`) — no se define un formato de error propio para
+Sede. Los `code` usados por este contrato: `VALIDACION` (400, `CONTACTO_SEDE_REQUERIDO`/
+`SEDE_NOMBRE_DUPLICADO` en `errors`), `NO_ENCONTRADO` (404), `SIN_PERMISO` (403),
+`NO_AUTENTICADO` (401).
+
 ## GET /sedes
 
 Público (sin auth) — Historia 1, FR-002/FR-004.

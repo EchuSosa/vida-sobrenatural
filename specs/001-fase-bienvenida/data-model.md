@@ -58,6 +58,10 @@ Visitante que solo mira contenido de Bienvenida (Historia 1) **no** genera un re
 | `estado` | enum: `activa` \| `pendiente_tutor` | sí, default calculado en el registro | FR-007/FR-008; **no** se agrega un tercer valor (ver Clarifications del spec, decisión sobre cierre de casos) |
 | `activo` | boolean | sí, default `true` | soft delete (Principio III); se pone en `false` cuando un `pendiente_tutor` no se autoriza (FR-014) — no es lo mismo que `estado` |
 | `consentimientoDatos` | boolean | sí para `estado=activa` | FR-013 — lo marca la propia Persona si es mayor de edad |
+| `consentimientoDatosFecha` | datetime | sí cuando `consentimientoDatos=true` | *(actualización 2026-09-17, FR-013)* momento en que se dio el consentimiento — al crear la Persona (`POST /personas`, mayor de edad) o al activarla (`PATCH /personas/:id/activar`, consentimiento del tutor) |
+| `consentimientoDatosOrigen` | enum: `app` \| `presencial` | sí cuando `consentimientoDatos=true` | *(actualización 2026-09-17, FR-013)* `app` si lo da la propia persona en el formulario online; `presencial` si lo da el tutor durante el contacto manual con el Admin/Discipulador |
+| `origenAlta` | enum: `autorregistro` \| `admin`, default `autorregistro` | sí | *(actualización 2026-09-17, FR-015, D97)* cómo se creó el registro; esta fase solo produce `autorregistro` — `admin` queda modelado para cuando exista el flujo de alta por Admin (feature propia, fuera de alcance) |
+| `altaPor` | string (uuid, sin FK activa) | solo si `origenAlta=admin` | *(actualización 2026-09-17, FR-015, D97)* referencia lógica al `id` de la Persona (Admin/Discipulador) que dio de alta a esta — se guarda como `String?` simple, **sin** `@relation` de Prisma en esta fase, porque siempre queda `null` (no existe todavía el flujo que lo completa); la relación se agrega recién cuando exista la feature de alta por Admin, para no modelar una FK sin ningún dato real que la ejercite (Principio IV) |
 | `tutorNombre` | string | solo si pasó por `pendiente_tutor` → `activa` | `docs/04-dominio-entidades.md`; se completa en el momento de activar (FR-008), no en el formulario inicial |
 | `tutorTelefono` | string | ídem | ídem — también sirve como evidencia informal de que el consentimiento del menor (FR-013) lo dio el tutor, no el menor |
 | `rol` | string/array | sí, default `["miembro_registrado"]` cuando `estado=activa` | roles acumulativos (`docs/03-roles-permisos.md`); esta fase solo asigna `miembro_registrado` al activarse — `admin`/`discipulador` se asignan fuera de este flujo (dato de seed/gestión manual, no hay UI de asignación de rol en este spec) |
@@ -69,6 +73,10 @@ Visitante que solo mira contenido de Bienvenida (Historia 1) **no** genera un re
 - `consentimientoDatos` no puede ser `true` si `estado=pendiente_tutor` en el momento de la
   creación (el menor no puede autoconsentir) — se completa recién cuando se activa, a partir del
   consentimiento del tutor (FR-013).
+- *(actualización 2026-09-17)* `consentimientoDatosFecha`/`consentimientoDatosOrigen` solo pueden
+  estar presentes si `consentimientoDatos=true` — se setean siempre juntos, nunca uno sin el otro.
+- *(actualización 2026-09-17)* `altaPor` solo puede tener valor si `origenAlta='admin'`; con
+  `origenAlta='autorregistro'` (el único valor que produce esta fase) queda siempre `null`.
 
 ### Transiciones de estado (`estado`)
 
@@ -79,7 +87,11 @@ pendiente_tutor --[PATCH /personas/:id/activar, con tutorNombre+tutorTelefono]--
 ```
 
 Al ejecutar `PATCH /personas/:id/activar`, el sistema DEBE setear `consentimientoDatos=true`
-(representa el consentimiento del tutor, capturado fuera del sistema — FR-013).
+(representa el consentimiento del tutor, capturado fuera del sistema — FR-013), junto con
+`consentimientoDatosFecha=now()` y `consentimientoDatosOrigen='presencial'` *(actualización
+2026-09-17)*. En `POST /personas` (mayor de edad, `consentimientoDatos=true` dado por la propia
+persona), el sistema setea del mismo modo `consentimientoDatosFecha=now()` y
+`consentimientoDatosOrigen='app'`.
 
 ### Transiciones de `activo` (independiente de `estado`)
 

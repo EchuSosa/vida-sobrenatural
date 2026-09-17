@@ -24,25 +24,35 @@ pnpm --filter backoffice dev       # Admin/Discipulador
 ## Escenario de validación 1 — Historia 1 (ver Bienvenida y Sede, sin cuenta)
 
 1. Abrir `apps/web` en una ventana sin sesión.
-2. Navegar al contenido de Bienvenida (`/bienvenida`) → debe explicar el proceso de integración
-   sin pedir login.
-3. Navegar a la info de Sede (`/sede`) → debe mostrar los datos de la Sede activa cargada en el
+2. Navegar al contenido de "Primeros pasos" (`/primeros-pasos`) → debe explicar el proceso de
+   integración sin pedir login, con el copy real de `docs/12-contenido-bienvenida.md` ("En qué
+   creemos" y las fotos como placeholders pendientes — D98).
+3. Navegar a "Visitanos" (`/visitanos`) → debe mostrar los datos de la Sede activa cargada en el
    prerrequisito, sin pedir login.
 4. **Resultado esperado**: SC-001 (encontrar esta info en menos de 2 minutos sin ayuda).
+
+*(actualización 2026-09-17: `/bienvenida` y `/sede` ya no existen — ver 002-base-transversal, D91/D92.)*
 
 ## Escenario de validación 2 — Historia 2 (registro adulto vía SSO) — flujo E2E crítico
 
 Este es el único flujo que la Constitución exige cubrir con Playwright (Principio VI).
 
-1. Desde `/bienvenida` o `/sede`, tocar "Registrarme".
-2. Autorizar con una cuenta de Google de test (mayor de 18 en los datos que se completan después).
-3. Completar el formulario obligatorio (`POST /personas` — ver `contracts/personas-api.md`).
-4. **Resultado esperado**: la Persona queda `estado: "activa"`; la sesión refleja rol
+1. Desde `/primeros-pasos` o `/visitanos`, tocar "Registrarme".
+2. Autorizar con una cuenta de Google de test (mayor de 18 en los datos que se completan después,
+   email verificado — ver paso 7).
+3. Completar el formulario obligatorio, ahora dividido en pasos cortos con indicador de progreso,
+   volver a un paso anterior sin perder los datos cargados, y un resumen final antes de enviar
+   (`POST /personas` — ver `contracts/personas-api.md`; FR-016).
+4. **Resultado esperado**: la Persona queda `estado: "activa"`, con `consentimientoDatosFecha`/
+   `consentimientoDatosOrigen: "app"` y `origenAlta: "autorregistro"`; la sesión refleja rol
    `miembro_registrado`; SC-002 (menos de 3 minutos).
 5. Cerrar sesión y volver a autorizar con la misma cuenta de Google → debe entrar directo, sin
    repetir el formulario (`GET /personas/by-email` la encuentra ya `activa`).
 6. Verificar que ningún link/contenido de la sesión lleva a Vida Nueva/Vida de Servicio/Ministerio
    (FR-012).
+7. Repetir el intento de login con una cuenta cuyo `email_verified` sea `false` (o simular la
+   respuesta del proveedor sin ese claim) → verificar que el sistema redirige a
+   `/email-no-verificado` sin vincular ni crear ninguna Persona (FR-017).
 
 ## Escenario de validación 3 — Historia 2b (menor de edad)
 
@@ -75,4 +85,9 @@ Este es el único flujo que la Constitución exige cubrir con Playwright (Princi
   punta a punta contra la base (crea fila, respeta constraint de unicidad de `email`);
   `PATCH /sedes/:id` con `activo:false` (soft delete real).
 - **E2E (Playwright, `apps/web/e2e`)**: Escenario de validación 2 completo (único flujo E2E
-  exigido — el registro de Bienvenida es el flujo crítico de esta fase).
+  exigido — el registro de Bienvenida es el flujo crítico de esta fase), con `@axe-core/playwright`
+  en modo claro y oscuro (Constitución Principio VII) sobre cada paso del formulario.
+
+*(actualización 2026-09-17, Fase 8 de `tasks.md`)*: se suman un unit test de la verificación de
+`email_verified` (Historia 2, Acceptance Scenario 7) y se actualiza el E2E existente a los
+selectores del formulario por pasos — ver `tasks.md`, Phase 8.
