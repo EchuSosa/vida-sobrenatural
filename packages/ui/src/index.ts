@@ -1,6 +1,10 @@
 export { cn } from './lib/utils';
 export { useIsMobile } from './hooks/use-mobile';
 export { EstadoVacio, type EstadoVacioProps } from './components/estado-vacio';
+export {
+  ConfirmDestructiveDialog,
+  type ConfirmDestructiveDialogProps,
+} from './components/confirm-destructive-dialog';
 export { Button, buttonVariants } from './components/ui/button';
 export { Input } from './components/ui/input';
 export { Separator } from './components/ui/separator';
