@@ -47,11 +47,12 @@ Visitante que solo mira contenido de Bienvenida (Historia 1) **no** genera un re
 | `apellido` | string | sí | pre-completado desde `family_name` del perfil de Google, editable en el formulario (FR-006) |
 | `genero` | enum | sí | valores a definir junto al resto del dominio en `docs/04-dominio-entidades.md`; no se amplía aquí por no ser parte del alcance de esta fase |
 | `fechaNacimiento` | date | sí | usada para calcular edad (FR-007); no editable por la propia Persona luego del registro (fuera de alcance de esta fase, ver Flujo 11) |
-| `telefono` | string | sí | FR-006; **no** único (FR-009 — dos Personas pueden compartir teléfono) |
+| `telefono` | string | sí | FR-006; **no** único (FR-009 — dos Personas pueden compartir teléfono). Se arma en el formulario a partir de un selector de código de país + un campo numérico (solo dígitos) — se guarda como un único string `"+<código> <número>"`; el backend valida el formato (`+` seguido de dígitos/espacios) igual, sin confiar en la validación del cliente |
 | `direccion` | string | sí | FR-006 |
 | `sedeId` | uuid (FK → Sede) | sí | FR-006/FR-009; la Sede a través de la cual se registró |
 | `estadoCivil` | enum | sí | `soltero_a, casado_a, en_concubinato, viudo_a, divorciado_a, separado_a` (`docs/05-decisiones.md` D53) |
-| `profesion` | string | sí | FR-006 |
+| `profesion` | enum | sí | `salud, educacion, tecnologia_ingenieria, comercio_ventas, oficios_construccion, administracion_finanzas, legal, comunicacion_marketing, arte_diseno, servicios_gastronomia, transporte, estudiante, ama_de_casa, jubilado_a, sin_ocupacion, otro` — selector en el formulario (FR-006) |
+| `profesionDetalle` | string | solo si `profesion=otro` | texto libre corto; el DTO lo exige cuando `profesion=otro` y lo ignora en cualquier otro caso |
 | `tiempoCongregacion` | enum | sí | `menos_6_meses, 6_meses_a_1_anio, 1_a_3_anios, 3_a_5_anios, mas_5_anios` (D53) |
 | `fotoUrl` | string | no | `picture` del perfil de Google, guardada tal cual al registrarse; no editable por la propia Persona por ahora |
 | `estado` | enum: `activa` \| `pendiente_tutor` | sí, default calculado en el registro | FR-007/FR-008; **no** se agrega un tercer valor (ver Clarifications del spec, decisión sobre cierre de casos) |

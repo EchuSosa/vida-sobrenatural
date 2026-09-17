@@ -64,6 +64,9 @@ export class PersonaService {
           sedeId: dto.sedeId,
           estadoCivil: dto.estadoCivil,
           profesion: dto.profesion,
+          // Solo tiene sentido cuando profesion = otro — el DTO ya lo exige
+          // en ese caso y lo deja opcional en cualquier otro (ver dto).
+          profesionDetalle: dto.profesionDetalle,
           tiempoCongregacion: dto.tiempoCongregacion,
           fotoUrl: dto.fotoUrl,
           estado: esMayorDeEdad ? EstadoPersona.activa : EstadoPersona.pendiente_tutor,

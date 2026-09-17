@@ -36,11 +36,12 @@ Registro inicial — Historia 2 / Historia 2b, FR-005 a FR-009, FR-013.
     "nombre": "string",
     "genero": "string (enum)",
     "fechaNacimiento": "YYYY-MM-DD",
-    "telefono": "string",
+    "telefono": "string (+<código país><dígitos>, ej. '+54 92211234567')",
     "direccion": "string",
     "sedeId": "uuid",
     "estadoCivil": "string (enum)",
-    "profesion": "string",
+    "profesion": "string (enum)",
+    "profesionDetalle": "string (obligatorio si profesion='otro', ignorado si no)",
     "tiempoCongregacion": "string (enum)",
     "consentimientoDatos": true,
     "fotoUrl": "string (opcional, URL — picture del perfil de Google)"
@@ -48,6 +49,13 @@ Registro inicial — Historia 2 / Historia 2b, FR-005 a FR-009, FR-013.
   ```
   `apellido` y `nombre` llegan pre-completados en el formulario desde `family_name`/`given_name`
   del perfil de Google (editables); `fotoUrl` sale de `picture` del mismo perfil, sin editar.
+  `telefono` se arma en el formulario con un selector de código de país + un input numérico
+  (sin letras); el backend igual valida el formato (`+` + dígitos/espacios) del lado del servidor.
+  `profesion` es un selector de categorías (`salud`, `educacion`, `tecnologia_ingenieria`,
+  `comercio_ventas`, `oficios_construccion`, `administracion_finanzas`, `legal`,
+  `comunicacion_marketing`, `arte_diseno`, `servicios_gastronomia`, `transporte`, `estudiante`,
+  `ama_de_casa`, `jubilado_a`, `sin_ocupacion`, `otro`); si se elige `otro`, el formulario muestra
+  un campo de texto corto adicional (`profesionDetalle`), obligatorio en ese caso únicamente.
 - **Reglas del servidor** (FR-007):
   - Calcula edad a partir de `fechaNacimiento`.
   - Si `edad >= 18`: requiere `consentimientoDatos === true` (FR-013) o rechaza con 400; crea la
@@ -65,7 +73,8 @@ Registro inicial — Historia 2 / Historia 2b, FR-005 a FR-009, FR-013.
   ```
 - **Response 409**: `email` (o el email del token) ya pertenece a una Persona existente (FR-009) —
   no crea un duplicado.
-- **Response 400**: falta algún campo obligatorio, o `sedeId` no corresponde a una Sede activa.
+- **Response 400**: falta algún campo obligatorio, `sedeId` no corresponde a una Sede activa,
+  `telefono` no tiene el formato `+<código><dígitos>`, o `profesion='otro'` sin `profesionDetalle`.
 
 ## GET /personas/pendientes-tutor
 

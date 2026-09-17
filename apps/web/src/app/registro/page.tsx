@@ -3,7 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
-import type { Genero, EstadoCivil, TiempoCongregacion, Sede } from '@vida-sobrenatural/shared-types';
+import type {
+  Genero,
+  EstadoCivil,
+  Profesion,
+  TiempoCongregacion,
+  Sede,
+} from '@vida-sobrenatural/shared-types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
@@ -29,6 +35,40 @@ const OPCIONES_TIEMPO_CONGREGACION: { value: TiempoCongregacion; label: string }
   { value: 'mas_5_anios', label: 'Más de 5 años' },
 ];
 
+const OPCIONES_PROFESION: { value: Profesion; label: string }[] = [
+  { value: 'salud', label: 'Salud' },
+  { value: 'educacion', label: 'Educación' },
+  { value: 'tecnologia_ingenieria', label: 'Tecnología/Ingeniería' },
+  { value: 'comercio_ventas', label: 'Comercio y Ventas' },
+  { value: 'oficios_construccion', label: 'Oficios/Construcción' },
+  { value: 'administracion_finanzas', label: 'Administración y Finanzas' },
+  { value: 'legal', label: 'Legal' },
+  { value: 'comunicacion_marketing', label: 'Comunicación y Marketing' },
+  { value: 'arte_diseno', label: 'Arte y Diseño' },
+  { value: 'servicios_gastronomia', label: 'Servicios y Gastronomía' },
+  { value: 'transporte', label: 'Transporte' },
+  { value: 'estudiante', label: 'Estudiante' },
+  { value: 'ama_de_casa', label: 'Ama/o de casa' },
+  { value: 'jubilado_a', label: 'Jubilado/a' },
+  { value: 'sin_ocupacion', label: 'Sin ocupación' },
+  { value: 'otro', label: 'Otro' },
+];
+
+const OPCIONES_CODIGO_PAIS = [
+  { value: '+54', label: '+54 Argentina' },
+  { value: '+598', label: '+598 Uruguay' },
+  { value: '+595', label: '+595 Paraguay' },
+  { value: '+591', label: '+591 Bolivia' },
+  { value: '+56', label: '+56 Chile' },
+  { value: '+55', label: '+55 Brasil' },
+  { value: '+51', label: '+51 Perú' },
+  { value: '+57', label: '+57 Colombia' },
+  { value: '+58', label: '+58 Venezuela' },
+  { value: '+52', label: '+52 México' },
+  { value: '+34', label: '+34 España' },
+  { value: '+1', label: '+1 Estados Unidos / Canadá' },
+];
+
 export default function RegistroPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -36,6 +76,7 @@ export default function RegistroPage() {
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [profesionSeleccionada, setProfesionSeleccionada] = useState('');
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/sedes`)
@@ -83,7 +124,29 @@ export default function RegistroPage() {
     setEnviando(true);
 
     const formData = new FormData(event.currentTarget);
-    const body = Object.fromEntries(formData.entries());
+    const profesion = formData.get('profesion') as string;
+    const codigoPais = formData.get('telefonoCodigoPais') as string;
+    // Cinturón y tiras: el input ya filtra letras al tipear, esto limpia
+    // cualquier cosa que igual haya llegado (pegado, autocompletado, etc.).
+    const numero = (formData.get('telefonoNumero') as string).replace(/[^0-9]/g, '');
+
+    const body = {
+      apellido: formData.get('apellido'),
+      nombre: formData.get('nombre'),
+      genero: formData.get('genero'),
+      fechaNacimiento: formData.get('fechaNacimiento'),
+      telefono: `${codigoPais} ${numero}`,
+      direccion: formData.get('direccion'),
+      sedeId: formData.get('sedeId'),
+      estadoCivil: formData.get('estadoCivil'),
+      profesion,
+      profesionDetalle: profesion === 'otro' ? formData.get('profesionDetalle') : undefined,
+      tiempoCongregacion: formData.get('tiempoCongregacion'),
+      consentimientoDatos: formData.get('consentimientoDatos') === 'on',
+      // Foto de perfil de Google — no es un campo del formulario, se toma
+      // directo de la sesión (no editable por ahora).
+      fotoUrl: session?.user.image ?? undefined,
+    };
 
     try {
       const response = await fetch(`${API_BASE_URL}/personas`, {
@@ -92,13 +155,7 @@ export default function RegistroPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.apiToken}`,
         },
-        body: JSON.stringify({
-          ...body,
-          consentimientoDatos: formData.get('consentimientoDatos') === 'on',
-          // Foto de perfil de Google — no es un campo del formulario, se toma
-          // directo de la sesión (no editable por ahora).
-          fotoUrl: session?.user.image ?? undefined,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (response.status === 409) {
@@ -147,7 +204,7 @@ export default function RegistroPage() {
         />
         <CampoSelect label="Género" name="genero" required opciones={OPCIONES_GENERO} />
         <Campo label="Fecha de nacimiento" name="fechaNacimiento" type="date" required />
-        <Campo label="Teléfono" name="telefono" required />
+        <CampoTelefono />
         <Campo label="Dirección" name="direccion" required />
         <CampoSelect
           label="Sede"
@@ -161,7 +218,16 @@ export default function RegistroPage() {
           required
           opciones={OPCIONES_ESTADO_CIVIL}
         />
-        <Campo label="Profesión" name="profesion" required />
+        <CampoSelect
+          label="Profesión"
+          name="profesion"
+          required
+          opciones={OPCIONES_PROFESION}
+          onChange={setProfesionSeleccionada}
+        />
+        {profesionSeleccionada === 'otro' && (
+          <Campo label="¿Cuál?" name="profesionDetalle" required />
+        )}
         <CampoSelect
           label="Tiempo congregándote"
           name="tiempoCongregacion"
@@ -218,11 +284,13 @@ function CampoSelect({
   name,
   required,
   opciones,
+  onChange,
 }: {
   label: string;
   name: string;
   required?: boolean;
   opciones: { value: string; label: string }[];
+  onChange?: (value: string) => void;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm font-medium">
@@ -231,6 +299,7 @@ function CampoSelect({
         name={name}
         required={required}
         defaultValue=""
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
       >
         <option value="" disabled>
@@ -243,5 +312,41 @@ function CampoSelect({
         ))}
       </select>
     </label>
+  );
+}
+
+function CampoTelefono() {
+  return (
+    <div className="flex flex-col gap-1 text-sm font-medium">
+      Teléfono
+      <div className="flex gap-2">
+        <select
+          name="telefonoCodigoPais"
+          required
+          defaultValue="+54"
+          aria-label="Código de país"
+          className="h-10 w-40 shrink-0 rounded-md border border-zinc-300 px-2 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+        >
+          {OPCIONES_CODIGO_PAIS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <input
+          name="telefonoNumero"
+          type="tel"
+          inputMode="numeric"
+          required
+          aria-label="Número de teléfono"
+          placeholder="Solo números"
+          onChange={(e) => {
+            // No debe aceptar letras — se filtra apenas se tipea, no solo al enviar.
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+          }}
+          className="h-10 flex-1 rounded-md border border-zinc-300 px-3 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+        />
+      </div>
+    </div>
   );
 }

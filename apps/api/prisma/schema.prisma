@@ -65,6 +65,25 @@ enum EstadoPersona {
   pendiente_tutor
 }
 
+enum Profesion {
+  salud
+  educacion
+  tecnologia_ingenieria
+  comercio_ventas
+  oficios_construccion
+  administracion_finanzas
+  legal
+  comunicacion_marketing
+  arte_diseno
+  servicios_gastronomia
+  transporte
+  estudiante
+  ama_de_casa
+  jubilado_a
+  sin_ocupacion
+  otro
+}
+
 model Persona {
   id     String @id @default(uuid())
   // Único dato de contacto con constraint de unicidad (FR-009) — el teléfono
@@ -78,7 +97,9 @@ model Persona {
   telefono           String
   direccion          String
   estadoCivil        EstadoCivil
-  profesion          String
+  profesion          Profesion
+  // Solo tiene sentido (y se completa) cuando profesion = otro.
+  profesionDetalle   String?
   tiempoCongregacion TiempoCongregacion
   // Foto de perfil de Google (picture), guardada al registrarse. Opcional,
   // no editable por la propia Persona por ahora.

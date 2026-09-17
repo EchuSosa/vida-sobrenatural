@@ -20,6 +20,24 @@ export type TiempoCongregacion =
 
 export type EstadoPersona = 'activa' | 'pendiente_tutor';
 
+export type Profesion =
+  | 'salud'
+  | 'educacion'
+  | 'tecnologia_ingenieria'
+  | 'comercio_ventas'
+  | 'oficios_construccion'
+  | 'administracion_finanzas'
+  | 'legal'
+  | 'comunicacion_marketing'
+  | 'arte_diseno'
+  | 'servicios_gastronomia'
+  | 'transporte'
+  | 'estudiante'
+  | 'ama_de_casa'
+  | 'jubilado_a'
+  | 'sin_ocupacion'
+  | 'otro';
+
 /** Body de POST /personas — ver contracts/personas-api.md. */
 export interface RegistroPersonaInput {
   apellido: string;
@@ -30,7 +48,9 @@ export interface RegistroPersonaInput {
   direccion: string;
   sedeId: string;
   estadoCivil: EstadoCivil;
-  profesion: string;
+  profesion: Profesion;
+  /** Obligatorio cuando profesion = 'otro'. */
+  profesionDetalle?: string;
   tiempoCongregacion: TiempoCongregacion;
   consentimientoDatos: boolean;
   /** Foto de perfil de Google (picture) — no editable por ahora. */

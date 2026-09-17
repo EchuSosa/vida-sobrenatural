@@ -29,11 +29,14 @@ test('un Visitante mayor de edad se registra vía SSO y queda como Miembro regis
   await page.getByLabel('Nombre').fill('Ana');
   await page.getByLabel('Género').selectOption('femenino');
   await page.getByLabel('Fecha de nacimiento').fill('1990-05-20');
-  await page.getByLabel('Teléfono').fill('+5492211234567');
+  await page.getByLabel('Código de país').selectOption('+54');
+  await page.getByLabel('Número de teléfono').fill('92211234567');
   await page.getByLabel('Dirección').fill('Calle 1 y 50');
   await page.getByLabel('Sede').selectOption({ index: 1 });
   await page.getByLabel('Estado civil').selectOption('soltero_a');
-  await page.getByLabel('Profesión').fill('Diseñadora');
+  // "Otro" ejercita también el campo condicional de detalle (misma tarea).
+  await page.getByLabel('Profesión').selectOption('otro');
+  await page.getByLabel('¿Cuál?').fill('Apicultora');
   await page.getByLabel('Tiempo congregándote').selectOption('menos_6_meses');
   await page.getByRole('checkbox').check();
 

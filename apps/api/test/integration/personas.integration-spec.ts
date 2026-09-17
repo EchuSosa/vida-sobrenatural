@@ -58,7 +58,7 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
       direccion: 'Calle 1 y 50',
       sedeId,
       estadoCivil: 'soltero_a',
-      profesion: 'Diseñadora',
+      profesion: 'arte_diseno',
       tiempoCongregacion: 'menos_6_meses',
       consentimientoDatos: true,
       fotoUrl: 'https://lh3.googleusercontent.com/a/foto-de-test',
@@ -114,5 +114,34 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
 
     expect(response.status).toBe(201);
     expect(response.body).toMatchObject({ estado: 'pendiente_tutor' });
+  });
+
+  it('responde 400 si profesion=otro sin profesionDetalle', async () => {
+    const email = `integ-otro-sin-detalle-${Date.now()}@example.com`;
+    const token = await mintToken(email);
+
+    const response = await request(app.getHttpServer())
+      .post('/personas')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...bodyAdultoValido(), profesion: 'otro' });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('crea la Persona guardando profesionDetalle cuando profesion=otro', async () => {
+    const email = `integ-otro-con-detalle-${Date.now()}@example.com`;
+    emailsCreados.push(email);
+    const token = await mintToken(email);
+
+    const response = await request(app.getHttpServer())
+      .post('/personas')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...bodyAdultoValido(), profesion: 'otro', profesionDetalle: 'Apicultora' });
+
+    expect(response.status).toBe(201);
+
+    const enBaseDeDatos = await prisma.persona.findUnique({ where: { email } });
+    expect(enBaseDeDatos?.profesion).toBe('otro');
+    expect(enBaseDeDatos?.profesionDetalle).toBe('Apicultora');
   });
 });
