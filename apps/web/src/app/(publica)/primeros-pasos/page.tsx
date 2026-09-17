@@ -1,0 +1,55 @@
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+export const metadata = {
+  title: 'Primeros pasos — Vida Sobrenatural',
+  description:
+    'Qué es la Bienvenida y cómo sigue el proceso de integración en Vida Sobrenatural.',
+};
+
+export default function PrimerosPasosPage() {
+  const t = useTranslations('primerosPasos');
+
+  return (
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
+      <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
+
+      <p className="text-lg leading-7 text-zinc-700 dark:text-zinc-300">{t('intro')}</p>
+
+      <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+        <h2 className="text-xl font-medium">{t('comoSigue')}</h2>
+        <p className="text-zinc-700 dark:text-zinc-300">{t('comoSigueDescripcion')}</p>
+        <ol className="flex flex-col gap-2 text-zinc-700 dark:text-zinc-300">
+          <li>
+            <strong>{t('paso1')}</strong> — {t('paso1Descripcion')}
+          </li>
+          <li>
+            <strong>{t('paso2')}</strong> — {t('paso2Descripcion')}
+          </li>
+          <li>
+            <strong>{t('paso3')}</strong> — {t('paso3Descripcion')}
+          </li>
+          <li>
+            <strong>{t('paso4')}</strong> — {t('paso4Descripcion')}
+          </li>
+        </ol>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('notaFinal')}</p>
+      </section>
+
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Link
+          href="/visitanos"
+          className="flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-center font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+        >
+          {t('verSede')}
+        </Link>
+        <Link
+          href="/registro"
+          className="flex h-11 items-center justify-center rounded-lg border border-border px-5 text-center font-medium transition-colors hover:bg-muted"
+        >
+          {t('registrarme')}
+        </Link>
+      </div>
+    </div>
+  );
+}
