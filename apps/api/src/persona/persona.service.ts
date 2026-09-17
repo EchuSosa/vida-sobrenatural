@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { EstadoPersona } from '../generated/prisma/enums.js';
+import { EstadoPersona, TemaPreferido } from '../generated/prisma/enums.js';
 import { calcularEdad } from './calcular-edad.js';
 import { AppException } from '../common/errors/app-exception.js';
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
@@ -25,12 +25,51 @@ export class PersonaService {
   async findByEmail(email: string) {
     const persona = await this.prisma.persona.findUnique({
       where: { email },
-      select: { id: true, estado: true, activo: true, rol: true },
+      // temaPreferido: para que NextAuth pueda hidratar session.user.temaPreferido
+      // sin flash (specs/002-base-transversal, research.md Decisión 3).
+      select: { id: true, estado: true, activo: true, rol: true, temaPreferido: true },
     });
     if (!persona) {
       throw new AppException('NO_ENCONTRADO', 404, 'No existe una Persona con ese email.');
     }
     return persona;
+  }
+
+  /** GET /personas/me — Historia 5 (specs/002-base-transversal). */
+  async obtenerPerfilPropio(personaId: string | null) {
+    if (!personaId) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
+    }
+    const persona = await this.prisma.persona.findUnique({
+      where: { id: personaId },
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        email: true,
+        fotoUrl: true,
+        sedeId: true,
+        estado: true,
+        idiomaPreferido: true,
+        temaPreferido: true,
+      },
+    });
+    if (!persona) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
+    }
+    return persona;
+  }
+
+  /** PATCH /personas/me/preferencias — Historia 5, FR-027/FR-028. */
+  async actualizarPreferenciasPropias(personaId: string | null, temaPreferido: TemaPreferido) {
+    if (!personaId) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
+    }
+    return this.prisma.persona.update({
+      where: { id: personaId },
+      data: { temaPreferido },
+      select: { id: true, temaPreferido: true },
+    });
   }
 
   /** POST /personas — FR-005 a FR-009, FR-013 (Historia 2 y 2b). */

@@ -15,6 +15,7 @@ declare module 'next-auth' {
       rol: string[];
       givenName: string | null;
       familyName: string | null;
+      temaPreferido: 'claro' | 'oscuro' | 'sistema';
     };
     apiToken: string;
   }
@@ -27,5 +28,6 @@ declare module 'next-auth/jwt' {
     rol?: string[];
     givenName?: string | null;
     familyName?: string | null;
+    temaPreferido?: 'claro' | 'oscuro' | 'sistema';
   }
 }

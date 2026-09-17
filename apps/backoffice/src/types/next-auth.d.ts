@@ -6,6 +6,7 @@ declare module 'next-auth' {
       personaId: string | null;
       estado: 'activa' | 'pendiente_tutor' | null;
       rol: string[];
+      temaPreferido: 'claro' | 'oscuro' | 'sistema';
     };
     apiToken: string;
   }
@@ -16,5 +17,6 @@ declare module 'next-auth/jwt' {
     personaId?: string | null;
     estado?: 'activa' | 'pendiente_tutor' | null;
     rol?: string[];
+    temaPreferido?: 'claro' | 'oscuro' | 'sistema';
   }
 }

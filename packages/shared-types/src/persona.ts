@@ -74,6 +74,26 @@ export interface PersonaLookup {
   estado: EstadoPersona;
   activo: boolean;
   rol: string[];
+  /** Base Transversal — para hidratar session.user.temaPreferido sin flash (research.md Decisión 3). */
+  temaPreferido: TemaPreferido;
+}
+
+/** Response de GET /personas/me — specs/002-base-transversal/contracts/personas-api.md. */
+export interface PersonaPerfil {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  fotoUrl: string | null;
+  sedeId: string;
+  estado: EstadoPersona;
+  idiomaPreferido: Idioma;
+  temaPreferido: TemaPreferido;
+}
+
+/** Body de PATCH /personas/me/preferencias. */
+export interface ActualizarPreferenciasInput {
+  temaPreferido: TemaPreferido;
 }
 
 /** Elemento de GET /personas/pendientes-tutor. */

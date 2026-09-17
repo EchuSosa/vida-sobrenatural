@@ -14,6 +14,7 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nest
 import { PersonaService } from './persona.service.js';
 import { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import { ActivarPersonaDto } from './dto/activar-persona.dto.js';
+import { ActualizarPreferenciasDto } from './dto/actualizar-preferencias.dto.js';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import { InternalLookupGuard } from '../auth/internal-lookup.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
@@ -43,6 +44,30 @@ export class PersonaController {
       throw new BadRequestException('El token no tiene un email válido.');
     }
     return this.personaService.create(dto, request.user.email);
+  }
+
+  @Get('me')
+  @UseGuards(JwtNextAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Perfil propio — Historia 5 (specs/002-base-transversal).' })
+  obtenerPerfilPropio(@Req() request: AuthenticatedRequest) {
+    // Autorización por registro (Constitución Principio V): siempre la propia
+    // Persona del token, nunca un :id de la URL.
+    return this.personaService.obtenerPerfilPropio(request.user?.personaId ?? null);
+  }
+
+  @Patch('me/preferencias')
+  @UseGuards(JwtNextAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Cambiar temaPreferido — Historia 5, FR-027/FR-028.' })
+  actualizarPreferenciasPropias(
+    @Body() dto: ActualizarPreferenciasDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.personaService.actualizarPreferenciasPropias(
+      request.user?.personaId ?? null,
+      dto.temaPreferido,
+    );
   }
 
   @Get('pendientes-tutor')

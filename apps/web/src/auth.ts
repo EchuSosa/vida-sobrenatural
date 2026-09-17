@@ -60,6 +60,7 @@ interface PersonaLookup {
   estado: 'activa' | 'pendiente_tutor';
   activo: boolean;
   rol: string[];
+  temaPreferido: 'claro' | 'oscuro' | 'sistema';
 }
 
 async function buscarPersonaPorEmail(email: string): Promise<PersonaLookup | null> {
@@ -114,7 +115,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return '/error-verificacion';
       }
     },
-    async jwt({ token, account, user }) {
+    async jwt({ token, account, user, trigger, session }) {
       // Solo se resuelve contra apps/api en el login inicial (cuando `account`
       // está presente) — ver research.md, Decisión 6, sobre staleness de rol.
       if (account && token.email) {
@@ -123,9 +124,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.personaId = persona?.id ?? null;
           token.estado = persona?.estado ?? null;
           token.rol = persona?.rol ?? [];
+          // Historia 5 (specs/002-base-transversal) — hidrata el tema sin
+          // flash en el layout server-side (T078).
+          token.temaPreferido = persona?.temaPreferido ?? 'sistema';
         } catch (error) {
           console.error('[auth] jwt: no se pudo resolver la Persona contra apps/api.', error);
         }
+      }
+      // `update()` desde el cliente (SelectorTema, T079) — el JWT no se
+      // vuelve a resolver contra apps/api en cada refresco (Decisión 6 de
+      // arriba), así que sin esto la sesión seguiría mostrando el tema viejo
+      // hasta el próximo login real.
+      if (trigger === 'update' && session?.temaPreferido) {
+        token.temaPreferido = session.temaPreferido;
       }
       // `user` solo está presente en el login inicial (viene del profile()
       // de Google) — se persiste en el token para que sobreviva a refrescos.
@@ -145,6 +156,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.rol = rol;
       session.user.givenName = (token.givenName as string | null) ?? null;
       session.user.familyName = (token.familyName as string | null) ?? null;
+      session.user.temaPreferido =
+        (token.temaPreferido as 'claro' | 'oscuro' | 'sistema' | undefined) ?? 'sistema';
       session.apiToken = await mintApiToken({
         email: session.user.email ?? '',
         personaId,

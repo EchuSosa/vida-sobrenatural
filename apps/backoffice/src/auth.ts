@@ -12,6 +12,7 @@ interface PersonaLookup {
   estado: 'activa' | 'pendiente_tutor';
   activo: boolean;
   rol: string[];
+  temaPreferido: 'claro' | 'oscuro' | 'sistema';
 }
 
 async function buscarPersonaPorEmail(email: string): Promise<PersonaLookup | null> {
@@ -54,12 +55,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, account }) {
+    async jwt({ token, account, trigger, session }) {
       if (account && token.email) {
         const persona = await buscarPersonaPorEmail(token.email);
         token.personaId = persona?.id ?? null;
         token.estado = persona?.estado ?? null;
         token.rol = persona?.rol ?? [];
+        // Historia 5 (specs/002-base-transversal) — hidrata el tema sin
+        // flash en el layout server-side.
+        token.temaPreferido = persona?.temaPreferido ?? 'sistema';
+      }
+      // `update()` desde el cliente (MenuUsuario) — ver auth.ts de apps/web
+      // para la misma lógica documentada.
+      if (trigger === 'update' && session?.temaPreferido) {
+        token.temaPreferido = session.temaPreferido;
       }
       return token;
     },
@@ -71,6 +80,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.personaId = personaId;
       session.user.estado = estado;
       session.user.rol = rol;
+      session.user.temaPreferido =
+        (token.temaPreferido as 'claro' | 'oscuro' | 'sistema' | undefined) ?? 'sistema';
       session.apiToken = await mintApiToken({
         email: session.user.email ?? '',
         personaId,
