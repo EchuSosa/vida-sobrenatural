@@ -55,6 +55,43 @@
     "email": "Email:"
   },
   "registro": {
+    "tituloPagina": "Completá tus datos",
+    "introPagina": "Ya autorizaste el acceso con {email}. Faltan estos datos para terminar tu registro.",
+    "cargando": "Cargando…",
+    "tituloNoAutenticado": "Registrarme",
+    "textoNoAutenticado": "Para registrarte, primero autorizá el acceso con tu cuenta de Google.",
+    "paso": "Paso {actual} de {total}",
+    "tituloPaso1": "Datos personales",
+    "tituloPaso2": "Contacto",
+    "tituloPaso3": "Sobre vos",
+    "tituloPaso4": "Resumen",
+    "resumenIntro": "Revisá tus datos antes de enviar.",
+    "campos": {
+      "apellido": "Apellido",
+      "nombre": "Nombre",
+      "genero": "Género",
+      "fechaNacimiento": "Fecha de nacimiento",
+      "codigoPais": "Código de país",
+      "numeroTelefono": "Número de teléfono",
+      "direccion": "Dirección",
+      "sede": "Sede",
+      "estadoCivil": "Estado civil",
+      "profesion": "Profesión",
+      "profesionDetalle": "¿Cuál?",
+      "tiempoCongregacion": "Tiempo congregándote",
+      "consentimiento": "Doy mi consentimiento para el almacenamiento de mis datos personales."
+    },
+    "botones": {
+      "atras": "Atrás",
+      "siguiente": "Siguiente",
+      "enviar": "Registrarme",
+      "enviando": "Enviando…",
+      "continuarGoogle": "Continuar con Google",
+      "editar": "Editar"
+    },
+    "errorCampo": "Revisá este dato.",
+    "elegirOpcion": "Elegí una opción",
+    "soloNumeros": "Solo números",
     "opciones": {
       "genero": {
         "femenino": "Femenino",
