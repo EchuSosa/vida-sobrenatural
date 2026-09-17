@@ -33,6 +33,8 @@ export interface RegistroPersonaInput {
   profesion: string;
   tiempoCongregacion: TiempoCongregacion;
   consentimientoDatos: boolean;
+  /** Foto de perfil de Google (picture) — no editable por ahora. */
+  fotoUrl?: string;
 }
 
 /** Response de POST /personas. */

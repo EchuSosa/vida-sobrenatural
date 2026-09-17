@@ -95,6 +95,9 @@ export default function RegistroPage() {
         body: JSON.stringify({
           ...body,
           consentimientoDatos: formData.get('consentimientoDatos') === 'on',
+          // Foto de perfil de Google — no es un campo del formulario, se toma
+          // directo de la sesión (no editable por ahora).
+          fotoUrl: session?.user.image ?? undefined,
         }),
       });
 
@@ -130,8 +133,18 @@ export default function RegistroPage() {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Campo label="Apellido" name="apellido" required />
-        <Campo label="Nombre" name="nombre" required defaultValue={session?.user.name ?? ''} />
+        <Campo
+          label="Apellido"
+          name="apellido"
+          required
+          defaultValue={session?.user.familyName ?? ''}
+        />
+        <Campo
+          label="Nombre"
+          name="nombre"
+          required
+          defaultValue={session?.user.givenName ?? ''}
+        />
         <CampoSelect label="Género" name="genero" required opciones={OPCIONES_GENERO} />
         <Campo label="Fecha de nacimiento" name="fechaNacimiento" type="date" required />
         <Campo label="Teléfono" name="telefono" required />

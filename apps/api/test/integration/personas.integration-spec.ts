@@ -61,10 +61,11 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
       profesion: 'Diseñadora',
       tiempoCongregacion: 'menos_6_meses',
       consentimientoDatos: true,
+      fotoUrl: 'https://lh3.googleusercontent.com/a/foto-de-test',
     };
   }
 
-  it('crea una Persona activa para un adulto y devuelve 201', async () => {
+  it('crea una Persona activa para un adulto y devuelve 201, guardando fotoUrl', async () => {
     const email = `integ-adulto-${Date.now()}@example.com`;
     emailsCreados.push(email);
     const token = await mintToken(email);
@@ -80,6 +81,7 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
     const enBaseDeDatos = await prisma.persona.findUnique({ where: { email } });
     expect(enBaseDeDatos?.estado).toBe('activa');
     expect(enBaseDeDatos?.rol).toEqual(['miembro_registrado']);
+    expect(enBaseDeDatos?.fotoUrl).toBe('https://lh3.googleusercontent.com/a/foto-de-test');
   });
 
   it('responde 409 ante un segundo registro con el mismo email (constraint único real)', async () => {

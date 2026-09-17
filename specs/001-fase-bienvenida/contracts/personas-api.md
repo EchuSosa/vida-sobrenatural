@@ -42,9 +42,12 @@ Registro inicial — Historia 2 / Historia 2b, FR-005 a FR-009, FR-013.
     "estadoCivil": "string (enum)",
     "profesion": "string",
     "tiempoCongregacion": "string (enum)",
-    "consentimientoDatos": true
+    "consentimientoDatos": true,
+    "fotoUrl": "string (opcional, URL — picture del perfil de Google)"
   }
   ```
+  `apellido` y `nombre` llegan pre-completados en el formulario desde `family_name`/`given_name`
+  del perfil de Google (editables); `fotoUrl` sale de `picture` del mismo perfil, sin editar.
 - **Reglas del servidor** (FR-007):
   - Calcula edad a partir de `fechaNacimiento`.
   - Si `edad >= 18`: requiere `consentimientoDatos === true` (FR-013) o rechaza con 400; crea la

@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, IsUrl } from 'class-validator';
 import { EstadoCivil, Genero, TiempoCongregacion } from '../../generated/prisma/enums.js';
 
 /** Formulario obligatorio de FR-006, completado luego de la autorización SSO. */
@@ -52,4 +52,9 @@ export class RegistroPersonaDto {
   @ApiProperty()
   @IsBoolean()
   consentimientoDatos!: boolean;
+
+  @ApiPropertyOptional({ description: 'Foto de perfil de Google (picture) — no editable por ahora.' })
+  @IsOptional()
+  @IsUrl()
+  fotoUrl?: string;
 }

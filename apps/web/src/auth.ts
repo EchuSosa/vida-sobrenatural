@@ -15,9 +15,28 @@ import { SignJWT } from 'jose';
 const testLoginHabilitado =
   process.env.NODE_ENV !== 'production' && process.env.ALLOW_TEST_LOGIN === 'true';
 
+/**
+ * Captura given_name/family_name/picture por separado — el profile() default
+ * de next-auth solo mapea `name` (completo) e `image`. given_name/family_name
+ * pre-completan "Nombre"/"Apellido" como campos independientes en el
+ * formulario de registro; picture se guarda en Persona.fotoUrl al registrarse.
+ */
+const googleProvider = Google({
+  profile(profile) {
+    return {
+      id: profile.sub,
+      name: profile.name,
+      email: profile.email,
+      image: profile.picture,
+      givenName: profile.given_name ?? null,
+      familyName: profile.family_name ?? null,
+    };
+  },
+});
+
 const proveedores = testLoginHabilitado
   ? [
-      Google,
+      googleProvider,
       Credentials({
         id: 'test-login',
         name: 'Test login (solo E2E)',
@@ -29,7 +48,7 @@ const proveedores = testLoginHabilitado
         },
       }),
     ]
-  : [Google];
+  : [googleProvider];
 
 /**
  * Claims que este servidor le pasa a apps/api en cada llamada — ver
@@ -84,7 +103,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
       // Solo se resuelve contra apps/api en el login inicial (cuando `account`
       // está presente) — ver research.md, Decisión 6, sobre staleness de rol.
       if (account && token.email) {
@@ -92,6 +111,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.personaId = persona?.id ?? null;
         token.estado = persona?.estado ?? null;
         token.rol = persona?.rol ?? [];
+      }
+      // `user` solo está presente en el login inicial (viene del profile()
+      // de Google) — se persiste en el token para que sobreviva a refrescos.
+      if (user) {
+        token.givenName = user.givenName ?? null;
+        token.familyName = user.familyName ?? null;
       }
       return token;
     },
@@ -103,6 +128,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.personaId = personaId;
       session.user.estado = estado;
       session.user.rol = rol;
+      session.user.givenName = (token.givenName as string | null) ?? null;
+      session.user.familyName = (token.familyName as string | null) ?? null;
       session.apiToken = await mintApiToken({
         email: session.user.email ?? '',
         personaId,

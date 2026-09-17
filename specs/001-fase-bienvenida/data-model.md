@@ -43,8 +43,8 @@ Visitante que solo mira contenido de Bienvenida (Historia 1) **no** genera un re
 |---|---|---|---|
 | `id` | uuid | sí | PK |
 | `email` | string | sí | recibido del proveedor SSO; **único** entre Personas (FR-009) — es el único dato de contacto con constraint de unicidad |
-| `nombre` | string | sí | recibido del SSO, editable en el formulario |
-| `apellido` | string | sí | FR-006 |
+| `nombre` | string | sí | pre-completado desde `given_name` del perfil de Google, editable en el formulario |
+| `apellido` | string | sí | pre-completado desde `family_name` del perfil de Google, editable en el formulario (FR-006) |
 | `genero` | enum | sí | valores a definir junto al resto del dominio en `docs/04-dominio-entidades.md`; no se amplía aquí por no ser parte del alcance de esta fase |
 | `fechaNacimiento` | date | sí | usada para calcular edad (FR-007); no editable por la propia Persona luego del registro (fuera de alcance de esta fase, ver Flujo 11) |
 | `telefono` | string | sí | FR-006; **no** único (FR-009 — dos Personas pueden compartir teléfono) |
@@ -53,6 +53,7 @@ Visitante que solo mira contenido de Bienvenida (Historia 1) **no** genera un re
 | `estadoCivil` | enum | sí | `soltero_a, casado_a, en_concubinato, viudo_a, divorciado_a, separado_a` (`docs/05-decisiones.md` D53) |
 | `profesion` | string | sí | FR-006 |
 | `tiempoCongregacion` | enum | sí | `menos_6_meses, 6_meses_a_1_anio, 1_a_3_anios, 3_a_5_anios, mas_5_anios` (D53) |
+| `fotoUrl` | string | no | `picture` del perfil de Google, guardada tal cual al registrarse; no editable por la propia Persona por ahora |
 | `estado` | enum: `activa` \| `pendiente_tutor` | sí, default calculado en el registro | FR-007/FR-008; **no** se agrega un tercer valor (ver Clarifications del spec, decisión sobre cierre de casos) |
 | `activo` | boolean | sí, default `true` | soft delete (Principio III); se pone en `false` cuando un `pendiente_tutor` no se autoriza (FR-014) — no es lo mismo que `estado` |
 | `consentimientoDatos` | boolean | sí para `estado=activa` | FR-013 — lo marca la propia Persona si es mayor de edad |

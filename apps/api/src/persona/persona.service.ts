@@ -65,6 +65,7 @@ export class PersonaService {
           estadoCivil: dto.estadoCivil,
           profesion: dto.profesion,
           tiempoCongregacion: dto.tiempoCongregacion,
+          fotoUrl: dto.fotoUrl,
           estado: esMayorDeEdad ? EstadoPersona.activa : EstadoPersona.pendiente_tutor,
           // El menor no autoconsiente (FR-013) — su consentimiento llega recién
           // al activar, vía el tutor (ver `activar` más abajo).

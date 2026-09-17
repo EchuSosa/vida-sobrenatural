@@ -80,6 +80,9 @@ model Persona {
   estadoCivil        EstadoCivil
   profesion          String
   tiempoCongregacion TiempoCongregacion
+  // Foto de perfil de Google (picture), guardada al registrarse. Opcional,
+  // no editable por la propia Persona por ahora.
+  fotoUrl            String?
 
   sedeId String
   sede   Sede   @relation(fields: [sedeId], references: [id])
