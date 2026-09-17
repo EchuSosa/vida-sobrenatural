@@ -97,20 +97,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // FR-008: una Persona pendiente_tutor no debe poder iniciar sesión —
       // se la redirige a la pantalla de espera en vez de completar el login.
       if (!user.email) return true;
-      const persona = await buscarPersonaPorEmail(user.email);
-      if (persona?.estado === 'pendiente_tutor') {
-        return '/pendiente-tutor';
+      try {
+        const persona = await buscarPersonaPorEmail(user.email);
+        if (persona?.estado === 'pendiente_tutor') {
+          return '/pendiente-tutor';
+        }
+        return true;
+      } catch (error) {
+        // Si apps/api no responde (caída, INTERNAL_API_SECRET desalineado,
+        // etc.), no podemos confirmar si esta Persona es pendiente_tutor —
+        // bloqueamos el login por completo en vez de dejarlo pasar sin rol,
+        // y mandamos a una pantalla propia con un mensaje claro en vez del
+        // AccessDenied opaco que arma Auth.js por defecto ante cualquier
+        // excepción de este callback.
+        console.error('[auth] signIn: no se pudo verificar la Persona contra apps/api.', error);
+        return '/error-verificacion';
       }
-      return true;
     },
     async jwt({ token, account, user }) {
       // Solo se resuelve contra apps/api en el login inicial (cuando `account`
       // está presente) — ver research.md, Decisión 6, sobre staleness de rol.
       if (account && token.email) {
-        const persona = await buscarPersonaPorEmail(token.email);
-        token.personaId = persona?.id ?? null;
-        token.estado = persona?.estado ?? null;
-        token.rol = persona?.rol ?? [];
+        try {
+          const persona = await buscarPersonaPorEmail(token.email);
+          token.personaId = persona?.id ?? null;
+          token.estado = persona?.estado ?? null;
+          token.rol = persona?.rol ?? [];
+        } catch (error) {
+          console.error('[auth] jwt: no se pudo resolver la Persona contra apps/api.', error);
+        }
       }
       // `user` solo está presente en el login inicial (viene del profile()
       // de Google) — se persiste en el token para que sobreviva a refrescos.
