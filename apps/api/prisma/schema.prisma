@@ -77,6 +77,18 @@ enum TemaPreferido {
   sistema
 }
 
+// --- Fase de Bienvenida, actualización 2026-09-17 (D97, FR-013, FR-015) ---
+
+enum OrigenConsentimiento {
+  app
+  presencial
+}
+
+enum OrigenAlta {
+  autorregistro
+  admin
+}
+
 enum Profesion {
   salud
   educacion
@@ -131,6 +143,18 @@ model Persona {
   // `false` cuando un pendiente_tutor no se autoriza (FR-014).
   activo              Boolean       @default(true)
   consentimientoDatos Boolean       @default(false)
+  // Actualización 2026-09-17 (FR-013): se setean siempre juntos, solo cuando
+  // consentimientoDatos=true — 'app' en POST /personas (mayor de edad),
+  // 'presencial' en PATCH /personas/:id/activar (consentimiento del tutor).
+  consentimientoDatosFecha  DateTime?
+  consentimientoDatosOrigen OrigenConsentimiento?
+
+  // Actualización 2026-09-17 (FR-015, D97): esta fase solo produce
+  // 'autorregistro' con altaPor=null — el alta por Admin es una feature
+  // propia, todavía sin flujo. altaPor es una referencia lógica al id de la
+  // Persona que dio de alta, sin @relation de Prisma (ver data-model.md).
+  origenAlta OrigenAlta @default(autorregistro)
+  altaPor    String?
 
   // Solo se completan al activar un pendiente_tutor (Flujo 7, FR-008).
   tutorNombre   String?

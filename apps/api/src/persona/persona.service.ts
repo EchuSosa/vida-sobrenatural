@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { EstadoPersona, TemaPreferido } from '../generated/prisma/enums.js';
+import {
+  EstadoPersona,
+  TemaPreferido,
+  OrigenConsentimiento,
+  OrigenAlta,
+} from '../generated/prisma/enums.js';
 import { calcularEdad } from './calcular-edad.js';
 import { AppException } from '../common/errors/app-exception.js';
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
@@ -115,6 +120,14 @@ export class PersonaService {
           // El menor no autoconsiente (FR-013) — su consentimiento llega recién
           // al activar, vía el tutor (ver `activar` más abajo).
           consentimientoDatos: esMayorDeEdad ? dto.consentimientoDatos : false,
+          // Actualización 2026-09-17 (FR-013): fecha/origen solo cuando el
+          // consentimiento se da acá mismo (mayor de edad, origen 'app').
+          consentimientoDatosFecha: esMayorDeEdad ? new Date() : null,
+          consentimientoDatosOrigen: esMayorDeEdad ? OrigenConsentimiento.app : null,
+          // Actualización 2026-09-17 (FR-015, D97): esta fase solo produce
+          // autorregistro — el alta por Admin es una feature propia.
+          origenAlta: OrigenAlta.autorregistro,
+          altaPor: null,
           rol: esMayorDeEdad ? ['miembro_registrado'] : [],
         },
         select: { id: true, estado: true },
@@ -153,6 +166,11 @@ export class PersonaService {
         // El consentimiento definitivo lo da el tutor en este paso, no el
         // menor en el formulario (FR-013; ver data-model.md).
         consentimientoDatos: true,
+        // Actualización 2026-09-17 (FR-013): origen 'presencial' — el
+        // consentimiento se toma fuera del sistema, durante el contacto
+        // manual del Admin/Discipulador con el tutor.
+        consentimientoDatosFecha: new Date(),
+        consentimientoDatosOrigen: OrigenConsentimiento.presencial,
         rol: ['miembro_registrado'],
       },
       select: { id: true, estado: true },

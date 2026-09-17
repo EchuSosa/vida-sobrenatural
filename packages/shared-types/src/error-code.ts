@@ -16,6 +16,7 @@ export type ErrorCode =
   | 'CONSENTIMIENTO_REQUERIDO'
   | 'PERSONA_NO_PENDIENTE_TUTOR'
   | 'VERIFICACION_LOGIN_FALLIDA'
+  | 'EMAIL_NO_VERIFICADO'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */
