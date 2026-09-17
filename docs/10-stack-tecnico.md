@@ -16,15 +16,17 @@ La navegación de cada app está definida en `14-navegacion.md`; los sistemas de
 
 ### Puertos fijos (desarrollo local)
 
-Por default, tanto Next.js como NestJS arrancan en el puerto 3000 — con 3 apps corriendo a la vez, eso genera colisiones y hace que cada una salte a un puerto distinto sin previsibilidad. Se fijan explícitamente (D86):
+Por default, tanto Next.js como NestJS arrancan en el puerto 3000 — con 3 apps corriendo a la vez, eso genera colisiones y hace que cada una salte a un puerto distinto sin previsibilidad. Se fijan explícitamente (D86, corregido en D104):
 
-| App | Puerto | Variable |
+| App | Puerto | Dónde se fija |
 |---|---|---|
-| `apps/web` | 3000 | `PORT=3000` |
-| `apps/backoffice` | 3001 | `PORT=3001` |
-| `apps/api` | 3333 | `PORT=3333` |
+| `apps/web` | 3001 | script `dev`/`start` de `package.json` (`next dev -p 3001`) |
+| `apps/backoffice` | 3002 | script `dev`/`start` de `package.json` (`next dev -p 3002`) |
+| `apps/api` | 3333 | `PORT=3333` en `apps/api/.env` (default en `main.ts`) |
 
-Los frontends necesitan saber dónde está la API — se configura con `NEXT_PUBLIC_API_URL=http://localhost:3333` en el `.env` de cada uno.
+El puerto 3000 queda libre a propósito (es el default de Next.js y NestJS; cualquier otro proyecto local que lo use no choca).
+
+Los frontends necesitan saber dónde está la API — en el `.env.local` de cada uno se configuran `API_BASE_URL` (llamadas desde el servidor) y `NEXT_PUBLIC_API_BASE_URL` (llamadas desde el navegador), ambas en `http://localhost:3333`, y `NEXTAUTH_URL` con el puerto propio de cada app (3001 / 3002). Ver los `.env.local.example`.
 
 ## Monorepo
 
@@ -143,4 +145,4 @@ Los frontends necesitan saber dónde está la API — se configura con `NEXT_PUB
 - Decisión de hosting y dominio reales (cuando corresponda).
 
 ---
-*Preparado fuera de sesión formal, antes de comenzar a usar Spec Kit (`/speckit.plan`). Ampliado con testing (D79/D80), puertos fijos (D86), foto de perfil y login fail-closed (D87/D88), datos estructurados de registro (D90), requisitos no funcionales (D81–D85), integración con YouTube (D93), modo oscuro (D95), y email, seed, errores y Sentry (D96–D101).*
+*Preparado fuera de sesión formal, antes de comenzar a usar Spec Kit (`/speckit.plan`). Ampliado con testing (D79/D80), puertos fijos (D86, D104), foto de perfil y login fail-closed (D87/D88), datos estructurados de registro (D90), requisitos no funcionales (D81–D85), integración con YouTube (D93), modo oscuro (D95), y email, seed, errores y Sentry (D96–D101).*

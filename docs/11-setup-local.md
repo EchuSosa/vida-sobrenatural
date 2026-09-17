@@ -127,13 +127,14 @@ cd web
 Crear `.env.local`:
 
 ```
-# apps/web/.env.local
-PORT=3000
-NEXT_PUBLIC_API_URL=http://localhost:3333
+# apps/web/.env.local (copiar de .env.local.example)
+NEXTAUTH_URL=http://localhost:3001
+API_BASE_URL=http://localhost:3333
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3333
 ```
 
 ```bash
-pnpm dev   # arranca en localhost:3000
+pnpm dev   # arranca en localhost:3001
 cd ../..
 ```
 
@@ -148,17 +149,18 @@ cd backoffice
 Crear `.env.local`:
 
 ```
-# apps/backoffice/.env.local
-PORT=3001
-NEXT_PUBLIC_API_URL=http://localhost:3333
+# apps/backoffice/.env.local (copiar de .env.local.example)
+NEXTAUTH_URL=http://localhost:3002
+API_BASE_URL=http://localhost:3333
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3333
 ```
 
 ```bash
-pnpm dev   # arranca en localhost:3001
+pnpm dev   # arranca en localhost:3002
 cd ../..
 ```
 
-> Si `pnpm dev` no respeta la variable `PORT` del `.env.local` (depende de la versión de Next.js), fijarlo directo en el script de `package.json`: `"dev": "next dev -p 3001"`.
+> Next.js no toma el puerto desde `.env.local`: se fija en los scripts de `package.json` de cada app — `"dev": "next dev -p 3001"` (web) y `"dev": "next dev -p 3002"` (backoffice), y lo mismo en `start`. El 3000 queda libre a propósito (D104).
 
 ## 7. Conectar Prisma al backend (`apps/api`)
 
