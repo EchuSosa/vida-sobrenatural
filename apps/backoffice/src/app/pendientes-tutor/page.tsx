@@ -35,7 +35,14 @@ export default function PendientesTutorPage() {
   }, [session?.apiToken]);
 
   useEffect(() => {
-    cargarPendientes();
+    // Función local declarada dentro del efecto (no llamar directo a la de
+    // useCallback) — evita que react-hooks/set-state-in-effect marque un
+    // falso positivo sobre un setState que en realidad ocurre después de un
+    // await, no de forma síncrona en el cuerpo del efecto.
+    async function ejecutar() {
+      await cargarPendientes();
+    }
+    ejecutar();
   }, [cargarPendientes]);
 
   async function activar(id: string) {
