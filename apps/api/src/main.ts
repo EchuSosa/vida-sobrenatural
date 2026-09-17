@@ -1,12 +1,52 @@
 import 'dotenv/config';
+import './instrument.js';
+import { randomUUID } from 'node:crypto';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { pinoHttp } from 'pino-http';
 import { AppModule } from './app.module.js';
+import { AllExceptionsFilter } from './common/errors/all-exceptions.filter.js';
+import { validationExceptionFactory } from './common/errors/validation-exception-factory.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Logs JSON estructurados con requestId, sin datos personales (Constitución
+  // Principio X / FR-025). Middleware de Express directo (no el módulo
+  // nestjs-pino: su dist compilado en CommonJS choca con la transformación a
+  // ESM de @nestjs/common bajo Jest --experimental-vm-modules; pino-http
+  // logra el mismo resultado sin ese problema).
+  app.use(
+    pinoHttp({
+      genReqId: (req) => (req as { id?: string }).id ?? randomUUID(),
+      redact: {
+        paths: [
+          'req.headers.authorization',
+          'req.headers["x-internal-secret"]',
+          'req.body.email',
+          'req.body.telefono',
+          'req.body.direccion',
+          'req.body.fechaNacimiento',
+          'req.body.tutorTelefono',
+          'req.body.tutorNombre',
+          'req.body.apellido',
+          'req.body.nombre',
+        ],
+        censor: '[redactado]',
+      },
+    }),
+  );
+
+  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      exceptionFactory: validationExceptionFactory,
+    }),
+  );
   // Desarrollo local únicamente — apps/web y apps/backoffice corren en otro
   // puerto. No se usan cookies de sesión hacia esta API (solo Bearer JWT), así
   // que reflejar el origin es suficiente sin necesitar `credentials: true`.

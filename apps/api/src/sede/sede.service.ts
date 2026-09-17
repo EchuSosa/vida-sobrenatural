@@ -1,5 +1,6 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { AppException } from '../common/errors/app-exception.js';
 import type { CrearSedeDto } from './dto/crear-sede.dto.js';
 import type { ActualizarSedeDto } from './dto/actualizar-sede.dto.js';
 
@@ -33,7 +34,7 @@ export class SedeService {
       select: SEDE_PUBLIC_SELECT,
     });
     if (!sede) {
-      throw new NotFoundException('Sede no encontrada.');
+      throw new AppException('NO_ENCONTRADO', 404, 'Sede no encontrada.');
     }
     return sede;
   }
@@ -53,13 +54,17 @@ export class SedeService {
   async update(id: string, dto: ActualizarSedeDto) {
     const existente = await this.prisma.sede.findUnique({ where: { id } });
     if (!existente) {
-      throw new NotFoundException('Sede no encontrada.');
+      throw new AppException('NO_ENCONTRADO', 404, 'Sede no encontrada.');
     }
 
     const contactoTelefono = dto.contactoTelefono ?? existente.contactoTelefono;
     const contactoEmail = dto.contactoEmail ?? existente.contactoEmail;
     if (!contactoTelefono && !contactoEmail) {
-      throw new BadRequestException('La Sede debe tener al menos un teléfono o email de contacto.');
+      throw new AppException(
+        'CONTACTO_SEDE_REQUERIDO',
+        400,
+        'La Sede debe tener al menos un teléfono o email de contacto.',
+      );
     }
 
     if (dto.nombre && dto.nombre !== existente.nombre) {
@@ -75,7 +80,11 @@ export class SedeService {
 
   private validarAlMenosUnContacto(dto: CrearSedeDto) {
     if (!dto.contactoTelefono && !dto.contactoEmail) {
-      throw new BadRequestException('La Sede debe tener al menos un teléfono o email de contacto.');
+      throw new AppException(
+        'CONTACTO_SEDE_REQUERIDO',
+        400,
+        'La Sede debe tener al menos un teléfono o email de contacto.',
+      );
     }
   }
 
@@ -85,7 +94,7 @@ export class SedeService {
       where: { nombre, activo: true, ...(excluirId ? { id: { not: excluirId } } : {}) },
     });
     if (duplicada) {
-      throw new ConflictException('Ya existe una Sede activa con ese nombre.');
+      throw new AppException('SEDE_NOMBRE_DUPLICADO', 409, 'Ya existe una Sede activa con ese nombre.');
     }
   }
 }

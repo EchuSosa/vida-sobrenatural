@@ -1,7 +1,8 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EstadoPersona } from '../generated/prisma/enums.js';
 import { calcularEdad } from './calcular-edad.js';
+import { AppException } from '../common/errors/app-exception.js';
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import type { ActivarPersonaDto } from './dto/activar-persona.dto.js';
 
@@ -27,7 +28,7 @@ export class PersonaService {
       select: { id: true, estado: true, activo: true, rol: true },
     });
     if (!persona) {
-      throw new NotFoundException('No existe una Persona con ese email.');
+      throw new AppException('NO_ENCONTRADO', 404, 'No existe una Persona con ese email.');
     }
     return persona;
   }
@@ -38,7 +39,7 @@ export class PersonaService {
       where: { id: dto.sedeId, activo: true },
     });
     if (!sede) {
-      throw new BadRequestException('La Sede indicada no existe o no está activa.');
+      throw new AppException('SEDE_INVALIDA', 400, 'La Sede indicada no existe o no está activa.');
     }
 
     const fechaNacimiento = new Date(dto.fechaNacimiento);
@@ -46,7 +47,9 @@ export class PersonaService {
 
     if (esMayorDeEdad && !dto.consentimientoDatos) {
       // FR-013: el consentimiento del propio adulto es obligatorio en el formulario.
-      throw new BadRequestException(
+      throw new AppException(
+        'CONSENTIMIENTO_REQUERIDO',
+        400,
         'Se requiere el consentimiento de almacenamiento de datos para completar el registro.',
       );
     }
@@ -83,7 +86,7 @@ export class PersonaService {
       // verdad ante un registro simultáneo con el mismo email (condición de
       // carrera — ver spec.md, Edge Cases).
       if (isUniqueConstraintViolation(error, 'email')) {
-        throw new ConflictException('Ya existe una Persona registrada con este email.');
+        throw new AppException('EMAIL_DUPLICADO', 409, 'Ya existe una Persona registrada con este email.');
       }
       throw error;
     }
@@ -131,7 +134,7 @@ export class PersonaService {
   private async buscarPendienteTutorActivoOFallar(id: string) {
     const persona = await this.prisma.persona.findUnique({ where: { id } });
     if (!persona || persona.estado !== EstadoPersona.pendiente_tutor || !persona.activo) {
-      throw new ConflictException('La Persona no está en estado pendiente_tutor.');
+      throw new AppException('PERSONA_NO_PENDIENTE_TUTOR', 409, 'La Persona no está en estado pendiente_tutor.');
     }
     return persona;
   }

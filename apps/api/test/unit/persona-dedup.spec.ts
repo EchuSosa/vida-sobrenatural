@@ -1,7 +1,7 @@
-import { ConflictException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { AppException } from '../../src/common/errors/app-exception.js';
 import type { RegistroPersonaDto } from '../../src/persona/dto/registro-persona.dto.js';
 
 function dtoAdultoValido(overrides: Partial<RegistroPersonaDto> = {}): RegistroPersonaDto {
@@ -22,7 +22,7 @@ function dtoAdultoValido(overrides: Partial<RegistroPersonaDto> = {}): RegistroP
 }
 
 describe('PersonaService.create — dedup por email (FR-009)', () => {
-  it('traduce una violación del constraint único de email a ConflictException', async () => {
+  it('traduce una violación del constraint único de email a AppException(EMAIL_DUPLICADO)', async () => {
     const prismaMock = {
       sede: { findFirst: jest.fn().mockResolvedValue({ id: 'sede-1', activo: true }) },
       persona: {
@@ -39,9 +39,12 @@ describe('PersonaService.create — dedup por email (FR-009)', () => {
     }).compile();
     const service = moduleRef.get(PersonaService);
 
-    await expect(
-      service.create(dtoAdultoValido(), 'ya-existe@example.com'),
-    ).rejects.toBeInstanceOf(ConflictException);
+    const error = await service
+      .create(dtoAdultoValido(), 'ya-existe@example.com')
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(AppException);
+    expect((error as AppException).code).toBe('EMAIL_DUPLICADO');
+    expect((error as AppException).getStatus()).toBe(409);
   });
 
   it('NO valida el teléfono como único — un error de constraint por teléfono no debe ocurrir en este flujo', async () => {

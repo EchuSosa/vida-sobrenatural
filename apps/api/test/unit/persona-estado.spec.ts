@@ -1,7 +1,7 @@
-import { ConflictException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { AppException } from '../../src/common/errors/app-exception.js';
 
 async function crearServicio(prismaMock: Record<string, unknown>) {
   const moduleRef = await Test.createTestingModule({
@@ -51,9 +51,12 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
       };
       const service = await crearServicio(prismaMock);
 
-      await expect(
-        service.activar('p1', { tutorNombre: 'X', tutorTelefono: 'Y' }),
-      ).rejects.toBeInstanceOf(ConflictException);
+      const error = await service
+        .activar('p1', { tutorNombre: 'X', tutorTelefono: 'Y' })
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(AppException);
+      expect((error as AppException).code).toBe('PERSONA_NO_PENDIENTE_TUTOR');
+      expect((error as AppException).getStatus()).toBe(409);
     });
   });
 
@@ -87,7 +90,10 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
       };
       const service = await crearServicio(prismaMock);
 
-      await expect(service.marcarInactiva('p1')).rejects.toBeInstanceOf(ConflictException);
+      const error = await service.marcarInactiva('p1').catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(AppException);
+      expect((error as AppException).code).toBe('PERSONA_NO_PENDIENTE_TUTOR');
+      expect((error as AppException).getStatus()).toBe(409);
     });
   });
 });
