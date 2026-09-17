@@ -20,6 +20,11 @@ export type TiempoCongregacion =
 
 export type EstadoPersona = 'activa' | 'pendiente_tutor';
 
+/** Base Transversal (specs/002-base-transversal) — solo "es" en el MVP (D84). */
+export type Idioma = 'es';
+
+export type TemaPreferido = 'claro' | 'oscuro' | 'sistema';
+
 export type Profesion =
   | 'salud'
   | 'educacion'

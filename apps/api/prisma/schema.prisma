@@ -65,6 +65,18 @@ enum EstadoPersona {
   pendiente_tutor
 }
 
+// --- Base Transversal (specs/002-base-transversal) ---
+
+enum Idioma {
+  es
+}
+
+enum TemaPreferido {
+  claro
+  oscuro
+  sistema
+}
+
 enum Profesion {
   salud
   educacion
@@ -104,6 +116,12 @@ model Persona {
   // Foto de perfil de Google (picture), guardada al registrarse. Opcional,
   // no editable por la propia Persona por ahora.
   fotoUrl            String?
+
+  // Base Transversal (specs/002-base-transversal) — sin UI para cambiar
+  // idiomaPreferido todavía (solo "es"); temaPreferido sí es editable por la
+  // propia Persona vía PATCH /personas/me/preferencias.
+  idiomaPreferido Idioma        @default(es)
+  temaPreferido   TemaPreferido @default(sistema)
 
   sedeId String
   sede   Sede   @relation(fields: [sedeId], references: [id])
