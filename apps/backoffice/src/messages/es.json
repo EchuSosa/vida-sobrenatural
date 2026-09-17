@@ -9,6 +9,7 @@
     "CONSENTIMIENTO_REQUERIDO": "Falta el consentimiento para guardar los datos.",
     "PERSONA_NO_PENDIENTE_TUTOR": "Este caso ya no está pendiente de un tutor.",
     "VERIFICACION_LOGIN_FALLIDA": "No pudimos verificar la cuenta. Probá de nuevo en un momento.",
+    "EMAIL_NO_VERIFICADO": "No pudimos confirmar que el email esté verificado con el proveedor de inicio de sesión.",
     "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
   },
   "nav": {

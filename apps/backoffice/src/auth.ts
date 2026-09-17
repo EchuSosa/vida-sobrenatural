@@ -3,6 +3,23 @@ import Google from 'next-auth/providers/google';
 import { SignJWT } from 'jose';
 
 /**
+ * Captura `email_verified` (claim estándar del perfil OIDC de Google) —
+ * actualización 2026-09-17, FR-017, Constitución Principio V: una cuenta SSO
+ * solo se vincula si el proveedor confirma el email como verificado.
+ */
+const googleProvider = Google({
+  profile(profile) {
+    return {
+      id: profile.sub,
+      name: profile.name,
+      email: profile.email,
+      image: profile.picture,
+      emailVerificadoPorProveedor: profile.email_verified === true,
+    };
+  },
+});
+
+/**
  * Claims que este servidor le pasa a apps/api en cada llamada — ver
  * specs/001-fase-bienvenida/contracts/auth-integration.md. No es el JWE
  * interno de sesión de NextAuth (ese no se comparte con el backend).
@@ -43,10 +60,16 @@ async function mintApiToken(claims: {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [Google],
+  providers: [googleProvider],
   session: { strategy: 'jwt' },
   callbacks: {
     async signIn({ user }) {
+      // FR-017 (actualización 2026-09-17): mismo patrón que pendiente_tutor
+      // más abajo — sin página propia en el backoffice, `return false` deja
+      // que NextAuth muestre su pantalla de error genérica.
+      if (user.emailVerificadoPorProveedor === false) {
+        return false;
+      }
       // FR-008: una Persona pendiente_tutor no debe poder iniciar sesión.
       if (!user.email) return true;
       const persona = await buscarPersonaPorEmail(user.email);

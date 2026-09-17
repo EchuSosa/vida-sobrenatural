@@ -20,6 +20,10 @@ const testLoginHabilitado =
  * de next-auth solo mapea `name` (completo) e `image`. given_name/family_name
  * pre-completan "Nombre"/"Apellido" como campos independientes en el
  * formulario de registro; picture se guarda en Persona.fotoUrl al registrarse.
+ * `email_verified` (claim estándar del perfil OIDC de Google) se captura
+ * como `emailVerificadoPorProveedor` — actualización 2026-09-17, FR-017,
+ * Constitución Principio V: una cuenta SSO solo se vincula si el proveedor
+ * confirma el email como verificado.
  */
 const googleProvider = Google({
   profile(profile) {
@@ -30,6 +34,7 @@ const googleProvider = Google({
       image: profile.picture,
       givenName: profile.given_name ?? null,
       familyName: profile.family_name ?? null,
+      emailVerificadoPorProveedor: profile.email_verified === true,
     };
   },
 });
@@ -40,11 +45,20 @@ const proveedores = testLoginHabilitado
       Credentials({
         id: 'test-login',
         name: 'Test login (solo E2E)',
-        credentials: { email: {} },
+        // `emailVerified` es un credential opcional (string "false" para
+        // simular el caso negativo de FR-017) — por defecto se considera
+        // verificado, ya que este proveedor reemplaza el login real de
+        // Google solo para poder automatizar el flujo feliz.
+        credentials: { email: {}, emailVerified: {} },
         authorize: async (credentials) => {
           const email = credentials?.email;
           if (typeof email !== 'string' || !email) return null;
-          return { id: email, email, name: 'Visitante de Test' };
+          return {
+            id: email,
+            email,
+            name: 'Visitante de Test',
+            emailVerificadoPorProveedor: credentials?.emailVerified !== 'false',
+          };
         },
       }),
     ]
@@ -95,6 +109,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
   callbacks: {
     async signIn({ user }) {
+      // FR-017 (actualización 2026-09-17): una cuenta SSO solo se vincula (o
+      // arranca un registro) si el proveedor confirma el email como
+      // verificado — chequeo ANTES de tocar apps/api, sin importar si el
+      // email coincide con una Persona existente.
+      if (user.emailVerificadoPorProveedor === false) {
+        return '/email-no-verificado';
+      }
       // FR-008: una Persona pendiente_tutor no debe poder iniciar sesión —
       // se la redirige a la pantalla de espera en vez de completar el login.
       if (!user.email) return true;

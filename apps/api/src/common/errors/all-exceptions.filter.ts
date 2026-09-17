@@ -36,6 +36,10 @@ const TITULOS: Record<ErrorCode, string> = {
   CONSENTIMIENTO_REQUERIDO: 'Consentimiento requerido',
   PERSONA_NO_PENDIENTE_TUTOR: 'Persona no está pendiente_tutor',
   VERIFICACION_LOGIN_FALLIDA: 'No se pudo verificar el login',
+  // No se lanza desde apps/api — la rechaza NextAuth antes de llegar acá
+  // (specs/001-fase-bienvenida/contracts/auth-integration.md) — pero el
+  // Record<ErrorCode, string> es exhaustivo, así que necesita su título igual.
+  EMAIL_NO_VERIFICADO: 'Email no verificado',
   ERROR_INTERNO: 'Error interno',
 };
 

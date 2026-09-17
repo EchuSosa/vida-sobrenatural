@@ -6,6 +6,9 @@ declare module 'next-auth' {
     // ver auth.ts. `image` (picture) ya es un campo estándar de next-auth.
     givenName?: string | null;
     familyName?: string | null;
+    // Actualización 2026-09-17 (FR-017) — email_verified del proveedor SSO,
+    // usado en el callback signIn antes de vincular o crear una Persona.
+    emailVerificadoPorProveedor?: boolean;
   }
 
   interface Session {
