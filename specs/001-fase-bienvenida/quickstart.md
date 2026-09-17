@@ -13,12 +13,19 @@ detalles de contratos o modelo de datos — ver `contracts/` y `data-model.md`.
 - Al menos una Sede activa cargada (seed o vía `POST /sedes` como Admin) — sin esto, Historia 1 no
   tiene nada que mostrar.
 
+## Cómo recorrer esta guía (revisión manual)
+
+- Cada escenario se prueba en **escritorio y en ancho de celular** (o en un celular real), y en **modo claro y oscuro**.
+- Al menos una pasada completa con una **cuenta real de Google**, además del login de test.
+- Anotá cada hallazgo en el archivo de revisión de la ronda (`specs/revision-manual/`), no solo los errores: también textos confusos o mejoras.
+- Al terminar, completá el checklist de lector de pantalla: `specs/002-base-transversal/checklists/accesibilidad-manual.md`.
+
 ## Levantar las apps
 
 ```bash
 pnpm --filter api start:dev        # http://localhost:3333 (PORT en apps/api/.env)
-pnpm --filter web dev              # Visitante
-pnpm --filter backoffice dev       # Admin/Discipulador
+pnpm --filter web dev              # Visitante — http://localhost:3001
+pnpm --filter backoffice dev       # Admin/Discipulador — http://localhost:3002
 ```
 
 ## Escenario de validación 1 — Historia 1 (ver Bienvenida y Sede, sin cuenta)
@@ -42,7 +49,9 @@ Este es el único flujo que la Constitución exige cubrir con Playwright (Princi
    email verificado — ver paso 7).
 3. Completar el formulario obligatorio, ahora dividido en pasos cortos con indicador de progreso,
    volver a un paso anterior sin perder los datos cargados, y un resumen final antes de enviar
-   (`POST /personas` — ver `contracts/personas-api.md`; FR-016).
+   (`POST /personas` — ver `contracts/personas-api.md`; FR-016). Probarlo también en ancho de
+   celular y en modo oscuro: el indicador de progreso, los errores por campo y el resumen final
+   deben verse y leerse bien; el teclado del celular no debe tapar el botón de avanzar.
 4. **Resultado esperado**: la Persona queda `estado: "activa"`, con `consentimientoDatosFecha`/
    `consentimientoDatosOrigen: "app"` y `origenAlta: "autorregistro"`; la sesión refleja rol
    `miembro_registrado`; SC-002 (menos de 3 minutos).
@@ -50,9 +59,11 @@ Este es el único flujo que la Constitución exige cubrir con Playwright (Princi
    repetir el formulario (`GET /personas/by-email` la encuentra ya `activa`).
 6. Verificar que ningún link/contenido de la sesión lleva a Vida Nueva/Vida de Servicio/Ministerio
    (FR-012).
-7. Repetir el intento de login con una cuenta cuyo `email_verified` sea `false` (o simular la
-   respuesta del proveedor sin ese claim) → verificar que el sistema redirige a
-   `/email-no-verificado` sin vincular ni crear ninguna Persona (FR-017).
+7. Verificar el caso de email no verificado (FR-017): las cuentas de Google **siempre** tienen el
+   email verificado, así que no se puede reproducir con una cuenta real. Se valida con el login de
+   test (`ALLOW_TEST_LOGIN=true`) o simulando la respuesta del proveedor sin `email_verified`, y
+   está cubierto por el e2e dedicado. Resultado esperado: redirige a `/email-no-verificado` sin
+   vincular ni crear ninguna Persona, con un mensaje claro de qué hacer.
 
 ## Escenario de validación 3 — Historia 2b (menor de edad)
 

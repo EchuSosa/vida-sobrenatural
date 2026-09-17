@@ -14,6 +14,13 @@ Valida de punta a punta cada historia de `spec.md` sobre un ambiente local ya pr
 - `SENTRY_DSN` **sin setear** en los `.env.local`/`.env` de las tres apps (para validar que Sentry
   queda desactivado en local).
 
+## Cómo recorrer esta guía (revisión manual)
+
+- Cada escenario se prueba en **escritorio y en ancho de celular** (o en un celular real), y en **modo claro y oscuro**.
+- Al menos una pasada completa con una **cuenta real de Google**, además del login de test.
+- Anotá cada hallazgo en el archivo de revisión de la ronda (`specs/revision-manual/`), no solo los errores: también textos confusos o mejoras.
+- Al terminar, completá el checklist de lector de pantalla: `specs/002-base-transversal/checklists/accesibilidad-manual.md`.
+
 ## Historia 1 — Navegación
 
 1. Abrir `http://localhost:3001/` sin sesión: el menú principal muestra Nosotros, Primeros pasos,
@@ -49,6 +56,14 @@ Valida de punta a punta cada historia de `spec.md` sobre un ambiente local ya pr
    una pantalla rota.
 2. Completar el formulario de `/registro` (spec 001) y observar el botón al enviar: queda en estado
    de carga y bloqueado hasta la respuesta.
+3. Mientras cargan los datos de `/visitanos` (con la red lenta, ej. "Slow 3G" en DevTools): se ven
+   esqueletos con la forma del contenido, no una pantalla en blanco.
+4. En `/ministerios` y `/eventos`: el estado vacío tiene un mensaje amable y una acción sugerida.
+5. En el backoffice, ejecutar una acción destructiva disponible (ej. desactivar una Sede o marcar
+   inactiva una Persona pendiente): aparece un diálogo de confirmación que nombra lo afectado, con
+   botones de verbo concreto (nunca un "Cancelar" ambiguo); al confirmar, un aviso breve con
+   "Deshacer" cuando la acción lo permite.
+6. Los avisos breves (toasts) se leen con lector de pantalla y duran lo suficiente para leerlos.
 
 ## Historia 4 — Errores
 
@@ -71,11 +86,17 @@ Valida de punta a punta cada historia de `spec.md` sobre un ambiente local ya pr
    quedó guardado.
 3. Cerrar sesión, volver a iniciarla: la interfaz carga directamente en modo claro, sin flash del
    modo del sistema antes de aplicar la preferencia guardada.
+4. Verificar que el selector de tema **se encuentra** desde la app con sesión (Perfil en la barra
+   inferior), en escritorio y en celular.
+5. Repetir los pasos 2–4 en el **backoffice**, desde el menú de usuario: el tema se guarda y al
+   recargar o volver a iniciar sesión no hay flash (`apps/backoffice/src/auth.ts`).
+6. Revisar en ambos temas que textos, botones, bordes y foco sigan siendo legibles (contraste).
 
 ## Historia 6 — Idioma
 
 1. Buscar en el código de `apps/web`/`apps/backoffice` (ej. `grep` de texto visible en JSX) — no
-   debería haber strings de interfaz fuera de `messages/es.json`.
+   debería haber strings de interfaz fuera de `messages/es.json`, **incluido `registro/page.tsx`**
+   (migrado en la Phase 8 del spec 001, cierra T082).
 2. Revisar el `<html>` de cualquier página: `lang="es"`.
 3. Crear una Persona nueva (registro del spec 001): en la base, `idiomaPreferido = 'es'` por default.
 
@@ -88,6 +109,9 @@ Valida de punta a punta cada historia de `spec.md` sobre un ambiente local ya pr
 3. `curl http://localhost:3002/robots.txt`: `Disallow: /` completo para el backoffice.
 4. Compartir (o inspeccionar las meta tags Open Graph de) cualquier página pública: título y
    descripción propios, no genéricos.
+5. Verificar que cada página pública tiene **imagen** de vista previa (`og:image`, 1200×630, con
+   texto alternativo) y tarjeta de Twitter. Probar pegando el link en WhatsApp (con un túnel o una
+   vista previa de meta tags) — debe mostrar imagen, título y descripción (SC-007).
 
 ## Historia 8 — Datos de demostración
 
