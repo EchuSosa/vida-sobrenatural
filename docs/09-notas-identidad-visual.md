@@ -6,7 +6,7 @@
 
 - Material de clase "Vida de Servicio" (Clase 1: Libertad y Propósito, Clase 3: Autoridad y ministerio, Clase 4: Encarnando nuestros valores) — PDFs oficiales de la iglesia, autor Juan Pablo Sosa.
 - Portada del libro "Vida de Servicio" — pieza de diseño más completa encontrada hasta ahora.
-- Sitio web anterior: vidasobrenatural.com (desactualizado, `noindex/nofollow`, contenido de ~2020-2021).
+- Sitio web anterior: vidasobrenatural.com (desactualizado, `noindex/nofollow`, contenido de ~2020-2021). Menú: Iglesia, Palabra Profética, Eventos, Visitanos, Contacto, Liderazgo (el menú nuevo está en `14-navegacion.md`).
 - Instagram @iglesiavs (acceso bloqueado para scraping automatizado — revisar manualmente en Sesión 6).
 
 ## Portada del libro "Vida de Servicio" (referencia visual clave)
@@ -24,6 +24,8 @@
 - **Crema / blanco roto**: fondo general.
 - **Marrón muy oscuro / casi negro**: títulos de clase, etiquetas "CLASE X", emblema de cruz.
 - **Beige / marrón claro**: paño/toalla (tono neutro secundario).
+
+**Nota de accesibilidad (D81, D95):** terracota y verde salvia se confunden con daltonismo rojo-verde (no usarlos para oponer estados), y el celeste sobre crema probablemente no alcanza el contraste mínimo para texto. Medir cada par, en modo claro y oscuro, al definir los tokens.
 
 ## Logo (confirmado)
 
@@ -48,6 +50,7 @@ El estilo del libro "Vida de Servicio" (editorial, botánico, sobrio) **no se pa
   - *Conferencia de hombres "Indestructibles — Plus Ultra"*: paleta azul con textura de piedra/mármol agrietado, columnas clásicas, tipografía tallada en piedra, líneas neón turquesa garabateadas, muy "gamer/superhéroe".
   - *Quote cards de prédicas (contenido regular)*: fondos oscuros (negro, azul marino, o foto en blanco y negro), tipografía sans-serif limpia y moderna (no la serif del libro), con **una curva/espiral blanca decorativa recurrente** en una esquina — este swoosh, junto con el logo de 4 pétalos, parecen ser los dos elementos gráficos más constantes de la marca, más allá de la paleta de color específica de cada pieza.
 - **Conclusión para Sesión 6**: la identidad real de la iglesia hoy es más "campaña por campaña" que "sistema de marca único". Vamos a necesitar decidir explícitamente si la app va con el estilo editorial del libro, con el estilo más pop/vibrante de Instagram, o con algo propio que tome el logo + swoosh como constantes y defina su propia paleta — esto es una decisión de diseño real a tomar en la Sesión 6, no algo que se pueda inferir de un único estilo dominante.
+- **Propuesta a evaluar**: sistema propio, con logo + swoosh como constantes y la paleta del libro como base (es el material más "permanente"); el estilo vibrante de cada campaña vive dentro del contenido (flyers de Eventos), no en la interfaz. Tipografía serif editorial solo en títulos y sans-serif para el resto.
 
 ## Datos reales para la sección de Ofrendas (MVP)
 
@@ -86,12 +89,13 @@ El material confirma que el proceso interno de la iglesia se llama formalmente:
 
 Donde "Discipulado" agrupa Vida Nueva, Grupos de Extensión, Vida de Servicio, Estudios Bíblicos y Jornadas de sanidad como actividades dentro de esa etapa, y "Red" es la etapa de integrarse a Ministerios/Equipos de servicio.
 
-**Nota:** esto difiere de la nomenclatura que usamos en la documentación del sistema (Bienvenida → Vida Nueva → Vida de Servicio → Ministerio, todos como pasos separados). No es un error — es una simplificación útil para el modelo de datos — pero vale la pena decidir en algún momento si la interfaz de usuario final debería hablar con el lenguaje oficial de la iglesia ("Discipulado", "Red") aunque el modelo interno mantenga sus propias entidades.
+**Resuelto (D92):** la interfaz usa nombres descriptivos para alguien que recién llega — **"Primeros pasos"** (sección pública) y **"Mi camino"** (sección privada) — en vez de "Discipulado"/"Red". Dentro de esas secciones se mantienen los nombres propios de cada curso/etapa (Vida Nueva, Vida de Servicio, Ministerios, Bautismo). El modelo de datos no cambia.
 
 ## Pendiente para la Sesión 6
 
 - ~~Revisar Instagram @iglesiavs~~ — hecho, ver hallazgos arriba.
-- **Decisión clave pendiente**: elegir entre el estilo editorial/botánico del libro, el estilo vibrante/por-campaña de Instagram, o un sistema propio que tome como constantes el logo (4 pétalos) y el swoosh curvo, con paleta propia definida para la app.
+- **Decisión clave pendiente**: elegir entre el estilo editorial/botánico del libro, el estilo vibrante/por-campaña de Instagram, o un sistema propio que tome como constantes el logo (4 pétalos) y el swoosh curvo, con paleta propia definida para la app (ver propuesta arriba).
 - Definir si la tipografía editorial del libro se traslada a la app, o se adapta a algo más liviano/moderno (más cercano a las quote cards, que usan sans-serif).
-- Confirmar con el usuario si "Discipulado" y "Red" deberían ser los nombres visibles en la UI en vez de "Vida Nueva"/"Vida de Servicio" y "Ministerio".
+- ~~Confirmar si "Discipulado" y "Red" deberían ser los nombres visibles en la UI~~ — resuelto en D92.
 - Usar los datos reales de Ofrendas (alias, CBU, entidad legal) ya recopilados arriba para la sección estática del MVP — no hace falta pedírselos de nuevo al usuario.
+- Traducir la dirección elegida a tokens de diseño (variables CSS en `packages/ui`, modo claro y oscuro) verificando contrastes WCAG 2.2 AA (ver `15-guia-ux-ui.md`).

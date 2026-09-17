@@ -1,23 +1,37 @@
 graph TD
     subgraph Monorepo["Monorepo (pnpm + Turborepo)"]
-        WEB["App web<br/>Next.js, PWA<br/>usuario final"]
-        BACKOFFICE["App backoffice<br/>Next.js<br/>Admin, Discipuladores, Líderes"]
-        API["API<br/>NestJS<br/>REST + lógica de negocio"]
-        SHARED["packages/shared-types<br/>tipos Prisma + DTOs"]
-        UI["packages/ui<br/>componentes shadcn/ui"]
+        WEB["App web :3000<br/>Next.js, PWA<br/>usuario final"]
+        BACKOFFICE["App backoffice :3001<br/>Next.js<br/>Admin, Discipuladores, Líderes"]
+        API["API :3333<br/>NestJS<br/>REST + lógica de negocio"]
+        JOBS["Tareas programadas<br/>@nestjs/schedule<br/>recordatorios, YouTube, reintentos"]
+        SHARED["packages/shared-types<br/>tipos Prisma + DTOs<br/>+ catálogo de códigos de error"]
+        UI["packages/ui<br/>componentes shadcn/ui<br/>+ tokens claro/oscuro"]
     end
 
     DB[("PostgreSQL<br/>vía Prisma")]
     SSO["SSO<br/>Google / Facebook<br/>(NextAuth.js)"]
     PUSH["Web Push<br/>notificaciones PWA"]
+    EMAIL["Email transaccional<br/>avisos importantes (D96)<br/>Mailpit en local"]
     STORAGE["Almacenamiento de archivos<br/>local en dev, S3-compatible después"]
+    YOUTUBE["YouTube Data API v3<br/>últimos videos (D93)"]
+    SENTRY["Sentry<br/>monitoreo de errores (D101)<br/>sin datos personales"]
 
     WEB -->|HTTPS / REST| API
     BACKOFFICE -->|HTTPS / REST| API
+    WEB --> SSO
+    BACKOFFICE --> SSO
     API --> DB
-    API --> SSO
     API --> PUSH
+    API --> EMAIL
     API --> STORAGE
+    API --- JOBS
+    JOBS --> YOUTUBE
+    JOBS --> PUSH
+    JOBS --> EMAIL
+
+    WEB -.errores.-> SENTRY
+    BACKOFFICE -.errores.-> SENTRY
+    API -.errores.-> SENTRY
 
     WEB -.usa.-> SHARED
     BACKOFFICE -.usa.-> SHARED

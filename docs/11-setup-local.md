@@ -102,7 +102,17 @@ pnpm add -D turbo -w
 cd apps
 npx @nestjs/cli new api --package-manager pnpm
 cd api
-pnpm run start:dev   # confirmar que arranca
+```
+
+Abrir `src/main.ts` y fijar el puerto (reemplazar `process.env.PORT ?? 3000` por `3333`, o crear un `.env` con `PORT=3333` si el scaffold ya lee `process.env.PORT`):
+
+```
+# apps/api/.env
+PORT=3333
+```
+
+```bash
+pnpm run start:dev   # confirmar que arranca en localhost:3333
 cd ../..
 ```
 
@@ -112,7 +122,18 @@ cd ../..
 cd apps
 npx create-next-app@latest web --typescript --tailwind
 cd web
-pnpm dev   # confirmar que arranca (puede pedir cambiar de puerto)
+```
+
+Crear `.env.local`:
+
+```
+# apps/web/.env.local
+PORT=3000
+NEXT_PUBLIC_API_URL=http://localhost:3333
+```
+
+```bash
+pnpm dev   # arranca en localhost:3000
 cd ../..
 ```
 
@@ -122,9 +143,22 @@ cd ../..
 cd apps
 npx create-next-app@latest backoffice --typescript --tailwind
 cd backoffice
-pnpm dev   # confirmar que arranca (otro puerto distinto a web)
+```
+
+Crear `.env.local`:
+
+```
+# apps/backoffice/.env.local
+PORT=3001
+NEXT_PUBLIC_API_URL=http://localhost:3333
+```
+
+```bash
+pnpm dev   # arranca en localhost:3001
 cd ../..
 ```
+
+> Si `pnpm dev` no respeta la variable `PORT` del `.env.local` (depende de la versión de Next.js), fijarlo directo en el script de `package.json`: `"dev": "next dev -p 3001"`.
 
 ## 7. Conectar Prisma al backend (`apps/api`)
 

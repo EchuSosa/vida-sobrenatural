@@ -10,8 +10,8 @@
 
 1. La persona entra a la app y toca "Registrarme" (o intenta ver contenido que requiere login y se le ofrece registrarse).
 2. Elige método de acceso vía SSO (Google u otro proveedor).
-3. Autoriza el acceso — el sistema recibe email y nombre básico desde el proveedor SSO.
-4. El sistema pide completar datos obligatorios: **apellido, nombre, género, fecha de nacimiento, teléfono, dirección, Sede, estado civil, profesión, tiempo congregándose** (hoy solo existe la Sede La Plata, pero el campo ya queda preparado para más sedes a futuro).
+3. Autoriza el acceso — el sistema recibe email, nombre básico y (si es Google) la foto de perfil desde el proveedor SSO. Si la verificación contra la API falla por un error inesperado, el login se bloquea con un mensaje para reintentar (fail-closed, D88).
+4. El sistema pide completar datos obligatorios: **apellido, nombre, género, fecha de nacimiento, teléfono, dirección, Sede, estado civil, profesión, tiempo congregándose** (hoy solo existe la Sede La Plata, pero el campo ya queda preparado para más sedes a futuro). El formulario se divide en pasos cortos con indicador de progreso (D94).
 5. El sistema calcula la edad a partir de la fecha de nacimiento. Es **mayor de 18** → se crea la cuenta con `estado = activa` y rol "Miembro registrado".
 6. La persona llega a una pantalla de bienvenida/perfil. Accede al contenido público + su propio perfil.
 
@@ -22,7 +22,9 @@
 4c. **El intento queda igualmente registrado** en el sistema con `estado = pendiente_tutor` (no se descarta el dato) — visible para el Admin en el back office, para que pueda hacer seguimiento y, si corresponde, completar el alta manualmente usando el contacto de un tutor.
 4d. La cuenta en estado `pendiente_tutor` **no puede iniciar sesión** ni acceder a contenido hasta que un Admin la active manualmente.
 
-**Datos obligatorios en el registro:** apellido, nombre, género, fecha de nacimiento, teléfono, dirección, Sede, estado civil, profesión, tiempo congregándose. (Email básico llega del proveedor SSO.) Con esto, el registro inicial ya cubre los datos que hoy se piden por separado en el formulario físico de Bautismo — no hace falta volver a pedirlos en la Solicitud de Bautismo (Flujo 6).
+**Datos obligatorios en el registro:** apellido, nombre, género, fecha de nacimiento, teléfono (input estructurado con selector de país, no texto libre), dirección, Sede, estado civil, profesión (categoría predefinida, con detalle libre opcional si es "Otro"), tiempo congregándose. (Email básico llega del proveedor SSO.) Con esto, el registro inicial ya cubre los datos que hoy se piden por separado en el formulario físico de Bautismo — no hace falta volver a pedirlos en la Solicitud de Bautismo (Flujo 6).
+
+**Personas que no pueden o prefieren no registrarse solas** (ej. personas mayores): las da de alta el Admin o un Discipulador, ver Flujo 12.
 
 ---
 
@@ -32,7 +34,7 @@
 
 **Camino feliz:**
 
-1. Una Persona registrada solicita comenzar Vida Nueva desde la app (botón "Quiero empezar Vida Nueva"), creando una **Solicitud de Discipulado** en estado `pendiente`.
+1. Una Persona registrada solicita comenzar Vida Nueva desde la app (botón "Quiero empezar Vida Nueva"), creando una **Solicitud de Discipulado** en estado `pendiente`. (Si la Persona no tiene acceso a la app, el Admin crea la Solicitud en su nombre — Flujo 12.)
 2. El Admin revisa la Solicitud, la aprueba, y al hacerlo crea un nuevo **Grupo** de Curso "Vida Nueva" (modalidad `seguimiento_por_encuentros`), asignando manualmente:
    - La Persona, vía **Inscripción**.
    - El Discipulador, vía **Liderazgo** (rol: discipulador) — el Admin ve un listado de Discipuladores filtrado por `disponible_discipulado = true` y sin un Bloqueo de Disponibilidad activo en la fecha actual, para elegir entre quienes efectivamente pueden tomar un nuevo discipulado.
@@ -64,7 +66,7 @@
 
 4. Una Persona con rol "Miembro registrado" (o ya con roles previos) ve el Grupo disponible. El botón "Solicitar inscripción" está **bloqueado** salvo que la Persona cumpla el `prerequisito_categoria` del Curso (por defecto, `vida_nueva` — ver `04-dominio-entidades.md`): tener una Inscripción `completada` en Vida Nueva (individual o grupal, cualquiera cuenta), o una **Completitud Manual** cargada por el Admin.
 4a. Si el prerrequisito no está cumplido, la Persona ve un mensaje explicando qué le falta, y no puede continuar — salvo que el Admin lo destrabe con una Completitud Manual (ver Flujo 9).
-5. Si el prerrequisito está cumplido, la Persona **solicita inscribirse** desde la app.
+5. Si el prerrequisito está cumplido, la Persona **solicita inscribirse** desde la app (o el Admin lo hace en su nombre si no tiene acceso — Flujo 12).
 6. El Admin revisa la solicitud y la **aprueba** — recién ahí se crea la **Inscripción** y la Persona pasa a tener el rol "En curso: Vida de Servicio", con acceso al contenido de ese Grupo.
 
 **Publicación semanal de contenido:**
@@ -76,7 +78,7 @@
 **Asistencia y bajas:**
 
 10. Cada semana, cualquier Líder asignado al Grupo (o el Admin) abre la pantalla de asistencia del Grupo — reemplaza la planilla física de la puerta. Esto crea (o usa) el **Encuentro** correspondiente a esa reunión, y marca presente/ausente para cada Inscripción activa. El Encuentro de asistencia es independiente de si ese domingo también hay Contenido digital liberado — son dos registros separados que pueden coincidir en fecha.
-11. En el listado de inscriptos del Grupo, las Personas que ya acumularon **2 o más faltas** se destacan visualmente (ej. otro color), para que el Líder/Admin pueda decidir con un vistazo si corresponde alguna acción. El sistema **no da de baja automáticamente** a nadie — solo señala el caso.
+11. En el listado de inscriptos del Grupo, las Personas que ya acumularon **2 o más faltas** se destacan visualmente (con ícono y texto, no solo color — D81), para que el Líder/Admin pueda decidir con un vistazo si corresponde alguna acción. El sistema **no da de baja automáticamente** a nadie — solo señala el caso.
 12. Desde ese listado, el Líder/Admin puede ejecutar una de estas acciones sobre una Inscripción activa:
     - **Dar de baja** (`estado = dada_de_baja`): decisión administrativa, ej. por exceso de faltas sin excepción.
     - **Marcar abandono** (`estado = abandono`): la propia Persona comunicó que no va a continuar.
@@ -108,7 +110,7 @@
 
 **Revisión por el Admin:**
 
-6. El Admin ve la lista de Postulaciones pendientes. Antes de aprobar una, el sistema verifica si la Persona ya tiene una Postulación `aprobada` activa en **otro** Ministerio:
+6. El Admin ve la lista de Postulaciones pendientes (en la bandeja unificada de Solicitudes). Antes de aprobar una, el sistema verifica si la Persona ya tiene una Postulación `aprobada` activa en **otro** Ministerio:
    - **Si la tiene:** se le muestra una advertencia: *"Esta persona ya pertenece al Ministerio X. ¿Confirmás el cambio?"* Si el Admin confirma, la Postulación anterior pasa a `inactiva` y la nueva a `aprobada`.
    - **Si no tiene ninguna activa:** se aprueba directamente, sin advertencia.
 7. Al aprobarse, la Persona pasa a tener el rol "Miembro de Ministerio", con el Ministerio y la Célula elegidos.
@@ -128,13 +130,13 @@
 
 ## Flujo 8 — Evento (publicación e inscripción)
 
-**Actores:** Admin (publica, verifica pagos, puede dar de baja inscripciones), Persona (se inscribe, cancela su propia inscripción, si aplica).
+**Actores:** Admin (publica, verifica pagos, puede inscribir o dar de baja inscripciones), Persona (se inscribe, cancela su propia inscripción, si aplica).
 
 **Publicación:**
 
-1. El Admin crea un **Evento**: nombre, fecha, descripción, Sede, `publico_objetivo` (texto informativo, ej. "Jornada de mujeres" — sin validación técnica), dos flags (`requiere_inscripcion` y, si aplica, `requiere_aprobacion`), opcionalmente `cupo` (con `permite_lista_espera`) y `costo` (para campamentos u otros Eventos pagos), y opcionalmente `dias_anticipacion_recordatorio` (si se completa, dispara un recordatorio automático a quienes no se anotaron — ver Flujo 10).
+1. El Admin crea un **Evento**: nombre, fecha, descripción, Sede, flyer opcional con su texto alternativo (D83), `publico_objetivo` (texto informativo, ej. "Jornada de mujeres" — sin validación técnica), dos flags (`requiere_inscripcion` y, si aplica, `requiere_aprobacion`), opcionalmente `cupo` (con `permite_lista_espera`) y `costo` (para campamentos u otros Eventos pagos), y opcionalmente `dias_anticipacion_recordatorio` (si se completa, dispara un recordatorio automático a quienes no se anotaron — ver Flujo 10). El Evento tiene una página pública con URL propia (D82).
 2. **Si `requiere_inscripcion = false`**: el Evento es puramente informativo (aparece en la cartelera pública, cualquiera lo ve, sin botón de inscripción).
-3. **Si `requiere_inscripcion = true`**: el sistema genera un **código QR** que lleva directo al formulario de inscripción de ese Evento — pensado para reemplazar el QR a un Google Form que hoy se muestra durante el culto. Si quien escanea el QR no tiene sesión iniciada, se le pide registrarse/loguearse primero, y después se lo redirige de vuelta a completar la inscripción.
+3. **Si `requiere_inscripcion = true`**: el sistema genera un **código QR** (acompañado siempre de un link equivalente) que lleva directo a la página del Evento con el botón de inscripción — pensado para reemplazar el QR a un Google Form que hoy se muestra durante el culto. Si quien escanea el QR no tiene sesión iniciada, se le pide registrarse/loguearse primero, y después se lo redirige de vuelta a completar la inscripción.
 
 **Inscripción:**
 
@@ -145,16 +147,17 @@
 5. Si hay lugar, se crea la **Inscripción a Evento**:
    - Si `requiere_aprobacion = false` → queda `confirmada` automáticamente.
    - Si `requiere_aprobacion = true` → queda `pendiente` hasta que el Admin la revise y confirme.
+5a. El Admin también puede **inscribir a una Persona desde el backoffice** (ej. una Persona sin acceso a la app, Flujo 12, o alguien que avisó por WhatsApp). Se aplican las mismas reglas de cupo y lista de espera.
 
 **Pago (solo si el Evento tiene `costo` definido):**
 
-6. La Persona sube un **comprobante de pago**: monto, medio de pago, y el archivo/imagen del comprobante. Se crea un registro de **Pago** en estado `pendiente_verificacion`.
+6. La Persona sube un **comprobante de pago**: monto, medio de pago, y el archivo/imagen del comprobante. Se crea un registro de **Pago** en estado `pendiente_verificacion`. (Si la Persona no tiene acceso a la app, el Admin puede registrar el Pago en su nombre.)
 7. El Admin revisa el comprobante y lo marca `verificado` o `rechazado`. La Inscripción al Evento puede quedar condicionada a que el Pago esté verificado (a definir en la Sesión 5 si el pago bloquea la confirmación o es un paso independiente).
 
 **Cancelación y lista de espera:**
 
 8. La Inscripción puede pasar a `cancelada` por **dos caminos**: la propia Persona la cancela desde la app, o el **Admin la da de baja manualmente** desde el back office (ej. alguien avisa por WhatsApp que no puede ir, sin necesidad de que entre a la app). Ambos casos producen el mismo resultado.
-9. Si esa Inscripción estaba `confirmada` (o `pendiente`) y hay gente en `lista_espera`, el **primero de la lista** pasa automáticamente al estado que corresponda (`confirmada` directo, o `pendiente` si el Evento requiere aprobación), y recibe una Notificación avisándole que consiguió lugar.
+9. Si esa Inscripción estaba `confirmada` (o `pendiente`) y hay gente en `lista_espera`, el **primero de la lista** pasa automáticamente al estado que corresponda (`confirmada` directo, o `pendiente` si el Evento requiere aprobación), y recibe una Notificación **importante** avisándole que consiguió lugar (push + Avisos + email, D96).
 
 ---
 
@@ -171,7 +174,7 @@
 
 1. El Admin o Discipulador contacta al tutor (fuera de la app, ej. WhatsApp o en persona) y obtiene su autorización, junto con el **email que el menor va a usar para loguearse** (el mismo que usará en el SSO), nombre y teléfono del tutor.
 2. En el back office, el Admin o Discipulador completa/crea el perfil de la Persona menor con: datos personales, `tutor_nombre`, `tutor_telefono`, y **cambia el estado a `activa`** (si venía de `pendiente_tutor`) o lo crea directamente en `activa` (si es alta desde cero).
-3. La próxima vez que el menor inicia sesión vía SSO usando el email ya cargado, el sistema **reconoce el email contra un registro existente en estado `activa`** y lo deja ingresar directamente — sin volver a pasar por la validación de edad del Flujo 2 (esa validación ya la hizo una persona humana, con la autorización del tutor).
+3. La próxima vez que el menor inicia sesión vía SSO usando el email ya cargado, el sistema **reconoce el email contra un registro existente en estado `activa`** y lo deja ingresar directamente — sin volver a pasar por la validación de edad del Flujo 2 (esa validación ya la hizo una persona humana, con la autorización del tutor). Solo se vincula si el proveedor confirma que el email está verificado.
 4. A partir de ahí, el menor tiene acceso igual que cualquier Miembro registrado, y el Admin/Discipulador le asigna los roles que correspondan (ej. Vida Nueva) de la misma forma que a un adulto.
 
 ---
@@ -192,34 +195,43 @@ La mayoría de las operaciones de gestión ya quedaron cubiertas dentro de los f
 
 **Confirmación reforzada al desactivar:** si el registro que se quiere desactivar tiene datos relacionados activos (ej. un Curso con Grupos en curso, un Ministerio con Miembros activos), el sistema debe mostrar un modal de confirmación reforzada — el Admin debe escribir el nombre exacto del registro para confirmar — ya que desactivarlo afecta a personas reales, aunque la acción sea reversible. Si no hay datos relacionados activos, alcanza con una confirmación simple.
 
-**Gestión de Personas:** el Admin puede ver el listado completo de Personas, editar sus datos, cambiar su `estado` (ej. activar una cuenta `pendiente_tutor`, ver Flujo 7), y asignar/quitar roles manualmente cuando haga falta corregir un error (fuera del flujo normal de solicitudes). Cada Persona tiene una **vista de perfil unificada** en el back office: sus roles actuales, historial de Inscripciones, Postulaciones y Solicitudes (con sus estados), y sus Relaciones Familiares — todo en una sola pantalla, en vez de tener que buscar por separado en cada módulo.
+**Gestión de Personas:** el Admin puede ver el listado completo de Personas (con su foto de perfil cuando exista, D87), dar de alta Personas adultas (Flujo 12), editar sus datos, cambiar su `estado` (ej. activar una cuenta `pendiente_tutor`, ver Flujo 7), y asignar/quitar roles manualmente cuando haga falta corregir un error (fuera del flujo normal de solicitudes). Cada Persona tiene una **vista de perfil unificada** en el back office: sus roles actuales, historial de Inscripciones, Postulaciones y Solicitudes (con sus estados), y sus Relaciones Familiares — todo en una sola pantalla, en vez de tener que buscar por separado en cada módulo.
 
 **Completitud Manual (excepción a prerrequisitos):** desde el perfil de una Persona, el Admin puede marcar un Curso como completado manualmente (ej. "hizo Vida Nueva en otra congregación"), sin necesidad de crear un Grupo ni una Inscripción real. Esto destraba cualquier prerrequisito que dependa de esa categoría de Curso (ej. poder solicitar Vida de Servicio), tal como se describe en el Flujo 4.
 
 **Cumpleaños:** el Admin tiene un listado (o recordatorio) de las Personas que cumplen años en el mes actual, calculado a partir de `fecha_nacimiento` — sin necesidad de una entidad nueva.
 
+**Comentarios de la app:** el Admin ve en el Inicio del backoffice los comentarios enviados desde "Contanos qué te parece" (D102).
+
 ---
 
-## Flujo 10 — Notificaciones push
+## Flujo 10 — Notificaciones (push, Avisos y email)
 
-**Actores:** Persona (recibe, se suscribe), Admin (crea manuales), Sistema (dispara automáticas).
+**Actores:** Persona (recibe, se suscribe), Admin (crea manuales), Sistema (dispara automáticas y envía).
 
-**Suscripción de un dispositivo:**
+Detalle técnico del envío en `16-sistemas-transversales.md` (D96, D100).
 
-1. La Persona, usando la app agregada a su pantalla de inicio (requisito de iOS; en Android funciona incluso sin agregarla), autoriza las notificaciones cuando la app se lo solicita.
+**Suscripción de un dispositivo (push):**
+
+1. La Persona, usando la app agregada a su pantalla de inicio (requisito de iOS; en Android funciona incluso sin agregarla), autoriza las notificaciones cuando la app se lo solicita **en contexto** (ej. después de enviar una solicitud), nunca al abrir la app por primera vez.
 2. Se crea una **Suscripción a Notificación** para ese dispositivo, asociada a la Persona.
 
 **Notificación manual (Admin):**
 
-3. El Admin crea una Notificación: título, mensaje, y elige el **alcance** — `todos`, o un Grupo específico, o un Ministerio específico.
-4. El sistema la envía a las Suscripciones activas de todas las Personas que correspondan según el alcance elegido (ej. todos los inscriptos activos de ese Grupo).
+3. El Admin crea una Notificación: título, mensaje, elige el **alcance** — `todos`, o un Grupo específico, o un Ministerio específico — y opcionalmente la marca como **importante** (también se envía por email).
+4. El sistema crea una Entrega por destinatario y canal, y la envía a las Suscripciones activas (push), la registra en Avisos, y si es importante la envía por email.
 
 **Notificaciones automáticas (Sistema):**
 
-5. **`contenido_liberado`** (alcance = `grupo`): cuando un Líder carga Contenido y se cumplen las condiciones de liberación (Flujo 4, paso 7), se dispara automáticamente con `alcance_id` = el Grupo, y llega a los inscriptos activos de ese Grupo.
-6. **`solicitud_actualizada`** (alcance = `persona`): cuando el Admin aprueba o rechaza una Postulación, Solicitud de Bautismo, Solicitud de Discipulado o Inscripción a Evento pendiente, se dispara con `alcance_id` = la Persona dueña de esa solicitud — es individual, no un segmento.
-7. **`evento_proximo`** (alcance = `evento`): recordatorio con `alcance_id` = el Evento, enviado a quienes tienen una Inscripción a Evento confirmada, con antelación a la fecha del Evento. A diferencia de los otros dos disparadores (que reaccionan a una acción), este necesita un proceso programado que revise periódicamente los Eventos próximos (detalle técnico a definir en la Sesión 5, specs).
-8. **`recordatorio_inscripcion`** (alcance = `todos`): si el Evento tiene `dias_anticipacion_recordatorio` configurado, el sistema envía un recordatorio a **todas** las Personas (no solo a quienes ya se inscribieron) cuando faltan esos días para el Evento — pensado para incentivar a quien todavía no se anotó. Como `publico_objetivo` es solo texto informativo y no hay segmentación técnica, este recordatorio necesariamente llega a todos; el Admin decide si vale la pena activarlo para cada Evento según cuán relevante sea para el público general. También requiere el mismo proceso programado que `evento_proximo`.
+5. **`contenido_liberado`** (alcance = `grupo`, prioridad normal): cuando un Líder carga Contenido y se cumplen las condiciones de liberación (Flujo 4, paso 7), se dispara automáticamente con `alcance_id` = el Grupo, y llega a los inscriptos activos de ese Grupo.
+6. **`solicitud_actualizada`** (alcance = `persona`, prioridad **importante**): cuando el Admin aprueba o rechaza una Postulación, Solicitud de Bautismo, Solicitud de Discipulado o Inscripción a Evento pendiente, se dispara con `alcance_id` = la Persona dueña de esa solicitud — es individual, no un segmento. También aplica a la promoción desde lista de espera, a la verificación/rechazo de un Pago y a la activación de una cuenta creada por el Admin.
+7. **`evento_proximo`** (alcance = `evento`, prioridad normal): recordatorio con `alcance_id` = el Evento, enviado a quienes tienen una Inscripción a Evento confirmada, con antelación a la fecha del Evento. A diferencia de los otros dos disparadores (que reaccionan a una acción), este necesita un proceso programado que revise periódicamente los Eventos próximos (detalle técnico a definir en la Sesión 5, specs).
+8. **`recordatorio_inscripcion`** (alcance = `todos`, prioridad normal): si el Evento tiene `dias_anticipacion_recordatorio` configurado, el sistema envía un recordatorio a **todas** las Personas (no solo a quienes ya se inscribieron) cuando faltan esos días para el Evento — pensado para incentivar a quien todavía no se anotó. Como `publico_objetivo` es solo texto informativo y no hay segmentación técnica, este recordatorio necesariamente llega a todos; el Admin decide si vale la pena activarlo para cada Evento según cuán relevante sea para el público general. También requiere el mismo proceso programado que `evento_proximo`.
+
+**Recepción:**
+
+9. La Persona ve todas sus notificaciones en la pestaña **Avisos**, con estado leída/no leída; tocar una la marca como leída y la lleva a la entidad relacionada (D59).
+10. Las Personas sin acceso a la app (Flujo 12) solo reciben las notificaciones importantes, y solo si tienen email cargado.
 
 ---
 
@@ -227,9 +239,29 @@ La mayoría de las operaciones de gestión ya quedaron cubiertas dentro de los f
 
 **Actor:** Persona.
 
-1. La Persona accede a "Mi perfil" y puede editar sus propios datos de contacto (teléfono, dirección) y otros campos no críticos (estado civil, profesión).
+1. La Persona accede a "Mi perfil" y puede editar sus propios datos de contacto (teléfono, dirección) y otros campos no críticos (estado civil, profesión), y su preferencia de tema (Claro / Oscuro / Sistema, D95). La foto de perfil no es editable en el MVP (D87).
 2. Campos que **no puede editar libremente** ella misma: `fecha_nacimiento` (afecta validaciones ya realizadas, como la de mayoría de edad) y `email` (es la identidad de login vía SSO). Cambios a estos dos campos requieren contactar al Admin.
 3. La Persona también puede gestionar sus **Relaciones Familiares** (vincular a su cónyuge, hijos, etc., si ya están registrados en el sistema).
 
 ---
-*Sesión de origen: Sesión 4 (cerrada), ampliada fuera de sesión con Notificaciones push, cancelación/lista de espera, y edición de perfil (ver `08-roadmap-producto.md` y `05-decisiones.md`).*
+
+## Flujo 12 — Alta de una Persona adulta por el Admin
+
+**Actores:** Admin o Discipulador, Persona adulta (ej. una persona mayor o con poca experiencia digital).
+
+**Cuándo se usa:** la Persona no puede o prefiere no registrarse sola (no tiene cuenta de Google/Facebook, no tiene email, o necesita ayuda). Ver D97.
+
+**Pasos:**
+
+1. El Admin o Discipulador obtiene los datos de la Persona **en persona o por WhatsApp**, junto con su consentimiento para guardarlos (D78). Al guardar, el sistema registra quién hizo el alta y que el consentimiento se obtuvo fuera de la app.
+2. En el backoffice, crea la Persona con los mismos datos obligatorios del registro (Flujo 2). El **email es opcional**. Se crea con `estado = activa` y `origen_alta = admin`.
+3. Según el email cargado:
+   - **Email de una cuenta Google o Facebook:** la Persona puede ingresar a la app vía SSO; el sistema reconoce el email contra el registro existente (mismo mecanismo que el Flujo 7, solo con email verificado por el proveedor). Recibe un email importante avisándole que su cuenta está lista, con instrucciones simples.
+   - **Otro email (sin cuenta Google/Facebook):** la Persona no puede ingresar a la app en el MVP (el ingreso con código por email queda para Fase 2), pero **sí recibe por email los avisos importantes** (D96).
+   - **Sin email:** la Persona queda registrada **sin acceso a la app** y sin avisos automáticos; el Admin/Discipulador le comunica las novedades por WhatsApp o en persona, como hoy.
+4. El Admin (o el Discipulador, en lo que le corresponde) puede **actuar en nombre de la Persona**: crear su Solicitud de Discipulado, de Bautismo o de inscripción a Vida de Servicio, inscribirla a Eventos y registrar Pagos. Cada acción queda registrada como hecha por el Admin/Discipulador.
+5. Su avance (Encuentros, Asistencia, Inscripciones, Completitudes) se registra igual que el de cualquier otra Persona, y cuenta para prerrequisitos y métricas.
+6. Si más adelante la Persona obtiene una cuenta de Google/Facebook, el Admin actualiza el email y la Persona puede empezar a ingresar a la app sin perder su historial.
+
+---
+*Sesión de origen: Sesión 4 (cerrada), ampliada fuera de sesión con Notificaciones push, cancelación/lista de espera, edición de perfil, datos estructurados de registro (D90), login fail-closed (D88), alta de adultos por el Admin y canal de email (ver `08-roadmap-producto.md` y `05-decisiones.md`).*
