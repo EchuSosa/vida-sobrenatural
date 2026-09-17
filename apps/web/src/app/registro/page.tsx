@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import type {
   Genero,
   EstadoCivil,
@@ -10,49 +11,61 @@ import type {
   TiempoCongregacion,
   Sede,
 } from '@vida-sobrenatural/shared-types';
+import { apiFetch, ApiError } from '../../lib/api-client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
-const OPCIONES_GENERO: { value: Genero; label: string }[] = [
-  { value: 'femenino', label: 'Femenino' },
-  { value: 'masculino', label: 'Masculino' },
-];
+/**
+ * Las listas predefinidas se guardan como claves estables (los mismos
+ * valores que Prisma/class-validator ya usan) y se traducen recién acá, al
+ * mostrarse — FR-032 (specs/002-base-transversal, Historia 6).
+ */
+function useOpcionesRegistro() {
+  const t = useTranslations('registro.opciones');
 
-const OPCIONES_ESTADO_CIVIL: { value: EstadoCivil; label: string }[] = [
-  { value: 'soltero_a', label: 'Soltero/a' },
-  { value: 'casado_a', label: 'Casado/a' },
-  { value: 'en_concubinato', label: 'En concubinato' },
-  { value: 'viudo_a', label: 'Viudo/a' },
-  { value: 'divorciado_a', label: 'Divorciado/a' },
-  { value: 'separado_a', label: 'Separado/a' },
-];
+  const genero: { value: Genero; label: string }[] = [
+    { value: 'femenino', label: t('genero.femenino') },
+    { value: 'masculino', label: t('genero.masculino') },
+  ];
 
-const OPCIONES_TIEMPO_CONGREGACION: { value: TiempoCongregacion; label: string }[] = [
-  { value: 'menos_6_meses', label: 'Menos de 6 meses' },
-  { value: 'de_6_meses_a_1_anio', label: 'De 6 meses a 1 año' },
-  { value: 'de_1_a_3_anios', label: 'De 1 a 3 años' },
-  { value: 'de_3_a_5_anios', label: 'De 3 a 5 años' },
-  { value: 'mas_5_anios', label: 'Más de 5 años' },
-];
+  const estadoCivil: { value: EstadoCivil; label: string }[] = [
+    { value: 'soltero_a', label: t('estadoCivil.soltero_a') },
+    { value: 'casado_a', label: t('estadoCivil.casado_a') },
+    { value: 'en_concubinato', label: t('estadoCivil.en_concubinato') },
+    { value: 'viudo_a', label: t('estadoCivil.viudo_a') },
+    { value: 'divorciado_a', label: t('estadoCivil.divorciado_a') },
+    { value: 'separado_a', label: t('estadoCivil.separado_a') },
+  ];
 
-const OPCIONES_PROFESION: { value: Profesion; label: string }[] = [
-  { value: 'salud', label: 'Salud' },
-  { value: 'educacion', label: 'Educación' },
-  { value: 'tecnologia_ingenieria', label: 'Tecnología/Ingeniería' },
-  { value: 'comercio_ventas', label: 'Comercio y Ventas' },
-  { value: 'oficios_construccion', label: 'Oficios/Construcción' },
-  { value: 'administracion_finanzas', label: 'Administración y Finanzas' },
-  { value: 'legal', label: 'Legal' },
-  { value: 'comunicacion_marketing', label: 'Comunicación y Marketing' },
-  { value: 'arte_diseno', label: 'Arte y Diseño' },
-  { value: 'servicios_gastronomia', label: 'Servicios y Gastronomía' },
-  { value: 'transporte', label: 'Transporte' },
-  { value: 'estudiante', label: 'Estudiante' },
-  { value: 'ama_de_casa', label: 'Ama/o de casa' },
-  { value: 'jubilado_a', label: 'Jubilado/a' },
-  { value: 'sin_ocupacion', label: 'Sin ocupación' },
-  { value: 'otro', label: 'Otro' },
-];
+  const tiempoCongregacion: { value: TiempoCongregacion; label: string }[] = [
+    { value: 'menos_6_meses', label: t('tiempoCongregacion.menos_6_meses') },
+    { value: 'de_6_meses_a_1_anio', label: t('tiempoCongregacion.de_6_meses_a_1_anio') },
+    { value: 'de_1_a_3_anios', label: t('tiempoCongregacion.de_1_a_3_anios') },
+    { value: 'de_3_a_5_anios', label: t('tiempoCongregacion.de_3_a_5_anios') },
+    { value: 'mas_5_anios', label: t('tiempoCongregacion.mas_5_anios') },
+  ];
+
+  const profesion: { value: Profesion; label: string }[] = [
+    { value: 'salud', label: t('profesion.salud') },
+    { value: 'educacion', label: t('profesion.educacion') },
+    { value: 'tecnologia_ingenieria', label: t('profesion.tecnologia_ingenieria') },
+    { value: 'comercio_ventas', label: t('profesion.comercio_ventas') },
+    { value: 'oficios_construccion', label: t('profesion.oficios_construccion') },
+    { value: 'administracion_finanzas', label: t('profesion.administracion_finanzas') },
+    { value: 'legal', label: t('profesion.legal') },
+    { value: 'comunicacion_marketing', label: t('profesion.comunicacion_marketing') },
+    { value: 'arte_diseno', label: t('profesion.arte_diseno') },
+    { value: 'servicios_gastronomia', label: t('profesion.servicios_gastronomia') },
+    { value: 'transporte', label: t('profesion.transporte') },
+    { value: 'estudiante', label: t('profesion.estudiante') },
+    { value: 'ama_de_casa', label: t('profesion.ama_de_casa') },
+    { value: 'jubilado_a', label: t('profesion.jubilado_a') },
+    { value: 'sin_ocupacion', label: t('profesion.sin_ocupacion') },
+    { value: 'otro', label: t('profesion.otro') },
+  ];
+
+  return { genero, estadoCivil, tiempoCongregacion, profesion };
+}
 
 const OPCIONES_CODIGO_PAIS = [
   { value: '+54', label: '+54 Argentina' },
@@ -72,10 +85,13 @@ const OPCIONES_CODIGO_PAIS = [
 export default function RegistroPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const t = useTranslations('errors');
+  const opciones = useOpcionesRegistro();
 
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [erroresPorCampo, setErroresPorCampo] = useState<Record<string, boolean>>({});
   const [profesionSeleccionada, setProfesionSeleccionada] = useState('');
 
   useEffect(() => {
@@ -89,7 +105,7 @@ export default function RegistroPage() {
     // FR-012 / edge case del spec: un Miembro registrado que ya está `activa`
     // no vuelve a ver el formulario — se lo saca de acá.
     if (session?.user.estado === 'activa') {
-      router.replace('/bienvenida');
+      router.replace('/primeros-pasos');
     }
     if (session?.user.estado === 'pendiente_tutor') {
       router.replace('/pendiente-tutor');
@@ -97,12 +113,12 @@ export default function RegistroPage() {
   }, [session, router]);
 
   if (status === 'loading') {
-    return <main className="mx-auto max-w-xl px-4 py-16">Cargando…</main>;
+    return <main id="contenido" className="mx-auto max-w-xl px-4 py-16">Cargando…</main>;
   }
 
   if (status === 'unauthenticated') {
     return (
-      <main className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
+      <main id="contenido" className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
         <h1 className="text-2xl font-semibold">Registrarme</h1>
         <p className="text-zinc-600 dark:text-zinc-400">
           Para registrarte, primero autorizá el acceso con tu cuenta de Google.
@@ -121,6 +137,7 @@ export default function RegistroPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setErroresPorCampo({});
     setEnviando(true);
 
     const formData = new FormData(event.currentTarget);
@@ -149,7 +166,7 @@ export default function RegistroPage() {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/personas`, {
+      const resultado = await apiFetch<{ id: string; estado: string }>('/personas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,26 +174,23 @@ export default function RegistroPage() {
         },
         body: JSON.stringify(body),
       });
-
-      if (response.status === 409) {
-        setError('Ya existe una persona registrada con este email.');
-        return;
-      }
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        setError(data?.message ?? 'No pudimos completar el registro. Revisá los datos.');
-        return;
-      }
-
-      const resultado = await response.json();
       router.push(resultado.estado === 'activa' ? '/registro/listo' : '/pendiente-tutor');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(t(err.code));
+        if (err.errors?.length) {
+          setErroresPorCampo(Object.fromEntries(err.errors.map((e) => [e.campo, true])));
+        }
+      } else {
+        setError(t('ERROR_INTERNO'));
+      }
     } finally {
       setEnviando(false);
     }
   }
 
   return (
-    <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
+    <main id="contenido" className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">Completá tus datos</h1>
       <p className="text-zinc-600 dark:text-zinc-400">
         Ya autorizaste el acceso con {session?.user.email}. Faltan estos datos para terminar tu
@@ -195,44 +209,67 @@ export default function RegistroPage() {
           name="apellido"
           required
           defaultValue={session?.user.familyName ?? ''}
+          error={erroresPorCampo.apellido}
         />
         <Campo
           label="Nombre"
           name="nombre"
           required
           defaultValue={session?.user.givenName ?? ''}
+          error={erroresPorCampo.nombre}
         />
-        <CampoSelect label="Género" name="genero" required opciones={OPCIONES_GENERO} />
-        <Campo label="Fecha de nacimiento" name="fechaNacimiento" type="date" required />
-        <CampoTelefono />
-        <Campo label="Dirección" name="direccion" required />
+        <CampoSelect
+          label="Género"
+          name="genero"
+          required
+          opciones={opciones.genero}
+          error={erroresPorCampo.genero}
+        />
+        <Campo
+          label="Fecha de nacimiento"
+          name="fechaNacimiento"
+          type="date"
+          required
+          error={erroresPorCampo.fechaNacimiento}
+        />
+        <CampoTelefono error={erroresPorCampo.telefono} />
+        <Campo label="Dirección" name="direccion" required error={erroresPorCampo.direccion} />
         <CampoSelect
           label="Sede"
           name="sedeId"
           required
           opciones={sedes.map((s) => ({ value: s.id, label: s.nombre }))}
+          error={erroresPorCampo.sedeId}
         />
         <CampoSelect
           label="Estado civil"
           name="estadoCivil"
           required
-          opciones={OPCIONES_ESTADO_CIVIL}
+          opciones={opciones.estadoCivil}
+          error={erroresPorCampo.estadoCivil}
         />
         <CampoSelect
           label="Profesión"
           name="profesion"
           required
-          opciones={OPCIONES_PROFESION}
+          opciones={opciones.profesion}
           onChange={setProfesionSeleccionada}
+          error={erroresPorCampo.profesion}
         />
         {profesionSeleccionada === 'otro' && (
-          <Campo label="¿Cuál?" name="profesionDetalle" required />
+          <Campo
+            label="¿Cuál?"
+            name="profesionDetalle"
+            required
+            error={erroresPorCampo.profesionDetalle}
+          />
         )}
         <CampoSelect
           label="Tiempo congregándote"
           name="tiempoCongregacion"
           required
-          opciones={OPCIONES_TIEMPO_CONGREGACION}
+          opciones={opciones.tiempoCongregacion}
+          error={erroresPorCampo.tiempoCongregacion}
         />
 
         <label className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
@@ -258,12 +295,14 @@ function Campo({
   type = 'text',
   required,
   defaultValue,
+  error,
 }: {
   label: string;
   name: string;
   type?: string;
   required?: boolean;
   defaultValue?: string;
+  error?: boolean;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm font-medium">
@@ -273,8 +312,15 @@ function Campo({
         type={type}
         required={required}
         defaultValue={defaultValue}
-        className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+        aria-invalid={error || undefined}
+        aria-describedby={error ? `${name}-error` : undefined}
+        className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
       />
+      {error && (
+        <span id={`${name}-error`} className="text-sm font-normal text-destructive">
+          Revisá este dato.
+        </span>
+      )}
     </label>
   );
 }
@@ -285,12 +331,14 @@ function CampoSelect({
   required,
   opciones,
   onChange,
+  error,
 }: {
   label: string;
   name: string;
   required?: boolean;
   opciones: { value: string; label: string }[];
   onChange?: (value: string) => void;
+  error?: boolean;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm font-medium">
@@ -300,7 +348,9 @@ function CampoSelect({
         required={required}
         defaultValue=""
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-        className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+        aria-invalid={error || undefined}
+        aria-describedby={error ? `${name}-error` : undefined}
+        className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
       >
         <option value="" disabled>
           Elegí una opción
@@ -311,11 +361,16 @@ function CampoSelect({
           </option>
         ))}
       </select>
+      {error && (
+        <span id={`${name}-error`} className="text-sm font-normal text-destructive">
+          Revisá este dato.
+        </span>
+      )}
     </label>
   );
 }
 
-function CampoTelefono() {
+function CampoTelefono({ error }: { error?: boolean }) {
   return (
     <div className="flex flex-col gap-1 text-sm font-medium">
       Teléfono
@@ -339,14 +394,16 @@ function CampoTelefono() {
           inputMode="numeric"
           required
           aria-label="Número de teléfono"
+          aria-invalid={error || undefined}
           placeholder="Solo números"
           onChange={(e) => {
             // No debe aceptar letras — se filtra apenas se tipea, no solo al enviar.
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
           }}
-          className="h-10 flex-1 rounded-md border border-zinc-300 px-3 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-10 flex-1 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
         />
       </div>
+      {error && <span className="text-sm font-normal text-destructive">Revisá este dato.</span>}
     </div>
   );
 }

@@ -1,0 +1,30 @@
+{
+  "errors": {
+    "NO_AUTENTICADO": "Necesitás iniciar sesión para continuar.",
+    "SIN_PERMISO": "No tenés permiso para hacer esto.",
+    "NO_ENCONTRADO": "No encontramos lo que buscabas.",
+    "VALIDACION": "Revisá los datos marcados e intentá de nuevo.",
+    "EMAIL_DUPLICADO": "Ya existe una cuenta registrada con este email.",
+    "SEDE_INVALIDA": "La Sede seleccionada no es válida.",
+    "CONSENTIMIENTO_REQUERIDO": "Falta el consentimiento para guardar los datos.",
+    "PERSONA_NO_PENDIENTE_TUTOR": "Este caso ya no está pendiente de un tutor.",
+    "VERIFICACION_LOGIN_FALLIDA": "No pudimos verificar la cuenta. Probá de nuevo en un momento.",
+    "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
+  },
+  "nav": {
+    "saltarAlContenido": "Saltar al contenido",
+    "accesibilidad": "Accesibilidad",
+    "inicio": "Inicio",
+    "personas": "Personas",
+    "pendientesTutor": "Pendientes tutor",
+    "solicitudes": "Solicitudes",
+    "grupos": "Grupos",
+    "eventos": "Eventos",
+    "notificaciones": "Notificaciones",
+    "sedes": "Sedes",
+    "catalogos": "Catálogos",
+    "misDiscipulados": "Mis discipulados",
+    "miDisponibilidad": "Mi disponibilidad",
+    "misGrupos": "Mis grupos"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "errors": {
+    "NO_AUTENTICADO": "Necesitás iniciar sesión para continuar.",
+    "SIN_PERMISO": "No tenés permiso para hacer esto.",
+    "NO_ENCONTRADO": "No encontramos lo que buscabas.",
+    "VALIDACION": "Revisá los datos marcados e intentá de nuevo.",
+    "EMAIL_DUPLICADO": "Ya existe una cuenta registrada con este email.",
+    "SEDE_INVALIDA": "La Sede seleccionada no es válida.",
+    "CONSENTIMIENTO_REQUERIDO": "Necesitamos tu consentimiento para guardar tus datos.",
+    "PERSONA_NO_PENDIENTE_TUTOR": "Este caso ya no está pendiente de un tutor.",
+    "VERIFICACION_LOGIN_FALLIDA": "No pudimos verificar tu cuenta. Probá de nuevo en un momento.",
+    "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
+  },
+  "nav": {
+    "nosotros": "Nosotros",
+    "primerosPasos": "Primeros pasos",
+    "ministerios": "Ministerios",
+    "eventos": "Eventos",
+    "visitanos": "Visitanos",
+    "dar": "Dar",
+    "ingresar": "Ingresar",
+    "inicio": "Inicio",
+    "miCamino": "Mi camino",
+    "avisos": "Avisos",
+    "perfil": "Perfil",
+    "saltarAlContenido": "Saltar al contenido",
+    "accesibilidad": "Accesibilidad",
+    "abrirMenu": "Abrir menú",
+    "menu": "Menú",
+    "principal": "Principal"
+  },
+  "primerosPasos": {
+    "titulo": "Bienvenido/a a Vida Sobrenatural",
+    "intro": "Somos una congregación en La Plata, Buenos Aires. Si te acercaste por primera vez, o hace poco empezaste a venir, esta página es para vos: acá vas a encontrar todo lo que necesitás saber, a tu propio ritmo, sin depender de preguntarle a alguien en persona o de enterarte por WhatsApp o Instagram.",
+    "comoSigue": "¿Cómo sigue el proceso?",
+    "comoSigueDescripcion": "A medida que te vayas sumando, vas a ir conociendo distintas etapas — no hay apuro, cada una se habilita cuando corresponde.",
+    "paso1": "1. Primeros pasos",
+    "paso1Descripcion": "donde estás ahora. Conocé la Sede, mirá los próximos eventos, y cuando quieras, registrate.",
+    "paso2": "2. Vida Nueva",
+    "paso2Descripcion": "tu primer paso de acompañamiento personal, con alguien de la iglesia que camina con vos.",
+    "paso3": "3. Vida de Servicio",
+    "paso3Descripcion": "un curso de 9 encuentros para seguir profundizando, en grupo.",
+    "paso4": "4. Ministerio",
+    "paso4Descripcion": "el momento de servir activamente en un área de la iglesia, con un equipo.",
+    "notaFinal": "No hace falta que hagas nada de esto ya mismo. Por ahora, lo único que necesitás es conocer tu Sede y, si querés, registrarte.",
+    "verSede": "Ver información de mi Sede",
+    "registrarme": "Registrarme"
+  },
+  "visitanos": {
+    "titulo": "Visitanos",
+    "sinSedes": "Todavía no cargamos la información de la Sede. Volvé a intentarlo más tarde.",
+    "elegirSede": "Elegí la Sede a la que te acercaste:",
+    "telefono": "Tel:",
+    "email": "Email:"
+  },
+  "registro": {
+    "opciones": {
+      "genero": {
+        "femenino": "Femenino",
+        "masculino": "Masculino"
+      },
+      "estadoCivil": {
+        "soltero_a": "Soltero/a",
+        "casado_a": "Casado/a",
+        "en_concubinato": "En concubinato",
+        "viudo_a": "Viudo/a",
+        "divorciado_a": "Divorciado/a",
+        "separado_a": "Separado/a"
+      },
+      "tiempoCongregacion": {
+        "menos_6_meses": "Menos de 6 meses",
+        "de_6_meses_a_1_anio": "De 6 meses a 1 año",
+        "de_1_a_3_anios": "De 1 a 3 años",
+        "de_3_a_5_anios": "De 3 a 5 años",
+        "mas_5_anios": "Más de 5 años"
+      },
+      "profesion": {
+        "salud": "Salud",
+        "educacion": "Educación",
+        "tecnologia_ingenieria": "Tecnología/Ingeniería",
+        "comercio_ventas": "Comercio y Ventas",
+        "oficios_construccion": "Oficios/Construcción",
+        "administracion_finanzas": "Administración y Finanzas",
+        "legal": "Legal",
+        "comunicacion_marketing": "Comunicación y Marketing",
+        "arte_diseno": "Arte y Diseño",
+        "servicios_gastronomia": "Servicios y Gastronomía",
+        "transporte": "Transporte",
+        "estudiante": "Estudiante",
+        "ama_de_casa": "Ama/o de casa",
+        "jubilado_a": "Jubilado/a",
+        "sin_ocupacion": "Sin ocupación",
+        "otro": "Otro"
+      }
+    }
+  }
+}
