@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import { AccionRegistro } from '../../../components/accion-registro';
+import { AvisoPorQuery } from '../../../components/aviso-por-query';
 
 export const metadata = {
   title: 'Primeros pasos — Vida Sobrenatural',
@@ -13,6 +15,10 @@ export default function PrimerosPasosPage() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
+      {/* H-16: aviso breve si llegó acá porque /registro la redirigió (ya activa) */}
+      <Suspense fallback={null}>
+        <AvisoPorQuery param="ya_registrado" valor="1" mensaje={t('avisoYaRegistrado')} />
+      </Suspense>
       <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
 
       <p className="text-lg leading-7 text-zinc-700 dark:text-zinc-300">{t('intro')}</p>
