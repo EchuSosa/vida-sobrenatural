@@ -19,7 +19,15 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  /*
+   * H-07 (revisión manual, actualización 2026-09-18): esto quedaba
+   * `var(--font-sans)` — autorreferenciado, nunca resuelve a nada, así que
+   * el navegador caía en su serif por defecto en toda la app. La variable
+   * real la define next/font en <html> (`layout.tsx` de cada app,
+   * `Geist({ variable: "--font-geist-sans" })`), igual que ya hacía
+   * --font-mono correctamente con --font-geist-mono acá abajo.
+   */
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);

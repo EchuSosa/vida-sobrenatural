@@ -110,7 +110,16 @@ Los estados siempre llevan texto + ícono (nunca solo color, D81).
 
 Definidos en `packages/ui` como variables CSS (formato de shadcn), para modo claro y oscuro:
 - **Color:** semánticos (fondo, texto, primario, secundario, destructivo, éxito, advertencia, borde, foco), no nombres de color. Contrastes verificados en ambos modos (D81).
-- **Tipografía:** escala fija de tamaños y pesos; máximo dos familias (títulos + texto).
+- **Tipografía** *(actualización 2026-09-18, revisión manual H-07)*: una sola familia (Geist, vía `next/font`, token `--font-sans`) para títulos y texto — dentro del máximo de dos que define D94; no hay todavía una familia de títulos separada porque la identidad visual (`09-notas-identidad-visual.md`) sigue pendiente. Escala fija de tamaños (tokens `text-*` de Tailwind, sin valores sueltos):
+
+  | Uso | Clase | Peso |
+  |---|---|---|
+  | Título de página (h1) | `text-2xl` / `text-3xl` | `font-semibold` |
+  | Título de sección (h2) | `text-xl` | `font-medium` |
+  | Subtítulo (h3) | `text-lg` | `font-medium` |
+  | Texto de cuerpo | `text-base` / `text-sm` | `font-normal` |
+  | Texto secundario/ayuda | `text-sm` | `font-normal`, color `muted-foreground` |
+  | Etiquetas de formulario, botones | `text-sm` | `font-medium` |
 - **Espaciado:** escala de Tailwind (múltiplos de 4 px), sin valores sueltos.
 - **Bordes redondeados, sombras y duración de animaciones:** pocos valores fijos. Animaciones cortas y desactivadas con `prefers-reduced-motion`.
 - **Íconos:** Lucide (el set de shadcn), siempre con texto visible o `aria-label`.
