@@ -4,9 +4,26 @@ import { PrismaClient } from '../src/generated/prisma/client.js';
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
+// H-09 (revisión manual, actualización 2026-09-18): datos reales de
+// docs/12-contenido-bienvenida.md / docs/09-notas-identidad-visual.md — antes
+// tenía una dirección placeholder ("a confirmar") y un horario inventado
+// ("10 y 18 hs") que no correspondía a ningún dato real.
+const DIRECCION_REAL = 'Calle 23 N°1665 e/ 66 y 67, La Plata, Buenos Aires';
+const HORARIOS_REAL = 'Domingos 10:30 hs (presencial y online, por YouTube)';
+
 async function crearSedeDemo() {
   const existente = await prisma.sede.findFirst({ where: { activo: true } });
   if (existente) {
+    // Corrige una Sede demo ya sembrada con los valores placeholder viejos,
+    // sin pisar una Sede que un Admin ya haya editado a mano.
+    if (existente.direccion.includes('a confirmar') || existente.horarios === 'Domingos 10 y 18 hs') {
+      const corregida = await prisma.sede.update({
+        where: { id: existente.id },
+        data: { direccion: DIRECCION_REAL, horarios: HORARIOS_REAL },
+      });
+      console.log(`Sede demo corregida con los datos reales: ${corregida.nombre} (${corregida.id})`);
+      return corregida;
+    }
     console.log(`Ya existe una Sede activa (${existente.nombre}), no se crea otra.`);
     return existente;
   }
@@ -14,9 +31,9 @@ async function crearSedeDemo() {
   const sede = await prisma.sede.create({
     data: {
       nombre: 'La Plata',
-      direccion: 'Dirección a confirmar — La Plata, Buenos Aires',
+      direccion: DIRECCION_REAL,
       contactoTelefono: '+54 9 221 000-0000',
-      horarios: 'Domingos 10 y 18 hs',
+      horarios: HORARIOS_REAL,
       descripcionBienvenida:
         'Bienvenido/a a Vida Sobrenatural La Plata. Nos alegra que te hayas acercado.',
       activo: true,
