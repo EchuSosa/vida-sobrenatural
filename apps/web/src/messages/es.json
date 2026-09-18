@@ -20,6 +20,7 @@
     "visitanos": "Visitanos",
     "dar": "Dar",
     "ingresar": "Ingresar",
+    "irALaApp": "Ir a la app",
     "inicio": "Inicio",
     "miCamino": "Mi camino",
     "avisos": "Avisos",
@@ -45,7 +46,8 @@
     "paso4Descripcion": "el momento de servir activamente en un área de la iglesia, con un equipo.",
     "notaFinal": "No hace falta que hagas nada de esto ya mismo. Por ahora, lo único que necesitás es conocer tu Sede y, si querés, registrarte.",
     "verSede": "Ver información de mi Sede",
-    "registrarme": "Registrarme"
+    "registrarme": "Registrarme",
+    "avisoYaRegistrado": "Ya estás registrada, no hace falta completarlo de nuevo."
   },
   "visitanos": {
     "titulo": "Visitanos",

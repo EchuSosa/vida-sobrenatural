@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { AccionRegistro } from '../../../components/accion-registro';
 
 export const metadata = {
   title: 'Primeros pasos — Vida Sobrenatural',
@@ -43,12 +44,7 @@ export default function PrimerosPasosPage() {
         >
           {t('verSede')}
         </Link>
-        <Link
-          href="/registro"
-          className="flex h-11 items-center justify-center rounded-lg border border-border px-5 text-center font-medium transition-colors hover:bg-muted"
-        >
-          {t('registrarme')}
-        </Link>
+        <AccionRegistro />
       </div>
     </div>
   );

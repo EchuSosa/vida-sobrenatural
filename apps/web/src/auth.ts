@@ -161,12 +161,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           console.error('[auth] jwt: no se pudo resolver la Persona contra apps/api.', error);
         }
       }
-      // `update()` desde el cliente (SelectorTema, T079) — el JWT no se
-      // vuelve a resolver contra apps/api en cada refresco (Decisión 6 de
-      // arriba), así que sin esto la sesión seguiría mostrando el tema viejo
-      // hasta el próximo login real.
-      if (trigger === 'update' && session?.temaPreferido) {
-        token.temaPreferido = session.temaPreferido;
+      // `update()` desde el cliente — el JWT no se vuelve a resolver contra
+      // apps/api en cada refresco (Decisión 6 de arriba), así que sin esto
+      // la sesión seguiría mostrando datos viejos hasta el próximo login
+      // real. Generalizado en H-19 (actualización 2026-09-18): CUALQUIER
+      // update() vuelve a resolver personaId/estado/rol contra apps/api —
+      // no solo cuando llega temaPreferido — para que apps/web/(publica)/
+      // registro/page.tsx pueda refrescar la sesión apenas termina el
+      // registro, sin esperar un nuevo login.
+      if (trigger === 'update' && token.email) {
+        try {
+          const persona = await buscarPersonaPorEmail(token.email);
+          token.personaId = persona?.id ?? token.personaId ?? null;
+          token.estado = persona?.estado ?? token.estado ?? null;
+          token.rol = persona?.rol ?? token.rol ?? [];
+          // El valor pasado explícitamente por el cliente (SelectorTema)
+          // gana sobre el recién leído de la base, para no depender de que
+          // el PATCH ya haya terminado de persistir en ese instante exacto.
+          token.temaPreferido = session?.temaPreferido ?? persona?.temaPreferido ?? token.temaPreferido;
+        } catch (error) {
+          console.error('[auth] jwt: no se pudo refrescar la Persona contra apps/api en update().', error);
+        }
       }
       // `user` solo está presente en el login inicial (viene del profile()
       // de Google) — se persiste en el token para que sobreviva a refrescos.

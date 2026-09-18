@@ -3,10 +3,28 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
 import { Button, Sheet, SheetContent, SheetTitle, SheetTrigger } from '@vida-sobrenatural/ui';
 import { NAV_PUBLICA, NAV_PUBLICA_ACCIONES } from '../config/nav-publica';
+
+/**
+ * H-19 (actualización 2026-09-18): con sesión de una Persona ya activa, la
+ * acción "Ingresar" deja de tener sentido — se reemplaza por un acceso
+ * directo a la app. "Dar" no depende de la sesión, se mantiene siempre.
+ */
+function useAccionesPublicas() {
+  const { data: session } = useSession();
+  const t = useTranslations('nav');
+  const yaEsMiembro = session?.user.estado === 'activa';
+
+  return NAV_PUBLICA_ACCIONES.map((item) =>
+    item.href === '/registro' && yaEsMiembro
+      ? { href: '/inicio', labelKey: 'irALaApp' as const, destacado: true }
+      : item,
+  ).map((item) => ({ ...item, label: t(item.labelKey) }));
+}
 
 function EnlaceMenu({
   href,
@@ -35,6 +53,7 @@ export function NavPublicaHeader() {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
   const t = useTranslations('nav');
+  const acciones = useAccionesPublicas();
 
   return (
     <header className="border-b border-border">
@@ -55,24 +74,24 @@ export function NavPublicaHeader() {
           ))}
         </nav>
         <div className="hidden items-center gap-2 md:flex">
-          {NAV_PUBLICA_ACCIONES.map((item) => (
+          {acciones.map((item) => (
             <Button
               key={item.href}
               variant={item.href === '/dar' ? 'outline' : 'default'}
               size="sm"
-              render={<Link href={item.href}>{t(item.labelKey)}</Link>}
+              render={<Link href={item.href}>{item.label}</Link>}
             />
           ))}
         </div>
 
         {/* Celular: menú hamburguesa (accesible — FR-014, T049) */}
         <div className="flex items-center gap-2 md:hidden">
-          {NAV_PUBLICA_ACCIONES.map((item) => (
+          {acciones.map((item) => (
             <Button
               key={item.href}
               variant={item.href === '/dar' ? 'outline' : 'default'}
               size="sm"
-              render={<Link href={item.href}>{t(item.labelKey)}</Link>}
+              render={<Link href={item.href}>{item.label}</Link>}
             />
           ))}
           <Sheet open={abierto} onOpenChange={setAbierto}>

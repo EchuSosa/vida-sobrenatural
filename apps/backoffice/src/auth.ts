@@ -99,9 +99,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.temaPreferido = persona?.temaPreferido ?? 'sistema';
       }
       // `update()` desde el cliente (MenuUsuario) — ver auth.ts de apps/web
-      // para la misma lógica documentada.
-      if (trigger === 'update' && session?.temaPreferido) {
-        token.temaPreferido = session.temaPreferido;
+      // para la misma lógica documentada. Generalizado en H-19 (actualización
+      // 2026-09-18): cualquier update() refresca personaId/estado/rol.
+      if (trigger === 'update' && token.email) {
+        try {
+          const persona = await buscarPersonaPorEmail(token.email);
+          token.personaId = persona?.id ?? token.personaId ?? null;
+          token.estado = persona?.estado ?? token.estado ?? null;
+          token.rol = persona?.rol ?? token.rol ?? [];
+          token.temaPreferido = session?.temaPreferido ?? persona?.temaPreferido ?? token.temaPreferido;
+        } catch (error) {
+          console.error('[auth] jwt: no se pudo refrescar la Persona contra apps/api en update().', error);
+        }
       }
       return token;
     },

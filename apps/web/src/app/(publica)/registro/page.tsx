@@ -12,7 +12,7 @@ import type {
   Sede,
 } from '@vida-sobrenatural/shared-types';
 import { PasoIndicador } from '@vida-sobrenatural/ui';
-import { apiFetch, ApiError } from '../../lib/api-client';
+import { apiFetch, ApiError } from '../../../lib/api-client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 const TOTAL_PASOS = 4;
@@ -115,12 +115,18 @@ function calcularEdadAproximada(fechaNacimiento: string): number | null {
 }
 
 export default function RegistroPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const t = useTranslations('registro');
   const tErrores = useTranslations('errors');
   const opciones = useOpcionesRegistro();
   const encabezadoRef = useRef<HTMLHeadingElement>(null);
+  // H-19/H-16 (actualización 2026-09-18): update() tras un registro exitoso
+  // dispara un re-render con session.user.estado ya "activa", que compite
+  // con el useEffect de abajo (pensado para quien entra a /registro ya
+  // activa de antes) — esta ref evita que ese efecto redirija a Primeros
+  // pasos justo cuando handleSubmit ya está navegando a /registro/listo.
+  const acabamosDeRegistrarRef = useRef(false);
 
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [paso, setPaso] = useState(1);
@@ -152,9 +158,11 @@ export default function RegistroPage() {
 
   useEffect(() => {
     // FR-012 / edge case del spec: un Miembro registrado que ya está `activa`
-    // no vuelve a ver el formulario — se lo saca de acá.
-    if (session?.user.estado === 'activa') {
-      router.replace('/primeros-pasos');
+    // no vuelve a ver el formulario — se lo saca de acá. H-16 (actualización
+    // 2026-09-18): el ?ya_registrado=1 hace que Primeros pasos avise por qué
+    // (AvisoPorQuery), en vez de un salto silencioso.
+    if (session?.user.estado === 'activa' && !acabamosDeRegistrarRef.current) {
+      router.replace('/primeros-pasos?ya_registrado=1');
     }
     if (session?.user.estado === 'pendiente_tutor') {
       router.replace('/pendiente-tutor');
@@ -175,17 +183,20 @@ export default function RegistroPage() {
   const apellidoEfectivo = datos.apellido || session?.user.familyName || '';
   const nombreEfectivo = datos.nombre || session?.user.givenName || '';
 
+  // Sin <main id="contenido"> propio: apps/web/src/app/(publica)/layout.tsx
+  // ya provee ese landmark desde que esta página se movió ahí (H-05,
+  // actualización 2026-09-18) — tenerlo acá también duplicaba el <main>.
   if (status === 'loading') {
     return (
-      <main id="contenido" className="mx-auto max-w-xl px-4 py-16">
+      <div className="mx-auto max-w-xl px-4 py-16">
         {t('cargando')}
-      </main>
+      </div>
     );
   }
 
   if (status === 'unauthenticated') {
     return (
-      <main id="contenido" className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
+      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
         <h1 className="text-2xl font-semibold">{t('tituloNoAutenticado')}</h1>
         <p className="text-zinc-600 dark:text-zinc-400">{t('textoNoAutenticado')}</p>
         <button
@@ -195,7 +206,7 @@ export default function RegistroPage() {
         >
           {t('botones.continuarGoogle')}
         </button>
-      </main>
+      </div>
     );
   }
 
@@ -294,7 +305,24 @@ export default function RegistroPage() {
         },
         body: JSON.stringify(body),
       });
-      router.push(resultado.estado === 'activa' ? '/registro/listo' : '/pendiente-tutor');
+      if (resultado.estado === 'activa') {
+        acabamosDeRegistrarRef.current = true;
+        // H-19 (actualización 2026-09-18): refresca la sesión ANTES de
+        // navegar, para que el menú público y el resto de la app ya vean
+        // estado: activa sin esperar un nuevo login (jwt callback en
+        // auth.ts vuelve a resolver contra apps/api en cualquier update()).
+        // OJO: update() SIN argumentos hace un simple GET /api/auth/session
+        // (no dispara trigger: "update" en el callback jwt) — hay que pasar
+        // un objeto, aunque sea vacío, para que next-auth lo mande por POST.
+        await update({});
+        // H-15: marca que se acaba de completar el registro EN ESTE tab —
+        // /registro/listo (Server Component) lo exige para no mostrar una
+        // confirmación falsa a quien entra directo por URL.
+        window.sessionStorage.setItem('registroRecienCompletado', '1');
+        router.push('/registro/listo');
+      } else {
+        router.push('/pendiente-tutor');
+      }
     } catch (err) {
       if (err instanceof ApiError) {
         setError(tErrores(err.code));
@@ -312,7 +340,7 @@ export default function RegistroPage() {
   const tituloPaso = t(`tituloPaso${paso}` as 'tituloPaso1');
 
   return (
-    <main id="contenido" className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
+    <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">{t('tituloPagina')}</h1>
       <p className="text-zinc-600 dark:text-zinc-400">
         {t('introPagina', { email: session?.user.email ?? '' })}
@@ -524,7 +552,7 @@ export default function RegistroPage() {
           )}
         </div>
       </form>
-    </main>
+    </div>
   );
 }
 
