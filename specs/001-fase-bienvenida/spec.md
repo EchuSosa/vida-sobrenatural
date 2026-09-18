@@ -25,6 +25,12 @@
 - Q: El consentimiento de datos (FR-013) y el alta de la Persona, ¿quedan con más detalle que un booleano? → A: Sí — se registra la fecha y el origen del consentimiento (`app` cuando lo da la propia persona en el formulario, `presencial` cuando lo da el tutor durante el contacto manual), y el origen del alta (`origen_alta`: `autorregistro` / `admin`) con quién la dio de alta (`alta_por`) cuando corresponda (D97). En esta actualización solo se agrega el modelo de datos para `origen_alta`/`alta_por`; el flujo de alta de adultos por un Admin es una feature propia, todavía sin implementar — por ahora `origen_alta` siempre queda en `autorregistro` y `alta_por` siempre queda vacío.
 - Q: Los errores del registro y de la gestión de Sede, ¿tienen su propio formato? → A: No — usan el catálogo de códigos compartido y el formato Problem Details que ya definió 002-base-transversal (D101), con mensajes amables según la matriz de feedback de `docs/16-sistemas-transversales.md`; no se inventa un mecanismo de error propio para esta fase.
 
+### Session 2026-09-18 — revisión manual, Lote 1 (`specs/revision-manual/2026-09-17-001-002.md`)
+
+- Q: Al completar el registro, ¿cuándo se entera el resto de la app (el menú, un nuevo intento de entrar a `/registro`) de que la Persona ya está `activa`? (H-19) → A: De inmediato, en la misma pestaña — el frontend refresca su sesión apenas `POST /personas` confirma `estado: activa`, sin esperar un cierre e inicio de sesión nuevo.
+- Q: ¿Alcanza con que `/registro/listo` muestre la confirmación a cualquier sesión con `estado: activa`? (H-15) → A: No — debe distinguir a quien acaba de completar el registro de cualquier Miembro registrado que entre por esa URL en otro momento; sin sesión, o sin haber completado el registro recién, redirige en vez de mostrar una confirmación falsa.
+- Q: Cuando `/registro` redirige a `/primeros-pasos` porque la Persona ya está `activa` (edge case ya identificado), ¿el salto queda silencioso? (H-16) → A: No — la redirección muestra un aviso breve que explica el motivo ("Ya estás registrada, no hace falta completarlo de nuevo").
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Entender la Bienvenida y ver la información de mi Sede (Priority: P1)
@@ -63,6 +69,8 @@ Un Visitante que ya entendió la Bienvenida quiere dar el primer paso del proces
 5. **Given** un Visitante que completa el registro exitosamente, **When** el registro es exitoso, **Then** el sistema no lo redirige ni le exige avanzar a Vida Nueva, Vida de Servicio o Ministerio (eso pertenece a fases posteriores).
 6. **Given** un Visitante completando el formulario obligatorio, **When** avanza de un paso al siguiente, **Then** ve un indicador de progreso ("Paso X de Y"), puede volver a un paso anterior sin perder lo ya cargado, y antes de enviar ve un resumen de todos los datos ingresados (D94).
 7. **Given** un Visitante que autoriza el acceso con una cuenta SSO cuyo proveedor **no** confirma el email como verificado, **When** el sistema evalúa esa autorización, **Then** rechaza el inicio de sesión (no vincula con una Persona existente ni permite iniciar el registro), sin importar si el email coincide con una Persona ya registrada.
+8. **Given** un Visitante que acaba de completar el registro (`estado: activa`), **When** el sistema confirma el registro, **Then** su sesión queda al día en esa misma pestaña de inmediato — el menú y el resto de la app ya no lo tratan como Visitante sin cuenta, sin necesitar cerrar e iniciar sesión de nuevo (actualización 2026-09-18).
+9. **Given** un Visitante que acaba de completar el registro, **When** llega a la pantalla de confirmación, **Then** ve "¡Listo, ya sos parte!" solo en esa oportunidad; si más tarde alguien (la misma Persona u otra) entra directamente a esa URL sin haber completado el registro en ese momento, el sistema la lleva a `/registro` o al Inicio en su lugar, nunca a una confirmación falsa (actualización 2026-09-18).
 
 ---
 
@@ -104,7 +112,7 @@ Un Admin quiere poder cargar y mantener actualizada la información de la Sede (
 
 - ¿Qué ve un Visitante si el Admin todavía no cargó la información de ninguna Sede?
 - ¿Qué sucede si un Visitante autoriza el acceso vía SSO pero abandona el formulario de datos obligatorio antes de completarlo? (No debe quedar una Persona a medio crear ni un estado ambiguo).
-- ¿Qué sucede si una persona que ya es Miembro registrado vuelve a acceder al contenido de Bienvenida o al formulario de registro?
+- ¿Qué sucede si una persona que ya es Miembro registrado vuelve a acceder al contenido de Bienvenida o al formulario de registro? → Redirige a Primeros pasos con un aviso breve que explica por qué (ver Historia 2, Acceptance Scenario 8-9 — actualización 2026-09-18).
 - Cuando exista más de una Sede: ¿cómo identifica el sistema a cuál Sede se acercó un Visitante determinado si no lo indica explícitamente?
 - ¿Qué pasa si dos Visitantes distintos intentan registrarse casi al mismo tiempo con el mismo email recibido del proveedor SSO?
 - ¿Qué sucede si un Admin elimina o desactiva la única Sede activa, dejando a los Visitantes sin información de Sede para mostrar?
@@ -134,6 +142,9 @@ Un Admin quiere poder cargar y mantener actualizada la información de la Sede (
 - **FR-016** *(actualización 2026-09-17, D94)*: El sistema DEBE presentar el formulario de registro obligatorio (FR-006) dividido en pasos cortos, con un indicador de progreso visible, la posibilidad de volver a un paso anterior sin perder los datos ya cargados en pasos posteriores, y un resumen de todos los datos ingresados antes de enviar el registro definitivo.
 - **FR-017** *(actualización 2026-09-17, Constitución Principio V ampliada por D105)*: El sistema DEBE vincular una cuenta SSO a una Persona existente (o permitir iniciar el flujo de registro de una Persona nueva) únicamente si el proveedor SSO confirma que el email recibido está verificado (`email_verified`); si el proveedor no lo confirma, el sistema DEBE rechazar el inicio de sesión sin vincular ni crear ninguna Persona.
 - **FR-018** *(actualización 2026-09-17, D101)*: Todo error que devuelvan los endpoints de Persona y de Sede DEBE seguir el formato único de errores (código del catálogo compartido + `requestId`) ya definido por 002-base-transversal, y el frontend DEBE mostrar un mensaje amable según ese código, siguiendo la matriz de feedback de `docs/16-sistemas-transversales.md` — esta fase no define un mecanismo de error propio.
+- **FR-019** *(actualización 2026-09-18, revisión manual H-19)*: Apenas `POST /personas` confirme `estado: activa`, el sistema DEBE refrescar la sesión de esa misma pestaña antes de continuar, de forma que el menú y el resto de la app reflejen de inmediato que la Persona ya no es un Visitante sin cuenta.
+- **FR-020** *(actualización 2026-09-18, revisión manual H-15)*: La pantalla de confirmación del registro DEBE exigir una sesión con `estado: activa` **y** evidencia de que el registro se completó en ese mismo momento; sin ambas condiciones, el sistema DEBE redirigir (a `/registro` sin sesión válida, al Inicio si la sesión es válida pero el registro no fue recién completado) en lugar de mostrar la confirmación.
+- **FR-021** *(actualización 2026-09-18, revisión manual H-16)*: Cuando el sistema redirige desde el formulario de registro por tratarse de una Persona ya `activa`, DEBE mostrar un aviso breve que explique el motivo, en vez de una redirección silenciosa.
 
 ### Key Entities *(include if feature involves data)*
 

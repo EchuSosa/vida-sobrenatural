@@ -57,9 +57,12 @@ Este es el único flujo que la Constitución exige cubrir con Playwright (Princi
    deben verse y leerse bien; el teclado del celular no debe tapar el botón de avanzar.
 4. **Resultado esperado**: la Persona queda `estado: "activa"`, con `consentimientoDatosFecha`/
    `consentimientoDatosOrigen: "app"` y `origenAlta: "autorregistro"`; la sesión refleja rol
-   `miembro_registrado`; SC-002 (menos de 3 minutos).
-5. Cerrar sesión y volver a autorizar con la misma cuenta de Google → debe entrar directo, sin
-   repetir el formulario (`GET /personas/by-email` la encuentra ya `activa`).
+   `miembro_registrado`; SC-002 (menos de 3 minutos). El menú público ya no muestra "Ingresar" en
+   esa misma pestaña, sin cerrar e iniciar sesión de nuevo (FR-019, actualización 2026-09-18).
+5. Cerrar sesión (botón "Cerrar sesión" en Perfil — ver
+   `specs/002-base-transversal/quickstart.md`, H-11) y volver a autorizar con la misma cuenta de
+   Google → debe entrar directo, sin repetir el formulario (`GET /personas/by-email` la encuentra
+   ya `activa`).
 6. Verificar que ningún link/contenido de la sesión lleva a Vida Nueva/Vida de Servicio/Ministerio
    (FR-012).
 7. Verificar el caso de email no verificado (FR-017): las cuentas de Google **siempre** tienen el
@@ -67,6 +70,13 @@ Este es el único flujo que la Constitución exige cubrir con Playwright (Princi
    test (`ALLOW_TEST_LOGIN=true`) o simulando la respuesta del proveedor sin `email_verified`, y
    está cubierto por el e2e dedicado. Resultado esperado: redirige a `/email-no-verificado` sin
    vincular ni crear ninguna Persona, con un mensaje claro de qué hacer.
+8. Con la Persona ya `activa`, volver a `/registro` → redirige a Primeros pasos con un aviso breve
+   ("Ya estás registrada, no hace falta completarlo de nuevo") en vez de un salto silencioso
+   (FR-021, actualización 2026-09-18).
+9. Copiar la URL de `/registro/listo` y abrirla en una pestaña nueva (misma sesión) → NO debe
+   mostrar "¡Listo, ya sos parte!"; debe redirigir al Inicio, porque esa pestaña no viene de haber
+   completado el registro recién (FR-020, actualización 2026-09-18). Sin ninguna sesión, la misma
+   URL debe redirigir a `/registro`.
 
 ## Escenario de validación 3 — Historia 2b (menor de edad)
 
@@ -105,3 +115,9 @@ Este es el único flujo que la Constitución exige cubrir con Playwright (Princi
 *(actualización 2026-09-17, Fase 8 de `tasks.md`)*: se suman un unit test de la verificación de
 `email_verified` (Historia 2, Acceptance Scenario 7) y se actualiza el E2E existente a los
 selectores del formulario por pasos — ver `tasks.md`, Phase 8.
+
+*(actualización 2026-09-18, Phase 9 de `tasks.md`, revisión manual Lote 1 — H-19/H-15/H-16)*: el
+E2E de registro-bienvenida.spec.ts se extiende para cubrir, dentro del mismo recorrido: el menú sin
+"Ingresar" apenas se completa el registro, `/registro/listo` en una pestaña nueva sin el flag de
+"recién completado" (redirige a Inicio), y el aviso al redirigir desde `/registro` por sesión ya
+`activa`; nuevo spec `registro-listo-guarda.spec.ts` para el caso sin sesión.
