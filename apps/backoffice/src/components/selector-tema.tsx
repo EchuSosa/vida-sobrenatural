@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Button,
+  ConfirmDestructiveDialog,
 } from '@vida-sobrenatural/ui';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
@@ -58,19 +59,40 @@ export function MenuUsuario() {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="sm">{session.user.name}</Button>} />
-      <DropdownMenuContent align="end">
-        {OPCIONES.map((opcion) => (
-          <DropdownMenuItem
-            key={opcion.value}
-            data-active={seleccionado === opcion.value}
-            onClick={() => elegir(opcion.value)}
-          >
-            {opcion.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger render={<Button variant="ghost" size="sm">{session.user.name}</Button>} />
+        <DropdownMenuContent align="end">
+          {OPCIONES.map((opcion) => (
+            <DropdownMenuItem
+              key={opcion.value}
+              data-active={seleccionado === opcion.value}
+              onClick={() => elegir(opcion.value)}
+            >
+              {opcion.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {/*
+        H-11 (actualización 2026-09-18): trigger separado del DropdownMenu de
+        arriba a propósito — anidar un AlertDialog dentro de un
+        DropdownMenuContent de Base UI genera conflictos conocidos entre
+        overlays (el menú se desmonta antes de que el diálogo termine de
+        abrir).
+      */}
+      <ConfirmDestructiveDialog
+        trigger={
+          <Button variant="ghost" size="sm">
+            Cerrar sesión
+          </Button>
+        }
+        titulo="¿Cerrar sesión?"
+        descripcion="Vas a tener que volver a autorizar el acceso con tu cuenta de Google para entrar de nuevo."
+        textoConfirmar="Sí, cerrar sesión"
+        textoCancelar="Volver"
+        onConfirmar={() => signOut({ callbackUrl: '/?sesion=cerrada' })}
+      />
+    </div>
   );
 }

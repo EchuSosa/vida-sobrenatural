@@ -1,6 +1,7 @@
 import { auth } from '../../../auth';
 import { apiFetch } from '../../../lib/api-client';
 import { SelectorTema } from '../../../components/selector-tema';
+import { CerrarSesionBoton } from '../../../components/cerrar-sesion-boton';
 
 interface PersonaPerfil {
   id: string;
@@ -28,6 +29,7 @@ export default async function PerfilPage() {
         <p>{perfil?.email ?? session?.user.email}</p>
       </div>
       <SelectorTema valorInicial={perfil?.temaPreferido ?? session?.user.temaPreferido ?? 'sistema'} />
+      <CerrarSesionBoton />
     </div>
   );
 }

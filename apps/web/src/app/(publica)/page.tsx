@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
+import { AvisoPorQuery } from '../../components/aviso-por-query';
 
 export const metadata = {
   title: 'Vida Sobrenatural — La Plata',
@@ -9,6 +11,10 @@ export const metadata = {
 export default function InicioPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
+      {/* H-11: aviso breve al volver acá después de cerrar sesión */}
+      <Suspense fallback={null}>
+        <AvisoPorQuery param="sesion" valor="cerrada" mensaje="Cerraste sesión." />
+      </Suspense>
       <h1 className="text-3xl font-semibold tracking-tight">Vida Sobrenatural — La Plata</h1>
       <p className="text-lg leading-7 text-zinc-700 dark:text-zinc-300">
         Nos alegra que estés acá. Si te acercaste por primera vez, o hace poco empezaste a venir,
