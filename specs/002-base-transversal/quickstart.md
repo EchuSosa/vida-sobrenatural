@@ -9,7 +9,9 @@ Valida de punta a punta cada historia de `spec.md` sobre un ambiente local ya pr
   spec (`idiomaPreferido`, `temaPreferido` en `Persona`).
 - Las tres apps levantadas en sus puertos fijos: `apps/api` (3333), `apps/web` (3001),
   `apps/backoffice` (3002) — ver `docs/10-stack-tecnico.md`.
-- Seed de Prisma corrido (`pnpm --filter api prisma db seed`) — deja cargada la Sede de ejemplo más
+- Seed de Prisma corrido (`pnpm --filter api exec prisma db seed --config prisma7.config.ts`) —
+  el `--config` hace falta porque el archivo se llama `prisma7.config.ts` y no `prisma.config.ts`
+  (ver H-13) — deja cargada la Sede de ejemplo más
   las Personas de demo de este spec (Decisión 13 de `research.md`).
 - `SENTRY_DSN` **sin setear** en los `.env.local`/`.env` de las tres apps (para validar que Sentry
   queda desactivado en local).

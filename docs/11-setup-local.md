@@ -171,7 +171,12 @@ pnpm add @prisma/client
 npx prisma init
 ```
 
-Esto crea `apps/api/prisma/schema.prisma` y un archivo `.env`. Editar el `.env` con:
+Esto crea `apps/api/prisma/schema.prisma` un archivo de configuración y un `.env`. Editar el `.env` con:
+
+> **Ojo con el nombre del archivo de configuración:** en este repo quedó como
+> `apps/api/prisma7.config.ts`, y Prisma solo lo toma solo si se llama `prisma.config.ts`. Mientras
+> siga así, todos los comandos de Prisma necesitan `--config prisma7.config.ts`
+> (`migrate dev`, `db seed`, `studio`). Ahí también se define el comando del seed.
 
 ```
 DATABASE_URL="postgresql://vidasobrenatural:vidasobrenatural_dev@localhost:5432/vidasobrenatural?schema=public"
@@ -180,7 +185,7 @@ DATABASE_URL="postgresql://vidasobrenatural:vidasobrenatural_dev@localhost:5432/
 Probar la conexión con una migración vacía:
 
 ```bash
-npx prisma migrate dev --name init
+npx prisma migrate dev --name init --config prisma7.config.ts
 ```
 
 Si corre sin errores, la base de datos está conectada y lista.
