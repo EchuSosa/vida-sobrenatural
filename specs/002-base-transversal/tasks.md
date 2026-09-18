@@ -269,6 +269,28 @@ spec). No modifica ninguna tarea de las Fases 1–12, ya completadas.
 botones/enlaces correcta, "Reintentar" revalida de verdad. Lote 3 queda para una corrección
 posterior.
 
+## Phase 14: Correcciones de la revisión manual — Lote 3 (contenido, datos y herramientas)
+
+**Purpose**: aplicar el Lote 3 del plan de corrección de
+`specs/revision-manual/2026-09-17-001-002.md` (hallazgos H-08, H-09, H-12, H-13, H-17, H-18 — los
+que son de esta spec o de infraestructura compartida). No modifica ninguna tarea de las Fases 1–13,
+ya completadas.
+
+**Contexto**: H-02 del mismo Lote 3 es un hallazgo de **specs/001-fase-bienvenida** (Escenario 1,
+`/primeros-pasos`) — ver su `tasks.md`, Phase 11.
+
+- [X] T111 [H-08] `apps/web/src/app/(publica)/dar/page.tsx` con los datos reales de Ofrendas de `docs/09-notas-identidad-visual.md` (alias, CBU, entidad, CUIT, cuenta, texto institucional) en vez del estado vacío. Nuevo `apps/web/src/components/campo-copiable.tsx` (alias y CBU copiables con `navigator.clipboard`, aviso breve con `sonner` — matriz de feedback de `docs/16-sistemas-transversales.md`). Namespace `dar` nuevo en `es.json`.
+- [X] T112 [H-09] `apps/api/prisma/seed.ts`: la Sede de demo tenía dirección placeholder ("a confirmar") y horario inventado ("Domingos 10 y 18 hs") — se reemplazan por los reales de `docs/12-contenido-bienvenida.md`/`docs/09-notas-identidad-visual.md` (`Calle 23 N°1665 e/ 66 y 67, La Plata`, `Domingos 10:30 hs`), con una corrección idempotente para una Sede demo ya sembrada con los valores viejos. El mismo horario hardcodeado en `apps/web/src/components/footer-publico.tsx` se corrigió en el commit de H-02 (mismo bug, dos lugares).
+- [X] T113 [H-13] Renombrar `apps/api/prisma7.config.ts` → `apps/api/prisma.config.ts` (Prisma lo toma automáticamente, sin `--config`); agregar `db:migrate`, `db:seed`, `db:studio` a `apps/api/package.json`; actualizar los comandos en `docs/11-setup-local.md` y en los dos quickstarts (ahí también se documenta `SEED_ADMIN_EMAIL` de T114, mismo bloque de texto).
+- [X] T114 [H-12] `apps/api/prisma/seed.ts`: nueva `promoverAdminDemo()` — sin `SEED_ADMIN_EMAIL` seteada no crea nada; con ella, agrega el rol `admin` a la Persona existente con ese email o crea una nueva con datos de ejemplo. Una Persona admin de demo fija no sirve (el login es por SSO real); esto deja que cada quien se promueva con su propio email real de Google. Documentado en `docs/11-setup-local.md` (commit de T113).
+- [X] T115 [H-17] `apps/api/scripts/limpiar-e2e.ts` (borra físicamente las Personas con email `e2e-*` — son datos de test, no de dominio, el Principio III no aplica) + script `db:limpiar-e2e`; `apps/web/e2e/global-teardown.ts` lo corre al final de toda la corrida de Playwright (registrado en `playwright.config.ts`), tolerando que `apps/api` no sea un workspace alcanzable (ej. una instancia aislada de verificación) sin romper la corrida.
+- [X] T116 [H-18] Borrar la línea `version: '3.8'` de `docker-compose.yml` (atributo obsoleto, Compose lo ignora con un warning).
+- [X] T117 [H-08, H-09, H-12, H-13, H-17, H-18] Tests afectados: nuevos e2e para `/dar` (datos reales + copiar alias) en `apps/web/e2e/primeros-pasos-visitanos.spec.ts`; `T104-T110` de la suite existente actualizados para ya no esperar el estado vacío de `/dar`. Seed corrido y verificado contra una instancia aislada (Sede corregida, Persona admin creada/promovida idempotentemente). `db:migrate`/`db:seed`/`db:studio` probados sin `--config`. `db:limpiar-e2e` probado creando y borrando una Persona `e2e-*` de prueba, y verificado en una corrida real de la suite completa (limpia lo creado al terminar). `docker compose up -d` sin warning.
+
+**Checkpoint**: Lote 3 de la revisión manual completo en 002 — `/dar` con contenido real, seed con
+datos correctos y un camino para tener un admin de demo, comandos de Prisma sin workarounds, y los
+e2e ya no ensucian la base de desarrollo.
+
 ---
 
 ## Dependencies & Execution Order

@@ -255,6 +255,21 @@ ver su `tasks.md`, Phase 13. H-04 en particular define el patrón de "Reintentar
 responde" de "no hay Sede cargada", con reintento funcional en el primer caso. Lote 3 queda para
 una corrección posterior.
 
+## Phase 11: Correcciones de la revisión manual — Lote 3 (contenido, datos y herramientas)
+
+**Purpose**: aplicar el Lote 3 del plan de corrección de
+`specs/revision-manual/2026-09-17-001-002.md` (hallazgo H-02, el único de esta spec en este lote).
+No modifica ninguna tarea de las Fases 1–10, ya completadas.
+
+**Contexto**: H-08, H-09, H-12, H-13, H-17 y H-18 del mismo Lote 3 son hallazgos de
+**specs/002-base-transversal** o de infraestructura compartida — ver su `tasks.md`, Phase 14.
+
+- [X] T118 [H-02] Copy real de `docs/12-contenido-bienvenida.md` en `apps/web/src/app/(publica)/primeros-pasos/page.tsx` (frase de apertura, namespace `primerosPasos.fraseTexto`/`fraseAutor` en `es.json`) y reescritura completa de `apps/web/src/app/(publica)/nosotros/page.tsx` (namespace `nosotros` nuevo): "Somos Familia", "Liderazgo" (tres parejas pastorales, con las fotos marcadas como pendientes — D98, no se inventan) y "En qué creemos" marcado explícitamente como pendiente de material real de la iglesia, no vacío ni con texto de relleno. `apps/web/src/components/footer-publico.tsx` pasa a usar `es.json` (namespace `footer`) y suma enlaces reales a Facebook/Instagram de `docs/09-notas-identidad-visual.md`; de paso corrige el mismo horario hardcodeado que tenía mal el seed (ver 002/T112).
+- [X] T119 [H-02] Tests afectados: nuevo e2e en `apps/web/e2e/primeros-pasos-visitanos.spec.ts` que verifica el copy real de Primeros pasos y Nosotros, los pendientes marcados como tales, y pasa `@axe-core/playwright` en modo claro y oscuro.
+
+**Checkpoint**: Lote 3 de la revisión manual completo en 001 — Primeros pasos y Nosotros usan el
+copy real de `docs/12-contenido-bienvenida.md`, con los pendientes reales visibles como tales.
+
 ---
 
 ## Dependencies & Execution Order
