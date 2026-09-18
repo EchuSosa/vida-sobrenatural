@@ -54,11 +54,65 @@ for (const colorScheme of ['light', 'dark'] as const) {
     test('las secciones sin funcionalidad muestran un estado vacío, no un error', async ({
       page,
     }) => {
-      for (const ruta of ['/ministerios', '/eventos', '/dar']) {
+      for (const ruta of ['/ministerios', '/eventos']) {
         const respuesta = await page.goto(ruta);
         expect(respuesta?.status()).toBe(200);
         await expect(page.getByText(/todavía no/i)).toBeVisible();
       }
+    });
+
+    // H-02 (revisión manual, actualización 2026-09-18): copy real en
+    // Primeros pasos y Nosotros, con los pendientes marcados como tales.
+    test('Primeros pasos y Nosotros usan el copy real, con los pendientes marcados', async ({
+      page,
+    }) => {
+      await page.goto('/primeros-pasos');
+      await expect(page.getByText('Siempre que lo llamamos, Dios nos responde.', { exact: false })).toBeVisible();
+
+      let resultados = await new AxeBuilder({ page }).analyze();
+      expect(resultados.violations).toEqual([]);
+
+      await page.goto('/nosotros');
+      await expect(page.getByRole('heading', { name: 'Somos Familia' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Liderazgo' })).toBeVisible();
+      await expect(page.getByText('Natalia Spetale y Juan Pablo Sosa')).toBeVisible();
+      // "En qué creemos" y las fotos son pendientes reales (D98) — no
+      // inventados: tienen que verse marcados como tales, no vacíos ni con
+      // texto de relleno.
+      await expect(page.getByRole('heading', { name: 'En qué creemos' })).toBeVisible();
+      await expect(page.getByText(/todavía no publicamos nuestra declaración de fe/i)).toBeVisible();
+      await expect(page.getByText('Foto pendiente', { exact: false }).first()).toBeVisible();
+
+      resultados = await new AxeBuilder({ page }).analyze();
+      expect(resultados.violations).toEqual([]);
+    });
+
+    // H-08 (revisión manual, actualización 2026-09-18): /dar con los datos
+    // reales de Ofrendas, alias y CBU copiables con aviso de confirmación.
+    test('Dar muestra los datos reales de Ofrendas y permite copiar el alias', async ({
+      page,
+      context,
+    }) => {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      await page.goto('/dar');
+      await expect(
+        page.getByText('Dar de lo que Dios nos dio nos hace profundamente felices.'),
+      ).toBeVisible();
+      await expect(page.getByText('IglesiaVS')).toBeVisible();
+      await expect(page.getByText('0720099120000002972718')).toBeVisible();
+      await expect(page.getByText('ISAIAS 61 ASOCIACIÓN CIVIL')).toBeVisible();
+
+      // Auditar antes del toast — el contraste del propio Toaster (sonner)
+      // es un hallazgo aparte (H-21 en la revisión manual), no de esta
+      // página; auditarlo acá lo mezclaría con lo que sí es responsabilidad
+      // de /dar.
+      const resultados = await new AxeBuilder({ page }).analyze();
+      expect(resultados.violations).toEqual([]);
+
+      await page.getByRole('button', { name: 'Copiar Alias' }).click();
+      await expect(page.getByText('Alias copiado')).toBeVisible();
+      const copiado = await page.evaluate(() => navigator.clipboard.readText());
+      expect(copiado).toBe('IglesiaVS');
     });
   });
 }

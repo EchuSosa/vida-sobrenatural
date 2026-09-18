@@ -21,6 +21,13 @@ export default function PrimerosPasosPage() {
       </Suspense>
       <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
 
+      {/* H-02 (revisión manual, actualización 2026-09-18): copy real de
+          docs/12-contenido-bienvenida.md, sección "Hero". */}
+      <blockquote className="border-l-2 border-primary pl-4 italic text-zinc-600 dark:text-zinc-400">
+        “{t('fraseTexto')}”
+        <footer className="mt-1 text-sm not-italic">— {t('fraseAutor')}</footer>
+      </blockquote>
+
       <p className="text-lg leading-7 text-zinc-700 dark:text-zinc-300">{t('intro')}</p>
 
       <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">

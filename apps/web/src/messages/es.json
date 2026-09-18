@@ -33,6 +33,8 @@
   },
   "primerosPasos": {
     "titulo": "Bienvenido/a a Vida Sobrenatural",
+    "fraseTexto": "Siempre que lo llamamos, Dios nos responde. Él nos infunde ánimo y renueva nuestras fuerzas.",
+    "fraseAutor": "Juan Pablo Sosa",
     "intro": "Somos una congregación en La Plata, Buenos Aires. Si te acercaste por primera vez, o hace poco empezaste a venir, esta página es para vos: acá vas a encontrar todo lo que necesitás saber, a tu propio ritmo, sin depender de preguntarle a alguien en persona o de enterarte por WhatsApp o Instagram.",
     "comoSigue": "¿Cómo sigue el proceso?",
     "comoSigueDescripcion": "A medida que te vayas sumando, vas a ir conociendo distintas etapas — no hay apuro, cada una se habilita cuando corresponde.",
@@ -57,6 +59,22 @@
     "elegirSede": "Elegí la Sede a la que te acercaste:",
     "telefono": "Tel:",
     "email": "Email:"
+  },
+  "nosotros": {
+    "titulo": "Nosotros",
+    "somosFamiliaTitulo": "Somos Familia",
+    "somosFamiliaTexto": "Creemos que cada día Dios quiere manifestarse de forma sobrenatural en nuestra vida, y también a través nuestro, para bendición de los que nos rodean.",
+    "liderazgoTitulo": "Liderazgo",
+    "liderazgoIntro": "Tres parejas pastorales guían Vida Sobrenatural:",
+    "pastor1": "Natalia Spetale y Juan Pablo Sosa",
+    "pastor1Rol": "Pastores Principales",
+    "pastor2": "Lorena Scerra y Ezequiel Rossini",
+    "pastor2Rol": "Pastores",
+    "pastor3": "Patricia Ryan y Ezequiel Parravicini",
+    "pastor3Rol": "Pastores",
+    "fotoPendiente": "Foto pendiente — falta el material real de la iglesia.",
+    "enQueCreemosTitulo": "En qué creemos",
+    "enQueCreemosPendiente": "Todavía no publicamos nuestra declaración de fe acá — es un texto que tiene que salir directamente de la iglesia, no algo que podamos redactar por nuestra cuenta. Lo sumamos en cuanto lo tengamos."
   },
   "registro": {
     "tituloPagina": "Completá tus datos",
@@ -135,5 +153,23 @@
         "otro": "Otro"
       }
     }
+  },
+  "footer": {
+    "direccion": "Calle 23 N°1665 e/ 66 y 67, La Plata, Buenos Aires",
+    "horarios": "Domingos 10:30 hs (presencial y online, por YouTube)",
+    "facebook": "Facebook",
+    "instagram": "Instagram"
+  },
+  "dar": {
+    "titulo": "Dar",
+    "textoInstitucional": "Dar de lo que Dios nos dio nos hace profundamente felices.",
+    "intro": "Podés colaborar con diezmos, ofrendas, donaciones o el pago de eventos especiales por transferencia, con estos datos:",
+    "alias": "Alias",
+    "cbu": "CBU",
+    "entidad": "Entidad",
+    "cuit": "CUIT",
+    "cuenta": "Cuenta",
+    "copiar": "Copiar {campo}",
+    "copiado": "{campo} copiado"
   }
 }
