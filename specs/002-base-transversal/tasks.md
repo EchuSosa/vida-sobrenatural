@@ -250,6 +250,25 @@ ubicación nueva.
 sesión disponible, layout público consistente. Lote 2 y Lote 3 (`specs/revision-manual/`) quedan
 para una corrección posterior, fuera de esta fase.
 
+## Phase 13: Correcciones de la revisión manual — Lote 2 (diseño y errores)
+
+**Purpose**: aplicar el Lote 2 del plan de corrección de
+`specs/revision-manual/2026-09-17-001-002.md` (hallazgos H-07, H-01, H-04 — los que son de esta
+spec). No modifica ninguna tarea de las Fases 1–12, ya completadas.
+
+**Contexto**: H-03 del mismo Lote 2 es un hallazgo de **specs/001-fase-bienvenida** (Escenario 1,
+`/visitanos`) — ver su `tasks.md`, Phase 10.
+
+- [X] T104 [H-07] En `packages/ui/src/styles/theme.css`: `--font-sans` dentro de `@theme inline` estaba autorreferenciado (`var(--font-sans)`, nunca resolvía a nada) en vez de apuntar a la variable real que define `next/font` en cada `layout.tsx` — cambiar a `--font-sans: var(--font-geist-sans)`, igual que ya hacía `--font-mono` con `--font-geist-mono`. Corrige la tipografía en `apps/web` y `apps/backoffice` a la vez, al ser un token compartido.
+- [X] T105 [P] [H-07] En `docs/15-guia-ux-ui.md`, reemplazar la mención suelta de "escala fija de tamaños y pesos" por una tabla concreta (h1/h2/h3/texto/texto secundario/etiquetas → clase `text-*` de Tailwind + peso) y aclarar que el proyecto usa una sola familia (`--font-sans`, Geist) para títulos y texto, dentro del máximo de dos familias de D94.
+- [X] T106 [H-01] En `apps/web/src/components/nav-publica-header.tsx`: las acciones "Dar"/"Ingresar"/"Ir a la app" dejan de pasar por `<Button render={<Link>}>` — Base UI expone `role="button"` en cualquier caso (con o sin `nativeButton`), lo que le quita el rol de enlace a un `<a>` real. Se reemplaza por un `<Link>` con las clases de `buttonVariants` (exportado ya de `@vida-sobrenatural/ui`), que se ve igual pero conserva su semántica de enlace.
+- [X] T107 [H-04] En `apps/web/src/app/error.tsx` y `apps/backoffice/src/app/error.tsx`: agregar `router.refresh()` (de `next/navigation`) antes de `reset()` en el handler de "Reintentar" — `reset()` solo remonta el segmento, no revalida el fetch del Server Component que lanzó el error.
+- [X] T108 [H-01, H-04, H-07] Tests afectados: verificado con Playwright contra una instancia aislada — cero advertencias de Base UI en consola al abrir la home, `font-family` computado del `<body>` resuelve a Geist, y "Reintentar" en `apps/web/src/app/error.tsx` recupera el contenido después de que la API vuelve a responder. No se agregó un e2e nuevo en el repo porque son verificaciones de una condición de infraestructura (consola del navegador, API caída) más frágiles de automatizar de forma estable que de volver a probar a mano — quedan en la sección "Verificación manual" de abajo.
+
+**Checkpoint**: Lote 2 de la revisión manual completo en 002 — tipografía aplicada, semántica de
+botones/enlaces correcta, "Reintentar" revalida de verdad. Lote 3 queda para una corrección
+posterior.
+
 ---
 
 ## Dependencies & Execution Order

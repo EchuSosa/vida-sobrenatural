@@ -238,6 +238,23 @@ de tocarlos acá** — las rutas de abajo ya asumen esa ubicación nueva.
 después de registrarse, y las pantallas de confirmación/redirección del registro dejan de ser
 ambiguas o falsificables por URL. Lote 2 y Lote 3 quedan para una corrección posterior.
 
+## Phase 10: Correcciones de la revisión manual — Lote 2 (diseño y errores)
+
+**Purpose**: aplicar el Lote 2 del plan de corrección de
+`specs/revision-manual/2026-09-17-001-002.md` (hallazgo H-03, el único de esta spec en este lote).
+No modifica ninguna tarea de las Fases 1–9, ya completadas.
+
+**Contexto**: H-07, H-01 y H-04 del mismo Lote 2 son hallazgos de **specs/002-base-transversal** —
+ver su `tasks.md`, Phase 13. H-04 en particular define el patrón de "Reintentar" (`router.refresh()`
++ `reset()`) que T109 reutiliza acá.
+
+- [X] T109 [H-03] Nuevo `apps/web/src/app/(publica)/visitanos/error.tsx`: límite de error propio de esta ruta, separado del `error.tsx` general de la raíz. Atrapa solo la falla de `GET /sedes` (la Sede sin cargar es un caso distinto, ya manejado sin lanzar en `page.tsx` con el estado `sinSedes`); mensaje propio (claves `visitanos.errorCargaTitulo`/`visitanos.errorCarga` en `es.json`) y "Reintentar" con el mismo patrón `router.refresh()` + `reset()` de 002/T107.
+- [X] T110 [H-03] Tests afectados: verificado con Playwright contra una instancia aislada — con la API caída, `/visitanos` muestra el mensaje de error propio (no el genérico de la raíz) con un código de referencia, y "Reintentar" recupera el contenido real de la Sede una vez que la API vuelve a responder.
+
+**Checkpoint**: Lote 2 de la revisión manual completo en 001 — `/visitanos` distingue "la API no
+responde" de "no hay Sede cargada", con reintento funcional en el primer caso. Lote 3 queda para
+una corrección posterior.
+
 ---
 
 ## Dependencies & Execution Order
