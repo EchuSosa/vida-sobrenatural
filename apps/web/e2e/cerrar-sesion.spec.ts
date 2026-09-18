@@ -25,7 +25,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(resultados.violations).toEqual([]);
 
       await page.getByRole('button', { name: 'Cerrar sesión' }).click();
-      await expect(page.getByRole('alertdialog', { name: '¿Cerrar sesión?' })).toBeVisible();
+      const dialogo = page.getByRole('alertdialog', { name: '¿Cerrar sesión?' });
+      await expect(dialogo).toBeVisible();
+      // El diálogo abre con una animación de 100ms (fade-in + zoom-in); sin
+      // esperarla, axe puede auditar un fotograma a mitad de transición y
+      // reportar un contraste de color que nunca se ve en pantalla quieta.
+      await expect(dialogo).toHaveCSS('opacity', '1');
 
       resultados = await new AxeBuilder({ page }).analyze();
       expect(resultados.violations).toEqual([]);
