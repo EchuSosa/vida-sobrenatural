@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@vida-sobrenatural/ui';
 import { NavPublicaHeader } from '../components/nav-publica-header';
 import { FooterPublico } from '../components/footer-publico';
@@ -18,10 +19,21 @@ export default function ErrorPantalla({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
+
   useEffect(() => {
     // El digest de Next.js sirve como referencia — no exponemos error.message.
     console.error('[error.tsx]', error.digest, error);
   }, [error]);
+
+  // H-04 (actualización 2026-09-18): reset() de Next.js solo vuelve a montar
+  // el segmento — no revalida el fetch de un Server Component. router.refresh()
+  // invalida el caché de router y pide de nuevo los datos del servidor;
+  // reset() recién después limpia el estado del error boundary.
+  function reintentar() {
+    router.refresh();
+    reset();
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -32,7 +44,7 @@ export default function ErrorPantalla({
           Podés reintentar en unos segundos. Si sigue pasando, contanos e incluí este código:{' '}
           <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{error.digest ?? 'sin-id'}</code>
         </p>
-        <Button onClick={reset} className="mx-auto">
+        <Button onClick={reintentar} className="mx-auto">
           Reintentar
         </Button>
       </main>
