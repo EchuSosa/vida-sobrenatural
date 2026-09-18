@@ -16,6 +16,13 @@
 - Q: FR-039 pide datos de demostración para lo que ya existe (Sede, Personas en cada estado). D99 describe un seed con "volumen" de datos ficticios pensado para cuando existan más entidades (Eventos, Pagos, etc.), que hoy no existen — ¿qué volumen de datos de demo necesita este spec, que solo cubre Sede y Persona? → A: Mínimo viable — una Sede completa más un puñado de Personas (una o dos por cada estado: activa mayor de edad, pendiente_tutor, inactiva), suficiente para mostrar y probar cada caso sin generar volumen artificial todavía innecesario.
 - Q: El contenido de las páginas actuales /bienvenida y /sede (spec 001) pasa a vivir en /primeros-pasos y /visitanos (Historia 1) — ¿qué debe pasar con las URLs viejas una vez hecho el traslado? → A: Dejan de existir, sin redirección; quien tenga un link viejo ve la página de "no encontrado" (Historia 4).
 
+### Session 2026-09-18 — revisión manual, Lote 1 (`specs/revision-manual/2026-09-17-001-002.md`)
+
+- Q: El menú público de la Historia 1 solo describe el caso sin sesión — ¿qué debe mostrar cuando quien navega ya tiene sesión iniciada (ej. volvió a una página pública después de registrarse)? (H-19) → A: Reemplaza el botón "Ingresar" por un acceso directo a la app con sesión; "Dar" se mantiene siempre, con o sin sesión.
+- Q: Las páginas de error, "no encontrado" y las del flujo de registro (spec 001), ¿deben conservar el menú y el pie de página públicos? (H-05) → A: Sí — perder la navegación en esas pantallas deja a la persona sin forma de continuar salvo el botón "atrás" del navegador; se agrega como requisito explícito.
+- Q: ¿Cómo cierra sesión una Persona? La Historia 5 asumía la acción sin definirla. (H-11) → A: Con un botón "Cerrar sesión" en Perfil (app) y en el menú de usuario (backoffice), que pide confirmación explícita (D94) antes de cerrarla, y vuelve al Inicio público con un aviso breve (D102).
+- Q: ¿Debe la app depender de las pantallas propias de NextAuth (inglés, sin el diseño de la app) para signIn/signOut/error? (H-14) → A: No — se configuran explícitamente para usar las pantallas propias del proyecto (o los flujos ya resueltos por H-11), incluso si nunca se llega a ellas en el uso normal.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Navegar la app según quién soy (Priority: P1)
@@ -34,6 +41,8 @@ Cualquier persona que usa la app — se haya acercado por primera vez, tenga ses
 4. **Given** una Persona con rol Admin que entra al backoffice, **When** ve el menú lateral, **Then** encuentra los ítems correspondientes a su rol (incluidos los que hoy no tienen funcionalidad propia, como Solicitudes o Notificaciones) mostrados como sección disponible pero vacía, no como un enlace que falla.
 5. **Given** una Persona con rol Discipulador y rol Líder de curso a la vez, **When** entra al backoffice, **Then** ve la unión de los ítems de ambos roles en su menú lateral.
 6. **Given** el contenido que hoy vive en las páginas de Bienvenida y Sede (spec 001), **When** se accede a la web pública después de este cambio, **Then** ese mismo contenido y esas mismas funcionalidades siguen disponibles, ahora dentro de las secciones Primeros pasos y Visitanos.
+7. **Given** una Persona con sesión iniciada que navega una página del menú público, **When** mira el menú, **Then** ya no ve "Ingresar" — ve un acceso directo a la app con sesión en su lugar; "Dar" se mantiene visible igual que sin sesión (actualización 2026-09-18).
+8. **Given** cualquier pantalla de error, "no encontrado", o del flujo de registro (spec 001), **When** una persona la ve, **Then** el menú público (o el de la app/backoffice, según corresponda) y el pie de página siguen presentes — nunca queda sin forma de navegar salvo el botón "atrás" del navegador (actualización 2026-09-18).
 
 ---
 
@@ -104,6 +113,7 @@ Una Persona con sesión iniciada puede elegir si quiere ver la app siempre en mo
 2. **Given** una Persona con sesión iniciada, **When** entra a su Perfil (o al menú de usuario en el backoffice), **Then** puede elegir explícitamente entre Claro, Oscuro o Sistema.
 3. **Given** una Persona que ya eligió un modo, **When** vuelve a entrar a la app más adelante, **Then** la interfaz se muestra en el modo que eligió, sin tener que configurarlo de nuevo.
 4. **Given** las pantallas existentes (Primeros pasos, Visitanos, registro), **When** se ven en modo oscuro, **Then** todos los textos e íconos mantienen el mismo nivel de legibilidad y contraste que en modo claro.
+5. **Given** una Persona con sesión iniciada, **When** elige "Cerrar sesión" desde su Perfil (o el menú de usuario del backoffice), **Then** el sistema pide confirmación explícita antes de cerrarla, y al confirmar vuelve al Inicio público con un aviso breve; si cancela, sigue con la sesión activa sin cambios (actualización 2026-09-18).
 
 ---
 
@@ -183,6 +193,8 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 - **FR-007**: El sistema DEBE trasladar el contenido explicativo de la Bienvenida (spec 001) a la sección Primeros pasos, conservando la explicación del proceso de integración y el acceso al registro. La URL anterior de Bienvenida deja de existir (sin redirección): quien la visite ve la página de "sección no encontrada" (Historia 4).
 - **FR-008**: El sistema DEBE trasladar la información de la Sede (spec 001) a la sección Visitanos, conservando la consulta pública de sus datos (nombre, dirección, contacto, horarios). La URL anterior de Sede deja de existir (sin redirección): quien la visite ve la página de "sección no encontrada" (Historia 4).
 - **FR-009**: El sistema DEBE indicar, tanto visualmente como para tecnología asistiva, cuál es la sección actual dentro de cada uno de los tres menús.
+- **FR-042** *(actualización 2026-09-18, revisión manual H-19)*: El menú público DEBE reflejar si hay una sesión iniciada: con sesión, reemplaza el botón "Ingresar" por un acceso directo a la app con sesión; "Dar" se muestra siempre, con o sin sesión.
+- **FR-043** *(actualización 2026-09-18, revisión manual H-05)*: Las pantallas de error, "no encontrado" y las del flujo de registro (spec 001) DEBEN conservar el menú (público, de la app, o del backoffice según corresponda) y el pie de página, igual que el resto de las pantallas.
 
 **Accesibilidad (Historia 2)**
 
@@ -215,6 +227,8 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 - **FR-027**: El sistema DEBE permitir que una Persona con sesión iniciada elija explícitamente el modo Claro, Oscuro o Sistema, tanto desde su Perfil en la app como desde el menú de usuario del backoffice.
 - **FR-028**: El sistema DEBE recordar la preferencia de modo elegida por cada Persona y aplicarla automáticamente la próxima vez que inicie sesión, en cualquier dispositivo.
 - **FR-029**: El sistema DEBE mantener el mismo nivel de contraste y legibilidad en las pantallas existentes tanto en modo claro como en modo oscuro.
+- **FR-044** *(actualización 2026-09-18, revisión manual H-11)*: El sistema DEBE proveer una acción "Cerrar sesión" en el Perfil (app) y en el menú de usuario (backoffice), que pida confirmación explícita antes de cerrar la sesión y, al confirmar, vuelva al Inicio público mostrando un aviso breve.
+- **FR-045** *(actualización 2026-09-18, revisión manual H-14)*: Ninguna de las dos apps DEBE depender de las pantallas por defecto del proveedor de autenticación (en otro idioma y sin el diseño del proyecto) para iniciar sesión, cerrar sesión, o mostrar un error de autenticación.
 
 **Idioma (Historia 6)**
 

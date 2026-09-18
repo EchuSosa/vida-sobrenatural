@@ -39,6 +39,11 @@ Valida de punta a punta cada historia de `spec.md` sobre un ambiente local ya pr
 7. Entrar a `http://localhost:3002/` (backoffice) autenticado con un email de rol Admin (seed o
    variable de entorno de test): el menú lateral muestra los ítems de Admin, incluidos los que
    todavía no tienen funcionalidad (estado vacío).
+8. *(actualización 2026-09-18, FR-042)* Con sesión de una Persona `activa`, navegar a una página
+   pública (ej. `/nosotros`): el menú ya no muestra "Ingresar" — muestra un acceso directo a la app;
+   "Dar" se mantiene visible.
+9. *(actualización 2026-09-18, FR-043)* Visitar una URL inexistente, forzar un error (ej. apagar la
+   API), y entrar a `/registro`: las tres pantallas conservan el menú y el pie de página públicos.
 
 ## Historia 2 — Accesibilidad
 
@@ -93,6 +98,14 @@ Valida de punta a punta cada historia de `spec.md` sobre un ambiente local ya pr
 5. Repetir los pasos 2–4 en el **backoffice**, desde el menú de usuario: el tema se guarda y al
    recargar o volver a iniciar sesión no hay flash (`apps/backoffice/src/auth.ts`).
 6. Revisar en ambos temas que textos, botones, bordes y foco sigan siendo legibles (contraste).
+7. *(actualización 2026-09-18, FR-044, H-11)* En Perfil, tocar "Cerrar sesión": aparece un diálogo
+   que pide confirmar ("¿Cerrar sesión?" / "Sí, cerrar sesión" / "Volver"). Tocar "Volver": la sesión
+   sigue activa. Repetir y confirmar: vuelve al Inicio público con el aviso "Cerraste sesión.".
+   Repetir los mismos pasos en el menú de usuario del backoffice.
+8. *(actualización 2026-09-18, FR-045, H-14)* Entrar directamente a `/api/auth/signin`,
+   `/api/auth/signout` y `/api/auth/error` en las dos apps: no deberían verse en el uso normal (las
+   acciones propias de la app ya cubren signIn/signOut/error), pero si se visitan a propósito no
+   deben ser la única vía — confirmar que `pages` está configurado en `auth.ts` de ambas apps.
 
 ## Historia 6 — Idioma
 
