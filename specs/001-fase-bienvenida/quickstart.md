@@ -99,6 +99,10 @@ Este es el único flujo que la Constitución exige cubrir con Playwright (Princi
 4. Desactivarla (`PATCH /sedes/:id` con `activo: false`) siendo la única Sede activa → verificar
    que `apps/web` maneja el caso de "sin Sede activa" sin error.
 5. Como usuario sin rol Admin, intentar `POST /sedes` → verificar `403`.
+6. *(actualización 2026-09-18, revisión manual H-03)* Con al menos una Sede activa, apagar
+   `apps/api` y entrar a `/visitanos` → debe mostrar un error propio de la página (no el genérico
+   de la raíz), distinto del "sin Sede activa" del paso 4; con la API de nuevo arriba, "Reintentar"
+   debe mostrar los datos reales de la Sede sin recargar a mano.
 
 ## Tests automatizados (Constitución, Principio VI)
 
