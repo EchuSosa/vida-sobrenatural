@@ -107,6 +107,15 @@ async function mintApiToken(claims: {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: proveedores,
   session: { strategy: 'jwt' },
+  // H-14 (actualización 2026-09-18): la app no depende de las pantallas por
+  // defecto de NextAuth (en inglés, sin el diseño propio) — signIn/signOut
+  // ya tienen su propia UI (formulario de /registro, diálogo de "Cerrar
+  // sesión" en Perfil); error reutiliza la pantalla de fail-closed de D88.
+  pages: {
+    signIn: '/registro',
+    signOut: '/',
+    error: '/error-verificacion',
+  },
   callbacks: {
     async signIn({ user }) {
       // FR-017 (actualización 2026-09-17): una cuenta SSO solo se vincula (o

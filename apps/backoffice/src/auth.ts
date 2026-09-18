@@ -62,6 +62,16 @@ async function mintApiToken(claims: {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [googleProvider],
   session: { strategy: 'jwt' },
+  // H-14 (actualización 2026-09-18): el backoffice no depende de las
+  // pantallas por defecto de NextAuth — todavía no tiene una página de
+  // error propia, así que error/signIn/signOut vuelven al Inicio, que ya
+  // resuelve tanto el estado sin sesión (botón "Ingresar con Google") como
+  // el diálogo de "Cerrar sesión" (MenuUsuario).
+  pages: {
+    signIn: '/',
+    signOut: '/',
+    error: '/',
+  },
   callbacks: {
     async signIn({ user }) {
       // FR-017 (actualización 2026-09-17): mismo patrón que pendiente_tutor
