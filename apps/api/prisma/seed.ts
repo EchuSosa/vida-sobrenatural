@@ -116,9 +116,65 @@ async function crearPersonasDemo(sedeId: string) {
   }
 }
 
+/**
+ * H-12 (revisión manual, actualización 2026-09-18): sin esto, entrar al
+ * backoffice exigía asignar el rol admin a mano en la base. Una Persona admin
+ * de demo fija no sirve para nada acá — el login es por SSO real, nadie
+ * puede autenticarse como "demo-admin@example.com". En cambio, `SEED_ADMIN_EMAIL`
+ * deja que cualquiera que corra el seed se promueva a sí mismo con su propio
+ * email real de Google (documentado en docs/11-setup-local.md y en los
+ * quickstarts). Si la Persona ya existe (por ej. ya se había registrado),
+ * solo le agrega el rol sin tocar el resto de sus datos; si no existe, la
+ * crea con datos de ejemplo, igual que las demás Personas demo.
+ */
+async function promoverAdminDemo(sedeId: string) {
+  const email = process.env.SEED_ADMIN_EMAIL;
+  if (!email) {
+    console.log('SEED_ADMIN_EMAIL no está seteada — no se crea ninguna Persona admin.');
+    return;
+  }
+
+  const existente = await prisma.persona.findUnique({ where: { email } });
+  if (existente) {
+    if (existente.rol.includes('admin')) {
+      console.log(`${email} ya tiene el rol admin.`);
+      return;
+    }
+    await prisma.persona.update({
+      where: { id: existente.id },
+      data: { rol: [...existente.rol, 'admin'] },
+    });
+    console.log(`Rol admin agregado a la Persona existente ${email}.`);
+    return;
+  }
+
+  const creada = await prisma.persona.create({
+    data: {
+      email,
+      nombre: 'Admin',
+      apellido: 'Demo',
+      genero: 'femenino',
+      fechaNacimiento: new Date('1990-01-01'),
+      telefono: '+54 9 221 100-0000',
+      direccion: 'Calle 50 y 15, La Plata',
+      sedeId,
+      estadoCivil: 'soltero_a',
+      profesion: 'otro',
+      profesionDetalle: 'Dato de ejemplo',
+      tiempoCongregacion: 'menos_6_meses',
+      estado: 'activa',
+      activo: true,
+      consentimientoDatos: true,
+      rol: ['admin'],
+    },
+  });
+  console.log(`Persona admin creada: ${creada.email} (${creada.id})`);
+}
+
 async function main() {
   const sede = await crearSedeDemo();
   await crearPersonasDemo(sede.id);
+  await promoverAdminDemo(sede.id);
 }
 
 main()
