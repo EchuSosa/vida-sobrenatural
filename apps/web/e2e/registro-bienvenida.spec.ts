@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { loguearseComoTest } from './helpers';
 
 /**
  * Único flujo E2E exigido por la Constitución (Principio VI): el registro
@@ -9,17 +10,9 @@ import AxeBuilder from '@axe-core/playwright';
  *
  * Corre en modo claro y oscuro con @axe-core/playwright en cada paso —
  * Constitución Principio VII / specs/001-fase-bienvenida, Phase 8 (D94,
- * formulario por pasos con indicador de progreso — actualización 2026-09-17).
+ * formulario por pasos con indicador de progreso — actualización 2026-09-17)
+ * y Phase 9 (H-19/H-15/H-16, sesión y navegación — actualización 2026-09-18).
  */
-
-async function loguearseComoTest(page: import('@playwright/test').Page, email: string) {
-  const csrfResponse = await page.request.get('/api/auth/csrf');
-  const { csrfToken } = await csrfResponse.json();
-
-  await page.request.post('/api/auth/callback/test-login', {
-    form: { email, csrfToken },
-  });
-}
 
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`modo ${colorScheme}`, () => {
@@ -87,21 +80,44 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('button', { name: 'Registrarme' }).click();
 
       // Éxito (Historia 2, FR-005 a FR-009) — sin mención a Vida Nueva/Vida de
-      // Servicio/Ministerio en esta pantalla (FR-012).
+      // Servicio/Ministerio en esta pantalla (FR-012). El menú público (H-19)
+      // ya no muestra "Ingresar" — update() de NextAuth refrescó la sesión
+      // antes de llegar acá, sin necesitar un login nuevo.
       await expect(page).toHaveURL(/\/registro\/listo/);
       await expect(page.getByRole('heading', { name: '¡Listo, ya sos parte!' })).toBeVisible();
+      // Acotado al contenido propio de la pantalla (no al menú/pie, que desde
+      // H-05 sí están presentes y legítimamente incluyen "Ministerios").
+      const contenido = page.locator('main');
       for (const fase of ['Vida Nueva', 'Vida de Servicio', 'Ministerio']) {
-        await expect(page.getByText(fase)).toHaveCount(0);
+        await expect(contenido.getByText(fase)).toHaveCount(0);
       }
+      await expect(page.getByRole('link', { name: 'Ingresar' })).toHaveCount(0);
+      await expect(page.getByRole('link', { name: 'Ir a la app' })).toBeVisible();
+      // H-05: /registro/listo conserva el menú y el pie de página, y ofrece
+      // volver al Inicio.
+      await expect(page.getByRole('link', { name: 'Ir a Inicio' })).toBeVisible();
 
       resultados = await new AxeBuilder({ page }).analyze();
       expect(resultados.violations).toEqual([]);
 
+      // H-15: entrar de nuevo a /registro/listo en otra pestaña (sin el flag
+      // de "recién completado" de esta) redirige a Inicio, no repite la
+      // confirmación falsa.
+      const otraPestana = await page.context().newPage();
+      await otraPestana.goto('/registro/listo');
+      await expect(otraPestana).toHaveURL('/');
+      await otraPestana.close();
+
       // Volver a "loguearse" con el mismo email ya no debería pedir el formulario
-      // de nuevo (Acceptance Scenario 3 de Historia 2).
+      // de nuevo (Acceptance Scenario 3 de Historia 2). H-16: la redirección
+      // avisa por qué, en vez de un salto silencioso.
       await loguearseComoTest(page, email);
       await page.goto('/registro');
       await expect(page).toHaveURL(/\/primeros-pasos/);
+      await expect(page.getByText('Ya estás registrada, no hace falta completarlo de nuevo.')).toBeVisible();
+
+      resultados = await new AxeBuilder({ page }).analyze();
+      expect(resultados.violations).toEqual([]);
     });
   });
 }
