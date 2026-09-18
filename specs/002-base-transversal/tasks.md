@@ -225,6 +225,33 @@ prioridad (P1, P1, P2, P2, P2, P3, P3, P3).
 
 ---
 
+## Phase 12: Correcciones de la revisión manual — Lote 1 (sesión y navegación)
+
+**Purpose**: aplicar el Lote 1 del plan de corrección de
+`specs/revision-manual/2026-09-17-001-002.md` (hallazgos H-05, H-11, H-14 — los que bloquean el
+resto de la revisión). No modifica ninguna tarea de las Fases 1–11, ya completadas.
+
+**Contexto**: H-19, H-15 y H-16 del mismo Lote 1 son hallazgos de **specs/001-fase-bienvenida**
+(Historia 2 de esa spec) — ver su `tasks.md`, Phase 9. Esta fase cubre solo los hallazgos que son
+de 002-base-transversal. **T100/T101 (H-05, mover archivos a `(publica)/`) deben completarse antes
+que 001/Phase 9**, porque esa fase edita `registro/page.tsx` y `registro/listo/page.tsx` en su
+ubicación nueva.
+
+- [X] T096 [H-11] Agregar la acción "Cerrar sesión" en `apps/web/src/app/(app)/perfil/page.tsx`: nuevo componente cliente `apps/web/src/components/cerrar-sesion-boton.tsx` que usa `ConfirmDestructiveDialog` de `packages/ui` (título/botones con verbo concreto: "¿Cerrar sesión?" / "Sí, cerrar sesión" / "Volver", D94) y llama a `signOut({ callbackUrl: '/?sesion=cerrada' })` de `next-auth/react` al confirmar.
+- [X] T097 [P] [H-11] Mismo patrón en `apps/backoffice/src/components/selector-tema.tsx` (`MenuUsuario`): botón "Cerrar sesión" (mismo `ConfirmDestructiveDialog`) junto al selector de tema — no anidado dentro del `DropdownMenu` de tema, para evitar el conflicto conocido entre overlays anidados de Base UI (diálogo dentro de un menú); `signOut({ callbackUrl: '/?sesion=cerrada' })`.
+- [X] T098 [P] [H-11] Crear `apps/web/src/components/aviso-por-query.tsx` (componente cliente reutilizable: lee un parámetro de la URL, muestra un `toast` de `sonner` una sola vez y limpia el parámetro con `router.replace`, envuelto en `Suspense` por `useSearchParams`) y usarlo en `apps/web/src/app/(publica)/page.tsx` (Inicio) para el aviso "Cerrsaste sesión" cuando `?sesion=cerrada`; equivalente en `apps/backoffice/src/app/page.tsx` (matriz de feedback, `docs/16-sistemas-transversales.md`).
+- [X] T099 [H-14] Configurar `pages: { signIn, signOut, error }` en el `NextAuth(...)` de `apps/web/src/auth.ts` (`signIn: '/registro'`, `signOut: '/'`, `error: '/error-verificacion'`) y de `apps/backoffice/src/auth.ts` (`signIn: '/'`, `signOut: '/'`, `error: '/'` — el backoffice no tiene página de error propia todavía) para que ninguna de las dos apps dependa de las pantallas por defecto de NextAuth (en inglés, sin el diseño de la app).
+- [X] T100 [H-05] Mover `apps/web/src/app/registro/` (con `listo/`), `apps/web/src/app/pendiente-tutor/`, `apps/web/src/app/email-no-verificado/` y `apps/web/src/app/error-verificacion/` a `apps/web/src/app/(publica)/` (mismas URLs — un grupo de rutas no agrega segmento — ahora heredan `NavPublicaHeader`/`FooterPublico` del layout de `(publica)`).
+- [X] T101 [P] [H-05] Actualizar `apps/web/src/app/not-found.tsx` y `apps/web/src/app/error.tsx` (quedan en la raíz de `app/`, fuera de `(publica)`, porque un 404 de una URL que no matchea ninguna ruta no hereda el layout de ningún grupo) para que rendericen `<NavPublicaHeader />`/`<FooterPublico />` directamente — los providers de la raíz (`NextIntlClientProvider`, `SessionProvider`) siguen montados en ese punto, así que es seguro.
+- [X] T102 [P] [H-05] En `apps/web/src/app/(publica)/registro/listo/page.tsx` (ruta nueva de T100), agregar un enlace "Ir a Inicio" junto al que ya vuelve a Primeros pasos.
+- [X] T103 [H-11, H-14, H-05] Tests afectados: e2e nuevo o extendido para cerrar sesión (Perfil y backoffice) con `@axe-core/playwright` en modo claro y oscuro; verificar en los e2e existentes que `/registro`, `/registro/listo`, `/pendiente-tutor`, `/email-no-verificado`, `/error-verificacion`, el 404 y la pantalla de error muestran el menú y el pie de página.
+
+**Checkpoint**: Lote 1 de la revisión manual completo en 002 — sesión visible en el menú, cierre de
+sesión disponible, layout público consistente. Lote 2 y Lote 3 (`specs/revision-manual/`) quedan
+para una corrección posterior, fuera de esta fase.
+
+---
+
 ## Dependencies & Execution Order
 
 - **Setup (Fase 1)** → sin dependencias, se puede empezar de inmediato.

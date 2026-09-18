@@ -215,6 +215,31 @@ tocar el trabajo ya entregado en T001–T041.
 
 ---
 
+## Phase 9: Correcciones de la revisión manual — Lote 1 (sesión y navegación)
+
+**Purpose**: aplicar el Lote 1 del plan de corrección de
+`specs/revision-manual/2026-09-17-001-002.md` (hallazgos H-19, H-15, H-16 — los de esta spec). No
+modifica ninguna tarea de las Fases 1–8, ya completadas.
+
+**Contexto**: H-11, H-14 y H-05 del mismo Lote 1 son hallazgos de **specs/002-base-transversal**
+(navegación y layout) — ver su `tasks.md`, Phase 12. **Esta fase depende de que esa Phase 12 haya
+movido `registro/page.tsx` y `registro/listo/page.tsx` a `apps/web/src/app/(publica)/` (T100) antes
+de tocarlos acá** — las rutas de abajo ya asumen esa ubicación nueva.
+
+- [X] T061 [H-19] En `apps/web/src/components/nav-publica-header.tsx`: leer la sesión con `useSession()`; si `session?.user.estado === 'activa'`, reemplazar la acción "Ingresar" por un enlace a `/inicio` (clave `nav.irALaApp` en `es.json`, ej. "Ir a la app"); "Dar" se mantiene siempre visible, con o sin sesión.
+- [X] T062 [P] [H-19] En `apps/web/src/app/(publica)/primeros-pasos/page.tsx`: extraer un componente cliente `apps/web/src/components/accion-registro.tsx` que reemplaza el enlace "Registrarme" — con sesión `estado: activa` muestra el mismo acceso a la app que T061 (`/inicio`); sin sesión o sin `estado: activa`, el "Registrarme" de siempre.
+- [X] T063 [H-19] En `apps/web/src/auth.ts` y `apps/backoffice/src/auth.ts`: generalizar el callback `jwt` para que, en **cualquier** `trigger === 'update'` (no solo cuando llega `temaPreferido`), vuelva a resolver `personaId`/`estado`/`rol` contra `GET /personas/by-email` — así `update()` funciona como un refresco genérico de la sesión contra el estado actual en la base, reutilizable por T064 y por el `SelectorTema` ya existente.
+- [X] T064 [H-19] En `apps/web/src/app/(publica)/registro/page.tsx` (ruta nueva de 002/T100): después de un `POST /personas` exitoso, llamar a `update()` de `next-auth/react` (depende de T063) **antes** de navegar a `/registro/listo`, para que la sesión ya refleje `estado: activa`/`personaId` sin esperar un nuevo login.
+- [X] T065 [P] [H-15] Convertir `apps/web/src/app/(publica)/registro/listo/page.tsx` (ruta nueva de 002/T100) en Server Component: `auth()` sin sesión o `estado !== 'activa'` → redirige a `/registro`; además, una guarda de "registro recién completado" vía `sessionStorage` (seteada en `registro/page.tsx` justo antes del `router.push` a esta ruta, leída y limpiada en un componente cliente chico acá) → si falta, redirige a `/` en vez de mostrar una confirmación falsa (depende de T064).
+- [X] T066 [H-16] Cuando `apps/web/src/app/(publica)/registro/page.tsx` redirige a `/primeros-pasos` por sesión ya `activa` (edge case existente del spec), agregar `?ya_registrado=1` a esa URL; en `primeros-pasos/page.tsx`, usar `AvisoPorQuery` (creado en 002/T098) para mostrar "Ya estás registrada, no hace falta completarlo de nuevo" una sola vez.
+- [X] T067 [H-19, H-15, H-16] Tests afectados: actualizar `apps/web/e2e/registro-bienvenida.spec.ts` para verificar que, tras registrarse, el menú público ya no muestra "Ingresar" y que volver a `/registro` no repite el formulario; nuevo caso e2e para `/registro/listo` sin sesión (debe redirigir, no mostrar la confirmación) — con `@axe-core/playwright` en modo claro y oscuro.
+
+**Checkpoint**: Lote 1 de la revisión manual completo en 001 — la sesión se refleja de inmediato
+después de registrarse, y las pantallas de confirmación/redirección del registro dejan de ser
+ambiguas o falsificables por URL. Lote 2 y Lote 3 quedan para una corrección posterior.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
