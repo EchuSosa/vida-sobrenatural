@@ -9,10 +9,11 @@ detalles de contratos o modelo de datos — ver `contracts/` y `data-model.md`.
 - Variables de entorno seteadas en `apps/api/.env`, `apps/web/.env.local`,
   `apps/backoffice/.env.local`: `DATABASE_URL`, `NEXTAUTH_SECRET`, `INTERNAL_API_SECRET`,
   `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (ver `contracts/auth-integration.md`).
-- Migraciones de Prisma aplicadas: `cd apps/api && npx prisma migrate dev --config prisma7.config.ts`
-  (el `--config` hace falta mientras el archivo se llame `prisma7.config.ts` — ver H-13).
-- Para entrar al backoffice hace falta una Persona con rol `admin`; hoy se asigna a mano en la base
-  (ver H-12).
+- Migraciones de Prisma aplicadas: `pnpm --filter api run db:migrate` *(actualización 2026-09-18,
+  H-13: ya no hace falta `--config`, el archivo se llama `prisma.config.ts`)*.
+- Seed corrido con `SEED_ADMIN_EMAIL=tu-email@gmail.com pnpm --filter api run db:seed` para tener
+  una Persona con rol `admin` y poder entrar al backoffice, sin tocar la base a mano
+  *(actualización 2026-09-18, H-12 — ver `docs/11-setup-local.md`)*.
 - Al menos una Sede activa cargada (seed o vía `POST /sedes` como Admin) — sin esto, Historia 1 no
   tiene nada que mostrar.
 

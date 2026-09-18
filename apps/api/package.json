@@ -20,6 +20,10 @@
     "test:cov": "jest --config ./jest.config.cjs --coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --config ./jest.config.cjs --runInBand",
     "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config ./test/jest-e2e.config.cjs",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "db:limpiar-e2e": "tsx scripts/limpiar-e2e.ts",
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {

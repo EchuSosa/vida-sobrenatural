@@ -173,11 +173,6 @@ npx prisma init
 
 Esto crea `apps/api/prisma/schema.prisma` un archivo de configuración y un `.env`. Editar el `.env` con:
 
-> **Ojo con el nombre del archivo de configuración:** en este repo quedó como
-> `apps/api/prisma7.config.ts`, y Prisma solo lo toma solo si se llama `prisma.config.ts`. Mientras
-> siga así, todos los comandos de Prisma necesitan `--config prisma7.config.ts`
-> (`migrate dev`, `db seed`, `studio`). Ahí también se define el comando del seed.
-
 ```
 DATABASE_URL="postgresql://vidasobrenatural:vidasobrenatural_dev@localhost:5432/vidasobrenatural?schema=public"
 ```
@@ -185,10 +180,27 @@ DATABASE_URL="postgresql://vidasobrenatural:vidasobrenatural_dev@localhost:5432/
 Probar la conexión con una migración vacía:
 
 ```bash
-npx prisma migrate dev --name init --config prisma7.config.ts
+npx prisma migrate dev --name init
 ```
 
 Si corre sin errores, la base de datos está conectada y lista.
+
+> *(actualización 2026-09-18, H-13)*: el archivo de configuración se llama `apps/api/prisma.config.ts`
+> (Prisma lo toma automáticamente, sin flags). En el día a día usá los scripts de
+> `apps/api/package.json` en vez de `npx prisma ...` directo: `pnpm --filter api run db:migrate`,
+> `pnpm --filter api run db:seed`, `pnpm --filter api run db:studio`.
+
+**Admin de demo (H-12):** el seed (`db:seed`) no crea ninguna Persona con rol admin por defecto —
+haría falta un email de Google real para poder loguearse como esa Persona, y no tenemos uno fijo
+que sirva para todos. En cambio, seteá `SEED_ADMIN_EMAIL` con tu propio email (el que vayas a usar
+para entrar a `apps/backoffice` vía Google) antes de correr el seed:
+
+```bash
+SEED_ADMIN_EMAIL="tu-email@gmail.com" pnpm --filter api run db:seed
+```
+
+Si esa Persona ya existe, el seed solo le agrega el rol `admin`; si no existe, la crea con datos de
+ejemplo (igual que las demás Personas demo). Es idempotente — correrlo de nuevo no duplica nada.
 
 ## 8. Inicializar shadcn/ui (en `apps/web`, después replicar en `apps/backoffice`)
 

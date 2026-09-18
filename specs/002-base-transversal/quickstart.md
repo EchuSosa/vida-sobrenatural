@@ -9,10 +9,10 @@ Valida de punta a punta cada historia de `spec.md` sobre un ambiente local ya pr
   spec (`idiomaPreferido`, `temaPreferido` en `Persona`).
 - Las tres apps levantadas en sus puertos fijos: `apps/api` (3333), `apps/web` (3001),
   `apps/backoffice` (3002) — ver `docs/10-stack-tecnico.md`.
-- Seed de Prisma corrido (`pnpm --filter api exec prisma db seed --config prisma7.config.ts`) —
-  el `--config` hace falta porque el archivo se llama `prisma7.config.ts` y no `prisma.config.ts`
-  (ver H-13) — deja cargada la Sede de ejemplo más
-  las Personas de demo de este spec (Decisión 13 de `research.md`).
+- Seed de Prisma corrido (`pnpm --filter api run db:seed` — *actualización 2026-09-18, H-13: ya no
+  hace falta `--config`*) — deja cargada la Sede de ejemplo más las Personas de demo de este spec
+  (Decisión 13 de `research.md`). Para tener una Persona admin y poder entrar al backoffice, setear
+  `SEED_ADMIN_EMAIL=tu-email@gmail.com` antes de correrlo (H-12 — ver `docs/11-setup-local.md`).
 - `SENTRY_DSN` **sin setear** en los `.env.local`/`.env` de las tres apps (para validar que Sentry
   queda desactivado en local).
 
