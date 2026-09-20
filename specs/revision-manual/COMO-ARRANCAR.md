@@ -53,6 +53,55 @@ docker compose exec -T postgres psql -U vidasobrenatural -d vidasobrenatural \
 # apagar la API a propósito (para probar los estados de error): Ctrl+C en su terminal
 ```
 
+## Chequear que la base está como se espera
+
+Una sola consulta:
+
+```bash
+docker compose exec -T postgres psql -U vidasobrenatural -d vidasobrenatural -c \
+  "SELECT nombre, direccion, horarios, activo FROM sedes;
+   SELECT email, estado, activo, rol FROM personas ORDER BY email;"
+```
+
+**Lo esperado después de correr el seed:**
+
+| Sede | Debe decir |
+|---|---|
+| La Plata | dirección Calle 23 N°1665 e/ 66 y 67, horario domingos 10:30 (+ online), `activo = t` |
+
+| Persona | estado | activo | rol |
+|---|---|---|---|
+| `demo-activa@example.com` | activa | t | `{miembro_registrado}` |
+| `demo-pendiente-tutor@example.com` | pendiente_tutor | t | `{}` |
+| `demo-inactiva@example.com` | pendiente_tutor | **f** | `{}` |
+| tu email real (si corriste el seed con `SEED_ADMIN_EMAIL`) | activa | t | incluye `admin` |
+
+**Señales de que algo quedó sucio:**
+
+- Aparecen Personas con prefijo `e2e-` → las dejaron los tests; borrarlas con
+  `pnpm --filter api run db:limpiar-e2e`.
+- Hay más de una Sede activa, o ninguna → el seed asume una sola; revisar antes de probar
+  Historia 1 / Escenario 1.
+- Tu Persona no tiene `admin` → correr el seed con `SEED_ADMIN_EMAIL` y **volver a iniciar sesión**.
+- La Sede dice "Dirección a confirmar" o "Domingos 10 y 18 hs" → son los valores viejos; volver a
+  correr el seed (los corrige, H-09).
+
+## Volver a un estado limpio
+
+```bash
+# opción suave: borra lo que dejaron los tests
+pnpm --filter api run db:limpiar-e2e
+
+# opción fuerte: borra la base entera y la vuelve a crear desde cero
+docker compose down -v
+docker compose up -d
+pnpm --filter api run db:migrate
+SEED_ADMIN_EMAIL=estersosaa@gmail.com pnpm --filter api run db:seed
+```
+
+> `down -v` borra el volumen: se pierden todas las Personas, incluida la tuya y su rol. Es lo que
+> conviene hacer antes de una ronda de pruebas completa, para partir siempre del mismo estado.
+
 ## Probar con distintos roles y personas
 
 ### Tu cuenta de Google con otro rol (única forma en el backoffice)
