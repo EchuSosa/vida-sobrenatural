@@ -13,8 +13,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/registro');
   }
 
+  // H-25/H-28 (revisión manual, actualización 2026-09-20): este contenedor
+  // tenía `md:flex-row`, pero NavAppBar ya es responsive por sí solo (barra
+  // inferior fija en celular, `md:sticky md:top-0` — barra superior en
+  // escritorio). Con `md:flex-row`, NavAppBar (sin `w-full`) quedaba como un
+  // ítem angosto de un flex-row junto al <main>, en vez de ocupar el ancho
+  // completo arriba — el layout roto de H-25, y la causa de que Perfil (ya
+  // presente en NAV_APP) fuera inalcanzable en escritorio (H-28).
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="flex min-h-screen flex-col">
       <SincronizarTema />
       <NavAppBar />
       <main id="contenido" className="flex-1 pb-20 md:pb-0">
