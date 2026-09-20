@@ -53,6 +53,19 @@ docker compose exec -T postgres psql -U vidasobrenatural -d vidasobrenatural \
 # apagar la API a propósito (para probar los estados de error): Ctrl+C en su terminal
 ```
 
+## Si tocás `packages/shared-types`
+
+Desde H-33 ese paquete se compila a `dist/` y los tres `dev` lo construyen antes de arrancar
+(`predev`). Pero **no se reconstruye solo mientras el servidor está corriendo**: si editás un tipo
+o una constante compartida con las apps levantadas, vas a seguir viendo el valor viejo. Corré:
+
+```bash
+pnpm --filter @vida-sobrenatural/shared-types run build
+```
+
+o dejá `tsc -w` corriendo en ese paquete mientras trabajás ahí. Si algo "no toma" un cambio de
+tipos compartidos, esto es lo primero que hay que descartar.
+
 ## Chequear que la base está como se espera
 
 Una sola consulta:
