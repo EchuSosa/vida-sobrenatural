@@ -57,6 +57,22 @@ export class SedeService {
       throw new AppException('NO_ENCONTRADO', 404, 'Sede no encontrada.');
     }
 
+    // H-30 (revisión manual, actualización 2026-09-20): no se puede
+    // desactivar la única Sede activa — la parte pública se quedaría sin
+    // qué mostrar (Visitanos, registro).
+    if (dto.activo === false && existente.activo) {
+      const otrasActivas = await this.prisma.sede.count({
+        where: { activo: true, id: { not: id } },
+      });
+      if (otrasActivas === 0) {
+        throw new AppException(
+          'SEDE_UNICA_ACTIVA',
+          409,
+          'Es la única Sede activa — creá una Sede nueva antes de desactivar esta.',
+        );
+      }
+    }
+
     const contactoTelefono = dto.contactoTelefono ?? existente.contactoTelefono;
     const contactoEmail = dto.contactoEmail ?? existente.contactoEmail;
     if (!contactoTelefono && !contactoEmail) {

@@ -20,9 +20,11 @@ export type ErrorCode =
   // H-29 (revisión manual, D108/D112): activar/vincular un tutor.
   | 'ACTIVAR_TUTOR_INVALIDO'
   | 'RELACION_FAMILIAR_INVALIDA'
-  // H-30 (revisión manual, D38/D102): Sedes.
+  // H-30 (revisión manual, D38/D102): Sedes. El formato de `horarios`
+  // inválido no suma un código propio: cae en 'VALIDACION' con el código de
+  // campo que ya deriva automáticamente validation-exception-factory.ts
+  // ('HORARIOS_INVALIDO'), igual que cualquier otro campo de un DTO.
   | 'SEDE_UNICA_ACTIVA'
-  | 'SEDE_HORARIOS_INVALIDO'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */
