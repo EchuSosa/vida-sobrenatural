@@ -3,13 +3,6 @@
  * Usado por `Persona.telefono` y, desde H-30 (revisión manual, actualización
  * 2026-09-20), también por `Sede.contactoTelefono` — mismo input en el
  * cliente (CampoTelefono, packages/ui), misma validación en el servidor.
- *
- * Documentado acá como fuente de la verdad, pero NO se importa como valor —
- * ver la nota larga junto a `HORARIOS_SEDE_REGEX` en `sede.ts` (mismo
- * paquete sin build propio, rompe en runtime vía webpack/Node). Copias
- * inline en `apps/api/src/persona/dto/registro-persona.dto.ts`,
- * `apps/api/src/sede/dto/crear-sede.dto.ts` y
- * `apps/backoffice/src/app/sedes/page.tsx`.
  */
 export const TELEFONO_REGEX = /^\+[0-9]{1,4}[0-9\s]{5,15}$/;
 

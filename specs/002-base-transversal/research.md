@@ -33,6 +33,13 @@ Cada app:
   (`export * from '@vida-sobrenatural/ui'`) o se eliminan y los imports pasan a apuntar al paquete,
   según convenga por componente al implementar.
 
+**Nota (H-33, revisión manual ronda 2, D113)**: esta decisión — consumir `packages/ui` como fuente
+TypeScript sin build propio — sigue vigente y no cambia. `packages/shared-types` sí sumó un build
+propio (`tsc` → `dist/`), pero por una razón que no aplica a `packages/ui`: `shared-types` lo
+consume también `apps/api` en runtime plano (`node dist/main.js`, sin bundler ni loader de TS), que
+no puede ejecutar `.ts` fuente. `packages/ui` solo lo consume Next.js (un bundler), que sí resuelve
+TypeScript fuente sin problema vía `transpilePackages`. Ver D113 en `docs/05-decisiones.md`.
+
 **Alternativas consideradas**: mantener la duplicación y agregar un lint/CI check de "archivos
 idénticos" — se descarta porque no evita que diverjan con el tiempo (Principio VIII exige
 consistencia real, no solo detectarla después) y `docs/10` ya fijó `packages/ui` como la solución.

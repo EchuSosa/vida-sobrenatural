@@ -12,17 +12,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { EstadoCivil, Genero, Profesion, TiempoCongregacion } from '../../generated/prisma/enums.js';
-
-// H-30 (revisión manual, actualización 2026-09-20): NO se importa como valor
-// desde @vida-sobrenatural/shared-types acá — ese paquete no tiene build
-// propio (su "main" apunta directo a src/index.ts), así que un `import`
-// (no `import type`) se resuelve bien bajo Jest/Next.js (bundlers/loaders
-// con transform TS) pero rompe en el runtime real de apps/api (`node
-// dist/main.js`, tsc puro sin bundler) con
-// ERR_MODULE_NOT_FOUND — confirmado corriendo la instancia aislada.
-// Mismo valor que TELEFONO_REGEX de packages/shared-types/src/persona.ts;
-// si uno cambia, cambiar el otro.
-const TELEFONO_REGEX = /^\+[0-9]{1,4}[0-9\s]{5,15}$/;
+import { TELEFONO_REGEX } from '@vida-sobrenatural/shared-types';
 
 /** Formulario obligatorio de FR-006, completado luego de la autorización SSO. */
 export class RegistroPersonaDto {

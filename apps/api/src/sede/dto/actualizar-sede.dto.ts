@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
-import { HORARIOS_SEDE_REGEX, TELEFONO_REGEX } from './crear-sede.dto.js';
+import { HORARIOS_SEDE_REGEX, TELEFONO_REGEX } from '@vida-sobrenatural/shared-types';
 
 /** Body de PATCH /sedes/:id — cualquier subconjunto, más el toggle de soft delete. */
 export class ActualizarSedeDto {

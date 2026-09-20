@@ -2,7 +2,6 @@ import { Test } from '@nestjs/testing';
 import { SedeService } from '../../src/sede/sede.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { AppException } from '../../src/common/errors/app-exception.js';
-import { HORARIOS_SEDE_REGEX } from '../../src/sede/dto/crear-sede.dto.js';
 
 async function crearServicio(prismaMock: Record<string, unknown>) {
   const moduleRef = await Test.createTestingModule({
@@ -63,23 +62,4 @@ describe('SedeService — regla de "al menos una Sede activa"', () => {
   });
 });
 
-describe('HORARIOS_SEDE_REGEX — formato acotado (H-30)', () => {
-  it.each([
-    'Domingos 10:30 hs',
-    'Domingos 10:30 hs.',
-    'Domingos 10 hs y Martes 19:30 hs',
-    'Domingos 10 hs, Martes 19 hs',
-  ])('acepta %s', (valor) => {
-    expect(HORARIOS_SEDE_REGEX.test(valor)).toBe(true);
-  });
-
-  it.each([
-    'Domingos 10 y 18 hs',
-    '12',
-    '',
-    'domingos 10:30 hs',
-    'Domingos 10:30',
-  ])('rechaza %s', (valor) => {
-    expect(HORARIOS_SEDE_REGEX.test(valor)).toBe(false);
-  });
-});
+// HORARIOS_SEDE_REGEX y TELEFONO_REGEX: ver test/unit/validaciones-compartidas.spec.ts (H-33).

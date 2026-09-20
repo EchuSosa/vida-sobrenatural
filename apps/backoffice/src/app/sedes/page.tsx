@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import type { Sede, ErrorCode } from '@vida-sobrenatural/shared-types';
+import { type Sede, type ErrorCode, HORARIOS_SEDE_REGEX } from '@vida-sobrenatural/shared-types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,16 +20,6 @@ import {
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 import { apiFetch, ApiError } from '../../lib/api-client';
-
-// H-30: no se importa como valor desde @vida-sobrenatural/shared-types acá
-// — ver la nota larga junto a HORARIOS_SEDE_REGEX en
-// packages/shared-types/src/sede.ts (rompe en runtime: ese paquete no tiene
-// build propio y sus re-exports con extensión .js, necesarios para el
-// type-check nodenext de apps/api, no resuelven bajo webpack). Mismo valor
-// que ahí y que apps/api/src/sede/dto/crear-sede.dto.ts — si uno cambia,
-// cambiar los tres.
-const GRUPO_HORARIO = '[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+ \\d{1,2}(?::\\d{2})? hs\\.?';
-const HORARIOS_SEDE_REGEX = new RegExp(`^${GRUPO_HORARIO}(?: y ${GRUPO_HORARIO}|, ${GRUPO_HORARIO})*$`);
 
 /**
  * H-30 (revisión manual, actualización 2026-09-20, D38/D90/D102): desactivar
