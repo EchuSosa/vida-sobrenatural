@@ -219,7 +219,48 @@ palabras propias, no reproducirla completa.
 
 Sección nueva con los libros publicados por la iglesia (fuente: `vidasobrenatural.com/2018/edicionesvs/`).
 Por cada libro: **portada** (placeholder mientras no haya imagen real), **título** y **autor/a**.
-Pendiente: el listado real de libros y sus portadas — pedirlo a la iglesia o relevarlo del sitio.
+
+**Texto de introducción (real, del sitio actual):**
+
+> Nuestra editorial nació en septiembre de 2014, a partir de la publicación del libro *«Mujer
+> Maravilla: cuando la realidad supera a la ficción»*.
+>
+> Ediciones VS pertenece a la Iglesia Cristiana Vida Sobrenatural y tiene como objetivo producir
+> materiales que lleven el Reino de Dios y su calidad de vida a todas las personas y lugares.
+> Entendemos cada libro o producción particular como una semilla que producirá frutos de vidas
+> tocadas, inspiradas y cambiadas para gloria de Dios. Cada uno de los autores de los materiales son
+> personas de gran bendición y comprometidas con la extensión del Reino.
+
+**Dónde se consiguen (real, del sitio actual):**
+
+> Todos los libros de Ediciones VS están disponibles en librerías a través de Producciones Peniel
+> (distribuye en toda Argentina). También pueden hacerse pedidos por Facebook
+> ([@ediciones.vs.lp](https://www.facebook.com/ediciones.vs.lp)) o Instagram
+> ([@edicionesvs](https://instagram.com/edicionesvs)).
+
+**Catálogo (8 libros, orden cronológico):**
+
+| Año | Título | Autor/a |
+|---|---|---|
+| 2014 | Mujer Maravilla: cuando la realidad supera a la ficción | Natalia Spetale |
+| 2014 | El sonido en la iglesia | Sebastián Arena |
+| 2015 | Una vida en su presencia | Ezequiel Rossini |
+| 2015 | El deseo de ser tres | Julieta Peralta |
+| 2016 | Antídotos contra la religión | Juan Pablo Sosa |
+| 2018 | Discipulado Generacional | Rosana y Marcos Oszurko |
+| 2019 | Hijos de la Promesa: identidad y propósito de los hijos de Dios | Ezequiel Rossini |
+| 2020 | Diseñados para una vida saludable | María José Amiunes |
+
+**Notas para el spec:**
+
+- El modelo de Libro suma `anio` (además de título, autor/a, portada, descripción, orden y activo).
+- La venta es **fuera de la app**: no hay carrito ni pagos. La sección informa y enlaza a las redes
+  de Ediciones VS y menciona la distribución por Producciones Peniel (D67 sigue valiendo: la app no
+  procesa pagos en el MVP).
+- Faltan las **portadas reales**; hasta entonces, placeholder con el título (nunca una imagen
+  inventada). Pedirlas junto con las fotos del equipo pastoral.
+- Los enlaces de Facebook e Instagram de Ediciones VS son distintos de los de la iglesia: van en
+  esta sección, no en el pie general.
 
 ### Palabra Profética
 
