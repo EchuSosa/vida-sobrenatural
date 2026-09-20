@@ -9,12 +9,14 @@
 
 **Información pública (sin login):**
 - Inicio: banner de Palabra Profética, próximos eventos y sección "Seguinos".
-- Nosotros: quiénes somos, "En qué creemos" (declaración de fe/valores, estática) y Liderazgo.
+- Nosotros: quiénes somos, identidad (cristianos, evangélicos, bautistas), historia, visión y misión, valores, sistema de trabajo (Bienvenida → Discipulado → Red), el llamado de Isaías 61, "En qué creemos" (pendiente de texto real) y Liderazgo (D109).
 - Primeros pasos: cómo integrarse (Vida Nueva, Vida de Servicio, Ministerios), bautismo, preguntas frecuentes.
 - Ministerios: listado público informativo.
 - Eventos: cartelera + página pública por Evento, con URL propia para compartir (D82).
 - Visitanos: dirección, horarios de culto, mapa, WhatsApp y contacto.
 - Dar (Ofrendas, versión estática): alias, CBU y datos de cuenta como contenido informativo — sin integración de pago real (Mercado Pago u otro servicio queda para Fase 2).
+- **Palabra Profética** (D109): sección propia con el texto y el video del año, más el banner en el Inicio.
+- **Ediciones VS** (D109): libros de la iglesia, con portada (placeholder mientras no haya imagen real), título y autor/a.
 - **Seguinos** (D93): últimos videos del canal de YouTube, guardados por el backend con una tarea programada. Instagram solo como enlace al perfil (el feed queda para Fase 2).
 - Contenido: real cuando ya es público (ver `12-contenido-bienvenida.md`), provisorio en el tono real (no lorem ipsum) para lo que falte (D98).
 
@@ -65,6 +67,7 @@ Cada solicitud muestra, además de su estado, qué pasa después (ver `15-guia-u
 - Vista de perfil unificada por Persona (roles, historial de Inscripciones/Postulaciones/Solicitudes, Relaciones Familiares), con foto de perfil de Google cuando exista (D87).
 - Listado de cumpleaños del mes.
 - Comentarios recibidos desde "Contanos qué te parece" (D102).
+- Gestión de la Palabra Profética (texto + link de YouTube) y CRUD de libros de Ediciones VS (D109).
 - Métricas básicas: cantidad de Personas activas, distribución por `tiempo_congregacion`, por Sede (el dashboard analítico completo queda en Fase 2).
 - Un solo Admin por ahora, pensado para escalar a más roles después.
 

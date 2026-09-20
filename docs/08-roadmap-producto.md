@@ -5,7 +5,7 @@
 ## Fase MVP (primera versión a mostrar)
 
 - Navegación de las tres superficies (web pública, app con sesión, backoffice) — ver `14-navegacion.md`.
-- Información pública (Inicio, Nosotros, Primeros pasos, Ministerios, Eventos, Visitanos, Dar), con contenido real o provisorio en el tono real (D98, `12-contenido-bienvenida.md`).
+- Información pública (Inicio, Nosotros, Primeros pasos, Ministerios, Palabra Profética, Ediciones VS, Eventos, Visitanos, Dar), con el contenido institucional real del sitio de la iglesia (D109) y textos provisorios marcados donde falta el real (D98, `12-contenido-bienvenida.md`).
 - **Seguinos con YouTube**: últimos videos del canal de la iglesia (D93, adelantado desde Fase 2).
 - Registro de usuario (SSO, validación de edad, alta manual de menores) y **alta de adultos por el Admin**, con acciones en su nombre (D97).
 - **Mi camino** como sección que agrupa los procesos de cada Persona (D92):
@@ -64,7 +64,7 @@
 **Herramientas del Admin / back office:**
 - Dashboard con métricas avanzadas (altas por mes, conversión Visitante → Bautismo → Ministerio, abandono por curso) — más allá de los conteos básicos que ya están en el MVP.
 - Registro de auditoría completo (quién hizo qué cambio y cuándo) — más relevante cuando haya más de un Admin. Evaluar adelantar una versión mínima al MVP (ver `06-preguntas-abiertas.md`).
-- Gestión de contenido institucional (textos/imágenes de la sección pública, incluyendo contenido que cambia con frecuencia como "Palabra Profética [año]") editable por el Admin sin tocar código.
+- Gestión de contenido institucional **completa** (todos los textos e imágenes de la sección pública) editable por el Admin sin tocar código. En el MVP ya son editables la Palabra Profética y los libros de Ediciones VS (D109); el resto del contenido vive en los mensajes hasta que haga falta.
 - Exportación de datos (ej. Excel/CSV de inscriptos de un Grupo).
 - **Integración de pago real para Ofrendas** (ej. Mercado Pago) — el MVP ya incluye una versión estática (alias/CBU como texto informativo, ver `02-alcance-mvp.md`); esto es el siguiente paso natural.
 

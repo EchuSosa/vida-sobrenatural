@@ -127,7 +127,7 @@ Definidos en `packages/ui` como variables CSS (formato de shadcn), para modo cla
 ## Modo oscuro (D95)
 
 - Entra en el MVP: con shadcn + variables CSS el costo es bajo si se contempla desde el inicio.
-- Por defecto sigue la configuración del sistema (`prefers-color-scheme`); la persona puede elegir Claro / Oscuro / Sistema desde Perfil (en el backoffice, desde el menú de usuario).
+- **Por defecto, tema claro** en las dos apps (D106) — no se sigue `prefers-color-scheme`. La persona puede elegir Claro / Oscuro / Sistema desde Perfil (en el backoffice, desde el menú de usuario), y esa preferencia se guarda.
 - Cada token de color se define para ambos modos y se verifica su contraste en los dos.
 - Logo: usar la versión blanca sobre fondos oscuros y la negra sobre fondos claros (la iglesia ya tiene ambas, ver `09`).
 - Flyers, fotos e imágenes de contenido no se alteran; se evita que queden "flotando" con bordes o fondos neutros. Los placeholders de "foto pendiente" también se definen para ambos modos.

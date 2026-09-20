@@ -296,3 +296,22 @@ erDiagram
         boolean revisado
         date fecha
     }
+    PALABRA_PROFETICA {
+        string id
+        int anio
+        string titulo "ej. Fidelidad y crecimiento"
+        string texto
+        string url_video "YouTube"
+        boolean vigente "una sola vigente por vez - D109"
+        string actualizado_por FK "admin"
+        date fecha_actualizacion
+    }
+    LIBRO {
+        string id
+        string titulo
+        string autor
+        string portada_url "opcional, placeholder si no hay - D109"
+        string descripcion "opcional"
+        int orden
+        boolean activo "soft delete - D37"
+    }

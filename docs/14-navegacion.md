@@ -10,9 +10,11 @@ La web anterior (vidasobrenatural.com) tenía un único menú informativo: **Igl
 
 | Ítem | Contenido | Origen en la web vieja |
 |---|---|---|
-| **Nosotros** | Quiénes somos ("Somos Familia") · En qué creemos · Liderazgo | Iglesia + Liderazgo |
+| **Nosotros** | Quiénes somos ("Somos Familia") · Identidad (cristianos, evangélicos, bautistas) · Historia · Visión y Misión · Valores · Sistema de trabajo (Bienvenida → Discipulado → Red) · Nuestro llamado (Isaías 61) · En qué creemos · Liderazgo (D109) | Iglesia + Liderazgo |
 | **Primeros pasos** | Cómo integrarse (Vida Nueva, Vida de Servicio, Ministerios), bautismo, preguntas frecuentes | Nuevo — es el corazón del Problem Statement |
 | **Ministerios** | Listado público de Ministerios | Nuevo |
+| **Palabra Profética** | Palabra del año: texto + video de YouTube, editable por el Admin (D109) | Palabra Profética |
+| **Ediciones VS** | Libros publicados por la iglesia: portada, título y autor/a (D109) | Nuevo (del sitio actual) |
 | **Eventos** | Cartelera + página pública de cada Evento (D82) | Eventos |
 | **Visitanos** | Dirección (Calle 23 N°1665 e/ 66 y 67, La Plata), horarios de culto (presencial y online), mapa, WhatsApp de Secretaría, contacto ("Queremos conocerte") | Visitanos + Contacto |
 
@@ -23,7 +25,7 @@ El contenido de cada sección sale de `12-contenido-bienvenida.md` cuando existe
 - **Ingresar** → login SSO.
 
 **Qué no va en el menú:**
-- **Palabra Profética:** cambia cada año y es un video → banner destacado en el Inicio. Puede alimentarse del video destacado del canal de YouTube (D93).
+- **Palabra Profética:** además de su sección propia (D109), se destaca como banner en el Inicio, porque es lo que la iglesia comunica todo el año.
 - **Redes sociales:** sección **"Seguinos"** en el Inicio (últimos videos de YouTube en el MVP; Instagram en Fase 2) + íconos en el pie de página.
 
 **Celular:** mismas secciones dentro de un menú hamburguesa; "Dar" e "Ingresar" siguen visibles.
