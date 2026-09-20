@@ -114,5 +114,29 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const copiado = await page.evaluate(() => navigator.clipboard.readText());
       expect(copiado).toBe('IglesiaVS');
     });
+
+    // H-21 (revisión manual, actualización 2026-09-20): el contraste del
+    // Toaster (sonner) resultó ser un falso positivo — axe auditaba con el
+    // toast todavía en `opacity: 0` (mitad de la animación de entrada), no
+    // con los tokens --normal-text/--normal-bg ya aplicados. Este test
+    // audita CON el toast visible y ya asentado (opacity: 1), para que una
+    // regresión real de contraste sí se detecte, en vez de esconderla detrás
+    // de la misma condición de carrera que generó el falso positivo.
+    test('el toast (sonner) cumple contraste con el aviso visible', async ({
+      page,
+      context,
+    }) => {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      await page.goto('/dar');
+      await page.getByRole('button', { name: 'Copiar Alias' }).click();
+
+      const toast = page.locator('[data-sonner-toast]').first();
+      await expect(toast).toBeVisible();
+      await expect(toast).toHaveCSS('opacity', '1');
+
+      const resultados = await new AxeBuilder({ page }).analyze();
+      const violacionesContraste = resultados.violations.filter((v) => v.id === 'color-contrast');
+      expect(violacionesContraste).toEqual([]);
+    });
   });
 }
