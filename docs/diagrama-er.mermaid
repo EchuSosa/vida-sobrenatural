@@ -311,7 +311,8 @@ erDiagram
         string titulo
         string autor
         int anio
-        string portada_url "opcional, placeholder si no hay - D109"
+        string portada_url "opcional, subida por el Admin, publica - D110; placeholder si no hay"
+        string portada_descripcion "obligatorio si hay portada_url, texto alternativo - D83"
         string descripcion "opcional"
         int orden
         boolean activo "soft delete - D37"
