@@ -9,14 +9,22 @@ const prisma = new PrismaClient({ adapter });
 // tenía una dirección placeholder ("a confirmar") y un horario inventado
 // ("10 y 18 hs") que no correspondía a ningún dato real.
 const DIRECCION_REAL = 'Calle 23 N°1665 e/ 66 y 67, La Plata, Buenos Aires';
-const HORARIOS_REAL = 'Domingos 10:30 hs (presencial y online, por YouTube)';
+// H-23 (revisión manual, actualización 2026-09-20): el horario queda solo
+// con el día y la hora — "presencial y online, por YouTube" (agregado en el
+// Lote 3) da información de más acá; la transmisión online va en
+// Seguinos/YouTube (todavía sin sección propia — depende de D93, spec 003).
+const HORARIOS_REAL = 'Domingos 10:30 hs';
 
 async function crearSedeDemo() {
   const existente = await prisma.sede.findFirst({ where: { activo: true } });
   if (existente) {
     // Corrige una Sede demo ya sembrada con los valores placeholder viejos,
     // sin pisar una Sede que un Admin ya haya editado a mano.
-    if (existente.direccion.includes('a confirmar') || existente.horarios === 'Domingos 10 y 18 hs') {
+    const horariosViejos = [
+      'Domingos 10 y 18 hs',
+      'Domingos 10:30 hs (presencial y online, por YouTube)',
+    ];
+    if (existente.direccion.includes('a confirmar') || horariosViejos.includes(existente.horarios)) {
       const corregida = await prisma.sede.update({
         where: { id: existente.id },
         data: { direccion: DIRECCION_REAL, horarios: HORARIOS_REAL },
