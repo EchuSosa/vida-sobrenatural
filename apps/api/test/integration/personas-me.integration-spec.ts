@@ -80,7 +80,7 @@ describe('GET/PATCH /personas/me (integración, Historia 5)', () => {
     await app.close();
   });
 
-  it('GET /personas/me devuelve el perfil propio, con temaPreferido por default "sistema"', async () => {
+  it('GET /personas/me devuelve el perfil propio, con temaPreferido por default "claro" (H-22, D106)', async () => {
     const token = await mintToken({ email, personaId, estado: 'activa', rol: ['miembro_registrado'] });
 
     const response = await request(app.getHttpServer())
@@ -91,7 +91,7 @@ describe('GET/PATCH /personas/me (integración, Historia 5)', () => {
     expect(response.body).toMatchObject({
       id: personaId,
       email,
-      temaPreferido: 'sistema',
+      temaPreferido: 'claro',
       idiomaPreferido: 'es',
     });
   });
