@@ -78,7 +78,7 @@ erDiagram
         string profesion_detalle "opcional, solo si profesion=otro"
         string tiempo_congregacion "menos_6_meses, 6_meses_1_anio, 1_3_anios, 3_5_anios, mas_5_anios"
         string idioma_preferido "es (default), pt o en - D84"
-        string tema_preferido "sistema (default), claro u oscuro - D95"
+        string tema_preferido "claro (default), oscuro o sistema - D106"
         string origen_alta "autorregistro o admin - D97"
         string alta_por FK "Persona que hizo el alta, null si autorregistro"
         date fecha_consentimiento "D78"
@@ -265,9 +265,9 @@ erDiagram
     }
     RELACION_FAMILIAR {
         string id
-        string persona_id FK
-        string familiar_id FK "otra Persona"
-        string tipo_relacion "conyuge, hijo_a, padre_madre, hermano_a"
+        string persona_id FK "sujeto de la relacion"
+        string familiar_id FK "otra Persona - el vinculo se guarda una sola vez, la inversa se resuelve en codigo (D112)"
+        string tipo_relacion "tutor, conyuge, hijo_a, padre_madre, hermano_a - D112"
     }
     COMPLETITUD_MANUAL {
         string id

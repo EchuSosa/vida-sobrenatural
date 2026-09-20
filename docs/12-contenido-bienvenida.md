@@ -104,6 +104,19 @@ Todo el contenido de arriba es texto real o adaptado de fuentes reales. Las **fo
 
 ---
 
+## Datos pendientes de pedirle a la iglesia
+
+Lista corta de lo que falta y no se puede inventar (D98). Se completa a medida que llega el material.
+
+| Qué falta | Para qué se necesita | Estado |
+|---|---|---|
+| Fotos del equipo pastoral, del templo y de la congregación | Nosotros → Liderazgo (hoy con placeholder "foto pendiente") | Pendiente |
+| Texto real de "En qué creemos" (declaración de fe) | Nosotros | Pendiente — se le pide a un pastor |
+| **URL del canal de YouTube de la iglesia** | Ícono de YouTube en el pie de página (H-24), transmisión del culto online (H-23) y sincronización de videos de Seguinos (D93, spec 003) | Pendiente — sin esto el ícono de YouTube queda fuera |
+| Portadas reales de los 8 libros de Ediciones VS | Sección Ediciones VS (hoy con placeholder, D110) | Pendiente |
+
+---
+
 ## Contenido institucional del sitio actual (D109, agregado 2026-09-20)
 
 Textos reales tomados del sitio de la iglesia. Van en **Nosotros** (con la estructura que defina el
