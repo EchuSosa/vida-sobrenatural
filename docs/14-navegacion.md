@@ -40,7 +40,7 @@ Barra de pestañas inferior (patrón de app nativa, usable con una mano):
 |---|---|
 | **Inicio** | Novedades, próximos pasos sugeridos, Palabra Profética, Seguinos |
 | **Mi camino** | Discipulado (Vida Nueva), Vida de Servicio, Ministerio, Bautismo — cada Persona ve solo lo que aplica a su etapa y roles |
-| **Eventos** | Cartelera + mis inscripciones y pagos |
+| **Eventos** | Cartelera + mis inscripciones y pagos (URL `/mis-eventos`: Next.js no permite que la pantalla de la app y la página pública resuelvan `/eventos`; mismo patrón que `/mi-camino`) |
 | **Avisos** | Historial de notificaciones con leídas/no leídas (cada una lleva a su entidad relacionada, D59, D100) |
 | **Perfil** | Mis datos (con foto de Google si existe, D87), Relaciones Familiares, tema Claro/Oscuro/Sistema (D95), "Contanos qué te parece", cerrar sesión (y selector de idioma cuando exista, D84) |
 
