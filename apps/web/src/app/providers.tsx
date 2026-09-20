@@ -7,8 +7,10 @@ import type { ReactNode } from 'react';
 import { OfflineBanner } from './../components/offline-banner';
 
 export function Providers({ children }: { children: ReactNode }) {
+  // H-22 (revisión manual, D106): default claro, no "system" — ver también
+  // el default de Persona.temaPreferido en schema.prisma.
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <SessionProvider>
         <OfflineBanner />
         {children}

@@ -109,11 +109,11 @@ enum Profesion {
 }
 
 model Persona {
-  id     String @id @default(uuid())
+  id       String @id @default(uuid())
   // Único dato de contacto con constraint de unicidad (FR-009) — el teléfono
   // explícitamente no lo es (ver Clarifications en spec.md).
-  email  String @unique
-  nombre String
+  email    String @unique
+  nombre   String
   apellido String
 
   genero             Genero
@@ -132,17 +132,19 @@ model Persona {
   // Base Transversal (specs/002-base-transversal) — sin UI para cambiar
   // idiomaPreferido todavía (solo "es"); temaPreferido sí es editable por la
   // propia Persona vía PATCH /personas/me/preferencias.
+  // H-22 (revisión manual, D106): default 'claro', no 'sistema' — ver
+  // migración de datos para las Personas ya sembradas con el default viejo.
   idiomaPreferido Idioma        @default(es)
-  temaPreferido   TemaPreferido @default(sistema)
+  temaPreferido   TemaPreferido @default(claro)
 
   sedeId String
   sede   Sede   @relation(fields: [sedeId], references: [id])
 
-  estado              EstadoPersona
+  estado                    EstadoPersona
   // Soft delete (Principio III) — independiente de `estado`. Se pone en
   // `false` cuando un pendiente_tutor no se autoriza (FR-014).
-  activo              Boolean       @default(true)
-  consentimientoDatos Boolean       @default(false)
+  activo                    Boolean               @default(true)
+  consentimientoDatos       Boolean               @default(false)
   // Actualización 2026-09-17 (FR-013): se setean siempre juntos, solo cuando
   // consentimientoDatos=true — 'app' en POST /personas (mayor de edad),
   // 'presencial' en PATCH /personas/:id/activar (consentimiento del tutor).
@@ -156,7 +158,10 @@ model Persona {
   origenAlta OrigenAlta @default(autorregistro)
   altaPor    String?
 
-  // Solo se completan al activar un pendiente_tutor (Flujo 7, FR-008).
+  // Solo se completan al activar un pendiente_tutor (Flujo 7, FR-008) y
+  // cuando el tutor NO está vinculado como Relación Familiar (D112) — si
+  // está vinculado, estos dos campos quedan en null: el vínculo es la única
+  // fuente de verdad.
   tutorNombre   String?
   tutorTelefono String?
 
@@ -167,5 +172,50 @@ model Persona {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // D112 (H-29): relaciones donde esta Persona es el sujeto (`personaId`) y
+  // relaciones donde esta Persona es la vinculada (`familiarId`) — cada
+  // vínculo se guarda una sola vez, nunca por los dos lados.
+  relacionesComoSujeto   RelacionFamiliar[] @relation("RelacionFamiliarSujeto")
+  relacionesComoFamiliar RelacionFamiliar[] @relation("RelacionFamiliarVinculado")
+
   @@map("personas")
+}
+
+// H-29 (revisión manual, D63/D108, precisada por D112): vincula dos
+// Personas ya registradas. En esta ronda el único tipo con un flujo real es
+// `tutor` (activar un pendiente_tutor con un tutor que ya se congrega); el
+// resto queda modelado para cuando una feature futura (ej. Escuelita) lo
+// necesite.
+enum TipoRelacionFamiliar {
+  tutor
+  conyuge
+  hijo_a
+  padre_madre
+  hermano_a
+}
+
+model RelacionFamiliar {
+  id String @id @default(uuid())
+
+  // Sujeto de la relación (ej., en `tutor`, el menor). La relación inversa
+  // (ej. "a_cargo") no se guarda como fila propia — no es un valor del
+  // enum — se resuelve en código al consultar desde el lado de `familiar`
+  // (D112). `hijo_a`/`padre_madre` sí son dos valores propios y opuestos:
+  // el servicio impide crear el par espejo para el mismo vínculo.
+  personaId String
+  persona   Persona @relation("RelacionFamiliarSujeto", fields: [personaId], references: [id])
+
+  familiarId String
+  familiar   Persona @relation("RelacionFamiliarVinculado", fields: [familiarId], references: [id])
+
+  tipoRelacion TipoRelacionFamiliar
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Evita el duplicado literal (misma fila dos veces); el duplicado espejo
+  // (mismo vínculo desde el otro lado) y la relación de una Persona consigo
+  // misma se validan en el servicio, no acá (D112).
+  @@unique([personaId, familiarId, tipoRelacion])
+  @@map("relaciones_familiares")
 }
