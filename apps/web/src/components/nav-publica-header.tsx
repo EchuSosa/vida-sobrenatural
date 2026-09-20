@@ -106,7 +106,11 @@ export function NavPublicaHeader() {
               }
             />
             <SheetContent side="right">
-              <SheetTitle>{t('menu')}</SheetTitle>
+              {/* H-27 (revisión manual, actualización 2026-09-20): título
+                  visible sacado — el nombre accesible del panel (mismo
+                  texto) sigue disponible para lectores de pantalla vía
+                  `aria-labelledby`, sin duplicar información en pantalla. */}
+              <SheetTitle className="sr-only">{t('menu')}</SheetTitle>
               <nav aria-label={`${t('principal')} (celular)`} className="flex flex-col gap-4 px-4 py-2">
                 {NAV_PUBLICA.map((item) => (
                   <EnlaceMenu
