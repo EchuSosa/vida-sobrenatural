@@ -1,13 +1,16 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { NAV_PUBLICA } from '../config/nav-publica';
+import { IconoFacebook, IconoInstagram } from './iconos-redes';
 
 /**
  * Pie de página de la web pública — FR-006. Dirección, horarios y redes
  * reales de docs/12-contenido-bienvenida.md / docs/09-notas-identidad-visual.md
  * (H-02/H-09, revisión manual, actualización 2026-09-18) — antes tenía el
  * horario incorrecto ("10 y 18 hs") sin corresponderse con la Sede real, y
- * sin enlaces a las redes reales de la iglesia.
+ * sin enlaces a las redes reales de la iglesia. Los enlaces de redes pasan a
+ * ser solo ícono, con aria-label (H-24, actualización 2026-09-20) — antes
+ * mostraban el nombre completo escrito.
  */
 export function FooterPublico() {
   const t = useTranslations('nav');
@@ -27,22 +30,24 @@ export function FooterPublico() {
           <p>{tf('direccion')}</p>
           <p>{tf('horarios')}</p>
         </div>
-        <nav aria-label={`${tf('facebook')}, ${tf('instagram')}`} className="flex gap-x-6">
+        <nav aria-label={`${tf('facebook')}, ${tf('instagram')}`} className="flex gap-x-4">
           <a
             href="https://facebook.com/iglesia.vida.sobrenatural"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={tf('facebook')}
             className="hover:text-foreground"
           >
-            {tf('facebook')}
+            <IconoFacebook className="size-5" />
           </a>
           <a
             href="https://instagram.com/iglesiavs"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={tf('instagram')}
             className="hover:text-foreground"
           >
-            {tf('instagram')}
+            <IconoInstagram className="size-5" />
           </a>
         </nav>
       </div>
