@@ -15,7 +15,10 @@ export interface ItemNavApp {
 export const NAV_APP: ItemNavApp[] = [
   { href: '/inicio', labelKey: 'inicio', icon: Home },
   { href: '/mi-camino', labelKey: 'miCamino', icon: MapIcon },
-  { href: '/eventos', labelKey: 'eventos', icon: CalendarDays },
+  // H-26 (revisión manual, actualización 2026-09-20, D107): /mis-eventos,
+  // no /eventos — esa URL ya la usa la cartelera pública (`(publica)/eventos`)
+  // y Next.js no permite que dos route groups resuelvan la misma URL.
+  { href: '/mis-eventos', labelKey: 'eventos', icon: CalendarDays },
   { href: '/avisos', labelKey: 'avisos', icon: Bell },
   { href: '/perfil', labelKey: 'perfil', icon: User },
 ];
