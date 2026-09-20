@@ -31,6 +31,14 @@
 - Q: ¿Alcanza con que `/registro/listo` muestre la confirmación a cualquier sesión con `estado: activa`? (H-15) → A: No — debe distinguir a quien acaba de completar el registro de cualquier Miembro registrado que entre por esa URL en otro momento; sin sesión, o sin haber completado el registro recién, redirige en vez de mostrar una confirmación falsa.
 - Q: Cuando `/registro` redirige a `/primeros-pasos` porque la Persona ya está `activa` (edge case ya identificado), ¿el salto queda silencioso? (H-16) → A: No — la redirección muestra un aviso breve que explica el motivo ("Ya estás registrada, no hace falta completarlo de nuevo").
 
+### Session 2026-09-20 — revisión manual, ronda 2 (`specs/revision-manual/2026-09-17-001-002.md`, Lote 4)
+
+- Q: Pantalla de Perfil (Flujo 11, `docs/07-flujos-casos-de-uso.md`) — ¿estaba implementada la edición de teléfono, dirección, estado civil y profesión? (H-28) → A: No — la pantalla de Perfil solo mostraba nombre/email de lectura, el selector de tema y cerrar sesión. Se agrega como User Story nueva de este spec (Flujo 11 ya estaba documentado en `07-flujos-casos-de-uso.md`, pero nunca había llegado a `spec.md`). Gestionar Relaciones Familiares (Flujo 11, punto 3) queda fuera de esta ronda — depende de la entidad Relación Familiar que recién se agrega con H-29/D108, y de una UI de búsqueda de Personas que no existe todavía.
+- Q: Al activar un menor, el tutor se guarda como texto libre (`tutorNombre`/`tutorTelefono`). Si el tutor se congrega y ya está registrado, ¿debería vincularse con su propia Persona? (H-29) → A: Sí — se vincula mediante una **Relación Familiar** (D63, D108) cuando el Admin/Discipulador encuentra a esa Persona en el sistema; si el tutor no se congrega (no tiene Persona propia), se siguen usando los campos de texto libre. Es una decisión del Admin/Discipulador al momento de activar, no una regla automática.
+- Q: ¿Puede desactivarse la única Sede activa? (H-30) → A: No — el sistema lo bloquea con un mensaje explicando por qué (la parte pública se quedaría sin qué mostrar) y ofrece crear una Sede nueva antes de desactivar la actual.
+- Q: El campo `horarios` de Sede acepta cualquier texto libre — ¿debería seguir así? (H-30) → A: No — pasa a un formato acotado (ver FR-047), para que sea consistente y legible en Visitanos, en vez de texto libre sin estructura.
+- Q: El teléfono de contacto de Sede es texto libre — ¿debería ser consistente con el teléfono estructurado del registro (D90)? (H-30) → A: Sí — mismo input de código de país + número que ya usa el registro de Personas.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Entender la Bienvenida y ver la información de mi Sede (Priority: P1)
@@ -89,6 +97,8 @@ Un Visitante menor de 18 años que autoriza el acceso vía SSO y completa el for
 3. **Given** una Persona en estado pendiente_tutor, **When** un Admin o Discipulador revisa los casos pendientes, **Then** puede ver los datos de contacto disponibles para comunicarse con un tutor y decidir si activa la cuenta.
 4. **Given** que un Admin/Discipulador contactó a un tutor y decide continuar, **When** activa manualmente la cuenta, **Then** el estado de la Persona pasa de pendiente_tutor a activa y esa persona puede iniciar sesión normalmente como Miembro registrado.
 5. **Given** una Persona en estado pendiente_tutor, **When** un Admin/Discipulador determina que el tutor no autoriza el registro o no logra contactarlo, **Then** marca esa Persona como inactiva (flag `activo` = false) para sacarla de la cola de casos pendientes, sin eliminarla físicamente de la base de datos.
+6. **Given** un Admin/Discipulador activando un pendiente_tutor, **When** activa o marca inactiva la Persona, **Then** el sistema pide confirmación con el diálogo del sistema de diseño (D94, D102) — nunca con `alert`/`prompt`/`confirm` nativos del navegador (actualización 2026-09-20, H-29).
+7. **Given** un Admin/Discipulador activando un pendiente_tutor, **When** identifica que el tutor ya está registrado y se congrega, **Then** puede buscarlo y vincularlo como **Relación Familiar** (D63, D108) en vez de cargar su nombre y teléfono como texto libre; si el tutor no se congrega, sigue completando `tutorNombre`/`tutorTelefono` como texto (actualización 2026-09-20, H-29).
 
 ---
 
@@ -105,6 +115,29 @@ Un Admin quiere poder cargar y mantener actualizada la información de la Sede (
 1. **Given** un Admin autenticado, **When** crea o edita los datos de una Sede (nombre, dirección, contacto, horarios, descripción), **Then** los cambios quedan guardados y disponibles para que los Visitantes los vean.
 2. **Given** un usuario que no tiene rol de Admin, **When** intenta acceder a la gestión de Sedes, **Then** el sistema le deniega el acceso.
 3. **Given** que en el futuro se agregue una segunda Sede, **When** el Admin la crea, **Then** el sistema permite tener más de una Sede activa simultáneamente sin afectar la información de las Sedes existentes.
+4. **Given** un Admin que va a desactivar una Sede y hay otra Sede activa, **When** confirma la acción, **Then** el sistema pide confirmación explícita con un diálogo que explica el efecto (deja de mostrarse en Visitanos y en el registro, nada se borra, se puede reactivar) antes de aplicarla (actualización 2026-09-20, H-30, D38/D102).
+5. **Given** un Admin que intenta desactivar la única Sede activa, **When** confirma la acción, **Then** el sistema la bloquea con un mensaje que explica por qué (la app se quedaría sin Sede para mostrar) y ofrece crear una Sede nueva en su lugar (actualización 2026-09-20, H-30).
+6. **Given** un Admin cargando o editando el horario de una Sede, **When** completa ese campo, **Then** el sistema valida un formato acotado (no cualquier texto libre) (actualización 2026-09-20, H-30).
+7. **Given** un Admin cargando o editando el teléfono de contacto de una Sede, **When** completa ese campo, **Then** usa el mismo input estructurado de código de país + número que ya usa el registro de Personas (D90), en vez de texto libre (actualización 2026-09-20, H-30).
+
+---
+
+### User Story 4 - Editar mi propio perfil (Priority: P3)
+
+*(nueva en esta ronda, actualización 2026-09-20 — Flujo 11 ya estaba documentado en `docs/07-flujos-casos-de-uso.md` pero nunca había llegado al spec.)*
+
+Una Persona con sesión iniciada quiere poder corregir o actualizar sus propios datos de contacto (teléfono, dirección) y otros no críticos (estado civil, profesión) sin depender de pedirle al Admin que se lo cambie.
+
+**Why this priority**: Es una mejora de autonomía sobre datos ya cargados en el registro (Historia 2); no bloquea el uso del resto de la app, por eso queda con la prioridad más baja del spec.
+
+**Independent Test**: Puede probarse por completo haciendo que una Persona con sesión edite su teléfono, dirección, estado civil y profesión desde Perfil, y verificando que los cambios quedan guardados y se reflejan la próxima vez que consulta su propio perfil.
+
+**Acceptance Scenarios**:
+
+1. **Given** una Persona con sesión iniciada en Perfil, **When** edita su teléfono, dirección, estado civil o profesión, **Then** el sistema guarda los cambios y los refleja de inmediato en la misma pantalla.
+2. **Given** esa misma pantalla, **When** la Persona intenta editar su fecha de nacimiento o su email, **Then** el sistema no lo permite — esos dos campos solo los puede cambiar un Admin (afectan validaciones ya hechas, como la mayoría de edad, o son la identidad de login vía SSO).
+3. **Given** una Persona editando su teléfono, **When** completa ese campo, **Then** usa el mismo input estructurado de código de país + número que ya usa el registro (D90), no texto libre.
+4. **Given** una Persona editando su profesión, **When** elige la opción "Otro", **Then** puede completar un detalle en texto libre, igual que en el registro; con cualquier otra opción, ese campo no aplica.
 
 ---
 
@@ -119,6 +152,9 @@ Un Admin quiere poder cargar y mantener actualizada la información de la Sede (
 - ¿Qué pasa si el tutor de un menor en estado pendiente_tutor no autoriza el registro o nunca puede ser contactado? (ver Historia 2b, Acceptance Scenario 5).
 - ¿Qué ve un Visitante si el proveedor SSO no confirma el email como verificado? (ver Historia 2, Acceptance Scenario 7 — actualización 2026-09-17).
 - ¿Qué pasa si un Visitante completa dos o tres pasos del formulario por pasos y cierra la pestaña antes de llegar al resumen final? (no debe quedar una Persona a medio crear — mismo principio que el edge case de abandono ya existente, ahora aplicado a un formulario con más de una pantalla).
+- ¿Qué pasa si el tutor que el Admin/Discipulador busca para vincular como Relación Familiar tiene más de una Persona con nombre parecido en el sistema? (actualización 2026-09-20, H-29 — la búsqueda debe mostrar datos suficientes, ej. email o teléfono, para elegir la correcta sin ambigüedad).
+- ¿Qué pasa si, después de vincular al tutor como Relación Familiar, esa Persona deja de congregarse o se marca inactiva? (actualización 2026-09-20 — la Relación Familiar es un vínculo de datos, no depende del estado `activo` de ninguna de las dos Personas; queda fuera de alcance de esta ronda resolver qué pasa con las notificaciones en ese caso).
+- ¿Qué pasa si un Admin edita el horario de una Sede a un formato que el sistema no reconoce? (actualización 2026-09-20, H-30 — el sistema rechaza el cambio con un mensaje claro, sin guardar un valor inconsistente).
 
 ## Requirements *(mandatory)*
 
@@ -145,12 +181,23 @@ Un Admin quiere poder cargar y mantener actualizada la información de la Sede (
 - **FR-019** *(actualización 2026-09-18, revisión manual H-19)*: Apenas `POST /personas` confirme `estado: activa`, el sistema DEBE refrescar la sesión de esa misma pestaña antes de continuar, de forma que el menú y el resto de la app reflejen de inmediato que la Persona ya no es un Visitante sin cuenta.
 - **FR-020** *(actualización 2026-09-18, revisión manual H-15)*: La pantalla de confirmación del registro DEBE exigir una sesión con `estado: activa` **y** evidencia de que el registro se completó en ese mismo momento; sin ambas condiciones, el sistema DEBE redirigir (a `/registro` sin sesión válida, al Inicio si la sesión es válida pero el registro no fue recién completado) en lugar de mostrar la confirmación.
 - **FR-021** *(actualización 2026-09-18, revisión manual H-16)*: Cuando el sistema redirige desde el formulario de registro por tratarse de una Persona ya `activa`, DEBE mostrar un aviso breve que explique el motivo, en vez de una redirección silenciosa.
+- **FR-022** *(actualización 2026-09-20, revisión manual H-29, D94/D102)*: Activar o marcar inactiva una Persona en estado pendiente_tutor DEBE pedir confirmación mediante el componente de confirmación del sistema de diseño (FR-019 de 002-base-transversal) — nunca `alert`/`prompt`/`confirm` nativos del navegador.
+- **FR-023** *(actualización 2026-09-20, revisión manual H-29, D63/D108)*: Al activar una Persona en estado pendiente_tutor, el sistema DEBE permitir al Admin/Discipulador elegir entre (a) buscar y vincular una Persona ya registrada como su tutor, creando una **Relación Familiar** entre ambas, o (b) cargar `tutorNombre`/`tutorTelefono` como texto libre cuando el tutor no se congrega. Ambos caminos satisfacen FR-008; no son excluyentes con los datos ya existentes de una Persona (una Persona puede tener Relaciones Familiares y, en otro registro donde sí actuó de tutor de alguien no vinculable, datos de tutor en texto).
+- **FR-024** *(actualización 2026-09-20, revisión manual H-30, D38/D102)*: Desactivar una Sede (poner `activo = false`) DEBE pedir confirmación explícita con el componente de confirmación del sistema de diseño, mostrando qué implica la acción (deja de verse en Visitanos y en el registro; no se borra nada; se puede reactivar).
+- **FR-025** *(actualización 2026-09-20, revisión manual H-30)*: El sistema NO DEBE permitir desactivar la única Sede activa; DEBE informar el motivo y ofrecer crear una Sede nueva como siguiente paso.
+- **FR-026** *(actualización 2026-09-20, revisión manual H-30)*: El campo `horarios` de una Sede DEBE validarse contra un formato acotado (uno o más grupos de "día(s) + horario", ej. "Domingos 10:30 hs"), rechazando texto libre sin esa forma.
+- **FR-027** *(actualización 2026-09-20, revisión manual H-30, D90)*: El campo `contactoTelefono` de una Sede DEBE usar el mismo input estructurado de código de país + número que ya usa el registro de Personas, en vez de texto libre.
+- **FR-028** *(nueva, actualización 2026-09-20 — Flujo 11, `docs/07-flujos-casos-de-uso.md`)*: El sistema DEBE permitir que una Persona con sesión iniciada edite sus propios `telefono`, `direccion`, `estadoCivil` y `profesion` (con `profesionDetalle` cuando corresponda) desde su Perfil, usando los mismos controles y opciones predefinidas que el formulario de registro (incluido el input estructurado de teléfono, D90).
+- **FR-029** *(nueva, actualización 2026-09-20 — Flujo 11)*: El sistema NO DEBE permitir que una Persona edite su propia `fechaNacimiento` ni su `email` desde Perfil; esos cambios requieren contactar a un Admin.
 
 ### Key Entities *(include if feature involves data)*
 
 - **Persona**: Representa a un individuo que interactúa con la iglesia. Se crea al autorizar el acceso vía SSO (recibiendo email y nombre básico de ese proveedor, solo si el proveedor confirma el email como verificado — FR-017) y se completa con: apellido, nombre, género, fecha de nacimiento, teléfono, dirección, Sede asociada, estado civil, profesión, tiempo congregándose, y consentimiento de datos. El email recibido del proveedor SSO es el único dato de contacto que debe ser único entre Personas; el teléfono no lo es. Atributo `estado`: **activa** (registro completo, mayor de edad, opera como Miembro registrado y puede iniciar sesión) o **pendiente_tutor** (detectado como menor de 18 años durante el registro; visible para el Admin, sin acceso hasta que un Admin/Discipulador la active manualmente). Atributo `activo` (flag de soft delete, ver Constitución del proyecto): se pone en `false` cuando un Admin/Discipulador determina que un caso pendiente_tutor no debe activarse (tutor no autoriza o no puede ser contactado), sin agregar un tercer valor a `estado`. Una Persona pertenece a una única Sede en esta fase.
   - *(actualización 2026-09-17, FR-013, FR-015)*: además de `consentimientoDatos` (booleano), registra la **fecha** y el **origen** (`app` / `presencial`) en que se dio ese consentimiento, y el **origen del alta** (`origen_alta`: `autorregistro` / `admin`) junto con **quién la dio de alta** (`alta_por`) cuando el origen es `admin`. En esta fase, toda Persona se crea con `origen_alta: autorregistro` — el flujo de alta por Admin (D97) es una feature propia, todavía no implementada; solo se agrega el modelo de datos para no requerir una migración adicional cuando esa feature exista.
+  - *(actualización 2026-09-20, FR-023, D63/D108)*: puede tener una o más **Relaciones Familiares** con otras Personas (ver entidad nueva abajo) — usada, por ahora, únicamente para vincular a un menor con el tutor que activó su cuenta, cuando ese tutor también es una Persona registrada.
 - **Sede**: Representa una locación/congregación de Vida Sobrenatural. Atributos clave: nombre, dirección, información de contacto, horarios, descripción/contenido de Bienvenida específico de esa Sede. Una Sede puede tener asociadas muchas Personas.
+  - *(actualización 2026-09-20, FR-026/FR-027, H-30)*: `horarios` pasa de texto libre a un formato acotado (validado, no un tipo de dato nuevo); `contactoTelefono` pasa de texto libre al mismo input estructurado de código de país + número que usa el registro de Personas (D90).
+- **Relación Familiar** *(nueva, actualización 2026-09-20 — D63, adelantada por D108)*: vincula dos Personas ya registradas con un tipo de relación (ej. tutor). En esta ronda se usa solo para el vínculo tutor↔menor de FR-023; el resto de los tipos de relación (cónyuge, hijo/a, hermano/a) queda modelado pero sin una interfaz propia para cargarlos todavía — se agregan cuando una feature futura (ej. Escuelita) los necesite.
 
 ## Success Criteria *(mandatory)*
 
@@ -162,6 +209,7 @@ Un Admin quiere poder cargar y mantener actualizada la información de la Sede (
 - **SC-004**: El 100% de los registros de Personas mayores de edad (estado activa) otorgan acceso inmediato (inicio de sesión) al nuevo Miembro registrado, sin pasos manuales adicionales por parte del equipo de la iglesia; los casos de menores de edad quedan documentados como pendientes para gestión manual del Admin, en lugar de generar un acceso automático.
 - **SC-005**: Un Admin puede actualizar la información visible de una Sede sin depender de intervención técnica externa, y el cambio se refleja para los Visitantes en el mismo día.
 - **SC-006**: Cero registros duplicados de Persona para un mismo email (el recibido del proveedor SSO) a lo largo del tiempo.
+- **SC-007** *(nueva, actualización 2026-09-20, H-30)*: La parte pública de la app nunca se queda sin ninguna Sede activa que mostrar — el sistema lo impide en el momento de desactivar, no lo detecta después.
 
 ## Assumptions
 

@@ -13,17 +13,19 @@ Representa una locación/congregación de Vida Sobrenatural (Historia 1, Histori
 | `id` | uuid | sí | PK |
 | `nombre` | string | sí | ej. "La Plata" |
 | `direccion` | string | sí | |
-| `contactoTelefono` | string | no | al menos un medio de contacto entre teléfono/email (FR-002) |
+| `contactoTelefono` | string | no | al menos un medio de contacto entre teléfono/email (FR-002); estructurado como código de país + número (D90), igual que `Persona.telefono` — corregido en la actualización 2026-09-20 (H-30, FR-027), antes era texto libre |
 | `contactoEmail` | string | no | |
-| `horarios` | string | sí | texto libre (ej. "Domingos 10 y 18 hs") — sin modelar Cronograma, eso es de Curso/Grupo (fase posterior) |
+| `horarios` | string | sí | formato acotado, validado (ej. "Domingos 10:30 hs") — corregido en la actualización 2026-09-20 (H-30, FR-026); antes era texto libre sin validar. Sin modelar Cronograma, eso es de Curso/Grupo (fase posterior) |
 | `descripcionBienvenida` | text | no | contenido específico de esa Sede para Historia 1 |
-| `activo` | boolean | sí, default `true` | soft delete (Principio III); una Sede con `activo=false` no aparece para Visitantes ni es seleccionable en el registro |
+| `activo` | boolean | sí, default `true` | soft delete (Principio III); una Sede con `activo=false` no aparece para Visitantes ni es seleccionable en el registro. No se puede pasar a `false` si es la única Sede con `activo=true` (FR-025, actualización 2026-09-20) |
 | `createdAt` / `updatedAt` | datetime | sí | auditoría estándar |
 
 **Validaciones**:
 - `nombre` único entre Sedes activas (evita duplicados accidentales del Admin).
 - Al menos uno de `contactoTelefono` / `contactoEmail` presente (FR-002 exige poder contactar la
   Sede sin preguntarle a una persona).
+- `horarios` matchea el formato acotado (FR-026, actualización 2026-09-20).
+- No se puede desactivar la única Sede `activo=true` (FR-025, actualización 2026-09-20).
 
 **Reglas de negocio**:
 - FR-004: si hay más de una Sede con `activo=true`, el Visitante debe poder elegir/identificar la
@@ -46,12 +48,12 @@ Visitante que solo mira contenido de Bienvenida (Historia 1) **no** genera un re
 | `nombre` | string | sí | pre-completado desde `given_name` del perfil de Google, editable en el formulario |
 | `apellido` | string | sí | pre-completado desde `family_name` del perfil de Google, editable en el formulario (FR-006) |
 | `genero` | enum | sí | valores a definir junto al resto del dominio en `docs/04-dominio-entidades.md`; no se amplía aquí por no ser parte del alcance de esta fase |
-| `fechaNacimiento` | date | sí | usada para calcular edad (FR-007); no editable por la propia Persona luego del registro (fuera de alcance de esta fase, ver Flujo 11) |
-| `telefono` | string | sí | FR-006; **no** único (FR-009 — dos Personas pueden compartir teléfono). Se arma en el formulario a partir de un selector de código de país + un campo numérico (solo dígitos) — se guarda como un único string `"+<código> <número>"`; el backend valida el formato (`+` seguido de dígitos/espacios) igual, sin confiar en la validación del cliente |
-| `direccion` | string | sí | FR-006 |
+| `fechaNacimiento` | date | sí | usada para calcular edad (FR-007); no editable por la propia Persona luego del registro (FR-029, actualización 2026-09-20 — Flujo 11 sí permite editar otros campos, pero no este ni el email) |
+| `telefono` | string | sí | FR-006; **no** único (FR-009 — dos Personas pueden compartir teléfono). Se arma en el formulario a partir de un selector de código de país + un campo numérico (solo dígitos) — se guarda como un único string `"+<código> <número>"`; el backend valida el formato (`+` seguido de dígitos/espacios) igual, sin confiar en la validación del cliente. Editable por la propia Persona desde Perfil (FR-028, actualización 2026-09-20 — Flujo 11) |
+| `direccion` | string | sí | FR-006. Editable por la propia Persona desde Perfil (FR-028, actualización 2026-09-20) |
 | `sedeId` | uuid (FK → Sede) | sí | FR-006/FR-009; la Sede a través de la cual se registró |
-| `estadoCivil` | enum | sí | `soltero_a, casado_a, en_concubinato, viudo_a, divorciado_a, separado_a` (`docs/05-decisiones.md` D53) |
-| `profesion` | enum | sí | `salud, educacion, tecnologia_ingenieria, comercio_ventas, oficios_construccion, administracion_finanzas, legal, comunicacion_marketing, arte_diseno, servicios_gastronomia, transporte, estudiante, ama_de_casa, jubilado_a, sin_ocupacion, otro` — selector en el formulario (FR-006) |
+| `estadoCivil` | enum | sí | `soltero_a, casado_a, en_concubinato, viudo_a, divorciado_a, separado_a` (`docs/05-decisiones.md` D53). Editable por la propia Persona desde Perfil (FR-028, actualización 2026-09-20) |
+| `profesion` | enum | sí | `salud, educacion, tecnologia_ingenieria, comercio_ventas, oficios_construccion, administracion_finanzas, legal, comunicacion_marketing, arte_diseno, servicios_gastronomia, transporte, estudiante, ama_de_casa, jubilado_a, sin_ocupacion, otro` — selector en el formulario (FR-006). Editable por la propia Persona desde Perfil, junto con `profesionDetalle` (FR-028, actualización 2026-09-20) |
 | `profesionDetalle` | string | solo si `profesion=otro` | texto libre corto; el DTO lo exige cuando `profesion=otro` y lo ignora en cualquier otro caso |
 | `tiempoCongregacion` | enum | sí | `menos_6_meses, 6_meses_a_1_anio, 1_a_3_anios, 3_a_5_anios, mas_5_anios` (D53) |
 | `fotoUrl` | string | no | `picture` del perfil de Google, guardada tal cual al registrarse; no editable por la propia Persona por ahora |
@@ -62,10 +64,32 @@ Visitante que solo mira contenido de Bienvenida (Historia 1) **no** genera un re
 | `consentimientoDatosOrigen` | enum: `app` \| `presencial` | sí cuando `consentimientoDatos=true` | *(actualización 2026-09-17, FR-013)* `app` si lo da la propia persona en el formulario online; `presencial` si lo da el tutor durante el contacto manual con el Admin/Discipulador |
 | `origenAlta` | enum: `autorregistro` \| `admin`, default `autorregistro` | sí | *(actualización 2026-09-17, FR-015, D97)* cómo se creó el registro; esta fase solo produce `autorregistro` — `admin` queda modelado para cuando exista el flujo de alta por Admin (feature propia, fuera de alcance) |
 | `altaPor` | string (uuid, sin FK activa) | solo si `origenAlta=admin` | *(actualización 2026-09-17, FR-015, D97)* referencia lógica al `id` de la Persona (Admin/Discipulador) que dio de alta a esta — se guarda como `String?` simple, **sin** `@relation` de Prisma en esta fase, porque siempre queda `null` (no existe todavía el flujo que lo completa); la relación se agrega recién cuando exista la feature de alta por Admin, para no modelar una FK sin ningún dato real que la ejercite (Principio IV) |
-| `tutorNombre` | string | solo si pasó por `pendiente_tutor` → `activa` | `docs/04-dominio-entidades.md`; se completa en el momento de activar (FR-008), no en el formulario inicial |
-| `tutorTelefono` | string | ídem | ídem — también sirve como evidencia informal de que el consentimiento del menor (FR-013) lo dio el tutor, no el menor |
+| `tutorNombre` | string | solo si pasó por `pendiente_tutor` → `activa` **y** el tutor no se vinculó como Relación Familiar | `docs/04-dominio-entidades.md`; se completa en el momento de activar (FR-008), no en el formulario inicial. Actualización 2026-09-20 (FR-023, H-29): opcional desde ahora — alternativa a vincular al tutor con `tutorPersonaId` (ver Relación Familiar abajo) |
+| `tutorTelefono` | string | ídem | ídem — también sirve como evidencia informal de que el consentimiento del menor (FR-013) lo dio el tutor, no el menor. Mismo cambio a opcional que `tutorNombre` |
 | `rol` | string/array | sí, default `["miembro_registrado"]` cuando `estado=activa` | roles acumulativos (`docs/03-roles-permisos.md`); esta fase solo asigna `miembro_registrado` al activarse — `admin`/`discipulador` se asignan fuera de este flujo (dato de seed/gestión manual, no hay UI de asignación de rol en este spec) |
 | `createdAt` / `updatedAt` | datetime | sí | auditoría estándar |
+
+**Validación nueva (actualización 2026-09-20, FR-023)**: al activar un `pendiente_tutor`, el request
+trae **exactamente uno** de los dos caminos — `tutorPersonaId` (crea una Relación Familiar) o el par
+`tutorNombre`+`tutorTelefono` (texto libre) — nunca ambos, nunca ninguno.
+
+## Relación Familiar *(nueva, actualización 2026-09-20 — D63, adelantada por D108, H-29)*
+
+Vincula dos Personas ya registradas. En esta ronda, el único uso real es el vínculo tutor↔menor de
+FR-023; el resto de `TipoRelacionFamiliar` queda modelado para cuando una feature futura (ej.
+Escuelita) lo necesite (D63).
+
+| Campo | Tipo | Obligatorio | Notas |
+|---|---|---|---|
+| `id` | uuid | sí | PK |
+| `personaId` | uuid (FK → Persona) | sí | la Persona "dueña" de la relación — en el caso de tutor, el menor |
+| `personaRelacionadaId` | uuid (FK → Persona) | sí | la Persona vinculada — en el caso de tutor, el tutor |
+| `tipo` | enum `TipoRelacionFamiliar`: `tutor` \| `conyuge` \| `hijo` \| `padre_madre` \| `hermano` | sí | solo `tutor` tiene un flujo que lo crea en esta ronda |
+| `createdAt` / `updatedAt` | datetime | sí | auditoría estándar; no hay soft delete propio — se borra si alguna vez hace falta desvincular (bajo volumen esperado, no es una entidad de negocio con historial crítico) |
+
+**Validaciones**:
+- `@@unique([personaId, personaRelacionadaId, tipo])` — no se puede duplicar el mismo vínculo.
+- `personaId` ≠ `personaRelacionadaId` (una Persona no puede ser su propio tutor).
 
 **Validaciones**:
 - `email` único entre **todas** las Personas (activas o no) — FR-009.
@@ -83,7 +107,7 @@ Visitante que solo mira contenido de Bienvenida (Historia 1) **no** genera un re
 ```text
 (no existe) --[POST /personas, edad >= 18]--> activa
 (no existe) --[POST /personas, edad < 18]--> pendiente_tutor
-pendiente_tutor --[PATCH /personas/:id/activar, con tutorNombre+tutorTelefono]--> activa
+pendiente_tutor --[PATCH /personas/:id/activar, con tutorNombre+tutorTelefono O tutorPersonaId]--> activa
 ```
 
 Al ejecutar `PATCH /personas/:id/activar`, el sistema DEBE setear `consentimientoDatos=true`

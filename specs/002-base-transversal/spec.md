@@ -23,6 +23,13 @@
 - Q: ¿Cómo cierra sesión una Persona? La Historia 5 asumía la acción sin definirla. (H-11) → A: Con un botón "Cerrar sesión" en Perfil (app) y en el menú de usuario (backoffice), que pide confirmación explícita (D94) antes de cerrarla, y vuelve al Inicio público con un aviso breve (D102).
 - Q: ¿Debe la app depender de las pantallas propias de NextAuth (inglés, sin el diseño de la app) para signIn/signOut/error? (H-14) → A: No — se configuran explícitamente para usar las pantallas propias del proyecto (o los flujos ya resueltos por H-11), incluso si nunca se llega a ellas en el uso normal.
 
+### Session 2026-09-20 — revisión manual, ronda 2 (`specs/revision-manual/2026-09-17-001-002.md`, Lote 4)
+
+- Q: ¿Cuál es el tema por defecto al abrir la app por primera vez? (H-22) → A: **Claro**, en las dos apps — corrige D95/FR-026 (D106). Sigue disponible elegir Claro/Oscuro/Sistema y esa elección se recuerda igual que antes.
+- Q: La pestaña "Eventos" de la barra de la app, ¿puede llevar a la página pública de Eventos? (H-26) → A: No — tiene su propia pantalla dentro de la app con sesión, igual que Mi camino y Avisos (D107). Ninguna pestaña de la barra de la app saca a la web pública; si en el futuro una pantalla pública se abre desde la app, debe ofrecer una forma de volver.
+- Q: El pie de página muestra las redes sociales como texto ("Facebook", "Instagram") — ¿alcanza, de cara a D81? (H-24) → A: No — deben ser íconos reconocibles (Facebook, Instagram, YouTube) con `aria-label`, para no depender de leer el nombre completo en pantallas chicas ni duplicar información para quien ya reconoce el ícono.
+- Q: El panel del menú hamburguesa muestra el texto "Menú" como título visible — ¿hace falta? (H-27) → A: No — el nombre accesible del panel (`aria-label`/`SheetTitle`) alcanza para tecnología asistiva; el texto visible se saca porque no aporta nada a quien ya ve el ícono de cierre y el contenido del panel.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Navegar la app según quién soy (Priority: P1)
@@ -37,7 +44,8 @@ Cualquier persona que usa la app — se haya acercado por primera vez, tenga ses
 
 1. **Given** un Visitante sin sesión en la web pública, **When** abre el menú principal, **Then** ve las secciones Nosotros, Primeros pasos, Ministerios, Eventos y Visitanos, además de los botones "Dar" e "Ingresar".
 2. **Given** ese mismo Visitante en un celular, **When** abre el menú, **Then** ve las mismas secciones agrupadas en un menú desplegable, con "Dar" e "Ingresar" siempre visibles.
-3. **Given** un Miembro registrado con sesión iniciada, **When** navega la app, **Then** ve una barra con las secciones Inicio, Mi camino, Eventos, Avisos y Perfil.
+3. **Given** un Miembro registrado con sesión iniciada, **When** navega la app, **Then** ve una barra con las secciones Inicio, Mi camino, Eventos, Avisos y Perfil; en pantallas grandes esa misma barra se muestra como una barra superior con los mismos ítems, sin romper el resto del layout (actualización 2026-09-20).
+9. **Given** un Miembro registrado con sesión iniciada, **When** toca la pestaña Eventos, **Then** ve una pantalla propia dentro de la app (estado vacío hasta que exista contenido real), sin salir de la app ni perder la barra de navegación — ninguna pestaña de la barra DEBE llevar a la web pública (D107, actualización 2026-09-20).
 4. **Given** una Persona con rol Admin que entra al backoffice, **When** ve el menú lateral, **Then** encuentra los ítems correspondientes a su rol (incluidos los que hoy no tienen funcionalidad propia, como Solicitudes o Notificaciones) mostrados como sección disponible pero vacía, no como un enlace que falla.
 5. **Given** una Persona con rol Discipulador y rol Líder de curso a la vez, **When** entra al backoffice, **Then** ve la unión de los ítems de ambos roles en su menú lateral.
 6. **Given** el contenido que hoy vive en las páginas de Bienvenida y Sede (spec 001), **When** se accede a la web pública después de este cambio, **Then** ese mismo contenido y esas mismas funcionalidades siguen disponibles, ahora dentro de las secciones Primeros pasos y Visitanos.
@@ -109,7 +117,7 @@ Una Persona con sesión iniciada puede elegir si quiere ver la app siempre en mo
 
 **Acceptance Scenarios**:
 
-1. **Given** una persona que abre la app por primera vez sin haber elegido nada, **When** la usa, **Then** ve la interfaz en el modo (claro u oscuro) que indica la configuración de su sistema operativo o navegador.
+1. **Given** una persona que abre la app por primera vez sin haber elegido nada, **When** la usa, **Then** ve la interfaz en modo **claro**, sin importar la configuración de su sistema operativo o navegador (D106, actualización 2026-09-20 — corrige el comportamiento original de esta Historia, que seguía la configuración del sistema).
 2. **Given** una Persona con sesión iniciada, **When** entra a su Perfil (o al menú de usuario en el backoffice), **Then** puede elegir explícitamente entre Claro, Oscuro o Sistema.
 3. **Given** una Persona que ya eligió un modo, **When** vuelve a entrar a la app más adelante, **Then** la interfaz se muestra en el modo que eligió, sin tener que configurarlo de nuevo.
 4. **Given** las pantallas existentes (Primeros pasos, Visitanos, registro), **When** se ven en modo oscuro, **Then** todos los textos e íconos mantienen el mismo nivel de legibilidad y contraste que en modo claro.
@@ -186,10 +194,11 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 
 - **FR-001**: El sistema DEBE mostrar, en la web pública sin sesión, un menú principal con las secciones Nosotros, Primeros pasos, Ministerios, Eventos y Visitanos, y los botones de acción "Dar" e "Ingresar".
 - **FR-002**: En pantallas de celular, el sistema DEBE agrupar esas mismas secciones dentro de un menú desplegable, manteniendo "Dar" e "Ingresar" siempre visibles fuera del menú.
-- **FR-003**: El sistema DEBE mostrar, para una Persona con sesión iniciada, una barra de navegación con las secciones Inicio, Mi camino, Eventos, Avisos y Perfil.
+- **FR-003**: El sistema DEBE mostrar, para una Persona con sesión iniciada, una barra de navegación con las secciones Inicio, Mi camino, Eventos, Avisos y Perfil. En pantallas grandes esa barra pasa a ser una barra superior con los mismos ítems (nunca una barra lateral), sin desarmar el resto del layout de la pantalla.
+- **FR-046** *(actualización 2026-09-20, revisión manual H-26, D107)*: Ninguna sección de la barra de navegación con sesión iniciada DEBE llevar a una página de la web pública perdiendo esa barra — Eventos tiene su propia pantalla dentro de la app, igual que Mi camino y Avisos. Si en el futuro una pantalla pública se abre desde dentro de la app, DEBE ofrecer una forma clara de volver a la app.
 - **FR-004**: El sistema DEBE mostrar, en el backoffice, un menú lateral cuyos ítems dependen de los roles de la Persona autenticada (Admin, Discipulador, Líder de curso, Pastor/Pastora), mostrando la unión de los ítems cuando una Persona tiene más de un rol.
 - **FR-005**: Cuando una sección de cualquiera de los tres menús todavía no tiene una funcionalidad implementada, el sistema DEBE mostrar un estado vacío con un mensaje amable (y una acción sugerida cuando corresponda) en vez de un error o una página en blanco.
-- **FR-006**: El sistema DEBE mostrar un pie de página en la web pública con las mismas secciones del menú principal, más dirección, horarios, teléfono de contacto y redes sociales.
+- **FR-006**: El sistema DEBE mostrar un pie de página en la web pública con las mismas secciones del menú principal, más dirección, horarios, teléfono de contacto y redes sociales — las redes sociales se identifican con su ícono reconocible (D81) y un `aria-label` propio, no con el nombre completo escrito (actualización 2026-09-20, H-24).
 - **FR-007**: El sistema DEBE trasladar el contenido explicativo de la Bienvenida (spec 001) a la sección Primeros pasos, conservando la explicación del proceso de integración y el acceso al registro. La URL anterior de Bienvenida deja de existir (sin redirección): quien la visite ve la página de "sección no encontrada" (Historia 4).
 - **FR-008**: El sistema DEBE trasladar la información de la Sede (spec 001) a la sección Visitanos, conservando la consulta pública de sus datos (nombre, dirección, contacto, horarios). La URL anterior de Sede deja de existir (sin redirección): quien la visite ve la página de "sección no encontrada" (Historia 4).
 - **FR-009**: El sistema DEBE indicar, tanto visualmente como para tecnología asistiva, cuál es la sección actual dentro de cada uno de los tres menús.
@@ -202,7 +211,7 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 - **FR-011**: El sistema DEBE permitir recorrer completamente los tres menús usando solo el teclado, con un orden de tabulación lógico y el foco siempre visible.
 - **FR-012**: El sistema NO DEBE comunicar ningún estado (activo, error, confirmado, etc.) usando exclusivamente el color; todo estado DEBE incluir también texto y, cuando aplique, un ícono.
 - **FR-013**: El sistema DEBE mantener un contraste mínimo de 4.5:1 para texto normal y 3:1 para texto grande y elementos de interfaz, verificado en modo claro y en modo oscuro, usando una paleta de colores provisoria (neutra, con tokens semánticos) mientras la paleta de marca definitiva no esté decidida.
-- **FR-014**: El menú hamburguesa de la web pública DEBE implementarse como un control real que informa su estado abierto/cerrado a tecnología asistiva, cerrarse con la tecla Escape, y mantener el foco dentro de él mientras está abierto.
+- **FR-014**: El menú hamburguesa de la web pública DEBE implementarse como un control real que informa su estado abierto/cerrado a tecnología asistiva, cerrarse con la tecla Escape, y mantener el foco dentro de él mientras está abierto. El panel tiene un nombre accesible (título del diálogo) que no necesita ser visible en pantalla — alcanza con que lo anuncie la tecnología asistiva (actualización 2026-09-20, H-27).
 - **FR-015**: Los ítems de la barra de navegación con sesión iniciada DEBEN mostrar siempre ícono y texto juntos (nunca solo ícono) y tener un objetivo táctil de al menos 44×44 px.
 
 **Feedback y estados (Historia 3)**
@@ -223,7 +232,7 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 
 **Tema claro/oscuro (Historia 5)**
 
-- **FR-026**: Por defecto, el sistema DEBE mostrar la interfaz en el modo (claro u oscuro) indicado por la configuración del sistema operativo o navegador de quien la usa.
+- **FR-026** *(actualización 2026-09-20, revisión manual H-22, D106 — corrige el valor original de este requisito)*: Por defecto, el sistema DEBE mostrar la interfaz en modo **claro**, sin importar la configuración del sistema operativo o navegador de quien la usa.
 - **FR-027**: El sistema DEBE permitir que una Persona con sesión iniciada elija explícitamente el modo Claro, Oscuro o Sistema, tanto desde su Perfil en la app como desde el menú de usuario del backoffice.
 - **FR-028**: El sistema DEBE recordar la preferencia de modo elegida por cada Persona y aplicarla automáticamente la próxima vez que inicie sesión, en cualquier dispositivo.
 - **FR-029**: El sistema DEBE mantener el mismo nivel de contraste y legibilidad en las pantallas existentes tanto en modo claro como en modo oscuro.
@@ -253,7 +262,7 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 
 ### Key Entities *(include if feature involves data)*
 
-- **Persona** (ya existe, spec 001): suma dos atributos nuevos — un idioma preferido (español por defecto) y una preferencia de tema (Claro, Oscuro o Sistema, con Sistema por defecto) — ambos elegidos por la propia Persona y recordados entre sesiones. Sus atributos y estados existentes (activa, pendiente_tutor, roles) no cambian.
+- **Persona** (ya existe, spec 001): suma dos atributos nuevos — un idioma preferido (español por defecto) y una preferencia de tema (Claro, Oscuro o Sistema, con **Claro** por defecto — corregido por D106, actualización 2026-09-20; originalmente Sistema) — ambos elegidos por la propia Persona y recordados entre sesiones. Sus atributos y estados existentes (activa, pendiente_tutor, roles) no cambian.
 - **Sede** (ya existe, spec 001): sin cambios en sus datos; su información pasa a mostrarse dentro de la sección Visitanos en lugar de una página propia separada.
 - **Catálogo de códigos de error**: lista compartida de identificadores estables que usa toda respuesta de error de la API; cada feature nueva agrega los códigos que le correspondan, sin reemplazar los ya existentes.
 
@@ -262,7 +271,7 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 Quedan explícitamente fuera de este spec (cada uno tendrá su propia especificación futura):
 
 - Contenido real de Mi camino (Vida Nueva, Vida de Servicio, Ministerio, Bautismo) — en este spec la sección existe solo como parte de la navegación, con estado vacío.
-- Eventos (cartelera, inscripciones, pagos, QR).
+- Eventos (cartelera, inscripciones, pagos, QR) — en este spec la sección existe como pantalla propia dentro de la app con sesión (D107), con estado vacío, igual que Mi camino.
 - Avisos con notificaciones push o email reales — el envío de notificaciones no se implementa acá.
 - Envío real de emails (el sistema de errores y feedback se define, pero no el canal de email en sí).
 - Integración con YouTube.

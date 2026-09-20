@@ -270,6 +270,44 @@ No modifica ninguna tarea de las Fases 1–10, ya completadas.
 **Checkpoint**: Lote 3 de la revisión manual completo en 001 — Primeros pasos y Nosotros usan el
 copy real de `docs/12-contenido-bienvenida.md`, con los pendientes reales visibles como tales.
 
+## Phase 12: Correcciones de la revisión manual — Lote 4 (ronda 2, Personas y Sedes)
+
+**Purpose**: aplicar la parte de esta spec del Lote 4 (`specs/revision-manual/2026-09-17-001-002.md`,
+"Plan de corrección (ronda 2)"): hallazgos H-28 (la parte de campos editables de Perfil — Flujo 11),
+H-29 (activar/inactivar un menor) y H-30 (Sedes). No modifica ninguna tarea de las Fases 1–11, ya
+completadas.
+
+**Contexto**: H-20, H-21, H-22, H-23, H-24, H-25, H-26, H-27 y la parte de layout de H-28 del mismo
+Lote 4 son hallazgos de **specs/002-base-transversal** — ver su `tasks.md`, Phase 15.
+
+**Migración de modelo (a confirmar antes de aplicarla — H-29, D63/D108)**: nueva entidad
+`RelacionFamiliar` en `apps/api/prisma/schema.prisma` — `id`, `personaId` (FK a Persona, "quien tiene
+la relación", ej. el menor), `personaRelacionadaId` (FK a Persona, "la Persona vinculada", ej. el
+tutor), `tipo` (enum `TipoRelacionFamiliar`: por ahora `tutor`, más `conyuge`/`hijo`/`padre_madre`/
+`hermano` ya modelados para cuando una feature futura los necesite — D63), `createdAt`/`updatedAt`,
+con `@@unique([personaId, personaRelacionadaId, tipo])` para no duplicar el mismo vínculo. No se
+agrega una tabla de auditoría propia — alcanza con `createdAt`. `ActivarPersonaDto` pasa a aceptar
+**o bien** `tutorPersonaId` (crea la Relación Familiar) **o bien** `tutorNombre` + `tutorTelefono`
+(texto libre, como hoy), nunca ambos ni ninguno.
+
+- [ ] T129 [H-29] Proponer y aplicar la migración de `RelacionFamiliar` descrita arriba (`prisma migrate dev`); actualizar `docs/04-dominio-entidades.md` si el detalle final difiere de lo ya escrito ahí.
+- [ ] T130 [H-29] `apps/api/src/persona/dto/activar-persona.dto.ts`: `tutorNombre`/`tutorTelefono` pasan a opcionales; nuevo `tutorPersonaId` opcional; validación a nivel servicio (no del DTO, que no puede expresar "uno u otro") de que se mandó exactamente un camino. Nuevo `GET /personas/buscar?q=` (rol admin/discipulador) para encontrar al tutor por nombre/email/teléfono — resultado acotado (id, nombre, apellido, email, teléfono) para elegir sin ambigüedad.
+- [ ] T131 [H-29] `apps/api/src/persona/persona.service.ts`: `activar()` crea la `RelacionFamiliar` (`tipo: 'tutor'`) cuando llega `tutorPersonaId`, en vez de guardar `tutorNombre`/`tutorTelefono`.
+- [ ] T132 [H-29] Reescribir `apps/backoffice/src/app/pendientes-tutor/page.tsx`: saca `window.alert`/`window.prompt`/`window.confirm`, usa `ConfirmDestructiveDialog` (`marcarInactiva`) y un diálogo propio de confirmación simple (`activar`) con: buscador de Persona existente (T130) **o** campos de texto tutor/teléfono — una de las dos opciones, no las dos a la vez.
+- [ ] T133 [H-30] `apps/api/src/sede/sede.service.ts`: `update()` rechaza (`SEDE_UNICA_ACTIVA`, nuevo código en `packages/shared-types/src/error-code.ts`) desactivar la única Sede `activo: true` que quede.
+- [ ] T134 [H-30] `apps/api/src/sede/dto/crear-sede.dto.ts` y `actualizar-sede.dto.ts`: `horarios` valida un formato acotado (`@Matches`, ej. `Domingos 10:30 hs`, ver constante compartida nueva); `contactoTelefono` pasa a los mismos dos campos estructurados (código de país + número) que ya usa `RegistroPersonaDto` (D90), en vez de un string libre.
+- [ ] T135 [H-30] Extraer `CampoTelefono` de `apps/web/src/app/(publica)/registro/page.tsx` a un componente compartido (`apps/web/src/components/campo-telefono.tsx`) — lo reutilizan T136 (Sede) y T138 (Perfil).
+- [ ] T136 [H-30] Reescribir `apps/backoffice/src/app/sedes/page.tsx` con los componentes del sistema de diseño: `ConfirmDestructiveDialog` al desactivar (con el copy exacto del hallazgo H-30) cuando hay otra Sede activa; diálogo informativo con acción "Crear una Sede" cuando es la única activa (código `SEDE_UNICA_ACTIVA` de T133); `CampoTelefono` (T135) para `contactoTelefono`; input de horarios con el mismo formato acotado de T134 (validación también en el cliente, mensaje de error si no matchea).
+- [ ] T137 [H-28] Nuevo `PATCH /personas/me` en `apps/api` (`persona.controller.ts`/`persona.service.ts`/`dto/actualizar-persona.dto.ts`): acepta `telefono` (estructurado), `direccion`, `estadoCivil`, `profesion`/`profesionDetalle` — todos opcionales, cualquier subconjunto. No acepta `fechaNacimiento` ni `email` (FR-029).
+- [ ] T138 [H-28] `apps/web/src/app/(app)/perfil/page.tsx`: formulario editable con los 4 campos de T137, reutilizando `CampoTelefono` (T135) y los mismos `<select>` de estado civil/profesión que `registro/page.tsx` (extraer las opciones a un archivo compartido si no lo están ya). Guardar por campo o con un único botón "Guardar cambios" — a definir al implementar, con feedback de éxito (D102).
+- [ ] T139 [H-29, H-30, H-28] Tests afectados: e2e nuevo o extendido en `apps/backoffice/e2e` (crear si no existe la carpeta) para activar un pendiente_tutor por los dos caminos (búsqueda de Persona y texto libre) y para el flujo de desactivar Sede (con y sin otra Sede activa), con `@axe-core/playwright`. E2e en `apps/web/e2e` para editar el Perfil. Unit tests en `apps/api/test/unit` para la regla de "al menos una Sede activa" y la validación de `horarios`.
+
+**Checkpoint**: Lote 4 (parte de 001) completo — activar/inactivar un menor usa el sistema de diseño
+y puede vincular al tutor como Relación Familiar; Sedes tiene confirmación, la regla de "al menos
+una activa" y campos validados; Perfil permite editar teléfono/dirección/estado civil/profesión
+(Flujo 11). Gestionar Relaciones Familiares desde el propio Perfil (Flujo 11, punto 3) queda fuera
+de esta ronda — depende de una UI de búsqueda de Personas más genérica que la acotada de T130.
+
 ---
 
 ## Dependencies & Execution Order

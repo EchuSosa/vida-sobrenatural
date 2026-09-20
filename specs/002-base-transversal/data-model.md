@@ -9,7 +9,7 @@ Alcance: solo lo que este spec agrega o modifica sobre el modelo ya existente de
 | Campo | Tipo | Obligatorio | Notas |
 |---|---|---|---|
 | `idiomaPreferido` | enum `Idioma` (`es`) | sí, default `es` | Historia 6 (FR-031). Un solo valor posible en este spec — agregar `pt`/`en` en Fase 2 es sumar valores al enum, sin migración de datos existentes. No se pide en el registro. |
-| `temaPreferido` | enum `TemaPreferido` (`claro` \| `oscuro` \| `sistema`) | sí, default `sistema` | Historia 5 (FR-026 a FR-028). Elegido por la propia Persona desde Perfil (app) o el menú de usuario (backoffice); se recuerda entre sesiones y dispositivos. |
+| `temaPreferido` | enum `TemaPreferido` (`claro` \| `oscuro` \| `sistema`) | sí, default `claro` (corregido D106, actualización 2026-09-20 — originalmente `sistema`) | Historia 5 (FR-026 a FR-028). Elegido por la propia Persona desde Perfil (app) o el menú de usuario (backoffice); se recuerda entre sesiones y dispositivos. |
 
 **Validaciones**:
 - `idiomaPreferido` y `temaPreferido` siempre tienen un valor (no son opcionales) — todo registro
