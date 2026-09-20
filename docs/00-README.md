@@ -50,3 +50,5 @@ Documentación de producto, previa a los specs técnicos (metodología SDD). Cad
 - **Antes de agregar una decisión o un documento nuevo, revisar el último número usado** (se trabaja en paralelo desde claude.ai y Claude Code; ver D89 y D103).
 - Ningún spec técnico (fase SDD) se escribe hasta que el modelo de dominio (`04-dominio-entidades.md`) esté razonablemente estable.
 - Los requisitos no funcionales (`13`), la guía de UX/UI (`15`) y los sistemas transversales (`16`) aplican a todas las specs y se trasladan como principios a la constitución de Spec Kit.
+- **Un lote de correcciones no se da por cerrado sin correr las tres suites**: unitarios (`pnpm --filter api run test`), integración (`pnpm --filter api run test:e2e` — config aparte) y e2e de `apps/web` (`pnpm --filter web exec playwright test`). El hueco entre la primera y la segunda dejó un test en rojo durante el Lote 4 (H-36).
+- **Un test que rompe por un cambio de modelo se actualiza en el mismo commit que el cambio**, no se hereda en rojo ni se reporta como "falla preexistente".
