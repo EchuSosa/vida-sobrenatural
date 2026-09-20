@@ -22,7 +22,8 @@ El contenido de cada sección sale de `12-contenido-bienvenida.md` cuando existe
 
 **Acciones destacadas** (botones, a la derecha del menú):
 - **Dar** → Ofrendas (versión estática, D67). Se usa "Dar", el mismo nombre que ya usa la iglesia en su link-in-bio.
-- **Ingresar** → login SSO.
+- **Ingresar** → login SSO. Con sesión activa se reemplaza por **"Ir a la app"** (D91, H-19).
+- **Con sesión activa**, además, un **menú de usuario** con Perfil, tema Claro/Oscuro/Sistema y cerrar sesión — igual que el del backoffice (H-38). En celular, esos ítems van dentro del panel del menú hamburguesa. Sin este menú, para cerrar sesión hay que entrar a la app primero.
 
 **Qué no va en el menú:**
 - **Palabra Profética:** además de su sección propia (D109), se destaca como banner en el Inicio, porque es lo que la iglesia comunica todo el año.
@@ -44,7 +45,10 @@ Barra de pestañas inferior (patrón de app nativa, usable con una mano):
 | **Avisos** | Historial de notificaciones con leídas/no leídas (cada una lleva a su entidad relacionada, D59, D100) |
 | **Perfil** | Mis datos (con foto de Google si existe, D87), Relaciones Familiares, tema Claro/Oscuro/Sistema (D95), "Contanos qué te parece", cerrar sesión (y selector de idioma cuando exista, D84) |
 
-- Las páginas públicas (Nosotros, Primeros pasos, Ministerios, Visitanos, Dar) siguen accesibles desde un menú secundario.
+- Las páginas públicas (Nosotros, Primeros pasos, Ministerios, Visitanos, Dar) siguen accesibles desde un **menú secundario** (H-37):
+  - **Celular:** la app tiene una barra superior delgada con el logo (lleva a Inicio) y un botón "Más" que abre el mismo panel lateral del menú público, con las cinco secciones y "Dar".
+  - **Escritorio:** esas secciones entran en la barra superior de la app, agrupadas bajo "Más" si no entran cómodas.
+  - Al abrir una pantalla pública desde la app, se ofrece volver (D107). Salir a lo público es una decisión de la persona, no algo que pase sin querer.
 - En pantallas grandes, la barra inferior pasa a ser una barra superior o lateral con los mismos ítems.
 - La visualización de progreso dentro de Mi camino (línea de tiempo del proceso) queda en Fase 2; en el MVP la sección existe y agrupa los procesos.
 
