@@ -2,82 +2,70 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import type { PersonaPendienteTutor } from '@vida-sobrenatural/shared-types';
+import { useTranslations } from 'next-intl';
+import type { PersonaPendienteTutor, BusquedaPersona, ErrorCode } from '@vida-sobrenatural/shared-types';
+import {
+  Button,
+  ConfirmDestructiveDialog,
+  Input,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from '@vida-sobrenatural/ui';
+import { toast } from 'sonner';
+import { apiFetch, ApiError } from '../../lib/api-client';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
-
+/**
+ * H-29 (revisión manual, actualización 2026-09-20, D94/D102/D108): activar
+ * y marcar inactiva pasan del alert/prompt/confirm nativo del navegador al
+ * sistema de diseño. Activar ofrece vincular al tutor como Relación
+ * Familiar (si ya está registrado) o cargar sus datos como texto libre — no
+ * las dos cosas.
+ */
 export default function PendientesTutorPage() {
   const { data: session, status } = useSession();
   const [pendientes, setPendientes] = useState<PersonaPendienteTutor[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
+  const [personaParaActivar, setPersonaParaActivar] = useState<PersonaPendienteTutor | null>(null);
+  const te = useTranslations('errors');
 
   const cargarPendientes = useCallback(async () => {
     if (!session?.apiToken) return;
     setCargando(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/personas/pendientes-tutor`, {
+      const datos = await apiFetch<PersonaPendienteTutor[]>('/personas/pendientes-tutor', {
         headers: { Authorization: `Bearer ${session.apiToken}` },
       });
-      if (response.status === 403) {
-        setError('Tu usuario no tiene rol Admin ni Discipulador.');
-        return;
-      }
-      if (!response.ok) {
-        setError('No pudimos cargar la lista de pendientes.');
-        return;
-      }
-      setPendientes(await response.json());
+      setPendientes(datos);
+    } catch (e) {
+      setError(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos cargar la lista de pendientes.');
     } finally {
       setCargando(false);
     }
-  }, [session?.apiToken]);
+  }, [session, te]);
 
   useEffect(() => {
-    // Función local declarada dentro del efecto (no llamar directo a la de
-    // useCallback) — evita que react-hooks/set-state-in-effect marque un
-    // falso positivo sobre un setState que en realidad ocurre después de un
-    // await, no de forma síncrona en el cuerpo del efecto.
     async function ejecutar() {
       await cargarPendientes();
     }
     ejecutar();
   }, [cargarPendientes]);
 
-  async function activar(id: string) {
-    const tutorNombre = window.prompt('Nombre del tutor:');
-    if (!tutorNombre) return;
-    const tutorTelefono = window.prompt('Teléfono del tutor:');
-    if (!tutorTelefono) return;
-
-    const response = await fetch(`${API_BASE_URL}/personas/${id}/activar`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session?.apiToken}`,
-      },
-      body: JSON.stringify({ tutorNombre, tutorTelefono }),
-    });
-    if (response.ok) {
-      await cargarPendientes();
-    } else {
-      setError('No pudimos activar a esta Persona.');
-    }
-  }
-
   async function marcarInactiva(id: string) {
-    if (!window.confirm('¿Confirmás que el tutor no autoriza (o no se lo pudo contactar)?')) {
-      return;
-    }
-    const response = await fetch(`${API_BASE_URL}/personas/${id}/marcar-inactiva`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${session?.apiToken}` },
-    });
-    if (response.ok) {
+    try {
+      await apiFetch(`/personas/${id}/marcar-inactiva`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${session?.apiToken}` },
+      });
+      toast('Persona marcada como inactiva.');
       await cargarPendientes();
-    } else {
-      setError('No pudimos marcar como inactiva a esta Persona.');
+    } catch (e) {
+      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos marcar como inactiva a esta Persona.');
     }
   }
 
@@ -89,13 +77,7 @@ export default function PendientesTutorPage() {
     return (
       <main className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
         <h1 className="text-2xl font-semibold">Casos pendientes de tutor</h1>
-        <button
-          type="button"
-          onClick={() => signIn('google')}
-          className="flex h-11 w-fit items-center justify-center rounded-lg bg-zinc-900 px-5 font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
-        >
-          Continuar con Google
-        </button>
+        <Button onClick={() => signIn('google')}>Continuar con Google</Button>
       </main>
     );
   }
@@ -133,24 +115,207 @@ export default function PendientesTutorPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => activar(persona.id)}
-                className="h-9 rounded-md bg-zinc-900 px-3 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
-              >
+              <Button size="sm" onClick={() => setPersonaParaActivar(persona)}>
                 Activar
-              </button>
-              <button
-                type="button"
-                onClick={() => marcarInactiva(persona.id)}
-                className="h-9 rounded-md border border-zinc-300 px-3 text-sm font-medium dark:border-zinc-700"
-              >
-                Marcar inactiva
-              </button>
+              </Button>
+              <ConfirmDestructiveDialog
+                trigger={
+                  <Button variant="outline" size="sm">
+                    Marcar inactiva
+                  </Button>
+                }
+                titulo={`¿Marcar inactiva a ${persona.nombre} ${persona.apellido}?`}
+                descripcion="Confirmá que el tutor no autoriza el registro, o que no se lo pudo contactar. La Persona sale de esta lista; no se borra nada."
+                textoConfirmar="Sí, marcar inactiva"
+                textoCancelar="Volver"
+                onConfirmar={() => marcarInactiva(persona.id)}
+              />
             </div>
           </li>
         ))}
       </ul>
+
+      <ActivarDialog
+        key={personaParaActivar?.id ?? 'cerrado'}
+        persona={personaParaActivar}
+        apiToken={session?.apiToken}
+        onCerrar={() => setPersonaParaActivar(null)}
+        onActivado={async () => {
+          setPersonaParaActivar(null);
+          await cargarPendientes();
+        }}
+      />
     </main>
+  );
+}
+
+function ActivarDialog({
+  persona,
+  apiToken,
+  onCerrar,
+  onActivado,
+}: {
+  persona: PersonaPendienteTutor | null;
+  apiToken: string | undefined;
+  onCerrar: () => void;
+  onActivado: () => void;
+}) {
+  const te = useTranslations('errors');
+  const [busqueda, setBusqueda] = useState('');
+  const [resultados, setResultados] = useState<BusquedaPersona[]>([]);
+  const [tutorElegido, setTutorElegido] = useState<BusquedaPersona | null>(null);
+  const [tutorNombre, setTutorNombre] = useState('');
+  const [tutorTelefono, setTutorTelefono] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // El estado interno se resetea remontando este componente (key={persona?.id}
+  // en el padre) en vez de un efecto que lo limpie al cerrar — evita
+  // setState síncrono dentro de un efecto (react-hooks/set-state-in-effect).
+  const resultadosVisibles = tutorElegido ? [] : resultados;
+
+  useEffect(() => {
+    if (!persona || tutorElegido || busqueda.trim().length < 2) return;
+    const idTimeout = setTimeout(async () => {
+      try {
+        const datos = await apiFetch<BusquedaPersona[]>(
+          `/personas/buscar?q=${encodeURIComponent(busqueda)}`,
+          { headers: { Authorization: `Bearer ${apiToken}` } },
+        );
+        setResultados(datos);
+      } catch {
+        // Búsqueda incidental — un error acá no bloquea completar el resto
+        // del formulario a mano.
+      }
+    }, 300);
+    return () => clearTimeout(idTimeout);
+  }, [busqueda, tutorElegido, persona, apiToken]);
+
+  async function activar() {
+    if (!persona) return;
+    setEnviando(true);
+    setError(null);
+    try {
+      const body = tutorElegido ? { tutorPersonaId: tutorElegido.id } : { tutorNombre, tutorTelefono };
+      await apiFetch(`/personas/${persona.id}/activar`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
+        body: JSON.stringify(body),
+      });
+      toast(`${persona.nombre} ${persona.apellido} activada.`);
+      onActivado();
+    } catch (e) {
+      setError(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos activar a esta Persona.');
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  const puedeEnviar = tutorElegido !== null || (tutorNombre.trim() !== '' && tutorTelefono.trim() !== '');
+
+  return (
+    <Sheet open={!!persona} onOpenChange={(abierto) => !abierto && onCerrar()}>
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>Activar a {persona ? `${persona.nombre} ${persona.apellido}` : ''}</SheetTitle>
+          <SheetDescription>
+            Buscá al tutor si ya está registrado y se congrega, o cargá sus datos a mano.
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="flex flex-col gap-4 px-4">
+          {error && (
+            <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+              {error}
+            </p>
+          )}
+
+          {tutorElegido ? (
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <p className="font-medium">
+                  {tutorElegido.nombre} {tutorElegido.apellido}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {tutorElegido.email} — {tutorElegido.telefono}
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setTutorElegido(null)}>
+                Quitar
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium" htmlFor="buscar-tutor">
+                  Buscar tutor ya registrado (opcional)
+                </label>
+                <Input
+                  id="buscar-tutor"
+                  placeholder="Nombre, email o teléfono"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                />
+                {resultadosVisibles.length > 0 && (
+                  <ul className="flex flex-col gap-1 rounded-lg border border-border p-1">
+                    {resultadosVisibles.map((r) => (
+                      <li key={r.id}>
+                        <button
+                          type="button"
+                          className="w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted"
+                          onClick={() => {
+                            setTutorElegido(r);
+                            setBusqueda('');
+                            setResultados([]);
+                          }}
+                        >
+                          <span className="font-medium">
+                            {r.nombre} {r.apellido}
+                          </span>{' '}
+                          <span className="text-muted-foreground">
+                            — {r.email} — {r.telefono}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <Separador texto="o" />
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium" htmlFor="tutor-nombre">
+                  Nombre del tutor
+                </label>
+                <Input id="tutor-nombre" value={tutorNombre} onChange={(e) => setTutorNombre(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium" htmlFor="tutor-telefono">
+                  Teléfono del tutor
+                </label>
+                <Input id="tutor-telefono" value={tutorTelefono} onChange={(e) => setTutorTelefono(e.target.value)} />
+              </div>
+            </>
+          )}
+        </div>
+
+        <SheetFooter>
+          <Button onClick={activar} disabled={!puedeEnviar || enviando}>
+            {enviando ? 'Activando…' : 'Activar'}
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function Separador({ texto }: { texto: string }) {
+  return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="h-px flex-1 bg-border" />
+      {texto}
+      <div className="h-px flex-1 bg-border" />
+    </div>
   );
 }

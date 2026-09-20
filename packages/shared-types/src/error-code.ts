@@ -17,6 +17,12 @@ export type ErrorCode =
   | 'PERSONA_NO_PENDIENTE_TUTOR'
   | 'VERIFICACION_LOGIN_FALLIDA'
   | 'EMAIL_NO_VERIFICADO'
+  // H-29 (revisión manual, D108/D112): activar/vincular un tutor.
+  | 'ACTIVAR_TUTOR_INVALIDO'
+  | 'RELACION_FAMILIAR_INVALIDA'
+  // H-30 (revisión manual, D38/D102): Sedes.
+  | 'SEDE_UNICA_ACTIVA'
+  | 'SEDE_HORARIOS_INVALIDO'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */

@@ -5,6 +5,7 @@ import {
   TemaPreferido,
   OrigenConsentimiento,
   OrigenAlta,
+  TipoRelacionFamiliar,
 } from '../generated/prisma/enums.js';
 import { calcularEdad } from './calcular-edad.js';
 import { AppException } from '../common/errors/app-exception.js';
@@ -12,6 +13,25 @@ import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import type { ActivarPersonaDto } from './dto/activar-persona.dto.js';
 
 const EDAD_MINIMA = 18;
+
+const BUSQUEDA_PERSONA_SELECT = {
+  id: true,
+  nombre: true,
+  apellido: true,
+  email: true,
+  telefono: true,
+} as const;
+
+// D112: inversa de cada tipo de Relación Familiar (para detectar el
+// "duplicado espejo" — el mismo vínculo cargado desde el otro lado). `tutor`
+// no tiene un valor inverso en el enum ("a_cargo" se resuelve en código al
+// consultar, no se guarda) — no puede haber espejo para ese tipo.
+const INVERSO_RELACION: Partial<Record<TipoRelacionFamiliar, TipoRelacionFamiliar>> = {
+  [TipoRelacionFamiliar.hijo_a]: TipoRelacionFamiliar.padre_madre,
+  [TipoRelacionFamiliar.padre_madre]: TipoRelacionFamiliar.hijo_a,
+  [TipoRelacionFamiliar.conyuge]: TipoRelacionFamiliar.conyuge,
+  [TipoRelacionFamiliar.hermano_a]: TipoRelacionFamiliar.hermano_a,
+};
 
 const PENDIENTE_TUTOR_SELECT = {
   id: true,
@@ -153,28 +173,119 @@ export class PersonaService {
     });
   }
 
-  /** PATCH /personas/:id/activar — FR-008, Flujo 7 camino A únicamente. */
+  /** GET /personas/buscar?q= — Historia 2b, H-29 (D108): elegir el tutor a vincular. */
+  buscarPersonas(q: string) {
+    const termino = q.trim();
+    if (termino.length < 2) return [];
+    return this.prisma.persona.findMany({
+      where: {
+        activo: true,
+        OR: [
+          { nombre: { contains: termino, mode: 'insensitive' } },
+          { apellido: { contains: termino, mode: 'insensitive' } },
+          { email: { contains: termino, mode: 'insensitive' } },
+          { telefono: { contains: termino, mode: 'insensitive' } },
+        ],
+      },
+      select: BUSQUEDA_PERSONA_SELECT,
+      orderBy: { nombre: 'asc' },
+      take: 10,
+    });
+  }
+
+  /**
+   * PATCH /personas/:id/activar — FR-008 (Flujo 7 camino A) + FR-023 (H-29,
+   * D108/D112): exactamente uno de `tutorPersonaId` (vincula una Relación
+   * Familiar tipo `tutor`, y vacía tutorNombre/tutorTelefono — el vínculo es
+   * la única fuente de verdad, D112) o tutorNombre+tutorTelefono (texto
+   * libre, cuando el tutor no se congrega).
+   */
   async activar(id: string, dto: ActivarPersonaDto) {
     const persona = await this.buscarPendienteTutorActivoOFallar(id);
 
-    return this.prisma.persona.update({
-      where: { id: persona.id },
-      data: {
-        estado: EstadoPersona.activa,
-        tutorNombre: dto.tutorNombre,
-        tutorTelefono: dto.tutorTelefono,
-        // El consentimiento definitivo lo da el tutor en este paso, no el
-        // menor en el formulario (FR-013; ver data-model.md).
-        consentimientoDatos: true,
-        // Actualización 2026-09-17 (FR-013): origen 'presencial' — el
-        // consentimiento se toma fuera del sistema, durante el contacto
-        // manual del Admin/Discipulador con el tutor.
-        consentimientoDatosFecha: new Date(),
-        consentimientoDatosOrigen: OrigenConsentimiento.presencial,
-        rol: ['miembro_registrado'],
-      },
-      select: { id: true, estado: true },
+    const tieneVinculo = !!dto.tutorPersonaId;
+    const tieneTexto = !!dto.tutorNombre || !!dto.tutorTelefono;
+    if (tieneVinculo === tieneTexto || (tieneTexto && !(dto.tutorNombre && dto.tutorTelefono))) {
+      throw new AppException(
+        'ACTIVAR_TUTOR_INVALIDO',
+        400,
+        'Elegí una Persona para vincular como tutor, o completá tutorNombre y tutorTelefono — no ambos ni ninguno.',
+      );
+    }
+
+    const datosBase = {
+      estado: EstadoPersona.activa,
+      // El consentimiento definitivo lo da el tutor en este paso, no el
+      // menor en el formulario (FR-013; ver data-model.md).
+      consentimientoDatos: true,
+      // Actualización 2026-09-17 (FR-013): origen 'presencial' — el
+      // consentimiento se toma fuera del sistema, durante el contacto
+      // manual del Admin/Discipulador con el tutor.
+      consentimientoDatosFecha: new Date(),
+      consentimientoDatosOrigen: OrigenConsentimiento.presencial,
+      rol: ['miembro_registrado'],
+    };
+
+    if (!dto.tutorPersonaId) {
+      return this.prisma.persona.update({
+        where: { id: persona.id },
+        data: { ...datosBase, tutorNombre: dto.tutorNombre, tutorTelefono: dto.tutorTelefono },
+        select: { id: true, estado: true },
+      });
+    }
+
+    await this.validarVinculoFamiliar(persona.id, dto.tutorPersonaId, TipoRelacionFamiliar.tutor);
+
+    const [, actualizada] = await this.prisma.$transaction([
+      this.prisma.relacionFamiliar.create({
+        data: {
+          personaId: persona.id,
+          familiarId: dto.tutorPersonaId,
+          tipoRelacion: TipoRelacionFamiliar.tutor,
+        },
+      }),
+      this.prisma.persona.update({
+        where: { id: persona.id },
+        data: { ...datosBase, tutorNombre: null, tutorTelefono: null },
+        select: { id: true, estado: true },
+      }),
+    ]);
+    return actualizada;
+  }
+
+  /**
+   * D112: valida antes de crear una Relación Familiar — ninguna Persona
+   * puede vincularse consigo misma, y no se puede duplicar el mismo vínculo
+   * ni cargarlo espejado desde el otro lado (ej. A-hijo_a-B cuando ya existe
+   * B-padre_madre-A).
+   */
+  private async validarVinculoFamiliar(personaId: string, familiarId: string, tipo: TipoRelacionFamiliar) {
+    if (personaId === familiarId) {
+      throw new AppException('RELACION_FAMILIAR_INVALIDA', 400, 'Una Persona no puede vincularse consigo misma.');
+    }
+    const familiar = await this.prisma.persona.findUnique({ where: { id: familiarId } });
+    if (!familiar) {
+      throw new AppException('NO_ENCONTRADO', 404, 'La Persona a vincular no existe.');
+    }
+
+    const duplicadoLiteral = await this.prisma.relacionFamiliar.findUnique({
+      where: { personaId_familiarId_tipoRelacion: { personaId, familiarId, tipoRelacion: tipo } },
     });
+    if (duplicadoLiteral) {
+      throw new AppException('RELACION_FAMILIAR_INVALIDA', 409, 'Ese vínculo ya existe.');
+    }
+
+    const inversa = INVERSO_RELACION[tipo];
+    if (inversa) {
+      const duplicadoEspejo = await this.prisma.relacionFamiliar.findUnique({
+        where: {
+          personaId_familiarId_tipoRelacion: { personaId: familiarId, familiarId: personaId, tipoRelacion: inversa },
+        },
+      });
+      if (duplicadoEspejo) {
+        throw new AppException('RELACION_FAMILIAR_INVALIDA', 409, 'Ese vínculo ya existe (cargado desde el otro lado).');
+      }
+    }
   }
 
   /** PATCH /personas/:id/marcar-inactiva — FR-014. */

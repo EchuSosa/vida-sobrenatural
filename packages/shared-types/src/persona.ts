@@ -106,8 +106,21 @@ export interface PersonaPendienteTutor {
   sedeId: string;
 }
 
-/** Body de PATCH /personas/:id/activar. */
-export interface ActivarPersonaInput {
-  tutorNombre: string;
-  tutorTelefono: string;
+/**
+ * Body de PATCH /personas/:id/activar. Exactamente uno de los dos caminos —
+ * `tutorPersonaId` (vincula una Relación Familiar) o `tutorNombre`+
+ * `tutorTelefono` (texto libre) — nunca ambos, nunca ninguno (H-29,
+ * D108/D112).
+ */
+export type ActivarPersonaInput =
+  | { tutorPersonaId: string; tutorNombre?: never; tutorTelefono?: never }
+  | { tutorPersonaId?: never; tutorNombre: string; tutorTelefono: string };
+
+/** Elemento de GET /personas/buscar?q= — H-29 (D108), elegir a quién vincular. */
+export interface BusquedaPersona {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
 }

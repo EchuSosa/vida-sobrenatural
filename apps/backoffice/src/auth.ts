@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
+import Credentials from 'next-auth/providers/credentials';
 import { SignJWT } from 'jose';
 
 /**
@@ -18,6 +19,36 @@ const googleProvider = Google({
     };
   },
 });
+
+/**
+ * H-29 (revisión manual, actualización 2026-09-20): backoffice no tenía
+ * ningún proveedor de test-login — apps/web sí (T028), y sin su equivalente
+ * acá no hay forma de automatizar un e2e de las pantallas con sesión
+ * (Personas, Sedes). Mismo patrón que apps/web/src/auth.ts: gateado en
+ * CÓDIGO, no solo por configuración — `NODE_ENV === 'production'` lo
+ * excluye siempre. No se armó un playwright.config.ts propio para
+ * apps/backoffice en este lote (alcance del hallazgo era arreglar el
+ * feedback de Personas/Sedes, no construir infraestructura de e2e nueva);
+ * queda disponible para cuando se decida agregarlo.
+ */
+const testLoginHabilitado =
+  process.env.NODE_ENV !== 'production' && process.env.ALLOW_TEST_LOGIN === 'true';
+
+const providers = testLoginHabilitado
+  ? [
+      googleProvider,
+      Credentials({
+        id: 'test-login',
+        name: 'Test login (solo E2E)',
+        credentials: { email: {} },
+        authorize: async (credentials) => {
+          const email = credentials?.email;
+          if (typeof email !== 'string' || !email) return null;
+          return { id: email, email, name: 'Admin de Test', emailVerificadoPorProveedor: true };
+        },
+      }),
+    ]
+  : [googleProvider];
 
 /**
  * Claims que este servidor le pasa a apps/api en cada llamada — ver
@@ -60,7 +91,7 @@ async function mintApiToken(claims: {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [googleProvider],
+  providers,
   session: { strategy: 'jwt' },
   // H-14 (actualización 2026-09-18): el backoffice no depende de las
   // pantallas por defecto de NextAuth — todavía no tiene una página de

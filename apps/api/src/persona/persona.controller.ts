@@ -79,6 +79,15 @@ export class PersonaController {
     return this.personaService.findPendientesTutor();
   }
 
+  @Get('buscar')
+  @UseGuards(JwtNextAuthGuard, RolesGuard)
+  @Roles('admin', 'discipulador')
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Búsqueda acotada de Personas — H-29, D108 (elegir a quién vincular como tutor).' })
+  buscarPersonas(@Query('q') q: string) {
+    return this.personaService.buscarPersonas(q ?? '');
+  }
+
   @Patch(':id/activar')
   @UseGuards(JwtNextAuthGuard, RolesGuard)
   @Roles('admin', 'discipulador')
