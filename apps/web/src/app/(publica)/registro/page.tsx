@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   type Sede,
   type ErrorCode,
@@ -11,6 +11,7 @@ import {
   ApiError,
   erroresPorCampo,
   mensajeDeCampo,
+  formatearFechaCorta,
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
@@ -76,6 +77,7 @@ export default function RegistroPage() {
   const router = useRouter();
   const t = useTranslations('registro');
   const tErrores = useTranslations('errors');
+  const locale = useLocale();
   const opciones = useOpcionesRegistro();
   const encabezadoRef = useRef<HTMLHeadingElement>(null);
   // H-19/H-16 (actualización 2026-09-18): update() tras un registro exitoso
@@ -510,6 +512,7 @@ export default function RegistroPage() {
               opciones={opciones}
               sedes={sedes}
               t={t}
+              locale={locale}
               onEditar={setPaso}
             />
 
@@ -554,12 +557,14 @@ function ResumenDatos({
   opciones,
   sedes,
   t,
+  locale,
   onEditar,
 }: {
   datos: DatosFormulario;
   opciones: ReturnType<typeof useOpcionesRegistro>;
   sedes: Sede[];
   t: ReturnType<typeof useTranslations<'registro'>>;
+  locale: string;
   onEditar: (paso: number) => void;
 }) {
   const sede = sedes.find((s) => s.id === datos.sedeId);
@@ -577,7 +582,10 @@ function ResumenDatos({
         { label: t('campos.apellido'), valor: datos.apellido },
         { label: t('campos.nombre'), valor: datos.nombre },
         { label: t('campos.genero'), valor: generoLabel },
-        { label: t('campos.fechaNacimiento'), valor: datos.fechaNacimiento },
+        {
+          label: t('campos.fechaNacimiento'),
+          valor: datos.fechaNacimiento ? formatearFechaCorta(datos.fechaNacimiento, locale) : '',
+        },
       ],
     },
     {
