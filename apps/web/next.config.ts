@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   // packages/ui se consume como fuente TypeScript, no como paquete compilado
   // (research.md, Decisión 1).
   transpilePackages: ["@vida-sobrenatural/ui"],
+  // H-39 (revisión manual ronda 3): el indicador de desarrollo tapaba la
+  // pestaña "Inicio" de la barra inferior en celular. Next sigue mostrando
+  // errores de compilación/runtime igual sin este indicador.
+  devIndicators: false,
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {
