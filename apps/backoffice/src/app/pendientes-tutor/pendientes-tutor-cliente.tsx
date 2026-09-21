@@ -345,7 +345,11 @@ function ActivarDialog({
                             {r.nombre} {r.apellido}
                           </span>{' '}
                           <span className="text-muted-foreground">
-                            — {r.email} — {r.telefono}
+                            {/* H-75 (revisión manual ronda 8): sin el `&&`, una Persona sin
+                                teléfono (campo vacío, no ausente — el modelo lo pide siempre)
+                                dejaba un guion final colgando, sin nada después. */}
+                            — {r.email}
+                            {r.telefono && ` — ${r.telefono}`}
                           </span>
                         </button>
                       </li>
