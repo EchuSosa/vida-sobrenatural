@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
 import { Button, Sheet, SheetTrigger, SheetContent, SheetTitle } from '@vida-sobrenatural/ui';
-import { NAV_PUBLICA, NAV_PUBLICA_ACCIONES } from '../config/nav-publica';
+import { NAV_PUBLICA } from '../config/nav-publica';
+import { useAccionesPublicas } from './nav-publica-header';
 
 /**
  * H-37 (revisión manual ronda 3, D107, docs/14-navegacion.md sección 2): la
@@ -16,12 +17,19 @@ import { NAV_PUBLICA, NAV_PUBLICA_ACCIONES } from '../config/nav-publica';
  * "Ir a la app" de forma permanente (H-19, FR-042) en cualquier pantalla
  * pública, incluidas estas.
  */
-const ITEMS_MAS = [...NAV_PUBLICA, ...NAV_PUBLICA_ACCIONES];
 
 /** Ítems del panel "Más" — usados acá (Sheet, celular) y en nav-app-bar.tsx (DropdownMenu, escritorio). */
 export function useItemsMas() {
   const t = useTranslations('nav');
-  return ITEMS_MAS.map((item) => ({ href: item.href, label: t(item.labelKey) }));
+  // H-64 (revisión manual ronda 5, D115): las acciones (Dar/Ingresar) pasan
+  // por useAccionesPublicas() — acá la sesión SIEMPRE está activa, así que
+  // sin este filtro "Ingresar" quedaba apuntando a /registro también para
+  // quien ya es Miembro registrado.
+  const acciones = useAccionesPublicas();
+  return [
+    ...NAV_PUBLICA.map((item) => ({ href: item.href, label: t(item.labelKey) })),
+    ...acciones.map((item) => ({ href: item.href, label: item.label })),
+  ];
 }
 
 /** Barra superior delgada de la app en celular — logo (a Inicio) + "Más". */

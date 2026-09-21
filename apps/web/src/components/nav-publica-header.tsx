@@ -14,8 +14,14 @@ import { MenuUsuarioPublico, ItemsUsuarioCelular } from './menu-usuario-publico'
  * H-19 (actualización 2026-09-18): con sesión de una Persona ya activa, la
  * acción "Ingresar" deja de tener sentido — se reemplaza por un acceso
  * directo a la app. "Dar" no depende de la sesión, se mantiene siempre.
+ * Exportado: H-64 (revisión manual ronda 5, D115) — nav-app-mas.tsx (el
+ * panel "Más" de la app, con sesión SIEMPRE activa) usaba NAV_PUBLICA_ACCIONES
+ * crudo, sin este filtro. Con sesión, cualquier enlace a `/registro` termina
+ * en el redirect de esa página hacia `/primeros-pasos?ya_registrado=1`, con
+ * el toast de sorpresa — una sola fuente de verdad para el filtro evita que
+ * se rompa en un lugar y no en el otro (Principio XI).
  */
-function useAccionesPublicas() {
+export function useAccionesPublicas() {
   const { data: session } = useSession();
   const t = useTranslations('nav');
   const yaEsMiembro = session?.user.estado === 'activa';
