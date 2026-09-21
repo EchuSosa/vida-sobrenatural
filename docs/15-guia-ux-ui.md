@@ -100,7 +100,9 @@ Los estados siempre llevan texto + ícono (nunca solo color, D81).
 ## Backoffice
 
 - Tablas con búsqueda, filtros y orden; paginación (ver performance en `13`). Aplica donde el volumen lo justifica —Personas, Solicitudes, Eventos—, no en catálogos de dos o tres filas (Principio IV). Cuando llegue la primera, se construye **una sola tabla compartida** en `packages/ui` y la usan todas (Principio XI), en vez de repetir el patrón por pantalla.
-- **Lo dado de baja se ve y se puede reactivar (D117):** los listados incluyen los registros inactivos, con su estado en texto + ícono y un filtro activas / todas; su detalle se puede abrir y existe la acción "Reactivar". Un borrado lógico que desaparece de la pantalla es, para quien lo usa, un borrado.
+- **Inactivar y eliminar son distintas (D117, D119):**
+  - **Inactivar** — el registro se sigue viendo en el listado, con su estado en texto + ícono y un filtro activas / todas; su detalle se puede abrir y existe "Reactivar". Es un estado del negocio, no una baja.
+  - **Eliminar** — para corregir un error de carga. Sigue siendo borrado lógico, pero desaparece de las vistas normales y va a la papelera, desde donde el Admin puede restaurarlo. **No se puede eliminar un registro con datos relacionados**: ahí el botón queda deshabilitado, explicando por qué y ofreciendo inactivar.
 - **Alta en modal:** crear un registro abre un diálogo; al cerrarse, el nuevo registro aparece en el listado. Las filas del listado llevan al detalle, y la edición vive ahí.
 - Acciones en lote donde tenga sentido (ej. aprobar varias inscripciones a un Evento).
 - Filtros y búsqueda reflejados en la URL, para poder volver o compartir la vista.
