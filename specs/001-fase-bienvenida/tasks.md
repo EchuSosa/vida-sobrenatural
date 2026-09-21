@@ -351,6 +351,25 @@ reactivar, en el backoffice y en la base (D117). El resto del Lote 7 sigue en cu
 
 ---
 
+## Phase 15: Correcciones de la revisión manual — Lote 7, parte 2 (ronda 4, errores por campo)
+
+**Purpose**: aplicar H-50 del Lote 7 — la API ya manda `errors: [{campo, code}]` (400 de
+validación) y `ApiError` ya lo expone, pero ningún formulario de esta spec lo leía. El resto del
+Lote 7 (H-48+H-49, H-46+H-47) es transversal a las dos apps y se documenta en
+`specs/002-base-transversal/tasks.md`.
+
+- [X] T150 [H-50] Pieza compartida (Principio XI): `packages/shared-types/src/api-field-error.ts` (`erroresPorCampo()` agrupa `ApiError.errors` por campo, `mensajeDeCampo()` traduce el `code` a una instrucción concreta — un solo diccionario para las dos apps) y `packages/ui/src/components/form-errors.tsx` (`<ResumenErrores>`: arriba, un enlace por campo, foco automático al cambiar el conjunto de errores; `<MensajeErrorCampo>`: debajo del campo, sin `role="alert"` propio para no duplicar el anuncio del resumen). `CampoTelefono` (`packages/ui`) suma un prop `id` para que el enlace del resumen pueda encontrar y enfocar el campo.
+- [X] T151 [H-50] Aplicado a `apps/web/src/components/perfil-formulario.tsx` y a `apps/web/src/app/(publica)/registro/page.tsx` — en el registro, un error de un campo de un paso anterior al que se envía (paso 4) fuerza a volver a ese paso antes de mostrar el resumen, con una bandera (`saltoPorErrorRef`) para que el foco no se lo robe el efecto existente que anuncia el título del paso nuevo (FR-016).
+- [X] T152 [H-50] Aplicado a `apps/backoffice/src/components/formulario-sede.tsx` (alta y edición) y al `ActivarDialog` de `apps/backoffice/src/app/pendientes-tutor/page.tsx`.
+- [X] T153 [H-50] E2e nuevos: `apps/web/e2e/validacion-por-campo.spec.ts` (Perfil y registro) y un caso nuevo en `apps/backoffice/e2e/sedes.spec.ts` — un teléfono de 2 dígitos, no de 3: con 3 el backtracking de `TELEFONO_REGEX` (código de país de 1 a 4 dígitos) a veces encuentra una lectura válida igual.
+- [X] T154 Correr las tres suites de la convención de `docs/00-README.md` antes de cerrar: unitarios de `apps/api`, integración y e2e de `apps/web` y `apps/backoffice`.
+
+**Checkpoint**: Lote 7, parte errores por campo, completo — Perfil, el registro, Sedes y activar
+con tutor muestran el mensaje debajo del campo, el resumen arriba con foco automático, y dicen
+cómo corregir (H-50).
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
