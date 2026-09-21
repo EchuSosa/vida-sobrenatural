@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { type Sede, type ErrorCode, HORARIOS_SEDE_REGEX } from '@vida-sobrenatural/shared-types';
+import {
+  type Sede,
+  type ErrorCode,
+  HORARIOS_SEDE_REGEX,
+  apiFetch,
+  ApiError,
+} from '@vida-sobrenatural/shared-types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +25,6 @@ import {
   Input,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
-import { apiFetch, ApiError } from '../../lib/api-client';
 
 /**
  * H-30 (revisión manual, actualización 2026-09-20, D38/D90/D102): desactivar

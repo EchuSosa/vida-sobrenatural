@@ -1,6 +1,5 @@
 import { auth } from '../../../auth';
-import type { PersonaPerfil } from '@vida-sobrenatural/shared-types';
-import { apiFetch } from '../../../lib/api-client';
+import { type PersonaPerfil, apiFetch } from '@vida-sobrenatural/shared-types';
 import { SelectorTema } from '../../../components/selector-tema';
 import { CerrarSesionBoton } from '../../../components/cerrar-sesion-boton';
 import { PerfilFormulario } from '../../../components/perfil-formulario';

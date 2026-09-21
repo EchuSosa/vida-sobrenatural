@@ -9,13 +9,21 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./auth-server": {
+      "types": "./dist/auth-server.d.ts",
+      "default": "./dist/auth-server.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "pnpm run build"
   },
+  "dependencies": {
+    "jose": "^6.2.12"
+  },
   "devDependencies": {
+    "@types/node": "^20",
     "typescript": "^5"
   }
 }

@@ -1,4 +1,4 @@
-import type { ErrorCode } from '@vida-sobrenatural/shared-types';
+import type { ErrorCode } from './error-code.js';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
@@ -9,9 +9,13 @@ export interface ApiFieldError {
 
 /**
  * Error normalizado a partir de una respuesta Problem Details de la API —
- * ver specs/002-base-transversal/contracts/errores.md (research.md,
- * Decisión 7). El componente que llama a `apiFetch` traduce `code` con
- * `next-intl` (namespace "errors") — este cliente no traduce nada.
+ * specs/002-base-transversal/contracts/errores.md (research.md, Decisión 7).
+ * El componente que llama a `apiFetch` traduce `code` con `next-intl`
+ * (namespace "errors") — este cliente no traduce nada.
+ *
+ * H-41 (revisión manual, revisión de código): un solo cliente para
+ * `apps/web` y `apps/backoffice` — antes eran 53 líneas idénticas
+ * duplicadas a mano en cada app (mismo riesgo de divergencia que H-33).
  */
 export class ApiError extends Error {
   readonly code: ErrorCode;

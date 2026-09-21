@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import type { EstadoCivil, Profesion } from '@vida-sobrenatural/shared-types';
+import { type EstadoCivil, type Profesion, apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
 import { Button, CampoTelefono } from '@vida-sobrenatural/ui';
-import { apiFetch, ApiError } from '../lib/api-client';
 import { useOpcionesRegistro } from '../hooks/use-opciones-registro';
 
 export interface PerfilEditable {

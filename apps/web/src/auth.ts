@@ -1,19 +1,20 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
-import { SignJWT } from 'jose';
+import {
+  testLoginHabilitado,
+  buscarPersonaPorEmail,
+  mintApiToken,
+} from '@vida-sobrenatural/shared-types/auth-server';
 
 /**
- * Proveedor habilitado únicamente para el E2E de Playwright (T028). Gateado
- * en CÓDIGO, no solo por configuración: `NODE_ENV === 'production'` lo
- * excluye siempre, sin importar qué valor tenga `ALLOW_TEST_LOGIN` — así una
- * env var mal seteada en producción no alcanza para habilitarlo por
- * accidente. Reemplaza el login real de Google, que no se puede automatizar
- * sin credenciales reales, sin reimplementar el cifrado interno de sesión de
- * NextAuth (se sigue pasando por su `signIn()` real).
+ * H-41 (revisión manual, revisión de código): `testLoginHabilitado()`,
+ * `buscarPersonaPorEmail` y `mintApiToken` viven en
+ * @vida-sobrenatural/shared-types/auth-server — eran idénticas a las de
+ * apps/backoffice/src/auth.ts. El resto de este archivo (proveedores,
+ * páginas, callbacks completos) sigue acá: difiere a propósito entre las
+ * dos apps.
  */
-const testLoginHabilitado =
-  process.env.NODE_ENV !== 'production' && process.env.ALLOW_TEST_LOGIN === 'true';
 
 /**
  * Captura given_name/family_name/picture por separado — el profile() default
@@ -39,7 +40,7 @@ const googleProvider = Google({
   },
 });
 
-const proveedores = testLoginHabilitado
+const proveedores = testLoginHabilitado()
   ? [
       googleProvider,
       Credentials({
@@ -63,46 +64,6 @@ const proveedores = testLoginHabilitado
       }),
     ]
   : [googleProvider];
-
-/**
- * Claims que este servidor le pasa a apps/api en cada llamada — ver
- * specs/001-fase-bienvenida/contracts/auth-integration.md. No es el JWE
- * interno de sesión de NextAuth (ese no se comparte con el backend).
- */
-interface PersonaLookup {
-  id: string;
-  estado: 'activa' | 'pendiente_tutor';
-  activo: boolean;
-  rol: string[];
-  temaPreferido: 'claro' | 'oscuro' | 'sistema';
-}
-
-async function buscarPersonaPorEmail(email: string): Promise<PersonaLookup | null> {
-  const baseUrl = process.env.API_BASE_URL ?? 'http://localhost:3333';
-  const response = await fetch(
-    `${baseUrl}/personas/by-email?email=${encodeURIComponent(email)}`,
-    { headers: { 'X-Internal-Secret': process.env.INTERNAL_API_SECRET ?? '' } },
-  );
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw new Error(`GET /personas/by-email respondió ${response.status}`);
-  }
-  return (await response.json()) as PersonaLookup;
-}
-
-async function mintApiToken(claims: {
-  email: string;
-  personaId: string | null;
-  estado: 'activa' | 'pendiente_tutor' | null;
-  rol: string[];
-}): Promise<string> {
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET ?? '');
-  return new SignJWT(claims)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('1h')
-    .sign(secret);
-}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: proveedores,

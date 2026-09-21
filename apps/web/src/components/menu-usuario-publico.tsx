@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@vida-sobrenatural/ui';
-import { apiFetch, ApiError } from '../lib/api-client';
+import { apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
 import { CerrarSesionBoton } from './cerrar-sesion-boton';
 
 type TemaPreferido = 'claro' | 'oscuro' | 'sistema';

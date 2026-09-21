@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { Button } from '@vida-sobrenatural/ui';
-import { apiFetch, ApiError } from '../lib/api-client';
+import { apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
 
 type TemaPreferido = 'claro' | 'oscuro' | 'sistema';
 

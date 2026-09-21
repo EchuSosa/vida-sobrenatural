@@ -4,9 +4,8 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import type { Sede } from '@vida-sobrenatural/shared-types';
+import { type Sede, apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
 import { PasoIndicador, CampoTelefono } from '@vida-sobrenatural/ui';
-import { apiFetch, ApiError } from '../../../lib/api-client';
 import { useOpcionesRegistro } from '../../../hooks/use-opciones-registro';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
