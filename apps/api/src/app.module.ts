@@ -5,9 +5,11 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { SedeModule } from './sede/sede.module.js';
 import { PersonaModule } from './persona/persona.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { PalabraProfeticaModule } from './palabra-profetica/palabra-profetica.module.js';
+import { LibroModule } from './libro/libro.module.js';
 
 @Module({
-  imports: [PrismaModule, AuthModule, SedeModule, PersonaModule],
+  imports: [PrismaModule, AuthModule, SedeModule, PersonaModule, PalabraProfeticaModule, LibroModule],
   controllers: [AppController],
   providers: [AppService],
 })
