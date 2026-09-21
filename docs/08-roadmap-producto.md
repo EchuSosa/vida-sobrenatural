@@ -74,6 +74,22 @@
 
 ## Backlog (fuera de alcance por ahora, sin fecha)
 
+**Ventas de Ediciones VS.** Son dos ideas distintas, con costos muy distintos:
+
+- **Registro de ventas presenciales** (la mesa de libros de los domingos) — candidata razonable de
+  Fase 2. Stock por Libro, y una Venta con fecha, cantidad, medio de pago y quién la registró, más
+  un resumen para el Admin. Sigue el mismo criterio que los Pagos de Eventos: la app **registra**
+  una operación que ocurrió afuera, no cobra (D67). Entidades nuevas que apuntan a Libro; el Libro
+  no cambia.
+- **Venta online** — proyecto aparte, no una spec más. Implica pasarela de pago, facturación ante
+  AFIP para la Asociación Civil, envío o retiro, y devoluciones. Es la misma razón por la que las
+  donaciones quedaron fuera de la app (D67).
+
+Nada del MVP bloquea ninguna de las dos: el borrado de Libro es lógico con papelera (D119), así
+que un historial de ventas nunca quedaría huérfano. **Cuando exista Venta, el Libro pasa a tener
+dependientes** y vuelve a aplicar la regla de no permitir eliminar un registro con datos
+relacionados, que hoy no aplica porque nada depende de un Libro.
+
 - Control de asistencia general a cultos (distinto de la asistencia a Vida de Servicio, que sí está en el MVP).
 - Reemplazo total de WhatsApp como canal (hoy conviven).
 
