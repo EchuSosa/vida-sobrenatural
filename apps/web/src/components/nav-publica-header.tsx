@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
 import { Button, Sheet, SheetContent, SheetTitle, SheetTrigger, buttonVariants } from '@vida-sobrenatural/ui';
 import { NAV_PUBLICA, NAV_PUBLICA_ACCIONES } from '../config/nav-publica';
+import { MenuUsuarioPublico, ItemsUsuarioCelular } from './menu-usuario-publico';
 
 /**
  * H-19 (actualización 2026-09-18): con sesión de una Persona ya activa, la
@@ -88,6 +89,8 @@ export function NavPublicaHeader() {
               {item.label}
             </Link>
           ))}
+          {/* H-38: menú de usuario (Perfil/tema/cerrar sesión) — no renderiza nada sin sesión. */}
+          <MenuUsuarioPublico />
         </div>
 
         {/* Celular: menú hamburguesa (accesible — FR-014, T049) */}
@@ -121,6 +124,8 @@ export function NavPublicaHeader() {
                     onNavigate={() => setAbierto(false)}
                   />
                 ))}
+                {/* H-38: mismos ítems de usuario que el DropdownMenu de escritorio, sin sesión no renderiza nada. */}
+                <ItemsUsuarioCelular onNavigate={() => setAbierto(false)} />
               </nav>
             </SheetContent>
           </Sheet>

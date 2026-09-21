@@ -29,7 +29,15 @@
     "accesibilidad": "Accesibilidad",
     "abrirMenu": "Abrir menú",
     "menu": "Menú",
-    "principal": "Principal"
+    "principal": "Principal",
+    "mas": "Más",
+    "secundario": "Secundario",
+    "menuUsuario": "Mi cuenta",
+    "tema": "Tema",
+    "temaClaro": "Claro",
+    "temaOscuro": "Oscuro",
+    "temaSistema": "Sistema",
+    "cerrarSesion": "Cerrar sesión"
   },
   "primerosPasos": {
     "titulo": "Bienvenido/a a Vida Sobrenatural",

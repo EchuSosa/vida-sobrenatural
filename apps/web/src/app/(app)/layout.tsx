@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '../../auth';
 import { NavAppBar } from '../../components/nav-app-bar';
+import { NavAppTopBarCelular } from '../../components/nav-app-mas';
 import { SincronizarTema } from '../../components/sincronizar-tema';
 
 export const metadata = {
@@ -23,6 +24,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen flex-col">
       <SincronizarTema />
+      {/* H-37: barra superior delgada solo en celular (logo + "Más") — en
+          escritorio esas secciones ya viven dentro de NavAppBar. */}
+      <NavAppTopBarCelular />
       <NavAppBar />
       <main id="contenido" className="flex-1 pb-20 md:pb-0">
         {children}

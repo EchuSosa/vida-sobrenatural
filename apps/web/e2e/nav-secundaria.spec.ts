@@ -1,0 +1,115 @@
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import { registrarPersonaDeTest } from './helpers';
+
+/**
+ * H-37/H-38 (revisión manual ronda 3, docs/14-navegacion.md secciones 1 y 2):
+ * la app con sesión ofrece un camino de ida y vuelta a lo público (panel
+ * "Más"), y el header público ofrece Perfil/tema/cerrar sesión con sesión
+ * activa. Corre en modo claro y oscuro (Constitución Principio VII).
+ */
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`modo ${colorScheme}`, () => {
+    test.use({ colorScheme });
+
+    test.describe('celular', () => {
+      test.use({ viewport: { width: 390, height: 844 } });
+
+      test('el panel "Más" de la app lleva a una sección pública, que ofrece volver', async ({ page }) => {
+        const email = `e2e-nav-mas-celular-${colorScheme}-${Date.now()}@example.com`;
+        await registrarPersonaDeTest(page, email);
+
+        await page.goto('/inicio');
+        await page.waitForLoadState('networkidle');
+
+        await page.getByRole('button', { name: 'Más' }).click();
+        const panel = page.getByRole('dialog');
+        await expect(panel).toBeVisible();
+        await expect(panel).toHaveCSS('opacity', '1');
+
+        const resultadosPanel = await new AxeBuilder({ page }).analyze();
+        expect(resultadosPanel.violations).toEqual([]);
+
+        await panel.getByRole('link', { name: 'Visitanos' }).click();
+        await expect(page).toHaveURL(/\/visitanos/);
+
+        // "Ir a la app" (H-19) es el camino de vuelta — sigue con sesión.
+        await expect(page.getByRole('link', { name: 'Ir a la app' })).toBeVisible();
+      });
+
+      test('el panel hamburguesa público incluye Perfil, tema y cerrar sesión con sesión activa', async ({ page }) => {
+        const email = `e2e-menu-usuario-celular-${colorScheme}-${Date.now()}@example.com`;
+        await registrarPersonaDeTest(page, email);
+
+        await page.goto('/nosotros');
+        await page.waitForLoadState('networkidle');
+
+        await page.getByRole('button', { name: 'Abrir menú' }).click();
+        const panel = page.getByRole('dialog');
+        await expect(panel).toBeVisible();
+        await expect(panel).toHaveCSS('opacity', '1');
+
+        await expect(panel.getByRole('link', { name: 'Perfil' })).toBeVisible();
+        await expect(panel.getByRole('button', { name: 'Claro' })).toBeVisible();
+        await expect(panel.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible();
+
+        const resultados = await new AxeBuilder({ page }).analyze();
+        expect(resultados.violations).toEqual([]);
+      });
+    });
+
+    test.describe('escritorio', () => {
+      test('el menú "Más" de la app agrupa las secciones públicas', async ({ page }) => {
+        const email = `e2e-nav-mas-escritorio-${colorScheme}-${Date.now()}@example.com`;
+        await registrarPersonaDeTest(page, email);
+
+        await page.goto('/inicio');
+        await page.waitForLoadState('networkidle');
+
+        await page.getByRole('button', { name: 'Más' }).click();
+        const menu = page.getByRole('menu');
+        await expect(menu).toBeVisible();
+
+        // "region" es una regla de best-practice de axe (no lleva tag wcag2*),
+        // no un criterio de WCAG 2.2 AA: exige que TODO contenido visible esté
+        // dentro de un landmark, pero eso es incompatible con el patrón ARIA
+        // menu/menuitem (el menuitem exige un padre con role="menu"/"menubar"/
+        // "group" — ninguno de esos es un landmark reconocido). Portalizado
+        // fuera de cualquier landmark es el comportamiento esperado de un menú
+        // flotante (Base UI, igual que shadcn/Radix).
+        const resultadosMenu = await new AxeBuilder({ page }).disableRules(['region']).analyze();
+        expect(resultadosMenu.violations).toEqual([]);
+
+        await menu.getByRole('menuitem', { name: 'Visitanos' }).click();
+        await expect(page).toHaveURL(/\/visitanos/);
+        await expect(page.getByRole('link', { name: 'Ir a la app' })).toBeVisible();
+      });
+
+      test('el menú de usuario del header público ofrece Perfil, tema y cerrar sesión', async ({ page }) => {
+        const email = `e2e-menu-usuario-escritorio-${colorScheme}-${Date.now()}@example.com`;
+        await registrarPersonaDeTest(page, email);
+
+        await page.goto('/nosotros');
+        await page.waitForLoadState('networkidle');
+
+        // El trigger muestra session.user.name — 'Visitante de Test' para el proveedor test-login.
+        await page.getByRole('button', { name: 'Visitante de Test' }).click();
+
+        const menu = page.getByRole('menu');
+        await expect(menu).toBeVisible();
+        await expect(menu.getByRole('menuitem', { name: 'Perfil' })).toBeVisible();
+        await expect(menu.getByRole('menuitem', { name: 'Claro' })).toBeVisible();
+
+        // "region" excluida — ver el comentario del test anterior.
+        const resultados = await new AxeBuilder({ page }).disableRules(['region']).analyze();
+        expect(resultados.violations).toEqual([]);
+
+        await page.keyboard.press('Escape');
+        await expect(menu).toBeHidden();
+
+        await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible();
+      });
+    });
+  });
+}
