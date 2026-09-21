@@ -17,6 +17,8 @@ export {
   type TablaDatosProps,
   type ColumnaTabla,
   type OrdenTabla,
+  TablaEsqueleto,
+  type TablaEsqueletoProps,
 } from './components/tabla-datos';
 export { Button, buttonVariants } from './components/ui/button';
 export { Input } from './components/ui/input';

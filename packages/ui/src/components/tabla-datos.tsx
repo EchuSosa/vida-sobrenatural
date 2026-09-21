@@ -42,6 +42,60 @@ export interface OrdenTabla {
   direccion: 'asc' | 'desc';
 }
 
+/**
+ * H-60 (revisión manual ronda 7): esqueleto exportado aparte — un
+ * `loading.tsx` (Server Component route) no tiene `datos` todavía, así que
+ * no puede montar un `<TablaDatos cargando>` con `celda` reales. Recibe
+ * solo la forma de las columnas (id/encabezado/className), no cómo se
+ * renderiza cada una — TablaDatos lo reutiliza para su propia rama
+ * `cargando`, una sola definición del esqueleto (Principio XI).
+ */
+export interface TablaEsqueletoProps {
+  columnas: { id: string; encabezado: string; className?: string }[];
+  conAcciones?: boolean;
+  encabezadoAcciones?: string;
+  filas?: number;
+}
+
+export function TablaEsqueleto({ columnas, conAcciones = false, encabezadoAcciones = 'Acciones', filas = 5 }: TablaEsqueletoProps) {
+  const totalColumnas = columnas.length + (conAcciones ? 1 : 0);
+  return (
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-border">
+            {columnas.map((columna) => (
+              <th
+                key={columna.id}
+                scope="col"
+                className={cn('px-3 py-2 text-left font-medium text-muted-foreground', columna.className)}
+              >
+                {columna.encabezado}
+              </th>
+            ))}
+            {conAcciones && (
+              <th scope="col" className="px-3 py-2 text-right font-medium text-muted-foreground">
+                {encabezadoAcciones}
+              </th>
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: filas }).map((_, i) => (
+            <tr key={i} className="border-b border-border last:border-0">
+              {Array.from({ length: totalColumnas }).map((__, j) => (
+                <td key={j} className="px-3 py-3">
+                  <Skeleton className="h-4 w-full max-w-32" />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export interface TablaDatosProps<T> {
   columnas: ColumnaTabla<T>[];
   datos: T[];
@@ -72,13 +126,17 @@ export function TablaDatos<T>({
   orden,
   onOrdenar,
 }: TablaDatosProps<T>) {
-  const totalColumnas = columnas.length + (acciones ? 1 : 0);
-
-  // Los cuatro estados (Principio VIII): acá, vacío — cargando y con datos
-  // comparten la misma estructura de <table> más abajo (para no duplicar
-  // encabezados), éxito son las filas con datos, error lo maneja quien usa
-  // la tabla (no le llega ni `datos` ni `cargando` hasta resolverlo).
-  if (!cargando && datos.length === 0) {
+  // Los cuatro estados (Principio VIII) — error lo maneja quien usa la
+  // tabla (no le llega ni `datos` ni `cargando` hasta resolverlo). La
+  // mayoría de las pantallas ya no necesitan esta rama (el fetch inicial
+  // vive en el Server Component y lo cubre loading.tsx con TablaEsqueleto,
+  // H-60) — queda para cuando un filtro/búsqueda se resuelve en cliente.
+  if (cargando) {
+    return (
+      <TablaEsqueleto columnas={columnas} conAcciones={!!acciones} encabezadoAcciones={encabezadoAcciones} filas={filasEsqueleto} />
+    );
+  }
+  if (datos.length === 0) {
     return <EstadoVacio mensaje={mensajeVacio} accion={accionVacio} />;
   }
 
@@ -125,26 +183,16 @@ export function TablaDatos<T>({
           </tr>
         </thead>
         <tbody>
-          {cargando
-            ? Array.from({ length: filasEsqueleto }).map((_, i) => (
-                <tr key={i} className="border-b border-border last:border-0">
-                  {Array.from({ length: totalColumnas }).map((__, j) => (
-                    <td key={j} className="px-3 py-3">
-                      <Skeleton className="h-4 w-full max-w-32" />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            : datos.map((fila) => (
-                <tr key={obtenerId(fila)} className="border-b border-border last:border-0 hover:bg-muted/50">
-                  {columnas.map((columna) => (
-                    <td key={columna.id} className={cn('px-3 py-3', columna.className)}>
-                      {columna.celda(fila)}
-                    </td>
-                  ))}
-                  {acciones && <td className="px-3 py-3 text-right">{acciones(fila)}</td>}
-                </tr>
+          {datos.map((fila) => (
+            <tr key={obtenerId(fila)} className="border-b border-border last:border-0 hover:bg-muted/50">
+              {columnas.map((columna) => (
+                <td key={columna.id} className={cn('px-3 py-3', columna.className)}>
+                  {columna.celda(fila)}
+                </td>
               ))}
+              {acciones && <td className="px-3 py-3 text-right">{acciones(fila)}</td>}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
