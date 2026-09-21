@@ -257,13 +257,20 @@ model PalabraProfetica {
 
   anio  Int
   titulo String
+  // D121: el texto es lo único realmente obligatorio de la palabra — sin
+  // texto no hay palabra que publicar. El video es una de las formas en
+  // que se comparte, no la palabra en sí.
   texto String @db.Text
 
-  // Se guarda tal como la cargó el Admin (para reeditar el formulario), pero
-  // el embed público siempre se arma desde youtubeVideoId, nunca reparseando
-  // esta columna en cada render (research.md Decisión 4).
-  youtubeUrl     String
-  youtubeVideoId String
+  // D121 (precisa D109): el video de YouTube es OPCIONAL — puede llegar
+  // después del anuncio, o no existir. Se guarda tal como la cargó el
+  // Admin (para reeditar el formulario), pero el embed público siempre se
+  // arma desde youtubeVideoId, nunca reparseando esta columna en cada
+  // render (research.md Decisión 4). Los dos van juntos o ninguno de los
+  // dos (igual que portadaUrl/portadaDescripcion en Libro) — no expresable
+  // como constraint de Prisma, se valida en el service.
+  youtubeUrl     String?
+  youtubeVideoId String?
 
   // Como máximo un registro con vigente:true a la vez — invariante de
   // negocio (PalabraProfeticaService, transacción al marcar una nueva

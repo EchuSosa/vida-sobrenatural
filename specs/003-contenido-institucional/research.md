@@ -90,7 +90,9 @@ acotada a esos tres patrones, devuelve el `ID` (11 caracteres, alfanumérico + `
 `null` si no. El service la usa para: (a) rechazar al guardar si devuelve `null` (FR-011, error
 `YOUTUBE_URL_INVALIDA`); (b) construir la URL de embed final desde el `ID`, nunca reusando la URL tal
 como la pegó el Admin — así la subpágina pública siempre embebe desde `youtube-nocookie.com`
-(FR-005) sin importar qué forma de URL cargó el Admin.
+(FR-005) sin importar qué forma de URL cargó el Admin. D121 (agregada durante la implementación):
+esta función sólo corre si el Admin cargó algo en `youtubeUrl` — un campo vacío/omitido no pasa por
+la regex, no es un caso de "formato inválido": `youtubeVideoId` simplemente queda en `null`.
 
 **Rationale**: No existe ya una decisión de usar la YouTube Data API para este caso (`docs/10` la
 menciona para otro propósito — obtener metadata, MVP con API key, fuera de alcance de este spec: acá

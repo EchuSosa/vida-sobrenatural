@@ -37,7 +37,7 @@ Un visitante quiere ver cuál es la Palabra Profética vigente de la iglesia (co
 
 **Acceptance Scenarios**:
 
-1. **Given** una Palabra Profética marcada vigente, **When** el visitante entra a su subpágina desde Nosotros, **Then** ve el título del año, el texto y el video de YouTube, que no se carga hasta que la persona interactúa con él (no retrasa el resto de la página).
+1. **Given** una Palabra Profética marcada vigente, **When** el visitante entra a su subpágina desde Nosotros, **Then** ve el título del año y el texto, y si tiene un video cargado (D121: es opcional) lo ve como miniatura, que no se carga hasta que la persona interactúa con ella (no retrasa el resto de la página).
 2. **Given** que todavía no hay ninguna Palabra Profética vigente, **When** el visitante entra a esa subpágina, **Then** ve un estado vacío amable, no un error ni una página en blanco.
 3. **Given** el catálogo de libros de Ediciones VS, **When** el visitante entra a su subpágina, **Then** ve la introducción de la editorial, cómo conseguir los libros (fuera de la app — no hay compra ni carrito), y el listado de libros activos con su portada (o un espacio con aspecto de portada si todavía no hay imagen real), título, autor/a y año.
 4. **Given** un libro sin portada cargada, **When** aparece en el listado, **Then** se ve un espacio con la proporción de una tapa de libro, no una imagen inventada ni un espacio vacío sin marcar.
@@ -55,7 +55,7 @@ Cada año, alguien de la iglesia tiene que poder cargar la nueva Palabra Profét
 
 **Acceptance Scenarios**:
 
-1. **Given** una sesión de Admin, **When** completa año, título, texto y la URL de un video de YouTube y guarda, **Then** el registro queda creado; si además lo marca vigente, la web pública lo muestra de inmediato en esa subpágina.
+1. **Given** una sesión de Admin, **When** completa año, título y texto (la URL de un video de YouTube es opcional, D121) y guarda, **Then** el registro queda creado; si además lo marca vigente, la web pública lo muestra de inmediato en esa subpágina.
 2. **Given** que ya existe una Palabra Profética vigente, **When** el Admin marca una nueva como vigente, **Then** la anterior deja de estarlo automáticamente, sin que el Admin tenga que hacer un paso aparte — y ambas quedan guardadas, visibles en el historial del backoffice.
 3. **Given** una sesión de Pastor/Pastora, **When** entra a esta sección del backoffice, **Then** puede ver el historial completo pero ningún campo ni botón de guardar están habilitados para editar.
 4. **Given** un campo obligatorio vacío o una URL de YouTube que no tiene ese formato, **When** el Admin intenta guardar, **Then** ve el error debajo del campo correspondiente, que desaparece al corregirlo sin tener que reenviar el formulario.
@@ -112,6 +112,7 @@ Llegaron los archivos de marca (isotipo y logotipo, documentados en `docs/marca/
 - ¿Qué pasa si dos Admins editan la Palabra Profética al mismo tiempo? Gana el último guardado (mismo criterio que el resto de la edición en el backoffice hoy) — no hay bloqueo optimista en esta spec.
 - ¿Qué pasa con el ícono de YouTube del pie de página o la transmisión en vivo del culto? No es parte de esta spec — siguen dependiendo de que la iglesia entregue la URL del canal (pendiente documentado aparte).
 - ¿Qué pasa si el Admin pega una URL que no es de YouTube, o de un video ya borrado/privado? El formato inválido se rechaza al guardar (FR-011); un video borrado o privado después de guardado válido queda fuera de esta spec — lo detecta quien mira la subpágina pública, igual que en el sitio anterior.
+- ¿Qué pasa si la Palabra Profética vigente todavía no tiene un video cargado (D121)? La subpágina pública muestra año, título y texto igual, sin el bloque de video — no es un estado vacío ni un error, es una variante normal que puede completarse más adelante sin volver a publicar nada.
 - ¿Qué pasa si la portada que sube el Admin es apaisada o cuadrada, no vertical? Se recorta centrada a la proporción de tapa (2:3) al procesarla (FR-024) — el libro se ve con el mismo formato que el resto del listado.
 - ¿Qué pasa con el vectorial (SVG) y el swoosh de la marca, que todavía no llegaron? No se inventan ni se aproximan: esta spec usa únicamente los PNG ya entregados (isotipo y logotipo, ver `docs/marca/README.md`), tal como están.
 - ¿Qué pasa con la cabecera del sidebar de `apps/backoffice`, que hoy no tiene ningún nombre que "reemplazar"? Se agrega el logotipo igual, con el mismo criterio del resto de la app — no es un caso especial, es la misma pieza en un lugar que hoy está vacío.
@@ -126,7 +127,7 @@ Llegaron los archivos de marca (isotipo y logotipo, documentados en `docs/marca/
 - **FR-002**: El sistema MUST conservar en Nosotros, sin cambios de contenido, lo que ya existe hoy (la introducción "Somos Familia", el listado del equipo pastoral con su placeholder de foto, y "En qué creemos" marcado como contenido pendiente).
 - **FR-003**: El sistema MUST ofrecer Palabra Profética y Ediciones VS como subpáginas propias, enlazadas desde Nosotros, cada una con su propia URL y sin agregar ítems al menú principal (que sigue teniendo cuatro).
 - **FR-004**: El sistema MUST mostrar, en la subpágina de Palabra Profética, la que esté marcada vigente: su año, título, texto y el video de YouTube asociado.
-- **FR-005**: El video de la Palabra Profética MUST mostrarse primero como una miniatura, sin cargar el reproductor hasta que la persona hace clic (mismo patrón ya definido para YouTube en D93), y el reproductor MUST embeberse desde el dominio de YouTube sin cookies (`youtube-nocookie.com`) — resuelve a la vez el tiempo de carga de la página y evitar que se activen rastreadores de terceros antes de que la persona decida ver el video (D5, y el pendiente de política de privacidad bajo la Ley 25.326).
+- **FR-005**: Cuando la Palabra Profética vigente tiene un video cargado (D121: es opcional), MUST mostrarse primero como una miniatura, sin cargar el reproductor hasta que la persona hace clic (mismo patrón ya definido para YouTube en D93), y el reproductor MUST embeberse desde el dominio de YouTube sin cookies (`youtube-nocookie.com`) — resuelve a la vez el tiempo de carga de la página y evitar que se activen rastreadores de terceros antes de que la persona decida ver el video (D5, y el pendiente de política de privacidad bajo la Ley 25.326). Sin video cargado, la subpágina MUST mostrar el resto del contenido igual, sin ese bloque — no es un estado vacío ni un error, es una variante normal.
 - **FR-006**: El sistema MUST mostrar un estado vacío (no un error) en la subpágina de Palabra Profética cuando todavía no hay ninguna marcada vigente.
 - **FR-007**: El sistema MUST mostrar, en la subpágina de Ediciones VS, el texto de introducción de la editorial, cómo se consiguen los libros (fuera de la app: no hay compra ni carrito) y el listado de los libros activos, cada uno con su portada (o un espacio con la proporción de una tapa cuando no hay portada real), título, autor/a y año, en el orden definido para cada uno.
 - **FR-008**: El sistema MUST mostrar un estado vacío (no un error) en Ediciones VS cuando no queda ningún libro activo.
@@ -134,8 +135,8 @@ Llegaron los archivos de marca (isotipo y logotipo, documentados en `docs/marca/
 
 **Backoffice — Palabra Profética**
 
-- **FR-010**: El sistema MUST permitir al rol Admin crear una Palabra Profética con año, título, texto y URL de un video de YouTube.
-- **FR-011**: El sistema MUST validar que la URL de YouTube cargada sea una URL de YouTube reconocible, de la que se pueda extraer el identificador del video; si no lo es, MUST rechazarla con un error claro antes de guardar, en vez de guardar un valor que después rompa la subpágina pública en silencio.
+- **FR-010**: El sistema MUST permitir al rol Admin crear una Palabra Profética con año, título y texto como datos obligatorios; la URL de un video de YouTube es opcional (D121) — puede llegar después del anuncio, o no llegar nunca, sin que eso bloquee publicar la palabra.
+- **FR-011**: Cuando el Admin carga una URL de video, el sistema MUST validar que sea una URL de YouTube reconocible, de la que se pueda extraer el identificador del video; si no lo es, MUST rechazarla con un error claro antes de guardar, en vez de guardar un valor que después rompa la subpágina pública en silencio. Dejar el campo vacío MUST seguir siendo válido (D121).
 - **FR-012**: El sistema MUST permitir al rol Admin marcar una Palabra Profética como vigente; al hacerlo, la que estuviera vigente hasta ese momento MUST dejar de estarlo automáticamente, sin un paso manual aparte.
 - **FR-013**: El sistema MUST conservar toda Palabra Profética anterior (nunca se borra al reemplazarla), visible en un historial dentro del backoffice.
 - **FR-014**: El sistema MUST validar el formulario de Palabra Profética campo por campo, con el error apareciendo debajo del campo correspondiente, limpiándose al corregirlo y revalidándose al salir del campo, sin necesitar un nuevo intento de envío para ver que se corrigió.
@@ -182,7 +183,7 @@ Llegaron los archivos de marca (isotipo y logotipo, documentados en `docs/marca/
 
 ### Key Entities
 
-- **Palabra Profética**: contenido institucional del año — a qué año pertenece, título, texto y el video de YouTube asociado. En un momento dado hay como máximo una vigente; las anteriores se conservan como historial, nunca se borran.
+- **Palabra Profética**: contenido institucional del año — a qué año pertenece, título, texto (obligatorio: sin texto no hay palabra que publicar) y, opcionalmente, un video de YouTube asociado (D121 — el video es una de las formas en que se comparte la palabra, no la palabra en sí; puede llegar después o no llegar). En un momento dado hay como máximo una vigente; las anteriores se conservan como historial, nunca se borran.
 - **Libro** (Ediciones VS): título, autor/a, año de publicación, descripción opcional, orden de aparición en el listado, y un par portada + texto alternativo (los dos juntos u ninguno de los dos). Tiene un estado activo/inactivo (para sacarlo de circulación sin perderlo) y puede quedar eliminado (borrado recuperable, con fecha y responsable) de forma independiente de ese estado.
 
 La Historia 5 no agrega ninguna entidad: el isotipo y el logotipo son archivos estáticos (ver `docs/marca/README.md`), sin persistencia en la base de datos.

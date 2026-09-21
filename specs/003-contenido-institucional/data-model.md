@@ -12,16 +12,17 @@ ni ninguna entidad de los specs 001/002.
 | `anio` | `Int` | sí | FR-010. Sin unicidad forzada por base: nada impide dos registros del mismo año (ej. corrección), la única regla real de negocio es "una sola vigente" (ver abajo). |
 | `titulo` | `String` | sí | FR-010. Ej. "Palabra Profética 2026 — Fidelidad y crecimiento". |
 | `texto` | `String` (`@db.Text`) | sí | FR-010. Texto libre, sin límite corto de longitud (es contenido institucional, no un campo de formulario acotado). |
-| `youtubeUrl` | `String` | sí | FR-010/FR-011. Se guarda la URL cargada por el Admin (para reeditar el formulario), pero el embed público siempre se arma desde `youtubeVideoId` (abajo), nunca reparseando esta columna en cada render. |
-| `youtubeVideoId` | `String` | sí | Derivado de `youtubeUrl` al guardar (`research.md` Decisión 4) — 11 caracteres. Columna propia (no un getter calculado) para que la subpágina pública arme el embed con una sola lectura, sin repetir el parseo de URL en cada request. |
+| `youtubeUrl` | `String?` | no (D121) | FR-010/FR-011. Opcional — puede llegar después del anuncio, o no llegar nunca; sólo el texto es obligatorio (D121, precisa D109). Se guarda la URL cargada por el Admin (para reeditar el formulario), pero el embed público siempre se arma desde `youtubeVideoId` (abajo), nunca reparseando esta columna en cada render. |
+| `youtubeVideoId` | `String?` | condicional | Derivado de `youtubeUrl` al guardar (`research.md` Decisión 4) — 11 caracteres, `null` si `youtubeUrl` es `null`. Columna propia (no un getter calculado) para que la subpágina pública arme el embed con una sola lectura, sin repetir el parseo de URL en cada request. Los dos van juntos o ninguno de los dos (mismo criterio que `Libro.portadaUrl`/`portadaDescripcion`) — no expresable como constraint de Prisma, se valida en el service. |
 | `vigente` | `Boolean` | sí, `@default(false)` | FR-004/FR-006/FR-012. Como máximo un registro con `vigente: true` a la vez — invariante de negocio (`PalabraProfeticaService`, transacción al marcar una nueva vigente), no un constraint de base (mismo criterio que "Sede única activa" en `sede.service.ts`). Índice (`@@index([vigente])`) porque la subpágina pública filtra por este campo en cada visita (H-42). |
 | `createdAt` | `DateTime` | — | `@default(now())`. Con `vigente` es lo que define el orden del historial (FR-013): el más reciente primero. |
 | `updatedAt` | `DateTime` | — | `@updatedAt`. |
 
 **Validaciones** (DTO, `class-validator`):
 - `anio`: entero, rango razonable (ej. `Min(2010)` — año de fundación, `Max(añoActual + 1)`).
-- `titulo`, `texto`, `youtubeUrl`: no vacíos.
-- `youtubeUrl`: además de no vacío, debe resolver a un `youtubeVideoId` válido (`research.md`
+- `titulo`, `texto`: no vacíos (`texto` es lo único de contenido realmente obligatorio, D121).
+- `youtubeUrl`: opcional (D121) — si se omite o llega vacío, `youtubeVideoId` queda en `null` sin
+  error. Si llega con un valor, debe resolver a un `youtubeVideoId` válido (`research.md`
   Decisión 4) o el service rechaza con `YOUTUBE_URL_INVALIDA` antes de tocar la base (FR-011).
 
 **Transición de estado**: solo `vigente`, y solo en una dirección observable por el usuario —

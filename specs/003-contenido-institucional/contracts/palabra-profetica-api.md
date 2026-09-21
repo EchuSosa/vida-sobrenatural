@@ -10,7 +10,9 @@ Público (sin guard) — usado por la subpágina pública (FR-004) y por el hist
 
 - `GET /palabra-profetica?vigente=true` → la única con `vigente: true`, o `204 No Content` si
   ninguna lo es todavía (FR-006: la subpágina pública renderiza su propio estado vacío ante ese
-  `204`, no un error).
+  `204`, no un error). Distinto de una vigente sin video (D121): esa sí devuelve `200` con
+  `youtubeUrl`/`youtubeVideoId` en `null` — la subpágina pública omite el bloque de video, no
+  renderiza el estado vacío (Edge Case del spec).
 - `GET /palabra-profetica` (sin filtro, paginado) → historial completo, orden `createdAt desc`
   (FR-013). Usado solo por el backoffice; `apps/web` nunca pide este listado completo.
 
@@ -19,10 +21,11 @@ Público (sin guard) — usado por la subpágina pública (FR-004) y por el hist
 ## `POST /palabra-profetica`
 
 - Guard: `JwtNextAuthGuard` + `RolesGuard` + `@Roles('admin')` (FR-028).
-- Body: `CrearPalabraProfeticaDto` — `anio`, `titulo`, `texto`, `youtubeUrl` (todos obligatorios,
-  `data-model.md`).
-- El service valida `youtubeUrl` y deriva `youtubeVideoId` (`research.md` Decisión 4); si no matchea
-  ningún patrón reconocido, `400 YOUTUBE_URL_INVALIDA` (FR-011) — no se guarda nada.
+- Body: `CrearPalabraProfeticaDto` — `anio`, `titulo`, `texto` obligatorios; `youtubeUrl` opcional
+  (D121, `data-model.md`).
+- Si llega `youtubeUrl`, el service la valida y deriva `youtubeVideoId` (`research.md` Decisión 4);
+  si no matchea ningún patrón reconocido, `400 YOUTUBE_URL_INVALIDA` (FR-011) — no se guarda nada.
+  Si no llega (u omitida), `youtubeVideoId` queda en `null` sin error (D121).
 - El registro nuevo se crea con `vigente: false` por default — marcar vigente es un paso propio (ver
   abajo), no un flag de este mismo POST, para que "crear" y "publicar" queden como dos acciones
   distinguibles en el historial (consistente con Acceptance Scenario 1 de la Historia 3: "si además

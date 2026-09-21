@@ -79,3 +79,11 @@
   dependencia de `seed-demo.ts` (T044) sobre `seed.ts` (T015) más su clave de idempotencia, ambas
   ausentes antes pese al patrón ya establecido (D120). Checklist no cambia de estado — ningún ítem
   dependía de estos detalles de plan/tasks.
+- 2026-09-21 (séptima revisión, durante `/speckit.implement` Tramo 1): D121 (nueva) hace opcional el
+  video de YouTube de PalabraProfetica — sólo `texto` es obligatorio. Surgió al sembrar la Palabra
+  Profética 2026 real: año y título están documentados, pero exigir el video bloqueaba publicar el
+  resto por un dato circunstancial. FR-005/FR-010/FR-011, Key Entities, un Edge Case nuevo, y
+  `data-model.md`/`research.md`/`contracts/palabra-profetica-api.md`/`tasks.md` (T016/T024/T025)
+  actualizados; `schema.prisma` ya tenía una migración aplicada con esas columnas `NOT NULL` —
+  se corrigió con una segunda migración (`ALTER COLUMN ... DROP NOT NULL`), no editando la primera.
+  Checklist revalidado: sigue en verde.
