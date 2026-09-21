@@ -54,9 +54,32 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
   // (apps/backoffice/e2e/palabra-profetica.spec.ts, libros.spec.ts) crean
   // PalabraProfetica/Libro con `titulo` prefijado `e2e-` — mismo criterio
   // que el resto de la lista, agregado acá y no en un script aparte.
+  //
+  // palabra-profetica.spec.ts marca vigente al registro `e2e-` que crea (es
+  // justamente lo que prueba, FR-012/SC-006) — al borrarlo acá no queda
+  // ninguna Palabra Profética vigente, y apps/web/e2e/palabra-profetica.spec.ts
+  // (lectura pública) necesita que siempre haya una. Ese registro sin
+  // vigente rompe la otra suite sin que nada en esta lo detecte, así que
+  // esta entrada repone la vigencia sobre el registro base del seed mínimo
+  // ('Fidelidad y crecimiento', apps/api/prisma/seed.ts) si el borrado deja
+  // la tabla sin ninguna vigente — no es una reposición genérica, es el
+  // mismo criterio de "reponer lo que borró este script", acotado a este
+  // caso conocido.
   {
     nombre: 'PalabraProfetica',
-    borrar: async () => (await prisma.palabraProfetica.deleteMany({ where: { titulo: { startsWith: 'e2e-' } } })).count,
+    borrar: async () => {
+      const { count } = await prisma.palabraProfetica.deleteMany({ where: { titulo: { startsWith: 'e2e-' } } });
+      if (count > 0) {
+        const quedaVigente = await prisma.palabraProfetica.findFirst({ where: { vigente: true } });
+        if (!quedaVigente) {
+          await prisma.palabraProfetica.updateMany({
+            where: { titulo: 'Fidelidad y crecimiento' },
+            data: { vigente: true },
+          });
+        }
+      }
+      return count;
+    },
   },
   {
     nombre: 'Libro',
