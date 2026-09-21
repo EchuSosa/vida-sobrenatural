@@ -18,6 +18,9 @@
     "SEDE_UNICA_ACTIVA": "Es la única Sede activa, y la app la usa para mostrar dónde y cuándo se reúne la iglesia. Creá la nueva Sede primero y después desactivá esta.",
     "SEDE_TIENE_DATOS_RELACIONADOS": "No se puede eliminar: tiene Personas asociadas. Inactivala en su lugar.",
     "YOUTUBE_URL_INVALIDA": "Esa URL no parece ser de un video de YouTube — pegá la URL completa (ej. https://www.youtube.com/watch?v=...).",
+    "PORTADA_TIPO_INVALIDO": "La portada tiene que ser un archivo JPG, PNG o WebP.",
+    "PORTADA_TAMANO_EXCEDIDO": "La portada pesa más del máximo permitido (5 MB) — probá con un archivo más liviano.",
+    "LIBRO_TEXTO_ALTERNATIVO_REQUERIDO": "Completá el texto alternativo de la portada antes de subirla.",
     "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
   },
   "nav": {

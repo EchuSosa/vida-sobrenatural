@@ -37,6 +37,10 @@ export type ErrorCode =
   // resuelve a un id de video reconocible (research.md Decisión 4). D121:
   // sólo se dispara si el Admin cargó algo — el campo vacío no es un error.
   | 'YOUTUBE_URL_INVALIDA'
+  // specs/003-contenido-institucional, FR-022/FR-025: subida de portada de Libro (D110).
+  | 'PORTADA_TIPO_INVALIDO'
+  | 'PORTADA_TAMANO_EXCEDIDO'
+  | 'LIBRO_TEXTO_ALTERNATIVO_REQUERIDO'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */

@@ -1,10 +1,29 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test, TestingModule } from '@nestjs/testing';
+import { SignJWT } from 'jose';
 import request from 'supertest';
+import sharp from 'sharp';
+import { rm } from 'node:fs/promises';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
+
+async function mintToken(rol: string[]): Promise<string> {
+  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+  return new SignJWT({ email: 'integ-libros@example.com', personaId: 'integ-libros', estado: 'activa', rol })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('1h')
+    .sign(secret);
+}
+
+async function imagenSintetica(ancho = 400, alto = 600): Promise<Buffer> {
+  return sharp({ create: { width: ancho, height: alto, channels: 3, background: { r: 10, g: 20, b: 30 } } })
+    .jpeg()
+    .toBuffer();
+}
 
 // FR-007/FR-008 (specs/003-contenido-institucional) — sólo las variantes de
 // lectura en este tramo; las de escritura y portada (US4) van en la misma
@@ -100,5 +119,172 @@ describe('GET /libros (integración)', () => {
     const response = await request(app.getHttpServer()).get(`/libros/${eliminado.id}`);
     expect(response.status).toBe(404);
     expect(response.body.code).toBe('NO_ENCONTRADO');
+  });
+});
+
+describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {
+  let app: NestExpressApplication;
+  let prisma: PrismaService;
+  const idsCreados: string[] = [];
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    app = moduleFixture.createNestApplication<NestExpressApplication>();
+    app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    // T037/main.ts: la ruta estática de portadas no la agrega el módulo,
+    // sólo bootstrap() — createNestApplication() no la ejecuta, así que
+    // este test la repite (mismo criterio que los filtros/pipes de arriba).
+    app.useStaticAssets(process.env.STORAGE_DIR ?? './storage/portadas', { prefix: '/archivos/portadas/' });
+    await app.init();
+    prisma = moduleFixture.get(PrismaService);
+  });
+
+  afterAll(async () => {
+    await prisma.libro.deleteMany({ where: { id: { in: idsCreados } } });
+    await rm(process.env.STORAGE_DIR ?? './storage/portadas', { recursive: true, force: true });
+    await app.close();
+  });
+
+  it('Admin crea, edita, inactiva/reactiva y elimina un Libro — siempre permitido (FR-020), y se restaura', async () => {
+    const token = await mintToken(['admin']);
+
+    const crear = await request(app.getHttpServer())
+      .post('/libros')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ titulo: `Integ libro ${Date.now()}`, autor: 'Autor Integ', anio: 2020 });
+    expect(crear.status).toBe(201);
+    expect(crear.body.activo).toBe(true);
+    idsCreados.push(crear.body.id);
+
+    const editar = await request(app.getHttpServer())
+      .patch(`/libros/${crear.body.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ orden: 5 });
+    expect(editar.status).toBe(200);
+    expect(editar.body.orden).toBe(5);
+
+    const inactivar = await request(app.getHttpServer())
+      .patch(`/libros/${crear.body.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ activo: false });
+    expect(inactivar.status).toBe(200);
+    expect(inactivar.body.activo).toBe(false);
+
+    const reactivar = await request(app.getHttpServer())
+      .patch(`/libros/${crear.body.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ activo: true });
+    expect(reactivar.status).toBe(200);
+    expect(reactivar.body.activo).toBe(true);
+
+    const eliminar = await request(app.getHttpServer())
+      .delete(`/libros/${crear.body.id}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(eliminar.status).toBe(200);
+
+    const enPapelera = await request(app.getHttpServer()).get('/libros?estado=papelera&take=200');
+    expect(enPapelera.body.items.map((l: { id: string }) => l.id)).toContain(crear.body.id);
+
+    const restaurar = await request(app.getHttpServer())
+      .post(`/libros/${crear.body.id}/restaurar`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(restaurar.status).toBe(201);
+    expect(restaurar.body.eliminadoEn).toBeNull();
+  });
+
+  it('Pastor recibe 403 al intentar crear; otro rol también', async () => {
+    const tokenPastor = await mintToken(['pastor']);
+    const respuestaPastor = await request(app.getHttpServer())
+      .post('/libros')
+      .set('Authorization', `Bearer ${tokenPastor}`)
+      .send({ titulo: 'No debería crearse', autor: 'X', anio: 2020 });
+    expect(respuestaPastor.status).toBe(403);
+
+    const tokenOtro = await mintToken(['discipulador']);
+    const respuestaOtro = await request(app.getHttpServer())
+      .post('/libros')
+      .set('Authorization', `Bearer ${tokenOtro}`)
+      .send({ titulo: 'No debería crearse', autor: 'X', anio: 2020 });
+    expect(respuestaOtro.status).toBe(403);
+  });
+
+  it('sube una portada válida con texto alternativo, la sirve pública, y reemplazarla borra la anterior', async () => {
+    const token = await mintToken(['admin']);
+    const crear = await request(app.getHttpServer())
+      .post('/libros')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ titulo: `Integ portada ${Date.now()}`, autor: 'Autor', anio: 2020 });
+    idsCreados.push(crear.body.id);
+
+    const imagen1 = await imagenSintetica();
+    const subida1 = await request(app.getHttpServer())
+      .post(`/libros/${crear.body.id}/portada`)
+      .set('Authorization', `Bearer ${token}`)
+      .field('portadaDescripcion', 'Tapa del libro de prueba')
+      .attach('portada', imagen1, { filename: 'portada.jpg', contentType: 'image/jpeg' });
+    expect(subida1.status).toBe(201);
+    expect(subida1.body.portadaUrl).toContain('/archivos/portadas/');
+    expect(subida1.body.portadaDescripcion).toBe('Tapa del libro de prueba');
+    const primeraUrl: string = subida1.body.portadaUrl;
+
+    // El archivo resultante se sirve público, sin sesión (D110/FR-026).
+    const servida = await request(app.getHttpServer()).get(new URL(primeraUrl).pathname);
+    expect(servida.status).toBe(200);
+
+    const imagen2 = await imagenSintetica(500, 500);
+    const subida2 = await request(app.getHttpServer())
+      .post(`/libros/${crear.body.id}/portada`)
+      .set('Authorization', `Bearer ${token}`)
+      .field('portadaDescripcion', 'Tapa reemplazada')
+      .attach('portada', imagen2, { filename: 'portada2.jpg', contentType: 'image/jpeg' });
+    expect(subida2.status).toBe(201);
+    expect(subida2.body.portadaUrl).not.toBe(primeraUrl);
+
+    // La anterior deja de servirse (Acceptance Scenario 4 de la Historia 4).
+    const anteriorServida = await request(app.getHttpServer()).get(new URL(primeraUrl).pathname);
+    expect(anteriorServida.status).toBe(404);
+
+    const quitar = await request(app.getHttpServer())
+      .delete(`/libros/${crear.body.id}/portada`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(quitar.status).toBe(200);
+    expect(quitar.body.portadaUrl).toBeNull();
+    expect(quitar.body.portadaDescripcion).toBeNull();
+  });
+
+  it('rechaza un tipo de archivo inválido, un archivo demasiado pesado, y una portada sin texto alternativo', async () => {
+    const token = await mintToken(['admin']);
+    const crear = await request(app.getHttpServer())
+      .post('/libros')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ titulo: `Integ portada inválida ${Date.now()}`, autor: 'Autor', anio: 2020 });
+    idsCreados.push(crear.body.id);
+
+    const tipoInvalido = await request(app.getHttpServer())
+      .post(`/libros/${crear.body.id}/portada`)
+      .set('Authorization', `Bearer ${token}`)
+      .field('portadaDescripcion', 'Texto')
+      .attach('portada', Buffer.from('no es una imagen'), { filename: 'archivo.txt', contentType: 'text/plain' });
+    expect(tipoInvalido.status).toBe(400);
+    expect(tipoInvalido.body.code).toBe('PORTADA_TIPO_INVALIDO');
+
+    const tamanoExcedido = await request(app.getHttpServer())
+      .post(`/libros/${crear.body.id}/portada`)
+      .set('Authorization', `Bearer ${token}`)
+      .field('portadaDescripcion', 'Texto')
+      .attach('portada', Buffer.alloc(6 * 1024 * 1024, 1), { filename: 'grande.jpg', contentType: 'image/jpeg' });
+    expect(tamanoExcedido.status).toBe(400);
+    expect(tamanoExcedido.body.code).toBe('PORTADA_TAMANO_EXCEDIDO');
+
+    const imagen = await imagenSintetica();
+    const sinTexto = await request(app.getHttpServer())
+      .post(`/libros/${crear.body.id}/portada`)
+      .set('Authorization', `Bearer ${token}`)
+      .attach('portada', imagen, { filename: 'portada.jpg', contentType: 'image/jpeg' });
+    expect(sinTexto.status).toBe(400);
+    expect(sinTexto.body.code).toBe('LIBRO_TEXTO_ALTERNATIVO_REQUERIDO');
   });
 });

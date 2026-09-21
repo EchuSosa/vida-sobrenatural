@@ -46,6 +46,9 @@ const TITULOS: Record<ErrorCode, string> = {
   SEDE_UNICA_ACTIVA: 'Es la única Sede activa',
   SEDE_TIENE_DATOS_RELACIONADOS: 'No se puede eliminar: tiene datos relacionados',
   YOUTUBE_URL_INVALIDA: 'URL de YouTube inválida',
+  PORTADA_TIPO_INVALIDO: 'Tipo de archivo inválido',
+  PORTADA_TAMANO_EXCEDIDO: 'Archivo demasiado pesado',
+  LIBRO_TEXTO_ALTERNATIVO_REQUERIDO: 'Falta el texto alternativo',
   ERROR_INTERNO: 'Error interno',
 };
 

@@ -48,6 +48,11 @@ async function bootstrap() {
       exceptionFactory: validationExceptionFactory,
     }),
   );
+  // D110/FR-026: las portadas de Libro se sirven públicas (sin sesión) desde
+  // su propia ruta — distinta del endpoint de subida (POST /libros/:id/portada,
+  // que sí exige rol Admin). STORAGE_DIR es el mismo directorio que usa
+  // LocalStorageProvider (research.md Decisión 3).
+  app.useStaticAssets(process.env.STORAGE_DIR ?? './storage/portadas', { prefix: '/archivos/portadas/' });
   // Desarrollo local únicamente — apps/web y apps/backoffice corren en otro
   // puerto. No se usan cookies de sesión hacia esta API (solo Bearer JWT), así
   // que reflejar el origin es suficiente sin necesitar `credentials: true`.

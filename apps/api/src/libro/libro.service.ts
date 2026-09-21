@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { MIME_TIPOS_PORTADA_PERMITIDOS, PORTADA_TAMANO_MAXIMO_BYTES } from '@vida-sobrenatural/shared-types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
+import { StorageService } from '../storage/storage.service.js';
+import { ImagenPortadaService } from '../storage/imagen-portada.service.js';
+import type { CrearLibroDto } from './dto/crear-libro.dto.js';
+import type { ActualizarLibroDto } from './dto/actualizar-libro.dto.js';
 
 const LIBRO_SELECT = {
   id: true,
@@ -21,7 +26,11 @@ const LIBRO_SELECT = {
 
 @Injectable()
 export class LibroService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+    private readonly imagenPortadaService: ImagenPortadaService,
+  ) {}
 
   /**
    * FR-007/FR-008 (`estado=activas`, default — lo único que usa
@@ -61,5 +70,130 @@ export class LibroService {
       throw new AppException('NO_ENCONTRADO', 404, 'Libro no encontrado.');
     }
     return libro;
+  }
+
+  /** POST /libros — FR-015. La portada no entra acá (FR-021, endpoint propio). */
+  create(dto: CrearLibroDto) {
+    return this.prisma.libro.create({
+      data: {
+        titulo: dto.titulo,
+        autor: dto.autor,
+        anio: dto.anio,
+        descripcion: dto.descripcion,
+        orden: dto.orden ?? 0,
+      },
+      select: LIBRO_SELECT,
+    });
+  }
+
+  /** PATCH /libros/:id — FR-017, incluye el toggle de inactivar/reactivar vía activo:true/false. */
+  async update(id: string, dto: ActualizarLibroDto) {
+    const existente = await this.prisma.libro.findUnique({ where: { id } });
+    if (!existente || existente.eliminadoEn) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Libro no encontrado.');
+    }
+    return this.prisma.libro.update({ where: { id }, data: dto, select: LIBRO_SELECT });
+  }
+
+  /**
+   * DELETE /libros/:id — FR-019/FR-020, D119. Borrado lógico, **siempre
+   * permitido**: a diferencia de Sede, hoy ninguna entidad referencia a
+   * Libro — sin chequeo de "datos relacionados" (condición del estado
+   * actual del modelo, no una regla permanente — ver FR-020 en spec.md).
+   * No borra el archivo de portada: sigue sirviéndose mientras el libro
+   * esté en la papelera, por si se restaura.
+   */
+  async eliminar(id: string, eliminadoPor: string) {
+    const existente = await this.prisma.libro.findUnique({ where: { id } });
+    if (!existente || existente.eliminadoEn) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Libro no encontrado.');
+    }
+    return this.prisma.libro.update({
+      where: { id },
+      data: { eliminadoEn: new Date(), eliminadoPor },
+      select: LIBRO_SELECT,
+    });
+  }
+
+  /** POST /libros/:id/restaurar — D119, vista de papelera del Admin. */
+  async restaurar(id: string) {
+    const existente = await this.prisma.libro.findUnique({ where: { id } });
+    if (!existente || !existente.eliminadoEn) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Libro no encontrado en la papelera.');
+    }
+    return this.prisma.libro.update({
+      where: { id },
+      data: { eliminadoEn: null, eliminadoPor: null },
+      select: LIBRO_SELECT,
+    });
+  }
+
+  /**
+   * POST /libros/:id/portada — FR-021 a FR-026. El controller ya validó
+   * tipo/tamaño con `multer` (primera barrera) — acá va la segunda
+   * validación explícita (defensa en profundidad, research.md Decisión 2),
+   * más la exigencia de texto alternativo (FR-025) antes de procesar nada.
+   * Reemplazar borra el archivo anterior en la misma operación (Acceptance
+   * Scenario 4 de la Historia 4) — nunca queda un huérfano servido.
+   */
+  async subirPortada(
+    id: string,
+    args: { buffer: Buffer; mimeType: string; portadaDescripcion: string },
+  ) {
+    const existente = await this.prisma.libro.findUnique({ where: { id } });
+    if (!existente || existente.eliminadoEn) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Libro no encontrado.');
+    }
+    if (!MIME_TIPOS_PORTADA_PERMITIDOS.includes(args.mimeType as (typeof MIME_TIPOS_PORTADA_PERMITIDOS)[number])) {
+      throw new AppException('PORTADA_TIPO_INVALIDO', 400, 'La portada tiene que ser JPG, PNG o WebP.');
+    }
+    if (args.buffer.length > PORTADA_TAMANO_MAXIMO_BYTES) {
+      throw new AppException('PORTADA_TAMANO_EXCEDIDO', 400, 'La portada pesa más del máximo permitido (5 MB).');
+    }
+    if (!args.portadaDescripcion || args.portadaDescripcion.trim() === '') {
+      throw new AppException(
+        'LIBRO_TEXTO_ALTERNATIVO_REQUERIDO',
+        400,
+        'Completá el texto alternativo de la portada antes de subirla.',
+      );
+    }
+
+    const procesada = await this.imagenPortadaService.procesar(args.buffer);
+    const subida = await this.storageService.subir({
+      buffer: procesada.buffer,
+      nombreOriginal: 'portada',
+      mimeType: procesada.mimeType,
+    });
+
+    if (existente.portadaUrl) {
+      await this.storageService.eliminar(this.extraerRutaDePortada(existente.portadaUrl));
+    }
+
+    return this.prisma.libro.update({
+      where: { id },
+      data: { portadaUrl: subida.url, portadaDescripcion: args.portadaDescripcion },
+      select: LIBRO_SELECT,
+    });
+  }
+
+  /** DELETE /libros/:id/portada — FR-021. El libro vuelve a mostrarse con PlaceholderImagen (FR-027). */
+  async eliminarPortada(id: string) {
+    const existente = await this.prisma.libro.findUnique({ where: { id } });
+    if (!existente || existente.eliminadoEn) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Libro no encontrado.');
+    }
+    if (existente.portadaUrl) {
+      await this.storageService.eliminar(this.extraerRutaDePortada(existente.portadaUrl));
+    }
+    return this.prisma.libro.update({
+      where: { id },
+      data: { portadaUrl: null, portadaDescripcion: null },
+      select: LIBRO_SELECT,
+    });
+  }
+
+  /** `portadaUrl` guarda la URL pública completa (StorageService.subir) — `StorageService.eliminar` necesita sólo el nombre de archivo. */
+  private extraerRutaDePortada(portadaUrl: string): string {
+    return portadaUrl.substring(portadaUrl.lastIndexOf('/') + 1);
   }
 }
