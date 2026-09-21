@@ -10,6 +10,8 @@ import {
   CalendarClock,
   Building2,
   Trash2,
+  Mic,
+  BookOpen,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 
@@ -50,6 +52,10 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/notificaciones', labelKey: 'notificaciones', icon: Bell, roles: ['admin', 'pastor'] },
   { href: '/sedes', labelKey: 'sedes', icon: Building2, roles: ['admin', 'pastor'] },
   { href: '/sedes/papelera', labelKey: 'papelera', icon: Trash2, roles: ['admin'], enMenu: false },
+  // specs/003-contenido-institucional (FR-028/FR-029): Admin edita, Pastor lee.
+  { href: '/palabra-profetica', labelKey: 'palabraProfetica', icon: Mic, roles: ['admin', 'pastor'] },
+  { href: '/libros', labelKey: 'libros', icon: BookOpen, roles: ['admin', 'pastor'] },
+  { href: '/libros/papelera', labelKey: 'papeleraLibros', icon: Trash2, roles: ['admin'], enMenu: false },
   { href: '/catalogos', labelKey: 'catalogos', icon: FolderKanban, roles: ['admin', 'pastor'] },
   {
     href: '/mis-discipulados',

@@ -111,10 +111,10 @@ tocar el CRUD de Libro.
 - [x] T026 [US3] Agregar `TITULOS['YOUTUBE_URL_INVALIDA']` en `apps/api/src/common/errors/all-exceptions.filter.ts`
 - [x] T027 [US3] Agregar `errors.YOUTUBE_URL_INVALIDA` a `apps/backoffice/src/messages/es.json`
 - [x] T028 [P] [US3] Tests de integración en `apps/api/test/integration/palabra-profetica.integration-spec.ts`: alta/edición/marcar-vigente, URL de YouTube inválida rechazada, la vigente anterior se desmarca sola, Pastor recibe 403 en escrituras, otro rol recibe 403 (depende de T025)
-- [ ] T029 [US3] Crear `apps/backoffice/src/app/palabra-profetica/{page.tsx,loading.tsx,error.tsx,palabra-profetica-cliente.tsx}`: formulario (año/título/texto/URL) + historial + botón marcar vigente, validación por campo con limpieza al escribir y revalidación al salir (H-50/H-72), envío protegido con `useEnvio` (H-57), Admin edita/Pastor lee (D64) (depende de T025)
-- [ ] T030 [P] [US3] Agregar la entrada "Palabra Profética" (Admin y Pastor) a `apps/backoffice/src/config/nav.ts` (FR-028, FR-029)
-- [ ] T031 [P] [US3] Crear `apps/backoffice/e2e/palabra-profetica.spec.ts`: alta, marcar vigente desmarca la anterior, errores de validación por campo, Pastor solo lectura, otro rol bloqueado por menú y por URL directa, `auditar()` en los dos temas
-- [ ] T031a [US3] Verificar la pantalla de Palabra Profética del backoffice contra el checklist de `docs/15-guia-ux-ui.md` — D114
+- [x] T029 [US3] Crear `apps/backoffice/src/app/palabra-profetica/{page.tsx,loading.tsx,error.tsx,palabra-profetica-cliente.tsx}`: formulario (año/título/texto/URL) + historial + botón marcar vigente, validación por campo con limpieza al escribir y revalidación al salir (H-50/H-72), envío protegido con `useEnvio` (H-57), Admin edita/Pastor lee (D64) (depende de T025)
+- [x] T030 [P] [US3] Agregar la entrada "Palabra Profética" (Admin y Pastor) a `apps/backoffice/src/config/nav.ts` (FR-028, FR-029)
+- [x] T031 [P] [US3] Crear `apps/backoffice/e2e/palabra-profetica.spec.ts`: alta, marcar vigente desmarca la anterior, errores de validación por campo, Pastor solo lectura, otro rol bloqueado por menú y por URL directa, `auditar()` en los dos temas
+- [x] T031a [US3] Verificar la pantalla de Palabra Profética del backoffice contra el checklist de `docs/15-guia-ux-ui.md` — D114
 
 **Checkpoint**: US1 + US2 + US3 funcionales de forma independiente; la web pública refleja las ediciones del Admin.
 
