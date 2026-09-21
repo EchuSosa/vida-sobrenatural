@@ -36,20 +36,34 @@ for (const colorScheme of ['light', 'dark'] as const) {
         'https://instagram.com/edicionesvs',
       );
 
-      // FR-007: al menos los 8 libros reales del seed mínimo, con año y
-      // autor/a. No es "exactamente 8": si además corrió seed-demo (D120,
-      // FR-032) hay 3 libros hostiles más — el catálogo público no
-      // distingue origen, así que este test no debe asumir cuál de los dos
-      // seeds corrió. Scopeado a los <li> del catálogo — el título del
-      // primer libro también aparece en el texto de introducción (es el
-      // origen de la editorial).
+      // FR-007: están los 8 libros reales del catálogo del seed mínimo, cada
+      // uno por su título exacto (apps/api/prisma/seed.ts). "Al menos 8" no
+      // alcanza: pasa igual si falta uno real y sobran dos de seed-demo
+      // (D120, FR-032) — acá se afirma cada título puntual, que convive con
+      // los libros hostiles del demo y sigue detectando si uno real
+      // desaparece. `exact: true` porque el título del catálogo se renderiza
+      // en un <p> propio (apps/web/src/app/(publica)/nosotros/ediciones-vs/page.tsx)
+      // y uno de los libros hostiles de seed-demo comparte el prefijo
+      // "Antídotos contra la religión" con el real — exact evita que un
+      // match parcial confunda a los dos.
       const items = page.getByRole('listitem');
       const cantidad = await items.count();
-      expect(cantidad).toBeGreaterThanOrEqual(8);
+      const TITULOS_REALES = [
+        'Mujer Maravilla: cuando la realidad supera a la ficción',
+        'El sonido en la iglesia',
+        'Una vida en su presencia',
+        'El deseo de ser tres',
+        'Antídotos contra la religión',
+        'Discipulado Generacional',
+        'Hijos de la Promesa: identidad y propósito de los hijos de Dios',
+        'Diseñados para una vida saludable',
+      ];
+      for (const titulo of TITULOS_REALES) {
+        await expect(page.getByText(titulo, { exact: true })).toBeVisible();
+      }
       await expect(
         items.filter({ hasText: 'Mujer Maravilla: cuando la realidad supera a la ficción' }),
       ).toContainText('por Natalia Spetale');
-      await expect(items.filter({ hasText: 'Diseñados para una vida saludable' })).toBeVisible();
 
       // FR-027: sin portada real todavía, cada libro muestra el espacio con
       // aspecto de tapa (PlaceholderImagen aspecto="portada"), no una
