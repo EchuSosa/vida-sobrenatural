@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import { loguearseComoAdminE2E, crearMenorPendienteTutor, crearPersonaActiva } from './helpers';
+import { loguearseComoAdminE2E, crearMenorPendienteTutor, crearPersonaActiva, crearAxeBuilder } from './helpers';
 
 /**
  * H-29 (revisión manual ronda 2) / H-34 (ronda 3 — la red de regresión que
@@ -33,7 +32,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(panel).toBeVisible();
       await expect(panel).toHaveCSS('opacity', '1');
 
-      const resultados = await new AxeBuilder({ page }).disableRules(['region']).analyze();
+      const resultados = await crearAxeBuilder(page).disableRules(['region']).analyze();
       expect(resultados.violations).toEqual([]);
 
       await panel.getByLabel('Buscar tutor ya registrado (opcional)').fill(apellidoTutor);

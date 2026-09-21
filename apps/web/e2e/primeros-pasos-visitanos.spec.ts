@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { crearAxeBuilder } from './helpers';
 
 /**
  * Historia 1 (specs/002-base-transversal): navegación pública, traslado de
@@ -26,7 +26,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('link', { name: 'Dar' })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Ingresar' })).toBeVisible();
 
-      let resultados = await new AxeBuilder({ page }).analyze();
+      let resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       await nav.getByRole('link', { name: 'Primeros pasos' }).click();
@@ -35,14 +35,14 @@ for (const colorScheme of ['light', 'dark'] as const) {
         page.getByRole('heading', { name: 'Bienvenido/a a Vida Sobrenatural' }),
       ).toBeVisible();
 
-      resultados = await new AxeBuilder({ page }).analyze();
+      resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       await nav.getByRole('link', { name: 'Visitanos' }).click();
       await expect(page).toHaveURL(/\/visitanos/);
       await expect(page.getByRole('heading', { name: 'Visitanos' })).toBeVisible();
 
-      resultados = await new AxeBuilder({ page }).analyze();
+      resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
     });
 
@@ -79,7 +79,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('heading', { name: 'Ministerios' })).toBeVisible();
       await page.goBack();
 
-      let resultados = await new AxeBuilder({ page }).analyze();
+      let resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       await page.goto('/nosotros');
@@ -93,7 +93,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText(/todavía no publicamos nuestra declaración de fe/i)).toBeVisible();
       await expect(page.getByText('Foto pendiente', { exact: false }).first()).toBeVisible();
 
-      resultados = await new AxeBuilder({ page }).analyze();
+      resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
     });
 
@@ -116,7 +116,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // es un hallazgo aparte (H-21 en la revisión manual), no de esta
       // página; auditarlo acá lo mezclaría con lo que sí es responsabilidad
       // de /dar.
-      const resultados = await new AxeBuilder({ page }).analyze();
+      const resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       await page.getByRole('button', { name: 'Copiar Alias' }).click();
@@ -144,7 +144,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(toast).toBeVisible();
       await expect(toast).toHaveCSS('opacity', '1');
 
-      const resultados = await new AxeBuilder({ page }).analyze();
+      const resultados = await crearAxeBuilder(page).analyze();
       const violacionesContraste = resultados.violations.filter((v) => v.id === 'color-contrast');
       expect(violacionesContraste).toEqual([]);
     });

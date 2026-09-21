@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import { registrarPersonaDeTest } from './helpers';
+import { registrarPersonaDeTest, crearAxeBuilder } from './helpers';
 
 /**
  * H-37/H-38 (revisión manual ronda 3, docs/14-navegacion.md secciones 1 y 2):
@@ -28,7 +27,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(panel).toBeVisible();
         await expect(panel).toHaveCSS('opacity', '1');
 
-        const resultadosPanel = await new AxeBuilder({ page }).analyze();
+        const resultadosPanel = await crearAxeBuilder(page).analyze();
         expect(resultadosPanel.violations).toEqual([]);
 
         await panel.getByRole('link', { name: 'Visitanos' }).click();
@@ -54,7 +53,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(panel.getByRole('button', { name: 'Claro' })).toBeVisible();
         await expect(panel.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible();
 
-        const resultados = await new AxeBuilder({ page }).analyze();
+        const resultados = await crearAxeBuilder(page).analyze();
         expect(resultados.violations).toEqual([]);
       });
     });
@@ -78,7 +77,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         // "group" — ninguno de esos es un landmark reconocido). Portalizado
         // fuera de cualquier landmark es el comportamiento esperado de un menú
         // flotante (Base UI, igual que shadcn/Radix).
-        const resultadosMenu = await new AxeBuilder({ page }).disableRules(['region']).analyze();
+        const resultadosMenu = await crearAxeBuilder(page).disableRules(['region']).analyze();
         expect(resultadosMenu.violations).toEqual([]);
 
         await menu.getByRole('menuitem', { name: 'Visitanos' }).click();
@@ -102,7 +101,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(menu.getByRole('menuitem', { name: 'Claro' })).toBeVisible();
 
         // "region" excluida — ver el comentario del test anterior.
-        const resultados = await new AxeBuilder({ page }).disableRules(['region']).analyze();
+        const resultados = await crearAxeBuilder(page).disableRules(['region']).analyze();
         expect(resultados.violations).toEqual([]);
 
         await page.keyboard.press('Escape');
@@ -136,7 +135,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         const itemCerrarSesion = menu.getByRole('menuitem', { name: 'Cerrar sesión' });
         await expect(itemCerrarSesion).toBeVisible();
 
-        const resultadosMenu = await new AxeBuilder({ page }).disableRules(['region']).analyze();
+        const resultadosMenu = await crearAxeBuilder(page).disableRules(['region']).analyze();
         expect(resultadosMenu.violations).toEqual([]);
 
         await itemCerrarSesion.click();
@@ -147,7 +146,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(dialogo).toBeVisible();
         await expect(dialogo).toHaveCSS('opacity', '1');
 
-        const resultadosDialogo = await new AxeBuilder({ page }).analyze();
+        const resultadosDialogo = await crearAxeBuilder(page).analyze();
         expect(resultadosDialogo.violations).toEqual([]);
 
         await dialogo.getByRole('button', { name: 'Sí, cerrar sesión' }).click();

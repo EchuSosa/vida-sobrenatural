@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import { loguearseComoAdminE2E, asegurarUnaSolaSedeActiva, reactivarSedes } from './helpers';
+import { loguearseComoAdminE2E, asegurarUnaSolaSedeActiva, reactivarSedes, crearAxeBuilder } from './helpers';
 
 /**
  * H-30 (revisión manual ronda 2) / H-34 (ronda 3) / H-51+H-52+H-50 (ronda 4,
@@ -44,7 +43,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // exact: true — "Activa" sin acotar matchea "Desactivar"/"Reactivar" por substring.
       await expect(page.getByText('Activa', { exact: true })).toBeVisible();
 
-      const resultados = await new AxeBuilder({ page }).analyze();
+      const resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       await page.getByPlaceholder('Dirección').fill('Calle 50 y 115, La Plata');
@@ -97,7 +96,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // No se creó nada — sigue en el modal, no hace falta limpiar después.
       await expect(modal).toBeVisible();
 
-      const resultados = await new AxeBuilder({ page }).analyze();
+      const resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
     });
 
@@ -226,7 +225,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
         const dialogo = page.getByRole('alertdialog', { name: 'Necesitás al menos una Sede activa' });
         await expect(dialogo).toBeVisible();
 
-        const resultados = await new AxeBuilder({ page }).analyze();
+        // El click en "Sí, desactivar" de arriba deja el cursor apoyado en
+        // esa posición de pantalla — si "Crear una Sede" (abajo) termina
+        // renderizando en el mismo lugar, queda en :hover sin que nadie lo
+        // haya pasado por encima de verdad, y axe audita ese estado en vez
+        // del normal (D118: el hover de un botón primario baja de 4.5:1).
+        await page.mouse.move(0, 0);
+        const resultados = await crearAxeBuilder(page).analyze();
         expect(resultados.violations).toEqual([]);
 
         // AlertDialogAction acá está renderizado como <Link> (role="link"),

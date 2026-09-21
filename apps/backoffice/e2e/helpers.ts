@@ -1,4 +1,5 @@
 import { request as playwrightRequest, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 /**
  * Helpers compartidos por los e2e de H-29/H-30 (H-34, revisión manual ronda 3).
@@ -14,6 +15,31 @@ export async function loguearseComoAdminE2E(page: Page) {
   await page.request.post('/api/auth/callback/test-login', {
     form: { email: 'e2e-admin@example.com', csrfToken },
   });
+}
+
+/**
+ * H-53 (revisión manual, D118): fuerza landmark-unique, landmark-one-main y
+ * region habilitadas — ya lo están por defecto en axe-core 4.13, pero
+ * quedan explícitas acá para que un cambio de versión no las apague sin que
+ * nadie lo note (los <main> anidados de H-51/H-52 pasaron desapercibidos
+ * por otra razón — los scans anteriores corrían con un modal abierto
+ * encima, que oculta el resto vía `inert` — pero esta explicitud es la
+ * defensa concreta que pide D118 contra ese mismo tipo de agujero).
+ * `reglasDeshabilitadas` reemplaza al `.disableRules()` encadenado: como
+ * `AxeBuilder#options`/`#disableRules` se pisan entre sí (cada uno
+ * reemplaza `this.option` entero, no lo mergea), hay que armar el objeto
+ * de reglas completo en un solo `.options()`.
+ */
+export function crearAxeBuilder(page: Page, reglasDeshabilitadas: string[] = []) {
+  const rules: Record<string, { enabled: boolean }> = {
+    'landmark-unique': { enabled: true },
+    'landmark-one-main': { enabled: true },
+    region: { enabled: true },
+  };
+  for (const regla of reglasDeshabilitadas) {
+    rules[regla] = { enabled: false };
+  }
+  return new AxeBuilder({ page }).options({ rules });
 }
 
 async function obtenerApiTokenAdmin(page: Page): Promise<string> {

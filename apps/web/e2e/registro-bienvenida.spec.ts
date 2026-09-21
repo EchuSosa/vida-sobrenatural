@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import { loguearseComoTest } from './helpers';
+import { loguearseComoTest, crearAxeBuilder } from './helpers';
 
 /**
  * Único flujo E2E exigido por la Constitución (Principio VI): el registro
@@ -28,7 +27,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('heading', { name: 'Completá tus datos' })).toBeVisible();
       await expect(page.getByText('Paso 1 de 4')).toBeVisible();
 
-      let resultados = await new AxeBuilder({ page }).analyze();
+      let resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       // Paso 1 — Datos personales.
@@ -40,7 +39,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       // Paso 2 — Contacto.
       await expect(page.getByText('Paso 2 de 4')).toBeVisible();
-      resultados = await new AxeBuilder({ page }).analyze();
+      resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       await page.getByLabel('Código de país').selectOption('+54');
@@ -51,7 +50,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       // Paso 3 — Sobre vos. "Otro" ejercita también el campo condicional de detalle.
       await expect(page.getByText('Paso 3 de 4')).toBeVisible();
-      resultados = await new AxeBuilder({ page }).analyze();
+      resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       await page.getByLabel('Estado civil').selectOption('soltero_a');
@@ -73,7 +72,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('button', { name: 'Siguiente' }).click();
       await expect(page.getByText('Paso 4 de 4')).toBeVisible();
 
-      resultados = await new AxeBuilder({ page }).analyze();
+      resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       await page.getByRole('checkbox').check();
@@ -98,7 +97,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // volver al Inicio.
       await expect(page.getByRole('link', { name: 'Ir a Inicio' })).toBeVisible();
 
-      resultados = await new AxeBuilder({ page }).analyze();
+      resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
 
       // H-15: entrar de nuevo a /registro/listo en otra pestaña (sin el flag
@@ -117,7 +116,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page).toHaveURL(/\/primeros-pasos/);
       await expect(page.getByText('Ya estás registrada, no hace falta completarlo de nuevo.')).toBeVisible();
 
-      resultados = await new AxeBuilder({ page }).analyze();
+      resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
     });
   });

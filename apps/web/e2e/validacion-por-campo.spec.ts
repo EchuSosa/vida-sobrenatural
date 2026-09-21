@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import { loguearseComoTest, registrarPersonaDeTest } from './helpers';
+import { loguearseComoTest, registrarPersonaDeTest, crearAxeBuilder } from './helpers';
 
 /**
  * H-50 (revisión manual ronda 4): errores de validación por campo — mensaje
@@ -41,7 +40,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         2,
       );
 
-      const resultados = await new AxeBuilder({ page }).analyze();
+      const resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
     });
 
@@ -90,7 +89,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         2,
       );
 
-      const resultados = await new AxeBuilder({ page }).analyze();
+      const resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
     });
   });
