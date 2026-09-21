@@ -334,6 +334,20 @@ el indicador de desarrollo ya no tapa la barra inferior en celular (H-39).
 
 ---
 
+## Phase 17: Correcciones de la revisión manual — Lote 7, parte 3 (ronda 4, tema)
+
+**Purpose**: aplicar H-48+H-49 del Lote 7 (`specs/revision-manual/2026-09-17-001-002.md`, D116).
+El resto del Lote 7 (H-50 en 001; H-46+H-47 en esta spec) se documenta aparte.
+
+- [X] T133 [H-49] `packages/shared-types/src/persona.ts` suma `TEMA_A_NEXT_THEMES` (el mapa a valores de `next-themes`) y `TEMAS_VISIBLES`/`TemaPreferidoVisible` (Principio XI) — `TemaPreferido` ya vivía ahí. Reemplaza la redeclaración local en `apps/web/src/components/selector-tema.tsx`, `apps/web/src/components/menu-usuario-publico.tsx` y `apps/backoffice/src/components/selector-tema.tsx`.
+- [X] T134 [H-48] Los tres selectores bajan a dos opciones (Claro/Oscuro), cada una con ícono (`Sun`/`Moon` de `lucide-react`) y texto, nunca solo el ícono (D81). El rótulo pasa de "Tema" a "Colores de la app" (`apps/web/src/messages/es.json`, namespace `nav`, clave `tema`; el `DropdownMenu` del backoffice y del header público suman el mismo rótulo como encabezado del grupo). `sistema` sigue siendo un valor válido en la base (sin migración) — si es el valor guardado de una Persona, ningún botón queda marcado como seleccionado hasta que elige uno de los dos.
+- [X] T135 Correr las tres suites de la convención de `docs/00-README.md` antes de cerrar: unitarios e integración de `apps/api` (sin cambios de este hallazgo, corren igual por la regla del Lote 6), y e2e de `apps/web`/`apps/backoffice` completos (ningún test existente citaba "Sistema").
+
+**Checkpoint**: Lote 7, parte tema, completo — Claro/Oscuro con ícono y texto bajo "Colores de la
+app" en las dos apps, sin duplicar el tipo ni el mapa (H-48+H-49).
+
+---
+
 ## Dependencies & Execution Order
 
 - **Setup (Fase 1)** → sin dependencias, se puede empezar de inmediato.
