@@ -56,9 +56,15 @@ export function NavAppTopBarCelular() {
             </Button>
           }
         />
-        <SheetContent side="right">
-          <SheetTitle className="sr-only">{t('mas')}</SheetTitle>
-          <nav aria-label={t('secundario')} className="flex flex-col gap-4 px-4 py-2">
+        <SheetContent side="right" className="gap-0">
+          {/* H-63 (revisión manual ronda 5): mismo criterio que el menú
+              hamburguesa público (nav-publica-header.tsx) — cabecera propia
+              separada por un borde, en vez de que la lista arranque a la
+              misma altura que la X. */}
+          <SheetTitle className="flex h-14 shrink-0 items-center border-b border-border px-4 text-base font-semibold">
+            {t('mas')}
+          </SheetTitle>
+          <nav aria-label={t('secundario')} className="flex flex-col gap-4 overflow-y-auto px-4 py-4">
             {items.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setAbierto(false)} className="text-sm font-medium">
                 {item.label}

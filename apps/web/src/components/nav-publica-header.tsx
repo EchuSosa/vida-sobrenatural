@@ -118,13 +118,17 @@ export function NavPublicaHeader() {
                 </Button>
               }
             />
-            <SheetContent side="right">
-              {/* H-27 (revisión manual, actualización 2026-09-20): título
-                  visible sacado — el nombre accesible del panel (mismo
-                  texto) sigue disponible para lectores de pantalla vía
-                  `aria-labelledby`, sin duplicar información en pantalla. */}
-              <SheetTitle className="sr-only">{t('menu')}</SheetTitle>
-              <nav aria-label={`${t('principal')} (celular)`} className="flex flex-col gap-4 px-4 py-2">
+            <SheetContent side="right" className="gap-0">
+              {/* H-63 (revisión manual ronda 5): cabecera propia, separada
+                  por un borde, para que la lista no arranque a la misma
+                  altura que la X de cerrar. H-27 pedía el título solo para
+                  lectores de pantalla porque no había dónde mostrarlo sin
+                  duplicar texto — ahora es el título visible de la cabecera,
+                  sin duplicarlo. */}
+              <SheetTitle className="flex h-14 shrink-0 items-center border-b border-border px-4 text-base font-semibold">
+                Vida Sobrenatural
+              </SheetTitle>
+              <nav aria-label={`${t('principal')} (celular)`} className="flex flex-col gap-4 overflow-y-auto px-4 py-4">
                 {NAV_PUBLICA.map((item) => (
                   <EnlaceMenu
                     key={item.href}
