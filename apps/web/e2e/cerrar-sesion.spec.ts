@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { registrarPersonaDeTest, crearAxeBuilder } from './helpers';
+import { registrarPersonaDeTest, auditar } from './helpers';
 
 /**
  * H-11 (specs/002-base-transversal, revisión manual 2026-09-18): cerrar
@@ -20,18 +20,14 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto('/perfil');
       await page.waitForLoadState('networkidle');
 
-      let resultados = await crearAxeBuilder(page).analyze();
+      let resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
       await page.getByRole('button', { name: 'Cerrar sesión' }).click();
       const dialogo = page.getByRole('alertdialog', { name: '¿Cerrar sesión?' });
       await expect(dialogo).toBeVisible();
-      // El diálogo abre con una animación de 100ms (fade-in + zoom-in); sin
-      // esperarla, axe puede auditar un fotograma a mitad de transición y
-      // reportar un contraste de color que nunca se ve en pantalla quieta.
-      await expect(dialogo).toHaveCSS('opacity', '1');
 
-      resultados = await crearAxeBuilder(page).analyze();
+      resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
       // "Volver" no cierra la sesión — sigue en Perfil.
@@ -44,18 +40,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await expect(page).toHaveURL('/');
       await expect(page.getByText('Cerraste sesión.')).toBeVisible();
-      // H-21: el toast (sonner) entra con una animación — sin esperar a que
-      // asiente (opacity: 1), axe puede auditar un fotograma a mitad de
-      // transición y reportar un contraste de color que nunca se ve en
-      // pantalla quieta (D118 lo hizo más frecuente: la paleta con color de
-      // verdad tiene menos margen que el gris neutro anterior). La opacidad
-      // animada vive en el <li data-sonner-toast> (el contenedor), no en el
-      // texto — el texto solo hereda el valor calculado, siempre "1".
-      await expect(page.locator('[data-sonner-toast]').first()).toHaveCSS('opacity', '1');
       // Sin sesión, el menú vuelve a ofrecer "Ingresar" — no "Ir a la app".
       await expect(page.getByRole('link', { name: 'Ingresar' })).toBeVisible();
 
-      resultados = await crearAxeBuilder(page).analyze();
+      // H-21/H-76: el toast (sonner) entra con una animación — `auditar`
+      // espera a que asiente antes de medir contraste.
+      resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
     });
   });

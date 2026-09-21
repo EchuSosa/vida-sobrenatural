@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
-import { loguearseComoAdminE2E, asegurarUnaSolaSedeActiva, reactivarSedes, crearAxeBuilder } from './helpers';
+import { loguearseComoAdminE2E, asegurarUnaSolaSedeActiva, reactivarSedes, auditar } from './helpers';
 
 /**
  * H-30 (revisión manual ronda 2) / H-34 (ronda 3) / H-51+H-52+H-50 (ronda 4,
@@ -59,7 +59,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // exact: true — "Activa" sin acotar matchea "Desactivar"/"Reactivar" por substring.
       await expect(page.getByText('Activa', { exact: true })).toBeVisible();
 
-      const resultados = await crearAxeBuilder(page).analyze();
+      const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
       await page.getByPlaceholder('Dirección').fill('Calle 50 y 115, La Plata');
@@ -120,7 +120,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // No se creó nada — sigue en el modal, no hace falta limpiar después.
       await expect(modal).toBeVisible();
 
-      const resultados = await crearAxeBuilder(page).analyze();
+      const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
     });
 
@@ -161,16 +161,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
 
     // H-73 (revisión manual ronda 8): el botón de envío de este modal midió
-    // 4.46 contra el mínimo de 4.5 en un axe corrido apenas se abría el
-    // panel. Causa real: el panel entra con `transition duration-200` de
-    // `opacity: 0` a `1` (Sheet, D95-style) — sin esperar a que asiente
-    // (mismo patrón que el resto de este archivo/apps/web con diálogos y
-    // toasts, ver `toHaveCSS('opacity', '1')`), axe mide un fotograma a
-    // mitad de la transición, con el botón todavía semitransparente sobre
-    // el fondo de la página. Confirmado con getComputedStyle: `opacity` da
-    // "0" apenas `toBeVisible()` resuelve. bg-primary + text-primary-
-    // foreground miden 5.80:1 (docs/17-paleta-y-tokens.md) — no hay nada
-    // que tocar en la paleta ni en la clase base del Button.
+    // 4.46 contra el mínimo de 4.5 — un falso positivo de axe corrido a
+    // mitad de la transición de apertura del panel (Sheet). `auditar` (H-76)
+    // espera esa transición antes de medir; bg-primary + text-primary-
+    // foreground dan 5.80:1 medido (docs/17-paleta-y-tokens.md) — no hay
+    // nada que tocar en la paleta ni en la clase base del Button.
     test('H-73: el botón "Crear Sede" cumple contraste una vez que el panel asienta su transición', async ({
       page,
     }) => {
@@ -181,10 +176,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('button', { name: 'Crear Sede' }).click();
       const modal = page.getByRole('dialog', { name: 'Crear Sede' });
       await expect(modal).toBeVisible();
-      await expect(modal).toHaveCSS('opacity', '1');
       await page.mouse.move(0, 0);
 
-      const resultados = await crearAxeBuilder(page).analyze();
+      const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
     });
 
@@ -326,7 +320,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         // haya pasado por encima de verdad, y axe audita ese estado en vez
         // del normal (D118: el hover de un botón primario baja de 4.5:1).
         await page.mouse.move(0, 0);
-        const resultados = await crearAxeBuilder(page).analyze();
+        const resultados = await auditar(page);
         expect(resultados.violations).toEqual([]);
 
         // AlertDialogAction acá está renderizado como <Link> (role="link"),
@@ -373,7 +367,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const filaPapelera = page.getByRole('row', { name: new RegExp(nombreSede) });
       await expect(filaPapelera).toBeVisible();
 
-      const resultadosPapelera = await crearAxeBuilder(page).analyze();
+      const resultadosPapelera = await auditar(page);
       expect(resultadosPapelera.violations).toEqual([]);
 
       await filaPapelera.getByRole('button', { name: 'Restaurar' }).click();

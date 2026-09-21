@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { crearAxeBuilder } from './helpers';
+import { auditar } from './helpers';
 
 /**
  * H-56 (revisión manual, D118): el hover de un botón primario apareció
@@ -21,11 +21,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const boton = page.getByRole('link', { name: 'Ver primeros pasos' });
       await expect(boton).toBeVisible();
       await boton.hover();
-      // El hover cambia bg-primary por transición CSS — esperar a que
-      // asiente antes de auditar (mismo motivo que H-21 con el toast).
-      await page.waitForTimeout(150);
 
-      const resultados = await crearAxeBuilder(page).analyze();
+      const resultados = await auditar(page);
       const violacionesContraste = resultados.violations.filter((v) => v.id === 'color-contrast');
       expect(violacionesContraste).toEqual([]);
     });

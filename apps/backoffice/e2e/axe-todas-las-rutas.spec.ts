@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { crearAxeBuilder, loguearseComoAdminE2E } from './helpers';
+import { auditar, loguearseComoAdminE2E } from './helpers';
 import { NAV_BACKOFFICE } from '../src/config/nav';
 
 /**
@@ -26,7 +26,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       for (const item of NAV_BACKOFFICE) {
         await page.goto(item.href);
         await page.waitForLoadState('networkidle');
-        const { violations } = await crearAxeBuilder(page).analyze();
+        const { violations } = await auditar(page);
         expect(violations, `${item.href}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
       }
     });

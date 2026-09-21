@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loguearseComoAdminE2E, crearAxeBuilder } from './helpers';
+import { loguearseComoAdminE2E, auditar } from './helpers';
 
 /**
  * H-58 (revisión manual): el menú de usuario del backoffice era la única de
@@ -31,16 +31,15 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const itemCerrarSesion = menu.getByRole('menuitem', { name: 'Cerrar sesión' });
       await expect(itemCerrarSesion).toBeVisible();
 
-      const resultadosMenu = await crearAxeBuilder(page, ['region']).analyze();
+      const resultadosMenu = await auditar(page, ['region']);
       expect(resultadosMenu.violations).toEqual([]);
 
       await itemCerrarSesion.click();
       await expect(menu).toBeHidden();
       const dialogo = page.getByRole('alertdialog', { name: '¿Cerrar sesión?' });
       await expect(dialogo).toBeVisible();
-      await expect(dialogo).toHaveCSS('opacity', '1');
 
-      const resultadosDialogo = await crearAxeBuilder(page).analyze();
+      const resultadosDialogo = await auditar(page);
       expect(resultadosDialogo.violations).toEqual([]);
 
       await dialogo.getByRole('button', { name: 'Sí, cerrar sesión' }).click();

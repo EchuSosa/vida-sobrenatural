@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { crearAxeBuilder, registrarPersonaDeTest } from './helpers';
+import { auditar, registrarPersonaDeTest } from './helpers';
 import { RUTAS_PUBLICAS } from '../src/app/sitemap';
 import { NAV_APP } from '../src/config/nav-app';
 
@@ -26,7 +26,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       for (const ruta of RUTAS_PUBLICAS) {
         await page.goto(ruta);
         await page.waitForLoadState('networkidle');
-        const { violations } = await crearAxeBuilder(page).analyze();
+        const { violations } = await auditar(page);
         expect(violations, `${ruta}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
       }
     });
@@ -37,7 +37,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       for (const item of NAV_APP) {
         await page.goto(item.href);
         await page.waitForLoadState('networkidle');
-        const { violations } = await crearAxeBuilder(page).analyze();
+        const { violations } = await auditar(page);
         expect(violations, `${item.href}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
       }
     });

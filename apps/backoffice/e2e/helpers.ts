@@ -42,6 +42,37 @@ export function crearAxeBuilder(page: Page, reglasDeshabilitadas: string[] = [])
   return new AxeBuilder({ page }).options({ rules });
 }
 
+/**
+ * H-76 (revisión manual ronda 8): H-21 (el toast, apps/web) y H-73 (el
+ * panel de Sede, acá) fueron el mismo falso positivo dos veces — un
+ * diálogo, panel o toast que entra con una transición de opacidad,
+ * auditado a mitad de esa transición, mide un contraste que nunca se ve en
+ * pantalla quieta. Antes cada test agregaba su propia espera puntual
+ * (`toHaveCSS('opacity', '1')`) sobre el elemento que sabía que estaba
+ * animándose; acá la espera es genérica — `document.getAnimations()` cubre
+ * transiciones y animations CSS por igual, sin que el test tenga que saber
+ * cuál elemento se está moviendo — así que cubre casos que todavía no se
+ * encontraron a mano. Reemplaza a `crearAxeBuilder(page)....analyze()` en
+ * todos los usos.
+ */
+export async function auditar(page: Page, reglasDeshabilitadas: string[] = []) {
+  await esperarAnimacionesAsentadas(page);
+  return crearAxeBuilder(page, reglasDeshabilitadas).analyze();
+}
+
+async function esperarAnimacionesAsentadas(page: Page) {
+  // Doble rAF: si la transición se disparó recién ahora (ej. un click que
+  // acaba de abrir un diálogo), el navegador todavía no creó el objeto
+  // Animation en el primer frame — `getAnimations()` daría una lista vacía
+  // y la espera de abajo no esperaría nada.
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  );
+  await page.evaluate(() =>
+    Promise.all(document.getAnimations().map((animacion) => animacion.finished.catch(() => {}))),
+  );
+}
+
 async function obtenerApiTokenAdmin(page: Page): Promise<string> {
   const sessionResponse = await page.request.get('/api/auth/session');
   const session = await sessionResponse.json();

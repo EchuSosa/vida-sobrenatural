@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { crearAxeBuilder } from './helpers';
+import { auditar } from './helpers';
 
 /**
  * Historia 1 (specs/002-base-transversal): navegación pública, traslado de
@@ -26,7 +26,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('link', { name: 'Dar' })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Ingresar' })).toBeVisible();
 
-      let resultados = await crearAxeBuilder(page).analyze();
+      let resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
       await nav.getByRole('link', { name: 'Primeros pasos' }).click();
@@ -35,14 +35,14 @@ for (const colorScheme of ['light', 'dark'] as const) {
         page.getByRole('heading', { name: 'Bienvenido/a a Vida Sobrenatural' }),
       ).toBeVisible();
 
-      resultados = await crearAxeBuilder(page).analyze();
+      resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
       await nav.getByRole('link', { name: 'Visitanos' }).click();
       await expect(page).toHaveURL(/\/visitanos/);
       await expect(page.getByRole('heading', { name: 'Visitanos' })).toBeVisible();
 
-      resultados = await crearAxeBuilder(page).analyze();
+      resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
     });
 
@@ -87,7 +87,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('heading', { name: 'Ministerios' })).toBeVisible();
       await page.goBack();
 
-      let resultados = await crearAxeBuilder(page).analyze();
+      let resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
       await page.goto('/nosotros');
@@ -101,7 +101,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText(/todavía no publicamos nuestra declaración de fe/i)).toBeVisible();
       await expect(page.getByText('Foto pendiente', { exact: false }).first()).toBeVisible();
 
-      resultados = await crearAxeBuilder(page).analyze();
+      resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
     });
 
@@ -124,7 +124,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // es un hallazgo aparte (H-21 en la revisión manual), no de esta
       // página; auditarlo acá lo mezclaría con lo que sí es responsabilidad
       // de /dar.
-      const resultados = await crearAxeBuilder(page).analyze();
+      const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
       await page.getByRole('button', { name: 'Copiar Alias' }).click();
@@ -136,10 +136,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
     // H-21 (revisión manual, actualización 2026-09-20): el contraste del
     // Toaster (sonner) resultó ser un falso positivo — axe auditaba con el
     // toast todavía en `opacity: 0` (mitad de la animación de entrada), no
-    // con los tokens --normal-text/--normal-bg ya aplicados. Este test
-    // audita CON el toast visible y ya asentado (opacity: 1), para que una
-    // regresión real de contraste sí se detecte, en vez de esconderla detrás
-    // de la misma condición de carrera que generó el falso positivo.
+    // con los tokens --normal-text/--normal-bg ya aplicados (H-76: `auditar`
+    // espera esa transición para todos los usos, no solo acá). Este test
+    // deja una regresión propia para el contraste del toast en particular.
     test('el toast (sonner) cumple contraste con el aviso visible', async ({
       page,
       context,
@@ -150,9 +149,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       const toast = page.locator('[data-sonner-toast]').first();
       await expect(toast).toBeVisible();
-      await expect(toast).toHaveCSS('opacity', '1');
 
-      const resultados = await crearAxeBuilder(page).analyze();
+      const resultados = await auditar(page);
       const violacionesContraste = resultados.violations.filter((v) => v.id === 'color-contrast');
       expect(violacionesContraste).toEqual([]);
     });
