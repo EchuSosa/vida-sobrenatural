@@ -178,6 +178,12 @@ model Persona {
   relacionesComoSujeto   RelacionFamiliar[] @relation("RelacionFamiliarSujeto")
   relacionesComoFamiliar RelacionFamiliar[] @relation("RelacionFamiliarVinculado")
 
+  // H-42 (revisión manual, revisión de código): PostgreSQL no indexa las
+  // claves foráneas por sí solo — `sedeId` lo necesita como FK.
+  // `estado` es el filtro de `findPendientesTutor` (y de cualquier consulta
+  // futura que separe activas de pendiente_tutor).
+  @@index([sedeId])
+  @@index([estado])
   @@map("personas")
 }
 
@@ -217,5 +223,10 @@ model RelacionFamiliar {
   // (mismo vínculo desde el otro lado) y la relación de una Persona consigo
   // misma se validan en el servicio, no acá (D112).
   @@unique([personaId, familiarId, tipoRelacion])
+  // H-42: `personaId` ya queda indexado como prefijo izquierdo del @@unique
+  // de arriba — no hace falta un índice aparte. `familiarId` (el otro lado
+  // de la FK, usado por ejemplo en scripts/limpiar-e2e.ts) no está cubierto
+  // por ningún índice existente.
+  @@index([familiarId])
   @@map("relaciones_familiares")
 }

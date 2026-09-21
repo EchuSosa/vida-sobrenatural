@@ -93,12 +93,18 @@ Registro inicial — Historia 2 / Historia 2b, FR-005 a FR-009, FR-013.
 
 Requiere rol **Admin** o **Discipulador** (FR-008, Historia 2b Acceptance Scenario 3).
 
-- **Response 200**: lista de Personas con `estado: "pendiente_tutor"` y `activo: true` (las ya
-  marcadas inactivas no aparecen — quedan cerradas, ver `data-model.md`).
+- **Query params** (H-42, revisión manual, revisión de código — paginado): `skip` (default `0`),
+  `take` (default `20`, máximo `100`).
+- **Response 200**: página de Personas con `estado: "pendiente_tutor"` y `activo: true` (las ya
+  marcadas inactivas no aparecen — quedan cerradas, ver `data-model.md`), ordenadas por
+  `createdAt` ascendente.
   ```json
-  [
-    { "id": "uuid", "nombre": "...", "apellido": "...", "telefono": "...", "fechaNacimiento": "...", "sedeId": "uuid" }
-  ]
+  {
+    "items": [
+      { "id": "uuid", "nombre": "...", "apellido": "...", "telefono": "...", "fechaNacimiento": "...", "sedeId": "uuid" }
+    ],
+    "total": 0
+  }
   ```
 
 ## PATCH /personas/:id/activar

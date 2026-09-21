@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import type { PersonaPendienteTutor, BusquedaPersona, ErrorCode } from '@vida-sobrenatural/shared-types';
+import {
+  type PersonaPendienteTutor,
+  type BusquedaPersona,
+  type ErrorCode,
+  type Pagina,
+  apiFetch,
+  ApiError,
+} from '@vida-sobrenatural/shared-types';
 import {
   Button,
   ConfirmDestructiveDialog,
@@ -16,7 +23,6 @@ import {
   SheetFooter,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
-import { apiFetch, ApiError } from '../../lib/api-client';
 
 /**
  * H-29 (revisión manual, actualización 2026-09-20, D94/D102/D108): activar
@@ -25,11 +31,16 @@ import { apiFetch, ApiError } from '../../lib/api-client';
  * Familiar (si ya está registrado) o cargar sus datos como texto libre — no
  * las dos cosas.
  */
+// H-42 (revisión manual, revisión de código): GET /personas/pendientes-tutor pagina.
+const TAMANIO_PAGINA = 20;
+
 export default function PendientesTutorPage() {
   const { data: session, status } = useSession();
   const [pendientes, setPendientes] = useState<PersonaPendienteTutor[]>([]);
+  const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const [personaParaActivar, setPersonaParaActivar] = useState<PersonaPendienteTutor | null>(null);
   const te = useTranslations('errors');
 
@@ -38,16 +49,35 @@ export default function PendientesTutorPage() {
     setCargando(true);
     setError(null);
     try {
-      const datos = await apiFetch<PersonaPendienteTutor[]>('/personas/pendientes-tutor', {
-        headers: { Authorization: `Bearer ${session.apiToken}` },
-      });
-      setPendientes(datos);
+      const pagina = await apiFetch<Pagina<PersonaPendienteTutor>>(
+        `/personas/pendientes-tutor?skip=0&take=${TAMANIO_PAGINA}`,
+        { headers: { Authorization: `Bearer ${session.apiToken}` } },
+      );
+      setPendientes(pagina.items);
+      setTotal(pagina.total);
     } catch (e) {
       setError(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos cargar la lista de pendientes.');
     } finally {
       setCargando(false);
     }
   }, [session, te]);
+
+  async function cargarMas() {
+    if (!session?.apiToken) return;
+    setCargandoMas(true);
+    try {
+      const pagina = await apiFetch<Pagina<PersonaPendienteTutor>>(
+        `/personas/pendientes-tutor?skip=${pendientes.length}&take=${TAMANIO_PAGINA}`,
+        { headers: { Authorization: `Bearer ${session.apiToken}` } },
+      );
+      setPendientes((actuales) => [...actuales, ...pagina.items]);
+      setTotal(pagina.total);
+    } catch (e) {
+      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos cargar más casos.');
+    } finally {
+      setCargandoMas(false);
+    }
+  }
 
   useEffect(() => {
     async function ejecutar() {
@@ -134,6 +164,12 @@ export default function PendientesTutorPage() {
           </li>
         ))}
       </ul>
+
+      {pendientes.length < total && (
+        <Button variant="outline" onClick={cargarMas} disabled={cargandoMas} className="self-start">
+          {cargandoMas ? 'Cargando…' : `Cargar más (${pendientes.length} de ${total})`}
+        </Button>
+      )}
 
       <ActivarDialog
         key={personaParaActivar?.id ?? 'cerrado'}

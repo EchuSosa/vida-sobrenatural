@@ -22,6 +22,9 @@ import { RolesGuard } from '../auth/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
 import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
 
+/** H-42: default de paginación de GET /personas/pendientes-tutor, acotado a un máximo de 100. */
+const PENDIENTES_TUTOR_TAKE_DEFAULT = 20;
+
 @ApiTags('personas')
 @Controller('personas')
 export class PersonaController {
@@ -83,9 +86,11 @@ export class PersonaController {
   @UseGuards(JwtNextAuthGuard, RolesGuard)
   @Roles('admin', 'discipulador')
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Cola de casos pendiente_tutor — Historia 2b, Acceptance Scenario 3.' })
-  findPendientesTutor() {
-    return this.personaService.findPendientesTutor();
+  @ApiOkResponse({ description: 'Cola de casos pendiente_tutor, paginada — Historia 2b, Acceptance Scenario 3 (H-42).' })
+  findPendientesTutor(@Query('skip') skipParam?: string, @Query('take') takeParam?: string) {
+    const skip = Math.max(0, Number(skipParam) || 0);
+    const take = Math.min(100, Math.max(1, Number(takeParam) || PENDIENTES_TUTOR_TAKE_DEFAULT));
+    return this.personaService.findPendientesTutor(skip, take);
   }
 
   @Get('buscar')

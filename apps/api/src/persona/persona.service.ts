@@ -198,16 +198,34 @@ export class PersonaService {
     }
   }
 
-  /** GET /personas/pendientes-tutor — Historia 2b, Acceptance Scenario 3. */
-  findPendientesTutor() {
-    return this.prisma.persona.findMany({
-      where: { estado: EstadoPersona.pendiente_tutor, activo: true },
-      select: PENDIENTE_TUTOR_SELECT,
-      orderBy: { createdAt: 'asc' },
-    });
+  /**
+   * GET /personas/pendientes-tutor — Historia 2b, Acceptance Scenario 3.
+   * H-42 (revisión manual, revisión de código, Restricción Técnica "acceso a
+   * datos"): paginado — `skip`/`take` acotado por el controller.
+   */
+  async findPendientesTutor(skip: number, take: number) {
+    const where = { estado: EstadoPersona.pendiente_tutor, activo: true };
+    const [items, total] = await Promise.all([
+      this.prisma.persona.findMany({
+        where,
+        select: PENDIENTE_TUTOR_SELECT,
+        orderBy: { createdAt: 'asc' },
+        skip,
+        take,
+      }),
+      this.prisma.persona.count({ where }),
+    ]);
+    return { items, total };
   }
 
-  /** GET /personas/buscar?q= — Historia 2b, H-29 (D108): elegir el tutor a vincular. */
+  /**
+   * GET /personas/buscar?q= — Historia 2b, H-29 (D108): elegir el tutor a
+   * vincular. `take: 10` alcanza mientras la tabla es chica — H-42: este
+   * `OR` con `contains` recorre la tabla entera (Postgres no puede usar un
+   * índice B-tree normal para `LIKE '%texto%'`); si `Persona` crece a miles
+   * de filas, va a necesitar un índice de texto (`pg_trgm` + índice GIN por
+   * trigram) en vez de (o además de) subir `take`.
+   */
   buscarPersonas(q: string) {
     const termino = q.trim();
     if (termino.length < 2) return [];
