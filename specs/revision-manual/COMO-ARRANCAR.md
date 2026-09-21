@@ -16,7 +16,7 @@ Desde la raíz del repo:
 ```bash
 docker compose up -d                                    # base de datos
 pnpm --filter api run db:migrate                        # migraciones al día
-SEED_ADMIN_EMAIL=estersosaa@gmail.com pnpm --filter api run db:seed   # datos de demo + tu rol admin
+SEED_ADMIN_EMAIL=estersosaa@gmail.com pnpm --filter api run db:seed   # mínimo + tu rol admin
 ```
 
 Después, una terminal por app:
@@ -31,6 +31,27 @@ Se prueba entrando a **http://localhost:3001**.
 
 > El seed es idempotente: se puede correr las veces que haga falta. `SEED_ADMIN_EMAIL` con tu email
 > real de Google es lo que te da el rol `admin` para entrar al backoffice (H-12).
+
+### Datos de demostración (D120, opcional)
+
+`db:seed` (arriba) es el mínimo para que la app arranque y para los tests — rápido, sin volumen.
+Para ver las pantallas del backoffice con algo parecido a datos reales (listas largas, nombres
+verosímiles, casos límite), corré **encima** ese segundo seed:
+
+```bash
+pnpm --filter api run db:seed-demo
+```
+
+Agrega (sin tocar lo que ya puso `db:seed`): ~200 Personas con nombres argentinos verosímiles,
+repartidas entre tres Sedes (agrega Buenos Aires y Rosario, además de La Plata); una Sede inactiva
+(Rosario) y una eliminada/papelera (Córdoba); dos menores `pendiente_tutor` — uno con un tutor
+encontrable por búsqueda (`demo-tutor-encontrable@example.com`, apellido "Zabala Quintero", que
+comparte con el menor) y otro sin tutor registrado, para cargar a mano; y datos hostiles a
+propósito, cada uno en su propia Persona (nombre larguísimo, apellido compuesto, tildes y ñ, sin
+teléfono, dirección de dos renglones, texto largo en `profesionDetalle`).
+
+Todos los emails llevan el prefijo `demo-` (no `e2e-`: `db:limpiar-e2e` no los toca) y es
+idempotente — se puede correr las veces que haga falta sin duplicar nada.
 
 ## Cosas útiles durante las pruebas
 
@@ -121,6 +142,7 @@ docker compose down -v
 docker compose up -d
 pnpm --filter api run db:migrate
 SEED_ADMIN_EMAIL=estersosaa@gmail.com pnpm --filter api run db:seed
+pnpm --filter api run db:seed-demo   # opcional — si vas a mirar pantallas con volumen
 ```
 
 > `down -v` borra el volumen: se pierden todas las Personas, incluida la tuya y su rol. Es lo que

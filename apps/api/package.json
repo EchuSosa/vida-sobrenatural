@@ -24,6 +24,7 @@
     "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config ./test/jest-e2e.config.cjs",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:seed-demo": "tsx prisma/seed-demo.ts",
     "db:studio": "prisma studio",
     "db:limpiar-e2e": "tsx scripts/limpiar-e2e.ts",
     "db:sembrar-e2e-admin": "tsx scripts/sembrar-e2e-admin.ts",
