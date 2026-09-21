@@ -101,8 +101,9 @@ docker compose exec -T postgres psql -U vidasobrenatural -d vidasobrenatural -c 
 
 **Señales de que algo quedó sucio:**
 
-- Aparecen Personas con prefijo `e2e-` → las dejaron los tests; borrarlas con
-  `pnpm --filter api run db:limpiar-e2e`.
+- Aparecen Personas o Sedes con prefijo `e2e-` → las dejaron los tests; borrarlas con
+  `pnpm --filter api run db:limpiar-e2e` (H-67: limpia toda entidad con ese prefijo, no solo
+  Personas).
 - Hay más de una Sede activa, o ninguna → el seed asume una sola; revisar antes de probar
   Historia 1 / Escenario 1.
 - Tu Persona no tiene `admin` → correr el seed con `SEED_ADMIN_EMAIL` y **volver a iniciar sesión**.
