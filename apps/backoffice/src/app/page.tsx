@@ -1,14 +1,18 @@
-'use client';
-
 import { Suspense } from 'react';
-import { signIn, useSession } from 'next-auth/react';
-import { Button, EstadoVacio } from '@vida-sobrenatural/ui';
+import { auth } from '../auth';
+import { EstadoVacio } from '@vida-sobrenatural/ui';
 import { AvisoPorQuery } from '../components/aviso-por-query';
+import { BotonIngresarGoogle } from '../components/boton-ingresar-google';
 
-export default function InicioBackofficePage() {
-  const { data: session, status } = useSession();
-
-  if (status === 'loading') return null;
+/**
+ * H-60 (revisión manual ronda 7): sin datos que traer, pero contaba entre
+ * los cinco `page.tsx` de cliente enteros de la finding — el chequeo de
+ * sesión pasa a `auth()` server-side (mismo patrón que ya usa
+ * apps/web/(app)/layout.tsx), y "Ingresar con Google" queda como la única
+ * isla de cliente.
+ */
+export default async function InicioBackofficePage() {
+  const session = await auth();
 
   if (!session) {
     return (
@@ -19,9 +23,7 @@ export default function InicioBackofficePage() {
         </Suspense>
         <h1 className="text-2xl font-semibold">Backoffice — Vida Sobrenatural</h1>
         <p className="text-muted-foreground">Necesitás iniciar sesión para continuar.</p>
-        <Button size="xl" onClick={() => signIn('google')}>
-          Ingresar con Google
-        </Button>
+        <BotonIngresarGoogle>Ingresar con Google</BotonIngresarGoogle>
       </div>
     );
   }
