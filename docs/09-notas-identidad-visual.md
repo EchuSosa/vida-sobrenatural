@@ -1,6 +1,8 @@
 # Notas de Identidad Visual (para Sesión 6)
 
-> Este documento acumula referencias visuales encontradas antes de la Sesión 6 formal, para no perder el contexto. No es una decisión de diseño todavía — es material crudo de referencia.
+> Este documento acumula referencias visuales encontradas antes de la Sesión 6 formal, para no perder el contexto. Era material crudo de referencia.
+>
+> **La bifurcación que planteaba (libro editorial / estilo por campaña de Instagram / sistema propio) quedó resuelta en D118: sistema propio con la paleta del libro como base.** Los tokens concretos, con los contrastes medidos, están en `17-paleta-y-tokens.md`. Lo de acá abajo sigue siendo la fuente de dónde salió esa paleta.
 
 ## Fuentes revisadas
 
