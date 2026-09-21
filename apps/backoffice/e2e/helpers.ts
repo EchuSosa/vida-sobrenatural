@@ -16,6 +16,46 @@ export async function loguearseComoAdminE2E(page: Page) {
   });
 }
 
+async function obtenerApiTokenAdmin(page: Page): Promise<string> {
+  const sessionResponse = await page.request.get('/api/auth/session');
+  const session = await sessionResponse.json();
+  return session.apiToken;
+}
+
+/**
+ * H-40 (revisión manual, revisión de código): el e2e de "única Sede activa"
+ * se salteaba según cuántas Sedes tuviera la base — un test que se saltea
+ * según datos de ambiente no existe. Deja exactamente una Sede activa
+ * (desactivando las demás por API, sin pasar por el formulario) y devuelve
+ * los ids que había que reactivar, para restaurar el estado real al
+ * terminar — este es un ambiente compartido con pruebas manuales, no una
+ * base descartable.
+ */
+export async function asegurarUnaSolaSedeActiva(page: Page): Promise<string[]> {
+  const apiToken = await obtenerApiTokenAdmin(page);
+  const sedes: { id: string }[] = await (await page.request.get(`${API_BASE_URL}/sedes`)).json();
+  const [, ...resto] = sedes;
+
+  for (const sede of resto) {
+    await page.request.patch(`${API_BASE_URL}/sedes/${sede.id}`, {
+      headers: { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'application/json' },
+      data: { activo: false },
+    });
+  }
+  return resto.map((sede) => sede.id);
+}
+
+/** Revierte asegurarUnaSolaSedeActiva — reactiva las Sedes que se desactivaron para el test. */
+export async function reactivarSedes(page: Page, ids: string[]) {
+  const apiToken = await obtenerApiTokenAdmin(page);
+  for (const id of ids) {
+    await page.request.patch(`${API_BASE_URL}/sedes/${id}`, {
+      headers: { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'application/json' },
+      data: { activo: true },
+    });
+  }
+}
+
 /**
  * Crea, vía `apps/web` (que sí tiene el flujo de registro completo), un
  * menor real en estado `pendiente_tutor` — insumo de los e2e de H-29. Usa un

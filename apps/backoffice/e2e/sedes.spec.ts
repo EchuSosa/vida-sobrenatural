@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { loguearseComoAdminE2E } from './helpers';
+import { loguearseComoAdminE2E, asegurarUnaSolaSedeActiva, reactivarSedes } from './helpers';
 
 /**
  * H-30 (revisión manual ronda 2) / H-34 (ronda 3 — la red de regresión que
@@ -46,24 +46,33 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('desactivar la única Sede activa la bloquea con un diálogo informativo', async ({ page }) => {
       await loguearseComoAdminE2E(page);
-      await page.goto('/sedes');
-      await page.waitForLoadState('networkidle');
+      // H-40: el test prepara su propio estado (exactamente una Sede activa)
+      // en vez de saltearse según lo que ya tenga la base.
+      const idsAReactivar = await asegurarUnaSolaSedeActiva(page);
 
-      const sedesVisibles = page.locator('article');
-      const cantidad = await sedesVisibles.count();
-      test.skip(cantidad !== 1, 'Este caso solo aplica cuando hay exactamente una Sede activa.');
+      try {
+        await page.goto('/sedes');
+        await page.waitForLoadState('networkidle');
 
-      await sedesVisibles.first().getByRole('button', { name: 'Desactivar' }).click();
+        const sedesVisibles = page.locator('article');
+        await expect(sedesVisibles).toHaveCount(1);
 
-      const dialogo = page.getByRole('alertdialog', { name: 'Necesitás al menos una Sede activa' });
-      await expect(dialogo).toBeVisible();
+        await sedesVisibles.first().getByRole('button', { name: 'Desactivar' }).click();
 
-      const resultados = await new AxeBuilder({ page }).analyze();
-      expect(resultados.violations).toEqual([]);
+        const dialogo = page.getByRole('alertdialog', { name: 'Necesitás al menos una Sede activa' });
+        await expect(dialogo).toBeVisible();
 
-      await dialogo.getByRole('button', { name: 'Crear una Sede' }).click();
-      await expect(dialogo).toBeHidden();
-      await expect(page.getByPlaceholder('Nombre')).toBeInViewport();
+        const resultados = await new AxeBuilder({ page }).analyze();
+        expect(resultados.violations).toEqual([]);
+
+        await dialogo.getByRole('button', { name: 'Crear una Sede' }).click();
+        await expect(dialogo).toBeHidden();
+        await expect(page.getByPlaceholder('Nombre')).toBeInViewport();
+      } finally {
+        // Restaura el estado real de la base — este ambiente también lo usan
+        // pruebas manuales, no es descartable entre corridas.
+        await reactivarSedes(page, idsAReactivar);
+      }
     });
   });
 }
