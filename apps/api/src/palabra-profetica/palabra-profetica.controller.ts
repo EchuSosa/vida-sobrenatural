@@ -1,7 +1,12 @@
-import { Controller, Get, Query, Res } from '@nestjs/common';
-import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { PalabraProfeticaService } from './palabra-profetica.service.js';
+import { CrearPalabraProfeticaDto } from './dto/crear-palabra-profetica.dto.js';
+import { ActualizarPalabraProfeticaDto } from './dto/actualizar-palabra-profetica.dto.js';
+import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
+import { RolesGuard } from '../auth/roles.guard.js';
+import { Roles } from '../auth/roles.decorator.js';
 
 /** H-42: default de paginación del historial, acotado a un máximo de 100 (mismo criterio que pendientes-tutor). */
 const HISTORIAL_TAKE_DEFAULT = 20;
@@ -42,5 +47,32 @@ export class PalabraProfeticaController {
     const skip = Math.max(0, Number(skipParam) || 0);
     const take = Math.min(100, Math.max(1, Number(takeParam) || HISTORIAL_TAKE_DEFAULT));
     return this.palabraProfeticaService.findHistorial(skip, take);
+  }
+
+  @Post()
+  @UseGuards(JwtNextAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiCreatedResponse({ description: 'FR-010 — Historia 3, solo Admin. youtubeUrl es opcional (D121).' })
+  create(@Body() dto: CrearPalabraProfeticaDto) {
+    return this.palabraProfeticaService.create(dto);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtNextAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'FR-010/FR-011 — edición parcial, no toca `vigente` (ver /marcar-vigente).' })
+  update(@Param('id') id: string, @Body() dto: ActualizarPalabraProfeticaDto) {
+    return this.palabraProfeticaService.update(id, dto);
+  }
+
+  @Patch(':id/marcar-vigente')
+  @UseGuards(JwtNextAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'FR-012, SC-006 — desmarca la anterior en la misma transacción, sin paso manual aparte.' })
+  marcarVigente(@Param('id') id: string) {
+    return this.palabraProfeticaService.marcarVigente(id);
   }
 }

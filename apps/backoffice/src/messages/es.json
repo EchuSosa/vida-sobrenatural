@@ -17,6 +17,7 @@
     "TUTOR_INVALIDO": "Esa Persona no puede ser tutor: tiene que ser un miembro activo y mayor de edad.",
     "SEDE_UNICA_ACTIVA": "Es la única Sede activa, y la app la usa para mostrar dónde y cuándo se reúne la iglesia. Creá la nueva Sede primero y después desactivá esta.",
     "SEDE_TIENE_DATOS_RELACIONADOS": "No se puede eliminar: tiene Personas asociadas. Inactivala en su lugar.",
+    "YOUTUBE_URL_INVALIDA": "Esa URL no parece ser de un video de YouTube — pegá la URL completa (ej. https://www.youtube.com/watch?v=...).",
     "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
   },
   "nav": {
@@ -32,6 +33,9 @@
     "notificaciones": "Notificaciones",
     "sedes": "Sedes",
     "papelera": "Papelera",
+    "palabraProfetica": "Palabra Profética",
+    "libros": "Libros",
+    "papeleraLibros": "Papelera de Libros",
     "catalogos": "Catálogos",
     "misDiscipulados": "Mis discipulados",
     "miDisponibilidad": "Mi disponibilidad",

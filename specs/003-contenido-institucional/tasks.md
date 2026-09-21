@@ -103,14 +103,14 @@ tocar el CRUD de Libro.
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Agregar `'YOUTUBE_URL_INVALIDA'` a la unión `ErrorCode` en `packages/shared-types/src/error-code.ts` (data-model.md)
-- [ ] T022 [US3] Crear el helper de validación/extracción de id de YouTube (reconoce `youtube.com/watch?v=`, `youtu.be/`, `youtube.com/embed/`; 11 caracteres o `null`) en `apps/api/src/palabra-profetica/youtube-url.ts` (research.md Decisión 4)
-- [ ] T023 [P] [US3] Test unitario `apps/api/test/unit/youtube-url.spec.ts` para las tres formas reconocidas y los casos de rechazo (depende de T022)
-- [ ] T024 [US3] Crear `apps/api/src/palabra-profetica/dto/{crear-palabra-profetica.dto.ts,actualizar-palabra-profetica.dto.ts}` (`anio` `Min(2010)`/`Max(añoActual+1)`, `titulo`/`texto` no vacíos, `youtubeUrl` opcional — D121)
-- [ ] T025 [US3] Agregar `POST /palabra-profetica`, `PATCH /palabra-profetica/:id` y `PATCH /palabra-profetica/:id/marcar-vigente` a `palabra-profetica.controller.ts`/`.service.ts` — guard Admin; si llega `youtubeUrl`, deriva `youtubeVideoId` con T022 o rechaza `YOUTUBE_URL_INVALIDA` (400); si no llega, `youtubeVideoId` queda `null` sin error (D121); `marcar-vigente` como una sola transacción de Prisma que desmarca la anterior (FR-010 a FR-013, `contracts/palabra-profetica-api.md`) (depende de T010, T021, T022, T024)
-- [ ] T026 [US3] Agregar `TITULOS['YOUTUBE_URL_INVALIDA']` en `apps/api/src/common/errors/all-exceptions.filter.ts`
-- [ ] T027 [US3] Agregar `errors.YOUTUBE_URL_INVALIDA` a `apps/backoffice/src/messages/es.json`
-- [ ] T028 [P] [US3] Tests de integración en `apps/api/test/integration/palabra-profetica.integration-spec.ts`: alta/edición/marcar-vigente, URL de YouTube inválida rechazada, la vigente anterior se desmarca sola, Pastor recibe 403 en escrituras, otro rol recibe 403 (depende de T025)
+- [x] T021 [US3] Agregar `'YOUTUBE_URL_INVALIDA'` a la unión `ErrorCode` en `packages/shared-types/src/error-code.ts` (data-model.md)
+- [x] T022 [US3] Crear el helper de validación/extracción de id de YouTube (reconoce `youtube.com/watch?v=`, `youtu.be/`, `youtube.com/embed/`; 11 caracteres o `null`) en `apps/api/src/palabra-profetica/youtube-url.ts` (research.md Decisión 4)
+- [x] T023 [P] [US3] Test unitario `apps/api/test/unit/youtube-url.spec.ts` para las tres formas reconocidas y los casos de rechazo (depende de T022)
+- [x] T024 [US3] Crear `apps/api/src/palabra-profetica/dto/{crear-palabra-profetica.dto.ts,actualizar-palabra-profetica.dto.ts}` (`anio` `Min(2010)`/`Max(añoActual+1)`, `titulo`/`texto` no vacíos, `youtubeUrl` opcional — D121)
+- [x] T025 [US3] Agregar `POST /palabra-profetica`, `PATCH /palabra-profetica/:id` y `PATCH /palabra-profetica/:id/marcar-vigente` a `palabra-profetica.controller.ts`/`.service.ts` — guard Admin; si llega `youtubeUrl`, deriva `youtubeVideoId` con T022 o rechaza `YOUTUBE_URL_INVALIDA` (400); si no llega, `youtubeVideoId` queda `null` sin error (D121); `marcar-vigente` como una sola transacción de Prisma que desmarca la anterior (FR-010 a FR-013, `contracts/palabra-profetica-api.md`) (depende de T010, T021, T022, T024)
+- [x] T026 [US3] Agregar `TITULOS['YOUTUBE_URL_INVALIDA']` en `apps/api/src/common/errors/all-exceptions.filter.ts`
+- [x] T027 [US3] Agregar `errors.YOUTUBE_URL_INVALIDA` a `apps/backoffice/src/messages/es.json`
+- [x] T028 [P] [US3] Tests de integración en `apps/api/test/integration/palabra-profetica.integration-spec.ts`: alta/edición/marcar-vigente, URL de YouTube inválida rechazada, la vigente anterior se desmarca sola, Pastor recibe 403 en escrituras, otro rol recibe 403 (depende de T025)
 - [ ] T029 [US3] Crear `apps/backoffice/src/app/palabra-profetica/{page.tsx,loading.tsx,error.tsx,palabra-profetica-cliente.tsx}`: formulario (año/título/texto/URL) + historial + botón marcar vigente, validación por campo con limpieza al escribir y revalidación al salir (H-50/H-72), envío protegido con `useEnvio` (H-57), Admin edita/Pastor lee (D64) (depende de T025)
 - [ ] T030 [P] [US3] Agregar la entrada "Palabra Profética" (Admin y Pastor) a `apps/backoffice/src/config/nav.ts` (FR-028, FR-029)
 - [ ] T031 [P] [US3] Crear `apps/backoffice/e2e/palabra-profetica.spec.ts`: alta, marcar vigente desmarca la anterior, errores de validación por campo, Pastor solo lectura, otro rol bloqueado por menú y por URL directa, `auditar()` en los dos temas

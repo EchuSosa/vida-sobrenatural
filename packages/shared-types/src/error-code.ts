@@ -33,6 +33,10 @@ export type ErrorCode =
   // catálogo con datos relacionados — Sede con Personas, primero de la
   // familia (Curso/Ministerio/Célula/Libro la suman cuando existan).
   | 'SEDE_TIENE_DATOS_RELACIONADOS'
+  // specs/003-contenido-institucional, FR-011: la URL de YouTube cargada no
+  // resuelve a un id de video reconocible (research.md Decisión 4). D121:
+  // sólo se dispara si el Admin cargó algo — el campo vacío no es un error.
+  | 'YOUTUBE_URL_INVALIDA'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */

@@ -44,6 +44,10 @@ const COPIA_POR_CODIGO: Record<string, string> = {
   HORARIOS_INVALIDO: 'Usá un formato como "Domingos 10:30 hs" o "Domingos 10 hs y Martes 19 hs".',
   CONTACTOEMAIL_INVALIDO: 'Ingresá un email válido, por ejemplo nombre@ejemplo.com.',
   FECHANACIMIENTO_INVALIDO: 'Ingresá una fecha válida.',
+  // specs/003-contenido-institucional, FR-011: no es un código derivado de
+  // `${CAMPO}_INVALIDO` por class-validator — lo lanza el service a mano
+  // (AppException), pero se muestra igual bajo el campo youtubeUrl.
+  YOUTUBE_URL_INVALIDA: 'Pegá la URL completa de un video de YouTube (ej. https://www.youtube.com/watch?v=...).',
 };
 
 export function mensajeDeCampo(code: string, etiquetaCampo: string): string {

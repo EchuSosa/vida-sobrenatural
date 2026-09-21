@@ -45,6 +45,7 @@ const TITULOS: Record<ErrorCode, string> = {
   TUTOR_INVALIDO: 'Tutor inválido',
   SEDE_UNICA_ACTIVA: 'Es la única Sede activa',
   SEDE_TIENE_DATOS_RELACIONADOS: 'No se puede eliminar: tiene datos relacionados',
+  YOUTUBE_URL_INVALIDA: 'URL de YouTube inválida',
   ERROR_INTERNO: 'Error interno',
 };
 

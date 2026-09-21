@@ -10,10 +10,28 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3
 
 /** Login vía test-login como la Persona admin+discipulador de e2e (globalSetup la siembra). */
 export async function loguearseComoAdminE2E(page: Page) {
+  await loguearseComoE2E(page, 'e2e-admin@example.com');
+}
+
+/**
+ * specs/003-contenido-institucional (Historias 3/4, D64): Pastor lee, no
+ * edita — Persona sembrada por apps/api/scripts/sembrar-e2e-admin.ts junto
+ * con la de Admin.
+ */
+export async function loguearseComoPastorE2E(page: Page) {
+  await loguearseComoE2E(page, 'e2e-pastor@example.com');
+}
+
+/** Un rol que no es ni Admin ni Pastor — bloqueado del todo en las dos secciones nuevas (FR-030). */
+export async function loguearseComoOtroRolE2E(page: Page) {
+  await loguearseComoE2E(page, 'e2e-otro-rol@example.com');
+}
+
+async function loguearseComoE2E(page: Page, email: string) {
   const csrfResponse = await page.request.get('/api/auth/csrf');
   const { csrfToken } = await csrfResponse.json();
   await page.request.post('/api/auth/callback/test-login', {
-    form: { email: 'e2e-admin@example.com', csrfToken },
+    form: { email, csrfToken },
   });
 }
 
