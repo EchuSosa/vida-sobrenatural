@@ -59,7 +59,7 @@ errores de accesibilidad — sin depender de ningún dato cargado desde el backo
 - [x] T007 [P] [US1] Agregar el contenido de Nosotros (identidad, historia, visión, misión, valores, sistema de trabajo, llamado con Isaías 61:1-4/Lucas 4:16-21, congregación local) al namespace `nosotros` de `apps/web/src/messages/es.json`, tomado de `docs/12-contenido-bienvenida.md` § "Contenido institucional del sitio actual" (FR-001, D84)
 - [x] T008 [US1] Actualizar `apps/web/src/app/(publica)/nosotros/page.tsx`: renderizar las secciones nuevas en orden, preservando sin cambios "Somos Familia", el placeholder del equipo pastoral y "En qué creemos" pendiente (FR-001, FR-002); el sistema de trabajo enlaza a Primeros pasos para el detalle en vez de repetir el texto completo (Acceptance Scenario 3) (depende de T007)
 - [x] T009 [P] [US1] Ampliar `apps/web/e2e/nosotros.spec.ts`: contenido nuevo visible, sin scroll horizontal a 320/375px (ya cubierto por `axe-todas-las-rutas.spec.ts`, H-62), `auditar()` en los dos temas (H-76)
-- [ ] T009a [US1] Verificar Nosotros contra el checklist de `docs/15-guia-ux-ui.md` (cuatro estados, una sola acción principal, orden de botones, tono, teclado y lector de pantalla, contraste en los dos temas) — D114
+- [x] T009a [US1] Verificar Nosotros contra el checklist de `docs/15-guia-ux-ui.md` (cuatro estados, una sola acción principal, orden de botones, tono, teclado y lector de pantalla, contraste en los dos temas) — D114
 
 **Checkpoint**: US1 funcional y verificable de forma independiente.
 
@@ -81,13 +81,13 @@ implementada todavía.
 - [x] T013 [P] [US2] Test unitario del comportamiento "una vigente o 204" de `palabra-profetica.service.ts` en `apps/api/test/unit/`
 - [x] T014 [P] [US2] Tests de integración de las variantes `GET` en `apps/api/test/integration/palabra-profetica.integration-spec.ts` y `apps/api/test/integration/libros.integration-spec.ts`
 - [x] T015 [US2] Cargar en `apps/api/prisma/seed.ts` la Palabra Profética vigente ("Palabra Profética 2026 — Fidelidad y crecimiento", `docs/12-contenido-bienvenida.md` § "Palabra Profética 2026") y los 8 libros reales del catálogo (`docs/12-contenido-bienvenida.md` § Ediciones VS) — sólo datos, `portadaUrl`/`portadaDescripcion` quedan en `null` en los 8; ningún archivo de imagen entra por este seed, el placeholder hace su trabajo (FR-031) (depende de T006, T010, T011; no depende de T032-T040, la parte de subida de portada de US4)
-- [ ] T016 [US2] Crear `apps/web/src/app/(publica)/nosotros/palabra-profetica/page.tsx`: título/año/texto, y sólo si hay video (D121: opcional) miniatura + carga al clic desde `youtube-nocookie.com` (D93); estado vacío únicamente si no hay ninguna vigente (204), no cuando la vigente no tiene video (FR-004, FR-005, FR-006)
-- [ ] T017 [US2] Crear `apps/web/src/app/(publica)/nosotros/ediciones-vs/page.tsx`: introducción y "cómo se consiguen" (`docs/12-contenido-bienvenida.md` § Ediciones VS) + listado de libros activos (portada o `PlaceholderImagen aspecto="portada"`, título, autor/a, año, orden por `orden`), estado vacío si no hay ninguno activo (FR-007, FR-008)
-- [ ] T018 [US2] Agregar en `apps/web/src/app/(publica)/nosotros/page.tsx` los enlaces a ambas subpáginas, sin sumar ítems al menú principal (FR-003, D115) (depende de T008, T016, T017)
-- [ ] T019 [P] [US2] Agregar ambas subpáginas a `apps/web/src/app/(publica)/sitemap.ts` (FR-009)
-- [ ] T020 [P] [US2] Crear `apps/web/e2e/palabra-profetica.spec.ts` y `apps/web/e2e/ediciones-vs.spec.ts`: contenido, estados vacíos, video con clic para cargar, `auditar()` en los dos temas (H-76)
-- [ ] T020a [US2] Verificar la subpágina de Palabra Profética contra el checklist de `docs/15-guia-ux-ui.md` — D114
-- [ ] T020b [US2] Verificar la subpágina de Ediciones VS contra el checklist de `docs/15-guia-ux-ui.md` — D114
+- [x] T016 [US2] Crear `apps/web/src/app/(publica)/nosotros/palabra-profetica/page.tsx`: título/año/texto, y sólo si hay video (D121: opcional) miniatura + carga al clic desde `youtube-nocookie.com` (D93); estado vacío únicamente si no hay ninguna vigente (204), no cuando la vigente no tiene video (FR-004, FR-005, FR-006)
+- [x] T017 [US2] Crear `apps/web/src/app/(publica)/nosotros/ediciones-vs/page.tsx`: introducción y "cómo se consiguen" (`docs/12-contenido-bienvenida.md` § Ediciones VS) + listado de libros activos (portada o `PlaceholderImagen aspecto="portada"`, título, autor/a, año, orden por `orden`), estado vacío si no hay ninguno activo (FR-007, FR-008)
+- [x] T018 [US2] Agregar en `apps/web/src/app/(publica)/nosotros/page.tsx` los enlaces a ambas subpáginas, sin sumar ítems al menú principal (FR-003, D115) (depende de T008, T016, T017)
+- [x] T019 [P] [US2] Agregar ambas subpáginas a `apps/web/src/app/(publica)/sitemap.ts` (FR-009)
+- [x] T020 [P] [US2] Crear `apps/web/e2e/palabra-profetica.spec.ts` y `apps/web/e2e/ediciones-vs.spec.ts`: contenido, estados vacíos, video con clic para cargar, `auditar()` en los dos temas (H-76)
+- [x] T020a [US2] Verificar la subpágina de Palabra Profética contra el checklist de `docs/15-guia-ux-ui.md` — D114
+- [x] T020b [US2] Verificar la subpágina de Ediciones VS contra el checklist de `docs/15-guia-ux-ui.md` — D114
 
 **Checkpoint**: US1 + US2 funcionales de forma independiente; la web pública ya muestra contenido real de ambas secciones (vía seed).
 
