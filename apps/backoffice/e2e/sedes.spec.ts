@@ -130,6 +130,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(dialogoDesactivar).toBeVisible();
       await expect(dialogoDesactivar).toHaveCSS('opacity', '1');
       await dialogoDesactivar.getByRole('button', { name: 'Sí, desactivar' }).click();
+      await expect(dialogoDesactivar).toBeHidden();
       await expect(page.getByText('Sede desactivada.')).toBeVisible();
       await expect(page.getByText('Inactiva', { exact: true })).toBeVisible();
 
@@ -145,12 +146,18 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const dialogoReactivar = page.getByRole('alertdialog', { name: `¿Reactivar la Sede ${nombreSede}?` });
       await expect(dialogoReactivar).toBeVisible();
       await dialogoReactivar.getByRole('button', { name: 'Sí, reactivar' }).click();
+      await expect(dialogoReactivar).toBeHidden();
       await expect(page.getByText('Sede reactivada.')).toBeVisible();
       await expect(page.getByText('Activa', { exact: true })).toBeVisible();
 
       // Cierra el ciclo desactivando de nuevo — dejarla activa ensuciaría
       // Visitanos y el registro reales para siempre (Sede no se borra).
-      await page.getByRole('button', { name: 'Desactivar' }).click();
+      // getByRole('button', { name: 'Desactivar', exact: true }) — sin
+      // exact, matchea también "Sí, desactivar" si ese diálogo (ya cerrado,
+      // pero router.refresh() tarda un instante en re-renderizar
+      // ConfirmDestructiveDialog con las props nuevas) todavía no terminó
+      // de desmontarse.
+      await page.getByRole('button', { name: 'Desactivar', exact: true }).click();
       await page
         .getByRole('alertdialog', { name: `¿Desactivar la Sede ${nombreSede}?` })
         .getByRole('button', { name: 'Sí, desactivar' })
