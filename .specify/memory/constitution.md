@@ -1,27 +1,32 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.1.0 (MINOR, per ADR D105 in docs/05-decisiones.md)
-- Rationale for bump: four new principles added and Principio V / Restricciones Técnicas
-  materially expanded; no existing principle was redefined or removed.
+- Version change: 1.1.0 → 1.2.0 (MINOR, per ADR D114 in docs/05-decisiones.md)
+- Rationale for bump: one new principle added (XI), Restricciones Técnicas expanded, Governance
+  expanded with a concrete "definición de terminado" — no existing principle was redefined or
+  removed.
+- Why D114 exists (kept here per the ADR's own request, for whoever reads this amendment):
+  Principio VIII already required the four loading/empty/error/success states per screen since
+  D105 (v1.1.0), and it was still missed across almost the whole app (H-43). The reason: 
+  /speckit.analyze compares spec.md against the Constitution, but nothing compares the actual
+  implementation against either one. A principle with no concrete check is a principle nobody is
+  actually accountable to. That's why this amendment doesn't just add XI — it also gives
+  Governance a control that turns "the app must look done" into a task that has to exist in
+  tasks.md and suites that have to be green, not just a sentence someone might remember to apply.
 - Modified principles:
-  - V. Seguridad — expanded with 6 new bullets (authorization by record, fail-closed login,
-    verified-email account linking, private files served via API, no sensitive data in
-    push/email subjects, Admin-created adult accounts as the sole SSO exception).
-  - VII. Accesibilidad e inclusión (new)
-  - VIII. Experiencia consistente (new)
-  - IX. Preparada para varios idiomas (new)
-  - X. Errores y observabilidad (new)
-  - I–IV, VI: unchanged.
-- Added sections: none new at the top level; Restricciones Técnicas expanded with 5 new bullets
-  (fixed local ports, next-intl / next-themes, EmailService & StorageService interfaces +
-  Mailpit, SEO scope, Core Web Vitals targets).
+  - XI. Una sola fuente de verdad en el código (new)
+  - I–X: unchanged.
+- Added sections: none new at the top level; Restricciones Técnicas gained one bullet (acceso a
+  datos: select explícito, paginación, índices — H-42); Governance gained one paragraph
+  (definición de terminado: checklist de docs/15-guia-ux-ui.md instanciado por pantalla en
+  tasks.md, y las tres suites verdes antes de cerrar una fase — H-43).
 - Removed sections: none.
 - Deferred items / TODOs: none.
 - Templates requiring follow-up: reviewed plan-template.md, spec-template.md, tasks-template.md.
-  plan-template.md's "Constitution Check" gate is generic ("[Gates determined based on
-  constitution file]") and resolves against this file at plan time, so it already covers
-  principles VII-X without edits. spec-template.md and tasks-template.md contain no
-  constitution-specific gates or principle references. No template changes required.
+  plan-template.md's "Constitution Check" gate resolves against this file at plan time, so it
+  already covers Principio XI without edits. tasks-template.md has no principle-specific gate to
+  update, but authors generating tasks.md from now on should read Governance below and instantiate
+  the docs/15-guia-ux-ui.md checklist per screen as its own task, per spec — no template change
+  required for that, it's a per-spec authoring responsibility. spec-template.md unaffected.
 -->
 
 # Vida Sobrenatural Constitution
@@ -173,6 +178,22 @@ formato de error. Sentry permite enterarse de errores en producción sin depende
 los reporte, y excluir datos personales evita convertir la observabilidad en un riesgo de
 privacidad. Fuente: D101, `docs/16-sistemas-transversales.md`.
 
+### XI. Una sola fuente de verdad en el código
+
+Una regla de negocio, una validación o un componente existen en **un solo lugar**. Lo que usan
+dos apps vive en `packages/` — valores y tipos compartidos en `packages/shared-types`,
+componentes de interfaz en `packages/ui`. Nada se copia entre `apps/web`, `apps/backoffice` y
+`apps/api`. Si una limitación técnica real obliga a copiar algo de todos modos, esa copia DEBE
+llevar un test que falle en cuanto diverja del original — la copia sin ese test no cumple este
+principio.
+
+**Rationale**: Dos copias de la misma regla se desincronizan tarde o temprano sin que nadie lo
+note hasta que alguien queda trabado en un formulario — es exactamente lo que pasó con
+`TELEFONO_REGEX`/`HORARIOS_SEDE_REGEX`, duplicadas a mano entre `apps/api` y los dos frontends
+antes de que `packages/shared-types` tuviera build propio (H-33), y el mismo riesgo corre
+cualquier componente reimplementado en más de una app en vez de extraerse a `packages/ui` (H-41).
+Fuente: H-33, H-41 (`specs/revision-manual/2026-09-17-001-002.md`).
+
 ## Restricciones Técnicas
 
 - Monorepo gestionado con pnpm + Turborepo: `apps/api` (NestJS), `apps/web` y `apps/backoffice`
@@ -191,6 +212,10 @@ privacidad. Fuente: D101, `docs/16-sistemas-transversales.md`.
 - SEO (SSG/ISR, metadata, sitemap, datos estructurados de schema.org) se implementa solo en las
   páginas públicas; el área privada de `apps/web` y todo `apps/backoffice` llevan `noindex` (D82).
 - Metas de Core Web Vitals en celular: LCP < 2.5 s, INP < 200 ms, CLS < 0.1.
+- Acceso a datos vía Prisma: todo query DEBE usar `select` explícito (nunca devolver un modelo
+  completo sin filtrar sus campos); todo listado que pueda crecer sin límite conocido DEBE
+  paginarse; las claves foráneas y los campos usados como filtro frecuente en un `where` DEBEN
+  tener índice en `schema.prisma` (H-42).
 
 ## Governance
 
@@ -199,13 +224,21 @@ un principio (agregar, modificar o eliminar) requiere registrar la ADR correspon
 `docs/05-decisiones.md` antes o junto con la actualización de este archivo — un cambio de
 principio sin su ADR asociada no es válido.
 
+**Definición de terminado**: cumplir el Principio VIII no es automático por citarlo. El
+`tasks.md` de cada spec DEBE instanciar, para cada pantalla que agregue o modifique, una tarea
+concreta que aplique el checklist del final de `docs/15-guia-ux-ui.md` a esa pantalla — el
+checklist referenciado sin una tarea propia por pantalla no cuenta como cumplido. Ninguna fase de
+un spec se da por cerrada sin correr, en verde, las tres suites de la convención de
+`docs/00-README.md`: los tests unitarios de `apps/api` (`pnpm --filter api run test`), la
+integración (`pnpm --filter api run test:e2e`, config aparte) y los end-to-end de `apps/web`.
+
 **Versionado semántico** de esta Constitución:
 - MAJOR: cambios incompatibles, o eliminación/redefinición de principios existentes.
 - MINOR: se agrega un principio nuevo, o se expande materialmente una guía existente.
 - PATCH: aclaraciones, correcciones de redacción o ajustes no semánticos.
 
-Toda spec, plan de implementación o PR debe poder verificarse contra los diez principios
+Toda spec, plan de implementación o PR debe poder verificarse contra los once principios
 anteriores antes de mergear. Cuando un principio y una spec entren en conflicto, gana la
 Constitución hasta que se apruebe una ADR que la enmiende.
 
-**Version**: 1.1.0 | **Ratified**: 2026-09-15 | **Last Amended**: 2026-09-17
+**Version**: 1.2.0 | **Ratified**: 2026-09-15 | **Last Amended**: 2026-09-20
