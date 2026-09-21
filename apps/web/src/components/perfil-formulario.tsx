@@ -4,8 +4,15 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { type EstadoCivil, type Profesion, apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
-import { Button, CampoTelefono } from '@vida-sobrenatural/ui';
+import {
+  type EstadoCivil,
+  type Profesion,
+  apiFetch,
+  ApiError,
+  erroresPorCampo,
+  mensajeDeCampo,
+} from '@vida-sobrenatural/shared-types';
+import { Button, CampoTelefono, ResumenErrores, MensajeErrorCampo, type ErrorResumen } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../hooks/use-opciones-registro';
 
 export interface PerfilEditable {
@@ -40,10 +47,22 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
   const [profesion, setProfesion] = useState<Profesion>(perfil.profesion);
   const [profesionDetalle, setProfesionDetalle] = useState(perfil.profesionDetalle ?? '');
   const [guardando, setGuardando] = useState(false);
+  const [mensajesPorCampo, setMensajesPorCampo] = useState<Record<string, string>>({});
+  const [resumenErrores, setResumenErrores] = useState<ErrorResumen[]>([]);
+
+  const etiquetasCampo: Record<string, string> = {
+    telefono: t('campos.numeroTelefono'),
+    direccion: t('campos.direccion'),
+    estadoCivil: t('campos.estadoCivil'),
+    profesion: t('campos.profesion'),
+    profesionDetalle: t('campos.profesionDetalle'),
+  };
 
   async function guardar(e: React.FormEvent) {
     e.preventDefault();
     setGuardando(true);
+    setMensajesPorCampo({});
+    setResumenErrores([]);
     try {
       await apiFetch('/personas/me', {
         method: 'PATCH',
@@ -61,8 +80,18 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
       });
       toast.success('Guardamos tus cambios.');
     } catch (error) {
-      const mensaje = error instanceof ApiError ? error.message : 'No pudimos guardar tus cambios.';
-      toast.error(mensaje);
+      const campos = erroresPorCampo(error);
+      if (campos) {
+        const resumen = campos.map(({ campo, code }) => ({
+          campo,
+          mensaje: mensajeDeCampo(code, etiquetasCampo[campo] ?? campo),
+        }));
+        setResumenErrores(resumen);
+        setMensajesPorCampo(Object.fromEntries(resumen.map((r) => [r.campo, r.mensaje])));
+      } else {
+        const mensaje = error instanceof ApiError ? error.message : 'No pudimos guardar tus cambios.';
+        toast.error(mensaje);
+      }
     } finally {
       setGuardando(false);
     }
@@ -70,30 +99,41 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
 
   return (
     <form onSubmit={guardar} className="flex flex-col gap-4">
+      <ResumenErrores errores={resumenErrores} />
       <CampoTelefono
+        id="campo-telefono"
         labelTelefono={t('campos.numeroTelefono')}
         labelCodigo={t('campos.codigoPais')}
         codigoPais={telefonoCodigoPais}
         numero={telefonoNumero}
         onChangeCodigo={setTelefonoCodigoPais}
         onChangeNumero={setTelefonoNumero}
+        error={Boolean(mensajesPorCampo.telefono)}
+        errorTexto={mensajesPorCampo.telefono}
       />
       <label className="flex flex-col gap-1 text-sm font-medium">
         {t('campos.direccion')}
         <input
+          id="campo-direccion"
           value={direccion}
           onChange={(e) => setDireccion(e.target.value)}
           required
-          className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+          aria-invalid={Boolean(mensajesPorCampo.direccion) || undefined}
+          aria-describedby={mensajesPorCampo.direccion ? 'campo-direccion-error' : undefined}
+          className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
         />
+        <MensajeErrorCampo id="campo-direccion-error" mensaje={mensajesPorCampo.direccion} />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
         {t('campos.estadoCivil')}
         <select
+          id="campo-estadoCivil"
           value={estadoCivil}
           onChange={(e) => setEstadoCivil(e.target.value as EstadoCivil)}
           required
-          className="h-10 rounded-md border border-zinc-300 px-2 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+          aria-invalid={Boolean(mensajesPorCampo.estadoCivil) || undefined}
+          aria-describedby={mensajesPorCampo.estadoCivil ? 'campo-estadoCivil-error' : undefined}
+          className="h-10 rounded-md border border-zinc-300 px-2 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
         >
           {opciones.estadoCivil.map((o) => (
             <option key={o.value} value={o.value}>
@@ -101,14 +141,18 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
             </option>
           ))}
         </select>
+        <MensajeErrorCampo id="campo-estadoCivil-error" mensaje={mensajesPorCampo.estadoCivil} />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
         {t('campos.profesion')}
         <select
+          id="campo-profesion"
           value={profesion}
           onChange={(e) => setProfesion(e.target.value as Profesion)}
           required
-          className="h-10 rounded-md border border-zinc-300 px-2 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+          aria-invalid={Boolean(mensajesPorCampo.profesion) || undefined}
+          aria-describedby={mensajesPorCampo.profesion ? 'campo-profesion-error' : undefined}
+          className="h-10 rounded-md border border-zinc-300 px-2 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
         >
           {opciones.profesion.map((o) => (
             <option key={o.value} value={o.value}>
@@ -116,16 +160,21 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
             </option>
           ))}
         </select>
+        <MensajeErrorCampo id="campo-profesion-error" mensaje={mensajesPorCampo.profesion} />
       </label>
       {profesion === 'otro' && (
         <label className="flex flex-col gap-1 text-sm font-medium">
           {t('campos.profesionDetalle')}
           <input
+            id="campo-profesionDetalle"
             value={profesionDetalle}
             onChange={(e) => setProfesionDetalle(e.target.value)}
             required
-            className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+            aria-invalid={Boolean(mensajesPorCampo.profesionDetalle) || undefined}
+            aria-describedby={mensajesPorCampo.profesionDetalle ? 'campo-profesionDetalle-error' : undefined}
+            className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
           />
+          <MensajeErrorCampo id="campo-profesionDetalle-error" mensaje={mensajesPorCampo.profesionDetalle} />
         </label>
       )}
       <Button type="submit" disabled={guardando} className="self-start">

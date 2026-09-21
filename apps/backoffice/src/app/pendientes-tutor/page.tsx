@@ -10,11 +10,14 @@ import {
   type Pagina,
   apiFetch,
   ApiError,
+  erroresPorCampo,
+  mensajeDeCampo,
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
   ConfirmDestructiveDialog,
   Input,
+  MensajeErrorCampo,
   Sheet,
   SheetContent,
   SheetHeader,
@@ -204,6 +207,7 @@ function ActivarDialog({
   const [tutorTelefono, setTutorTelefono] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mensajesCampo, setMensajesCampo] = useState<Record<string, string>>({});
 
   // El estado interno se resetea remontando este componente (key={persona?.id}
   // en el padre) en vez de un efecto que lo limpie al cerrar — evita
@@ -231,6 +235,7 @@ function ActivarDialog({
     if (!persona) return;
     setEnviando(true);
     setError(null);
+    setMensajesCampo({});
     try {
       const body = tutorElegido ? { tutorPersonaId: tutorElegido.id } : { tutorNombre, tutorTelefono };
       await apiFetch(`/personas/${persona.id}/activar`, {
@@ -241,6 +246,20 @@ function ActivarDialog({
       toast(`${persona.nombre} ${persona.apellido} activada.`);
       onActivado();
     } catch (e) {
+      // H-50: además del código general del error, ver si hay {campo, code}
+      // por cada campo (ej. tutorTelefono mal formado) para mostrar debajo
+      // del campo en vez de solo un mensaje genérico.
+      const campos = erroresPorCampo(e);
+      if (campos) {
+        setMensajesCampo(
+          Object.fromEntries(
+            campos.map(({ campo, code }) => [
+              campo,
+              mensajeDeCampo(code, campo === 'tutorNombre' ? 'Nombre del tutor' : 'Teléfono del tutor'),
+            ]),
+          ),
+        );
+      }
       setError(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos activar a esta Persona.');
     } finally {
       setEnviando(false);
@@ -324,13 +343,27 @@ function ActivarDialog({
                 <label className="text-sm font-medium" htmlFor="tutor-nombre">
                   Nombre del tutor
                 </label>
-                <Input id="tutor-nombre" value={tutorNombre} onChange={(e) => setTutorNombre(e.target.value)} />
+                <Input
+                  id="tutor-nombre"
+                  value={tutorNombre}
+                  onChange={(e) => setTutorNombre(e.target.value)}
+                  aria-invalid={Boolean(mensajesCampo.tutorNombre)}
+                  aria-describedby={mensajesCampo.tutorNombre ? 'tutor-nombre-error' : undefined}
+                />
+                <MensajeErrorCampo id="tutor-nombre-error" mensaje={mensajesCampo.tutorNombre} />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium" htmlFor="tutor-telefono">
                   Teléfono del tutor
                 </label>
-                <Input id="tutor-telefono" value={tutorTelefono} onChange={(e) => setTutorTelefono(e.target.value)} />
+                <Input
+                  id="tutor-telefono"
+                  value={tutorTelefono}
+                  onChange={(e) => setTutorTelefono(e.target.value)}
+                  aria-invalid={Boolean(mensajesCampo.tutorTelefono)}
+                  aria-describedby={mensajesCampo.tutorTelefono ? 'tutor-telefono-error' : undefined}
+                />
+                <MensajeErrorCampo id="tutor-telefono-error" mensaje={mensajesCampo.tutorTelefono} />
               </div>
             </>
           )}

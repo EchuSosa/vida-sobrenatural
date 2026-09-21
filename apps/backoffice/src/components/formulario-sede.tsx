@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { type Sede, HORARIOS_SEDE_REGEX } from '@vida-sobrenatural/shared-types';
-import { Button, CampoTelefono, Input } from '@vida-sobrenatural/ui';
+import { useMemo, useState } from 'react';
+import { type Sede, type ErrorDeCampo, HORARIOS_SEDE_REGEX, mensajeDeCampo } from '@vida-sobrenatural/shared-types';
+import { Button, CampoTelefono, Input, ResumenErrores, MensajeErrorCampo } from '@vida-sobrenatural/ui';
 
 export interface ValoresSede {
   nombre: string;
@@ -56,6 +56,15 @@ export function datosSedeParaEnviar(valores: ValoresSede) {
  * de alta, copiado íntegro hubiera sido la misma duplicación que ya marcó
  * H-49/Principio XI en el selector de tema.
  */
+const ETIQUETAS_CAMPO: Record<string, string> = {
+  nombre: 'Nombre',
+  direccion: 'Dirección',
+  horarios: 'Horarios',
+  contactoTelefono: 'Teléfono de contacto',
+  contactoEmail: 'Email de contacto',
+  descripcionBienvenida: 'Descripción para la Bienvenida',
+};
+
 export function FormularioSede({
   valoresIniciales,
   onGuardar,
@@ -63,6 +72,7 @@ export function FormularioSede({
   textoBoton,
   textoEnviando,
   error,
+  erroresCampo,
 }: {
   valoresIniciales: ValoresSede;
   onGuardar: (valores: ValoresSede) => void;
@@ -70,11 +80,26 @@ export function FormularioSede({
   textoBoton: string;
   textoEnviando: string;
   error?: string | null;
+  /** H-50: `{campo, code}` de un 400 de validación — ver `erroresPorCampo` en shared-types. */
+  erroresCampo?: ErrorDeCampo[] | null;
 }) {
   const [valores, setValores] = useState(valoresIniciales);
   const [horariosTocado, setHorariosTocado] = useState(false);
 
   const horariosValido = valores.horarios === '' || HORARIOS_SEDE_REGEX.test(valores.horarios);
+
+  const mensajesPorCampo = useMemo(() => {
+    const mapa: Record<string, string> = {};
+    for (const { campo, code } of erroresCampo ?? []) {
+      mapa[campo] = mensajeDeCampo(code, ETIQUETAS_CAMPO[campo] ?? campo);
+    }
+    return mapa;
+  }, [erroresCampo]);
+
+  const resumenErrores = useMemo(
+    () => Object.entries(mensajesPorCampo).map(([campo, mensaje]) => ({ campo, mensaje })),
+    [mensajesPorCampo],
+  );
 
   function actualizar<K extends keyof ValoresSede>(campo: K, valor: ValoresSede[K]) {
     setValores((actuales) => ({ ...actuales, [campo]: valor }));
@@ -93,34 +118,55 @@ export function FormularioSede({
           {error}
         </p>
       )}
-      <Input
-        placeholder="Nombre"
-        required
-        value={valores.nombre}
-        onChange={(e) => actualizar('nombre', e.target.value)}
-      />
-      <Input
-        placeholder="Dirección"
-        required
-        value={valores.direccion}
-        onChange={(e) => actualizar('direccion', e.target.value)}
-      />
+      <ResumenErrores errores={resumenErrores} />
       <div className="flex flex-col gap-1">
         <Input
+          id="campo-nombre"
+          placeholder="Nombre"
+          required
+          aria-invalid={Boolean(mensajesPorCampo.nombre)}
+          aria-describedby={mensajesPorCampo.nombre ? 'campo-nombre-error' : undefined}
+          value={valores.nombre}
+          onChange={(e) => actualizar('nombre', e.target.value)}
+        />
+        <MensajeErrorCampo id="campo-nombre-error" mensaje={mensajesPorCampo.nombre} />
+      </div>
+      <div className="flex flex-col gap-1">
+        <Input
+          id="campo-direccion"
+          placeholder="Dirección"
+          required
+          aria-invalid={Boolean(mensajesPorCampo.direccion)}
+          aria-describedby={mensajesPorCampo.direccion ? 'campo-direccion-error' : undefined}
+          value={valores.direccion}
+          onChange={(e) => actualizar('direccion', e.target.value)}
+        />
+        <MensajeErrorCampo id="campo-direccion-error" mensaje={mensajesPorCampo.direccion} />
+      </div>
+      <div className="flex flex-col gap-1">
+        <Input
+          id="campo-horarios"
           placeholder='Horarios (ej. "Domingos 10:30 hs")'
           required
-          aria-invalid={horariosTocado && !horariosValido}
+          aria-invalid={(horariosTocado && !horariosValido) || Boolean(mensajesPorCampo.horarios)}
+          aria-describedby={mensajesPorCampo.horarios ? 'campo-horarios-error' : undefined}
           value={valores.horarios}
           onChange={(e) => actualizar('horarios', e.target.value)}
           onBlur={() => setHorariosTocado(true)}
         />
-        {horariosTocado && !horariosValido && (
-          <span className="text-sm text-destructive">
-            Formato no reconocido — ej. &quot;Domingos 10:30 hs&quot; o &quot;Domingos 10 hs y Martes 19 hs&quot;.
-          </span>
+        {mensajesPorCampo.horarios ? (
+          <MensajeErrorCampo id="campo-horarios-error" mensaje={mensajesPorCampo.horarios} />
+        ) : (
+          horariosTocado &&
+          !horariosValido && (
+            <span className="text-sm text-destructive">
+              Formato no reconocido — ej. &quot;Domingos 10:30 hs&quot; o &quot;Domingos 10 hs y Martes 19 hs&quot;.
+            </span>
+          )
         )}
       </div>
       <CampoTelefono
+        id="campo-contactoTelefono"
         labelTelefono="Teléfono de contacto (opcional)"
         labelCodigo="Código de país"
         codigoPais={valores.codigoPais}
@@ -128,14 +174,23 @@ export function FormularioSede({
         onChangeCodigo={(v) => actualizar('codigoPais', v)}
         onChangeNumero={(v) => actualizar('numero', v)}
         requerido={false}
+        error={Boolean(mensajesPorCampo.contactoTelefono)}
+        errorTexto={mensajesPorCampo.contactoTelefono}
       />
-      <Input
-        placeholder="Email de contacto"
-        type="email"
-        value={valores.contactoEmail}
-        onChange={(e) => actualizar('contactoEmail', e.target.value)}
-      />
+      <div className="flex flex-col gap-1">
+        <Input
+          id="campo-contactoEmail"
+          placeholder="Email de contacto"
+          type="email"
+          aria-invalid={Boolean(mensajesPorCampo.contactoEmail)}
+          aria-describedby={mensajesPorCampo.contactoEmail ? 'campo-contactoEmail-error' : undefined}
+          value={valores.contactoEmail}
+          onChange={(e) => actualizar('contactoEmail', e.target.value)}
+        />
+        <MensajeErrorCampo id="campo-contactoEmail-error" mensaje={mensajesPorCampo.contactoEmail} />
+      </div>
       <textarea
+        id="campo-descripcionBienvenida"
         placeholder="Descripción para la Bienvenida (opcional)"
         value={valores.descripcionBienvenida}
         onChange={(e) => actualizar('descripcionBienvenida', e.target.value)}

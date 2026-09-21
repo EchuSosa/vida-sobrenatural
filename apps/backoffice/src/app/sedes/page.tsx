@@ -4,7 +4,14 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { type Sede, type ErrorCode, apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
+import {
+  type Sede,
+  type ErrorCode,
+  type ErrorDeCampo,
+  apiFetch,
+  ApiError,
+  erroresPorCampo,
+} from '@vida-sobrenatural/shared-types';
 import {
   Button,
   EstadoActivoBadge,
@@ -38,6 +45,7 @@ export default function SedesPage() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
+  const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
 
   const cargarSedes = useCallback(async () => {
@@ -59,6 +67,7 @@ export default function SedesPage() {
 
   async function crearSede(valores: ValoresSede) {
     setErrorAlta(null);
+    setErroresCampoAlta(null);
     setEnviando(true);
     try {
       await apiFetch('/sedes', {
@@ -70,7 +79,12 @@ export default function SedesPage() {
       setModalAbierto(false);
       await cargarSedes();
     } catch (e) {
-      setErrorAlta(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos crear la Sede.');
+      const campos = erroresPorCampo(e);
+      if (campos) {
+        setErroresCampoAlta(campos);
+      } else {
+        setErrorAlta(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos crear la Sede.');
+      }
     } finally {
       setEnviando(false);
     }
@@ -93,7 +107,15 @@ export default function SedesPage() {
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Sedes</h1>
-        <Button onClick={() => { setErrorAlta(null); setModalAbierto(true); }}>Crear Sede</Button>
+        <Button
+          onClick={() => {
+            setErrorAlta(null);
+            setErroresCampoAlta(null);
+            setModalAbierto(true);
+          }}
+        >
+          Crear Sede
+        </Button>
       </div>
 
       {error && (
@@ -150,6 +172,7 @@ export default function SedesPage() {
               textoBoton="Crear Sede"
               textoEnviando="Creando…"
               error={errorAlta}
+              erroresCampo={erroresCampoAlta}
             />
           </div>
         </SheetContent>

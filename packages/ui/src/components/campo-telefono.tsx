@@ -21,6 +21,7 @@ export const OPCIONES_CODIGO_PAIS = [
 ];
 
 export function CampoTelefono({
+  id,
   labelTelefono,
   labelCodigo,
   codigoPais,
@@ -32,6 +33,8 @@ export function CampoTelefono({
   placeholderNumero,
   requerido = true,
 }: {
+  /** H-50: id del input de número — permite que un `<ResumenErrores>` enlace y enfoque este campo. */
+  id?: string;
   labelTelefono: string;
   labelCodigo: string;
   codigoPais: string;
@@ -43,6 +46,7 @@ export function CampoTelefono({
   placeholderNumero?: string;
   requerido?: boolean;
 }) {
+  const idError = id ? `${id}-error` : undefined;
   return (
     <div className="flex flex-col gap-1 text-sm font-medium">
       {labelTelefono}
@@ -62,19 +66,25 @@ export function CampoTelefono({
           ))}
         </select>
         <input
+          id={id}
           name="telefonoNumero"
           type="tel"
           inputMode="numeric"
           required={requerido}
           aria-label={labelTelefono}
           aria-invalid={error || undefined}
+          aria-describedby={error && idError ? idError : undefined}
           value={numero}
           placeholder={placeholderNumero}
           onChange={(e) => onChangeNumero(e.target.value.replace(/[^0-9]/g, ''))}
           className="h-10 flex-1 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
         />
       </div>
-      {error && errorTexto && <span className="text-sm font-normal text-destructive">{errorTexto}</span>}
+      {error && errorTexto && (
+        <span id={idError} className="text-sm font-normal text-destructive">
+          {errorTexto}
+        </span>
+      )}
     </div>
   );
 }

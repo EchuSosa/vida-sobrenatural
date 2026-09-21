@@ -3,10 +3,10 @@ import AxeBuilder from '@axe-core/playwright';
 import { loguearseComoAdminE2E, asegurarUnaSolaSedeActiva, reactivarSedes } from './helpers';
 
 /**
- * H-30 (revisión manual ronda 2) / H-34 (ronda 3) / H-51+H-52 (ronda 4,
+ * H-30 (revisión manual ronda 2) / H-34 (ronda 3) / H-51+H-52+H-50 (ronda 4,
  * D117): listado con filtro activas/todas, alta en modal, detalle con
- * edición, Desactivar/Reactivar desde el detalle. Corre en modo claro y
- * oscuro (Constitución Principio VII).
+ * edición, Desactivar/Reactivar desde el detalle, errores de validación por
+ * campo en el alta. Corre en modo claro y oscuro (Constitución Principio VII).
  */
 
 async function crearSedePorModal(page: import('@playwright/test').Page, nombre: string) {
@@ -63,6 +63,42 @@ for (const colorScheme of ['light', 'dark'] as const) {
         .getByRole('button', { name: 'Sí, desactivar' })
         .click();
       await expect(page.getByText('Sede desactivada.')).toBeVisible();
+    });
+
+    test('crear una Sede con un teléfono inválido muestra el error debajo del campo y un resumen arriba (H-50)', async ({
+      page,
+    }) => {
+      const nombreSede = `e2e-sede-h50-${colorScheme}-${Date.now()}`;
+
+      await loguearseComoAdminE2E(page);
+      await page.goto('/sedes');
+      await page.waitForLoadState('networkidle');
+
+      await page.getByRole('button', { name: 'Crear Sede' }).click();
+      const modal = page.getByRole('dialog', { name: 'Crear Sede' });
+      await expect(modal).toBeVisible();
+      await modal.getByPlaceholder('Nombre').fill(nombreSede);
+      await modal.getByPlaceholder('Dirección').fill('Calle 7 y 47, La Plata');
+      await modal.getByPlaceholder('Horarios (ej. "Domingos 10:30 hs")').fill('Domingos 11 hs');
+      // TELEFONO_REGEX pide 5-15 dígitos/espacios después del código de
+      // país. El backend arma "código + espacio + número": con "123" el
+      // backtracking del regex (país de 1 a 4 dígitos) encuentra una lectura
+      // válida igual (ej. "+54 123" ~ país "5", resto "4 123" de 5
+      // caracteres) — "12" no deja ninguna combinación posible.
+      await modal.getByLabel('Teléfono de contacto (opcional)').fill('12');
+      await modal.getByRole('button', { name: 'Crear Sede' }).click();
+
+      const resumen = modal.getByRole('alert').filter({ hasText: 'Revisá estos campos:' });
+      await expect(resumen).toBeVisible();
+      await expect(resumen).toBeFocused();
+      await expect(
+        modal.getByText('Ingresá un teléfono con código de área, por ejemplo 221 555 1234.'),
+      ).toHaveCount(2);
+      // No se creó nada — sigue en el modal, no hace falta limpiar después.
+      await expect(modal).toBeVisible();
+
+      const resultados = await new AxeBuilder({ page }).analyze();
+      expect(resultados.violations).toEqual([]);
     });
 
     test('desactivar y reactivar una Sede desde su detalle', async ({ page }) => {

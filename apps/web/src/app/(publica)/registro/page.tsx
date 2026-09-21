@@ -1,16 +1,38 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { type Sede, apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
-import { PasoIndicador, CampoTelefono } from '@vida-sobrenatural/ui';
+import {
+  type Sede,
+  type ErrorCode,
+  apiFetch,
+  ApiError,
+  erroresPorCampo,
+  mensajeDeCampo,
+} from '@vida-sobrenatural/shared-types';
+import { PasoIndicador, CampoTelefono, ResumenErrores, MensajeErrorCampo, type ErrorResumen } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../../../hooks/use-opciones-registro';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 const TOTAL_PASOS = 4;
 const EDAD_MINIMA = 18;
+
+/** H-50: a qué paso pertenece cada campo del DTO, para saltar ahí si el error del servidor lo señala. */
+const CAMPO_A_PASO: Record<string, number> = {
+  apellido: 1,
+  nombre: 1,
+  genero: 1,
+  fechaNacimiento: 1,
+  telefono: 2,
+  direccion: 2,
+  sedeId: 2,
+  estadoCivil: 3,
+  profesion: 3,
+  profesionDetalle: 3,
+  tiempoCongregacion: 3,
+};
 
 interface DatosFormulario {
   apellido: string;
@@ -54,12 +76,22 @@ export default function RegistroPage() {
   // activa de antes) — esta ref evita que ese efecto redirija a Primeros
   // pasos justo cuando handleSubmit ya está navegando a /registro/listo.
   const acabamosDeRegistrarRef = useRef(false);
+  // H-50: cuando un error de campo del servidor obliga a saltar a un paso
+  // anterior, el foco tiene que quedar en el resumen (ver ResumenErrores),
+  // no en el título del paso — sin esta bandera, el useEffect de abajo
+  // (pensado para la navegación normal con "Siguiente"/"Atrás") se lo roba.
+  const saltoPorErrorRef = useRef(false);
 
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [paso, setPaso] = useState(1);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [erroresPorCampo, setErroresPorCampo] = useState<Record<string, boolean>>({});
+  const [camposVacios, setCamposVacios] = useState<Record<string, boolean>>({});
+  const [mensajesServidor, setMensajesServidor] = useState<Record<string, string>>({});
+  const resumenErrores: ErrorResumen[] = useMemo(
+    () => Object.entries(mensajesServidor).map(([campo, mensaje]) => ({ campo, mensaje })),
+    [mensajesServidor],
+  );
   const [datos, setDatos] = useState<DatosFormulario>({
     apellido: '',
     nombre: '',
@@ -100,6 +132,12 @@ export default function RegistroPage() {
     // FR-016: mover el foco al título del paso nuevo — orden de tabulación y
     // foco predecibles para quien navega con teclado/lector de pantalla
     // (Constitución Principio VII).
+    if (saltoPorErrorRef.current) {
+      // H-50: este salto de paso lo disparó un error de campo del servidor
+      // — el foco tiene que quedar en el resumen, no acá (ver más abajo).
+      saltoPorErrorRef.current = false;
+      return;
+    }
     encabezadoRef.current?.focus();
   }, [paso]);
 
@@ -139,8 +177,11 @@ export default function RegistroPage() {
 
   function actualizar<K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) {
     setDatos((prev) => ({ ...prev, [campo]: valor }));
-    if (erroresPorCampo[campo]) {
-      setErroresPorCampo((prev) => ({ ...prev, [campo]: false }));
+    if (camposVacios[campo]) {
+      setCamposVacios((prev) => ({ ...prev, [campo]: false }));
+    }
+    if (mensajesServidor[campo]) {
+      setMensajesServidor((prev) => Object.fromEntries(Object.entries(prev).filter(([c]) => c !== campo)));
     }
   }
 
@@ -163,7 +204,7 @@ export default function RegistroPage() {
   function siguiente() {
     if (!pasoValido(paso)) {
       // Marca los campos vacíos del paso actual sin llamar a la API todavía.
-      setErroresPorCampo((prev) => ({ ...prev, ...camposVaciosDelPaso(paso) }));
+      setCamposVacios((prev) => ({ ...prev, ...camposVaciosDelPaso(paso) }));
       return;
     }
     setPaso((p) => Math.min(p + 1, TOTAL_PASOS));
@@ -203,6 +244,7 @@ export default function RegistroPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setMensajesServidor({});
     setEnviando(true);
 
     const body = {
@@ -252,9 +294,34 @@ export default function RegistroPage() {
       }
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(tErrores(err.code));
-        if (err.errors?.length) {
-          setErroresPorCampo(Object.fromEntries(err.errors.map((e) => [e.campo, true])));
+        setError(tErrores(err.code as ErrorCode));
+        const campos = erroresPorCampo(err);
+        if (campos) {
+          const etiquetas: Record<string, string> = {
+            apellido: t('campos.apellido'),
+            nombre: t('campos.nombre'),
+            genero: t('campos.genero'),
+            fechaNacimiento: t('campos.fechaNacimiento'),
+            telefono: t('campos.numeroTelefono'),
+            direccion: t('campos.direccion'),
+            sedeId: t('campos.sede'),
+            estadoCivil: t('campos.estadoCivil'),
+            profesion: t('campos.profesion'),
+            profesionDetalle: t('campos.profesionDetalle'),
+            tiempoCongregacion: t('campos.tiempoCongregacion'),
+          };
+          setMensajesServidor(
+            Object.fromEntries(campos.map(({ campo, code }) => [campo, mensajeDeCampo(code, etiquetas[campo] ?? campo)])),
+          );
+          // Los campos con error pueden pertenecer a un paso anterior al 4
+          // (todo el DTO se valida junto recién al enviar) — hay que
+          // llevar a la persona ahí para que el campo señalado exista en
+          // el DOM (y el enlace del resumen pueda enfocarlo).
+          const pasoConError = Math.min(...campos.map(({ campo }) => CAMPO_A_PASO[campo] ?? TOTAL_PASOS));
+          if (pasoConError !== paso) {
+            saltoPorErrorRef.current = true;
+            setPaso(pasoConError);
+          }
         }
       } else {
         setError(tErrores('ERROR_INTERNO'));
@@ -265,6 +332,13 @@ export default function RegistroPage() {
   }
 
   const tituloPaso = t(`tituloPaso${paso}` as 'tituloPaso1');
+
+  function estadoCampo(campo: string) {
+    return {
+      error: Boolean(camposVacios[campo]) || Boolean(mensajesServidor[campo]),
+      errorTexto: mensajesServidor[campo] ?? t('errorCampo'),
+    };
+  }
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
@@ -286,6 +360,8 @@ export default function RegistroPage() {
         </p>
       )}
 
+      <ResumenErrores errores={resumenErrores} />
+
       <form
         onSubmit={paso === TOTAL_PASOS ? handleSubmit : (e) => e.preventDefault()}
         className="flex flex-col gap-4"
@@ -303,8 +379,7 @@ export default function RegistroPage() {
               required
               value={apellidoEfectivo}
               onChange={(v) => actualizar('apellido', v)}
-              error={erroresPorCampo.apellido}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('apellido')}
             />
             <Campo
               label={t('campos.nombre')}
@@ -312,8 +387,7 @@ export default function RegistroPage() {
               required
               value={nombreEfectivo}
               onChange={(v) => actualizar('nombre', v)}
-              error={erroresPorCampo.nombre}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('nombre')}
             />
             <CampoSelect
               label={t('campos.genero')}
@@ -322,8 +396,7 @@ export default function RegistroPage() {
               opciones={opciones.genero}
               value={datos.genero}
               onChange={(v) => actualizar('genero', v)}
-              error={erroresPorCampo.genero}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('genero')}
               placeholder={t('elegirOpcion')}
             />
             <Campo
@@ -333,8 +406,7 @@ export default function RegistroPage() {
               required
               value={datos.fechaNacimiento}
               onChange={(v) => actualizar('fechaNacimiento', v)}
-              error={erroresPorCampo.fechaNacimiento}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('fechaNacimiento')}
             />
           </>
         )}
@@ -342,14 +414,14 @@ export default function RegistroPage() {
         {paso === 2 && (
           <>
             <CampoTelefono
+              id="campo-telefono"
               labelTelefono={t('campos.numeroTelefono')}
               labelCodigo={t('campos.codigoPais')}
               codigoPais={datos.telefonoCodigoPais}
               numero={datos.telefonoNumero}
               onChangeCodigo={(v) => actualizar('telefonoCodigoPais', v)}
               onChangeNumero={(v) => actualizar('telefonoNumero', v)}
-              error={erroresPorCampo.telefono}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('telefono')}
               placeholderNumero={t('soloNumeros')}
             />
             <Campo
@@ -358,8 +430,7 @@ export default function RegistroPage() {
               required
               value={datos.direccion}
               onChange={(v) => actualizar('direccion', v)}
-              error={erroresPorCampo.direccion}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('direccion')}
             />
             <CampoSelect
               label={t('campos.sede')}
@@ -368,8 +439,7 @@ export default function RegistroPage() {
               opciones={sedes.map((s) => ({ value: s.id, label: s.nombre }))}
               value={datos.sedeId}
               onChange={(v) => actualizar('sedeId', v)}
-              error={erroresPorCampo.sedeId}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('sedeId')}
               placeholder={t('elegirOpcion')}
             />
           </>
@@ -384,8 +454,7 @@ export default function RegistroPage() {
               opciones={opciones.estadoCivil}
               value={datos.estadoCivil}
               onChange={(v) => actualizar('estadoCivil', v)}
-              error={erroresPorCampo.estadoCivil}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('estadoCivil')}
               placeholder={t('elegirOpcion')}
             />
             <CampoSelect
@@ -395,8 +464,7 @@ export default function RegistroPage() {
               opciones={opciones.profesion}
               value={datos.profesion}
               onChange={(v) => actualizar('profesion', v)}
-              error={erroresPorCampo.profesion}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('profesion')}
               placeholder={t('elegirOpcion')}
             />
             {datos.profesion === 'otro' && (
@@ -406,8 +474,7 @@ export default function RegistroPage() {
                 required
                 value={datos.profesionDetalle}
                 onChange={(v) => actualizar('profesionDetalle', v)}
-                error={erroresPorCampo.profesionDetalle}
-                errorTexto={t('errorCampo')}
+                {...estadoCampo('profesionDetalle')}
               />
             )}
             <CampoSelect
@@ -417,8 +484,7 @@ export default function RegistroPage() {
               opciones={opciones.tiempoCongregacion}
               value={datos.tiempoCongregacion}
               onChange={(v) => actualizar('tiempoCongregacion', v)}
-              error={erroresPorCampo.tiempoCongregacion}
-              errorTexto={t('errorCampo')}
+              {...estadoCampo('tiempoCongregacion')}
               placeholder={t('elegirOpcion')}
             />
           </>
@@ -591,20 +657,17 @@ function Campo({
     <label className="flex flex-col gap-1 text-sm font-medium">
       {label}
       <input
+        id={`campo-${name}`}
         name={name}
         type={type}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error || undefined}
-        aria-describedby={error ? `${name}-error` : undefined}
+        aria-describedby={error ? `campo-${name}-error` : undefined}
         className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
       />
-      {error && (
-        <span id={`${name}-error`} className="text-sm font-normal text-destructive">
-          {errorTexto}
-        </span>
-      )}
+      {error && <MensajeErrorCampo id={`campo-${name}-error`} mensaje={errorTexto} />}
     </label>
   );
 }
@@ -634,12 +697,13 @@ function CampoSelect({
     <label className="flex flex-col gap-1 text-sm font-medium">
       {label}
       <select
+        id={`campo-${name}`}
         name={name}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error || undefined}
-        aria-describedby={error ? `${name}-error` : undefined}
+        aria-describedby={error ? `campo-${name}-error` : undefined}
         className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
       >
         <option value="" disabled>
@@ -651,11 +715,7 @@ function CampoSelect({
           </option>
         ))}
       </select>
-      {error && (
-        <span id={`${name}-error`} className="text-sm font-normal text-destructive">
-          {errorTexto}
-        </span>
-      )}
+      {error && <MensajeErrorCampo id={`campo-${name}-error`} mensaje={errorTexto} />}
     </label>
   );
 }

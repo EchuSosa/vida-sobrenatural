@@ -5,7 +5,14 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { type Sede, type ErrorCode, apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
+import {
+  type Sede,
+  type ErrorCode,
+  type ErrorDeCampo,
+  apiFetch,
+  ApiError,
+  erroresPorCampo,
+} from '@vida-sobrenatural/shared-types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +44,7 @@ export default function SedeDetallePage() {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
+  const [erroresCampoGuardar, setErroresCampoGuardar] = useState<ErrorDeCampo[] | null>(null);
   const [avisoUnicaActiva, setAvisoUnicaActiva] = useState(false);
   const te = useTranslations('errors');
 
@@ -66,6 +74,7 @@ export default function SedeDetallePage() {
 
   async function guardar(valores: ValoresSede) {
     setErrorGuardar(null);
+    setErroresCampoGuardar(null);
     setEnviando(true);
     try {
       await apiFetch(`/sedes/${params.id}`, {
@@ -76,7 +85,12 @@ export default function SedeDetallePage() {
       toast('Cambios guardados.');
       await cargarSede();
     } catch (e) {
-      setErrorGuardar(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos guardar los cambios.');
+      const campos = erroresPorCampo(e);
+      if (campos) {
+        setErroresCampoGuardar(campos);
+      } else {
+        setErrorGuardar(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos guardar los cambios.');
+      }
     } finally {
       setEnviando(false);
     }
@@ -202,6 +216,7 @@ export default function SedeDetallePage() {
         textoBoton="Guardar cambios"
         textoEnviando="Guardando…"
         error={errorGuardar}
+        erroresCampo={erroresCampoGuardar}
       />
 
       <AlertDialog open={avisoUnicaActiva} onOpenChange={setAvisoUnicaActiva}>

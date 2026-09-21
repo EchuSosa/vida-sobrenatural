@@ -4,6 +4,7 @@ export { EstadoVacio, type EstadoVacioProps } from './components/estado-vacio';
 export { EstadoActivoBadge, type EstadoActivoBadgeProps } from './components/estado-activo-badge';
 export { PasoIndicador, type PasoIndicadorProps } from './components/paso-indicador';
 export { CampoTelefono, OPCIONES_CODIGO_PAIS } from './components/campo-telefono';
+export { ResumenErrores, MensajeErrorCampo, type ErrorResumen } from './components/form-errors';
 export {
   ConfirmDestructiveDialog,
   type ConfirmDestructiveDialogProps,
