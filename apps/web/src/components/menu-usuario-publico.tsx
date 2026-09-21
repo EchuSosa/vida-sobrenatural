@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -14,21 +15,19 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@vida-sobrenatural/ui';
-import { apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
+import {
+  type TemaPreferido,
+  type TemaPreferidoVisible,
+  TEMA_A_NEXT_THEMES,
+  apiFetch,
+  ApiError,
+} from '@vida-sobrenatural/shared-types';
 import { CerrarSesionBoton } from './cerrar-sesion-boton';
 
-type TemaPreferido = 'claro' | 'oscuro' | 'sistema';
-
-const TEMA_A_NEXT_THEMES: Record<TemaPreferido, string> = {
-  claro: 'light',
-  oscuro: 'dark',
-  sistema: 'system',
-};
-
-const OPCIONES_TEMA: { value: TemaPreferido; labelKey: string }[] = [
-  { value: 'claro', labelKey: 'temaClaro' },
-  { value: 'oscuro', labelKey: 'temaOscuro' },
-  { value: 'sistema', labelKey: 'temaSistema' },
+/** D116: dos opciones visibles, no tres — "sistema" se saca de la interfaz. */
+const OPCIONES_TEMA: { value: TemaPreferidoVisible; labelKey: string; Icono: typeof Sun }[] = [
+  { value: 'claro', labelKey: 'temaClaro', Icono: Sun },
+  { value: 'oscuro', labelKey: 'temaOscuro', Icono: Moon },
 ];
 
 /**
@@ -84,13 +83,11 @@ export function MenuUsuarioPublico() {
         <DropdownMenuContent align="end" aria-label={t('menuUsuario')}>
           <DropdownMenuItem render={<Link href="/perfil">{t('perfil')}</Link>} />
           <DropdownMenuSeparator />
-          {OPCIONES_TEMA.map((opcion) => (
-            <DropdownMenuItem
-              key={opcion.value}
-              data-active={seleccionado === opcion.value}
-              onClick={() => elegir(opcion.value)}
-            >
-              {t(opcion.labelKey)}
+          <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">{t('tema')}</div>
+          {OPCIONES_TEMA.map(({ value, labelKey, Icono }) => (
+            <DropdownMenuItem key={value} data-active={seleccionado === value} onClick={() => elegir(value)}>
+              <Icono className="size-4" aria-hidden="true" />
+              {t(labelKey)}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -124,15 +121,16 @@ export function ItemsUsuarioCelular({ onNavigate }: { onNavigate?: () => void })
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-medium">{t('tema')}</legend>
         <div className="flex gap-2">
-          {OPCIONES_TEMA.map((opcion) => (
+          {OPCIONES_TEMA.map(({ value, labelKey, Icono }) => (
             <Button
-              key={opcion.value}
+              key={value}
               type="button"
-              variant={seleccionado === opcion.value ? 'default' : 'outline'}
+              variant={seleccionado === value ? 'default' : 'outline'}
               size="sm"
-              onClick={() => elegir(opcion.value)}
+              onClick={() => elegir(value)}
             >
-              {t(opcion.labelKey)}
+              <Icono className="size-4" aria-hidden="true" />
+              {t(labelKey)}
             </Button>
           ))}
         </div>

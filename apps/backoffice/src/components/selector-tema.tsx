@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -12,29 +13,21 @@ import {
   Button,
   ConfirmDestructiveDialog,
 } from '@vida-sobrenatural/ui';
+import { type TemaPreferido, type TemaPreferidoVisible, TEMA_A_NEXT_THEMES } from '@vida-sobrenatural/shared-types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
-type TemaPreferido = 'claro' | 'oscuro' | 'sistema';
-
-const OPCIONES: { value: TemaPreferido; label: string }[] = [
-  { value: 'claro', label: 'Claro' },
-  { value: 'oscuro', label: 'Oscuro' },
-  { value: 'sistema', label: 'Sistema' },
+const OPCIONES: { value: TemaPreferidoVisible; label: string; Icono: typeof Sun }[] = [
+  { value: 'claro', label: 'Claro', Icono: Sun },
+  { value: 'oscuro', label: 'Oscuro', Icono: Moon },
 ];
 
-const TEMA_A_NEXT_THEMES: Record<TemaPreferido, string> = {
-  claro: 'light',
-  oscuro: 'dark',
-  sistema: 'system',
-};
-
-/** Menú de usuario — tema (Historia 5, FR-027) y cerrar sesión. */
+/** Menú de usuario — colores de la app (Historia 5, FR-027; D116: sin "Sistema") y cerrar sesión. */
 export function MenuUsuario() {
   const { setTheme } = useTheme();
   const { data: session, update } = useSession();
   const [seleccionado, setSeleccionado] = useState<TemaPreferido>(
-    (session?.user.temaPreferido as TemaPreferido) ?? 'sistema',
+    (session?.user.temaPreferido as TemaPreferido) ?? 'claro',
   );
 
   if (!session) return null;
@@ -63,13 +56,11 @@ export function MenuUsuario() {
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="ghost" size="sm">{session.user.name}</Button>} />
         <DropdownMenuContent align="end">
-          {OPCIONES.map((opcion) => (
-            <DropdownMenuItem
-              key={opcion.value}
-              data-active={seleccionado === opcion.value}
-              onClick={() => elegir(opcion.value)}
-            >
-              {opcion.label}
+          <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Colores de la app</div>
+          {OPCIONES.map(({ value, label, Icono }) => (
+            <DropdownMenuItem key={value} data-active={seleccionado === value} onClick={() => elegir(value)}>
+              <Icono className="size-4" aria-hidden="true" />
+              {label}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

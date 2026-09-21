@@ -33,6 +33,28 @@ export type Idioma = 'es';
 
 export type TemaPreferido = 'claro' | 'oscuro' | 'sistema';
 
+/**
+ * H-48/H-49 (revisión manual ronda 4, D116): opciones que ofrece la
+ * interfaz — dos, no tres. `sistema` sigue siendo un valor válido en
+ * `Persona.tema_preferido` para quien ya lo tenga guardado (no se migra ni
+ * se rompe), pero ningún selector lo muestra más.
+ */
+export type TemaPreferidoVisible = Extract<TemaPreferido, 'claro' | 'oscuro'>;
+export const TEMAS_VISIBLES: readonly TemaPreferidoVisible[] = ['claro', 'oscuro'];
+
+/**
+ * Un solo mapa de `TemaPreferido` a los valores de `next-themes`, para las
+ * dos apps (Principio XI) — antes triplicado en
+ * `apps/web/src/components/selector-tema.tsx`,
+ * `apps/web/src/components/menu-usuario-publico.tsx` y
+ * `apps/backoffice/src/components/selector-tema.tsx`.
+ */
+export const TEMA_A_NEXT_THEMES: Record<TemaPreferido, string> = {
+  claro: 'light',
+  oscuro: 'dark',
+  sistema: 'system',
+};
+
 export type Profesion =
   | 'salud'
   | 'educacion'

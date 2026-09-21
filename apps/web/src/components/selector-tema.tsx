@@ -1,27 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { Button } from '@vida-sobrenatural/ui';
-import { apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
+import {
+  type TemaPreferido,
+  type TemaPreferidoVisible,
+  TEMA_A_NEXT_THEMES,
+  apiFetch,
+  ApiError,
+} from '@vida-sobrenatural/shared-types';
 
-type TemaPreferido = 'claro' | 'oscuro' | 'sistema';
-
-const OPCIONES: { value: TemaPreferido; label: string }[] = [
-  { value: 'claro', label: 'Claro' },
-  { value: 'oscuro', label: 'Oscuro' },
-  { value: 'sistema', label: 'Sistema' },
+const OPCIONES: { value: TemaPreferidoVisible; label: string; Icono: typeof Sun }[] = [
+  { value: 'claro', label: 'Claro', Icono: Sun },
+  { value: 'oscuro', label: 'Oscuro', Icono: Moon },
 ];
 
-const TEMA_A_NEXT_THEMES: Record<TemaPreferido, string> = {
-  claro: 'light',
-  oscuro: 'dark',
-  sistema: 'system',
-};
-
-/** Selector Claro/Oscuro/Sistema — Historia 5, FR-027/FR-028. */
+/** Selector Claro/Oscuro — Historia 5, FR-027/FR-028 (D116: sin "Sistema"). */
 export function SelectorTema({ valorInicial }: { valorInicial: TemaPreferido }) {
   const { setTheme } = useTheme();
   const { data: session, update } = useSession();
@@ -52,17 +50,18 @@ export function SelectorTema({ valorInicial }: { valorInicial: TemaPreferido }) 
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="text-sm font-medium">Tema</legend>
+      <legend className="text-sm font-medium">Colores de la app</legend>
       <div className="flex gap-2">
-        {OPCIONES.map((opcion) => (
+        {OPCIONES.map(({ value, label, Icono }) => (
           <Button
-            key={opcion.value}
+            key={value}
             type="button"
-            variant={seleccionado === opcion.value ? 'default' : 'outline'}
+            variant={seleccionado === value ? 'default' : 'outline'}
             size="sm"
-            onClick={() => elegir(opcion.value)}
+            onClick={() => elegir(value)}
           >
-            {opcion.label}
+            <Icono className="size-4" aria-hidden="true" />
+            {label}
           </Button>
         ))}
       </div>
