@@ -53,6 +53,14 @@ docker compose exec -T postgres psql -U vidasobrenatural -d vidasobrenatural \
 # apagar la API a propósito (para probar los estados de error): Ctrl+C en su terminal
 ```
 
+## Antes de correr los tests (una sola vez)
+
+- **`ALLOW_TEST_LOGIN=true`** tiene que estar en el `.env.local` de **las dos** apps
+  (`apps/web` y `apps/backoffice`). Sin eso, cualquier e2e que use el login de prueba falla.
+  Esos archivos no están en el repositorio, así que hay que ponerlo a mano en cada máquina.
+- La suite de integración de la API necesita su propia base: si `vidasobrenatural_test` no
+  existe, hay que crearla y correrle las migraciones antes de la primera corrida.
+
 ## Si tocás `packages/shared-types`
 
 Desde H-33 ese paquete se compila a `dist/` y los tres `dev` lo construyen antes de arrancar
