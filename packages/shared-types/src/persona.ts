@@ -97,11 +97,30 @@ export interface PersonaPerfil {
   estado: EstadoPersona;
   idiomaPreferido: Idioma;
   temaPreferido: TemaPreferido;
+  /** H-35 (revisión manual ronda 3, Lote 5) — base del self-edit de Perfil (Flujo 11). */
+  telefono: string;
+  direccion: string;
+  estadoCivil: EstadoCivil;
+  profesion: Profesion;
+  profesionDetalle: string | null;
 }
 
 /** Body de PATCH /personas/me/preferencias. */
 export interface ActualizarPreferenciasInput {
   temaPreferido: TemaPreferido;
+}
+
+/**
+ * Body de PATCH /personas/me — H-35, Flujo 11 (FR-028/FR-029). Cualquier
+ * subconjunto; nunca `fechaNacimiento` ni `email` (los edita un Admin).
+ */
+export interface ActualizarPerfilInput {
+  telefono?: string;
+  direccion?: string;
+  estadoCivil?: EstadoCivil;
+  profesion?: Profesion;
+  /** Obligatorio cuando `profesion` viene como 'otro' en esta misma petición. */
+  profesionDetalle?: string;
 }
 
 /** Elemento de GET /personas/pendientes-tutor. */

@@ -11,6 +11,7 @@ import { calcularEdad } from './calcular-edad.js';
 import { AppException } from '../common/errors/app-exception.js';
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import type { ActivarPersonaDto } from './dto/activar-persona.dto.js';
+import type { ActualizarPerfilDto } from './dto/actualizar-perfil.dto.js';
 
 const EDAD_MINIMA = 18;
 
@@ -77,12 +78,45 @@ export class PersonaService {
         estado: true,
         idiomaPreferido: true,
         temaPreferido: true,
+        // H-35 (revisión manual ronda 3): base del self-edit de Perfil.
+        telefono: true,
+        direccion: true,
+        estadoCivil: true,
+        profesion: true,
+        profesionDetalle: true,
       },
     });
     if (!persona) {
       throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
     }
     return persona;
+  }
+
+  /** PATCH /personas/me — H-35, Flujo 11 (FR-028/FR-029): cualquier subconjunto de los 4 campos. */
+  async actualizarPerfilPropio(personaId: string | null, dto: ActualizarPerfilDto) {
+    if (!personaId) {
+      throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
+    }
+    return this.prisma.persona.update({
+      where: { id: personaId },
+      data: {
+        telefono: dto.telefono,
+        direccion: dto.direccion,
+        estadoCivil: dto.estadoCivil,
+        profesion: dto.profesion,
+        // Solo tiene sentido cuando profesion = otro en esta misma petición
+        // (el DTO ya lo exige en ese caso) — igual que en el registro.
+        profesionDetalle: dto.profesion ? dto.profesionDetalle : undefined,
+      },
+      select: {
+        id: true,
+        telefono: true,
+        direccion: true,
+        estadoCivil: true,
+        profesion: true,
+        profesionDetalle: true,
+      },
+    });
   }
 
   /** PATCH /personas/me/preferencias — Historia 5, FR-027/FR-028. */

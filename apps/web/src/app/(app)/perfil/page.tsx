@@ -1,16 +1,9 @@
 import { auth } from '../../../auth';
+import type { PersonaPerfil } from '@vida-sobrenatural/shared-types';
 import { apiFetch } from '../../../lib/api-client';
 import { SelectorTema } from '../../../components/selector-tema';
 import { CerrarSesionBoton } from '../../../components/cerrar-sesion-boton';
-
-interface PersonaPerfil {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  fotoUrl: string | null;
-  temaPreferido: 'claro' | 'oscuro' | 'sistema';
-}
+import { PerfilFormulario } from '../../../components/perfil-formulario';
 
 export default async function PerfilPage() {
   const session = await auth();
@@ -28,7 +21,21 @@ export default async function PerfilPage() {
         </p>
         <p>{perfil?.email ?? session?.user.email}</p>
       </div>
-      <SelectorTema valorInicial={perfil?.temaPreferido ?? session?.user.temaPreferido ?? 'sistema'} />
+      {/* H-35 (Flujo 11): sin datos de perfil (ej. la API no respondió), no se
+          muestra un formulario a medio llenar — mejor nada que datos vacíos
+          que parezcan reales. */}
+      {perfil && (
+        <PerfilFormulario
+          perfil={{
+            telefono: perfil.telefono,
+            direccion: perfil.direccion,
+            estadoCivil: perfil.estadoCivil,
+            profesion: perfil.profesion,
+            profesionDetalle: perfil.profesionDetalle,
+          }}
+        />
+      )}
+      <SelectorTema valorInicial={perfil?.temaPreferido ?? session?.user.temaPreferido ?? 'claro'} />
       <CerrarSesionBoton />
     </div>
   );

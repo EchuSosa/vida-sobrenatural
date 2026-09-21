@@ -15,6 +15,7 @@ import { PersonaService } from './persona.service.js';
 import { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import { ActivarPersonaDto } from './dto/activar-persona.dto.js';
 import { ActualizarPreferenciasDto } from './dto/actualizar-preferencias.dto.js';
+import { ActualizarPerfilDto } from './dto/actualizar-perfil.dto.js';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import { InternalLookupGuard } from '../auth/internal-lookup.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
@@ -54,6 +55,14 @@ export class PersonaController {
     // Autorización por registro (Constitución Principio V): siempre la propia
     // Persona del token, nunca un :id de la URL.
     return this.personaService.obtenerPerfilPropio(request.user?.personaId ?? null);
+  }
+
+  @Patch('me')
+  @UseGuards(JwtNextAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Self-edit de Perfil — Flujo 11 (H-35, FR-028/FR-029).' })
+  actualizarPerfilPropio(@Body() dto: ActualizarPerfilDto, @Req() request: AuthenticatedRequest) {
+    return this.personaService.actualizarPerfilPropio(request.user?.personaId ?? null, dto);
   }
 
   @Patch('me/preferencias')
