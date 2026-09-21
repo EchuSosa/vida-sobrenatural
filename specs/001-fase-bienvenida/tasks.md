@@ -298,8 +298,8 @@ agrega una tabla de auditoría propia — alcanza con `createdAt`. `ActivarPerso
 - [X] T134 [H-30] `apps/api/src/sede/dto/crear-sede.dto.ts` y `actualizar-sede.dto.ts`: `horarios` valida un formato acotado (`@Matches`, ej. `Domingos 10:30 hs`, ver constante compartida nueva); `contactoTelefono` pasa a los mismos dos campos estructurados (código de país + número) que ya usa `RegistroPersonaDto` (D90), en vez de un string libre.
 - [X] T135 [H-30] Extraer `CampoTelefono` de `apps/web/src/app/(publica)/registro/page.tsx` a un componente compartido (`apps/web/src/components/campo-telefono.tsx`) — lo reutilizan T136 (Sede) y T138 (Perfil).
 - [X] T136 [H-30] Reescribir `apps/backoffice/src/app/sedes/page.tsx` con los componentes del sistema de diseño: `ConfirmDestructiveDialog` al desactivar (con el copy exacto del hallazgo H-30) cuando hay otra Sede activa; diálogo informativo con acción "Crear una Sede" cuando es la única activa (código `SEDE_UNICA_ACTIVA` de T133); `CampoTelefono` (T135) para `contactoTelefono`; input de horarios con el mismo formato acotado de T134 (validación también en el cliente, mensaje de error si no matchea).
-- [ ] T137 [H-28] **Postergado** (decisión explícita: "si el lote se complica, eso es lo primero que se posterga" — con H-29/H-30 ya completos, el lote ya había crecido bastante). Nuevo `PATCH /personas/me` en `apps/api` (`persona.controller.ts`/`persona.service.ts`/`dto/actualizar-persona.dto.ts`): acepta `telefono` (estructurado), `direccion`, `estadoCivil`, `profesion`/`profesionDetalle` — todos opcionales, cualquier subconjunto. No acepta `fechaNacimiento` ni `email` (FR-029).
-- [ ] T138 [H-28] **Postergado**, mismo motivo que T137. `apps/web/src/app/(app)/perfil/page.tsx`: formulario editable con los 4 campos de T137, reutilizando `CampoTelefono` (`packages/ui`, ya extraído por T135) y los mismos `<select>` de estado civil/profesión que `registro/page.tsx`. Guardar por campo o con un único botón "Guardar cambios" — a definir al implementar, con feedback de éxito (D102).
+- [X] T137 [H-28] **Postergado en el Lote 4** (decisión explícita: "si el lote se complica, eso es lo primero que se posterga" — con H-29/H-30 ya completos, el lote ya había crecido bastante). Nuevo `PATCH /personas/me` en `apps/api` (`persona.controller.ts`/`persona.service.ts`/`dto/actualizar-persona.dto.ts`): acepta `telefono` (estructurado), `direccion`, `estadoCivil`, `profesion`/`profesionDetalle` — todos opcionales, cualquier subconjunto. No acepta `fechaNacimiento` ni `email` (FR-029). **Retomado en el Lote 5, ver Phase 13, T140.**
+- [X] T138 [H-28] **Postergado en el Lote 4**, mismo motivo que T137. `apps/web/src/app/(app)/perfil/page.tsx`: formulario editable con los 4 campos de T137, reutilizando `CampoTelefono` (`packages/ui`, ya extraído por T135) y los mismos `<select>` de estado civil/profesión que `registro/page.tsx`. Guardar por campo o con un único botón "Guardar cambios" — a definir al implementar, con feedback de éxito (D102). **Retomado en el Lote 5, ver Phase 13, T141.**
 - [X] T139 [H-29, H-30] Tests afectados (parte de H-28/Perfil postergada con T137-T138): unit tests nuevos en `apps/api/test/unit/persona-estado.spec.ts` (caminos inválidos de `activar`, self-relación, duplicado literal, duplicado espejo, vínculo exitoso con Relación Familiar) y `apps/api/test/unit/sede-desactivar.spec.ts` (regla de "al menos una Sede activa", formato de `horarios`). Verificado además con Playwright ad hoc contra una instancia aislada (login, activar con búsqueda de tutor, crear/validar/desactivar Sede) — no se armó un `playwright.config.ts` permanente para `apps/backoffice` en este lote (alcance mayor al de H-29/H-30); sí se agregó el proveedor `test-login` a `apps/backoffice/src/auth.ts` como prerrequisito para cuando se decida armarlo.
 
 **Checkpoint**: Lote 4 (parte de 001) — H-29 y H-30 completos: activar/inactivar un menor usa el
@@ -309,6 +309,27 @@ escritorio ya está arreglado (ver 002/T123), pero el self-edit de teléfono/dir
 civil/profesión (Flujo 11) se posterga — T137/T138 quedan listas para retomar. Gestionar Relaciones
 Familiares desde el propio Perfil (Flujo 11, punto 3) también queda fuera — depende de una UI de
 búsqueda de Personas más genérica que la acotada de T130.
+
+## Phase 13: Correcciones de la revisión manual — Lote 5 (Perfil y backoffice)
+
+**Purpose**: aplicar la parte de esta spec del Lote 5 (`specs/revision-manual/2026-09-17-001-002.md`):
+H-35 (retoma T137/T138, postergados en el Lote 4 — mismo alcance, User Story 4/FR-028/FR-029 de
+`spec.md`, ya especificados) y H-34 (suite de e2e propia para `apps/backoffice`). No modifica ninguna
+tarea de las Fases 1–12, ya completadas.
+
+**Contexto**: H-37, H-38 y H-39 del mismo Lote 5 son hallazgos de **specs/002-base-transversal** — ver
+su `tasks.md`, Phase 16. Orden sugerido: T140+T141 (H-35) después del Lote 5 de 002 (misma costura de
+navegación que toca `apps/web`); T142+T143 (H-34) al final.
+
+- [X] T140 [H-35] Nuevo `PATCH /personas/me` en `apps/api`: `apps/api/src/persona/dto/actualizar-perfil.dto.ts` (`telefono` con `@Matches(TELEFONO_REGEX)` de `@vida-sobrenatural/shared-types` — H-33 — , `direccion`, `estadoCivil`, `profesion`/`profesionDetalle`, todos `@IsOptional()`, cualquier subconjunto; sin `fechaNacimiento` ni `email`, FR-029), `persona.controller.ts` (mismo patrón de autorización por registro que `GET /personas/me` — siempre `request.user.personaId`, nunca un `:id` de la URL) y `persona.service.ts` (`actualizarPerfilPropio`, `update` con los campos presentes en el DTO).
+- [X] T141 [H-35] `apps/web/src/app/(app)/perfil/page.tsx`: formulario editable con los 4 campos de T140, reutilizando `CampoTelefono` (`@vida-sobrenatural/ui`, ya extraído por T135) y los mismos `<select>`/opciones de estado civil y profesión que `registro/page.tsx` (mismas claves de `es.json`, namespace `registro.opciones`). Guardado optimista con feedback de éxito/error (D102), mismo patrón que `selector-tema.tsx`. Sigue afuera "gestionar Relaciones Familiares desde Perfil" (nota de `spec.md`).
+- [X] T142 [H-34] Nuevo `apps/backoffice/playwright.config.ts` (mismo patrón que `apps/web/playwright.config.ts`: `workers: 1` por D111, `globalTeardown` reutilizando `db:limpiar-e2e` de `apps/api`) y `apps/backoffice/e2e/helpers.ts` (login vía el proveedor `test-login` ya existente en `apps/backoffice/src/auth.ts`).
+- [X] T143 [H-34] E2e nuevos: `apps/backoffice/e2e/pendientes-tutor.spec.ts` (activar un menor con tutor vinculado por búsqueda, y con tutor por texto libre — H-29) y `apps/backoffice/e2e/sedes.spec.ts` (desactivar una Sede con confirmación cuando hay otra activa, y el caso de la única Sede activa — H-30).
+- [X] T144 [H-35] Tests afectados: unit test nuevo en `apps/api/test/unit/` para `actualizarPerfilPropio` (subconjunto parcial de campos, rechazo de `fechaNacimiento`/`email` fuera del DTO) y confirmación manual del formulario de Perfil en las dos apps.
+
+**Checkpoint**: Lote 5 (parte de 001) completo — Perfil permite editar teléfono, dirección, estado
+civil y profesión (H-35, cierra el Flujo 11 salvo Relaciones Familiares, que sigue fuera de
+alcance), y `apps/backoffice` tiene su propia suite de e2e cubriendo H-29 y H-30 (H-34).
 
 ---
 

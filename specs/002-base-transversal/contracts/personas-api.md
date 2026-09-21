@@ -34,11 +34,40 @@ Perfil con más datos.
     "sedeId": "uuid",
     "estado": "activa",
     "idiomaPreferido": "es",
-    "temaPreferido": "sistema"
+    "temaPreferido": "sistema",
+    "telefono": "string",
+    "direccion": "string",
+    "estadoCivil": "soltero_a",
+    "profesion": "salud",
+    "profesionDetalle": "string | null"
   }
   ```
+  Los últimos 5 campos se agregan en H-35 (revisión manual ronda 3, Lote 5) — base para el
+  self-edit de `PATCH /personas/me` de abajo.
 - **Response 404**: el token es válido pero `personaId` es `null` (login exitoso sin registro
   completado todavía) o no corresponde a ninguna Persona existente.
+
+## PATCH /personas/me (nuevo — H-35, Flujo 11)
+
+Self-edit de Perfil (FR-028, FR-029) — cualquier subconjunto de estos 4 campos; nunca
+`fechaNacimiento` ni `email` (esos dos requieren un Admin).
+
+- **Auth**: igual que `GET /personas/me`.
+- **Request body** (todos opcionales):
+  ```json
+  {
+    "telefono": "+54 9 221 1234567",
+    "direccion": "string",
+    "estadoCivil": "soltero_a",
+    "profesion": "salud",
+    "profesionDetalle": "string"
+  }
+  ```
+  `telefono` valida el mismo formato estructurado que el registro (D90). `profesionDetalle` solo se
+  exige cuando `profesion` viene como `"otro"` **en esta misma petición**.
+- **Response 200**: `{ "id": "uuid", "telefono": "...", "direccion": "...", "estadoCivil": "...", "profesion": "...", "profesionDetalle": "..." | null }`.
+- **Response 404**: igual que `GET /personas/me`.
+- **Response 400**: `code: VALIDACION` — `telefono` no matchea el formato, o un enum inválido.
 
 ## PATCH /personas/me/preferencias (nuevo)
 

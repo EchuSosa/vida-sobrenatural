@@ -30,6 +30,11 @@
 - Q: El pie de página muestra las redes sociales como texto ("Facebook", "Instagram") — ¿alcanza, de cara a D81? (H-24) → A: No — deben ser íconos reconocibles (Facebook, Instagram, YouTube) con `aria-label`, para no depender de leer el nombre completo en pantallas chicas ni duplicar información para quien ya reconoce el ícono.
 - Q: El panel del menú hamburguesa muestra el texto "Menú" como título visible — ¿hace falta? (H-27) → A: No — el nombre accesible del panel (`aria-label`/`SheetTitle`) alcanza para tecnología asistiva; el texto visible se saca porque no aporta nada a quien ya ve el ícono de cierre y el contenido del panel.
 
+### Session 2026-09-20 — revisión manual, ronda 3 (`specs/revision-manual/2026-09-17-001-002.md`, Lote 5)
+
+- Q: FR-046 dice que si una pantalla pública se abre desde la app debe "ofrecer una forma clara de volver", pero el menú secundario que llevaría de la app a lo público nunca se construyó — ¿cómo se resuelve, en concreto? (H-37) → A: La forma exacta ya está definida en `docs/14-navegacion.md` (secciones 1 y 2, actualizadas): en celular, la app suma una barra superior delgada con el logo (lleva a Inicio) y un botón "Más" que abre el mismo panel lateral del menú público (Nosotros, Primeros pasos, Ministerios, Visitanos, Dar); en escritorio, esas secciones entran en la barra superior de la app, agrupadas bajo "Más". El "volver" ya queda cubierto por el acceso permanente "Ir a la app" del header público (H-19) — no hace falta un banner aparte.
+- Q: Con sesión iniciada, el header público no tiene forma de cerrar sesión ni cambiar el tema sin entrar primero a la app — ¿se agrega un menú de usuario ahí también? (H-38) → A: Sí, con Perfil, tema Claro/Oscuro/Sistema y cerrar sesión — mismo patrón que el menú de usuario que ya existe en `apps/backoffice` (`docs/14-navegacion.md`, sección 1). En celular esos ítems van dentro del panel del menú hamburguesa en vez de un menú aparte.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Navegar la app según quién soy (Priority: P1)
@@ -51,6 +56,9 @@ Cualquier persona que usa la app — se haya acercado por primera vez, tenga ses
 6. **Given** el contenido que hoy vive en las páginas de Bienvenida y Sede (spec 001), **When** se accede a la web pública después de este cambio, **Then** ese mismo contenido y esas mismas funcionalidades siguen disponibles, ahora dentro de las secciones Primeros pasos y Visitanos.
 7. **Given** una Persona con sesión iniciada que navega una página del menú público, **When** mira el menú, **Then** ya no ve "Ingresar" — ve un acceso directo a la app con sesión en su lugar; "Dar" se mantiene visible igual que sin sesión (actualización 2026-09-18).
 8. **Given** cualquier pantalla de error, "no encontrado", o del flujo de registro (spec 001), **When** una persona la ve, **Then** el menú público (o el de la app/backoffice, según corresponda) y el pie de página siguen presentes — nunca queda sin forma de navegar salvo el botón "atrás" del navegador (actualización 2026-09-18).
+10. **Given** un Miembro registrado con sesión iniciada, **When** en celular toca el botón "Más" de la barra superior de la app, **Then** se abre el mismo panel del menú público (Nosotros, Primeros pasos, Ministerios, Visitanos, Dar); en escritorio esas secciones están en la barra superior de la app, agrupadas bajo "Más" (actualización 2026-09-20, H-37).
+11. **Given** ese mismo Miembro registrado navegando una de esas secciones públicas desde la app, **When** mira el header, **Then** encuentra "Ir a la app" para volver, sin haber perdido el acceso (actualización 2026-09-20, H-37, D107).
+12. **Given** un Miembro registrado con sesión iniciada en cualquier página pública, **When** abre el menú de usuario del header (o el panel hamburguesa en celular), **Then** encuentra Perfil, el selector de tema Claro/Oscuro/Sistema y "Cerrar sesión", sin tener que entrar primero a la app (actualización 2026-09-20, H-38).
 
 ---
 
@@ -204,6 +212,8 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 - **FR-009**: El sistema DEBE indicar, tanto visualmente como para tecnología asistiva, cuál es la sección actual dentro de cada uno de los tres menús.
 - **FR-042** *(actualización 2026-09-18, revisión manual H-19)*: El menú público DEBE reflejar si hay una sesión iniciada: con sesión, reemplaza el botón "Ingresar" por un acceso directo a la app con sesión; "Dar" se muestra siempre, con o sin sesión.
 - **FR-043** *(actualización 2026-09-18, revisión manual H-05)*: Las pantallas de error, "no encontrado" y las del flujo de registro (spec 001) DEBEN conservar el menú (público, de la app, o del backoffice según corresponda) y el pie de página, igual que el resto de las pantallas.
+- **FR-047** *(actualización 2026-09-20, revisión manual H-37, D107, `docs/14-navegacion.md` sección 2)*: La app con sesión iniciada DEBE ofrecer acceso a las secciones públicas (Nosotros, Primeros pasos, Ministerios, Visitanos, Dar) sin salir de la experiencia de app: en celular, mediante una barra superior delgada con el logo (lleva a Inicio) y un botón "Más" que abre el mismo panel del menú público; en escritorio, esas secciones se muestran en la barra superior de la app, agrupadas bajo "Más". El acceso permanente "Ir a la app" del header público (FR-042) cumple la función de volver.
+- **FR-048** *(actualización 2026-09-20, revisión manual H-38, `docs/14-navegacion.md` sección 1)*: Con sesión iniciada, el header público DEBE mostrar además un menú de usuario con Perfil, el selector de tema Claro/Oscuro/Sistema y "Cerrar sesión" — mismo patrón que el menú de usuario de `apps/backoffice`. En celular esos ítems se muestran dentro del panel del menú hamburguesa en vez de un menú aparte.
 
 **Accesibilidad (Historia 2)**
 
@@ -211,7 +221,7 @@ Quien necesita mostrar o probar la app (para una presentación, o durante el des
 - **FR-011**: El sistema DEBE permitir recorrer completamente los tres menús usando solo el teclado, con un orden de tabulación lógico y el foco siempre visible.
 - **FR-012**: El sistema NO DEBE comunicar ningún estado (activo, error, confirmado, etc.) usando exclusivamente el color; todo estado DEBE incluir también texto y, cuando aplique, un ícono.
 - **FR-013**: El sistema DEBE mantener un contraste mínimo de 4.5:1 para texto normal y 3:1 para texto grande y elementos de interfaz, verificado en modo claro y en modo oscuro, usando una paleta de colores provisoria (neutra, con tokens semánticos) mientras la paleta de marca definitiva no esté decidida.
-- **FR-014**: El menú hamburguesa de la web pública DEBE implementarse como un control real que informa su estado abierto/cerrado a tecnología asistiva, cerrarse con la tecla Escape, y mantener el foco dentro de él mientras está abierto. El panel tiene un nombre accesible (título del diálogo) que no necesita ser visible en pantalla — alcanza con que lo anuncie la tecnología asistiva (actualización 2026-09-20, H-27).
+- **FR-014**: El menú hamburguesa de la web pública, el panel "Más" de la app (FR-047) y cualquier menú desplegable equivalente (ej. el menú de usuario de FR-048) DEBEN implementarse como un control real que informa su estado abierto/cerrado a tecnología asistiva (`aria-expanded`), cerrarse con la tecla Escape, y mantener el foco dentro de él mientras está abierto. El panel tiene un nombre accesible (título del diálogo) que no necesita ser visible en pantalla — alcanza con que lo anuncie la tecnología asistiva (actualización 2026-09-20, H-27, H-37, H-38).
 - **FR-015**: Los ítems de la barra de navegación con sesión iniciada DEBEN mostrar siempre ícono y texto juntos (nunca solo ícono) y tener un objetivo táctil de al menos 44×44 px.
 
 **Feedback y estados (Historia 3)**

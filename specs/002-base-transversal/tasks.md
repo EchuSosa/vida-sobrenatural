@@ -313,6 +313,25 @@ sin duplicar el horario, layout de escritorio de la app funcional (Perfil accesi
 pantalla propia dentro de la app, panel de celular sin título visible redundante, contraste del
 Toaster confirmado correcto, y suite de e2e estable con `workers: 1`.
 
+## Phase 16: Correcciones de la revisión manual — Lote 5 (ronda 3, menú secundario y devIndicators)
+
+**Purpose**: aplicar la parte de esta spec del Lote 5 (`specs/revision-manual/2026-09-17-001-002.md`,
+"Hallazgos de la verificación (ronda 3, 2026-09-20 — Lote 4)"): hallazgos H-37, H-38 y H-39. No
+modifica ninguna tarea de las Fases 1–15, ya completadas.
+
+**Contexto**: H-34 y H-35 del mismo Lote 5 son hallazgos de **specs/001-fase-bienvenida** (Perfil y
+backoffice) — ver su `tasks.md`, Phase 13. Orden sugerido: T129+T130 primero (misma costura,
+comparten componentes), T131 al final por ser de una línea.
+
+- [X] T129 [H-37] `apps/web/src/components/nav-app-bar.tsx` (o un componente nuevo compañero, `nav-app-mas.tsx`): en celular, barra superior delgada con el logo (`Link` a `/inicio`) y un botón "Más" que abre el mismo `Sheet` del menú público (`NAV_PUBLICA` + `NAV_PUBLICA_ACCIONES` de `nav-publica.ts`, reutilizados sin duplicar hrefs/labels) — mismo componente `Sheet`/`SheetContent` de `@vida-sobrenatural/ui` que ya usa `nav-publica-header.tsx` (H-27: `aria-expanded`, Escape y foco atrapado ya vienen del primitivo Base UI). En escritorio, esas mismas secciones se agregan a la barra superior existente de `NavAppBar`, agrupadas bajo un `DropdownMenu` "Más" (mismo patrón que el menú de usuario del backoffice). `apps/web/src/app/(app)/layout.tsx` monta el componente nuevo junto a `NavAppBar`. El "volver" (FR-047) no requiere código nuevo: ya lo resuelve el "Ir a la app" permanente del header público (H-19, FR-042).
+- [X] T130 [H-38] `apps/web/src/components/nav-publica-header.tsx`: nuevo menú de usuario (componente `menu-usuario-publico.tsx`, mismo patrón `DropdownMenu` que `apps/backoffice/src/components/selector-tema.tsx`) con Perfil (`Link` a `/perfil`), el selector de tema (reutiliza la lógica de `apps/web/src/components/selector-tema.tsx` en versión compacta) y `CerrarSesionBoton` (ya existe, se reutiliza) — visible junto a "Ir a la app" cuando hay sesión. En celular, esos mismos ítems se agregan dentro del `SheetContent` del menú hamburguesa existente, no en un menú aparte.
+- [X] T131 [H-39] `apps/web/next.config.ts`: agregar `devIndicators: false` (el indicador tapaba la pestaña "Inicio" de la barra inferior en celular — `capturas/H-37.png`); Next.js sigue mostrando errores de compilación/runtime igual (no depende de este indicador).
+- [X] T132 [H-37, H-38] Tests afectados: e2e nuevo en `apps/web/e2e/` que cubre, con sesión iniciada, abrir el panel "Más" desde la app y llegar a una sección pública, y abrir el menú de usuario del header público (Perfil/tema/cerrar sesión) sin pasar por la app — en celular y escritorio, con `@axe-core/playwright` en modo claro y oscuro sobre los paneles nuevos.
+
+**Checkpoint**: Lote 5 (parte de 002) completo — la app con sesión ofrece un camino de ida y vuelta
+real hacia lo público (H-37), el header público iguala al menú de usuario del backoffice (H-38), y
+el indicador de desarrollo ya no tapa la barra inferior en celular (H-39).
+
 ---
 
 ## Dependencies & Execution Order
