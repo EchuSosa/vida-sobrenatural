@@ -147,6 +147,7 @@ Definidos en `packages/ui` como variables CSS (formato de shadcn), para modo cla
 - [ ] Una sola acción principal, con verbo concreto.
 - [ ] Orden de botones según la convención.
 - [ ] Estados de carga, vacío, error y éxito definidos.
+- [ ] Los botones que disparan una acción quedan bloqueados y con indicador de carga mientras se procesa, y el envío se protege de la reentrada (H-57).
 - [ ] Feedback de cada acción según la matriz de `16`.
 - [ ] Se entiende qué pasa después de cada acción.
 - [ ] Textos en el tono definido, sin jerga interna.
