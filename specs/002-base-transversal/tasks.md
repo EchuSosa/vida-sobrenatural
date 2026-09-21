@@ -348,6 +348,23 @@ app" en las dos apps, sin duplicar el tipo ni el mapa (H-48+H-49).
 
 ---
 
+## Phase 18: Correcciones de la revisión manual — Lote 7, parte 4 (ronda 4, menú y Perfil)
+
+**Purpose**: aplicar H-46+H-47 del Lote 7 — los últimos dos hallazgos de la ronda 4, D115. Cierra
+el Lote 7 completo (H-51+H-52 y H-50 en `specs/001-fase-bienvenida/tasks.md`, Phases 14 y 15;
+H-48+H-49 en esta spec, Phase 17).
+
+- [X] T136 [H-46] `apps/web/src/config/nav-publica.ts`: `NAV_PUBLICA` baja de cinco a cuatro ítems (Nosotros, Primeros pasos, Eventos, Visitanos) — Ministerios deja de estar ahí. Header (`nav-publica-header.tsx`), panel "Más" de la app (`nav-app-mas.tsx`) y pie de página (`footer-publico.tsx`) heredan el cambio sin tocarlos, porque los tres leen de `NAV_PUBLICA`. `/ministerios` conserva su URL y su entrada en `sitemap.ts` (D82) — sin redirección, porque la URL no cambia.
+- [X] T137 [H-46] `apps/web/src/app/(publica)/primeros-pasos/page.tsx`: el paso "4. Ministerio" de la sección "¿Cómo sigue el proceso?" pasa a ser un link a `/ministerios` — es la "última etapa" que D115 pide dentro de Primeros pasos.
+- [X] T138 [H-47] Nuevo `apps/web/src/components/nav-app-perfil-menu.tsx`: en escritorio, el ítem "Perfil" de `NavAppBar` abre un `DropdownMenu` (Perfil / Claro-Oscuro / Cerrar sesión) en vez de navegar directo — en celular sigue siendo un link común. "Cerrar sesión" es un ítem dentro del menú (a diferencia de `MenuUsuarioPublico`/`MenuUsuario`, que lo ponen afuera): cierra el `DropdownMenu` (estado controlado) antes de abrir un `AlertDialog` aparte, también controlado, para no anidar overlays de Base UI (H-11). Reutiliza `OPCIONES_TEMA`/`useSincronizarTemaPropio`, exportados de `menu-usuario-publico.tsx` (Principio XI).
+- [X] T139 Tests afectados: `apps/web/e2e/primeros-pasos-visitanos.spec.ts` (el menú ya no incluye "Ministerios"; Primeros pasos linkea a `/ministerios`) y un caso nuevo en `apps/web/e2e/nav-secundaria.spec.ts` (H-47, en los dos temas, con `@axe-core/playwright` sobre el menú y el diálogo).
+- [X] T140 Correr las tres suites de la convención de `docs/00-README.md` antes de cerrar: unitarios e integración de `apps/api`, y e2e completos de `apps/web`/`apps/backoffice`.
+
+**Checkpoint**: Lote 7 completo — Sedes (H-51+H-52), errores por campo (H-50), tema (H-48+H-49) y
+menú/Perfil (H-46+H-47), los siete hallazgos de la ronda 4.
+
+---
+
 ## Dependencies & Execution Order
 
 - **Setup (Fase 1)** → sin dependencias, se puede empezar de inmediato.
