@@ -112,7 +112,9 @@ Lista corta de lo que falta y no se puede inventar (D98). Se completa a medida q
 |---|---|---|
 | Fotos del equipo pastoral, del templo y de la congregación | Nosotros → Liderazgo (hoy con placeholder "foto pendiente") | Pendiente |
 | Texto real de "En qué creemos" (declaración de fe) | Nosotros | Pendiente — se le pide a un pastor |
-| **URL del canal de YouTube de la iglesia** | Ícono de YouTube en el pie de página (H-24), transmisión del culto online (H-23) y sincronización de videos de Seguinos (D93, spec 003) | Pendiente — sin esto el ícono de YouTube queda fuera |
+| **URL del canal de YouTube de la iglesia** | Ícono de YouTube en el pie de página (H-24), transmisión del culto online (H-23) y sincronización de videos de Seguinos (D93) | ✅ **`https://www.youtube.com/@vidasobrenatural`** (2026-09-21) |
+| URL del **video** de la Palabra Profética 2026 | La subpágina de Palabra Profética. Es un video puntual, distinto del canal | Pendiente — no bloquea: el video es opcional (D121) |
+| Texto real de la Palabra Profética 2026 | La subpágina de Palabra Profética. Lo que hay documentado es la frase promocional del link-in-bio, no la palabra | Pendiente — mientras tanto, texto provisorio marcado (D98) |
 | Portadas reales de los 8 libros de Ediciones VS | Sección Ediciones VS (hoy con placeholder, D110) | Pendiente |
 
 ---
