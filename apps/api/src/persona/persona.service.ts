@@ -295,7 +295,22 @@ export class PersonaService {
       });
     }
 
-    await this.validarVinculoFamiliar(persona.id, dto.tutorPersonaId, TipoRelacionFamiliar.tutor);
+    const tutor = await this.validarVinculoFamiliar(persona.id, dto.tutorPersonaId, TipoRelacionFamiliar.tutor);
+    // H-74 (revisión manual ronda 8, D35): invariante propia de "tutor", no
+    // de un vínculo familiar en general — un tutor tiene que ser un
+    // miembro ya verificado (`estado: activa`, no otro pendiente_tutor sin
+    // verificar ni el propio menor) y mayor de edad. `buscarPersonas` (la
+    // búsqueda que arma la lista de candidatos) debería filtrar esto
+    // también, pero es una comodidad de UI, no la barrera real: la barrera
+    // real es acá, del lado del servidor, para quien llame a este endpoint
+    // directamente.
+    if (tutor.estado !== EstadoPersona.activa || calcularEdad(tutor.fechaNacimiento) < EDAD_MINIMA) {
+      throw new AppException(
+        'TUTOR_INVALIDO',
+        400,
+        'La Persona elegida como tutor no es válida: tiene que ser un miembro activo y mayor de edad.',
+      );
+    }
 
     const [, actualizada] = await this.prisma.$transaction([
       this.prisma.relacionFamiliar.create({
@@ -318,7 +333,11 @@ export class PersonaService {
    * D112: valida antes de crear una Relación Familiar — ninguna Persona
    * puede vincularse consigo misma, y no se puede duplicar el mismo vínculo
    * ni cargarlo espejado desde el otro lado (ej. A-hijo_a-B cuando ya existe
-   * B-padre_madre-A).
+   * B-padre_madre-A). Genérica a los cinco tipos de vínculo — devuelve la
+   * Persona vinculada (ya la busca acá) para que el llamador la reutilice
+   * sin una segunda consulta; las invariantes propias de un tipo puntual
+   * (ej. "tutor" — ver `activar`) NO van acá, van del lado que sí las
+   * conoce.
    */
   private async validarVinculoFamiliar(personaId: string, familiarId: string, tipo: TipoRelacionFamiliar) {
     if (personaId === familiarId) {
@@ -347,6 +366,8 @@ export class PersonaService {
         throw new AppException('RELACION_FAMILIAR_INVALIDA', 409, 'Ese vínculo ya existe (cargado desde el otro lado).');
       }
     }
+
+    return familiar;
   }
 
   /** PATCH /personas/:id/marcar-inactiva — FR-014. */

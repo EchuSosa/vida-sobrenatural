@@ -163,7 +163,7 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
           findUnique: jest
             .fn()
             .mockResolvedValueOnce({ id: 'p1', estado: 'pendiente_tutor', activo: true })
-            .mockResolvedValueOnce({ id: 'p2' }),
+            .mockResolvedValueOnce({ id: 'p2', estado: 'activa', fechaNacimiento: new Date('1990-01-01') }),
           update: updatePersona,
         },
         relacionFamiliar: {
@@ -185,6 +185,50 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
           data: expect.objectContaining({ tutorNombre: null, tutorApellido: null, tutorTelefono: null, estado: 'activa' }),
         }),
       );
+    });
+
+    // H-74 (revisión manual ronda 8, D35): el tutor propuesto tiene que ser
+    // un miembro ya verificado — `estado: activa` — y mayor de edad. La
+    // búsqueda (`buscarPersonas`) hoy no lo filtra (comodidad de UI), así
+    // que la barrera real tiene que estar acá, sin importar qué id llegue.
+    it('rechaza vincular un tutorPersonaId cuyo estado no es activa (ej. otro pendiente_tutor sin verificar)', async () => {
+      const prismaMock = {
+        persona: {
+          findUnique: jest
+            .fn()
+            .mockResolvedValueOnce({ id: 'p1', estado: 'pendiente_tutor', activo: true })
+            .mockResolvedValueOnce({
+              id: 'p2',
+              estado: 'pendiente_tutor',
+              fechaNacimiento: new Date('1990-01-01'),
+            }),
+        },
+        relacionFamiliar: { findUnique: jest.fn().mockResolvedValue(null) },
+      };
+      const service = await crearServicio(prismaMock);
+
+      const error = await service.activar('p1', { tutorPersonaId: 'p2' }).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(AppException);
+      expect((error as AppException).code).toBe('TUTOR_INVALIDO');
+    });
+
+    it('rechaza vincular un tutorPersonaId que es menor de edad, aunque esté activa', async () => {
+      const hoy = new Date();
+      const fechaNacimientoMenor = new Date(hoy.getFullYear() - 15, hoy.getMonth(), hoy.getDate());
+      const prismaMock = {
+        persona: {
+          findUnique: jest
+            .fn()
+            .mockResolvedValueOnce({ id: 'p1', estado: 'pendiente_tutor', activo: true })
+            .mockResolvedValueOnce({ id: 'p2', estado: 'activa', fechaNacimiento: fechaNacimientoMenor }),
+        },
+        relacionFamiliar: { findUnique: jest.fn().mockResolvedValue(null) },
+      };
+      const service = await crearServicio(prismaMock);
+
+      const error = await service.activar('p1', { tutorPersonaId: 'p2' }).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(AppException);
+      expect((error as AppException).code).toBe('TUTOR_INVALIDO');
     });
   });
 

@@ -20,6 +20,10 @@ export type ErrorCode =
   // H-29 (revisión manual, D108/D112): activar/vincular un tutor.
   | 'ACTIVAR_TUTOR_INVALIDO'
   | 'RELACION_FAMILIAR_INVALIDA'
+  // H-74 (revisión manual ronda 8, D35): el candidato a tutor propuesto no
+  // es un miembro activo y mayor de edad (o es la misma Persona que se
+  // activa — ese caso cae en RELACION_FAMILIAR_INVALIDA, ya existente).
+  | 'TUTOR_INVALIDO'
   // H-30 (revisión manual, D38/D102): Sedes. El formato de `horarios`
   // inválido no suma un código propio: cae en 'VALIDACION' con el código de
   // campo que ya deriva automáticamente validation-exception-factory.ts
