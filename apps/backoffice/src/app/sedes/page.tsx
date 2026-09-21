@@ -20,6 +20,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
+  useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 import { FormularioSede, VALORES_SEDE_VACIOS, datosSedeParaEnviar, type ValoresSede } from '../../components/formulario-sede';
@@ -43,7 +44,6 @@ export default function SedesPage() {
   const [filtro, setFiltro] = useState<Filtro>('activas');
   const [error, setError] = useState<string | null>(null);
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [enviando, setEnviando] = useState(false);
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
@@ -65,10 +65,9 @@ export default function SedesPage() {
     ejecutar();
   }, [cargarSedes]);
 
-  async function crearSede(valores: ValoresSede) {
+  const { enviando, ejecutar: crearSede } = useEnvio(async (valores: ValoresSede) => {
     setErrorAlta(null);
     setErroresCampoAlta(null);
-    setEnviando(true);
     try {
       await apiFetch('/sedes', {
         method: 'POST',
@@ -85,10 +84,8 @@ export default function SedesPage() {
       } else {
         setErrorAlta(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos crear la Sede.');
       }
-    } finally {
-      setEnviando(false);
     }
-  }
+  });
 
   if (status === 'loading') {
     return <div className="mx-auto max-w-3xl px-4 py-16">Cargando…</div>;

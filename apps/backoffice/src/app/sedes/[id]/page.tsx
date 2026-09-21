@@ -25,6 +25,7 @@ import {
   Button,
   ConfirmDestructiveDialog,
   EstadoActivoBadge,
+  useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 import { FormularioSede, sedeAValoresFormulario, datosSedeParaEnviar, type ValoresSede } from '../../../components/formulario-sede';
@@ -42,7 +43,6 @@ export default function SedeDetallePage() {
   const [cargando, setCargando] = useState(true);
   const [noEncontrada, setNoEncontrada] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [enviando, setEnviando] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
   const [erroresCampoGuardar, setErroresCampoGuardar] = useState<ErrorDeCampo[] | null>(null);
   const [avisoUnicaActiva, setAvisoUnicaActiva] = useState(false);
@@ -72,10 +72,9 @@ export default function SedeDetallePage() {
     ejecutar();
   }, [cargarSede]);
 
-  async function guardar(valores: ValoresSede) {
+  const { enviando, ejecutar: guardar } = useEnvio(async (valores: ValoresSede) => {
     setErrorGuardar(null);
     setErroresCampoGuardar(null);
-    setEnviando(true);
     try {
       await apiFetch(`/sedes/${params.id}`, {
         method: 'PATCH',
@@ -91,12 +90,15 @@ export default function SedeDetallePage() {
       } else {
         setErrorGuardar(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos guardar los cambios.');
       }
-    } finally {
-      setEnviando(false);
     }
-  }
+  });
 
-  async function desactivar() {
+  // H-57: el guard va también en el envío — ConfirmDestructiveDialog ya
+  // cierra el diálogo apenas se confirma (así que ese botón puntual no
+  // puede clickearse dos veces), pero desactivar()/reactivar() podrían
+  // dispararse de nuevo si alguien reabre el diálogo mientras la primera
+  // petición sigue en curso.
+  const { enviando: desactivando, ejecutar: desactivar } = useEnvio(async () => {
     try {
       await apiFetch(`/sedes/${params.id}`, {
         method: 'PATCH',
@@ -112,9 +114,9 @@ export default function SedeDetallePage() {
       }
       toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos desactivar la Sede.');
     }
-  }
+  });
 
-  async function reactivar() {
+  const { enviando: reactivando, ejecutar: reactivar } = useEnvio(async () => {
     try {
       await apiFetch(`/sedes/${params.id}`, {
         method: 'PATCH',
@@ -132,7 +134,7 @@ export default function SedeDetallePage() {
       }
       toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos reactivar la Sede.');
     }
-  }
+  });
 
   if (status === 'loading' || cargando) {
     return <div className="mx-auto max-w-2xl px-4 py-16">Cargando…</div>;
@@ -186,7 +188,12 @@ export default function SedeDetallePage() {
         {sede.activo ? (
           <ConfirmDestructiveDialog
             trigger={
-              <Button variant="outline" className="text-destructive">
+              <Button
+                variant="outline"
+                className="text-destructive"
+                loading={desactivando}
+                loadingText="Desactivando…"
+              >
                 Desactivar
               </Button>
             }
@@ -198,7 +205,11 @@ export default function SedeDetallePage() {
           />
         ) : (
           <ConfirmDestructiveDialog
-            trigger={<Button>Reactivar</Button>}
+            trigger={
+              <Button loading={reactivando} loadingText="Reactivando…">
+                Reactivar
+              </Button>
+            }
             titulo={`¿Reactivar la Sede ${sede.nombre}?`}
             descripcion="Vuelve a mostrarse en Visitanos y en el registro."
             textoConfirmar="Sí, reactivar"

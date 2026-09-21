@@ -85,6 +85,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(page.getByRole('link', { name: 'Ir a la app' })).toBeVisible();
       });
 
+      // H-58 (revisión manual): "Cerrar sesión" es una fila más DENTRO del
+      // propio menú (antes vivía afuera, como botón suelto — contradecía
+      // docs/14-navegacion.md sección 1). Mismo `MenuUsuario` compartido que
+      // usa la barra de la app (H-47, test de abajo): el menú se cierra
+      // ANTES de abrir el diálogo de confirmación (H-11, sin overlays
+      // anidados de Base UI).
       test('el menú de usuario del header público ofrece Perfil, tema y cerrar sesión', async ({ page }) => {
         const email = `e2e-menu-usuario-escritorio-${colorScheme}-${Date.now()}@example.com`;
         await registrarPersonaDeTest(page, email);
@@ -99,22 +105,25 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(menu).toBeVisible();
         await expect(menu.getByRole('menuitem', { name: 'Perfil' })).toBeVisible();
         await expect(menu.getByRole('menuitem', { name: 'Claro' })).toBeVisible();
+        const itemCerrarSesion = menu.getByRole('menuitem', { name: 'Cerrar sesión' });
+        await expect(itemCerrarSesion).toBeVisible();
 
         // "region" excluida — ver el comentario del test anterior.
         const resultados = await crearAxeBuilder(page).disableRules(['region']).analyze();
         expect(resultados.violations).toEqual([]);
 
-        await page.keyboard.press('Escape');
+        await itemCerrarSesion.click();
         await expect(menu).toBeHidden();
-
-        await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible();
+        const dialogo = page.getByRole('alertdialog', { name: '¿Cerrar sesión?' });
+        await expect(dialogo).toBeVisible();
+        await expect(dialogo).toHaveCSS('opacity', '1');
+        await dialogo.getByRole('button', { name: 'Sí, cerrar sesión' }).click();
+        await expect(page).toHaveURL('/');
+        await expect(page.getByText('Cerraste sesión.')).toBeVisible();
       });
 
-      // H-47 (revisión manual ronda 4): a diferencia del menú de usuario del
-      // header público (arriba), acá "Cerrar sesión" es una fila más DENTRO
-      // del propio menú — el punto a probar es que el diálogo de
-      // confirmación no queda atrapado por el DropdownMenu que se
-      // desmonta (H-11): tiene que verse solo, ya cerrado el menú.
+      // H-47 (revisión manual ronda 4): la barra de la app usa el mismo
+      // `MenuUsuario` compartido — ver el test de arriba.
       test('en escritorio, el ítem Perfil de la barra de la app abre un menú con Perfil, colores de la app y cerrar sesión', async ({
         page,
       }) => {

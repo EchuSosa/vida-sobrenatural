@@ -5,15 +5,12 @@ import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import { Button, MenuUsuario as MenuUsuarioCompartido } from '@vida-sobrenatural/ui';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Button,
-  ConfirmDestructiveDialog,
-} from '@vida-sobrenatural/ui';
-import { type TemaPreferido, type TemaPreferidoVisible, TEMA_A_NEXT_THEMES } from '@vida-sobrenatural/shared-types';
+  type TemaPreferido,
+  type TemaPreferidoVisible,
+  TEMA_A_NEXT_THEMES,
+} from '@vida-sobrenatural/shared-types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
@@ -22,7 +19,17 @@ const OPCIONES: { value: TemaPreferidoVisible; label: string; Icono: typeof Sun 
   { value: 'oscuro', label: 'Oscuro', Icono: Moon },
 ];
 
-/** Menú de usuario — colores de la app (Historia 5, FR-027; D116: sin "Sistema") y cerrar sesión. */
+/**
+ * Menú de usuario del backoffice — colores de la app (Historia 5, FR-027;
+ * D116: sin "Sistema") y cerrar sesión. Sin ítem "Perfil": el backoffice no
+ * tiene pantalla propia (docs/14-navegacion.md sección 3).
+ *
+ * H-58 (revisión manual): pasa a usar el `MenuUsuario` compartido de
+ * packages/ui (ya lo usaban el header público y la barra de la app,
+ * H-38/H-47) en vez de su propia estructura — acá era la única de las tres
+ * que todavía dejaba "Cerrar sesión" afuera del desplegable, como botón
+ * suelto (contradice docs/14-navegacion.md sección 1).
+ */
 export function MenuUsuario() {
   const { setTheme } = useTheme();
   const { data: session, update } = useSession();
@@ -52,38 +59,18 @@ export function MenuUsuario() {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="ghost" size="sm">{session.user.name}</Button>} />
-        <DropdownMenuContent align="end">
-          <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Colores de la app</div>
-          {OPCIONES.map(({ value, label, Icono }) => (
-            <DropdownMenuItem key={value} data-active={seleccionado === value} onClick={() => elegir(value)}>
-              <Icono className="size-4" aria-hidden="true" />
-              {label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      {/*
-        H-11 (actualización 2026-09-18): trigger separado del DropdownMenu de
-        arriba a propósito — anidar un AlertDialog dentro de un
-        DropdownMenuContent de Base UI genera conflictos conocidos entre
-        overlays (el menú se desmonta antes de que el diálogo termine de
-        abrir).
-      */}
-      <ConfirmDestructiveDialog
-        trigger={
-          <Button variant="ghost" size="sm">
-            Cerrar sesión
-          </Button>
-        }
-        titulo="¿Cerrar sesión?"
-        descripcion="Vas a tener que volver a autorizar el acceso con tu cuenta de Google para entrar de nuevo."
-        textoConfirmar="Sí, cerrar sesión"
-        textoCancelar="Volver"
-        onConfirmar={() => signOut({ callbackUrl: '/?sesion=cerrada' })}
-      />
-    </div>
+    <MenuUsuarioCompartido
+      trigger={
+        <Button variant="ghost" size="sm">
+          {session.user.name}
+        </Button>
+      }
+      labelColoresDeLaApp="Colores de la app"
+      opcionesTema={OPCIONES}
+      temaSeleccionado={seleccionado}
+      onElegirTema={(value) => elegir(value as TemaPreferido)}
+      labelCerrarSesion="Cerrar sesión"
+      onCerrarSesion={() => signOut({ callbackUrl: '/?sesion=cerrada' })}
+    />
   );
 }

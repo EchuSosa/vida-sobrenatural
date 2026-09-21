@@ -18,6 +18,7 @@ import {
   CampoTelefono,
   ResumenErrores,
   MensajeErrorCampo,
+  useEnvio,
   type ErrorResumen,
 } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../../../hooks/use-opciones-registro';
@@ -91,7 +92,6 @@ export default function RegistroPage() {
 
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [paso, setPaso] = useState(1);
-  const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [camposVacios, setCamposVacios] = useState<Record<string, boolean>>({});
   const [mensajesServidor, setMensajesServidor] = useState<Record<string, string>>({});
@@ -154,6 +154,12 @@ export default function RegistroPage() {
   // no un setState en un efecto (evita cascading renders innecesarios).
   const apellidoEfectivo = datos.apellido || session?.user.familyName || '';
   const nombreEfectivo = datos.nombre || session?.user.givenName || '';
+
+  // H-57: el guard vive acá, no solo en el botón — si ya hay una petición en
+  // curso, un segundo Enter/clic no dispara otra (ver useEnvio). Antes de
+  // los early return de abajo: es un Hook, no puede ser condicional —
+  // `enviarRegistro` (función normal, hoisted) se declara más abajo.
+  const { enviando, ejecutar: handleSubmit } = useEnvio(enviarRegistro);
 
   // Sin <main id="contenido"> propio: apps/web/src/app/(publica)/layout.tsx
   // ya provee ese landmark desde que esta página se movió ahí (H-05,
@@ -244,11 +250,9 @@ export default function RegistroPage() {
   const edadAproximada = calcularEdadAproximada(datos.fechaNacimiento);
   const esProbablementeMayorDeEdad = edadAproximada === null || edadAproximada >= EDAD_MINIMA;
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function enviarRegistro() {
     setError(null);
     setMensajesServidor({});
-    setEnviando(true);
 
     const body = {
       apellido: apellidoEfectivo,
@@ -329,8 +333,6 @@ export default function RegistroPage() {
       } else {
         setError(tErrores('ERROR_INTERNO'));
       }
-    } finally {
-      setEnviando(false);
     }
   }
 
@@ -366,7 +368,14 @@ export default function RegistroPage() {
       <ResumenErrores errores={resumenErrores} />
 
       <form
-        onSubmit={paso === TOTAL_PASOS ? handleSubmit : (e) => e.preventDefault()}
+        onSubmit={(e) => {
+          // El preventDefault tiene que correr SIEMPRE, no solo cuando el
+          // guard de useEnvio deja pasar el envío (H-57) — si no, un envío
+          // bloqueado por el guard sigue su curso nativo (navegación GET
+          // con los campos como query string) en vez de quedar sin efecto.
+          e.preventDefault();
+          if (paso === TOTAL_PASOS) void handleSubmit();
+        }}
         className="flex flex-col gap-4"
       >
         {/* tabIndex -1 + focus programático (arriba) — anuncia el paso nuevo sin robar el foco de un click real. */}
@@ -530,8 +539,8 @@ export default function RegistroPage() {
             </Button>
           )}
           {paso === TOTAL_PASOS && (
-            <Button type="submit" size="xl" disabled={enviando}>
-              {enviando ? t('botones.enviando') : t('botones.enviar')}
+            <Button type="submit" size="xl" loading={enviando} loadingText={t('botones.enviando')}>
+              {t('botones.enviar')}
             </Button>
           )}
         </div>

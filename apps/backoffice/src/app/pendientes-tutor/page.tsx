@@ -24,6 +24,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
+  useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 
@@ -89,7 +90,9 @@ export default function PendientesTutorPage() {
     ejecutar();
   }, [cargarPendientes]);
 
-  async function marcarInactiva(id: string) {
+  // H-57: el guard va también en el envío, no solo en el botón que lo
+  // dispara (ConfirmDestructiveDialog ya lo cierra al confirmar).
+  const { ejecutar: marcarInactiva } = useEnvio(async (id: string) => {
     try {
       await apiFetch(`/personas/${id}/marcar-inactiva`, {
         method: 'PATCH',
@@ -100,7 +103,7 @@ export default function PendientesTutorPage() {
     } catch (e) {
       toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos marcar como inactiva a esta Persona.');
     }
-  }
+  });
 
   if (status === 'loading') {
     return <div className="mx-auto max-w-3xl px-4 py-16">Cargando…</div>;
@@ -205,7 +208,6 @@ function ActivarDialog({
   const [tutorElegido, setTutorElegido] = useState<BusquedaPersona | null>(null);
   const [tutorNombre, setTutorNombre] = useState('');
   const [tutorTelefono, setTutorTelefono] = useState('');
-  const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mensajesCampo, setMensajesCampo] = useState<Record<string, string>>({});
 
@@ -231,9 +233,8 @@ function ActivarDialog({
     return () => clearTimeout(idTimeout);
   }, [busqueda, tutorElegido, persona, apiToken]);
 
-  async function activar() {
+  const { enviando, ejecutar: activar } = useEnvio(async () => {
     if (!persona) return;
-    setEnviando(true);
     setError(null);
     setMensajesCampo({});
     try {
@@ -261,10 +262,8 @@ function ActivarDialog({
         );
       }
       setError(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos activar a esta Persona.');
-    } finally {
-      setEnviando(false);
     }
-  }
+  });
 
   const puedeEnviar = tutorElegido !== null || (tutorNombre.trim() !== '' && tutorTelefono.trim() !== '');
 
@@ -370,8 +369,8 @@ function ActivarDialog({
         </div>
 
         <SheetFooter>
-          <Button onClick={activar} disabled={!puedeEnviar || enviando}>
-            {enviando ? 'Activando…' : 'Activar'}
+          <Button onClick={() => void activar()} disabled={!puedeEnviar} loading={enviando} loadingText="Activando…">
+            Activar
           </Button>
         </SheetFooter>
       </SheetContent>

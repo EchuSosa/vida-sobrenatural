@@ -4,17 +4,10 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@vida-sobrenatural/ui';
+import { Button, MenuUsuario, useEnvio } from '@vida-sobrenatural/ui';
 import {
   type TemaPreferido,
   type TemaPreferidoVisible,
@@ -32,12 +25,10 @@ export const OPCIONES_TEMA: { value: TemaPreferidoVisible; labelKey: string; Ico
 ];
 
 /**
- * H-38 (revisión manual ronda 3, docs/14-navegacion.md sección 1): con
- * sesión activa, el header público ofrece Perfil/tema/cerrar sesión — mismo
- * patrón que `apps/backoffice/src/components/selector-tema.tsx`
- * (`MenuUsuario`), incluido el trigger de cerrar sesión separado del
- * `DropdownMenu` (H-11: un `AlertDialog` anidado dentro de un
- * `DropdownMenuContent` de Base UI genera conflictos entre overlays).
+ * H-38/H-58 (revisión manual): sincroniza el tema elegido con next-themes y
+ * lo persiste contra la API. `useSincronizarTemaPropio` en sí ya es una
+ * pieza compartida (Principio XI) — la usan `MenuUsuario` acá y
+ * `nav-app-perfil-menu.tsx` (H-47).
  */
 export function useSincronizarTemaPropio() {
   const { setTheme } = useTheme();
@@ -61,7 +52,13 @@ export function useSincronizarTemaPropio() {
   return elegir;
 }
 
-/** Menú de usuario del header público (escritorio y celular) — Perfil, tema, cerrar sesión. */
+/**
+ * Menú de usuario del header público (escritorio) — Perfil, tema, cerrar
+ * sesión. H-58: pasa a usar el `MenuUsuario` compartido de packages/ui (ya
+ * lo usaba la barra de la app, H-47) en vez de repetir la misma estructura
+ * a mano — antes tenía "Cerrar sesión" afuera del desplegable, como botón
+ * suelto.
+ */
 export function MenuUsuarioPublico() {
   const { data: session } = useSession();
   const t = useTranslations('nav');
@@ -72,29 +69,25 @@ export function MenuUsuarioPublico() {
 
   if (!session) return null;
 
-  function elegir(tema: TemaPreferido) {
-    setSeleccionado(tema);
-    elegirTema(tema);
-  }
-
   return (
-    <div className="flex items-center gap-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="ghost" size="sm">{session.user.name}</Button>} />
-        <DropdownMenuContent align="end" aria-label={t('menuUsuario')}>
-          <DropdownMenuItem render={<Link href="/perfil">{t('perfil')}</Link>} />
-          <DropdownMenuSeparator />
-          <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">{t('tema')}</div>
-          {OPCIONES_TEMA.map(({ value, labelKey, Icono }) => (
-            <DropdownMenuItem key={value} data-active={seleccionado === value} onClick={() => elegir(value)}>
-              <Icono className="size-4" aria-hidden="true" />
-              {t(labelKey)}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <CerrarSesionBoton />
-    </div>
+    <MenuUsuario
+      trigger={
+        <Button variant="ghost" size="sm">
+          {session.user.name}
+        </Button>
+      }
+      ariaLabel={t('menuUsuario')}
+      perfil={<Link href="/perfil">{t('perfil')}</Link>}
+      labelColoresDeLaApp={t('tema')}
+      opcionesTema={OPCIONES_TEMA.map(({ value, labelKey, Icono }) => ({ value, label: t(labelKey), Icono }))}
+      temaSeleccionado={seleccionado}
+      onElegirTema={async (value) => {
+        setSeleccionado(value as TemaPreferido);
+        await elegirTema(value as TemaPreferido);
+      }}
+      labelCerrarSesion={t('cerrarSesion')}
+      onCerrarSesion={() => signOut({ callbackUrl: '/?sesion=cerrada' })}
+    />
   );
 }
 
@@ -102,16 +95,19 @@ export function MenuUsuarioPublico() {
 export function ItemsUsuarioCelular({ onNavigate }: { onNavigate?: () => void }) {
   const { data: session } = useSession();
   const t = useTranslations('nav');
-  const elegirTema = useSincronizarTemaPropio();
+  const elegirTemaBase = useSincronizarTemaPropio();
   const [seleccionado, setSeleccionado] = useState<TemaPreferido>(
     (session?.user.temaPreferido as TemaPreferido) ?? 'claro',
   );
+  // H-57: el selector de tema persiste contra la API — mismo guard que
+  // el resto de los envíos, para no disparar dos PATCH si se toca rápido.
+  const { enviando: eligiendoTema, ejecutar: elegirTema } = useEnvio(elegirTemaBase);
 
   if (!session) return null;
 
   function elegir(tema: TemaPreferido) {
     setSeleccionado(tema);
-    elegirTema(tema);
+    void elegirTema(tema);
   }
 
   return (
@@ -128,7 +124,11 @@ export function ItemsUsuarioCelular({ onNavigate }: { onNavigate?: () => void })
               type="button"
               variant={seleccionado === value ? 'default' : 'outline'}
               size="sm"
-              onClick={() => elegir(value)}
+              aria-disabled={eligiendoTema || undefined}
+              onClick={() => {
+                if (eligiendoTema) return;
+                elegir(value);
+              }}
             >
               <Icono className="size-4" aria-hidden="true" />
               {t(labelKey)}

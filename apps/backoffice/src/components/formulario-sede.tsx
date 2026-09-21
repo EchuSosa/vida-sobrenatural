@@ -196,8 +196,14 @@ export function FormularioSede({
         onChange={(e) => actualizar('descripcionBienvenida', e.target.value)}
         className="rounded-md border border-input bg-transparent px-3 py-2 text-sm dark:bg-input/30"
       />
-      <Button type="submit" disabled={enviando || !horariosValido} className="w-fit">
-        {enviando ? textoEnviando : textoBoton}
+      <Button
+        type="submit"
+        disabled={!horariosValido}
+        loading={enviando}
+        loadingText={textoEnviando}
+        className="w-fit"
+      >
+        {textoBoton}
       </Button>
     </form>
   );

@@ -12,7 +12,14 @@ import {
   erroresPorCampo,
   mensajeDeCampo,
 } from '@vida-sobrenatural/shared-types';
-import { Button, CampoTelefono, ResumenErrores, MensajeErrorCampo, type ErrorResumen } from '@vida-sobrenatural/ui';
+import {
+  Button,
+  CampoTelefono,
+  ResumenErrores,
+  MensajeErrorCampo,
+  useEnvio,
+  type ErrorResumen,
+} from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../hooks/use-opciones-registro';
 
 export interface PerfilEditable {
@@ -46,7 +53,6 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
   const [estadoCivil, setEstadoCivil] = useState<EstadoCivil>(perfil.estadoCivil);
   const [profesion, setProfesion] = useState<Profesion>(perfil.profesion);
   const [profesionDetalle, setProfesionDetalle] = useState(perfil.profesionDetalle ?? '');
-  const [guardando, setGuardando] = useState(false);
   const [mensajesPorCampo, setMensajesPorCampo] = useState<Record<string, string>>({});
   const [resumenErrores, setResumenErrores] = useState<ErrorResumen[]>([]);
 
@@ -58,9 +64,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
     profesionDetalle: t('campos.profesionDetalle'),
   };
 
-  async function guardar(e: React.FormEvent) {
-    e.preventDefault();
-    setGuardando(true);
+  const { enviando: guardando, ejecutar: guardar } = useEnvio(async () => {
     setMensajesPorCampo({});
     setResumenErrores([]);
     try {
@@ -92,13 +96,21 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
         const mensaje = error instanceof ApiError ? error.message : 'No pudimos guardar tus cambios.';
         toast.error(mensaje);
       }
-    } finally {
-      setGuardando(false);
     }
-  }
+  });
 
   return (
-    <form onSubmit={guardar} className="flex flex-col gap-4">
+    <form
+      onSubmit={(e) => {
+        // El preventDefault tiene que correr SIEMPRE, no solo cuando el
+        // guard de useEnvio deja pasar el envío — si no, un segundo/tercer
+        // submit bloqueado por el guard sigue su curso nativo (navegación
+        // GET con los campos como query string) en vez de quedar sin efecto.
+        e.preventDefault();
+        void guardar();
+      }}
+      className="flex flex-col gap-4"
+    >
       <ResumenErrores errores={resumenErrores} />
       <CampoTelefono
         id="campo-telefono"
@@ -177,8 +189,8 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           <MensajeErrorCampo id="campo-profesionDetalle-error" mensaje={mensajesPorCampo.profesionDetalle} />
         </label>
       )}
-      <Button type="submit" disabled={guardando} className="self-start">
-        {guardando ? 'Guardando…' : 'Guardar cambios'}
+      <Button type="submit" loading={guardando} loadingText="Guardando…" className="self-start">
+        Guardar cambios
       </Button>
     </form>
   );

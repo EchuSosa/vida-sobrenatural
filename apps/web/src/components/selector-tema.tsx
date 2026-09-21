@@ -5,7 +5,7 @@ import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import { Button } from '@vida-sobrenatural/ui';
+import { Button, useEnvio } from '@vida-sobrenatural/ui';
 import {
   type TemaPreferido,
   type TemaPreferidoVisible,
@@ -25,7 +25,8 @@ export function SelectorTema({ valorInicial }: { valorInicial: TemaPreferido }) 
   const { data: session, update } = useSession();
   const [seleccionado, setSeleccionado] = useState(valorInicial);
 
-  async function elegir(tema: TemaPreferido) {
+  // H-57: persiste contra la API — mismo guard que el resto de los envíos.
+  const { enviando, ejecutar: elegir } = useEnvio(async (tema: TemaPreferido) => {
     // Optimista: se aplica al instante en el cliente, se persiste en paralelo.
     setSeleccionado(tema);
     setTheme(TEMA_A_NEXT_THEMES[tema]);
@@ -46,7 +47,7 @@ export function SelectorTema({ valorInicial }: { valorInicial: TemaPreferido }) 
       const mensaje = error instanceof ApiError ? error.message : 'No pudimos guardar tu preferencia.';
       toast.error(mensaje);
     }
-  }
+  });
 
   return (
     <fieldset className="flex flex-col gap-2">
@@ -58,7 +59,8 @@ export function SelectorTema({ valorInicial }: { valorInicial: TemaPreferido }) 
             type="button"
             variant={seleccionado === value ? 'default' : 'outline'}
             size="sm"
-            onClick={() => elegir(value)}
+            disabled={enviando}
+            onClick={() => void elegir(value)}
           >
             <Icono className="size-4" aria-hidden="true" />
             {label}
