@@ -33,7 +33,7 @@ export function GuardaRegistroReciente({ children }: { children: ReactNode }) {
       // No hay forma de leer sessionStorage sin arriesgar un mismatch de
       // hidratación (SSR no tiene `window`) — se corrige acá a propósito,
       // mismo patrón justificado que apps/web/src/components/offline-banner.tsx.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sessionStorage no se puede leer sin este efecto (SSR no tiene `window`).
       setEstado('ok');
     } else {
       router.replace('/');

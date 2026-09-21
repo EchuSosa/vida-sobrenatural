@@ -20,7 +20,7 @@ export function useEnLinea(): boolean {
     // No hay forma de conocer el valor real de navigator.onLine sin
     // arriesgar un mismatch de hidratación (SSR no tiene `navigator`) — se
     // corrige acá a propósito, no es el caso que la regla busca evitar.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- navigator.onLine no se puede leer sin este efecto (SSR no tiene `navigator`).
     setEnLinea(navigator.onLine);
     const marcarOnline = () => setEnLinea(true);
     const marcarOffline = () => setEnLinea(false);

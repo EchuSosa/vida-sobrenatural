@@ -26,7 +26,7 @@ export function EstadoActivoBadge({
     <span
       className={cn(
         'inline-flex items-center gap-1 text-sm font-medium',
-        activo ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground',
+        activo ? 'text-success' : 'text-muted-foreground',
         className,
       )}
     >

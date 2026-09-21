@@ -11,6 +11,7 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     mql.addEventListener("change", onChange)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- window.innerWidth no se puede leer sin este efecto (SSR no tiene `window`).
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     return () => mql.removeEventListener("change", onChange)
   }, [])

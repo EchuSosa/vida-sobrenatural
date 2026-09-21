@@ -29,7 +29,7 @@ export function ResumenErrores({
     if (errores.length > 0) {
       ref.current?.focus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- se enfoca por `clave` (el contenido de los errores), no por la identidad de `errores`, que cambia en cada render aunque el error sea el mismo.
   }, [clave]);
 
   if (errores.length === 0) return null;
@@ -39,7 +39,7 @@ export function ResumenErrores({
       ref={ref}
       tabIndex={-1}
       role="alert"
-      className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-800 outline-none dark:border-red-800 dark:bg-red-950 dark:text-red-300"
+      className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive outline-none"
     >
       <p className="font-medium">{titulo}</p>
       <ul className="mt-2 list-disc space-y-1 pl-5">

@@ -32,7 +32,7 @@ export function SincronizarTema() {
     }
     // Solo al cambiar la sesión — no repetir en cada cambio de `theme` (que
     // el propio usuario puede elegir manualmente después).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar la sesión, no en cada cambio de `theme` elegido a mano después.
   }, [session?.user.temaPreferido]);
 
   return null;

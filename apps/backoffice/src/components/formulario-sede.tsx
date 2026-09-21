@@ -114,7 +114,7 @@ export function FormularioSede({
       className="flex flex-col gap-3"
     >
       {error && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </p>
       )}
