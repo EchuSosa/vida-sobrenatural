@@ -99,7 +99,9 @@ Los estados siempre llevan texto + ícono (nunca solo color, D81).
 
 ## Backoffice
 
-- Tablas con búsqueda, filtros y orden; paginación (ver performance en `13`).
+- Tablas con búsqueda, filtros y orden; paginación (ver performance en `13`). Aplica donde el volumen lo justifica —Personas, Solicitudes, Eventos—, no en catálogos de dos o tres filas (Principio IV). Cuando llegue la primera, se construye **una sola tabla compartida** en `packages/ui` y la usan todas (Principio XI), en vez de repetir el patrón por pantalla.
+- **Lo dado de baja se ve y se puede reactivar (D117):** los listados incluyen los registros inactivos, con su estado en texto + ícono y un filtro activas / todas; su detalle se puede abrir y existe la acción "Reactivar". Un borrado lógico que desaparece de la pantalla es, para quien lo usa, un borrado.
+- **Alta en modal:** crear un registro abre un diálogo; al cerrarse, el nuevo registro aparece en el listado. Las filas del listado llevan al detalle, y la edición vive ahí.
 - Acciones en lote donde tenga sentido (ej. aprobar varias inscripciones a un Evento).
 - Filtros y búsqueda reflejados en la URL, para poder volver o compartir la vista.
 - Indicar claramente cuando el Admin está actuando **en nombre de otra Persona** (D97), con el nombre visible durante toda la acción.
@@ -127,7 +129,8 @@ Definidos en `packages/ui` como variables CSS (formato de shadcn), para modo cla
 ## Modo oscuro (D95)
 
 - Entra en el MVP: con shadcn + variables CSS el costo es bajo si se contempla desde el inicio.
-- **Por defecto, tema claro** en las dos apps (D106) — no se sigue `prefers-color-scheme`. La persona puede elegir Claro / Oscuro / Sistema desde Perfil (en el backoffice, desde el menú de usuario), y esa preferencia se guarda.
+- **Por defecto, tema claro** en las dos apps (D106) — no se sigue `prefers-color-scheme`. La persona puede elegir entre **Claro y Oscuro** desde Perfil (en el backoffice y en el header público, desde el menú de usuario), y esa preferencia se guarda.
+- **Dos opciones, no tres (D116):** "Sistema" se saca de la interfaz — nadie entendió qué era, y desde D106 ya no es el default de nadie. Cada opción lleva ícono **y** texto (nunca el ícono solo, D81), bajo un rótulo sin jerga: "Colores de la app".
 - Cada token de color se define para ambos modos y se verifica su contraste en los dos.
 - Logo: usar la versión blanca sobre fondos oscuros y la negra sobre fondos claros (la iglesia ya tiene ambas, ver `09`).
 - Flyers, fotos e imágenes de contenido no se alteran; se evita que queden "flotando" con bordes o fondos neutros. Los placeholders de "foto pendiente" también se definen para ambos modos.

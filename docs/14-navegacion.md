@@ -10,20 +10,19 @@ La web anterior (vidasobrenatural.com) tenía un único menú informativo: **Igl
 
 | Ítem | Contenido | Origen en la web vieja |
 |---|---|---|
-| **Nosotros** | Quiénes somos ("Somos Familia") · Identidad (cristianos, evangélicos, bautistas) · Historia · Visión y Misión · Valores · Sistema de trabajo (Bienvenida → Discipulado → Red) · Nuestro llamado (Isaías 61) · En qué creemos · Liderazgo (D109) | Iglesia + Liderazgo |
-| **Primeros pasos** | Cómo integrarse (Vida Nueva, Vida de Servicio, Ministerios), bautismo, preguntas frecuentes | Nuevo — es el corazón del Problem Statement |
-| **Ministerios** | Listado público de Ministerios | Nuevo |
-| **Palabra Profética** | Palabra del año: texto + video de YouTube, editable por el Admin (D109) | Palabra Profética |
-| **Ediciones VS** | Libros publicados por la iglesia: portada, título y autor/a (D109) | Nuevo (del sitio actual) |
+| **Nosotros** | Página de sección: Quiénes somos ("Somos Familia") · Identidad (cristianos, evangélicos, bautistas) · Historia · Visión y Misión · Valores · Sistema de trabajo (Bienvenida → Discipulado → Red) · Nuestro llamado (Isaías 61) · En qué creemos · Liderazgo · **Palabra Profética** · **Ediciones VS** (D109, D115) | Iglesia + Liderazgo + Palabra Profética |
+| **Primeros pasos** | Página de sección: cómo integrarse (Vida Nueva, Vida de Servicio y **Ministerios**, que es la última etapa), bautismo, preguntas frecuentes (D115) | Nuevo — es el corazón del Problem Statement |
 | **Eventos** | Cartelera + página pública de cada Evento (D82) | Eventos |
-| **Visitanos** | Dirección (Calle 23 N°1665 e/ 66 y 67, La Plata), horarios de culto (presencial y online), mapa, WhatsApp de Secretaría, contacto ("Queremos conocerte") | Visitanos + Contacto |
+| **Visitanos** | Dirección (Calle 23 N°1665 e/ 66 y 67, La Plata), horarios de culto, mapa, WhatsApp de Secretaría, contacto ("Queremos conocerte") | Visitanos + Contacto |
 
 El contenido de cada sección sale de `12-contenido-bienvenida.md` cuando existe.
+
+**Cuatro ítems fijos y ningún submenú desplegable (D115).** Nosotros y Primeros pasos son páginas de sección que enlazan a sus subpáginas; cada subsección mantiene su URL propia (D82). Los desplegables quedan descartados: no funcionan con el dedo y desorientan a quien no está acostumbrado a navegar.
 
 **Acciones destacadas** (botones, a la derecha del menú):
 - **Dar** → Ofrendas (versión estática, D67). Se usa "Dar", el mismo nombre que ya usa la iglesia en su link-in-bio.
 - **Ingresar** → login SSO. Con sesión activa se reemplaza por **"Ir a la app"** (D91, H-19).
-- **Con sesión activa**, además, un **menú de usuario** con Perfil, tema Claro/Oscuro/Sistema y cerrar sesión — igual que el del backoffice (H-38). En celular, esos ítems van dentro del panel del menú hamburguesa. Sin este menú, para cerrar sesión hay que entrar a la app primero.
+- **Con sesión activa**, además, un **menú de usuario** con Perfil, colores de la app (Claro / Oscuro, D116) y cerrar sesión — igual que el del backoffice (H-38). En celular, esos ítems van dentro del panel del menú hamburguesa. Sin este menú, para cerrar sesión hay que entrar a la app primero.
 
 **Qué no va en el menú:**
 - **Palabra Profética:** además de su sección propia (D109), se destaca como banner en el Inicio, porque es lo que la iglesia comunica todo el año.
@@ -43,7 +42,7 @@ Barra de pestañas inferior (patrón de app nativa, usable con una mano):
 | **Mi camino** | Discipulado (Vida Nueva), Vida de Servicio, Ministerio, Bautismo — cada Persona ve solo lo que aplica a su etapa y roles |
 | **Eventos** | Cartelera + mis inscripciones y pagos (URL `/mis-eventos`: Next.js no permite que la pantalla de la app y la página pública resuelvan `/eventos`; mismo patrón que `/mi-camino`) |
 | **Avisos** | Historial de notificaciones con leídas/no leídas (cada una lleva a su entidad relacionada, D59, D100) |
-| **Perfil** | Mis datos (con foto de Google si existe, D87), Relaciones Familiares, tema Claro/Oscuro/Sistema (D95), "Contanos qué te parece", cerrar sesión (y selector de idioma cuando exista, D84) |
+| **Perfil** | Mis datos (con foto de Google si existe, D87), Relaciones Familiares, colores de la app — Claro / Oscuro (D116), "Contanos qué te parece", cerrar sesión (y selector de idioma cuando exista, D84) |
 
 - Las páginas públicas (Nosotros, Primeros pasos, Ministerios, Visitanos, Dar) siguen accesibles desde un **menú secundario** (H-37):
   - **Celular:** la app tiene una barra superior delgada con el logo (lleva a Inicio) y un botón "Más" que abre el mismo panel lateral del menú público, con las cinco secciones y "Dar".
