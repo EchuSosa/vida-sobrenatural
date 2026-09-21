@@ -23,7 +23,8 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
       const service = await crearServicio(prismaMock);
 
       const resultado = await service.activar('p1', {
-        tutorNombre: 'María Pérez',
+        tutorNombre: 'María',
+        tutorApellido: 'Pérez',
         tutorTelefono: '+5492211111111',
       });
 
@@ -33,7 +34,8 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
           where: { id: 'p1' },
           data: expect.objectContaining({
             estado: 'activa',
-            tutorNombre: 'María Pérez',
+            tutorNombre: 'María',
+            tutorApellido: 'Pérez',
             tutorTelefono: '+5492211111111',
             consentimientoDatos: true,
             rol: ['miembro_registrado'],
@@ -52,7 +54,7 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
       const service = await crearServicio(prismaMock);
 
       const error = await service
-        .activar('p1', { tutorNombre: 'X', tutorTelefono: 'Y' })
+        .activar('p1', { tutorNombre: 'X', tutorApellido: 'Y', tutorTelefono: 'Z' })
         .catch((e: unknown) => e);
       expect(error).toBeInstanceOf(AppException);
       expect((error as AppException).code).toBe('PERSONA_NO_PENDIENTE_TUTOR');
@@ -60,7 +62,7 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
     });
 
     // H-29 (revisión manual, D108/D112).
-    it('rechaza activar sin tutorPersonaId ni tutorNombre/tutorTelefono', async () => {
+    it('rechaza activar sin tutorPersonaId ni tutorNombre/tutorApellido/tutorTelefono', async () => {
       const prismaMock = {
         persona: { findUnique: jest.fn().mockResolvedValue({ id: 'p1', estado: 'pendiente_tutor', activo: true }) },
       };
@@ -71,14 +73,29 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
       expect((error as AppException).code).toBe('ACTIVAR_TUTOR_INVALIDO');
     });
 
-    it('rechaza activar con tutorPersonaId Y tutorNombre/tutorTelefono a la vez', async () => {
+    // H-71 (revisión manual ronda 7): antes de separar tutorApellido, con
+    // nombre+teléfono ya alcanzaba — ahora hacen falta los tres.
+    it('rechaza activar con tutorNombre y tutorTelefono pero sin tutorApellido', async () => {
       const prismaMock = {
         persona: { findUnique: jest.fn().mockResolvedValue({ id: 'p1', estado: 'pendiente_tutor', activo: true }) },
       };
       const service = await crearServicio(prismaMock);
 
       const error = await service
-        .activar('p1', { tutorPersonaId: 'p2', tutorNombre: 'X', tutorTelefono: 'Y' })
+        .activar('p1', { tutorNombre: 'X', tutorTelefono: 'Z' })
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(AppException);
+      expect((error as AppException).code).toBe('ACTIVAR_TUTOR_INVALIDO');
+    });
+
+    it('rechaza activar con tutorPersonaId Y tutorNombre/tutorApellido/tutorTelefono a la vez', async () => {
+      const prismaMock = {
+        persona: { findUnique: jest.fn().mockResolvedValue({ id: 'p1', estado: 'pendiente_tutor', activo: true }) },
+      };
+      const service = await crearServicio(prismaMock);
+
+      const error = await service
+        .activar('p1', { tutorPersonaId: 'p2', tutorNombre: 'X', tutorApellido: 'Y', tutorTelefono: 'Z' })
         .catch((e: unknown) => e);
       expect(error).toBeInstanceOf(AppException);
       expect((error as AppException).code).toBe('ACTIVAR_TUTOR_INVALIDO');
@@ -138,7 +155,7 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
       expect((error as AppException).code).toBe('RELACION_FAMILIAR_INVALIDA');
     });
 
-    it('vincula un tutorPersonaId: crea la Relación Familiar y vacía tutorNombre/tutorTelefono', async () => {
+    it('vincula un tutorPersonaId: crea la Relación Familiar y vacía tutorNombre/tutorApellido/tutorTelefono', async () => {
       const crearRelacion = jest.fn().mockResolvedValue({ id: 'r1' });
       const updatePersona = jest.fn().mockResolvedValue({ id: 'p1', estado: 'activa' });
       const prismaMock = {
@@ -165,7 +182,7 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
       });
       expect(updatePersona).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ tutorNombre: null, tutorTelefono: null, estado: 'activa' }),
+          data: expect.objectContaining({ tutorNombre: null, tutorApellido: null, tutorTelefono: null, estado: 'activa' }),
         }),
       );
     });

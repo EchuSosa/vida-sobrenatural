@@ -248,20 +248,24 @@ export class PersonaService {
   /**
    * PATCH /personas/:id/activar — FR-008 (Flujo 7 camino A) + FR-023 (H-29,
    * D108/D112): exactamente uno de `tutorPersonaId` (vincula una Relación
-   * Familiar tipo `tutor`, y vacía tutorNombre/tutorTelefono — el vínculo es
-   * la única fuente de verdad, D112) o tutorNombre+tutorTelefono (texto
-   * libre, cuando el tutor no se congrega).
+   * Familiar tipo `tutor`, y vacía tutorNombre/tutorApellido/tutorTelefono —
+   * el vínculo es la única fuente de verdad, D112) o
+   * tutorNombre+tutorApellido+tutorTelefono (texto libre, cuando el tutor no
+   * se congrega).
    */
   async activar(id: string, dto: ActivarPersonaDto) {
     const persona = await this.buscarPendienteTutorActivoOFallar(id);
 
     const tieneVinculo = !!dto.tutorPersonaId;
-    const tieneTexto = !!dto.tutorNombre || !!dto.tutorTelefono;
-    if (tieneVinculo === tieneTexto || (tieneTexto && !(dto.tutorNombre && dto.tutorTelefono))) {
+    const tieneTexto = !!dto.tutorNombre || !!dto.tutorApellido || !!dto.tutorTelefono;
+    if (
+      tieneVinculo === tieneTexto ||
+      (tieneTexto && !(dto.tutorNombre && dto.tutorApellido && dto.tutorTelefono))
+    ) {
       throw new AppException(
         'ACTIVAR_TUTOR_INVALIDO',
         400,
-        'Elegí una Persona para vincular como tutor, o completá tutorNombre y tutorTelefono — no ambos ni ninguno.',
+        'Elegí una Persona para vincular como tutor, o completá tutorNombre, tutorApellido y tutorTelefono — no ambos ni ninguno.',
       );
     }
 
@@ -281,7 +285,12 @@ export class PersonaService {
     if (!dto.tutorPersonaId) {
       return this.prisma.persona.update({
         where: { id: persona.id },
-        data: { ...datosBase, tutorNombre: dto.tutorNombre, tutorTelefono: dto.tutorTelefono },
+        data: {
+          ...datosBase,
+          tutorNombre: dto.tutorNombre,
+          tutorApellido: dto.tutorApellido,
+          tutorTelefono: dto.tutorTelefono,
+        },
         select: { id: true, estado: true },
       });
     }
@@ -298,7 +307,7 @@ export class PersonaService {
       }),
       this.prisma.persona.update({
         where: { id: persona.id },
-        data: { ...datosBase, tutorNombre: null, tutorTelefono: null },
+        data: { ...datosBase, tutorNombre: null, tutorApellido: null, tutorTelefono: null },
         select: { id: true, estado: true },
       }),
     ]);

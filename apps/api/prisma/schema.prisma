@@ -171,9 +171,12 @@ model Persona {
 
   // Solo se completan al activar un pendiente_tutor (Flujo 7, FR-008) y
   // cuando el tutor NO está vinculado como Relación Familiar (D112) — si
-  // está vinculado, estos dos campos quedan en null: el vínculo es la única
-  // fuente de verdad.
+  // está vinculado, estos tres campos quedan en null: el vínculo es la
+  // única fuente de verdad. tutorApellido (H-71, revisión manual ronda 7):
+  // separado de tutorNombre igual que Persona separa nombre/apellido — un
+  // solo campo de texto libre no distinguía dónde terminaba el nombre.
   tutorNombre   String?
+  tutorApellido String?
   tutorTelefono String?
 
   // Roles acumulativos (docs/03-roles-permisos.md). Vacío hasta que la

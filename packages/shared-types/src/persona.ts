@@ -158,12 +158,12 @@ export interface PersonaPendienteTutor {
 /**
  * Body de PATCH /personas/:id/activar. Exactamente uno de los dos caminos —
  * `tutorPersonaId` (vincula una Relación Familiar) o `tutorNombre`+
- * `tutorTelefono` (texto libre) — nunca ambos, nunca ninguno (H-29,
- * D108/D112).
+ * `tutorApellido`+`tutorTelefono` (texto libre) — nunca ambos, nunca
+ * ninguno (H-29, D108/D112; tutorApellido: H-71, revisión manual ronda 7).
  */
 export type ActivarPersonaInput =
-  | { tutorPersonaId: string; tutorNombre?: never; tutorTelefono?: never }
-  | { tutorPersonaId?: never; tutorNombre: string; tutorTelefono: string };
+  | { tutorPersonaId: string; tutorNombre?: never; tutorApellido?: never; tutorTelefono?: never }
+  | { tutorPersonaId?: never; tutorNombre: string; tutorApellido: string; tutorTelefono: string };
 
 /** Elemento de GET /personas/buscar?q= — H-29 (D108), elegir a quién vincular. */
 export interface BusquedaPersona {

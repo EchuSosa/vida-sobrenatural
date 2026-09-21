@@ -87,7 +87,7 @@ describe('PersonaService — consentimiento (fecha/origen) y origenAlta (FR-013,
     }).compile();
     const service = moduleRef.get(PersonaService);
 
-    const dto: ActivarPersonaDto = { tutorNombre: 'Juan Pérez', tutorTelefono: '+54 9 221 000-0000' };
+    const dto: ActivarPersonaDto = { tutorNombre: 'Juan', tutorApellido: 'Pérez', tutorTelefono: '+54 9 221 000-0000' };
     await service.activar('p3', dto);
 
     const dataActualizada = actualizar.mock.calls[0][0].data;

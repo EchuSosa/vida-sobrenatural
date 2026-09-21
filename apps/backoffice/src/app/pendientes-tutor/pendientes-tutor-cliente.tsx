@@ -8,6 +8,7 @@ import {
   type BusquedaPersona,
   type ErrorCode,
   type Pagina,
+  TELEFONO_REGEX,
   apiFetch,
   ApiError,
   erroresPorCampo,
@@ -16,9 +17,11 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
+  CampoTelefono,
   ConfirmDestructiveDialog,
   Input,
   MensajeErrorCampo,
+  ResumenErrores,
   Sheet,
   SheetContent,
   SheetHeader,
@@ -28,6 +31,8 @@ import {
   TablaDatos,
   type ColumnaTabla,
   useEnvio,
+  useValidacionCampos,
+  type ValidacionCampo,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 
@@ -197,9 +202,32 @@ function ActivarDialog({
   const [resultados, setResultados] = useState<BusquedaPersona[]>([]);
   const [tutorElegido, setTutorElegido] = useState<BusquedaPersona | null>(null);
   const [tutorNombre, setTutorNombre] = useState('');
-  const [tutorTelefono, setTutorTelefono] = useState('');
+  // H-71 (revisión manual ronda 7): nombre y apellido separados, igual que
+  // en el resto de la app (Persona ya los separa) — antes era un solo
+  // campo de texto libre.
+  const [tutorApellido, setTutorApellido] = useState('');
+  const [tutorCodigoPais, setTutorCodigoPais] = useState('+54');
+  const [tutorNumero, setTutorNumero] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [mensajesCampo, setMensajesCampo] = useState<Record<string, string>>({});
+  // H-72 (revisión manual ronda 7): un error se limpia al escribir y se
+  // revalida al salir del campo. Pieza compartida (H-50), usada igual en
+  // los seis formularios.
+  const validacion = useValidacionCampos();
+
+  const ETIQUETAS_TUTOR: Record<string, string> = {
+    tutorNombre: 'Nombre del tutor',
+    tutorApellido: 'Apellido del tutor',
+    tutorTelefono: 'Teléfono del tutor',
+  };
+  const requerido: ValidacionCampo<string> = { esValido: (v) => v.trim() !== '', mensaje: 'Revisá este dato.' };
+  const validaciones = {
+    tutorNombre: requerido,
+    tutorApellido: requerido,
+    tutorTelefono: {
+      esValido: (v: { codigoPais: string; numero: string }) => TELEFONO_REGEX.test(`${v.codigoPais} ${v.numero}`),
+      mensaje: mensajeDeCampo('TUTORTELEFONO_INVALIDO', ETIQUETAS_TUTOR.tutorTelefono),
+    } satisfies ValidacionCampo<{ codigoPais: string; numero: string }>,
+  };
 
   // El estado interno se resetea remontando este componente (key={persona?.id}
   // en el padre) en vez de un efecto que lo limpie al cerrar — evita
@@ -226,9 +254,11 @@ function ActivarDialog({
   const { enviando, ejecutar: activar } = useEnvio(async () => {
     if (!persona) return;
     setError(null);
-    setMensajesCampo({});
+    validacion.reset();
     try {
-      const body = tutorElegido ? { tutorPersonaId: tutorElegido.id } : { tutorNombre, tutorTelefono };
+      const body = tutorElegido
+        ? { tutorPersonaId: tutorElegido.id }
+        : { tutorNombre, tutorApellido, tutorTelefono: `${tutorCodigoPais} ${tutorNumero}` };
       await apiFetch(`/personas/${persona.id}/activar`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
@@ -242,20 +272,17 @@ function ActivarDialog({
       // del campo en vez de solo un mensaje genérico.
       const campos = erroresPorCampo(e);
       if (campos) {
-        setMensajesCampo(
-          Object.fromEntries(
-            campos.map(({ campo, code }) => [
-              campo,
-              mensajeDeCampo(code, campo === 'tutorNombre' ? 'Nombre del tutor' : 'Teléfono del tutor'),
-            ]),
-          ),
+        validacion.reemplazar(
+          Object.fromEntries(campos.map(({ campo, code }) => [campo, mensajeDeCampo(code, ETIQUETAS_TUTOR[campo] ?? campo)])),
         );
       }
       setError(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos activar a esta Persona.');
     }
   });
 
-  const puedeEnviar = tutorElegido !== null || (tutorNombre.trim() !== '' && tutorTelefono.trim() !== '');
+  const puedeEnviar =
+    tutorElegido !== null ||
+    (tutorNombre.trim() !== '' && tutorApellido.trim() !== '' && tutorNumero.trim() !== '');
 
   return (
     <Sheet open={!!persona} onOpenChange={(abierto) => !abierto && onCerrar()}>
@@ -273,6 +300,7 @@ function ActivarDialog({
               {error}
             </p>
           )}
+          <ResumenErrores errores={validacion.resumen} foco={validacion.foco} />
 
           {tutorElegido ? (
             <div className="flex items-center justify-between rounded-lg border border-border p-3">
@@ -329,31 +357,63 @@ function ActivarDialog({
               <Separador texto="o" />
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium" htmlFor="tutor-nombre">
+                <label className="text-sm font-medium" htmlFor="campo-tutorNombre">
                   Nombre del tutor
                 </label>
                 <Input
-                  id="tutor-nombre"
+                  id="campo-tutorNombre"
                   value={tutorNombre}
-                  onChange={(e) => setTutorNombre(e.target.value)}
-                  aria-invalid={Boolean(mensajesCampo.tutorNombre)}
-                  aria-describedby={mensajesCampo.tutorNombre ? 'tutor-nombre-error' : undefined}
+                  onChange={(e) => {
+                    setTutorNombre(e.target.value);
+                    validacion.limpiar('tutorNombre');
+                  }}
+                  onBlur={() => validacion.revalidar('tutorNombre', tutorNombre, validaciones.tutorNombre)}
+                  aria-invalid={Boolean(validacion.mensajes.tutorNombre)}
+                  aria-describedby={validacion.mensajes.tutorNombre ? 'campo-tutorNombre-error' : undefined}
                 />
-                <MensajeErrorCampo id="tutor-nombre-error" mensaje={mensajesCampo.tutorNombre} />
+                <MensajeErrorCampo id="campo-tutorNombre-error" mensaje={validacion.mensajes.tutorNombre} />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium" htmlFor="tutor-telefono">
-                  Teléfono del tutor
+                <label className="text-sm font-medium" htmlFor="campo-tutorApellido">
+                  Apellido del tutor
                 </label>
                 <Input
-                  id="tutor-telefono"
-                  value={tutorTelefono}
-                  onChange={(e) => setTutorTelefono(e.target.value)}
-                  aria-invalid={Boolean(mensajesCampo.tutorTelefono)}
-                  aria-describedby={mensajesCampo.tutorTelefono ? 'tutor-telefono-error' : undefined}
+                  id="campo-tutorApellido"
+                  value={tutorApellido}
+                  onChange={(e) => {
+                    setTutorApellido(e.target.value);
+                    validacion.limpiar('tutorApellido');
+                  }}
+                  onBlur={() => validacion.revalidar('tutorApellido', tutorApellido, validaciones.tutorApellido)}
+                  aria-invalid={Boolean(validacion.mensajes.tutorApellido)}
+                  aria-describedby={validacion.mensajes.tutorApellido ? 'campo-tutorApellido-error' : undefined}
                 />
-                <MensajeErrorCampo id="tutor-telefono-error" mensaje={mensajesCampo.tutorTelefono} />
+                <MensajeErrorCampo id="campo-tutorApellido-error" mensaje={validacion.mensajes.tutorApellido} />
               </div>
+              <CampoTelefono
+                id="campo-tutorTelefono"
+                labelTelefono="Teléfono del tutor"
+                labelCodigo="Código de país"
+                codigoPais={tutorCodigoPais}
+                numero={tutorNumero}
+                onChangeCodigo={(v) => {
+                  setTutorCodigoPais(v);
+                  validacion.limpiar('tutorTelefono');
+                }}
+                onChangeNumero={(v) => {
+                  setTutorNumero(v);
+                  validacion.limpiar('tutorTelefono');
+                }}
+                onBlurNumero={() =>
+                  validacion.revalidar(
+                    'tutorTelefono',
+                    { codigoPais: tutorCodigoPais, numero: tutorNumero },
+                    validaciones.tutorTelefono,
+                  )
+                }
+                error={Boolean(validacion.mensajes.tutorTelefono)}
+                errorTexto={validacion.mensajes.tutorTelefono}
+              />
             </>
           )}
         </div>

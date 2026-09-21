@@ -31,6 +31,7 @@ async function bootstrap() {
           'req.body.fechaNacimiento',
           'req.body.tutorTelefono',
           'req.body.tutorNombre',
+          'req.body.tutorApellido',
           'req.body.apellido',
           'req.body.nombre',
         ],
