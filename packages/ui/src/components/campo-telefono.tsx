@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
 /**
  * Input de teléfono estructurado (código de país + número) — D90. Extraído
  * de apps/web/src/app/(publica)/registro/page.tsx (H-30, revisión manual,
@@ -5,6 +9,29 @@
  * (apps/backoffice) y en el self-edit de Perfil (apps/web, H-28) sin
  * duplicar el mismo componente en las dos apps.
  */
+
+/**
+ * H-62 (revisión manual ronda 5): en celular el selector muestra solo el
+ * código (`+54`); el nombre del país recién aparece desde `sm` (640px). Un
+ * <select> nativo no puede cambiar el texto de sus <option> por media query
+ * en CSS puro — el texto visible es el de la <option> elegida — así que el
+ * breakpoint se resuelve en JS. Arranca en `false` (solo código):
+ * mobile-first, sin parpadeo en el caso más común.
+ */
+function usePantallaDesdeSm() {
+  const [enSm, setEnSm] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 640px)');
+    const leer = () => setEnSm(mql.matches);
+    leer();
+    mql.addEventListener('change', leer);
+    return () => mql.removeEventListener('change', leer);
+  }, []);
+
+  return enSm;
+}
+
 export const OPCIONES_CODIGO_PAIS = [
   { value: '+54', label: '+54 Argentina' },
   { value: '+598', label: '+598 Uruguay' },
@@ -47,6 +74,7 @@ export function CampoTelefono({
   requerido?: boolean;
 }) {
   const idError = id ? `${id}-error` : undefined;
+  const mostrarNombrePais = usePantallaDesdeSm();
   return (
     <div className="flex flex-col gap-1 text-sm font-medium">
       {labelTelefono}
@@ -57,11 +85,11 @@ export function CampoTelefono({
           value={codigoPais}
           onChange={(e) => onChangeCodigo(e.target.value)}
           aria-label={labelCodigo}
-          className="h-10 w-40 shrink-0 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30"
+          className="h-10 w-24 shrink-0 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30 sm:w-40"
         >
           {OPCIONES_CODIGO_PAIS.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {mostrarNombrePais ? o.label : o.value}
             </option>
           ))}
         </select>
@@ -77,7 +105,7 @@ export function CampoTelefono({
           value={numero}
           placeholder={placeholderNumero}
           onChange={(e) => onChangeNumero(e.target.value.replace(/[^0-9]/g, ''))}
-          className="h-10 flex-1 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
+          className="h-10 min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         />
       </div>
       {error && errorTexto && (
