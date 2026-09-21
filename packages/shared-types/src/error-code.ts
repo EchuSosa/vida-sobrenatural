@@ -25,6 +25,10 @@ export type ErrorCode =
   // campo que ya deriva automáticamente validation-exception-factory.ts
   // ('HORARIOS_INVALIDO'), igual que cualquier otro campo de un DTO.
   | 'SEDE_UNICA_ACTIVA'
+  // D119 (revisión manual ronda 6): eliminar (no inactivar) un registro de
+  // catálogo con datos relacionados — Sede con Personas, primero de la
+  // familia (Curso/Ministerio/Célula/Libro la suman cuando existan).
+  | 'SEDE_TIENE_DATOS_RELACIONADOS'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */

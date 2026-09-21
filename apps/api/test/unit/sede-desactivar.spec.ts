@@ -30,7 +30,7 @@ describe('SedeService — regla de "al menos una Sede activa"', () => {
   });
 
   it('permite desactivar una Sede si hay otra activa', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 's1', activo: false });
+    const update = jest.fn().mockResolvedValue({ id: 's1', activo: false, _count: { personas: 0 } });
     const prismaMock = {
       sede: {
         findUnique: jest.fn().mockResolvedValue({ id: 's1', activo: true, contactoTelefono: '+5492211110000', contactoEmail: null }),
@@ -41,12 +41,12 @@ describe('SedeService — regla de "al menos una Sede activa"', () => {
     const service = await crearServicio(prismaMock);
 
     const resultado = await service.update('s1', { activo: false });
-    expect(resultado).toEqual({ id: 's1', activo: false });
+    expect(resultado).toEqual({ id: 's1', activo: false, personasAsociadas: 0 });
     expect(update).toHaveBeenCalled();
   });
 
   it('permite desactivar una Sede que ya estaba inactiva (no vuelve a contar)', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 's1', activo: false });
+    const update = jest.fn().mockResolvedValue({ id: 's1', activo: false, _count: { personas: 0 } });
     const prismaMock = {
       sede: {
         findUnique: jest.fn().mockResolvedValue({ id: 's1', activo: false, contactoTelefono: '+5492211110000', contactoEmail: null }),
@@ -95,7 +95,7 @@ describe('SedeService — nombre duplicado al reactivar', () => {
   });
 
   it('permite reactivar si no hay otra Sede activa con ese nombre', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 's1', activo: true });
+    const update = jest.fn().mockResolvedValue({ id: 's1', activo: true, _count: { personas: 0 } });
     const prismaMock = {
       sede: {
         findUnique: jest.fn().mockResolvedValue({
@@ -112,14 +112,14 @@ describe('SedeService — nombre duplicado al reactivar', () => {
     const service = await crearServicio(prismaMock);
 
     const resultado = await service.update('s1', { activo: true });
-    expect(resultado).toEqual({ id: 's1', activo: true });
+    expect(resultado).toEqual({ id: 's1', activo: true, personasAsociadas: 0 });
     expect(update).toHaveBeenCalled();
   });
 
   it('desactivar→reactivar sin tocar el nombre no dispara el chequeo si no cambia activo', async () => {
     // Guarda contra una regresión obvia: un PATCH que no toca `activo` ni
     // `nombre` (ej. solo contactoTelefono) no debe llamar a findFirst.
-    const update = jest.fn().mockResolvedValue({ id: 's1' });
+    const update = jest.fn().mockResolvedValue({ id: 's1', _count: { personas: 0 } });
     const prismaMock = {
       sede: {
         findUnique: jest.fn().mockResolvedValue({

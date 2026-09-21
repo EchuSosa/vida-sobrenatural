@@ -1,14 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page, type Locator } from '@playwright/test';
 import { loguearseComoAdminE2E, asegurarUnaSolaSedeActiva, reactivarSedes, crearAxeBuilder } from './helpers';
 
 /**
  * H-30 (revisión manual ronda 2) / H-34 (ronda 3) / H-51+H-52+H-50 (ronda 4,
- * D117): listado con filtro activas/todas, alta en modal, detalle con
- * edición, Desactivar/Reactivar desde el detalle, errores de validación por
- * campo en el alta. Corre en modo claro y oscuro (Constitución Principio VII).
+ * D117) / H-69+D119 (ronda 6): tabla compartida (packages/ui) con filtro
+ * activas/todas, alta en modal, columna de acciones (Ver detalle,
+ * Inactivar/Reactivar, Eliminar), papelera con Restaurar. Corre en modo
+ * claro y oscuro (Constitución Principio VII).
  */
 
-async function crearSedePorModal(page: import('@playwright/test').Page, nombre: string) {
+async function crearSedePorModal(page: Page, nombre: string) {
   await page.getByRole('button', { name: 'Crear Sede' }).click();
   const modal = page.getByRole('dialog', { name: 'Crear Sede' });
   await expect(modal).toBeVisible();
@@ -20,6 +21,21 @@ async function crearSedePorModal(page: import('@playwright/test').Page, nombre: 
   await modal.getByRole('button', { name: 'Crear Sede' }).click();
   await expect(page.getByText('Sede creada.')).toBeVisible();
   await expect(modal).toBeHidden();
+}
+
+/** H-69: la fila de la tabla (no un <a>) — "Ver detalle" vive en su menú de acciones (D119). */
+function filaSede(page: Page, nombreSede: string) {
+  return page.getByRole('row', { name: new RegExp(nombreSede) });
+}
+
+async function abrirDetalleDesdeFila(page: Page, fila: Locator) {
+  await fila.getByRole('button', { name: /^Acciones para/ }).click();
+  await page.getByRole('menuitem', { name: 'Ver detalle' }).click();
+  // El click en el <Link> de "Ver detalle" dispara una navegación client-side
+  // (Next.js) que no es instantánea — sin esto, la siguiente aserción del
+  // test puede correr contra el listado todavía visible, en medio de la
+  // transición y de la animación de cierre del menú (Base UI).
+  await page.waitForURL(/\/sedes\/[^/]+$/);
 }
 
 for (const colorScheme of ['light', 'dark'] as const) {
@@ -35,9 +51,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await crearSedePorModal(page, nombreSede);
 
-      const fila = page.getByRole('link', { name: new RegExp(nombreSede) });
+      const fila = filaSede(page, nombreSede);
       await expect(fila).toBeVisible();
-      await fila.click();
+      await abrirDetalleDesdeFila(page, fila);
 
       await expect(page.getByRole('heading', { name: nombreSede })).toBeVisible();
       // exact: true — "Activa" sin acotar matchea "Desactivar"/"Reactivar" por substring.
@@ -107,7 +123,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto('/sedes');
       await page.waitForLoadState('networkidle');
       await crearSedePorModal(page, nombreSede);
-      await page.getByRole('link', { name: new RegExp(nombreSede) }).click();
+      await abrirDetalleDesdeFila(page, filaSede(page, nombreSede));
 
       await page.getByRole('button', { name: 'Desactivar' }).click();
       const dialogoDesactivar = page.getByRole('alertdialog', { name: `¿Desactivar la Sede ${nombreSede}?` });
@@ -122,9 +138,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.waitForLoadState('networkidle');
       await expect(page.getByText(nombreSede)).toHaveCount(0);
       await page.getByRole('button', { name: 'Todas' }).click();
-      await expect(page.getByRole('link', { name: new RegExp(nombreSede) })).toBeVisible();
+      await expect(filaSede(page, nombreSede)).toBeVisible();
 
-      await page.getByRole('link', { name: new RegExp(nombreSede) }).click();
+      await abrirDetalleDesdeFila(page, filaSede(page, nombreSede));
       await page.getByRole('button', { name: 'Reactivar' }).click();
       const dialogoReactivar = page.getByRole('alertdialog', { name: `¿Reactivar la Sede ${nombreSede}?` });
       await expect(dialogoReactivar).toBeVisible();
@@ -151,7 +167,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       // Crea la primera y la desactiva.
       await crearSedePorModal(page, nombreSede);
-      await page.getByRole('link', { name: new RegExp(nombreSede) }).click();
+      await abrirDetalleDesdeFila(page, filaSede(page, nombreSede));
       await page.getByRole('button', { name: 'Desactivar' }).click();
       await page
         .getByRole('alertdialog', { name: `¿Desactivar la Sede ${nombreSede}?` })
@@ -169,7 +185,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // el mismo nombre, se elige la inactiva por el badge (el orden entre
       // dos Sedes con nombre idéntico no está garantizado).
       await page.getByRole('button', { name: 'Todas' }).click();
-      await page.getByRole('link', { name: new RegExp(nombreSede) }).filter({ hasText: 'Inactiva' }).click();
+      await abrirDetalleDesdeFila(page, filaSede(page, nombreSede).filter({ hasText: 'Inactiva' }));
       await page.getByRole('button', { name: 'Reactivar' }).click();
       await page
         .getByRole('alertdialog', { name: `¿Reactivar la Sede ${nombreSede}?` })
@@ -188,7 +204,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.waitForLoadState('networkidle');
       await page.getByRole('button', { name: 'Todas' }).click();
       // "Activa" es substring de "Inactiva" — se excluye por texto, no se busca por él.
-      await page.getByRole('link', { name: new RegExp(nombreSede) }).filter({ hasNotText: 'Inactiva' }).click();
+      await abrirDetalleDesdeFila(page, filaSede(page, nombreSede).filter({ hasNotText: 'Inactiva' }));
       await page.getByRole('button', { name: 'Desactivar' }).click();
       await page
         .getByRole('alertdialog', { name: `¿Desactivar la Sede ${nombreSede}?` })
@@ -207,10 +223,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await page.goto('/sedes');
         await page.waitForLoadState('networkidle');
 
-        // Scoped a <main>: el <Sidebar> del backoffice también son <a> con role="link".
-        const filas = page.locator('main').getByRole('link');
+        // Una sola fila de datos en la tabla (más el <thead>, que no cuenta como "row" de datos para este propósito).
+        const filas = page.getByRole('table', { name: 'Sedes' }).locator('tbody tr');
         await expect(filas).toHaveCount(1);
-        await filas.first().click();
+        await abrirDetalleDesdeFila(page, filas.first());
 
         // A diferencia del listado viejo, el detalle no sabe de antemano
         // que es la única activa — confirma el ConfirmDestructiveDialog
@@ -248,6 +264,56 @@ for (const colorScheme of ['light', 'dark'] as const) {
         // pruebas manuales, no es descartable entre corridas.
         await reactivarSedes(page, idsAReactivar);
       }
+    });
+
+    test('D119: no se puede eliminar una Sede con Personas asociadas; eliminar una sin datos la saca de Activas y Todas, y se puede restaurar', async ({
+      page,
+    }) => {
+      const nombreSede = `e2e-sede-eliminar-${colorScheme}-${Date.now()}`;
+
+      await loguearseComoAdminE2E(page);
+      await page.goto('/sedes');
+      await page.waitForLoadState('networkidle');
+      await crearSedePorModal(page, nombreSede);
+
+      const fila = filaSede(page, nombreSede);
+      await fila.getByRole('button', { name: /^Eliminar/ }).click();
+      const dialogoEliminar = page.getByRole('alertdialog', { name: `¿Eliminar ${nombreSede}?` });
+      await expect(dialogoEliminar).toBeVisible();
+      await dialogoEliminar.getByRole('button', { name: 'Sí, eliminar' }).click();
+      await expect(page.getByText('Sede eliminada.')).toBeVisible();
+
+      // Fuera de Activas y de Todas (D119: "desaparece de todas las vistas normales").
+      await expect(filaSede(page, nombreSede)).toHaveCount(0);
+      await page.getByRole('button', { name: 'Todas' }).click();
+      await expect(filaSede(page, nombreSede)).toHaveCount(0);
+
+      // Restaurar desde la papelera la devuelve a "Todas".
+      await page.goto('/sedes/papelera');
+      await page.waitForLoadState('networkidle');
+      const filaPapelera = page.getByRole('row', { name: new RegExp(nombreSede) });
+      await expect(filaPapelera).toBeVisible();
+
+      const resultadosPapelera = await crearAxeBuilder(page).analyze();
+      expect(resultadosPapelera.violations).toEqual([]);
+
+      await filaPapelera.getByRole('button', { name: 'Restaurar' }).click();
+      await expect(page.getByText(`${nombreSede} restaurada.`)).toBeVisible();
+      await expect(filaPapelera).toHaveCount(0);
+
+      await page.goto('/sedes');
+      await page.waitForLoadState('networkidle');
+      await page.getByRole('button', { name: 'Todas' }).click();
+      await expect(filaSede(page, nombreSede)).toBeVisible();
+
+      // Limpieza: sacarla de "Activas" reales para no ensuciar Visitanos/el registro.
+      await abrirDetalleDesdeFila(page, filaSede(page, nombreSede));
+      await page.getByRole('button', { name: 'Desactivar' }).click();
+      await page
+        .getByRole('alertdialog', { name: `¿Desactivar la Sede ${nombreSede}?` })
+        .getByRole('button', { name: 'Sí, desactivar' })
+        .click();
+      await expect(page.getByText('Sede desactivada.')).toBeVisible();
     });
   });
 }

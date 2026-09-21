@@ -15,6 +15,7 @@
     "ACTIVAR_TUTOR_INVALIDO": "Elegí una Persona para vincular como tutor, o completá su nombre y teléfono — no las dos cosas a la vez.",
     "RELACION_FAMILIAR_INVALIDA": "Ese vínculo no es válido (una Persona no puede vincularse consigo misma, o ya existe el vínculo).",
     "SEDE_UNICA_ACTIVA": "Es la única Sede activa, y la app la usa para mostrar dónde y cuándo se reúne la iglesia. Creá la nueva Sede primero y después desactivá esta.",
+    "SEDE_TIENE_DATOS_RELACIONADOS": "No se puede eliminar: tiene Personas asociadas. Inactivala en su lugar.",
     "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
   },
   "nav": {
@@ -29,6 +30,7 @@
     "eventos": "Eventos",
     "notificaciones": "Notificaciones",
     "sedes": "Sedes",
+    "papelera": "Papelera",
     "catalogos": "Catálogos",
     "misDiscipulados": "Mis discipulados",
     "miDisponibilidad": "Mi disponibilidad",

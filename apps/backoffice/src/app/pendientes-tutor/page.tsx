@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   type PersonaPendienteTutor,
   type BusquedaPersona,
@@ -12,6 +12,7 @@ import {
   ApiError,
   erroresPorCampo,
   mensajeDeCampo,
+  formatearFechaCorta,
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
@@ -24,6 +25,8 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
+  TablaDatos,
+  type ColumnaTabla,
   useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
@@ -47,6 +50,7 @@ export default function PendientesTutorPage() {
   const [cargandoMas, setCargandoMas] = useState(false);
   const [personaParaActivar, setPersonaParaActivar] = useState<PersonaPendienteTutor | null>(null);
   const te = useTranslations('errors');
+  const locale = useLocale();
 
   const cargarPendientes = useCallback(async () => {
     if (!session?.apiToken) return;
@@ -98,10 +102,10 @@ export default function PendientesTutorPage() {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${session?.apiToken}` },
       });
-      toast('Persona marcada como inactiva.');
+      toast('Caso cerrado.');
       await cargarPendientes();
     } catch (e) {
-      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos marcar como inactiva a esta Persona.');
+      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos cerrar este caso.');
     }
   });
 
@@ -118,6 +122,31 @@ export default function PendientesTutorPage() {
     );
   }
 
+  // H-69: sin búsqueda ni filtros por ahora (H-69, alcance) — orden tampoco:
+  // la paginación por "cargar más" no trae todas las filas a la vez, así
+  // que ordenar del lado del cliente sería incorrecto acá.
+  const COLUMNAS_PENDIENTES: ColumnaTabla<PersonaPendienteTutor>[] = [
+    {
+      id: 'nombre',
+      encabezado: 'Nombre',
+      celda: (persona) => (
+        <span className="font-medium">
+          {persona.nombre} {persona.apellido}
+        </span>
+      ),
+    },
+    {
+      id: 'contacto',
+      encabezado: 'Contacto',
+      className: 'hidden sm:table-cell',
+      celda: (persona) => (
+        <span className="text-muted-foreground">
+          {persona.telefono} — Nació: {formatearFechaCorta(persona.fechaNacimiento, locale)}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">Casos pendientes de tutor</h1>
@@ -132,44 +161,36 @@ export default function PendientesTutorPage() {
         </p>
       )}
 
-      {!cargando && pendientes.length === 0 && !error && (
-        <p className="text-muted-foreground">No hay casos pendientes por ahora.</p>
-      )}
-
-      <ul className="flex flex-col gap-3">
-        {pendientes.map((persona) => (
-          <li
-            key={persona.id}
-            className="flex flex-col gap-2 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div>
-              <p className="font-medium">
-                {persona.nombre} {persona.apellido}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Tel: {persona.telefono} — Nació: {persona.fechaNacimiento}
-              </p>
-            </div>
-            <div className="flex gap-2">
+      {!error && (
+        <TablaDatos
+          columnas={COLUMNAS_PENDIENTES}
+          datos={pendientes}
+          obtenerId={(persona) => persona.id}
+          etiqueta="Casos pendientes de tutor"
+          cargando={cargando}
+          mensajeVacio="No hay casos pendientes por ahora."
+          encabezadoAcciones="Acciones"
+          acciones={(persona) => (
+            <div className="flex flex-wrap justify-end gap-2">
               <Button size="sm" onClick={() => setPersonaParaActivar(persona)}>
                 Activar
               </Button>
               <ConfirmDestructiveDialog
                 trigger={
                   <Button variant="outline" size="sm">
-                    Marcar inactiva
+                    Cerrar el caso
                   </Button>
                 }
-                titulo={`¿Marcar inactiva a ${persona.nombre} ${persona.apellido}?`}
+                titulo={`¿Cerrar el caso de ${persona.nombre} ${persona.apellido}?`}
                 descripcion="Confirmá que el tutor no autoriza el registro, o que no se lo pudo contactar. La Persona sale de esta lista; no se borra nada."
-                textoConfirmar="Sí, marcar inactiva"
+                textoConfirmar="Sí, cerrar el caso"
                 textoCancelar="Volver"
                 onConfirmar={() => marcarInactiva(persona.id)}
               />
             </div>
-          </li>
-        ))}
-      </ul>
+          )}
+        />
+      )}
 
       {pendientes.length < total && (
         <Button variant="outline" onClick={cargarMas} disabled={cargandoMas} className="self-start">
@@ -244,7 +265,7 @@ function ActivarDialog({
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         body: JSON.stringify(body),
       });
-      toast(`${persona.nombre} ${persona.apellido} activada.`);
+      toast(`${persona.nombre} ${persona.apellido}: caso activado.`);
       onActivado();
     } catch (e) {
       // H-50: además del código general del error, ver si hay {campo, code}

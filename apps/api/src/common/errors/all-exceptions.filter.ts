@@ -43,6 +43,7 @@ const TITULOS: Record<ErrorCode, string> = {
   ACTIVAR_TUTOR_INVALIDO: 'Datos de tutor inválidos',
   RELACION_FAMILIAR_INVALIDA: 'Relación familiar inválida',
   SEDE_UNICA_ACTIVA: 'Es la única Sede activa',
+  SEDE_TIENE_DATOS_RELACIONADOS: 'No se puede eliminar: tiene datos relacionados',
   ERROR_INTERNO: 'Error interno',
 };
 

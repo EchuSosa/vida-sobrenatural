@@ -30,6 +30,17 @@ model Sede {
   descripcionBienvenida String?
   activo                Boolean @default(true)
 
+  // D119 (revisión manual ronda 6, H-67/H-69): Inactivar y Eliminar son dos
+  // acciones distintas. `activo` (arriba) sigue significando el estado del
+  // negocio, sin tocar — `eliminadoEn`/`eliminadoPor` son la propia marca
+  // de un borrado lógico (Principio III, nunca físico) que saca el
+  // registro de TODAS las vistas normales (no solo "inactivas"), con su
+  // fecha y responsable. `eliminadoPor` es una referencia lógica al id de
+  // la Persona que eliminó, sin @relation de Prisma (mismo criterio que
+  // `Persona.altaPor`).
+  eliminadoEn  DateTime?
+  eliminadoPor String?
+
   personas Persona[]
 
   createdAt DateTime @default(now())

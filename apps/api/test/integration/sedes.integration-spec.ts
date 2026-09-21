@@ -5,6 +5,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
 
 async function mintAdminToken(): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -97,5 +98,122 @@ describe('PATCH /sedes/:id (integración) — soft delete real (Principio III)',
 
     expect(response.status).toBe(403);
     await prisma.sede.delete({ where: { id: sede.id } });
+  });
+});
+
+describe('DELETE /sedes/:id (integración) — D119, eliminar es distinto de inactivar', () => {
+  let app: INestApplication<App>;
+  let prisma: PrismaService;
+  const idsSedeParaLimpiar: string[] = [];
+  const idsPersonaParaLimpiar: string[] = [];
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    await app.init();
+    prisma = moduleFixture.get(PrismaService);
+  });
+
+  afterAll(async () => {
+    if (idsPersonaParaLimpiar.length > 0) {
+      await prisma.persona.deleteMany({ where: { id: { in: idsPersonaParaLimpiar } } });
+    }
+    if (idsSedeParaLimpiar.length > 0) {
+      await prisma.sede.deleteMany({ where: { id: { in: idsSedeParaLimpiar } } });
+    }
+    await app.close();
+  });
+
+  async function crearSede(nombre: string) {
+    const sede = await prisma.sede.create({
+      data: { nombre, direccion: 'Dirección', horarios: 'Domingos 10 hs', contactoTelefono: '+5492210000000', activo: true },
+    });
+    idsSedeParaLimpiar.push(sede.id);
+    return sede.id;
+  }
+
+  it('no se puede eliminar una Sede con Personas asociadas — queda bloqueada, con el motivo', async () => {
+    const sedeId = await crearSede(`Sede integ con Personas ${Date.now()}`);
+    const persona = await prisma.persona.create({
+      data: {
+        email: `integ-sede-delete-${Date.now()}@example.com`,
+        nombre: 'Ana',
+        apellido: 'García',
+        genero: 'femenino',
+        fechaNacimiento: new Date('1990-05-20'),
+        telefono: '+5492211234567',
+        direccion: 'Calle 1 y 50',
+        sedeId,
+        estadoCivil: 'soltero_a',
+        profesion: 'otro',
+        profesionDetalle: 'Apicultora',
+        tiempoCongregacion: 'menos_6_meses',
+        estado: 'activa',
+      },
+    });
+    idsPersonaParaLimpiar.push(persona.id);
+
+    const token = await mintAdminToken();
+    const response = await request(app.getHttpServer())
+      .delete(`/sedes/${sedeId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('SEDE_TIENE_DATOS_RELACIONADOS');
+
+    const enBaseDeDatos = await prisma.sede.findUnique({ where: { id: sedeId } });
+    expect(enBaseDeDatos?.eliminadoEn).toBeNull();
+  });
+
+  it('elimina una Sede sin datos relacionados, y desaparece tanto de Activas como de Todas', async () => {
+    // Dos Sedes: la que se elimina, y otra para no chocar con el guard de "única Sede activa".
+    await crearSede(`Sede integ testigo ${Date.now()}`);
+    const sedeId = await crearSede(`Sede integ a eliminar ${Date.now()}`);
+
+    const token = await mintAdminToken();
+    const eliminar = await request(app.getHttpServer())
+      .delete(`/sedes/${sedeId}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(eliminar.status).toBe(200);
+
+    const enBaseDeDatos = await prisma.sede.findUnique({ where: { id: sedeId } });
+    expect(enBaseDeDatos).not.toBeNull(); // borrado lógico, no físico (Principio III)
+    expect(enBaseDeDatos?.eliminadoEn).not.toBeNull();
+
+    const activas = await request(app.getHttpServer()).get('/sedes');
+    expect(activas.body.map((s: { id: string }) => s.id)).not.toContain(sedeId);
+
+    const todas = await request(app.getHttpServer()).get('/sedes?estado=todas');
+    expect(todas.body.map((s: { id: string }) => s.id)).not.toContain(sedeId);
+
+    const papelera = await request(app.getHttpServer())
+      .get('/sedes?estado=papelera')
+      .set('Authorization', `Bearer ${token}`);
+    expect(papelera.body.map((s: { id: string }) => s.id)).toContain(sedeId);
+
+    const detalle = await request(app.getHttpServer()).get(`/sedes/${sedeId}`);
+    expect(detalle.status).toBe(404);
+  });
+
+  it('restaura una Sede eliminada — vuelve a aparecer en Todas', async () => {
+    const sedeId = await crearSede(`Sede integ a restaurar ${Date.now()}`);
+    const token = await mintAdminToken();
+
+    await request(app.getHttpServer()).delete(`/sedes/${sedeId}`).set('Authorization', `Bearer ${token}`);
+
+    const restaurar = await request(app.getHttpServer())
+      .post(`/sedes/${sedeId}/restaurar`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(restaurar.status).toBe(201);
+
+    const enBaseDeDatos = await prisma.sede.findUnique({ where: { id: sedeId } });
+    expect(enBaseDeDatos?.eliminadoEn).toBeNull();
+
+    const todas = await request(app.getHttpServer()).get('/sedes?estado=todas');
+    expect(todas.body.map((s: { id: string }) => s.id)).toContain(sedeId);
   });
 });

@@ -19,6 +19,10 @@ export interface Sede {
   descripcionBienvenida: string | null;
   /** H-51 (revisión manual ronda 4, D117): antes no viajaba — el listado público nunca incluía inactivas. */
   activo: boolean;
+  /** D119 (revisión manual ronda 6): null si no está eliminada — GET /sedes y /sedes/:id nunca devuelven una eliminada, solo GET /sedes?estado=papelera. */
+  eliminadoEn: string | null;
+  /** D119: cuántas Personas tiene asociadas — decide si "Eliminar" puede ejecutarse o si hay que ofrecer inactivar en su lugar. */
+  personasAsociadas: number;
 }
 
 /** Body de POST /sedes. */

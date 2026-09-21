@@ -12,6 +12,12 @@ export {
   type ConfirmDestructiveDialogProps,
 } from './components/confirm-destructive-dialog';
 export { MenuUsuario, type MenuUsuarioProps, type OpcionTemaMenu } from './components/menu-usuario';
+export {
+  TablaDatos,
+  type TablaDatosProps,
+  type ColumnaTabla,
+  type OrdenTabla,
+} from './components/tabla-datos';
 export { Button, buttonVariants } from './components/ui/button';
 export { Input } from './components/ui/input';
 export { Separator } from './components/ui/separator';
