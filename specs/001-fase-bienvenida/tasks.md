@@ -333,6 +333,24 @@ alcance), y `apps/backoffice` tiene su propia suite de e2e cubriendo H-29 y H-30
 
 ---
 
+## Phase 14: Correcciones de la revisión manual — Lote 7, parte 1 (ronda 4, Sedes)
+
+**Purpose**: aplicar la parte de Sedes del Lote 7 (`specs/revision-manual/2026-09-17-001-002.md`,
+ronda 4): H-51+H-52, decisión **D117**. El resto del Lote 7 (H-50, H-48+H-49, H-46+H-47) es
+transversal a `apps/web`/`apps/backoffice` y se documenta en `specs/002-base-transversal/tasks.md`.
+
+- [X] T145 [H-51] `GET /sedes` deja de filtrar `activo: true` por defecto: `SedeService.findAll(estado: 'activas' | 'todas' = 'activas')`, `SedeController` con `@Query('estado')`. `GET /sedes/:id` deja de filtrar del todo (`SedeService.findOne`, sin variante "Active"). `Sede` (`packages/shared-types`) suma `activo: boolean`.
+- [X] T146 [H-51] `SedeService.update`: reactivar (`dto.activo === true` sobre una Sede inactiva) corre `validarNombreUnicoEntreActivas` igual que un cambio de nombre — puede chocar con una Sede activa creada mientras tanto (409 `SEDE_NOMBRE_DUPLICADO`). Cubierto en `apps/api/test/unit/sede-desactivar.spec.ts`.
+- [X] T147 [H-52] Nueva pantalla `apps/backoffice/src/app/sedes/[id]/page.tsx`: detalle + edición (usa el `PATCH /sedes/:id` ya existente), `EstadoActivoBadge` (texto + ícono, D81, `packages/ui`), Desactivar (si está activa) y Reactivar (si no), con el error de T146 mostrado como "cómo corregir", no solo "inválido".
+- [X] T148 [H-52] `apps/backoffice/src/app/sedes/page.tsx`: filtro Activas/Todas (sin búsqueda, orden ni paginación — alcance de spec 004, Principio IV), filas a `sedes/[id]`, alta movida a un modal (`Sheet`) que al cerrarse refresca el listado. Campos de formulario compartidos entre alta y edición en `apps/backoffice/src/components/formulario-sede.tsx`.
+- [X] T148a [H-51/H-52] Verificar `sedes/page.tsx` y `sedes/[id]/page.tsx` contra el checklist de `docs/15-guia-ux-ui.md` (cuatro estados, una sola acción principal, orden de botones, tono, teclado y lector de pantalla, contraste en los dos temas) — encontró y corrigió el estado de error sin "Reintentar" en el listado.
+- [X] T149 Correr las tres suites de la convención de `docs/00-README.md` antes de cerrar: unitarios de `apps/api`, integración (`pnpm --filter api run test:e2e`) y e2e de `apps/backoffice` (`sedes.spec.ts`, `pendientes-tutor.spec.ts`) y de `apps/web` (regresión del `ConfirmDestructiveDialog` compartido, tocado como efecto de lado necesario de T147).
+
+**Checkpoint**: Lote 7, parte Sedes, completo — una Sede desactivada se sigue viendo y se puede
+reactivar, en el backoffice y en la base (D117). El resto del Lote 7 sigue en curso.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
