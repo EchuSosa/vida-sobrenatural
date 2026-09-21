@@ -17,6 +17,8 @@ export interface Sede {
   contactoEmail: string | null;
   horarios: string;
   descripcionBienvenida: string | null;
+  /** H-51 (revisión manual ronda 4, D117): antes no viajaba — el listado público nunca incluía inactivas. */
+  activo: boolean;
 }
 
 /** Body de POST /sedes. */

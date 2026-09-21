@@ -30,6 +30,8 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
   const roles = (session?.user.rol ?? []) as RolBackoffice[];
 
   if (!session) {
+    // Sin Sidebar en este caso — no hay otro <main> en juego, así que este
+    // sigue siendo el único landmark "main" de la página.
     return (
       <main id="contenido" className="flex-1">
         {children}
@@ -44,21 +46,27 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarMenu>
-              {items.map(({ href, labelKey, icon: Icon }) => (
-                <SidebarMenuItem key={href}>
-                  <SidebarMenuButton
-                    isActive={pathname === href}
-                    render={
-                      <Link href={href} aria-current={pathname === href ? 'page' : undefined}>
-                        <Icon />
-                        <span>{t(labelKey)}</span>
-                      </Link>
-                    }
-                  />
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            {/* H-51/H-52 (revisión manual ronda 4): el menú no estaba dentro
+                de un <nav> — docs/14-navegacion.md pide un <nav aria-label>
+                por menú (D81), y sin esto axe marca cada ítem como contenido
+                fuera de cualquier landmark. */}
+            <nav aria-label={t('principal')}>
+              <SidebarMenu>
+                {items.map(({ href, labelKey, icon: Icon }) => (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton
+                      isActive={pathname === href}
+                      render={
+                        <Link href={href} aria-current={pathname === href ? 'page' : undefined}>
+                          <Icon />
+                          <span>{t(labelKey)}</span>
+                        </Link>
+                      }
+                    />
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </nav>
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
@@ -67,9 +75,13 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
           <SidebarTrigger />
           <MenuUsuario />
         </header>
-        <main id="contenido" className="flex-1 p-4">
+        {/* H-51/H-52: SidebarInset ya es un <main> (packages/ui) — un
+            <main id="contenido"> acá adentro duplicaba el landmark
+            ("at most one main landmark", "main is top level"). Este <div>
+            sigue siendo el destino del skip-link (layout.tsx). */}
+        <div id="contenido" className="flex-1 p-4">
           {children}
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

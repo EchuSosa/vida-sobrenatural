@@ -100,20 +100,20 @@ export default function PendientesTutorPage() {
   }
 
   if (status === 'loading') {
-    return <main className="mx-auto max-w-3xl px-4 py-16">Cargando…</main>;
+    return <div className="mx-auto max-w-3xl px-4 py-16">Cargando…</div>;
   }
 
   if (status === 'unauthenticated') {
     return (
-      <main className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
+      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
         <h1 className="text-2xl font-semibold">Casos pendientes de tutor</h1>
         <Button onClick={() => signIn('google')}>Continuar con Google</Button>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">Casos pendientes de tutor</h1>
       <p className="text-zinc-600 dark:text-zinc-400">
         Menores de 18 años que intentaron registrarse (Historia 2b) — contactá al tutor antes de
@@ -181,7 +181,7 @@ export default function PendientesTutorPage() {
           await cargarPendientes();
         }}
       />
-    </main>
+    </div>
   );
 }
 

@@ -47,6 +47,7 @@ export async function asegurarUnaSolaSedeActiva(page: Page): Promise<string[]> {
 
 /** Revierte asegurarUnaSolaSedeActiva — reactiva las Sedes que se desactivaron para el test. */
 export async function reactivarSedes(page: Page, ids: string[]) {
+  if (ids.length === 0) return;
   const apiToken = await obtenerApiTokenAdmin(page);
   for (const id of ids) {
     await page.request.patch(`${API_BASE_URL}/sedes/${id}`, {

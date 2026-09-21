@@ -62,4 +62,82 @@ describe('SedeService — regla de "al menos una Sede activa"', () => {
   });
 });
 
+// H-51 (revisión manual ronda 4, D117): reactivar puede chocar con un nombre
+// creado mientras la Sede estaba inactiva — validarNombreUnicoEntreActivas
+// solo mira activas, así que nunca se disparaba al reactivar.
+describe('SedeService — nombre duplicado al reactivar', () => {
+  it('rechaza reactivar si ya existe otra Sede activa con el mismo nombre', async () => {
+    const update = jest.fn();
+    const prismaMock = {
+      sede: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 's1',
+          nombre: 'La Plata',
+          activo: false,
+          contactoTelefono: '+5492211110000',
+          contactoEmail: null,
+        }),
+        findFirst: jest.fn().mockResolvedValue({ id: 's2', nombre: 'La Plata', activo: true }),
+        update,
+      },
+    };
+    const service = await crearServicio(prismaMock);
+
+    const error = await service.update('s1', { activo: true }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(AppException);
+    expect((error as AppException).code).toBe('SEDE_NOMBRE_DUPLICADO');
+    expect(prismaMock.sede.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ nombre: 'La Plata', activo: true, id: { not: 's1' } }),
+      }),
+    );
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('permite reactivar si no hay otra Sede activa con ese nombre', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 's1', activo: true });
+    const prismaMock = {
+      sede: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 's1',
+          nombre: 'La Plata',
+          activo: false,
+          contactoTelefono: '+5492211110000',
+          contactoEmail: null,
+        }),
+        findFirst: jest.fn().mockResolvedValue(null),
+        update,
+      },
+    };
+    const service = await crearServicio(prismaMock);
+
+    const resultado = await service.update('s1', { activo: true });
+    expect(resultado).toEqual({ id: 's1', activo: true });
+    expect(update).toHaveBeenCalled();
+  });
+
+  it('desactivar→reactivar sin tocar el nombre no dispara el chequeo si no cambia activo', async () => {
+    // Guarda contra una regresión obvia: un PATCH que no toca `activo` ni
+    // `nombre` (ej. solo contactoTelefono) no debe llamar a findFirst.
+    const update = jest.fn().mockResolvedValue({ id: 's1' });
+    const prismaMock = {
+      sede: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 's1',
+          nombre: 'La Plata',
+          activo: true,
+          contactoTelefono: '+5492211110000',
+          contactoEmail: null,
+        }),
+        findFirst: jest.fn(),
+        update,
+      },
+    };
+    const service = await crearServicio(prismaMock);
+
+    await service.update('s1', { contactoTelefono: '+5492211110001' });
+    expect(prismaMock.sede.findFirst).not.toHaveBeenCalled();
+  });
+});
+
 // HORARIOS_SEDE_REGEX y TELEFONO_REGEX: ver test/unit/validaciones-compartidas.spec.ts (H-33).

@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { SedeService } from './sede.service.js';
 import { CrearSedeDto } from './dto/crear-sede.dto.js';
 import { ActualizarSedeDto } from './dto/actualizar-sede.dto.js';
@@ -13,15 +13,18 @@ export class SedeController {
   constructor(private readonly sedeService: SedeService) {}
 
   @Get()
-  @ApiOkResponse({ description: 'Sedes activas (FR-002/FR-003, Historia 1).' })
-  findAll() {
-    return this.sedeService.findAllActive();
+  @ApiQuery({ name: 'estado', required: false, enum: ['activas', 'todas'] })
+  @ApiOkResponse({
+    description: 'Sedes — activas por defecto (FR-002/FR-003); `estado=todas` incluye inactivas (D117, H-51).',
+  })
+  findAll(@Query('estado') estado?: 'activas' | 'todas') {
+    return this.sedeService.findAll(estado === 'todas' ? 'todas' : 'activas');
   }
 
   @Get(':id')
-  @ApiOkResponse({ description: 'Detalle de una Sede activa (FR-004).' })
+  @ApiOkResponse({ description: 'Detalle de una Sede, activa o no (FR-004, H-51/H-52).' })
   findOne(@Param('id') id: string) {
-    return this.sedeService.findOneActive(id);
+    return this.sedeService.findOne(id);
   }
 
   @Post()

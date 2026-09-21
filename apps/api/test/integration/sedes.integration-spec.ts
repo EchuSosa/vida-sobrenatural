@@ -62,9 +62,20 @@ describe('PATCH /sedes/:id (integración) — soft delete real (Principio III)',
     expect(enBaseDeDatos).not.toBeNull();
     expect(enBaseDeDatos?.activo).toBe(false);
 
-    // Y ya no aparece en el listado público de Historia 1.
-    const getPublico = await request(app.getHttpServer()).get(`/sedes/${sedeId}`);
-    expect(getPublico.status).toBe(404);
+    // Ya no aparece en el listado público de Historia 1 (default activas)...
+    const listadoPublico = await request(app.getHttpServer()).get('/sedes');
+    expect(listadoPublico.body.map((s: { id: string }) => s.id)).not.toContain(sedeId);
+
+    // ...pero H-51 (D117, revisión manual ronda 4): el detalle sigue
+    // abriéndose igual — antes de H-51 esto daba 404 y no había forma de
+    // reactivarla desde el backoffice (apps/backoffice/sedes/[id]).
+    const getDetalle = await request(app.getHttpServer()).get(`/sedes/${sedeId}`);
+    expect(getDetalle.status).toBe(200);
+    expect(getDetalle.body.activo).toBe(false);
+
+    // Y sigue apareciendo con estado=todas — lo que usa el listado del backoffice.
+    const listadoTodas = await request(app.getHttpServer()).get('/sedes?estado=todas');
+    expect(listadoTodas.body.map((s: { id: string }) => s.id)).toContain(sedeId);
   });
 
   it('responde 403 si quien intenta desactivar no tiene rol Admin', async () => {

@@ -15,10 +15,13 @@ Sede. Los `code` usados por este contrato: `VALIDACION` (400, `CONTACTO_SEDE_REQ
 
 ## GET /sedes
 
-Público (sin auth) — Historia 1, FR-002/FR-004.
+Público (sin auth) — Historia 1, FR-002/FR-004. H-51/D117 (revisión manual ronda 4): sigue siendo
+público (qué Sedes existen no es información sensible), sin guard nuevo.
 
-- **Query params**: ninguno en esta fase (sin paginación — volumen bajo).
-- **Response 200**: lista de Sedes con `activo=true` únicamente.
+- **Query params**: `estado` (opcional) — `"activas"` (default, sin cambios: es lo que usan
+  `apps/web` Visitanos y el selector de Sede del registro, que nunca mandan este parámetro) o
+  `"todas"` (incluye inactivas — lo usa el listado de Sedes de `apps/backoffice`).
+- **Response 200**: lista de Sedes.
   ```json
   [
     {
@@ -28,20 +31,24 @@ Público (sin auth) — Historia 1, FR-002/FR-004.
       "contactoTelefono": "...",
       "contactoEmail": "...",
       "horarios": "...",
-      "descripcionBienvenida": "..."
+      "descripcionBienvenida": "...",
+      "activo": true
     }
   ]
   ```
-- Si no hay ninguna Sede activa: `200` con `[]` (no es un error — el frontend maneja el caso
+  `activo` se agrega al shape en H-51 — antes no viajaba porque el listado público nunca incluía
+  inactivas; ahora el backoffice lo necesita para el estado (texto + ícono).
+- Si no hay ninguna Sede que matchee: `200` con `[]` (no es un error — el frontend maneja el caso
   vacío, ver edge case del spec).
 
 ## GET /sedes/:id
 
-Público — detalle de una Sede puntual (usado cuando hay más de una Sede y el Visitante ya
-identificó la suya).
+Público — detalle de una Sede puntual. H-51/H-52 (D117): ya **no** filtra por `activo` — el
+detalle de una Sede inactiva se tiene que poder abrir desde `apps/backoffice/sedes/[id]` (nuevo,
+H-52). Antes de H-52 este endpoint no tenía ningún consumidor.
 
-- **Response 200**: mismo shape que un elemento de la lista anterior.
-- **Response 404**: Sede inexistente o `activo=false`.
+- **Response 200**: mismo shape que un elemento de la lista anterior (incluye `activo`).
+- **Response 404**: Sede inexistente.
 
 ## POST /sedes
 
@@ -71,6 +78,10 @@ Requiere rol **Admin**. Edición parcial, incluye el toggle de soft delete.
 - **Response 200**: la Sede actualizada.
 - **Response 403/401**: igual que POST.
 - **Response 404**: Sede inexistente.
+- **Response 409** (H-51, D117): `SEDE_UNICA_ACTIVA` al desactivar la única Sede activa (sin
+  cambios, H-30); `SEDE_NOMBRE_DUPLICADO` al **reactivar** (`activo: true`) si el nombre de esta
+  Sede ya lo tiene otra Sede activa — pudo haberse creado una con ese nombre mientras esta
+  estaba inactiva. El chequeo corre aunque `nombre` no venga en este PATCH.
 
 No existe `DELETE /sedes/:id` — el soft delete se hace vía `PATCH` con `activo: false`
 (Principio III de la Constitución).

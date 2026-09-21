@@ -12,25 +12,42 @@ const SEDE_PUBLIC_SELECT = {
   contactoEmail: true,
   horarios: true,
   descripcionBienvenida: true,
+  // H-51/D117: el backoffice necesita saber cuáles están inactivas para
+  // mostrar el estado (texto + ícono) en el listado — no es un dato
+  // sensible, así que se agrega al select público en vez de duplicar uno
+  // aparte solo para el backoffice.
+  activo: true,
 } as const;
 
 @Injectable()
 export class SedeService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** FR-002/FR-003 — Historia 1: listado público de Sedes activas. */
-  findAllActive() {
+  /**
+   * FR-002/FR-003 — Historia 1. `estado` por defecto es `'activas'`: el
+   * comportamiento público no cambia (apps/web — Visitanos y el selector de
+   * Sede del registro — nunca manda este query param). `'todas'` es lo que
+   * usa el listado del backoffice para incluir las inactivas (D117, H-51) —
+   * sigue siendo un GET público, sin guard nuevo: qué Sedes existen no es
+   * información sensible, a diferencia de datos de Persona.
+   */
+  findAll(estado: 'activas' | 'todas' = 'activas') {
     return this.prisma.sede.findMany({
-      where: { activo: true },
+      where: estado === 'todas' ? {} : { activo: true },
       select: SEDE_PUBLIC_SELECT,
       orderBy: { nombre: 'asc' },
     });
   }
 
-  /** FR-004 — detalle público de una Sede activa puntual. */
-  async findOneActive(id: string) {
-    const sede = await this.prisma.sede.findFirst({
-      where: { id, activo: true },
+  /**
+   * FR-004. Sin filtrar por `activo` (H-51/H-52, D117) — el detalle de una
+   * Sede inactiva se tiene que poder abrir desde el backoffice. Hoy este
+   * endpoint no tiene ningún consumidor público (`sedes/[id]` es nuevo), así
+   * que no hay comportamiento existente que este cambio pueda romper.
+   */
+  async findOne(id: string) {
+    const sede = await this.prisma.sede.findUnique({
+      where: { id },
       select: SEDE_PUBLIC_SELECT,
     });
     if (!sede) {
@@ -83,8 +100,14 @@ export class SedeService {
       );
     }
 
-    if (dto.nombre && dto.nombre !== existente.nombre) {
-      await this.validarNombreUnicoEntreActivas(dto.nombre, id);
+    // H-51 (borde a contemplar): `validarNombreUnicoEntreActivas` solo mira
+    // Sedes activas, así que reactivar una nunca lo disparaba — pero
+    // mientras estuvo inactiva pudo haberse creado otra Sede activa con el
+    // mismo nombre. Se chequea también al reactivar, aunque `nombre` no
+    // venga en este PATCH.
+    const reactivando = dto.activo === true && !existente.activo;
+    if ((dto.nombre && dto.nombre !== existente.nombre) || reactivando) {
+      await this.validarNombreUnicoEntreActivas(dto.nombre ?? existente.nombre, id);
     }
 
     return this.prisma.sede.update({
