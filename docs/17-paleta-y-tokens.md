@@ -87,6 +87,47 @@ consigo misma.
 }
 ```
 
+### Tokens del sidebar y de los gráficos
+
+El archivo actual también define `--sidebar-*` (los usa el menú lateral del backoffice) y
+`--chart-*`. Si quedan neutros, el menú lateral sigue gris aunque el resto tome color.
+
+```css
+:root {
+  --sidebar: oklch(0.955 0.012 82);
+  --sidebar-foreground: oklch(0.255 0.030 45);
+  --sidebar-primary: oklch(0.520 0.120 42);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.930 0.020 80);
+  --sidebar-accent-foreground: oklch(0.255 0.030 45);
+  --sidebar-border: oklch(0.885 0.015 80);
+  --sidebar-ring: oklch(0.520 0.120 42);
+  --chart-1: oklch(0.560 0.130 42);   /* terracota */
+  --chart-2: oklch(0.600 0.095 232);  /* celeste */
+  --chart-3: oklch(0.560 0.080 152);  /* salvia */
+  --chart-4: oklch(0.680 0.120 78);   /* ámbar */
+  --chart-5: oklch(0.400 0.050 55);   /* marrón */
+}
+
+.dark {
+  --sidebar: oklch(0.245 0.013 50);
+  --sidebar-foreground: oklch(0.955 0.010 85);
+  --sidebar-primary: oklch(0.700 0.105 45);
+  --sidebar-primary-foreground: oklch(0.205 0.012 50);
+  --sidebar-accent: oklch(0.300 0.018 55);
+  --sidebar-accent-foreground: oklch(0.955 0.010 85);
+  --sidebar-border: oklch(0.330 0.013 55);
+  --sidebar-ring: oklch(0.700 0.105 45);
+  /* los --chart-* se mantienen: ya son legibles sobre el fondo oscuro */
+}
+```
+
+Texto sobre el sidebar: 13.9:1 en claro, 14.3:1 en oscuro.
+
+**Ojo con los bordes del modo oscuro:** hoy son `oklch(1 0 0 / 10%)` y `/ 15%`, o sea blanco
+translúcido. Se reemplazan por los valores opacos de arriba — el `--input` translúcido no llegaba
+a 3:1 contra el fondo.
+
 ## Contrastes medidos
 
 Mínimos de D81: 4.5:1 para texto, 3:1 para elementos de interfaz y foco.
