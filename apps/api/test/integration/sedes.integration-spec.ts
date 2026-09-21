@@ -20,6 +20,7 @@ describe('PATCH /sedes/:id (integración) — soft delete real (Principio III)',
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let sedeId: string;
+  let sedeTestigoId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -35,10 +36,28 @@ describe('PATCH /sedes/:id (integración) — soft delete real (Principio III)',
     if (sedeId) {
       await prisma.sede.delete({ where: { id: sedeId } }).catch(() => undefined);
     }
+    if (sedeTestigoId) {
+      await prisma.sede.delete({ where: { id: sedeTestigoId } }).catch(() => undefined);
+    }
     await app.close();
   });
 
   it('desactiva una Sede vía activo:false sin borrarla físicamente', async () => {
+    // H-30/D38: desactivar la única Sede activa está bloqueado a propósito
+    // (SEDE_UNICA_ACTIVA) — este test no verifica esa regla, así que
+    // necesita otra Sede activa propia para no depender de que el resto de
+    // la suite (u otro archivo, en una corrida en paralelo) deje alguna.
+    const testigo = await prisma.sede.create({
+      data: {
+        nombre: `Sede integ testigo soft-delete ${Date.now()}`,
+        direccion: 'Dirección',
+        horarios: 'Horario',
+        contactoTelefono: '+5492210000000',
+        activo: true,
+      },
+    });
+    sedeTestigoId = testigo.id;
+
     const sede = await prisma.sede.create({
       data: {
         nombre: `Sede integ soft-delete ${Date.now()}`,
