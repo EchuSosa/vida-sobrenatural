@@ -104,6 +104,13 @@ Los estados siempre llevan texto + ícono (nunca solo color, D81).
   - **Inactivar** — el registro se sigue viendo en el listado, con su estado en texto + ícono y un filtro activas / todas; su detalle se puede abrir y existe "Reactivar". Es un estado del negocio, no una baja.
   - **Eliminar** — para corregir un error de carga. Sigue siendo borrado lógico, pero desaparece de las vistas normales y va a la papelera, desde donde el Admin puede restaurarlo. **No se puede eliminar un registro con datos relacionados**: ahí el botón queda deshabilitado, explicando por qué y ofreciendo inactivar.
 - **Alta en modal:** crear un registro abre un diálogo; al cerrarse, el nuevo registro aparece en el listado. Las filas del listado llevan al detalle, y la edición vive ahí.
+- **Una sola tabla para todos los listados** (`TablaDatos` de `packages/ui`, H-69): columnas configurables, orden por columna, columna de acciones, estado vacío y esqueleto de carga incluidos, y `<table>` real con encabezados. Búsqueda y filtros son opcionales por pantalla; el orden, los filtros y la búsqueda se reflejan en la URL.
+- **Cómo colapsa la tabla en celular:** cada columna declara su propia clase responsive — no hay un punto de corte global. El orden de prioridad, de lo que nunca se oculta a lo primero que se va:
+  1. La columna que **identifica** la fila (el nombre) y la de **acciones**: siempre visibles.
+  2. El dato que más ayuda a **distinguir dos filas** entre sí (la dirección, en Sedes).
+  3. Los secundarios, de mayor a menor utilidad.
+  4. Lo que un filtro activo ya vuelve redundante (con el filtro en "Activas", la columna Estado no aporta nada).
+  Dos reglas que no se negocian: **nunca hay scroll horizontal** (el smoke de rutas lo verifica a 320 px), y **ningún dato vive solo en una columna que se oculta** — si desaparece en celular, tiene que estar en el detalle.
 - Acciones en lote donde tenga sentido (ej. aprobar varias inscripciones a un Evento).
 - Filtros y búsqueda reflejados en la URL, para poder volver o compartir la vista.
 - Indicar claramente cuando el Admin está actuando **en nombre de otra Persona** (D97), con el nombre visible durante toda la acción.
