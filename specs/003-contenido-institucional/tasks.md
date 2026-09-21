@@ -65,6 +65,37 @@ errores de accesibilidad — sin depender de ningún dato cargado desde el backo
 
 ---
 
+## Phase 3b: D122 — Nosotros pasa a entrada con tarjetas (previa a US5)
+
+**Goal**: reestructurar Nosotros (T007-T009, ya entregados) de una sola página larga a una entrada
+corta ("Somos Familia") más una grilla de seis tarjetas hacia sus subpáginas — cuatro nuevas
+(Quiénes somos, Visión/misión/valores, Liderazgo, En qué creemos) y dos que ya existían sin cambio
+de URL (Palabra Profética, Ediciones VS). Va antes de la Historia 5 (D122): la marca define Open
+Graph, sitemap y navegación, y si fuera después las cuatro subpáginas nuevas nacerían sin esa
+metadata (ver D122 en `docs/05-decisiones.md` y H-77 en `specs/revision-manual/2026-09-17-001-002.md`).
+
+**Independent Test**: entrar a Nosotros sin sesión, ver la entrada corta y la grilla de seis
+tarjetas, y desde cada una llegar a su subpágina con contenido completo — en los dos temas y sin
+errores de accesibilidad.
+
+### Implementation for D122
+
+- [x] T009b [US1] Reestructurar el namespace `nosotros` de `apps/web/src/messages/es.json` (entrada + textos de las seis tarjetas) y crear los namespaces `quienesSomos`, `visionMisionValores`, `liderazgo`, `enQueCreemos` con el contenido movido de `nosotros` (FR-001, FR-002, D84, D122)
+- [x] T009c [US1] Reescribir `apps/web/src/app/(publica)/nosotros/page.tsx`: entrada corta ("Somos Familia") + grilla de seis tarjetas, cada una con `PlaceholderImagen aspecto="equipo"` como espacio de imagen reservado (FR-001, FR-003, FR-003a, D122) (depende de T009b)
+- [x] T009d [P] [US1] Crear `apps/web/src/app/(publica)/nosotros/quienes-somos/page.tsx`: identidad, historia y congregación local, con fondo alternado por sección (`bg-background`/`bg-secondary`, FR-003b) (D122) (depende de T009b)
+- [x] T009e [P] [US1] Crear `apps/web/src/app/(publica)/nosotros/vision-mision-valores/page.tsx`: visión, misión, valores, sistema de trabajo (enlaza a Primeros pasos) y el llamado de Isaías 61, con fondo alternado por sección (FR-003b) (D122) (depende de T009b)
+- [x] T009f [P] [US1] Crear `apps/web/src/app/(publica)/nosotros/liderazgo/page.tsx`: listado del equipo pastoral movido sin cambios de contenido (FR-002), con fondo alternado por sección (FR-003b) (D122) (depende de T009b)
+- [x] T009g [P] [US1] Crear `apps/web/src/app/(publica)/nosotros/en-que-creemos/page.tsx`: "En qué creemos" pendiente movido sin cambios de contenido (FR-002) (D122) (depende de T009b)
+- [x] T009h [US1] Agregar `/nosotros/quienes-somos`, `/nosotros/vision-mision-valores`, `/nosotros/liderazgo` y `/nosotros/en-que-creemos` a `RUTAS_PUBLICAS` en `apps/web/src/app/sitemap.ts` (FR-009, D82, D122) (depende de T009c-T009g)
+- [x] T009i [US1] Reescribir `apps/web/e2e/nosotros.spec.ts` (entrada + grilla de tarjetas) y agregar la cobertura e2e de las cuatro subpáginas nuevas, `auditar()` en los dos temas (H-76) (depende de T009c-T009h)
+- [x] T009j [US1] Verificar la entrada de Nosotros y las subpáginas Quiénes somos, Visión/misión/valores, Liderazgo y En qué creemos contra el checklist de `docs/15-guia-ux-ui.md` (cuatro estados, contraste en los dos temas, teclado y lector de pantalla) — D114 (depende de T009i)
+
+**Checkpoint**: Nosotros reestructurado y verificable de forma independiente; las cuatro
+subpáginas nuevas ya tienen URL, entrada de sitemap y tarea de checklist antes de que la Historia 5
+agregue la marca a la navegación.
+
+---
+
 ## Phase 4: User Story 2 - Leer la Palabra Profética y conocer Ediciones VS (Priority: P2)
 
 **Goal**: subpáginas públicas de sólo lectura para ambas entidades, cada una con su URL propia.
@@ -266,8 +297,8 @@ Task: "T050 Marca de agua en packages/ui/src/components/placeholder-imagen.tsx"
 ## Notes
 
 - **Definición de terminado (D114)**: cada pantalla nueva o modificada tiene su propia tarea de
-  checklist (`docs/15-guia-ux-ui.md`) dentro de la historia que la agrega — T009a, T020a, T020b,
-  T031a, T049a-c, T060a. Ninguna es opcional ni se resume en otra tarea.
+  checklist (`docs/15-guia-ux-ui.md`) dentro de la historia que la agrega — T009a, T009j, T020a,
+  T020b, T031a, T049a-c, T060a. Ninguna es opcional ni se resume en otra tarea.
 - Phase 8 (T062) es la tarea que corre las cuatro suites (unitarios + integración de `apps/api`, e2e
   de `apps/web` y `apps/backoffice`) — tampoco es opcional; ninguna fase se cierra sin ella
   (CLAUDE.md).

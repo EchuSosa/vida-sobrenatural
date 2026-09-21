@@ -90,16 +90,24 @@ for (const colorScheme of ['light', 'dark'] as const) {
       let resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
+      // D122/H-77: Nosotros pasa a una entrada corta más una grilla de
+      // tarjetas — la cobertura detallada de cada subpágina (Liderazgo, En
+      // qué creemos) vive en nosotros.spec.ts; acá solo se confirma que la
+      // entrada sigue con el copy real y que sus dos pendientes reales
+      // (D98: "En qué creemos" y las fotos del equipo) siguen marcados como
+      // tales, no inventados, en sus subpáginas propias.
       await page.goto('/nosotros');
       await expect(page.getByRole('heading', { name: 'Somos Familia' })).toBeVisible();
-      await expect(page.getByRole('heading', { name: 'Liderazgo' })).toBeVisible();
+
+      await page.getByRole('link', { name: 'Liderazgo' }).click();
+      await expect(page).toHaveURL(/\/nosotros\/liderazgo$/);
       await expect(page.getByText('Natalia Spetale y Juan Pablo Sosa')).toBeVisible();
-      // "En qué creemos" y las fotos son pendientes reales (D98) — no
-      // inventados: tienen que verse marcados como tales, no vacíos ni con
-      // texto de relleno.
-      await expect(page.getByRole('heading', { name: 'En qué creemos' })).toBeVisible();
-      await expect(page.getByText(/todavía no publicamos nuestra declaración de fe/i)).toBeVisible();
       await expect(page.getByText('Foto pendiente', { exact: false }).first()).toBeVisible();
+      await page.goBack();
+
+      await page.getByRole('link', { name: 'En qué creemos' }).click();
+      await expect(page).toHaveURL(/\/nosotros\/en-que-creemos$/);
+      await expect(page.getByText(/todavía no publicamos nuestra declaración de fe/i)).toBeVisible();
 
       resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);

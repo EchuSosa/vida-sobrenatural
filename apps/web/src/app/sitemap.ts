@@ -10,6 +10,10 @@ const BASE_URL = process.env.NEXTAUTH_URL ?? 'http://localhost:3001';
 export const RUTAS_PUBLICAS = [
   '/',
   '/nosotros',
+  '/nosotros/quienes-somos',
+  '/nosotros/vision-mision-valores',
+  '/nosotros/liderazgo',
+  '/nosotros/en-que-creemos',
   '/nosotros/palabra-profetica',
   '/nosotros/ediciones-vs',
   '/primeros-pasos',
