@@ -7,13 +7,15 @@ import { ChevronDown } from 'lucide-react';
 import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@vida-sobrenatural/ui';
 import { NAV_APP } from '../config/nav-app';
 import { useItemsMas } from './nav-app-mas';
+import { NavAppPerfilMenu } from './nav-app-perfil-menu';
 
 /**
  * H-37 (revisión manual ronda 3, docs/14-navegacion.md sección 2): en
- * escritorio, las secciones públicas (Nosotros, Primeros pasos, Ministerios,
- * Visitanos, Dar) se agregan a esta misma barra, agrupadas bajo "Más" — en
- * celular esta barra sigue siendo solo la de pestañas; el acceso a "Más" ahí
- * vive en `NavAppTopBarCelular` (nav-app-mas.tsx), una barra aparte.
+ * escritorio, las secciones públicas (NAV_PUBLICA — H-46/D115: Nosotros,
+ * Primeros pasos, Eventos, Visitanos — más Dar) se agregan a esta misma
+ * barra, agrupadas bajo "Más" — en celular esta barra sigue siendo solo la
+ * de pestañas; el acceso a "Más" ahí vive en `NavAppTopBarCelular`
+ * (nav-app-mas.tsx), una barra aparte.
  */
 function MenuMasEscritorio() {
   const t = useTranslations('nav');
@@ -51,7 +53,7 @@ export function NavAppBar() {
       <div className="mx-auto flex max-w-5xl items-center justify-around px-2 py-1 md:justify-start md:gap-8 md:py-3">
         {NAV_APP.map(({ href, labelKey, icon: Icon }) => {
           const activo = pathname === href;
-          return (
+          const enlace = (
             <Link
               key={href}
               href={href}
@@ -61,6 +63,18 @@ export function NavAppBar() {
               <Icon className="size-5" />
               <span>{t(labelKey)}</span>
             </Link>
+          );
+          // H-47: en escritorio, "Perfil" abre un menú (Perfil/colores de la
+          // app/cerrar sesión) en vez de navegar directo — en celular sigue
+          // siendo un link común, como el resto de esta barra.
+          if (href !== '/perfil') return enlace;
+          return (
+            <div key={href} className="contents">
+              <div className="md:hidden">{enlace}</div>
+              <div className="hidden md:block">
+                <NavAppPerfilMenu label={t(labelKey)} Icon={Icon} activo={activo} />
+              </div>
+            </div>
           );
         })}
         <div className="hidden md:block">

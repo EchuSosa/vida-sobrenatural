@@ -16,10 +16,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
     }) => {
       await page.goto('/');
 
+      // H-46 (D115): cuatro ítems fijos — Ministerios ya no es uno de ellos
+      // (pasó adentro de Primeros pasos, como última etapa del proceso).
       const nav = page.getByRole('navigation', { name: 'Principal' });
-      for (const label of ['Nosotros', 'Primeros pasos', 'Ministerios', 'Eventos', 'Visitanos']) {
+      for (const label of ['Nosotros', 'Primeros pasos', 'Eventos', 'Visitanos']) {
         await expect(nav.getByRole('link', { name: label })).toBeVisible();
       }
+      await expect(nav.getByRole('link', { name: 'Ministerios' })).toHaveCount(0);
       await expect(page.getByRole('link', { name: 'Dar' })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Ingresar' })).toBeVisible();
 
@@ -68,6 +71,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
     }) => {
       await page.goto('/primeros-pasos');
       await expect(page.getByText('Siempre que lo llamamos, Dios nos responde.', { exact: false })).toBeVisible();
+
+      // H-46 (D115): Ministerios ya no está en el menú, pero sigue siendo la
+      // última etapa del proceso acá, con su URL propia.
+      await page.getByRole('link', { name: '4. Ministerio' }).click();
+      await expect(page).toHaveURL(/\/ministerios/);
+      await expect(page.getByRole('heading', { name: 'Ministerios' })).toBeVisible();
+      await page.goBack();
 
       let resultados = await new AxeBuilder({ page }).analyze();
       expect(resultados.violations).toEqual([]);

@@ -44,7 +44,14 @@ export default function PrimerosPasosPage() {
             <strong>{t('paso3')}</strong> — {t('paso3Descripcion')}
           </li>
           <li>
-            <strong>{t('paso4')}</strong> — {t('paso4Descripcion')}
+            {/* H-46 (D115): Ministerios pasa adentro de Primeros pasos, como
+                última etapa — deja de estar en el menú principal pero
+                conserva su URL propia (/ministerios) y su entrada en el
+                sitemap (D82). */}
+            <Link href="/ministerios" className="font-medium text-primary underline-offset-2 hover:underline">
+              {t('paso4')}
+            </Link>{' '}
+            — {t('paso4Descripcion')}
           </li>
         </ol>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('notaFinal')}</p>

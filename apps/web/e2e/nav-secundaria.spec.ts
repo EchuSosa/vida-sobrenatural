@@ -110,6 +110,50 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
         await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible();
       });
+
+      // H-47 (revisión manual ronda 4): a diferencia del menú de usuario del
+      // header público (arriba), acá "Cerrar sesión" es una fila más DENTRO
+      // del propio menú — el punto a probar es que el diálogo de
+      // confirmación no queda atrapado por el DropdownMenu que se
+      // desmonta (H-11): tiene que verse solo, ya cerrado el menú.
+      test('en escritorio, el ítem Perfil de la barra de la app abre un menú con Perfil, colores de la app y cerrar sesión', async ({
+        page,
+      }) => {
+        const email = `e2e-perfil-app-escritorio-${colorScheme}-${Date.now()}@example.com`;
+        await registrarPersonaDeTest(page, email);
+
+        await page.goto('/inicio');
+        await page.waitForLoadState('networkidle');
+
+        const barra = page.getByRole('navigation', { name: 'Principal' });
+        await barra.getByRole('button', { name: 'Perfil' }).click();
+
+        const menu = page.getByRole('menu');
+        await expect(menu).toBeVisible();
+        await expect(menu.getByRole('menuitem', { name: 'Perfil' })).toBeVisible();
+        await expect(menu.getByRole('menuitem', { name: 'Claro' })).toBeVisible();
+        await expect(menu.getByRole('menuitem', { name: 'Oscuro' })).toBeVisible();
+        const itemCerrarSesion = menu.getByRole('menuitem', { name: 'Cerrar sesión' });
+        await expect(itemCerrarSesion).toBeVisible();
+
+        const resultadosMenu = await new AxeBuilder({ page }).disableRules(['region']).analyze();
+        expect(resultadosMenu.violations).toEqual([]);
+
+        await itemCerrarSesion.click();
+        // El menú se cierra ANTES de que aparezca el diálogo — si quedara
+        // anidado, el diálogo nunca terminaría de abrirse (H-11).
+        await expect(menu).toBeHidden();
+        const dialogo = page.getByRole('alertdialog', { name: '¿Cerrar sesión?' });
+        await expect(dialogo).toBeVisible();
+        await expect(dialogo).toHaveCSS('opacity', '1');
+
+        const resultadosDialogo = await new AxeBuilder({ page }).analyze();
+        expect(resultadosDialogo.violations).toEqual([]);
+
+        await dialogo.getByRole('button', { name: 'Sí, cerrar sesión' }).click();
+        await expect(page).toHaveURL('/');
+        await expect(page.getByText('Cerraste sesión.')).toBeVisible();
+      });
     });
   });
 }

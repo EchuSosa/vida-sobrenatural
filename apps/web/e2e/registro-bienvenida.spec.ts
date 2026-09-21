@@ -85,8 +85,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // antes de llegar acá, sin necesitar un login nuevo.
       await expect(page).toHaveURL(/\/registro\/listo/);
       await expect(page.getByRole('heading', { name: '¡Listo, ya sos parte!' })).toBeVisible();
-      // Acotado al contenido propio de la pantalla (no al menú/pie, que desde
-      // H-05 sí están presentes y legítimamente incluyen "Ministerios").
+      // Acotado al contenido propio de la pantalla, no al menú/pie (desde
+      // H-05 están presentes ahí; "Ministerios" ya no es uno de sus ítems
+      // desde H-46/D115, pero el resto de esta aserción no depende de eso).
       const contenido = page.locator('main');
       for (const fase of ['Vida Nueva', 'Vida de Servicio', 'Ministerio']) {
         await expect(contenido.getByText(fase)).toHaveCount(0);

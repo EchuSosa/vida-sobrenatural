@@ -10,10 +10,17 @@ export interface ItemNavPublica {
   destacado?: boolean;
 }
 
+/**
+ * H-46 (revisión manual ronda 4, D115): cuatro ítems fijos, sin submenús
+ * desplegables — con lo que suma el spec 003 el menú llegaba a siete
+ * secciones y no entraba en escritorio. Ministerios pasa adentro de
+ * Primeros pasos (última etapa del proceso, ver esa página) — conserva su
+ * URL propia (`/ministerios`) y su entrada en el sitemap (D82, sitemap.ts),
+ * solo deja de estar en este menú.
+ */
 export const NAV_PUBLICA: ItemNavPublica[] = [
   { href: '/nosotros', labelKey: 'nosotros' },
   { href: '/primeros-pasos', labelKey: 'primerosPasos' },
-  { href: '/ministerios', labelKey: 'ministerios' },
   { href: '/eventos', labelKey: 'eventos' },
   { href: '/visitanos', labelKey: 'visitanos' },
 ];

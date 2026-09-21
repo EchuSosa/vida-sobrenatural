@@ -10,10 +10,11 @@ import { NAV_PUBLICA, NAV_PUBLICA_ACCIONES } from '../config/nav-publica';
 /**
  * H-37 (revisión manual ronda 3, D107, docs/14-navegacion.md sección 2): la
  * app con sesión no tenía forma de llegar a las secciones públicas
- * (Nosotros, Primeros pasos, Ministerios, Visitanos, Dar) — NAV_APP solo
- * tiene las cinco pestañas propias. El "volver" (FR-047) no necesita código
- * nuevo: el header público ya ofrece "Ir a la app" de forma permanente
- * (H-19, FR-042) en cualquier pantalla pública, incluidas estas.
+ * (NAV_PUBLICA + NAV_PUBLICA_ACCIONES — H-46/D115 las bajó a cuatro fijas
+ * más Dar/Ingresar) — NAV_APP solo tiene las cinco pestañas propias. El
+ * "volver" (FR-047) no necesita código nuevo: el header público ya ofrece
+ * "Ir a la app" de forma permanente (H-19, FR-042) en cualquier pantalla
+ * pública, incluidas estas.
  */
 const ITEMS_MAS = [...NAV_PUBLICA, ...NAV_PUBLICA_ACCIONES];
 

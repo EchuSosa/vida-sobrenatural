@@ -25,7 +25,8 @@ import {
 import { CerrarSesionBoton } from './cerrar-sesion-boton';
 
 /** D116: dos opciones visibles, no tres — "sistema" se saca de la interfaz. */
-const OPCIONES_TEMA: { value: TemaPreferidoVisible; labelKey: string; Icono: typeof Sun }[] = [
+/** Exportado: también lo usa `nav-app-perfil-menu.tsx` (H-47) — mismas dos opciones, mismo ícono. */
+export const OPCIONES_TEMA: { value: TemaPreferidoVisible; labelKey: string; Icono: typeof Sun }[] = [
   { value: 'claro', labelKey: 'temaClaro', Icono: Sun },
   { value: 'oscuro', labelKey: 'temaOscuro', Icono: Moon },
 ];
