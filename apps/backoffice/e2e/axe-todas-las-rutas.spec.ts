@@ -32,3 +32,31 @@ for (const tema of ['claro', 'oscuro'] as const) {
     });
   });
 }
+
+/**
+ * H-62 (revisión manual ronda 5, punto 5): mismo chequeo que
+ * apps/web/e2e/axe-todas-las-rutas.spec.ts — ver el comentario ahí. 320 px
+ * es el piso real, 375 el iPhone SE de la ronda de verificación.
+ */
+const ANCHOS_CELULAR = [
+  { width: 320, height: 568 },
+  { width: 375, height: 667 },
+];
+
+for (const viewport of ANCHOS_CELULAR) {
+  test.describe(`sin scroll horizontal a ${viewport.width}px`, () => {
+    test.use({ viewport });
+
+    test('todas las rutas del backoffice', async ({ page }) => {
+      await loguearseComoAdminE2E(page);
+      for (const item of NAV_BACKOFFICE) {
+        await page.goto(item.href);
+        await page.waitForLoadState('networkidle');
+        const sinDesborde = await page.evaluate(
+          () => document.scrollingElement!.scrollWidth <= window.innerWidth,
+        );
+        expect(sinDesborde, `${item.href}: hay scroll horizontal a ${viewport.width}px`).toBe(true);
+      }
+    });
+  });
+}
