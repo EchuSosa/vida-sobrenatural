@@ -70,3 +70,12 @@
   research.md no tenía capturado. `spec.md`, `plan.md`, `research.md` y `data-model.md` actualizados
   para no seguir afirmando que los PNG originales siguen en `docs/marca/`. Checklist no cambia de
   estado.
+- 2026-09-21 (sexta revisión, `/speckit.analyze` sobre `plan.md`/`tasks.md`, no sobre `spec.md`):
+  8 hallazgos aplicados — contradicción sobre las dependencias de la Historia 5 en la estrategia
+  multi-persona, dos conteos desactualizados (6 archivos de marca no 4; 5 historias con e2e no 4),
+  la promesa de test unitario de "único-vigente" corregida a integración (Principio VI: el nivel se
+  elige por capa, no se agrega un unitario que sólo probaría un mock de Prisma), FR-027 y FR-029
+  nombrados explícitamente en las tareas de UI de Libro que antes sólo los cubrían implícito, y la
+  dependencia de `seed-demo.ts` (T044) sobre `seed.ts` (T015) más su clave de idempotencia, ambas
+  ausentes antes pese al patrón ya establecido (D120). Checklist no cambia de estado — ningún ítem
+  dependía de estos detalles de plan/tasks.

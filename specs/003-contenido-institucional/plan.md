@@ -59,6 +59,14 @@ Primer uso real de almacenamiento de archivos del proyecto: `StorageService` con
 dev (carpeta fuera del control de versiones, servida por `apps/api` en una ruta pública propia — ver
 Decisión 3 de `research.md`), migrable a un proveedor S3-compatible sin tocar la lógica de negocio
 (D110, docs/10-stack-tecnico.md) — la migración de proveedor queda fuera de alcance de este spec.
+**Consecuencia, no sólo arquitectura**: mientras la decisión de hosting siga pospuesta (D75), esas
+portadas no son durables — en la mayoría de las plataformas candidatas el disco del contenedor es
+efímero y cada despliegue nuevo lo borra, StorageService y todo. Por eso este spec **no carga
+todavía ninguna portada real** de los 8 libros del catálogo: quedan con `PlaceholderImagen` hasta
+que exista almacenamiento persistente (S3-compatible u otro) — cargarlas antes sería subir un
+archivo que el próximo deploy borra sin aviso. El botón de subir portada funciona en dev igual
+(FR-021 a FR-027 se implementan y se prueban), pero usarlo con material real de la iglesia queda
+para cuando D75 se resuelva.
 
 **Testing**: Jest (unit + integración, `apps/api`, ya en uso) y Playwright (e2e, `apps/web` y
 `apps/backoffice`, ya en uso), incluyendo `auditar()` (H-76) para los e2e nuevos en vez de
@@ -89,8 +97,9 @@ app (D67, fuera de alcance).
 **Scale/Scope**: 1 página ampliada (Nosotros) + 2 subpáginas nuevas en `apps/web`; 2 secciones nuevas
 en `apps/backoffice` (Palabra Profética, Libros con su papelera); 2 modelos de Prisma nuevos; ~10-12
 endpoints nuevos en `apps/api` (CRUD de ambas entidades + subida/eliminación de portada + servido
-público del archivo); 1 implementación nueva (`StorageService`, primera vez en el proyecto); 4
-archivos fuente de marca derivados a favicon/ícono de PWA/marca de agua/logotipo, aplicados en 2 apps.
+público del archivo); 1 implementación nueva (`StorageService`, primera vez en el proyecto); 6
+archivos fuente de marca (2 isotipo + 4 logotipo) derivados a favicon/ícono de PWA/marca de
+agua/logotipo, aplicados en 2 apps.
 Cubre las 5 historias de `spec.md`.
 
 ## Constitution Check
@@ -106,7 +115,7 @@ Evaluado contra `.specify/memory/constitution.md` v1.2.0 (11 principios):
 | III. Soft delete obligatorio | ✅ | `Libro` usa `activo` + `eliminadoEn`/`eliminadoPor` (D119), igual que `Sede`. `PalabraProfetica` no tiene borrado en absoluto (append-only vía `vigente`, FR-013) — no es una excepción al principio, es que nunca se elimina un registro, ni física ni lógicamente. |
 | IV. Simplicidad / no artefactos prematuros | ✅ | `Libro` no copia el bloqueo por "datos relacionados" de Sede porque hoy no tiene dependientes reales en el modelo (FR-020) — evita una regla de negocio sin ningún caso que la dispare todavía; queda explícito que es una condición del estado actual, no una decisión permanente (el backlog de Ventas de Ediciones VS, `docs/08-roadmap-producto.md`, la reactivaría el día que exista esa entidad). El proveedor S3-compatible de `StorageService` queda como interfaz, no como implementación: no se construye antes de necesitarse. |
 | V. Seguridad | ✅ | Alta/edición/subida/borrado de ambas entidades exigen rol Admin (`RolesGuard`), Pastor/Pastora queda en solo lectura (D64, FR-028/FR-029); cualquier otro rol no accede ni por URL directa (FR-030). El endpoint de subida de portada requiere sesión Admin; el archivo servido es público mientras el endpoint que lo genera no lo es (D110, distinto del caso de comprobantes de Pago, que son privados con URL firmada). |
-| VI. Testing pragmático por capas | ✅ | Lógica con ramas (validación/extracción de id de YouTube, único-vigente, procesamiento de portada) recibe test unitario; endpoints de creación/edición/subida reciben test de integración; los e2e nuevos cubren las 4 historias con `auditar()` (H-76). |
+| VI. Testing pragmático por capas | ✅ | Validación/extracción de id de YouTube y procesamiento de portada reciben test unitario (lógica pura, sin estado); la regla "una sola vigente a la vez" es una invariante de transacción contra la base real, así que se prueba en integración (T028) y no en unitario — simularla con un mock de Prisma probaría el simulacro, no la regla (Principio VI: el nivel se elige por capa, no todo pasa por unitario). Endpoints de creación/edición/subida reciben test de integración; los e2e nuevos cubren las 5 historias con `auditar()` (H-76). |
 | VII. Accesibilidad e inclusión | ✅ | Texto alternativo obligatorio en cuanto hay portada (D83, FR-025); el video con miniatura+clic no depende solo de color para indicar que es interactivo; `PlaceholderImagen` ya lleva `role="img"` + `aria-label`, y su nueva marca de agua queda decorativa para no competir con ese texto (FR-034); el logotipo lleva su propio texto alternativo salvo que un título vecino ya diga el nombre (FR-042); SC-004 exige axe en claro y oscuro sobre las 5 pantallas nuevas más los usos transversales de marca. |
 | VIII. Experiencia consistente | ✅ | Cuatro estados (cargando/vacío/error/éxito) en cada pantalla nueva desde el principio (D114) — vacío explícito para "sin Palabra Profética vigente" (FR-006) y "sin libros activos" (FR-008); `useEnvio` (H-57) en los formularios de ambas secciones del backoffice. |
 | IX. Preparada para varios idiomas | ✅ | Todo el contenido institucional nuevo de Nosotros vive en `next-intl` (D84), no en la base — la base solo guarda los datos variables (Palabra Profética, Libros). |

@@ -76,6 +76,12 @@ Nest sirve estáticos nativamente (`app.useStaticAssets` del adapter Express) si
 servirlo directo por HTTP estático (cada request pasaría por Node + Prisma) y no es el camino que
 D110 ya fijó; se rechaza sin más análisis por contradecir una decisión ya tomada.
 
+**No durable hasta que exista hosting (D75)**: `LocalStorageProvider` cumple la interfaz, pero el
+disco donde escribe es efímero en la mayoría de las plataformas candidatas — un despliegue nuevo lo
+borra. Este spec implementa y prueba la subida (funciona en dev), pero no carga ninguna portada real
+del catálogo con ella (ver `plan.md` § Storage): eso espera a que D75 se resuelva con un proveedor
+que sí persista.
+
 ## 4. Validación y extracción de id de YouTube
 
 **Decision**: Una función pura (sin librería nueva) que reconoce las formas habituales de URL de
