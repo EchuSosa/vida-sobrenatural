@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
+import { buttonVariants } from '@vida-sobrenatural/ui';
 import { AccionRegistro } from '../../../components/accion-registro';
 import { AvisoPorQuery } from '../../../components/aviso-por-query';
 
@@ -23,17 +24,23 @@ export default function PrimerosPasosPage() {
 
       {/* H-02 (revisión manual, actualización 2026-09-18): copy real de
           docs/12-contenido-bienvenida.md, sección "Hero". */}
-      <blockquote className="border-l-2 border-primary pl-4 italic text-zinc-600 dark:text-zinc-400">
+      <blockquote className="border-l-2 border-primary pl-4 italic text-muted-foreground">
         “{t('fraseTexto')}”
         <footer className="mt-1 text-sm not-italic">— {t('fraseAutor')}</footer>
       </blockquote>
 
-      <p className="text-lg leading-7 text-zinc-700 dark:text-zinc-300">{t('intro')}</p>
+      <p className="text-lg leading-7 text-foreground">{t('intro')}</p>
 
-      <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+      <section className="flex flex-col gap-3 rounded-lg border border-border p-5">
         <h2 className="text-xl font-medium">{t('comoSigue')}</h2>
-        <p className="text-zinc-700 dark:text-zinc-300">{t('comoSigueDescripcion')}</p>
-        <ol className="flex flex-col gap-2 text-zinc-700 dark:text-zinc-300">
+        <p className="text-foreground">{t('comoSigueDescripcion')}</p>
+        {/*
+          H-55 (revisión manual, D81/WCAG 1.4.1): los cuatro pasos se ven
+          iguales — antes el paso 4 era un <Link> distinguido solo por color
+          (con subrayado recién al pasar el mouse, que en celular no existe).
+          El enlace a /ministerios va aparte, explícito, debajo de la lista.
+        */}
+        <ol className="flex flex-col gap-2 text-foreground">
           <li>
             <strong>{t('paso1')}</strong> — {t('paso1Descripcion')}
           </li>
@@ -48,20 +55,17 @@ export default function PrimerosPasosPage() {
                 última etapa — deja de estar en el menú principal pero
                 conserva su URL propia (/ministerios) y su entrada en el
                 sitemap (D82). */}
-            <Link href="/ministerios" className="font-medium text-primary underline-offset-2 hover:underline">
-              {t('paso4')}
-            </Link>{' '}
-            — {t('paso4Descripcion')}
+            <strong>{t('paso4')}</strong> — {t('paso4Descripcion')}
           </li>
         </ol>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('notaFinal')}</p>
+        <Link href="/ministerios" className="w-fit font-medium text-primary underline underline-offset-2">
+          {t('conoceMinisterios')}
+        </Link>
+        <p className="text-sm text-muted-foreground">{t('notaFinal')}</p>
       </section>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Link
-          href="/visitanos"
-          className="flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-center font-medium text-primary-foreground transition-colors hover:bg-primary/80"
-        >
+        <Link href="/visitanos" className={buttonVariants({ size: 'xl' })}>
           {t('verSede')}
         </Link>
         <AccionRegistro />

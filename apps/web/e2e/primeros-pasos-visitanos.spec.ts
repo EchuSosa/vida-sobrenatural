@@ -72,9 +72,17 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto('/primeros-pasos');
       await expect(page.getByText('Siempre que lo llamamos, Dios nos responde.', { exact: false })).toBeVisible();
 
+      // H-55 (D81/WCAG 1.4.1): los cuatro pasos se ven iguales — antes el 4
+      // era un <Link> distinguido solo por color. Los cuatro son <strong>.
+      const lista = page.locator('ol');
+      await expect(lista.locator('strong')).toHaveCount(4);
+      await expect(lista.locator('strong').nth(3)).toHaveText('4. Ministerio');
+
       // H-46 (D115): Ministerios ya no está en el menú, pero sigue siendo la
-      // última etapa del proceso acá, con su URL propia.
-      await page.getByRole('link', { name: '4. Ministerio' }).click();
+      // última etapa del proceso acá, con su URL propia. H-55: el enlace
+      // real va aparte, debajo de la lista, no en el paso 4.
+      await expect(page.getByRole('link', { name: '4. Ministerio' })).toHaveCount(0);
+      await page.getByRole('link', { name: 'Conocé los ministerios' }).click();
       await expect(page).toHaveURL(/\/ministerios/);
       await expect(page.getByRole('heading', { name: 'Ministerios' })).toBeVisible();
       await page.goBack();
