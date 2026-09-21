@@ -43,6 +43,26 @@ description: "Task list template for feature implementation"
 
   DO NOT keep these sample tasks in the generated tasks.md file.
   ============================================================================
+  CONSTITUTION — Governance, "Definición de terminado" (D114): the two rules
+  below are NOT illustrative sample content — they are structural
+  requirements that every generated tasks.md MUST satisfy, independent of
+  which sample task IDs get replaced.
+
+  1. For EVERY new or modified screen in a user story's implementation
+     section, include its own task that verifies that screen against the
+     checklist at the end of docs/15-guia-ux-ui.md (four states, a single
+     primary action, button order, tone, keyboard/screen-reader access,
+     contrast in both themes). Citing the checklist in a task description is
+     not enough — each screen needs its own checklist task, or the omission
+     is invisible until a manual review catches it (see H-43: Principio VIII
+     already required this and was still missed across almost the whole app,
+     because nothing but a human remembering checked implementation against
+     it).
+  2. The Polish & Cross-Cutting phase MUST include one closing task that runs
+     the three suites from docs/00-README.md's convention — API unit tests,
+     API integration tests (separate config, `--filter api run test:e2e`),
+     and web e2e — before the spec's phase is considered done.
+  ============================================================================
 -->
 
 ## Phase 1: Setup (Shared Infrastructure)
@@ -95,6 +115,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
 - [ ] T016 [US1] Add validation and error handling
 - [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T017a [US1] Verificar [pantalla] contra el checklist de docs/15-guia-ux-ui.md (cuatro estados, una sola acción principal, orden de botones, tono, teclado y lector de pantalla, contraste en los dos temas) — una tarea por pantalla nueva o modificada de esta historia, no una sola genérica
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -117,6 +138,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T021 [US2] Implement [Service] in src/services/[service].py
 - [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
 - [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T023a [US2] Verificar [pantalla] contra el checklist de docs/15-guia-ux-ui.md — una tarea por pantalla nueva o modificada de esta historia
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -138,6 +160,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
 - [ ] T027 [US3] Implement [Service] in src/services/[service].py
 - [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T028a [US3] Verificar [pantalla] contra el checklist de docs/15-guia-ux-ui.md — una tarea por pantalla nueva o modificada de esta historia
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -157,6 +180,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
+- [ ] TXXX Correr las tres suites de la convención de docs/00-README.md antes de dar la fase por cerrada: unitarios de apps/api (`pnpm --filter api run test`), integración (`pnpm --filter api run test:e2e`, config aparte) y e2e de apps/web (`pnpm --filter web exec playwright test`)
 
 ---
 
@@ -250,3 +274,8 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
+- Definición de terminado (Constitución, Governance, D114): cada pantalla nueva o modificada
+  necesita su propia tarea de checklist (docs/15-guia-ux-ui.md) dentro de la historia que la
+  agrega — no una tarea genérica al final ni solo una cita al checklist. La fase de Polish
+  necesita su propia tarea que corra las tres suites de docs/00-README.md. Ninguna de las dos
+  es opcional ni se resume en otra tarea.
