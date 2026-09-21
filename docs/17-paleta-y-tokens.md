@@ -1,6 +1,6 @@
 # Paleta y tokens de color
 
-> Propuesta concreta para aprobar o rechazar mirándola. Deriva de `09-notas-identidad-visual.md`
+> **Aplicada** en `f3622ad` (tokens) — D118. Propuesta concreta para aprobar o rechazar mirándola. Deriva de `09-notas-identidad-visual.md`
 > (paleta del libro *Vida de Servicio*) y respeta D81 (contrastes WCAG 2.2 AA), D95 y D106
 > (modo claro por defecto, ambos modos verificados). Todos los contrastes de este documento
 > están **medidos**, no estimados.
@@ -127,6 +127,16 @@ Texto sobre el sidebar: 13.9:1 en claro, 14.3:1 en oscuro.
 **Ojo con los bordes del modo oscuro:** hoy son `oklch(1 0 0 / 10%)` y `/ 15%`, o sea blanco
 translúcido. Se reemplazan por los valores opacos de arriba — el `--input` translúcido no llegaba
 a 3:1 contra el fondo.
+
+### Hover de los botones sólidos (H-56)
+
+El hover **no se hace bajando la opacidad**: `bg-primary/80` acerca el botón al fondo y el texto
+blanco cae de 5.8:1 a 3.9:1, por debajo de AA. Se cambia de tono.
+
+```css
+:root { --primary-hover: oklch(0.460 0.118 42); }  /* 7.5:1 con blanco */
+.dark { --primary-hover: oklch(0.760 0.100 45); }  /* 8.1:1 con el texto oscuro */
+```
 
 ## Contrastes medidos
 
