@@ -156,8 +156,36 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(modal).toBeVisible();
       await expect(page.getByText('Sede creada.')).toBeHidden();
       // Sin axe acá a propósito: este test verifica el estado de
-      // validación, no accesibilidad — los otros tests de este archivo ya
-      // cubren la Sede con axe en los dos temas.
+      // validación, no accesibilidad — H-73 (más abajo) audita el botón de
+      // envío en su estado normal, y H-50 lo hace con un error real visible.
+    });
+
+    // H-73 (revisión manual ronda 8): el botón de envío de este modal midió
+    // 4.46 contra el mínimo de 4.5 en un axe corrido apenas se abría el
+    // panel. Causa real: el panel entra con `transition duration-200` de
+    // `opacity: 0` a `1` (Sheet, D95-style) — sin esperar a que asiente
+    // (mismo patrón que el resto de este archivo/apps/web con diálogos y
+    // toasts, ver `toHaveCSS('opacity', '1')`), axe mide un fotograma a
+    // mitad de la transición, con el botón todavía semitransparente sobre
+    // el fondo de la página. Confirmado con getComputedStyle: `opacity` da
+    // "0" apenas `toBeVisible()` resuelve. bg-primary + text-primary-
+    // foreground miden 5.80:1 (docs/17-paleta-y-tokens.md) — no hay nada
+    // que tocar en la paleta ni en la clase base del Button.
+    test('H-73: el botón "Crear Sede" cumple contraste una vez que el panel asienta su transición', async ({
+      page,
+    }) => {
+      await loguearseComoAdminE2E(page);
+      await page.goto('/sedes');
+      await page.waitForLoadState('networkidle');
+
+      await page.getByRole('button', { name: 'Crear Sede' }).click();
+      const modal = page.getByRole('dialog', { name: 'Crear Sede' });
+      await expect(modal).toBeVisible();
+      await expect(modal).toHaveCSS('opacity', '1');
+      await page.mouse.move(0, 0);
+
+      const resultados = await crearAxeBuilder(page).analyze();
+      expect(resultados.violations).toEqual([]);
     });
 
     test('desactivar y reactivar una Sede desde su detalle', async ({ page }) => {
