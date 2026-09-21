@@ -7,6 +7,7 @@
 module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '..',
+  globalSetup: '<rootDir>/test/global-setup.cjs',
   setupFiles: ['<rootDir>/test/load-test-env.cjs'],
   testRegex: '(/test/.*\\.e2e-spec\\.ts$|/test/integration/.*\\.integration-spec\\.ts$)',
   extensionsToTreatAsEsm: ['.ts'],

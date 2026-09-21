@@ -58,8 +58,10 @@ docker compose exec -T postgres psql -U vidasobrenatural -d vidasobrenatural \
 - **`ALLOW_TEST_LOGIN=true`** tiene que estar en el `.env.local` de **las dos** apps
   (`apps/web` y `apps/backoffice`). Sin eso, cualquier e2e que use el login de prueba falla.
   Esos archivos no están en el repositorio, así que hay que ponerlo a mano en cada máquina.
-- La suite de integración de la API necesita su propia base: si `vidasobrenatural_test` no
-  existe, hay que crearla y correrle las migraciones antes de la primera corrida.
+
+La suite de integración de la API necesita su propia base (`vidasobrenatural_test`), pero ya no
+hay que crearla a mano (H-59): `pnpm --filter api run test:e2e` la crea y le corre las
+migraciones sola si no existe, antes de la primera corrida.
 
 ## Si tocás `packages/shared-types`
 
