@@ -11,16 +11,23 @@ export interface ErrorResumen {
  * Resumen de errores de formulario — H-50 (revisión manual ronda 4),
  * docs/15-guia-ux-ui.md: "resumen arriba con enlaces a cada campo, foco
  * movido al resumen" al enviar con errores. Cada campo tiene que tener
- * `id={`campo-${campo}`}` para que los enlaces funcionen. Se enfoca solo
- * cuando el conjunto de errores cambia (aparece por primera vez, o cambia
- * tras un nuevo intento de envío) — no en cada render del formulario.
+ * `id={`campo-${campo}`}` para que los enlaces funcionen.
+ *
+ * `foco` (H-72, `useValidacionCampos().foco`) es lo que dispara el efecto de
+ * abajo — un contador que solo avanza en un intento de envío. Antes de H-72
+ * se derivaba del CONTENIDO de `errores`, que entonces solo cambiaba al
+ * enviar; con la revalidación al escribir/salir de un campo (H-72) ese
+ * contenido cambia todo el tiempo, y enfocar el resumen en esos casos le
+ * robaría el foco al campo que la persona está usando en ese momento.
  */
 export function ResumenErrores({
   errores,
   titulo = 'Revisá estos campos:',
+  foco,
 }: {
   errores: ErrorResumen[];
   titulo?: string;
+  foco?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const clave = errores.map((e) => `${e.campo}:${e.mensaje}`).join('|');
@@ -29,8 +36,8 @@ export function ResumenErrores({
     if (errores.length > 0) {
       ref.current?.focus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- se enfoca por `clave` (el contenido de los errores), no por la identidad de `errores`, que cambia en cada render aunque el error sea el mismo.
-  }, [clave]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `foco` (si se pasa) es la única dependencia real: un contador que solo avanza en un intento de envío. Sin él, se cae al viejo comportamiento por `clave` (contenido) para no romper un uso directo sin el hook.
+  }, [foco ?? clave]);
 
   if (errores.length === 0) return null;
 

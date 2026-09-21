@@ -55,6 +55,7 @@ export function CampoTelefono({
   numero,
   onChangeCodigo,
   onChangeNumero,
+  onBlurNumero,
   error,
   errorTexto,
   placeholderNumero,
@@ -68,6 +69,8 @@ export function CampoTelefono({
   numero: string;
   onChangeCodigo: (value: string) => void;
   onChangeNumero: (value: string) => void;
+  /** H-72: revalidar al salir del campo — el código de país no lo necesita (siempre válido, es un <select>). */
+  onBlurNumero?: () => void;
   error?: boolean;
   errorTexto?: string;
   placeholderNumero?: string;
@@ -105,6 +108,7 @@ export function CampoTelefono({
           value={numero}
           placeholder={placeholderNumero}
           onChange={(e) => onChangeNumero(e.target.value.replace(/[^0-9]/g, ''))}
+          onBlur={onBlurNumero}
           className="h-10 min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         />
       </div>

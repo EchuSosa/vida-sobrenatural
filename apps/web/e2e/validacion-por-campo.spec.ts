@@ -26,7 +26,16 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto('/perfil');
       await page.waitForLoadState('networkidle');
 
-      await page.getByLabel('Número de teléfono').fill('123');
+      const telefono = page.getByLabel('Número de teléfono');
+      await telefono.fill('123');
+      // H-72: salir del campo ahora revalida en el momento — sin este blur
+      // explícito, el propio click en "Guardar cambios" dispara ese blur (el
+      // teléfono todavía tiene el foco) y el mensaje que aparece corre el
+      // resto del formulario antes de que el click llegue a destino. Un
+      // blur previo es lo que haría alguien tabulando o clickeando en otro
+      // lado primero.
+      await telefono.blur();
+      await expect(page.locator('#campo-telefono-error')).toBeVisible();
       await page.getByRole('button', { name: 'Guardar cambios' }).click();
 
       const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos:' });
@@ -42,6 +51,35 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       const resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
+    });
+
+    test('H-72: en Perfil, el error de un campo se limpia al escribir y vuelve al salir si sigue mal, sin reenviar', async ({
+      page,
+    }) => {
+      const email = `e2e-h72-perfil-${colorScheme}-${Date.now()}@example.com`;
+      await registrarPersonaDeTest(page, email);
+      await page.goto('/perfil');
+      await page.waitForLoadState('networkidle');
+
+      const telefono = page.getByLabel('Número de teléfono');
+      const errorTelefono = page.locator('#campo-telefono-error');
+
+      // Formato inválido + salir del campo: aparece el error, sin haber enviado.
+      await telefono.fill('123');
+      await telefono.blur();
+      await expect(errorTelefono).toBeVisible();
+      await expect(errorTelefono).toHaveText('Ingresá un teléfono con código de área, por ejemplo 221 555 1234.');
+
+      // Escribir de nuevo lo limpia al toque, antes de volver a salir del campo.
+      await telefono.fill('1234');
+      await expect(errorTelefono).toBeHidden();
+
+      // Corregido y fuera del campo: se queda limpio (no "vuelve" porque ahora es válido).
+      await telefono.fill('92211230000');
+      await telefono.blur();
+      await expect(errorTelefono).toBeHidden();
+
+      await expect(page.getByText('Guardamos tus cambios.')).toBeHidden();
     });
 
     test('Registro: un teléfono inválido cargado en el paso 2 se señala aunque el error llegue recién al enviar en el paso 4', async ({

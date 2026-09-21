@@ -1,6 +1,7 @@
 export { cn } from './lib/utils';
 export { useIsMobile } from './hooks/use-mobile';
 export { useEnvio } from './hooks/use-envio';
+export { useValidacionCampos, type ValidacionCampo } from './hooks/use-validacion-campos';
 export { EstadoVacio, type EstadoVacioProps } from './components/estado-vacio';
 export { EstadoActivoBadge, type EstadoActivoBadgeProps } from './components/estado-activo-badge';
 export { PlaceholderImagen, type PlaceholderImagenProps } from './components/placeholder-imagen';

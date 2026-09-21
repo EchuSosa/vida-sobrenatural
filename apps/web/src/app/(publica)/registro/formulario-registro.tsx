@@ -1,12 +1,13 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   type Sede,
   type ErrorCode,
+  TELEFONO_REGEX,
   apiFetch,
   ApiError,
   erroresPorCampo,
@@ -20,7 +21,8 @@ import {
   ResumenErrores,
   MensajeErrorCampo,
   useEnvio,
-  type ErrorResumen,
+  useValidacionCampos,
+  type ValidacionCampo,
 } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../../../hooks/use-opciones-registro';
 
@@ -101,12 +103,11 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
   const [error, setError] = useState<string | null>(
     errorSedes ? 'No pudimos cargar las Sedes. Volvé a intentarlo más tarde.' : null,
   );
-  const [camposVacios, setCamposVacios] = useState<Record<string, boolean>>({});
-  const [mensajesServidor, setMensajesServidor] = useState<Record<string, string>>({});
-  const resumenErrores: ErrorResumen[] = useMemo(
-    () => Object.entries(mensajesServidor).map(([campo, mensaje]) => ({ campo, mensaje })),
-    [mensajesServidor],
-  );
+  // H-72 (revisión manual ronda 7): un error se limpia al escribir y se
+  // revalida al salir del campo — antes solo se limpiaba al reintentar el
+  // envío (docs/15-guia-ux-ui.md pide las dos cosas). Pieza compartida
+  // (H-50), usada igual en los seis formularios.
+  const validacion = useValidacionCampos();
   const [datos, setDatos] = useState<DatosFormulario>({
     apellido: '',
     nombre: '',
@@ -187,13 +188,34 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
 
   function actualizar<K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) {
     setDatos((prev) => ({ ...prev, [campo]: valor }));
-    if (camposVacios[campo]) {
-      setCamposVacios((prev) => ({ ...prev, [campo]: false }));
-    }
-    if (mensajesServidor[campo]) {
-      setMensajesServidor((prev) => Object.fromEntries(Object.entries(prev).filter(([c]) => c !== campo)));
-    }
+    // "telefono" es el nombre del campo del lado de la API/el resumen —
+    // CampoTelefono en sí actualiza "telefonoCodigoPais"/"telefonoNumero".
+    validacion.limpiar(campo === 'telefonoCodigoPais' || campo === 'telefonoNumero' ? 'telefono' : campo);
   }
+
+  // H-72: una regla por campo, reutilizada en el onBlur de cada uno y al
+  // intentar avanzar de paso con algo sin completar — la misma pieza que
+  // decide "¿está bien?" decide también qué mensaje mostrar.
+  const requerido: ValidacionCampo<string> = { esValido: (v) => v.trim() !== '', mensaje: t('errorCampo') };
+  const validaciones = {
+    apellido: requerido,
+    nombre: requerido,
+    genero: requerido,
+    fechaNacimiento: requerido,
+    telefono: {
+      esValido: (v: { codigoPais: string; numero: string }) => TELEFONO_REGEX.test(`${v.codigoPais} ${v.numero}`),
+      mensaje: mensajeDeCampo('TELEFONO_INVALIDO', t('campos.numeroTelefono')),
+    } satisfies ValidacionCampo<{ codigoPais: string; numero: string }>,
+    direccion: requerido,
+    sedeId: requerido,
+    estadoCivil: requerido,
+    profesion: requerido,
+    profesionDetalle: {
+      esValido: () => datos.profesion !== 'otro' || datos.profesionDetalle.trim() !== '',
+      mensaje: t('errorCampo'),
+    } satisfies ValidacionCampo<string>,
+    tiempoCongregacion: requerido,
+  };
 
   function pasoValido(numeroPaso: number): boolean {
     if (numeroPaso === 1) {
@@ -211,10 +233,36 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
     return true;
   }
 
+  function revalidarPaso(numeroPaso: number) {
+    if (numeroPaso === 1) {
+      validacion.revalidar('apellido', apellidoEfectivo, validaciones.apellido);
+      validacion.revalidar('nombre', nombreEfectivo, validaciones.nombre);
+      validacion.revalidar('genero', datos.genero, validaciones.genero);
+      validacion.revalidar('fechaNacimiento', datos.fechaNacimiento, validaciones.fechaNacimiento);
+    } else if (numeroPaso === 2) {
+      validacion.revalidar(
+        'telefono',
+        { codigoPais: datos.telefonoCodigoPais, numero: datos.telefonoNumero },
+        validaciones.telefono,
+      );
+      validacion.revalidar('direccion', datos.direccion, validaciones.direccion);
+      validacion.revalidar('sedeId', datos.sedeId, validaciones.sedeId);
+    } else if (numeroPaso === 3) {
+      validacion.revalidar('estadoCivil', datos.estadoCivil, validaciones.estadoCivil);
+      validacion.revalidar('profesion', datos.profesion, validaciones.profesion);
+      if (datos.profesion === 'otro') {
+        validacion.revalidar('profesionDetalle', datos.profesionDetalle, validaciones.profesionDetalle);
+      } else {
+        validacion.limpiar('profesionDetalle');
+      }
+      validacion.revalidar('tiempoCongregacion', datos.tiempoCongregacion, validaciones.tiempoCongregacion);
+    }
+  }
+
   function siguiente() {
     if (!pasoValido(paso)) {
-      // Marca los campos vacíos del paso actual sin llamar a la API todavía.
-      setCamposVacios((prev) => ({ ...prev, ...camposVaciosDelPaso(paso) }));
+      // Marca los campos sin completar del paso actual sin llamar a la API todavía.
+      revalidarPaso(paso);
       return;
     }
     setPaso((p) => Math.min(p + 1, TOTAL_PASOS));
@@ -224,36 +272,12 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
     setPaso((p) => Math.max(p - 1, 1));
   }
 
-  function camposVaciosDelPaso(numeroPaso: number): Record<string, boolean> {
-    if (numeroPaso === 1) {
-      return {
-        apellido: !apellidoEfectivo,
-        nombre: !nombreEfectivo,
-        genero: !datos.genero,
-        fechaNacimiento: !datos.fechaNacimiento,
-      };
-    }
-    if (numeroPaso === 2) {
-      return {
-        telefono: !datos.telefonoNumero,
-        direccion: !datos.direccion,
-        sedeId: !datos.sedeId,
-      };
-    }
-    return {
-      estadoCivil: !datos.estadoCivil,
-      profesion: !datos.profesion,
-      profesionDetalle: datos.profesion === 'otro' && !datos.profesionDetalle,
-      tiempoCongregacion: !datos.tiempoCongregacion,
-    };
-  }
-
   const edadAproximada = calcularEdadAproximada(datos.fechaNacimiento);
   const esProbablementeMayorDeEdad = edadAproximada === null || edadAproximada >= EDAD_MINIMA;
 
   async function enviarRegistro() {
     setError(null);
-    setMensajesServidor({});
+    validacion.reset();
 
     const body = {
       apellido: apellidoEfectivo,
@@ -318,7 +342,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
             profesionDetalle: t('campos.profesionDetalle'),
             tiempoCongregacion: t('campos.tiempoCongregacion'),
           };
-          setMensajesServidor(
+          validacion.reemplazar(
             Object.fromEntries(campos.map(({ campo, code }) => [campo, mensajeDeCampo(code, etiquetas[campo] ?? campo)])),
           );
           // Los campos con error pueden pertenecer a un paso anterior al 4
@@ -341,8 +365,8 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
 
   function estadoCampo(campo: string) {
     return {
-      error: Boolean(camposVacios[campo]) || Boolean(mensajesServidor[campo]),
-      errorTexto: mensajesServidor[campo] ?? t('errorCampo'),
+      error: Boolean(validacion.mensajes[campo]),
+      errorTexto: validacion.mensajes[campo] ?? t('errorCampo'),
     };
   }
 
@@ -366,7 +390,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
         </p>
       )}
 
-      <ResumenErrores errores={resumenErrores} />
+      <ResumenErrores errores={validacion.resumen} foco={validacion.foco} />
 
       <form
         onSubmit={(e) => {
@@ -392,6 +416,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               required
               value={apellidoEfectivo}
               onChange={(v) => actualizar('apellido', v)}
+              onBlur={() => validacion.revalidar('apellido', apellidoEfectivo, validaciones.apellido)}
               {...estadoCampo('apellido')}
             />
             <Campo
@@ -400,6 +425,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               required
               value={nombreEfectivo}
               onChange={(v) => actualizar('nombre', v)}
+              onBlur={() => validacion.revalidar('nombre', nombreEfectivo, validaciones.nombre)}
               {...estadoCampo('nombre')}
             />
             <CampoSelect
@@ -409,6 +435,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               opciones={opciones.genero}
               value={datos.genero}
               onChange={(v) => actualizar('genero', v)}
+              onBlur={() => validacion.revalidar('genero', datos.genero, validaciones.genero)}
               {...estadoCampo('genero')}
               placeholder={t('elegirOpcion')}
             />
@@ -419,6 +446,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               required
               value={datos.fechaNacimiento}
               onChange={(v) => actualizar('fechaNacimiento', v)}
+              onBlur={() => validacion.revalidar('fechaNacimiento', datos.fechaNacimiento, validaciones.fechaNacimiento)}
               {...estadoCampo('fechaNacimiento')}
             />
           </>
@@ -434,6 +462,13 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               numero={datos.telefonoNumero}
               onChangeCodigo={(v) => actualizar('telefonoCodigoPais', v)}
               onChangeNumero={(v) => actualizar('telefonoNumero', v)}
+              onBlurNumero={() =>
+                validacion.revalidar(
+                  'telefono',
+                  { codigoPais: datos.telefonoCodigoPais, numero: datos.telefonoNumero },
+                  validaciones.telefono,
+                )
+              }
               {...estadoCampo('telefono')}
               placeholderNumero={t('soloNumeros')}
             />
@@ -443,6 +478,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               required
               value={datos.direccion}
               onChange={(v) => actualizar('direccion', v)}
+              onBlur={() => validacion.revalidar('direccion', datos.direccion, validaciones.direccion)}
               {...estadoCampo('direccion')}
             />
             <CampoSelect
@@ -452,6 +488,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               opciones={sedes.map((s) => ({ value: s.id, label: s.nombre }))}
               value={datos.sedeId}
               onChange={(v) => actualizar('sedeId', v)}
+              onBlur={() => validacion.revalidar('sedeId', datos.sedeId, validaciones.sedeId)}
               {...estadoCampo('sedeId')}
               placeholder={t('elegirOpcion')}
             />
@@ -467,6 +504,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               opciones={opciones.estadoCivil}
               value={datos.estadoCivil}
               onChange={(v) => actualizar('estadoCivil', v)}
+              onBlur={() => validacion.revalidar('estadoCivil', datos.estadoCivil, validaciones.estadoCivil)}
               {...estadoCampo('estadoCivil')}
               placeholder={t('elegirOpcion')}
             />
@@ -477,6 +515,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               opciones={opciones.profesion}
               value={datos.profesion}
               onChange={(v) => actualizar('profesion', v)}
+              onBlur={() => validacion.revalidar('profesion', datos.profesion, validaciones.profesion)}
               {...estadoCampo('profesion')}
               placeholder={t('elegirOpcion')}
             />
@@ -487,6 +526,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
                 required
                 value={datos.profesionDetalle}
                 onChange={(v) => actualizar('profesionDetalle', v)}
+                onBlur={() => validacion.revalidar('profesionDetalle', datos.profesionDetalle, validaciones.profesionDetalle)}
                 {...estadoCampo('profesionDetalle')}
               />
             )}
@@ -497,6 +537,9 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
               opciones={opciones.tiempoCongregacion}
               value={datos.tiempoCongregacion}
               onChange={(v) => actualizar('tiempoCongregacion', v)}
+              onBlur={() =>
+                validacion.revalidar('tiempoCongregacion', datos.tiempoCongregacion, validaciones.tiempoCongregacion)
+              }
               {...estadoCampo('tiempoCongregacion')}
               placeholder={t('elegirOpcion')}
             />
@@ -645,6 +688,7 @@ function Campo({
   required,
   value,
   onChange,
+  onBlur,
   error,
   errorTexto,
 }: {
@@ -654,6 +698,8 @@ function Campo({
   required?: boolean;
   value: string;
   onChange: (value: string) => void;
+  /** H-72: revalida al salir del campo. */
+  onBlur?: () => void;
   error?: boolean;
   errorTexto: string;
 }) {
@@ -667,6 +713,7 @@ function Campo({
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
         aria-invalid={error || undefined}
         aria-describedby={error ? `campo-${name}-error` : undefined}
         className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
@@ -683,6 +730,7 @@ function CampoSelect({
   opciones,
   value,
   onChange,
+  onBlur,
   error,
   errorTexto,
   placeholder,
@@ -693,6 +741,8 @@ function CampoSelect({
   opciones: { value: string; label: string }[];
   value: string;
   onChange: (value: string) => void;
+  /** H-72: revalida al salir del campo. */
+  onBlur?: () => void;
   error?: boolean;
   errorTexto: string;
   placeholder: string;
@@ -706,6 +756,7 @@ function CampoSelect({
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
         aria-invalid={error || undefined}
         aria-describedby={error ? `campo-${name}-error` : undefined}
         className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"

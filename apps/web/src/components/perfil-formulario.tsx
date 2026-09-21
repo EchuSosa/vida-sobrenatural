@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import {
   type EstadoCivil,
   type Profesion,
+  TELEFONO_REGEX,
   apiFetch,
   ApiError,
   erroresPorCampo,
@@ -18,7 +19,8 @@ import {
   ResumenErrores,
   MensajeErrorCampo,
   useEnvio,
-  type ErrorResumen,
+  useValidacionCampos,
+  type ValidacionCampo,
 } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../hooks/use-opciones-registro';
 
@@ -53,8 +55,10 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
   const [estadoCivil, setEstadoCivil] = useState<EstadoCivil>(perfil.estadoCivil);
   const [profesion, setProfesion] = useState<Profesion>(perfil.profesion);
   const [profesionDetalle, setProfesionDetalle] = useState(perfil.profesionDetalle ?? '');
-  const [mensajesPorCampo, setMensajesPorCampo] = useState<Record<string, string>>({});
-  const [resumenErrores, setResumenErrores] = useState<ErrorResumen[]>([]);
+  // H-72 (revisión manual ronda 7): un error se limpia al escribir y se
+  // revalida al salir del campo — antes solo se limpiaba al reintentar el
+  // envío. Pieza compartida (H-50), usada igual en los seis formularios.
+  const validacion = useValidacionCampos();
 
   const etiquetasCampo: Record<string, string> = {
     telefono: t('campos.numeroTelefono'),
@@ -64,9 +68,24 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
     profesionDetalle: t('campos.profesionDetalle'),
   };
 
+  const requerido: ValidacionCampo<string> = { esValido: (v) => v.trim() !== '', mensaje: t('errorCampo') };
+  const validaciones = {
+    telefono: {
+      // Sin espacio — es el mismo formato que arma el body del PATCH más abajo.
+      esValido: (v: { codigoPais: string; numero: string }) => TELEFONO_REGEX.test(`${v.codigoPais}${v.numero}`),
+      mensaje: mensajeDeCampo('TELEFONO_INVALIDO', t('campos.numeroTelefono')),
+    } satisfies ValidacionCampo<{ codigoPais: string; numero: string }>,
+    direccion: requerido,
+    estadoCivil: requerido,
+    profesion: requerido,
+    profesionDetalle: {
+      esValido: () => profesion !== 'otro' || profesionDetalle.trim() !== '',
+      mensaje: t('errorCampo'),
+    } satisfies ValidacionCampo<string>,
+  };
+
   const { enviando: guardando, ejecutar: guardar } = useEnvio(async () => {
-    setMensajesPorCampo({});
-    setResumenErrores([]);
+    validacion.reset();
     try {
       await apiFetch('/personas/me', {
         method: 'PATCH',
@@ -86,12 +105,9 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
     } catch (error) {
       const campos = erroresPorCampo(error);
       if (campos) {
-        const resumen = campos.map(({ campo, code }) => ({
-          campo,
-          mensaje: mensajeDeCampo(code, etiquetasCampo[campo] ?? campo),
-        }));
-        setResumenErrores(resumen);
-        setMensajesPorCampo(Object.fromEntries(resumen.map((r) => [r.campo, r.mensaje])));
+        validacion.reemplazar(
+          Object.fromEntries(campos.map(({ campo, code }) => [campo, mensajeDeCampo(code, etiquetasCampo[campo] ?? campo)])),
+        );
       } else {
         const mensaje = error instanceof ApiError ? error.message : 'No pudimos guardar tus cambios.';
         toast.error(mensaje);
@@ -111,40 +127,57 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
       }}
       className="flex flex-col gap-4"
     >
-      <ResumenErrores errores={resumenErrores} />
+      <ResumenErrores errores={validacion.resumen} foco={validacion.foco} />
       <CampoTelefono
         id="campo-telefono"
         labelTelefono={t('campos.numeroTelefono')}
         labelCodigo={t('campos.codigoPais')}
         codigoPais={telefonoCodigoPais}
         numero={telefonoNumero}
-        onChangeCodigo={setTelefonoCodigoPais}
-        onChangeNumero={setTelefonoNumero}
-        error={Boolean(mensajesPorCampo.telefono)}
-        errorTexto={mensajesPorCampo.telefono}
+        onChangeCodigo={(v) => {
+          setTelefonoCodigoPais(v);
+          validacion.limpiar('telefono');
+        }}
+        onChangeNumero={(v) => {
+          setTelefonoNumero(v);
+          validacion.limpiar('telefono');
+        }}
+        onBlurNumero={() =>
+          validacion.revalidar('telefono', { codigoPais: telefonoCodigoPais, numero: telefonoNumero }, validaciones.telefono)
+        }
+        error={Boolean(validacion.mensajes.telefono)}
+        errorTexto={validacion.mensajes.telefono}
       />
       <label className="flex flex-col gap-1 text-sm font-medium">
         {t('campos.direccion')}
         <input
           id="campo-direccion"
           value={direccion}
-          onChange={(e) => setDireccion(e.target.value)}
+          onChange={(e) => {
+            setDireccion(e.target.value);
+            validacion.limpiar('direccion');
+          }}
+          onBlur={() => validacion.revalidar('direccion', direccion, validaciones.direccion)}
           required
-          aria-invalid={Boolean(mensajesPorCampo.direccion) || undefined}
-          aria-describedby={mensajesPorCampo.direccion ? 'campo-direccion-error' : undefined}
+          aria-invalid={Boolean(validacion.mensajes.direccion) || undefined}
+          aria-describedby={validacion.mensajes.direccion ? 'campo-direccion-error' : undefined}
           className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         />
-        <MensajeErrorCampo id="campo-direccion-error" mensaje={mensajesPorCampo.direccion} />
+        <MensajeErrorCampo id="campo-direccion-error" mensaje={validacion.mensajes.direccion} />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
         {t('campos.estadoCivil')}
         <select
           id="campo-estadoCivil"
           value={estadoCivil}
-          onChange={(e) => setEstadoCivil(e.target.value as EstadoCivil)}
+          onChange={(e) => {
+            setEstadoCivil(e.target.value as EstadoCivil);
+            validacion.limpiar('estadoCivil');
+          }}
+          onBlur={() => validacion.revalidar('estadoCivil', estadoCivil, validaciones.estadoCivil)}
           required
-          aria-invalid={Boolean(mensajesPorCampo.estadoCivil) || undefined}
-          aria-describedby={mensajesPorCampo.estadoCivil ? 'campo-estadoCivil-error' : undefined}
+          aria-invalid={Boolean(validacion.mensajes.estadoCivil) || undefined}
+          aria-describedby={validacion.mensajes.estadoCivil ? 'campo-estadoCivil-error' : undefined}
           className="h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         >
           {opciones.estadoCivil.map((o) => (
@@ -153,17 +186,21 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
             </option>
           ))}
         </select>
-        <MensajeErrorCampo id="campo-estadoCivil-error" mensaje={mensajesPorCampo.estadoCivil} />
+        <MensajeErrorCampo id="campo-estadoCivil-error" mensaje={validacion.mensajes.estadoCivil} />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
         {t('campos.profesion')}
         <select
           id="campo-profesion"
           value={profesion}
-          onChange={(e) => setProfesion(e.target.value as Profesion)}
+          onChange={(e) => {
+            setProfesion(e.target.value as Profesion);
+            validacion.limpiar('profesion');
+          }}
+          onBlur={() => validacion.revalidar('profesion', profesion, validaciones.profesion)}
           required
-          aria-invalid={Boolean(mensajesPorCampo.profesion) || undefined}
-          aria-describedby={mensajesPorCampo.profesion ? 'campo-profesion-error' : undefined}
+          aria-invalid={Boolean(validacion.mensajes.profesion) || undefined}
+          aria-describedby={validacion.mensajes.profesion ? 'campo-profesion-error' : undefined}
           className="h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         >
           {opciones.profesion.map((o) => (
@@ -172,7 +209,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
             </option>
           ))}
         </select>
-        <MensajeErrorCampo id="campo-profesion-error" mensaje={mensajesPorCampo.profesion} />
+        <MensajeErrorCampo id="campo-profesion-error" mensaje={validacion.mensajes.profesion} />
       </label>
       {profesion === 'otro' && (
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -180,13 +217,17 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           <input
             id="campo-profesionDetalle"
             value={profesionDetalle}
-            onChange={(e) => setProfesionDetalle(e.target.value)}
+            onChange={(e) => {
+              setProfesionDetalle(e.target.value);
+              validacion.limpiar('profesionDetalle');
+            }}
+            onBlur={() => validacion.revalidar('profesionDetalle', profesionDetalle, validaciones.profesionDetalle)}
             required
-            aria-invalid={Boolean(mensajesPorCampo.profesionDetalle) || undefined}
-            aria-describedby={mensajesPorCampo.profesionDetalle ? 'campo-profesionDetalle-error' : undefined}
+            aria-invalid={Boolean(validacion.mensajes.profesionDetalle) || undefined}
+            aria-describedby={validacion.mensajes.profesionDetalle ? 'campo-profesionDetalle-error' : undefined}
             className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
           />
-          <MensajeErrorCampo id="campo-profesionDetalle-error" mensaje={mensajesPorCampo.profesionDetalle} />
+          <MensajeErrorCampo id="campo-profesionDetalle-error" mensaje={validacion.mensajes.profesionDetalle} />
         </label>
       )}
       <Button type="submit" loading={guardando} loadingText="Guardando…" className="self-start">

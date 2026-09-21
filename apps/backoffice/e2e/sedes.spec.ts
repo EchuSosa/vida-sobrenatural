@@ -100,7 +100,15 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // backtracking del regex (país de 1 a 4 dígitos) encuentra una lectura
       // válida igual (ej. "+54 123" ~ país "5", resto "4 123" de 5
       // caracteres) — "12" no deja ninguna combinación posible.
-      await modal.getByLabel('Teléfono de contacto (opcional)').fill('12');
+      const telefono = modal.getByLabel('Teléfono de contacto (opcional)');
+      await telefono.fill('12');
+      // H-72: salir del campo ahora revalida en el momento — sin este blur
+      // explícito, el propio click en "Crear Sede" dispara ese blur (el
+      // teléfono todavía tiene el foco) y el mensaje que aparece corre el
+      // botón antes de que el click llegue a destino. Un blur previo es lo
+      // que haría alguien tabulando o clickeando en otro lado primero.
+      await telefono.blur();
+      await expect(modal.locator('#campo-contactoTelefono-error')).toBeVisible();
       await modal.getByRole('button', { name: 'Crear Sede' }).click();
 
       const resumen = modal.getByRole('alert').filter({ hasText: 'Revisá estos campos:' });
@@ -114,6 +122,42 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       const resultados = await crearAxeBuilder(page).analyze();
       expect(resultados.violations).toEqual([]);
+    });
+
+    test('H-72: el error de un campo se limpia al escribir y vuelve al salir si sigue mal, sin reenviar', async ({
+      page,
+    }) => {
+      await loguearseComoAdminE2E(page);
+      await page.goto('/sedes');
+      await page.waitForLoadState('networkidle');
+
+      await page.getByRole('button', { name: 'Crear Sede' }).click();
+      const modal = page.getByRole('dialog', { name: 'Crear Sede' });
+      await expect(modal).toBeVisible();
+
+      const horarios = modal.getByPlaceholder('Horarios (ej. "Domingos 10:30 hs")');
+      const errorHorarios = modal.locator('#campo-horarios-error');
+
+      // Formato inválido + salir del campo: aparece el error, sin haber enviado.
+      await horarios.fill('cualquier cosa');
+      await horarios.blur();
+      await expect(errorHorarios).toBeVisible();
+      await expect(errorHorarios).toHaveText('Usá un formato como "Domingos 10:30 hs" o "Domingos 10 hs y Martes 19 hs".');
+
+      // Escribir de nuevo lo limpia al toque, antes de volver a salir del campo.
+      await horarios.fill('cualquier cosa a');
+      await expect(errorHorarios).toBeHidden();
+
+      // Corregido y fuera del campo: se queda limpio (no "vuelve" porque ahora es válido).
+      await horarios.fill('Domingos 10:30 hs');
+      await horarios.blur();
+      await expect(errorHorarios).toBeHidden();
+
+      await expect(modal).toBeVisible();
+      await expect(page.getByText('Sede creada.')).toBeHidden();
+      // Sin axe acá a propósito: este test verifica el estado de
+      // validación, no accesibilidad — los otros tests de este archivo ya
+      // cubren la Sede con axe en los dos temas.
     });
 
     test('desactivar y reactivar una Sede desde su detalle', async ({ page }) => {

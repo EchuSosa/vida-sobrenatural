@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { type Sede, type ErrorDeCampo, HORARIOS_SEDE_REGEX, mensajeDeCampo } from '@vida-sobrenatural/shared-types';
-import { Button, CampoTelefono, Input, ResumenErrores, MensajeErrorCampo } from '@vida-sobrenatural/ui';
+import { useState } from 'react';
+import { type Sede, type ErrorDeCampo, HORARIOS_SEDE_REGEX, TELEFONO_REGEX, mensajeDeCampo } from '@vida-sobrenatural/shared-types';
+import { Button, CampoTelefono, Input, ResumenErrores, MensajeErrorCampo, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
 
 export interface ValoresSede {
   nombre: string;
@@ -65,6 +65,8 @@ const ETIQUETAS_CAMPO: Record<string, string> = {
   descripcionBienvenida: 'Descripción para la Bienvenida',
 };
 
+const MENSAJE_REQUERIDO = 'Revisá este dato.';
+
 export function FormularioSede({
   valoresIniciales,
   onGuardar,
@@ -84,22 +86,44 @@ export function FormularioSede({
   erroresCampo?: ErrorDeCampo[] | null;
 }) {
   const [valores, setValores] = useState(valoresIniciales);
-  const [horariosTocado, setHorariosTocado] = useState(false);
-
-  const horariosValido = valores.horarios === '' || HORARIOS_SEDE_REGEX.test(valores.horarios);
-
-  const mensajesPorCampo = useMemo(() => {
+  // H-72 (revisión manual ronda 7): un error se limpia al escribir y se
+  // revalida al salir del campo — antes horarios era el único campo con
+  // algo de esto (a mano, distinto del resto), y nombre/dirección no tenían
+  // nada más que el `required` nativo del navegador. Pieza compartida
+  // (H-50), usada igual en los seis formularios.
+  const validacion = useValidacionCampos();
+  // `erroresCampo` (prop, del servidor) se vuelca al estado compartido
+  // cuando cambia — comparado por referencia porque el padre arma un array
+  // nuevo (o null) en cada intento de envío. Ajuste durante el render
+  // (React: "adjusting state when a prop changes"), no en un efecto, que
+  // dispararía un render en cascada de más.
+  const [erroresCampoVistos, setErroresCampoVistos] = useState(erroresCampo);
+  if (erroresCampo !== erroresCampoVistos) {
+    setErroresCampoVistos(erroresCampo);
     const mapa: Record<string, string> = {};
     for (const { campo, code } of erroresCampo ?? []) {
       mapa[campo] = mensajeDeCampo(code, ETIQUETAS_CAMPO[campo] ?? campo);
     }
-    return mapa;
-  }, [erroresCampo]);
+    validacion.reemplazar(mapa);
+  }
 
-  const resumenErrores = useMemo(
-    () => Object.entries(mensajesPorCampo).map(([campo, mensaje]) => ({ campo, mensaje })),
-    [mensajesPorCampo],
-  );
+  const requerido: ValidacionCampo<string> = { esValido: (v) => v.trim() !== '', mensaje: MENSAJE_REQUERIDO };
+  const validaciones = {
+    nombre: requerido,
+    direccion: requerido,
+    horarios: {
+      esValido: (v: string) => v.trim() !== '' && HORARIOS_SEDE_REGEX.test(v),
+      mensaje: mensajeDeCampo('HORARIOS_INVALIDO', ETIQUETAS_CAMPO.horarios),
+    } satisfies ValidacionCampo<string>,
+    // Opcional — D90/H-30: si se carga un teléfono, tiene que tener código
+    // de país; en blanco no es un error (CONTACTO_SEDE_REQUERIDO, si hace
+    // falta, lo valida el servidor al enviar).
+    contactoTelefono: {
+      esValido: (v: { codigoPais: string; numero: string }) =>
+        v.numero.trim() === '' || TELEFONO_REGEX.test(`${v.codigoPais} ${v.numero}`),
+      mensaje: mensajeDeCampo('CONTACTOTELEFONO_INVALIDO', ETIQUETAS_CAMPO.contactoTelefono),
+    } satisfies ValidacionCampo<{ codigoPais: string; numero: string }>,
+  };
 
   function actualizar<K extends keyof ValoresSede>(campo: K, valor: ValoresSede[K]) {
     setValores((actuales) => ({ ...actuales, [campo]: valor }));
@@ -118,52 +142,57 @@ export function FormularioSede({
           {error}
         </p>
       )}
-      <ResumenErrores errores={resumenErrores} />
+      <ResumenErrores errores={validacion.resumen} foco={validacion.foco} />
       <div className="flex flex-col gap-1">
         <Input
           id="campo-nombre"
           placeholder="Nombre"
+          aria-label={ETIQUETAS_CAMPO.nombre}
           required
-          aria-invalid={Boolean(mensajesPorCampo.nombre)}
-          aria-describedby={mensajesPorCampo.nombre ? 'campo-nombre-error' : undefined}
+          aria-invalid={Boolean(validacion.mensajes.nombre)}
+          aria-describedby={validacion.mensajes.nombre ? 'campo-nombre-error' : undefined}
           value={valores.nombre}
-          onChange={(e) => actualizar('nombre', e.target.value)}
+          onChange={(e) => {
+            actualizar('nombre', e.target.value);
+            validacion.limpiar('nombre');
+          }}
+          onBlur={() => validacion.revalidar('nombre', valores.nombre, validaciones.nombre)}
         />
-        <MensajeErrorCampo id="campo-nombre-error" mensaje={mensajesPorCampo.nombre} />
+        <MensajeErrorCampo id="campo-nombre-error" mensaje={validacion.mensajes.nombre} />
       </div>
       <div className="flex flex-col gap-1">
         <Input
           id="campo-direccion"
           placeholder="Dirección"
+          aria-label={ETIQUETAS_CAMPO.direccion}
           required
-          aria-invalid={Boolean(mensajesPorCampo.direccion)}
-          aria-describedby={mensajesPorCampo.direccion ? 'campo-direccion-error' : undefined}
+          aria-invalid={Boolean(validacion.mensajes.direccion)}
+          aria-describedby={validacion.mensajes.direccion ? 'campo-direccion-error' : undefined}
           value={valores.direccion}
-          onChange={(e) => actualizar('direccion', e.target.value)}
+          onChange={(e) => {
+            actualizar('direccion', e.target.value);
+            validacion.limpiar('direccion');
+          }}
+          onBlur={() => validacion.revalidar('direccion', valores.direccion, validaciones.direccion)}
         />
-        <MensajeErrorCampo id="campo-direccion-error" mensaje={mensajesPorCampo.direccion} />
+        <MensajeErrorCampo id="campo-direccion-error" mensaje={validacion.mensajes.direccion} />
       </div>
       <div className="flex flex-col gap-1">
         <Input
           id="campo-horarios"
           placeholder='Horarios (ej. "Domingos 10:30 hs")'
+          aria-label={ETIQUETAS_CAMPO.horarios}
           required
-          aria-invalid={(horariosTocado && !horariosValido) || Boolean(mensajesPorCampo.horarios)}
-          aria-describedby={mensajesPorCampo.horarios ? 'campo-horarios-error' : undefined}
+          aria-invalid={Boolean(validacion.mensajes.horarios)}
+          aria-describedby={validacion.mensajes.horarios ? 'campo-horarios-error' : undefined}
           value={valores.horarios}
-          onChange={(e) => actualizar('horarios', e.target.value)}
-          onBlur={() => setHorariosTocado(true)}
+          onChange={(e) => {
+            actualizar('horarios', e.target.value);
+            validacion.limpiar('horarios');
+          }}
+          onBlur={() => validacion.revalidar('horarios', valores.horarios, validaciones.horarios)}
         />
-        {mensajesPorCampo.horarios ? (
-          <MensajeErrorCampo id="campo-horarios-error" mensaje={mensajesPorCampo.horarios} />
-        ) : (
-          horariosTocado &&
-          !horariosValido && (
-            <span className="text-sm text-destructive">
-              Formato no reconocido — ej. &quot;Domingos 10:30 hs&quot; o &quot;Domingos 10 hs y Martes 19 hs&quot;.
-            </span>
-          )
-        )}
+        <MensajeErrorCampo id="campo-horarios-error" mensaje={validacion.mensajes.horarios} />
       </div>
       <CampoTelefono
         id="campo-contactoTelefono"
@@ -171,38 +200,50 @@ export function FormularioSede({
         labelCodigo="Código de país"
         codigoPais={valores.codigoPais}
         numero={valores.numero}
-        onChangeCodigo={(v) => actualizar('codigoPais', v)}
-        onChangeNumero={(v) => actualizar('numero', v)}
+        onChangeCodigo={(v) => {
+          actualizar('codigoPais', v);
+          validacion.limpiar('contactoTelefono');
+        }}
+        onChangeNumero={(v) => {
+          actualizar('numero', v);
+          validacion.limpiar('contactoTelefono');
+        }}
+        onBlurNumero={() =>
+          validacion.revalidar(
+            'contactoTelefono',
+            { codigoPais: valores.codigoPais, numero: valores.numero },
+            validaciones.contactoTelefono,
+          )
+        }
         requerido={false}
-        error={Boolean(mensajesPorCampo.contactoTelefono)}
-        errorTexto={mensajesPorCampo.contactoTelefono}
+        error={Boolean(validacion.mensajes.contactoTelefono)}
+        errorTexto={validacion.mensajes.contactoTelefono}
       />
       <div className="flex flex-col gap-1">
         <Input
           id="campo-contactoEmail"
           placeholder="Email de contacto"
+          aria-label={ETIQUETAS_CAMPO.contactoEmail}
           type="email"
-          aria-invalid={Boolean(mensajesPorCampo.contactoEmail)}
-          aria-describedby={mensajesPorCampo.contactoEmail ? 'campo-contactoEmail-error' : undefined}
+          aria-invalid={Boolean(validacion.mensajes.contactoEmail)}
+          aria-describedby={validacion.mensajes.contactoEmail ? 'campo-contactoEmail-error' : undefined}
           value={valores.contactoEmail}
-          onChange={(e) => actualizar('contactoEmail', e.target.value)}
+          onChange={(e) => {
+            actualizar('contactoEmail', e.target.value);
+            validacion.limpiar('contactoEmail');
+          }}
         />
-        <MensajeErrorCampo id="campo-contactoEmail-error" mensaje={mensajesPorCampo.contactoEmail} />
+        <MensajeErrorCampo id="campo-contactoEmail-error" mensaje={validacion.mensajes.contactoEmail} />
       </div>
       <textarea
         id="campo-descripcionBienvenida"
         placeholder="Descripción para la Bienvenida (opcional)"
+        aria-label={ETIQUETAS_CAMPO.descripcionBienvenida}
         value={valores.descripcionBienvenida}
         onChange={(e) => actualizar('descripcionBienvenida', e.target.value)}
         className="rounded-md border border-input bg-transparent px-3 py-2 text-sm dark:bg-input/30"
       />
-      <Button
-        type="submit"
-        disabled={!horariosValido}
-        loading={enviando}
-        loadingText={textoEnviando}
-        className="w-fit"
-      >
+      <Button type="submit" loading={enviando} loadingText={textoEnviando} className="w-fit">
         {textoBoton}
       </Button>
     </form>
