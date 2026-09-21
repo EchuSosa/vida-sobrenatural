@@ -194,7 +194,7 @@ export function FormularioSede({
         placeholder="Descripción para la Bienvenida (opcional)"
         value={valores.descripcionBienvenida}
         onChange={(e) => actualizar('descripcionBienvenida', e.target.value)}
-        className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="rounded-md border border-input bg-transparent px-3 py-2 text-sm dark:bg-input/30"
       />
       <Button type="submit" disabled={enviando || !horariosValido} className="w-fit">
         {enviando ? textoEnviando : textoBoton}

@@ -40,7 +40,7 @@ export default function ErrorPantalla({
       <NavPublicaHeader />
       <main id="contenido" className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-16 text-center">
         <h1 className="text-2xl font-semibold">Ocurrió un error inesperado</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-muted-foreground">
           Podés reintentar en unos segundos. Si sigue pasando, contanos e incluí este código:{' '}
           <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{error.digest ?? 'sin-id'}</code>
         </p>

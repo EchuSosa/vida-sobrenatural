@@ -120,7 +120,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           required
           aria-invalid={Boolean(mensajesPorCampo.direccion) || undefined}
           aria-describedby={mensajesPorCampo.direccion ? 'campo-direccion-error' : undefined}
-          className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         />
         <MensajeErrorCampo id="campo-direccion-error" mensaje={mensajesPorCampo.direccion} />
       </label>
@@ -133,7 +133,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           required
           aria-invalid={Boolean(mensajesPorCampo.estadoCivil) || undefined}
           aria-describedby={mensajesPorCampo.estadoCivil ? 'campo-estadoCivil-error' : undefined}
-          className="h-10 rounded-md border border-zinc-300 px-2 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         >
           {opciones.estadoCivil.map((o) => (
             <option key={o.value} value={o.value}>
@@ -152,7 +152,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           required
           aria-invalid={Boolean(mensajesPorCampo.profesion) || undefined}
           aria-describedby={mensajesPorCampo.profesion ? 'campo-profesion-error' : undefined}
-          className="h-10 rounded-md border border-zinc-300 px-2 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         >
           {opciones.profesion.map((o) => (
             <option key={o.value} value={o.value}>
@@ -172,7 +172,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
             required
             aria-invalid={Boolean(mensajesPorCampo.profesionDetalle) || undefined}
             aria-describedby={mensajesPorCampo.profesionDetalle ? 'campo-profesionDetalle-error' : undefined}
-            className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
+            className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
           />
           <MensajeErrorCampo id="campo-profesionDetalle-error" mensaje={mensajesPorCampo.profesionDetalle} />
         </label>

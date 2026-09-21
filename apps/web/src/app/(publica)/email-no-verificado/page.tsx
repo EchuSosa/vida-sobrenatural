@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { buttonVariants } from '@vida-sobrenatural/ui';
 
 export const metadata = {
   title: 'No pudimos confirmar tu email — Vida Sobrenatural',
@@ -16,15 +17,12 @@ export default function EmailNoVerificadoPage() {
     // (H-05, actualización 2026-09-18).
     <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
       <h1 className="text-2xl font-semibold">No pudimos confirmar tu email</h1>
-      <p className="text-zinc-600 dark:text-zinc-400">
+      <p className="text-muted-foreground">
         Tu proveedor de inicio de sesión no confirmó que tu email esté verificado, así que no
         podemos vincular tu cuenta. Verificá tu email con Google e intentá de nuevo, o escribinos
         a Secretaría si el problema sigue.
       </p>
-      <Link
-        href="/registro"
-        className="flex h-11 w-fit items-center justify-center rounded-lg bg-zinc-900 px-5 font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900"
-      >
+      <Link href="/registro" className={buttonVariants({ size: 'xl', className: 'w-fit' })}>
         Reintentar
       </Link>
     </div>

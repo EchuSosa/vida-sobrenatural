@@ -118,7 +118,7 @@ export default function PendientesTutorPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">Casos pendientes de tutor</h1>
-      <p className="text-zinc-600 dark:text-zinc-400">
+      <p className="text-muted-foreground">
         Menores de 18 años que intentaron registrarse (Historia 2b) — contactá al tutor antes de
         activar o cerrar el caso.
       </p>
@@ -130,20 +130,20 @@ export default function PendientesTutorPage() {
       )}
 
       {!cargando && pendientes.length === 0 && !error && (
-        <p className="text-zinc-500">No hay casos pendientes por ahora.</p>
+        <p className="text-muted-foreground">No hay casos pendientes por ahora.</p>
       )}
 
       <ul className="flex flex-col gap-3">
         {pendientes.map((persona) => (
           <li
             key={persona.id}
-            className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <p className="font-medium">
                 {persona.nombre} {persona.apellido}
               </p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm text-muted-foreground">
                 Tel: {persona.telefono} — Nació: {persona.fechaNacimiento}
               </p>
             </div>

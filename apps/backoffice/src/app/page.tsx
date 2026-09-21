@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { EstadoVacio } from '@vida-sobrenatural/ui';
+import { Button, EstadoVacio } from '@vida-sobrenatural/ui';
 import { AvisoPorQuery } from '../components/aviso-por-query';
 
 export default function InicioBackofficePage() {
@@ -18,14 +18,10 @@ export default function InicioBackofficePage() {
           <AvisoPorQuery param="sesion" valor="cerrada" mensaje="Cerraste sesión." />
         </Suspense>
         <h1 className="text-2xl font-semibold">Backoffice — Vida Sobrenatural</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">Necesitás iniciar sesión para continuar.</p>
-        <button
-          type="button"
-          onClick={() => signIn('google')}
-          className="flex h-11 items-center justify-center rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/80"
-        >
+        <p className="text-muted-foreground">Necesitás iniciar sesión para continuar.</p>
+        <Button size="xl" onClick={() => signIn('google')}>
           Ingresar con Google
-        </button>
+        </Button>
       </div>
     );
   }

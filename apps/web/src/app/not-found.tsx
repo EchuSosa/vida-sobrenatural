@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { buttonVariants } from '@vida-sobrenatural/ui';
 import { NavPublicaHeader } from '../components/nav-publica-header';
 import { FooterPublico } from '../components/footer-publico';
 
@@ -20,20 +21,14 @@ export default function NoEncontrado() {
       <NavPublicaHeader />
       <main id="contenido" className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-16 text-center">
         <h1 className="text-2xl font-semibold">No encontramos esta sección</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-muted-foreground">
           Puede que el link esté roto o que la página ya no exista.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link
-            href="/"
-            className="flex h-11 items-center justify-center rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/80"
-          >
+          <Link href="/" className={buttonVariants({ size: 'xl' })}>
             Ir a Inicio
           </Link>
-          <Link
-            href="/primeros-pasos"
-            className="flex h-11 items-center justify-center rounded-lg border border-border px-5 font-medium hover:bg-muted"
-          >
+          <Link href="/primeros-pasos" className={buttonVariants({ variant: 'outline', size: 'xl' })}>
             Ver Primeros pasos
           </Link>
         </div>

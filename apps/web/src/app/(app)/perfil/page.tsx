@@ -14,7 +14,7 @@ export default async function PerfilPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Perfil</h1>
-      <div className="flex flex-col gap-1 text-zinc-700 dark:text-zinc-300">
+      <div className="flex flex-col gap-1 text-foreground">
         <p>
           {perfil ? `${perfil.nombre} ${perfil.apellido}` : session?.user.name}
         </p>

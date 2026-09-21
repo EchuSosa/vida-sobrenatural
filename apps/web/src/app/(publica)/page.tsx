@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { buttonVariants } from '@vida-sobrenatural/ui';
 import { AvisoPorQuery } from '../../components/aviso-por-query';
 
 export const metadata = {
@@ -16,21 +17,15 @@ export default function InicioPage() {
         <AvisoPorQuery param="sesion" valor="cerrada" mensaje="Cerraste sesión." />
       </Suspense>
       <h1 className="text-3xl font-semibold tracking-tight">Vida Sobrenatural — La Plata</h1>
-      <p className="text-lg leading-7 text-zinc-700 dark:text-zinc-300">
+      <p className="text-lg leading-7 text-muted-foreground">
         Nos alegra que estés acá. Si te acercaste por primera vez, o hace poco empezaste a venir,
         arrancá por Primeros pasos.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Link
-          href="/primeros-pasos"
-          className="flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-center font-medium text-primary-foreground transition-colors hover:bg-primary/80"
-        >
+        <Link href="/primeros-pasos" className={buttonVariants({ size: 'xl' })}>
           Ver primeros pasos
         </Link>
-        <Link
-          href="/visitanos"
-          className="flex h-11 items-center justify-center rounded-lg border border-border px-5 text-center font-medium transition-colors hover:bg-muted"
-        >
+        <Link href="/visitanos" className={buttonVariants({ variant: 'outline', size: 'xl' })}>
           Visitanos
         </Link>
       </div>

@@ -8,7 +8,7 @@ export default async function InicioAppPage() {
       <h1 className="text-3xl font-semibold tracking-tight">
         Hola, {session?.user.givenName ?? session?.user.name}
       </h1>
-      <p className="text-zinc-700 dark:text-zinc-300">
+      <p className="text-foreground">
         Este es tu Inicio. Acá vas a ver novedades y tus próximos pasos sugeridos.
       </p>
     </div>

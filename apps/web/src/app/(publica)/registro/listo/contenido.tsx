@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { buttonVariants } from '@vida-sobrenatural/ui';
 
 export function ContenidoRegistroListo() {
   // Sin <main id="contenido"> propio — (publica)/layout.tsx ya lo provee
@@ -6,7 +7,7 @@ export function ContenidoRegistroListo() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
       <h1 className="text-2xl font-semibold">¡Listo, ya sos parte!</h1>
-      <p className="text-zinc-600 dark:text-zinc-400">
+      <p className="text-muted-foreground">
         Tu registro se completó. Ya podés volver a iniciar sesión con tu cuenta de Google cuando
         quieras.
       </p>
@@ -16,16 +17,10 @@ export function ContenidoRegistroListo() {
         integración, fuera del alcance de la Fase de Bienvenida.
       */}
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Link
-          href="/"
-          className="flex h-11 items-center justify-center rounded-lg bg-primary px-5 font-medium text-primary-foreground transition-colors hover:bg-primary/80"
-        >
+        <Link href="/" className={buttonVariants({ size: 'xl' })}>
           Ir a Inicio
         </Link>
-        <Link
-          href="/primeros-pasos"
-          className="flex h-11 items-center justify-center rounded-lg border border-zinc-300 px-5 font-medium transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
-        >
+        <Link href="/primeros-pasos" className={buttonVariants({ variant: 'outline', size: 'xl' })}>
           Volver a Primeros pasos
         </Link>
       </div>

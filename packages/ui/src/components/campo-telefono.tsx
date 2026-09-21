@@ -57,7 +57,7 @@ export function CampoTelefono({
           value={codigoPais}
           onChange={(e) => onChangeCodigo(e.target.value)}
           aria-label={labelCodigo}
-          className="h-10 w-40 shrink-0 rounded-md border border-zinc-300 px-2 text-sm font-normal dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-10 w-40 shrink-0 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30"
         >
           {OPCIONES_CODIGO_PAIS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -77,7 +77,7 @@ export function CampoTelefono({
           value={numero}
           placeholder={placeholderNumero}
           onChange={(e) => onChangeNumero(e.target.value.replace(/[^0-9]/g, ''))}
-          className="h-10 flex-1 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-10 flex-1 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
         />
       </div>
       {error && errorTexto && (

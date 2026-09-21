@@ -12,7 +12,14 @@ import {
   erroresPorCampo,
   mensajeDeCampo,
 } from '@vida-sobrenatural/shared-types';
-import { PasoIndicador, CampoTelefono, ResumenErrores, MensajeErrorCampo, type ErrorResumen } from '@vida-sobrenatural/ui';
+import {
+  Button,
+  PasoIndicador,
+  CampoTelefono,
+  ResumenErrores,
+  MensajeErrorCampo,
+  type ErrorResumen,
+} from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../../../hooks/use-opciones-registro';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
@@ -163,14 +170,10 @@ export default function RegistroPage() {
     return (
       <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
         <h1 className="text-2xl font-semibold">{t('tituloNoAutenticado')}</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">{t('textoNoAutenticado')}</p>
-        <button
-          type="button"
-          onClick={() => signIn('google', { callbackUrl: '/registro' })}
-          className="flex h-11 w-fit items-center justify-center rounded-lg bg-zinc-900 px-5 font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900"
-        >
+        <p className="text-muted-foreground">{t('textoNoAutenticado')}</p>
+        <Button size="xl" className="w-fit" onClick={() => signIn('google', { callbackUrl: '/registro' })}>
           {t('botones.continuarGoogle')}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -343,7 +346,7 @@ export default function RegistroPage() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">{t('tituloPagina')}</h1>
-      <p className="text-zinc-600 dark:text-zinc-400">
+      <p className="text-muted-foreground">
         {t('introPagina', { email: session?.user.email ?? '' })}
       </p>
 
@@ -492,7 +495,7 @@ export default function RegistroPage() {
 
         {paso === 4 && (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('resumenIntro')}</p>
+            <p className="text-sm text-muted-foreground">{t('resumenIntro')}</p>
             <ResumenDatos
               datos={{ ...datos, apellido: apellidoEfectivo, nombre: nombreEfectivo }}
               opciones={opciones}
@@ -502,7 +505,7 @@ export default function RegistroPage() {
             />
 
             {esProbablementeMayorDeEdad && (
-              <label className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+              <label className="flex items-start gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
                   checked={datos.consentimientoDatos}
@@ -517,31 +520,19 @@ export default function RegistroPage() {
 
         <div className="flex gap-3">
           {paso > 1 && (
-            <button
-              type="button"
-              onClick={atras}
-              className="flex h-11 items-center justify-center rounded-lg border border-zinc-300 px-5 font-medium transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
-            >
+            <Button type="button" variant="outline" size="xl" onClick={atras}>
               {t('botones.atras')}
-            </button>
+            </Button>
           )}
           {paso < TOTAL_PASOS && (
-            <button
-              type="button"
-              onClick={siguiente}
-              className="flex h-11 items-center justify-center rounded-lg bg-zinc-900 px-5 font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900"
-            >
+            <Button type="button" size="xl" onClick={siguiente}>
               {t('botones.siguiente')}
-            </button>
+            </Button>
           )}
           {paso === TOTAL_PASOS && (
-            <button
-              type="submit"
-              disabled={enviando}
-              className="flex h-11 items-center justify-center rounded-lg bg-zinc-900 px-5 font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
-            >
+            <Button type="submit" size="xl" disabled={enviando}>
               {enviando ? t('botones.enviando') : t('botones.enviar')}
-            </button>
+            </Button>
           )}
         </div>
       </form>
@@ -606,12 +597,9 @@ function ResumenDatos({
   return (
     <div className="flex flex-col gap-4">
       {grupos.map((grupo) => (
-        <section
-          key={grupo.paso}
-          className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
-        >
+        <section key={grupo.paso} className="flex flex-col gap-2 rounded-lg border border-border p-4">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{grupo.titulo}</h3>
+            <h3 className="text-sm font-medium text-foreground">{grupo.titulo}</h3>
             <button
               type="button"
               onClick={() => onEditar(grupo.paso)}
@@ -623,8 +611,8 @@ function ResumenDatos({
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
             {grupo.filas.map((fila) => (
               <Fragment key={fila.label}>
-                <dt className="font-medium text-zinc-600 dark:text-zinc-400">{fila.label}</dt>
-                <dd className="text-zinc-700 dark:text-zinc-300">{fila.valor || '—'}</dd>
+                <dt className="font-medium text-muted-foreground">{fila.label}</dt>
+                <dd className="text-foreground">{fila.valor || '—'}</dd>
               </Fragment>
             ))}
           </dl>
@@ -665,7 +653,7 @@ function Campo({
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error || undefined}
         aria-describedby={error ? `campo-${name}-error` : undefined}
-        className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
+        className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
       />
       {error && <MensajeErrorCampo id={`campo-${name}-error`} mensaje={errorTexto} />}
     </label>
@@ -704,7 +692,7 @@ function CampoSelect({
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error || undefined}
         aria-describedby={error ? `campo-${name}-error` : undefined}
-        className="h-10 rounded-md border border-zinc-300 px-3 text-sm font-normal aria-invalid:border-destructive dark:border-zinc-700 dark:bg-zinc-900"
+        className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
       >
         <option value="" disabled>
           {placeholder}

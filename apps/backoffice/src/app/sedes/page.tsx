@@ -138,7 +138,7 @@ export default function SedesPage() {
 
       <section className="flex flex-col gap-3">
         {sedes.length === 0 && (
-          <p className="text-zinc-500">
+          <p className="text-muted-foreground">
             {filtro === 'activas' ? 'Todavía no hay Sedes activas.' : 'Todavía no hay Sedes cargadas.'}
           </p>
         )}
@@ -146,14 +146,14 @@ export default function SedesPage() {
           <Link
             key={sede.id}
             href={`/sedes/${sede.id}`}
-            className="flex flex-col gap-1 rounded-lg border border-zinc-200 p-4 hover:bg-muted/50 dark:border-zinc-800"
+            className="flex flex-col gap-1 rounded-lg border border-border p-4 hover:bg-muted/50"
           >
             <div className="flex items-center justify-between gap-2">
               <p className="font-medium">{sede.nombre}</p>
               {filtro === 'todas' && <EstadoActivoBadge activo={sede.activo} />}
             </div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">{sede.direccion}</p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">{sede.horarios}</p>
+            <p className="text-sm text-muted-foreground">{sede.direccion}</p>
+            <p className="text-sm text-muted-foreground">{sede.horarios}</p>
           </Link>
         ))}
       </section>

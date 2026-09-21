@@ -15,16 +15,16 @@ export default function GlobalError({
       <body>
         <main className="mx-auto flex max-w-md flex-col gap-4 px-4 py-16 text-center">
           <h1 className="text-2xl font-semibold">Ocurrió un error inesperado</h1>
-          <p className="text-zinc-600">
+          <p className="text-muted-foreground">
             Podés reintentar en unos segundos. Si sigue pasando, contanos e incluí este código:{' '}
-            <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-sm">
+            <code className="rounded bg-muted px-1.5 py-0.5 text-sm">
               {error.digest ?? 'sin-id'}
             </code>
           </p>
           <button
             type="button"
             onClick={reset}
-            className="mx-auto flex h-11 items-center justify-center rounded-lg bg-zinc-900 px-5 font-medium text-white"
+            className="mx-auto flex h-11 items-center justify-center rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary-hover"
           >
             Reintentar
           </button>

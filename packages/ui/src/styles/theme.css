@@ -53,6 +53,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
@@ -76,6 +77,8 @@
   --popover-foreground: oklch(0.255 0.030 45);
   --primary: oklch(0.520 0.120 42);
   --primary-foreground: oklch(1 0 0);
+  /* H-56 (D118): hover de botones sólidos — cambia de tono, no de opacidad (bg-primary/80 caía a 3.9:1). */
+  --primary-hover: oklch(0.460 0.118 42);
   --secondary: oklch(0.930 0.020 80);
   --secondary-foreground: oklch(0.255 0.030 45);
   --muted: oklch(0.950 0.012 82);
@@ -116,6 +119,7 @@
   --popover-foreground: oklch(0.955 0.010 85);
   --primary: oklch(0.700 0.105 45);
   --primary-foreground: oklch(0.205 0.012 50);
+  --primary-hover: oklch(0.760 0.100 45);
   --secondary: oklch(0.300 0.018 55);
   --secondary-foreground: oklch(0.955 0.010 85);
   --muted: oklch(0.275 0.013 50);

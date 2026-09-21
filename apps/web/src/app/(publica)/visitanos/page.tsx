@@ -21,20 +21,20 @@ function SedeCard({ sede, t }: { sede: Sede; t: ReturnType<typeof useTranslation
   return (
     <article className="flex flex-col gap-2 rounded-lg border border-border p-5">
       <h2 className="text-xl font-medium">{sede.nombre}</h2>
-      <p className="text-zinc-700 dark:text-zinc-300">{sede.direccion}</p>
-      <p className="text-zinc-700 dark:text-zinc-300">{sede.horarios}</p>
+      <p className="text-foreground">{sede.direccion}</p>
+      <p className="text-foreground">{sede.horarios}</p>
       {sede.contactoTelefono && (
-        <p className="text-zinc-700 dark:text-zinc-300">
+        <p className="text-foreground">
           {t('telefono')} {sede.contactoTelefono}
         </p>
       )}
       {sede.contactoEmail && (
-        <p className="text-zinc-700 dark:text-zinc-300">
+        <p className="text-foreground">
           {t('email')} {sede.contactoEmail}
         </p>
       )}
       {sede.descripcionBienvenida && (
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">{sede.descripcionBienvenida}</p>
+        <p className="mt-2 text-muted-foreground">{sede.descripcionBienvenida}</p>
       )}
     </article>
   );
@@ -50,7 +50,7 @@ export default async function VisitanosPage() {
 
       {sedes.length === 0 && (
         // Edge case del spec 001: todavía no hay ninguna Sede cargada por el Admin.
-        <p className="text-zinc-600 dark:text-zinc-400">{t('sinSedes')}</p>
+        <p className="text-muted-foreground">{t('sinSedes')}</p>
       )}
 
       {/* FR-002/FR-003 (spec 001): una única Sede activa se muestra directamente, sin selección. */}
@@ -64,7 +64,7 @@ export default async function VisitanosPage() {
       {/* FR-004 (spec 001): más de una Sede activa — el Visitante identifica la suya. */}
       {sedes.length > 1 && (
         <div className="flex flex-col gap-4">
-          <p className="text-zinc-600 dark:text-zinc-400">{t('elegirSede')}</p>
+          <p className="text-muted-foreground">{t('elegirSede')}</p>
           {sedes.map((sede) => (
             <SedeCard key={sede.id} sede={sede} t={t} />
           ))}

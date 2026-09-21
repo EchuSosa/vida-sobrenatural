@@ -37,7 +37,7 @@ export default function ErrorVisitanos({
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-16 text-center">
       <h1 className="text-2xl font-semibold">{t('errorCargaTitulo')}</h1>
-      <p className="text-zinc-600 dark:text-zinc-400">
+      <p className="text-muted-foreground">
         {t('errorCarga')}{' '}
         <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{error.digest ?? 'sin-id'}</code>
       </p>

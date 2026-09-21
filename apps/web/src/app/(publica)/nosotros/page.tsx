@@ -26,14 +26,14 @@ export default function NosotrosPage() {
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
         <h2 className="text-xl font-medium">{t('somosFamiliaTitulo')}</h2>
-        <p className="text-lg leading-7 text-zinc-700 dark:text-zinc-300">
+        <p className="text-lg leading-7 text-foreground">
           {t('somosFamiliaTexto')}
         </p>
       </div>
 
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-medium">{t('liderazgoTitulo')}</h2>
-        <p className="text-zinc-700 dark:text-zinc-300">{t('liderazgoIntro')}</p>
+        <p className="text-foreground">{t('liderazgoIntro')}</p>
         <ul className="flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:gap-3">
           {pastores.map((pastor) => (
             <li
@@ -43,7 +43,7 @@ export default function NosotrosPage() {
               {/* D118 (docs/17): en Liderazgo el texto va visible, no solo aria-label — acá sí es honesto decir que falta la foto. */}
               <PlaceholderImagen aspecto="equipo" etiqueta={t('fotoPendiente')} mostrarTexto />
               <p className="font-medium">{pastor.nombre}</p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">{pastor.rol}</p>
+              <p className="text-sm text-muted-foreground">{pastor.rol}</p>
             </li>
           ))}
         </ul>
@@ -51,7 +51,7 @@ export default function NosotrosPage() {
 
       <section className="flex flex-col gap-3 rounded-lg border border-dashed border-border p-5">
         <h2 className="text-xl font-medium">{t('enQueCreemosTitulo')}</h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('enQueCreemosPendiente')}</p>
+        <p className="text-sm text-muted-foreground">{t('enQueCreemosPendiente')}</p>
       </section>
     </div>
   );
