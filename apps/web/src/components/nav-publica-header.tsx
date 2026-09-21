@@ -57,7 +57,11 @@ export function NavPublicaHeader() {
   const acciones = useAccionesPublicas();
 
   return (
-    <header className="border-b border-border">
+    // H-65 (revisión manual ronda 5): en celular, al bajar, el header (y el
+    // acceso al menú) desaparecía — no hacía falta compensar el <main> con
+    // padding: a diferencia de `fixed`, `sticky` sigue ocupando su lugar en
+    // el flujo normal.
+    <header className="sticky top-0 z-40 border-b border-border bg-background">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/" className="font-semibold" aria-current={pathname === '/' ? 'page' : undefined}>
           Vida Sobrenatural

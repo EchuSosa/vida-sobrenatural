@@ -31,7 +31,11 @@ export function NavAppTopBarCelular() {
   const items = useItemsMas();
 
   return (
-    <div className="flex items-center justify-between border-b border-border px-4 py-2 md:hidden">
+    // H-66 (revisión manual ronda 5): esta barra se iba con el scroll — acá
+    // vive "Más", la única salida de la app hacia las páginas públicas
+    // (H-37). `fixed`, como la barra inferior (nav-app-bar.tsx) — el
+    // `<main>` compensa con `pt-14` (app/(app)/layout.tsx).
+    <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
       <Link href="/inicio" className="font-semibold">
         Vida Sobrenatural
       </Link>
