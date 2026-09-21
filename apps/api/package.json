@@ -26,6 +26,7 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "db:limpiar-e2e": "tsx scripts/limpiar-e2e.ts",
+    "db:sembrar-e2e-admin": "tsx scripts/sembrar-e2e-admin.ts",
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {
