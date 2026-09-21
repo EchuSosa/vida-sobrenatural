@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import { PlaceholderImagen } from '@vida-sobrenatural/ui';
 
 export const metadata = {
   title: 'Nosotros — Vida Sobrenatural',
@@ -39,13 +40,8 @@ export default function NosotrosPage() {
               key={pastor.nombre}
               className="flex flex-col gap-2 rounded-lg border border-border p-4"
             >
-              <div
-                className="flex h-24 items-center justify-center rounded-md border border-dashed border-border text-center text-xs text-muted-foreground"
-                role="img"
-                aria-label={t('fotoPendiente')}
-              >
-                {t('fotoPendiente')}
-              </div>
+              {/* D118 (docs/17): en Liderazgo el texto va visible, no solo aria-label — acá sí es honesto decir que falta la foto. */}
+              <PlaceholderImagen aspecto="equipo" etiqueta={t('fotoPendiente')} mostrarTexto />
               <p className="font-medium">{pastor.nombre}</p>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">{pastor.rol}</p>
             </li>
