@@ -24,9 +24,9 @@ propio "Independent Test".
 **Purpose**: dependencias y configuración que ninguna historia necesita en el arranque mismo, pero
 que hace falta declarar antes de escribir el código que las usa.
 
-- [ ] T001 [P] Agregar `sharp`, `multer` y `@types/multer` a `apps/api/package.json` e instalar (research.md Decisión 1 y 2 — usados por US4)
-- [ ] T002 [P] Agregar `"./assets/marca/*": "./src/assets/marca/*"` a `exports` en `packages/ui/package.json` (research.md Decisión 7 — usado por US5; hoy `exports` sólo declara `.` y `./theme.css`)
-- [ ] T003 [P] Agregar `STORAGE_DIR` a `apps/api/.env.example` (default `apps/api/storage/portadas/`) y esa carpeta a `apps/api/.gitignore` (research.md Decisión 3 — usado por US4)
+- [x] T001 [P] Agregar `sharp`, `multer` y `@types/multer` a `apps/api/package.json` e instalar (research.md Decisión 1 y 2 — usados por US4)
+- [x] T002 [P] Agregar `"./assets/marca/*": "./src/assets/marca/*"` a `exports` en `packages/ui/package.json` (research.md Decisión 7 — usado por US5; hoy `exports` sólo declara `.` y `./theme.css`)
+- [x] T003 [P] Agregar `STORAGE_DIR` a `apps/api/.env.example` (default `apps/api/storage/portadas/`) y esa carpeta a `apps/api/.gitignore` (research.md Decisión 3 — usado por US4)
 
 ---
 
@@ -38,9 +38,9 @@ avanzar en paralelo con ella.
 
 **⚠️ CRITICAL**: US2, US3 y US4 no pueden empezar hasta que esta fase esté completa.
 
-- [ ] T004 [P] Agregar `model PalabraProfetica` a `apps/api/prisma/schema.prisma` — campos y `@@index([vigente])` según `data-model.md` § PalabraProfetica
-- [ ] T005 [P] Agregar `model Libro` a `apps/api/prisma/schema.prisma` — campos y `@@index([orden])` según `data-model.md` § Libro (mismo criterio de `eliminadoEn`/`eliminadoPor` que `Sede`, D119)
-- [ ] T006 Generar y aplicar la migración (`pnpm --filter api exec prisma migrate dev --name palabra_profetica_libro`) (depende de T004, T005)
+- [x] T004 [P] Agregar `model PalabraProfetica` a `apps/api/prisma/schema.prisma` — campos y `@@index([vigente])` según `data-model.md` § PalabraProfetica
+- [x] T005 [P] Agregar `model Libro` a `apps/api/prisma/schema.prisma` — campos y `@@index([orden])` según `data-model.md` § Libro (mismo criterio de `eliminadoEn`/`eliminadoPor` que `Sede`, D119)
+- [x] T006 Generar y aplicar la migración (`pnpm --filter api exec prisma migrate dev --name palabra_profetica_libro`) (depende de T004, T005)
 
 **Checkpoint**: esquema listo — US2, US3 y US4 pueden empezar.
 
@@ -56,9 +56,9 @@ errores de accesibilidad — sin depender de ningún dato cargado desde el backo
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] Agregar el contenido de Nosotros (identidad, historia, visión, misión, valores, sistema de trabajo, llamado con Isaías 61:1-4/Lucas 4:16-21, congregación local) al namespace `nosotros` de `apps/web/src/messages/es.json`, tomado de `docs/12-contenido-bienvenida.md` § "Contenido institucional del sitio actual" (FR-001, D84)
-- [ ] T008 [US1] Actualizar `apps/web/src/app/(publica)/nosotros/page.tsx`: renderizar las secciones nuevas en orden, preservando sin cambios "Somos Familia", el placeholder del equipo pastoral y "En qué creemos" pendiente (FR-001, FR-002); el sistema de trabajo enlaza a Primeros pasos para el detalle en vez de repetir el texto completo (Acceptance Scenario 3) (depende de T007)
-- [ ] T009 [P] [US1] Ampliar `apps/web/e2e/nosotros.spec.ts`: contenido nuevo visible, sin scroll horizontal a 320/375px (ya cubierto por `axe-todas-las-rutas.spec.ts`, H-62), `auditar()` en los dos temas (H-76)
+- [x] T007 [P] [US1] Agregar el contenido de Nosotros (identidad, historia, visión, misión, valores, sistema de trabajo, llamado con Isaías 61:1-4/Lucas 4:16-21, congregación local) al namespace `nosotros` de `apps/web/src/messages/es.json`, tomado de `docs/12-contenido-bienvenida.md` § "Contenido institucional del sitio actual" (FR-001, D84)
+- [x] T008 [US1] Actualizar `apps/web/src/app/(publica)/nosotros/page.tsx`: renderizar las secciones nuevas en orden, preservando sin cambios "Somos Familia", el placeholder del equipo pastoral y "En qué creemos" pendiente (FR-001, FR-002); el sistema de trabajo enlaza a Primeros pasos para el detalle en vez de repetir el texto completo (Acceptance Scenario 3) (depende de T007)
+- [x] T009 [P] [US1] Ampliar `apps/web/e2e/nosotros.spec.ts`: contenido nuevo visible, sin scroll horizontal a 320/375px (ya cubierto por `axe-todas-las-rutas.spec.ts`, H-62), `auditar()` en los dos temas (H-76)
 - [ ] T009a [US1] Verificar Nosotros contra el checklist de `docs/15-guia-ux-ui.md` (cuatro estados, una sola acción principal, orden de botones, tono, teclado y lector de pantalla, contraste en los dos temas) — D114
 
 **Checkpoint**: US1 funcional y verificable de forma independiente.

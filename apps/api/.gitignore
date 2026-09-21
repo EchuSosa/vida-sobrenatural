@@ -3,3 +3,6 @@ node_modules
 .env
 
 /src/generated/prisma
+
+# StorageService, proveedor local de dev (D110, research.md Decisión 3) — no durable, no se versiona.
+/storage

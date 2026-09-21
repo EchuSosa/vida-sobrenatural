@@ -244,3 +244,77 @@ model RelacionFamiliar {
   @@index([familiarId])
   @@map("relaciones_familiares")
 }
+
+// --- Contenido institucional (specs/003-contenido-institucional) ---
+// Nombres de campo alineados con docs/04-dominio-entidades.md (Principio II).
+
+// FR-004/FR-006/FR-012/FR-013 (data-model.md): historial completo, nunca se
+// borra al reemplazarla — a diferencia de Libro, no tiene `activo` ni
+// `eliminadoEn`/`eliminadoPor` (Constitution Check de plan.md, Principio III:
+// nunca se elimina, ni física ni lógicamente, no hay nada que soft-deletear).
+model PalabraProfetica {
+  id String @id @default(uuid())
+
+  anio  Int
+  titulo String
+  texto String @db.Text
+
+  // Se guarda tal como la cargó el Admin (para reeditar el formulario), pero
+  // el embed público siempre se arma desde youtubeVideoId, nunca reparseando
+  // esta columna en cada render (research.md Decisión 4).
+  youtubeUrl     String
+  youtubeVideoId String
+
+  // Como máximo un registro con vigente:true a la vez — invariante de
+  // negocio (PalabraProfeticaService, transacción al marcar una nueva
+  // vigente), no un constraint de base (mismo criterio que "Sede única
+  // activa" en sede.service.ts).
+  vigente Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // H-42: la subpágina pública filtra por este campo en cada visita.
+  @@index([vigente])
+  @@map("palabras_profeticas")
+}
+
+// FR-015 a FR-027 (data-model.md): mismo patrón D119 que Sede (activo +
+// eliminadoEn/eliminadoPor), pero SIN el bloqueo por "datos relacionados" al
+// eliminar (FR-020) — hoy ninguna entidad referencia a Libro. Condición del
+// estado actual del modelo, no una regla permanente (ver FR-020 en spec.md).
+model Libro {
+  id String @id @default(uuid())
+
+  titulo      String
+  autor       String
+  anio        Int
+  descripcion String? @db.Text
+
+  // Define la posición en el listado público (FR-007); editable libremente
+  // por el Admin, sin unicidad forzada entre libros.
+  orden Int @default(0)
+
+  // Portada + texto alternativo: los dos juntos o ninguno de los dos
+  // (validado en el service, FR-025 — no expresable como constraint de
+  // Prisma). Ruta pública del archivo ya procesado por StorageService, no la
+  // URL externa que subió el Admin.
+  portadaUrl         String?
+  portadaDescripcion String?
+
+  activo Boolean @default(true)
+
+  // D119: borrado lógico, independiente de `activo` — mismo criterio que
+  // Sede.eliminadoEn/eliminadoPor. `eliminadoPor` es una referencia lógica
+  // al id de la Persona que eliminó, sin @relation de Prisma (mismo criterio
+  // que Sede.eliminadoPor/Persona.altaPor).
+  eliminadoEn  DateTime?
+  eliminadoPor String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // H-42: el listado público ordena por este campo en cada visita.
+  @@index([orden])
+  @@map("libros")
+}
