@@ -407,6 +407,51 @@ async function crearPersonasHostiles(sedeId: string) {
   console.log('Personas demo con datos hostiles listas (o ya existentes).');
 }
 
+/**
+ * FR-032/D120 (specs/003-contenido-institucional): tres Libros hostiles a
+ * propósito, sumados a los 8 reales de `seed.ts` (este script corre
+ * ENCIMA de ese mínimo, no lo reemplaza — D120). Idempotente por `titulo`,
+ * mismo criterio que el resto de este script (un dato único por registro).
+ */
+async function crearLibrosHostiles() {
+  const hostiles: Array<Parameters<typeof prisma.libro.create>[0]['data']> = [
+    {
+      // Sin límite corto definido en el modelo (Edge Case del spec) — un
+      // título larguísimo real, no relleno repetido, para verificar que no
+      // rompe el layout del listado ni desborda en celular.
+      titulo:
+        'Antídotos contra la religión: una guía práctica para reconocer, entender y dejar atrás las estructuras religiosas que se disfrazan de fe genuina, con testimonios reales de quienes ya hicieron ese camino',
+      autor: 'Juan Pablo Sosa (edición ampliada)',
+      anio: 2016,
+      orden: 100,
+    },
+    {
+      titulo: 'Vida de Servicio: acompañamiento pastoral',
+      // Tildes y ñ — Edge Case explícito del spec.
+      autor: 'Ñañez Bermúdez, María José',
+      anio: 2021,
+      orden: 101,
+    },
+    {
+      titulo: 'Discipulado en tiempos de crisis',
+      autor: 'Equipo Pastoral VS',
+      anio: 2022,
+      orden: 102,
+      // Sin descripción — dato hostil a propósito (FR-032).
+    },
+  ];
+
+  for (const libro of hostiles) {
+    const existente = await prisma.libro.findFirst({ where: { titulo: libro.titulo } });
+    if (existente) {
+      console.log(`Ya existe el Libro hostil "${existente.titulo}", no se duplica.`);
+      continue;
+    }
+    const creado = await prisma.libro.create({ data: libro });
+    console.log(`Libro hostil creado: "${creado.titulo}" (${creado.id})`);
+  }
+}
+
 async function main() {
   const sedes = await crearSedesDemo();
   await crearPersonasVolumenDemo({
@@ -416,6 +461,7 @@ async function main() {
   });
   await crearEscenarioTutores(sedes.laPlata.id);
   await crearPersonasHostiles(sedes.laPlata.id);
+  await crearLibrosHostiles();
 }
 
 main()

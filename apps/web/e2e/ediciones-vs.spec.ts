@@ -36,11 +36,16 @@ for (const colorScheme of ['light', 'dark'] as const) {
         'https://instagram.com/edicionesvs',
       );
 
-      // FR-007: los 8 libros reales del seed, con año y autor/a. Scopeado a
-      // los <li> del catálogo — el título del primer libro también aparece
-      // en el texto de introducción (es el origen de la editorial).
+      // FR-007: al menos los 8 libros reales del seed mínimo, con año y
+      // autor/a. No es "exactamente 8": si además corrió seed-demo (D120,
+      // FR-032) hay 3 libros hostiles más — el catálogo público no
+      // distingue origen, así que este test no debe asumir cuál de los dos
+      // seeds corrió. Scopeado a los <li> del catálogo — el título del
+      // primer libro también aparece en el texto de introducción (es el
+      // origen de la editorial).
       const items = page.getByRole('listitem');
-      await expect(items).toHaveCount(8);
+      const cantidad = await items.count();
+      expect(cantidad).toBeGreaterThanOrEqual(8);
       await expect(
         items.filter({ hasText: 'Mujer Maravilla: cuando la realidad supera a la ficción' }),
       ).toContainText('por Natalia Spetale');
@@ -48,9 +53,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       // FR-027: sin portada real todavía, cada libro muestra el espacio con
       // aspecto de tapa (PlaceholderImagen aspecto="portada"), no una
-      // imagen inventada ni un espacio sin marcar.
+      // imagen inventada ni un espacio sin marcar — uno por cada libro
+      // listado (mismo motivo que arriba: no se asume la cantidad exacta).
       const placeholders = page.getByRole('img', { name: /Portada de/ });
-      await expect(placeholders).toHaveCount(8);
+      await expect(placeholders).toHaveCount(cantidad);
 
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);

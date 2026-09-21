@@ -50,6 +50,18 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
     nombre: 'Sede',
     borrar: async () => (await prisma.sede.deleteMany({ where: { nombre: { startsWith: 'e2e-' } } })).count,
   },
+  // specs/003-contenido-institucional: los e2e de Historia 3/4
+  // (apps/backoffice/e2e/palabra-profetica.spec.ts, libros.spec.ts) crean
+  // PalabraProfetica/Libro con `titulo` prefijado `e2e-` — mismo criterio
+  // que el resto de la lista, agregado acá y no en un script aparte.
+  {
+    nombre: 'PalabraProfetica',
+    borrar: async () => (await prisma.palabraProfetica.deleteMany({ where: { titulo: { startsWith: 'e2e-' } } })).count,
+  },
+  {
+    nombre: 'Libro',
+    borrar: async () => (await prisma.libro.deleteMany({ where: { titulo: { startsWith: 'e2e-' } } })).count,
+  },
 ];
 
 async function main() {
