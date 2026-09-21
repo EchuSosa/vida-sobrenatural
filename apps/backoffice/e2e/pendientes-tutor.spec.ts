@@ -44,7 +44,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await panel.getByRole('button', { name: 'Activar' }).click();
 
       await expect(panel).toBeHidden();
-      await expect(page.getByText('E2E Menor')).toHaveCount(0);
+      // Escopado a <main> — no a `getByText('E2E Menor')` a secas: el toast
+      // de éxito ("E2E Menor: caso activado.") repite el nombre y tarda unos
+      // segundos en desaparecer (sonner), así que sin este scope el conteo
+      // podía quedar en 1 aunque la fila ya se hubiera ido de la tabla.
+      await expect(page.getByRole('main').getByText('E2E Menor')).toHaveCount(0);
     });
 
     test('activar un menor con los datos del tutor a mano', async ({ page }) => {
@@ -66,7 +70,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await panel.getByRole('button', { name: 'Activar' }).click();
 
       await expect(panel).toBeHidden();
-      await expect(page.getByText('E2E Menor')).toHaveCount(0);
+      // Ver el comentario del primer test — escopado a <main> por el mismo motivo.
+      await expect(page.getByRole('main').getByText('E2E Menor')).toHaveCount(0);
     });
   });
 }
