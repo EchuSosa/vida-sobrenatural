@@ -299,7 +299,7 @@ async function crearLibrosDemo() {
       anio: 2015,
       orden: 3,
       archivoPortada: 'una-vida-en-su-presencia.jpg',
-      portadaDescripcion: 'Foto del libro «Una vida en su presencia» de pie sobre un soporte, con un fósforo encendido delante.',
+      portadaDescripcion: 'Foto del libro «Una vida en su presencia» de pie sobre un atril negro; en su tapa, la llama de un fósforo encendido.',
     },
     {
       titulo: 'El deseo de ser tres',
@@ -349,7 +349,7 @@ async function crearLibrosDemo() {
       orden: 9,
       archivoPortada: 'vida-nueva.jpg',
       portadaDescripcion:
-        'Foto del libro «Vida nueva: una experiencia personal con Jesucristo» apoyado sobre una mesa, corrido hacia la derecha, junto a unos anteojos y una lapicera.',
+        'Foto del libro «Vida nueva: una experiencia personal con Jesucristo» apoyado sobre un escritorio blanco, junto a unos anteojos y una lapicera.',
     },
   ];
 
