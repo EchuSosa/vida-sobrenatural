@@ -120,7 +120,8 @@ Lista corta de lo que falta y no se puede inventar (D98). Se completa a medida q
 | **URL del canal de YouTube de la iglesia** | Ícono de YouTube en el pie de página (H-24), transmisión del culto online (H-23) y sincronización de videos de Seguinos (D93) | ✅ **`https://www.youtube.com/@vidasobrenatural`** (2026-09-21) |
 | URL del **video** de la Palabra Profética 2026 | La subpágina de Palabra Profética. Es un video puntual, distinto del canal | ✅ **`https://www.youtube.com/watch?v=oVLmI6_IoC8`** (2026-09-21) |
 | Texto real de la Palabra Profética 2026 | La subpágina de Palabra Profética. Lo que hay documentado es la frase promocional del link-in-bio, no la palabra | Pendiente — mientras tanto, texto provisorio marcado (D98) |
-| Portadas reales de los 8 libros de Ediciones VS | Sección Ediciones VS (hoy con placeholder, D110) | Pendiente |
+| Tapas reales de los 9 libros de Ediciones VS | Sección Ediciones VS — hoy con fotos provisorias de los libros (no son archivos de tapa), `apps/api/prisma/portadas/README.md` (D110) | Pendiente — se piden a la editorial |
+| Año real de "Vida nueva: una experiencia personal con Jesucristo" | Catálogo de Ediciones VS — el seed lo carga con 2021 inventado (marcado en el código); se corrige por el backoffice cuando se sepa | Pendiente |
 
 ---
 
@@ -258,7 +259,7 @@ Por cada libro: **portada** (placeholder mientras no haya imagen real), **títul
 > ([@ediciones.vs.lp](https://www.facebook.com/ediciones.vs.lp)) o Instagram
 > ([@edicionesvs](https://instagram.com/edicionesvs)).
 
-**Catálogo (8 libros, orden cronológico):**
+**Catálogo (9 libros, orden cronológico):**
 
 | Año | Título | Autor/a |
 |---|---|---|
@@ -270,6 +271,7 @@ Por cada libro: **portada** (placeholder mientras no haya imagen real), **títul
 | 2018 | Discipulado Generacional | Rosana y Marcos Oszurko |
 | 2019 | Hijos de la Promesa: identidad y propósito de los hijos de Dios | Ezequiel Rossini |
 | 2020 | Diseñados para una vida saludable | María José Amiunes |
+| 2021 *(provisorio, inventado)* | Vida nueva: una experiencia personal con Jesucristo | Juan Pablo Sosa |
 
 **Notas para el spec:**
 
@@ -277,8 +279,9 @@ Por cada libro: **portada** (placeholder mientras no haya imagen real), **títul
 - La venta es **fuera de la app**: no hay carrito ni pagos. La sección informa y enlaza a las redes
   de Ediciones VS y menciona la distribución por Producciones Peniel (D67 sigue valiendo: la app no
   procesa pagos en el MVP).
-- Faltan las **portadas reales**; hasta entonces, placeholder con el título (nunca una imagen
-  inventada). Pedirlas junto con las fotos del equipo pastoral.
+- Faltan las **tapas reales**; hasta entonces, fotos provisorias de los libros (no archivos de
+  tapa, `apps/api/prisma/portadas/README.md`). Pedirlas a la editorial junto con las fotos del
+  equipo pastoral.
 - Los enlaces de Facebook e Instagram de Ediciones VS son distintos de los de la iglesia: van en
   esta sección, no en el pie general.
 

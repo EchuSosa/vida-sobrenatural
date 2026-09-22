@@ -252,7 +252,7 @@ async function crearPalabraProfeticaDemo() {
 }
 
 /**
- * FR-031: los 8 libros reales de Ediciones VS, orden cronológico de
+ * FR-031: los 9 libros reales de Ediciones VS, orden cronológico de
  * publicación (docs/12-contenido-bienvenida.md § Ediciones VS) — el Admin
  * puede reordenarlos después (FR-016). Idempotente por `titulo`.
  *
@@ -262,6 +262,15 @@ async function crearPalabraProfeticaDemo() {
  * describe la FOTO (dónde y cómo está apoyado el libro), no repite el
  * título. Idempotente por separado de la creación del Libro: si ya tiene
  * portada, no se vuelve a subir (`sembrarPortada` no se llama).
+ *
+ * "Vida nueva" (el último, `orden: 9`) es el único con el **año
+ * inventado**: no está documentado en `docs/12-contenido-bienvenida.md`
+ * como los otros ocho y no se encontró el dato real (D98 — no se inventa
+ * contenido institucional haciéndolo pasar por definitivo, pero acá hace
+ * falta *algún* año para el modelo y no hay forma de marcarlo "pendiente"
+ * en un campo numérico). Queda anotado en `docs/12-contenido-bienvenida.md`
+ * § "Datos pendientes de pedirle a la iglesia" — se corrige por el
+ * backoffice el día que llegue el dato real.
  */
 async function crearLibrosDemo() {
   const libros: Array<
@@ -332,6 +341,15 @@ async function crearLibrosDemo() {
       orden: 8,
       archivoPortada: 'disenados-para-una-vida-saludable.jpg',
       portadaDescripcion: 'Foto del libro «Diseñados para una vida saludable» sostenido con la mano, al aire libre con plantas de fondo.',
+    },
+    {
+      titulo: 'Vida nueva: una experiencia personal con Jesucristo',
+      autor: 'Juan Pablo Sosa',
+      anio: 2021, // PROVISORIO, INVENTADO — ver el comentario arriba de esta función.
+      orden: 9,
+      archivoPortada: 'vida-nueva.jpg',
+      portadaDescripcion:
+        'Foto del libro «Vida nueva: una experiencia personal con Jesucristo» apoyado sobre una mesa, corrido hacia la derecha, junto a unos anteojos y una lapicera.',
     },
   ];
 
