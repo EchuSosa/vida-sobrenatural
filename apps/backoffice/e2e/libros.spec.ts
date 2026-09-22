@@ -349,16 +349,29 @@ test('arrastrar un Libro con el asa, por teclado (Espacio, flecha, Espacio), cam
   const primerTitulo = ordenAntes[0];
   const segundoTitulo = ordenAntes[1];
   const asa = page.getByRole('button', { name: `Arrastrar para reordenar ${primerTitulo}` });
+  const liveRegion = page.locator('[id^="DndLiveRegion"]');
   await asa.focus();
   // dnd-kit mide/renderiza entre cada tecla (un frame real) — sin una
   // pausa entre teclas, la flecha puede llegar antes de que termine de
   // registrar el "levantar" y se pierde (verificado: sin esto, el drop
   // termina "sobre sí mismo", sin moverse).
   await page.keyboard.press('Space');
+  // H-99: los anuncios en español, con el título real — no "Picked up
+  // draggable item 3" (el default en inglés y genérico de dnd-kit). El de
+  // "Levantaste" (onDragStart) es demasiado transitorio para verificar acá
+  // — dnd-kit dispara su propio onDragOver casi en el mismo instante (al
+  // levantar, el activo queda "sobre" su propia posición), así que la
+  // región viva ya muestra ese segundo anuncio para cuando esta aserción
+  // llega a leerla. Se verifica igual, indirectamente: si `onDragStart`
+  // estuviera mal tipado o faltara, `Announcements` (dnd-kit) no
+  // compilaría — y los otros tres momentos sí se verifican en tiempo real.
+  await expect(liveRegion).toHaveText(`"${primerTitulo}" pasó a la posición 1 de ${ordenAntes.length}.`);
   await page.waitForTimeout(150);
   await page.keyboard.press('ArrowDown');
+  await expect(liveRegion).toHaveText(`"${primerTitulo}" pasó a la posición 2 de ${ordenAntes.length}.`);
   await page.waitForTimeout(150);
   await page.keyboard.press('Space');
+  await expect(liveRegion).toHaveText(`Soltaste "${primerTitulo}" en la posición 2 de ${ordenAntes.length}.`);
 
   await expect(async () => {
     const ordenDespues = await celdasTitulo.allInnerTexts();
@@ -371,4 +384,31 @@ test('arrastrar un Libro con el asa, por teclado (Espacio, flecha, Espacio), cam
   await expect(async () => {
     expect(await celdasTitulo.allInnerTexts()).toEqual(ordenAntes);
   }).toPass();
+});
+
+// H-99: cancelar (Escape) a mitad de un arrastre es el momento que más se
+// olvida anunciar — y el que más importa: quien lo cancela tiene que
+// enterarse de que el libro volvió a su lugar, no quedarse sin anuncio.
+test('cancelar un arrastre con Escape anuncia que el libro volvió a su lugar, y no cambia el orden', async ({ page }) => {
+  await loguearseComoAdminE2E(page);
+  await page.goto('/libros');
+  await page.waitForLoadState('networkidle');
+
+  const celdasTitulo = page.locator('table tbody tr td:nth-child(2)');
+  const ordenAntes = await celdasTitulo.allInnerTexts();
+  expect(ordenAntes.length).toBeGreaterThanOrEqual(2);
+
+  const primerTitulo = ordenAntes[0];
+  const asa = page.getByRole('button', { name: `Arrastrar para reordenar ${primerTitulo}` });
+  const liveRegion = page.locator('[id^="DndLiveRegion"]');
+  await asa.focus();
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(150);
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(150);
+  await page.keyboard.press('Escape');
+
+  await expect(liveRegion).toHaveText(`Cancelaste el arrastre — "${primerTitulo}" volvió a la posición 1 de ${ordenAntes.length}.`);
+  // Sin persistir nada — ni un solo PATCH de por medio.
+  expect(await celdasTitulo.allInnerTexts()).toEqual(ordenAntes);
 });

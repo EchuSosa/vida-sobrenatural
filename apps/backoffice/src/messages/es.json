@@ -45,5 +45,16 @@
     "misDiscipulados": "Mis discipulados",
     "miDisponibilidad": "Mi disponibilidad",
     "misGrupos": "Mis grupos"
+  },
+  "libros": {
+    "arrastrar": {
+      "instrucciones": "Para levantar un libro, apretá la barra espaciadora. Mientras lo arrastrás, usá las flechas para moverlo. Apretá espacio de nuevo para soltarlo en la posición nueva, o escape para cancelar.",
+      "levantado": "Levantaste \"{titulo}\", posición {posicion} de {total}.",
+      "sobrePosicion": "\"{titulo}\" pasó a la posición {posicion} de {total}.",
+      "fueraDePosicion": "\"{titulo}\" ya no está sobre una posición válida.",
+      "soltado": "Soltaste \"{titulo}\" en la posición {posicion} de {total}.",
+      "soltadoSinPosicion": "Soltaste \"{titulo}\".",
+      "cancelado": "Cancelaste el arrastre — \"{titulo}\" volvió a la posición {posicion} de {total}."
+    }
   }
 }

@@ -1,11 +1,21 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useId, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ArrowDown, ArrowUp, GripVertical, MoreVertical, Trash2 } from 'lucide-react';
-import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type Announcements,
+  type DragEndEvent,
+  type ScreenReaderInstructions,
+} from '@dnd-kit/core';
 import {
   SortableContext,
   arrayMove,
@@ -126,9 +136,56 @@ function EnvoltorioDnd({
   libros: Libro[];
   children: ReactNode;
 }) {
+  const tl = useTranslations('libros.arrastrar');
+  // H-99: id estable entre servidor y cliente — sin esto, `<DndContext>`
+  // arma sus ids internos (ej. el `aria-describedby` del asa) con un
+  // contador de módulo que diverge entre el render del servidor y el del
+  // cliente. No era cosmético: ese id enlaza el elemento arrastrable con
+  // el texto de instrucciones para lector de pantalla; si no coincide,
+  // `aria-describedby` puede terminar apuntando a un id que no existe.
+  const dndId = useId();
+
+  function tituloDe(id: string): string {
+    return libros.find((l) => l.id === String(id))?.titulo ?? '';
+  }
+  function posicionDe(id: string): number {
+    return libros.findIndex((l) => l.id === String(id)) + 1;
+  }
+
+  // H-99: sin esto, dnd-kit anuncia con sus textos por defecto — en
+  // inglés, y genéricos ("draggable item 3") en vez del título del libro.
+  // Los cuatro momentos que anuncia (no un quinto: onDragMove es opcional
+  // y los defaults tampoco lo usan): levantar, pasar sobre una posición,
+  // soltar, cancelar. El de cancelar importa tanto como los otros tres —
+  // quien cancela con Escape tiene que enterarse de que el libro volvió a
+  // su lugar, no quedarse sin ningún anuncio.
+  const announcements: Announcements = {
+    onDragStart: ({ active }) =>
+      tl('levantado', { titulo: tituloDe(String(active.id)), posicion: posicionDe(String(active.id)), total: libros.length }),
+    onDragOver: ({ active, over }) =>
+      over
+        ? tl('sobrePosicion', { titulo: tituloDe(String(active.id)), posicion: posicionDe(String(over.id)), total: libros.length })
+        : tl('fueraDePosicion', { titulo: tituloDe(String(active.id)) }),
+    onDragEnd: ({ active, over }) =>
+      over
+        ? tl('soltado', { titulo: tituloDe(String(active.id)), posicion: posicionDe(String(over.id)), total: libros.length })
+        : tl('soltadoSinPosicion', { titulo: tituloDe(String(active.id)) }),
+    // Al cancelar, `libros` todavía no cambió (nada se persistió) — la
+    // posición actual del propio activo YA es "donde volvió".
+    onDragCancel: ({ active }) =>
+      tl('cancelado', { titulo: tituloDe(String(active.id)), posicion: posicionDe(String(active.id)), total: libros.length }),
+  };
+  const screenReaderInstructions: ScreenReaderInstructions = { draggable: tl('instrucciones') };
+
   if (!puedeReordenar) return children;
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+    <DndContext
+      id={dndId}
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={onDragEnd}
+      accessibility={{ announcements, screenReaderInstructions }}
+    >
       <SortableContext items={libros.map((l) => l.id)} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
