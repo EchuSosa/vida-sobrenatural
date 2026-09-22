@@ -123,6 +123,32 @@ describe('GET /libros (integración)', () => {
     expect(response.status).toBe(404);
     expect(response.body.code).toBe('NO_ENCONTRADO');
   });
+
+  it('GET /libros/autores devuelve autores distintos, incluidos los de inactivos, sin los de eliminados (H-91)', async () => {
+    const sufijo = Date.now();
+    const activo = await prisma.libro.create({
+      data: { titulo: `Integ autor activo ${sufijo}`, autor: `Autora Activa ${sufijo}`, anio: 2020, activo: true },
+    });
+    const inactivo = await prisma.libro.create({
+      data: { titulo: `Integ autor inactivo ${sufijo}`, autor: `Autor Inactivo ${sufijo}`, anio: 2020, activo: false },
+    });
+    const eliminado = await prisma.libro.create({
+      data: {
+        titulo: `Integ autor eliminado ${sufijo}`,
+        autor: `Autor Eliminado ${sufijo}`,
+        anio: 2020,
+        eliminadoEn: new Date(),
+        eliminadoPor: 'admin-integ',
+      },
+    });
+    idsCreados.push(activo.id, inactivo.id, eliminado.id);
+
+    const response = await request(app.getHttpServer()).get('/libros/autores');
+    expect(response.status).toBe(200);
+    expect(response.body).toContain(`Autora Activa ${sufijo}`);
+    expect(response.body).toContain(`Autor Inactivo ${sufijo}`);
+    expect(response.body).not.toContain(`Autor Eliminado ${sufijo}`);
+  });
 });
 
 describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {

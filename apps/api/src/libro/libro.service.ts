@@ -73,6 +73,24 @@ export class LibroService {
   }
 
   /**
+   * GET /libros/autores — H-91. Autores ya cargados, para sugerir mientras
+   * se escribe (no un catálogo cerrado: sigue siendo texto libre, el CRUD
+   * de Autores queda explícitamente fuera de alcance con 9 libros). Incluye
+   * los de Libros inactivos (siguen siendo un autor válido para sugerir);
+   * excluye solo los eliminados (D119) — esos ya no representan datos
+   * vigentes.
+   */
+  async findAutores(): Promise<string[]> {
+    const filas = await this.prisma.libro.findMany({
+      where: { eliminadoEn: null },
+      select: { autor: true },
+      distinct: ['autor'],
+      orderBy: { autor: 'asc' },
+    });
+    return filas.map((fila) => fila.autor);
+  }
+
+  /**
    * POST /libros — FR-015. La portada no entra acá (FR-021, endpoint propio).
    * H-89: sin `orden` explícito, va al último lugar (máximo actual + 1) en
    * vez de 0 — con todos los registros en 0 el desempate lo decidía la

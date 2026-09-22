@@ -45,7 +45,18 @@ const TAMANO_MAXIMO_MB = Math.round(PORTADA_TAMANO_MAXIMO_BYTES / (1024 * 1024))
  * rama "bloqueada" que sí tiene Sede). Pastor (`esAdmin: false`) ve todo
  * sin ningún control habilitado.
  */
-export function LibroDetalleCliente({ libro, apiToken, esAdmin }: { libro: Libro; apiToken: string; esAdmin: boolean }) {
+export function LibroDetalleCliente({
+  libro,
+  apiToken,
+  esAdmin,
+  autoresSugeridos,
+}: {
+  libro: Libro;
+  apiToken: string;
+  esAdmin: boolean;
+  /** H-91: ya viene resuelto de page.tsx (H-60 — se busca en el servidor). */
+  autoresSugeridos: string[];
+}) {
   const router = useRouter();
   const te = useTranslations('errors');
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
@@ -164,6 +175,7 @@ export function LibroDetalleCliente({ libro, apiToken, esAdmin }: { libro: Libro
         error={errorGuardar}
         erroresCampo={erroresCampoGuardar}
         soloLectura={!esAdmin}
+        autoresSugeridos={autoresSugeridos}
       />
 
       {esAdmin && (

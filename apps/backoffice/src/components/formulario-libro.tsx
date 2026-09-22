@@ -9,7 +9,14 @@ import {
   LIBRO_ORDEN_MAXIMO,
   libroAnioMaximo,
 } from '@vida-sobrenatural/shared-types';
-import { Button, MensajeErrorCampo, ResumenErrores, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
+import {
+  Button,
+  CampoAutocompletado,
+  MensajeErrorCampo,
+  ResumenErrores,
+  useValidacionCampos,
+  type ValidacionCampo,
+} from '@vida-sobrenatural/ui';
 
 export interface ValoresLibro {
   titulo: string;
@@ -62,6 +69,7 @@ const ETIQUETAS_CAMPO: Record<string, string> = {
 };
 
 const MENSAJE_REQUERIDO = 'Revisá este dato.';
+const MENSAJE_SIN_AUTORES_SUGERIDOS = 'Sin coincidencias — se guarda tal como lo escribiste.';
 
 /** FR-015/FR-016 — título/autor/año obligatorios; descripción y orden opcionales/con default. Mismo patrón H-50/H-72 que FormularioSede. */
 export function FormularioLibro({
@@ -73,6 +81,7 @@ export function FormularioLibro({
   error,
   erroresCampo,
   soloLectura = false,
+  autoresSugeridos = [],
 }: {
   valoresIniciales: ValoresLibro;
   onGuardar: (valores: ValoresLibro) => void;
@@ -82,6 +91,8 @@ export function FormularioLibro({
   error?: string | null;
   erroresCampo?: ErrorDeCampo[] | null;
   soloLectura?: boolean;
+  /** H-91: autores ya cargados en otros Libros, para sugerir mientras se escribe — sigue siendo texto libre. */
+  autoresSugeridos?: string[];
 }) {
   const [valores, setValores] = useState(valoresIniciales);
   const validacion = useValidacionCampos();
@@ -158,19 +169,21 @@ export function FormularioLibro({
         <label htmlFor="campo-autor" className="text-sm font-medium">
           {ETIQUETAS_CAMPO.autor}
         </label>
-        <input
+        <CampoAutocompletado
           id="campo-autor"
+          etiqueta={ETIQUETAS_CAMPO.autor}
           required
-          aria-invalid={Boolean(validacion.mensajes.autor)}
-          aria-describedby={validacion.mensajes.autor ? 'campo-autor-error' : undefined}
+          ariaInvalid={Boolean(validacion.mensajes.autor)}
+          ariaDescribedby={validacion.mensajes.autor ? 'campo-autor-error' : undefined}
           value={valores.autor}
           disabled={soloLectura}
-          onChange={(e) => {
-            actualizar('autor', e.target.value);
+          sugerencias={autoresSugeridos}
+          mensajeVacio={MENSAJE_SIN_AUTORES_SUGERIDOS}
+          onChange={(valor) => {
+            actualizar('autor', valor);
             validacion.limpiar('autor');
           }}
           onBlur={() => validacion.revalidar('autor', valores.autor, validaciones.autor)}
-          className="rounded-md border border-input bg-transparent px-3 py-2 text-sm dark:bg-input/30"
         />
         <MensajeErrorCampo id="campo-autor-error" mensaje={validacion.mensajes.autor} />
       </div>

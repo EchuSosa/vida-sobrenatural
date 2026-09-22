@@ -225,6 +225,10 @@ export function LibrosCliente({
   // (page.tsx ya lo explica del lado del servidor); mostrar ahí los
   // controles de reordenar invitaría a "reordenar" algo que no existe.
   const puedeReordenar = esAdmin && filtro === 'activas' && orden.columna === 'orden' && busqueda.trim() === '';
+
+  // H-91: sin pegarle a la API de nuevo — `libros` ya trae todo lo que
+  // necesita para sugerir (esta pantalla sí carga el listado completo).
+  const autoresSugeridos = Array.from(new Set(libros.map((l) => l.autor))).sort((a, b) => a.localeCompare(b));
   const [reordenando, setReordenando] = useState(false);
   const [anuncioOrden, setAnuncioOrden] = useState('');
 
@@ -482,6 +486,7 @@ export function LibrosCliente({
                 textoEnviando="Creando…"
                 error={errorAlta}
                 erroresCampo={erroresCampoAlta}
+                autoresSugeridos={autoresSugeridos}
               />
             </div>
           </SheetContent>

@@ -42,5 +42,17 @@ export default async function LibroDetallePage({ params }: { params: Promise<{ i
     throw e;
   }
 
-  return <LibroDetalleCliente libro={libro} apiToken={session.apiToken} esAdmin={rol.includes('admin')} />;
+  // H-91/H-60: se busca en el servidor, no acá adentro — esta pantalla no
+  // tiene (como sí libros-cliente.tsx) el listado completo ya cargado del
+  // que derivar las sugerencias.
+  const autoresSugeridos = await apiFetch<string[]>('/libros/autores');
+
+  return (
+    <LibroDetalleCliente
+      libro={libro}
+      apiToken={session.apiToken}
+      esAdmin={rol.includes('admin')}
+      autoresSugeridos={autoresSugeridos}
+    />
+  );
 }

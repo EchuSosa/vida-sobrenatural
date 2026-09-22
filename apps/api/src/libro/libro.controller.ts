@@ -47,6 +47,17 @@ export class LibroController {
     return this.libroService.findAll(valido, skip, take);
   }
 
+  /**
+   * H-91: antes de `:id` a propósito, mismo motivo que `PATCH /libros/reordenar`
+   * (H-89) — si fuera después, Nest lo tomaría como un `GET /libros/:id` con id
+   * literal "autores".
+   */
+  @Get('autores')
+  @ApiOkResponse({ description: 'H-91 — autores ya cargados en Libros no eliminados, para sugerir mientras se escribe (no un catálogo cerrado).' })
+  findAutores() {
+    return this.libroService.findAutores();
+  }
+
   @Get(':id')
   @ApiOkResponse({ description: 'Detalle de un Libro, activo o no (FR-007, mismo criterio que Sede) — nunca uno eliminado (D119).' })
   findOne(@Param('id') id: string) {

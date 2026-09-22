@@ -27,12 +27,12 @@ async function portadaValida(): Promise<Buffer> {
   return portadaValidaCache;
 }
 
-async function crearLibroPorModal(page: Page, titulo: string) {
+async function crearLibroPorModal(page: Page, titulo: string, autor = 'Autor E2E') {
   await page.getByRole('button', { name: 'Crear Libro' }).click();
   const modal = page.getByRole('dialog', { name: 'Crear Libro' });
   await expect(modal).toBeVisible();
   await modal.getByLabel('Título').fill(titulo);
-  await modal.getByLabel('Autor/a').fill('Autor E2E');
+  await modal.getByLabel('Autor/a').fill(autor);
   await modal.getByLabel('Año').fill('2024');
 
   // H-92: la fila de Año/Orden desbordaba el modal (flex-1 sin min-w-0) —
@@ -235,6 +235,68 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await filaLibro(page, titulo).getByRole('button', { name: 'Restaurar' }).click();
       await expect(page.getByText(`${titulo} restaurado.`)).toBeVisible();
+    });
+
+    // H-91: el campo autor/a SUGIERE autores ya cargados mientras se
+    // escribe — no obliga a elegir uno. Patrón ARIA de combobox (Base UI
+    // `Autocomplete`): input con role="combobox", opciones con
+    // role="option", navegables con flechas y Enter.
+    test('el campo autor/a sugiere autores ya cargados, navegable por teclado, y sigue aceptando texto libre (H-91)', async ({
+      page,
+    }) => {
+      const sufijo = `${colorScheme}-${Date.now()}`;
+      const autorExistente = `Autora Sugerida ${sufijo}`;
+      const autorLibre = `Autor Libre Nunca Cargado ${sufijo}`;
+      const tituloBase = `e2e-libro-autocompletado-base-${sufijo}`;
+      const tituloNuevo = `e2e-libro-autocompletado-nuevo-${sufijo}`;
+
+      await loguearseComoAdminE2E(page);
+      await page.goto('/libros');
+      await page.waitForLoadState('networkidle');
+
+      // Primero un Libro con un autor conocido, para que exista como sugerencia del siguiente.
+      await crearLibroPorModal(page, tituloBase, autorExistente);
+
+      await page.getByRole('button', { name: 'Crear Libro' }).click();
+      const modal = page.getByRole('dialog', { name: 'Crear Libro' });
+      await expect(modal).toBeVisible();
+      await modal.getByLabel('Título').fill(tituloNuevo);
+
+      const campoAutor = modal.getByRole('combobox', { name: 'Autor/a' });
+      await campoAutor.pressSequentially(autorExistente.slice(0, 8));
+      const opcion = page.getByRole('option', { name: autorExistente });
+      await expect(opcion).toBeVisible();
+
+      // Teclado, no clic: flecha resalta, Enter elige — sin soltar el mouse.
+      await campoAutor.press('ArrowDown');
+      await expect(opcion).toHaveAttribute('data-highlighted', '');
+      await campoAutor.press('Enter');
+      await expect(campoAutor).toHaveValue(autorExistente);
+
+      // Sigue siendo texto libre: un autor nuevo no pelea con el control —
+      // "sin coincidencias" es informativo, nunca bloquea escribir.
+      await campoAutor.fill('');
+      await campoAutor.pressSequentially(autorLibre);
+      await expect(page.getByText('Sin coincidencias', { exact: false })).toBeVisible();
+      // Escape cierra la lista sin perder lo escrito (patrón ARIA de combobox).
+      await campoAutor.press('Escape');
+      await expect(campoAutor).toHaveAttribute('aria-expanded', 'false');
+      await expect(campoAutor).toHaveValue(autorLibre);
+
+      await modal.getByLabel('Año').fill('2024');
+
+      const resultados = await auditar(page);
+      expect(resultados.violations).toEqual([]);
+
+      await modal.getByRole('button', { name: 'Crear Libro' }).click();
+      // .last(): este test ya creó un Libro antes (tituloBase) — su propio
+      // toast puede seguir visible cuando aparece el de este segundo.
+      await expect(page.getByText('Libro creado.').last()).toBeVisible();
+      await expect(modal).toBeHidden();
+
+      const filaNueva = filaLibro(page, tituloNuevo);
+      await expect(filaNueva).toBeVisible();
+      await expect(filaNueva.getByText(autorLibre)).toBeVisible();
     });
 
     test('Pastor ve el listado y el detalle pero no puede editar nada (D64)', async ({ page }) => {
