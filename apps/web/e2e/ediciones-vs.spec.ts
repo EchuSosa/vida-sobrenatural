@@ -59,7 +59,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
         'Diseñados para una vida saludable',
       ];
       for (const titulo of TITULOS_REALES) {
-        await expect(page.getByText(titulo, { exact: true })).toBeVisible();
+        // .first(): mismo artefacto ya documentado arriba para el párrafo
+        // de introducción — en la suite completa este <p> a veces resuelve
+        // a dos nodos idénticos, sin que haya un Libro duplicado en la base
+        // (verificado contra la API).
+        await expect(page.getByText(titulo, { exact: true }).first()).toBeVisible();
       }
       await expect(
         items.filter({ hasText: 'Mujer Maravilla: cuando la realidad supera a la ficción' }),
