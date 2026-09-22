@@ -10,6 +10,15 @@ import { AppException } from '../common/errors/app-exception.js';
 const ANCHO_PORTADA = 800;
 const ALTO_PORTADA = Math.round((ANCHO_PORTADA * PORTADA_ASPECTO.alto) / PORTADA_ASPECTO.ancho);
 
+// H-94a: mínimo de dimensiones de origen sobre el LADO CORTO, no sobre
+// ancho y alto por separado. La regla original ("ancho ≥ 800 Y alto ≥
+// 1200") asumía que toda portada se recortaba a vertical (D110, antes de
+// la enmienda) — sin recorte esa regla rechazaba una foto apaisada
+// perfectamente buena solo por no ser alta. Coincide en valor con
+// `ANCHO_PORTADA` porque ese es el eje que ata la escala de salida en el
+// peor caso (ver `procesar`), no porque sean el mismo concepto.
+const LADO_CORTO_MINIMO = ANCHO_PORTADA;
+
 /**
  * FR-023/FR-024 (research.md Decisión 1): redimensiona y recomprime con
  * `sharp`, **sin recortar** (D110, enmendada — revisión manual, portadas
@@ -34,11 +43,11 @@ export class ImagenPortadaService {
     // dimensiones de origen ANTES de procesar y se corta acá si no
     // alcanzan.
     const { width, height } = await sharp(buffer).metadata();
-    if (!width || !height || width < ANCHO_PORTADA || height < ALTO_PORTADA) {
+    if (!width || !height || Math.min(width, height) < LADO_CORTO_MINIMO) {
       throw new AppException(
         'PORTADA_DIMENSION_INSUFICIENTE',
         400,
-        `La imagen es más chica que el mínimo para una portada (${ANCHO_PORTADA}×${ALTO_PORTADA}px).`,
+        `La imagen es más chica que el mínimo para una portada (el lado corto tiene que ser de al menos ${LADO_CORTO_MINIMO}px).`,
       );
     }
 

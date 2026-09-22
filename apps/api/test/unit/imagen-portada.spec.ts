@@ -10,10 +10,10 @@ async function crearImagenSintetica(ancho: number, alto: number): Promise<Buffer
     .toBuffer();
 }
 
-// FR-023/FR-024 (specs/003-contenido-institucional). H-94: el mínimo de
-// dimensiones (800×1200, el propio destino) se agrega acá — las imágenes
-// sintéticas de estos tests pasan a estar por encima de ese piso; el
-// rechazo de las que están por debajo tiene sus propios tests al final.
+// FR-023/FR-024 (specs/003-contenido-institucional). H-94/H-94a: el mínimo
+// es sobre el LADO CORTO (800px), no sobre ancho y alto por separado — las
+// imágenes sintéticas de estos tests pasan a estar por encima de ese piso;
+// el rechazo de las que están por debajo tiene sus propios tests al final.
 describe('ImagenPortadaService', () => {
   const service = new ImagenPortadaService();
 
@@ -60,29 +60,42 @@ describe('ImagenPortadaService', () => {
     expect(metadata.format).toBe('jpeg');
   });
 
-  it('H-94: una imagen más chica que el destino se rechaza, no se agranda en silencio', async () => {
-    const original = await crearImagenSintetica(200, 300);
+  it('H-94: una imagen con el lado corto muy por debajo del mínimo se rechaza, no se agranda en silencio', async () => {
+    const original = await crearImagenSintetica(200, 300); // lado corto 200
     await expect(service.procesar(original)).rejects.toMatchObject({
       code: 'PORTADA_DIMENSION_INSUFICIENTE',
     });
     await expect(service.procesar(original)).rejects.toBeInstanceOf(AppException);
   });
 
-  it('H-94: rechaza igual cuando solo un eje está por debajo del mínimo (ancho suficiente, alto no)', async () => {
-    // 2400×900: ancho (2400) sobra, pero cubrir 800×1200 con cover
-    // necesitaría escalar por 1200/900 ≈ 1.33 — agrandaría.
+  /**
+   * H-94a: el bug que este test demuestra ahora resuelto. La regla vieja
+   * ("ancho ≥ 800 Y alto ≥ 1200") asumía que toda portada se recortaba a
+   * vertical — 2400×900 es una foto apaisada perfectamente buena (lado
+   * corto 900 ≥ 800) que esa regla rechazaba igual, solo porque
+   * 900 < 1200. Con el mínimo sobre el lado corto, se acepta.
+   */
+  it('H-94a: una foto apaisada con el lado corto por encima del mínimo se acepta (antes se rechazaba)', async () => {
     const original = await crearImagenSintetica(2400, 900);
-    await expect(service.procesar(original)).rejects.toMatchObject({
-      code: 'PORTADA_DIMENSION_INSUFICIENTE',
-    });
+    const { buffer } = await service.procesar(original);
+    const metadata = await sharp(buffer).metadata();
+
+    expect(metadata.width).toBe(800);
   });
 
-  it('H-94: una imagen justo en el mínimo (800×1200) se acepta, sin agrandar', async () => {
-    const original = await crearImagenSintetica(800, 1200);
+  it('H-94a: el lado corto exactamente en el mínimo (800) se acepta, sin agrandar', async () => {
+    const original = await crearImagenSintetica(800, 1200); // lado corto 800
     const { buffer } = await service.procesar(original);
     const metadata = await sharp(buffer).metadata();
 
     expect(metadata.width).toBe(800);
     expect(metadata.height).toBe(1200);
+  });
+
+  it('H-94a: el lado corto justo por debajo del mínimo (799) se rechaza', async () => {
+    const original = await crearImagenSintetica(1000, 799);
+    await expect(service.procesar(original)).rejects.toMatchObject({
+      code: 'PORTADA_DIMENSION_INSUFICIENTE',
+    });
   });
 });

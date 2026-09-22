@@ -41,9 +41,9 @@ export type ErrorCode =
   | 'PORTADA_TIPO_INVALIDO'
   | 'PORTADA_TAMANO_EXCEDIDO'
   | 'LIBRO_TEXTO_ALTERNATIVO_REQUERIDO'
-  // revision-manual H-94: la imagen de origen es más chica que el destino
-  // (800×1200) — agrandarla la deja borrosa, así que se rechaza en vez de
-  // tolerarla.
+  // revision-manual H-94/H-94a: el lado corto de la imagen de origen es
+  // más chico que el mínimo (800px) — agrandarla la deja borrosa, así que
+  // se rechaza en vez de tolerarla.
   | 'PORTADA_DIMENSION_INSUFICIENTE'
   | 'ERROR_INTERNO';
 

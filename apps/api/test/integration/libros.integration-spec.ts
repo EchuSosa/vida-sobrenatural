@@ -290,8 +290,8 @@ describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {
     expect(sinTexto.status).toBe(400);
     expect(sinTexto.body.code).toBe('LIBRO_TEXTO_ALTERNATIVO_REQUERIDO');
 
-    // H-94: una imagen más chica que el destino (800×1200) se rechaza en
-    // vez de agrandarse en silencio.
+    // H-94/H-94a: una imagen con el lado corto por debajo del mínimo
+    // (800px) se rechaza en vez de agrandarse en silencio.
     const imagenChica = await imagenSintetica(200, 300);
     const dimensionInsuficiente = await request(app.getHttpServer())
       .post(`/libros/${crear.body.id}/portada`)
