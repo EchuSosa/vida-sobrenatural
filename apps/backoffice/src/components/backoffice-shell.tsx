@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -8,6 +9,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
+  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
@@ -15,6 +17,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@vida-sobrenatural/ui';
+import logotipoClaro from '@vida-sobrenatural/ui/assets/marca/logotipo-oscuro-600.png';
+import logotipoOscuro from '@vida-sobrenatural/ui/assets/marca/logotipo-blanco-600.png';
 import { itemsParaRoles, type RolBackoffice } from '../config/nav';
 import { MenuUsuario } from './selector-tema';
 
@@ -44,13 +48,23 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarContent>
-          <SidebarGroup>
-            {/* H-51/H-52 (revisión manual ronda 4): el menú no estaba dentro
-                de un <nav> — docs/14-navegacion.md pide un <nav aria-label>
-                por menú (D81), y sin esto axe marca cada ítem como contenido
-                fuera de cualquier landmark. */}
-            <nav aria-label={t('principal')}>
+        {/* H-51/H-52 (revisión manual ronda 4): el menú no estaba dentro de
+            un <nav> — docs/14-navegacion.md pide un <nav aria-label> por
+            menú (D81), y sin esto axe marca cada ítem como contenido fuera
+            de cualquier landmark. FR-038 (D122) agregó el logotipo de la
+            cabecera del sidebar como hermano de ese menú — el <nav> ahora
+            envuelve a los dos (en vez de duplicar el landmark) para que el
+            logotipo también quede contenido. */}
+        <nav aria-label={t('principal')}>
+          {/* FR-038 (D122): logotipo en la cabecera del sidebar, hoy sin ninguna marca. */}
+          <SidebarHeader>
+            <Link href="/" className="flex items-center px-2 py-1">
+              <Image src={logotipoClaro} alt="Vida Sobrenatural" className="h-6 w-auto dark:hidden" />
+              <Image src={logotipoOscuro} alt="Vida Sobrenatural" className="hidden h-6 w-auto dark:block" />
+            </Link>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
               <SidebarMenu>
                 {items.map(({ href, labelKey, icon: Icon }) => (
                   <SidebarMenuItem key={href}>
@@ -66,9 +80,9 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
-            </nav>
-          </SidebarGroup>
-        </SidebarContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </nav>
       </Sidebar>
       <SidebarInset>
         <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">

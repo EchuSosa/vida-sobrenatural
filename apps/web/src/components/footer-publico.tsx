@@ -1,5 +1,8 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import logotipoClaro from '@vida-sobrenatural/ui/assets/marca/logotipo-oscuro-600.png';
+import logotipoOscuro from '@vida-sobrenatural/ui/assets/marca/logotipo-blanco-600.png';
 import { NAV_PUBLICA } from '../config/nav-publica';
 import { IconoFacebook, IconoInstagram } from './iconos-redes';
 
@@ -19,6 +22,9 @@ export function FooterPublico() {
   return (
     <footer className="mt-auto border-t border-border">
       <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-8 text-sm text-muted-foreground">
+        {/* FR-039 (D122): logotipo del pie de página, claro/oscuro por tema. */}
+        <Image src={logotipoClaro} alt="Vida Sobrenatural" className="h-6 w-auto dark:hidden" />
+        <Image src={logotipoOscuro} alt="Vida Sobrenatural" className="hidden h-6 w-auto dark:block" />
         <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
           {NAV_PUBLICA.map((item) => (
             <Link key={item.href} href={item.href} className="hover:text-foreground">
