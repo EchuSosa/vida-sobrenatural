@@ -1,0 +1,1 @@
+no-es-una-imagen. Sirve para probar que el rechazo por tipo de archivo funciona.
