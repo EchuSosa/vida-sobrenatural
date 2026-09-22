@@ -4,12 +4,19 @@ import { apiFetch, ApiError, type Libro, type Pagina } from '@vida-sobrenatural/
 import { PapeleraCliente } from './papelera-cliente';
 import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
 
+type ColumnaOrden = 'titulo' | 'autor' | 'eliminadoEn';
+
 /**
  * D119: papelera de Libros. Mismo patrón que sedes/papelera/page.tsx —
  * distingue el 403 (SIN_PERMISO) del resto: "Reintentar" no serviría de
- * nada ahí.
+ * nada ahí. H-88: orden en la URL, en memoria (D126) — mismo criterio que
+ * el resto de los listados chicos.
  */
-export default async function PapeleraLibrosPage() {
+export default async function PapeleraLibrosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orden?: string; dir?: string }>;
+}) {
   const session = await auth();
   if (!session) {
     return (
@@ -29,6 +36,11 @@ export default async function PapeleraLibrosPage() {
       </div>
     );
   }
+
+  const { orden: ordenParam, dir } = await searchParams;
+  const ordenColumna: ColumnaOrden =
+    ordenParam === 'autor' ? 'autor' : ordenParam === 'eliminadoEn' ? 'eliminadoEn' : 'titulo';
+  const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
 
   let pagina: Pagina<Libro>;
   try {
@@ -50,5 +62,20 @@ export default async function PapeleraLibrosPage() {
     throw e;
   }
 
-  return <PapeleraCliente libros={pagina.items} apiToken={session.apiToken} esAdmin={rol.includes('admin')} />;
+  const librosOrdenados = [...pagina.items].sort((a, b) => {
+    const cmp =
+      ordenColumna === 'eliminadoEn'
+        ? (a.eliminadoEn ?? '').localeCompare(b.eliminadoEn ?? '')
+        : a[ordenColumna].localeCompare(b[ordenColumna], 'es');
+    return ordenDireccion === 'asc' ? cmp : -cmp;
+  });
+
+  return (
+    <PapeleraCliente
+      libros={librosOrdenados}
+      orden={{ columna: ordenColumna, direccion: ordenDireccion }}
+      apiToken={session.apiToken}
+      esAdmin={rol.includes('admin')}
+    />
+  );
 }

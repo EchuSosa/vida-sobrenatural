@@ -31,6 +31,7 @@ import {
   SheetDescription,
   TablaDatos,
   type ColumnaTabla,
+  type OrdenTabla,
   useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
@@ -40,17 +41,19 @@ type Filtro = 'activas' | 'todas';
 
 /**
  * Historia 4 (FR-018, D64): mismo patrón que SedesCliente. `libros` llega
- * ya cargado desde page.tsx. Pastor (`esAdmin: false`) ve todo pero no
- * tiene ni el botón "Crear Libro" ni columna de acciones.
+ * ya cargado y ordenado desde page.tsx. Pastor (`esAdmin: false`) ve todo
+ * pero no tiene ni el botón "Crear Libro" ni columna de acciones.
  */
 export function LibrosCliente({
   libros,
   filtro,
+  orden,
   apiToken,
   esAdmin,
 }: {
   libros: Libro[];
   filtro: Filtro;
+  orden: OrdenTabla;
   apiToken: string;
   esAdmin: boolean;
 }) {
@@ -119,14 +122,15 @@ export function LibrosCliente({
           <PlaceholderImagen aspecto="portada" etiqueta={`Portada de ${libro.titulo}`} className="h-16 w-auto" />
         ),
     },
-    { id: 'titulo', encabezado: 'Título', celda: (libro) => <span className="font-medium">{libro.titulo}</span> },
-    { id: 'autor', encabezado: 'Autor/a', className: 'hidden sm:table-cell', celda: (libro) => libro.autor },
-    { id: 'anio', encabezado: 'Año', className: 'hidden sm:table-cell', celda: (libro) => libro.anio },
+    { id: 'titulo', encabezado: 'Título', ordenable: true, celda: (libro) => <span className="font-medium">{libro.titulo}</span> },
+    { id: 'autor', encabezado: 'Autor/a', ordenable: true, className: 'hidden sm:table-cell', celda: (libro) => libro.autor },
+    { id: 'anio', encabezado: 'Año', ordenable: true, className: 'hidden sm:table-cell', celda: (libro) => libro.anio },
     ...(filtro === 'todas'
       ? [
           {
             id: 'estado',
             encabezado: 'Estado',
+            ordenable: true,
             celda: (libro: Libro) => <EstadoActivoBadge activo={libro.activo} textoActivo="Activo" textoInactivo="Inactivo" />,
           } satisfies ColumnaTabla<Libro>,
         ]
@@ -175,6 +179,13 @@ export function LibrosCliente({
         obtenerId={(libro) => libro.id}
         etiqueta="Libros"
         mensajeVacio={filtro === 'activas' ? 'Todavía no hay Libros activos.' : 'Todavía no hay Libros cargados.'}
+        orden={orden}
+        onOrdenar={(columnaId) =>
+          actualizarParams({
+            orden: columnaId === 'orden' ? null : columnaId,
+            dir: orden.columna === columnaId && orden.direccion === 'asc' ? 'desc' : null,
+          })
+        }
         acciones={
           esAdmin
             ? (libro) => (

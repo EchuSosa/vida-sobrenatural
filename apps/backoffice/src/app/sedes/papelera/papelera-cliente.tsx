@@ -2,19 +2,33 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { type Sede, type ErrorCode, apiFetch, ApiError, formatearFechaHora } from '@vida-sobrenatural/shared-types';
-import { Button, MigaDePan, TablaDatos, type ColumnaTabla } from '@vida-sobrenatural/ui';
+import { Button, MigaDePan, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 
-/** H-60 (revisión manual ronda 7): `sedes` llega ya cargada desde page.tsx — isla de cliente: Restaurar. */
-export function PapeleraCliente({ sedes, apiToken }: { sedes: Sede[]; apiToken: string }) {
+/**
+ * H-60 (revisión manual ronda 7): `sedes` llega ya cargada y ordenada desde
+ * page.tsx — isla de cliente: Restaurar y el orden que navega (H-88).
+ */
+export function PapeleraCliente({ sedes, orden, apiToken }: { sedes: Sede[]; orden: OrdenTabla; apiToken: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const te = useTranslations('errors');
   const locale = useLocale();
   const procesandoRef = useRef(new Set<string>());
   const [restaurandoId, setRestaurandoId] = useState<string | null>(null);
+
+  function actualizarParams(cambios: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams);
+    for (const [clave, valor] of Object.entries(cambios)) {
+      if (valor === null) params.delete(clave);
+      else params.set(clave, valor);
+    }
+    const query = params.toString();
+    router.push(query ? `/sedes/papelera?${query}` : '/sedes/papelera');
+  }
 
   async function restaurar(sede: Sede) {
     if (procesandoRef.current.has(sede.id)) return;
@@ -36,10 +50,16 @@ export function PapeleraCliente({ sedes, apiToken }: { sedes: Sede[]; apiToken: 
   }
 
   const columnas: ColumnaTabla<Sede>[] = [
-    { id: 'nombre', encabezado: 'Nombre', celda: (sede) => <span className="font-medium">{sede.nombre}</span> },
+    {
+      id: 'nombre',
+      encabezado: 'Nombre',
+      ordenable: true,
+      celda: (sede) => <span className="font-medium">{sede.nombre}</span>,
+    },
     {
       id: 'eliminadoEn',
       encabezado: 'Eliminada el',
+      ordenable: true,
       className: 'hidden sm:table-cell',
       celda: (sede) => (sede.eliminadoEn ? formatearFechaHora(sede.eliminadoEn, locale) : '—'),
     },
@@ -67,6 +87,13 @@ export function PapeleraCliente({ sedes, apiToken }: { sedes: Sede[]; apiToken: 
         obtenerId={(sede) => sede.id}
         etiqueta="Papelera de Sedes"
         mensajeVacio="La papelera está vacía."
+        orden={orden}
+        onOrdenar={(columnaId) =>
+          actualizarParams({
+            orden: columnaId === 'nombre' ? null : columnaId,
+            dir: orden.columna === columnaId && orden.direccion === 'asc' ? 'desc' : null,
+          })
+        }
         acciones={(sede) => (
           <Button
             variant="outline"

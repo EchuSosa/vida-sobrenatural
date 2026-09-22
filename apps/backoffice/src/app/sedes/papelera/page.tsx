@@ -4,6 +4,8 @@ import { apiFetch, ApiError, type Sede } from '@vida-sobrenatural/shared-types';
 import { PapeleraCliente } from './papelera-cliente';
 import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
 
+type ColumnaOrden = 'nombre' | 'eliminadoEn';
+
 /**
  * D119: papelera de Sedes, para el Admin. H-60/H-43 (ronda 7): Server
  * Component — GET /sedes?estado=papelera pasa al servidor. Gateado por rol
@@ -11,8 +13,16 @@ import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
  * resto: no es un error transitorio, "Reintentar" (error.tsx) no serviría
  * de nada — se muestra el motivo directamente, sin ofrecer un botón que no
  * va a arreglar nada.
+ *
+ * H-88: orden (columna + dirección) en la URL, mismo patrón que
+ * sedes-cliente.tsx — el orden en sí se resuelve acá (Server Component),
+ * ordenar en memoria alcanza con el volumen de hoy (D126).
  */
-export default async function PapeleraSedesPage() {
+export default async function PapeleraSedesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orden?: string; dir?: string }>;
+}) {
   const session = await auth();
   if (!session) {
     return (
@@ -22,6 +32,10 @@ export default async function PapeleraSedesPage() {
       </div>
     );
   }
+
+  const { orden: ordenParam, dir } = await searchParams;
+  const ordenColumna: ColumnaOrden = ordenParam === 'eliminadoEn' ? 'eliminadoEn' : 'nombre';
+  const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
 
   let sedes: Sede[];
   try {
@@ -43,5 +57,15 @@ export default async function PapeleraSedesPage() {
     throw e;
   }
 
-  return <PapeleraCliente sedes={sedes} apiToken={session.apiToken} />;
+  const sedesOrdenadas = [...sedes].sort((a, b) => {
+    const cmp =
+      ordenColumna === 'eliminadoEn'
+        ? (a.eliminadoEn ?? '').localeCompare(b.eliminadoEn ?? '')
+        : a.nombre.localeCompare(b.nombre, 'es');
+    return ordenDireccion === 'asc' ? cmp : -cmp;
+  });
+
+  return (
+    <PapeleraCliente sedes={sedesOrdenadas} orden={{ columna: ordenColumna, direccion: ordenDireccion }} apiToken={session.apiToken} />
+  );
 }

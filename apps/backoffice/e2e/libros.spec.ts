@@ -265,3 +265,26 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
   });
 }
+
+// H-88: independiente del tema — el orden se refleja en la URL, así que
+// sobrevive a un F5 (page.reload) y no depende de qué tema esté activo.
+test('ordenar por una columna se refleja en la URL y sobrevive a un F5', async ({ page }) => {
+  await loguearseComoAdminE2E(page);
+  await page.goto('/libros');
+  await page.waitForLoadState('networkidle');
+
+  // Por default el listado está en su orden manual (H-89) — clickear "Año"
+  // lo reemplaza por orden alfabético/numérico ascendente por esa columna.
+  await page.getByRole('button', { name: 'Año' }).click();
+  await page.waitForURL(/orden=anio/);
+
+  const celdasAnio = page.locator('table tbody tr td:nth-child(4)');
+  const aniosOrdenados = (await celdasAnio.allInnerTexts()).map(Number);
+  expect(aniosOrdenados).toEqual([...aniosOrdenados].sort((a, b) => a - b));
+
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  expect(page.url()).toContain('orden=anio');
+  const aniosTrasReload = (await celdasAnio.allInnerTexts()).map(Number);
+  expect(aniosTrasReload).toEqual(aniosOrdenados);
+});

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   type PalabraProfetica,
@@ -12,7 +12,7 @@ import {
   erroresPorCampo,
   formatearFechaHora,
 } from '@vida-sobrenatural/shared-types';
-import { Button, EstadoVacio, TablaDatos, type ColumnaTabla, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, EstadoVacio, TablaDatos, type ColumnaTabla, type OrdenTabla, useEnvio } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 import {
   FormularioPalabraProfetica,
@@ -21,29 +21,57 @@ import {
   type ValoresPalabraProfetica,
 } from '../../components/formulario-palabra-profetica';
 
+/** Mismo criterio que page.tsx: createdAt arranca desc, el resto asc. */
+function direccionDefaultDe(columna: string): 'asc' | 'desc' {
+  return columna === 'createdAt' ? 'desc' : 'asc';
+}
+
 /**
- * Historia 3 (D64): `historial` llega ya cargado desde page.tsx (Server
- * Component). Isla de cliente: el formulario de alta y el botón "Marcar
- * vigente" de cada fila. Pastor (`esAdmin: false`) ve todo, sin ningún
- * control habilitado — el formulario queda `inert` (FormularioPalabraProfetica)
- * y la columna de acciones no se renderiza.
+ * Historia 3 (D64): `historial` llega ya cargado y ordenado desde page.tsx
+ * (Server Component). Isla de cliente: el formulario de alta, el botón
+ * "Marcar vigente" de cada fila, y el orden que navega (H-88). Pastor
+ * (`esAdmin: false`) ve todo, sin ningún control habilitado — el formulario
+ * queda `inert` (FormularioPalabraProfetica) y la columna de acciones no se
+ * renderiza.
  */
 export function PalabraProfeticaCliente({
   historial,
+  orden,
   apiToken,
   esAdmin,
 }: {
   historial: PalabraProfetica[];
+  orden: OrdenTabla;
   apiToken: string;
   esAdmin: boolean;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const te = useTranslations('errors');
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const procesandoRef = useRef(new Set<string>());
   const [marcandoId, setMarcandoId] = useState<string | null>(null);
+
+  function actualizarParams(cambios: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams);
+    for (const [clave, valor] of Object.entries(cambios)) {
+      if (valor === null) params.delete(clave);
+      else params.set(clave, valor);
+    }
+    const query = params.toString();
+    router.push(query ? `/palabra-profetica?${query}` : '/palabra-profetica');
+  }
+
+  function onOrdenar(columnaId: string) {
+    const siguienteDireccion: 'asc' | 'desc' =
+      orden.columna === columnaId ? (orden.direccion === 'asc' ? 'desc' : 'asc') : direccionDefaultDe(columnaId);
+    actualizarParams({
+      orden: columnaId === 'createdAt' ? null : columnaId,
+      dir: siguienteDireccion === direccionDefaultDe(columnaId) ? null : siguienteDireccion,
+    });
+  }
 
   const { enviando, ejecutar: crear } = useEnvio(async (valores: ValoresPalabraProfetica) => {
     setErrorAlta(null);
@@ -90,11 +118,12 @@ export function PalabraProfeticaCliente({
   }
 
   const columnas: ColumnaTabla<PalabraProfetica>[] = [
-    { id: 'anio', encabezado: 'Año', celda: (p) => <span className="font-medium">{p.anio}</span> },
-    { id: 'titulo', encabezado: 'Título', celda: (p) => p.titulo },
+    { id: 'anio', encabezado: 'Año', ordenable: true, celda: (p) => <span className="font-medium">{p.anio}</span> },
+    { id: 'titulo', encabezado: 'Título', ordenable: true, celda: (p) => p.titulo },
     {
       id: 'estado',
       encabezado: 'Estado',
+      ordenable: true,
       celda: (p) =>
         p.vigente ? (
           <span className="text-sm font-medium text-success">Vigente</span>
@@ -105,6 +134,7 @@ export function PalabraProfeticaCliente({
     {
       id: 'createdAt',
       encabezado: 'Creada',
+      ordenable: true,
       className: 'hidden sm:table-cell',
       celda: (p) => formatearFechaHora(p.createdAt, locale),
     },
@@ -139,6 +169,8 @@ export function PalabraProfeticaCliente({
             obtenerId={(p) => p.id}
             etiqueta="Historial de Palabra Profética"
             mensajeVacio="Todavía no hay ninguna Palabra Profética cargada."
+            orden={orden}
+            onOrdenar={onOrdenar}
             acciones={
               esAdmin
                 ? (p) =>

@@ -3,13 +3,28 @@ import { apiFetch, type PalabraProfetica, type Pagina } from '@vida-sobrenatural
 import { PalabraProfeticaCliente } from './palabra-profetica-cliente';
 import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
 
+type ColumnaOrden = 'anio' | 'titulo' | 'estado' | 'createdAt';
+
+/** El default de cada columna cuando no hay `dir` explícito en la URL — igual que hoy trae la API (createdAt desc, la más nueva primero). */
+function direccionDefaultDe(columna: ColumnaOrden): 'asc' | 'desc' {
+  return columna === 'createdAt' ? 'desc' : 'asc';
+}
+
 /**
  * Historia 3 (specs/003-contenido-institucional, D64): Server Component —
  * GET /palabra-profetica (historial completo, paginado) pasa al servidor.
  * Admin edita, Pastor lee (FR-028/FR-029) — la distinción vive en el
  * cliente (`esAdmin`), el guard real está en la API.
+ *
+ * H-88: orden en la URL. `createdAt` es la única columna con default
+ * `desc` (la API ya ordena así, FR-013) — las demás arrancan `asc` cuando
+ * se eligen por primera vez, mismo criterio que el resto de los listados.
  */
-export default async function PalabraProfeticaPage() {
+export default async function PalabraProfeticaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orden?: string; dir?: string }>;
+}) {
   const session = await auth();
   if (!session) {
     return (
@@ -33,11 +48,35 @@ export default async function PalabraProfeticaPage() {
     );
   }
 
+  const { orden: ordenParam, dir } = await searchParams;
+  const ordenColumna: ColumnaOrden =
+    ordenParam === 'anio' || ordenParam === 'titulo' || ordenParam === 'estado' ? ordenParam : 'createdAt';
+  const ordenDireccion: 'asc' | 'desc' = dir === 'asc' ? 'asc' : dir === 'desc' ? 'desc' : direccionDefaultDe(ordenColumna);
+
   const pagina = await apiFetch<Pagina<PalabraProfetica>>('/palabra-profetica?take=100', {
     headers: { Authorization: `Bearer ${session.apiToken}` },
   });
 
+  const historial = [...pagina.items].sort((a, b) => {
+    const cmp =
+      ordenColumna === 'anio'
+        ? a.anio - b.anio
+        : ordenColumna === 'estado'
+          ? Number(a.vigente) - Number(b.vigente)
+          : ordenColumna === 'createdAt'
+            ? a.createdAt.localeCompare(b.createdAt)
+            : a.titulo.localeCompare(b.titulo, 'es');
+    return ordenDireccion === 'asc' ? cmp : -cmp;
+  });
+
   const esAdmin = rol.includes('admin');
 
-  return <PalabraProfeticaCliente historial={pagina.items} apiToken={session.apiToken} esAdmin={esAdmin} />;
+  return (
+    <PalabraProfeticaCliente
+      historial={historial}
+      orden={{ columna: ordenColumna, direccion: ordenDireccion }}
+      apiToken={session.apiToken}
+      esAdmin={esAdmin}
+    />
+  );
 }

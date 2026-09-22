@@ -148,6 +148,7 @@ export function SedesCliente({
           {
             id: 'estado',
             encabezado: 'Estado',
+            ordenable: true,
             celda: (sede: Sede) => <EstadoActivoBadge activo={sede.activo} />,
           } satisfies ColumnaTabla<Sede>,
         ]

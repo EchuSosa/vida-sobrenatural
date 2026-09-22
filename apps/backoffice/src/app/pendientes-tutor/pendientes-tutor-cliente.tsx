@@ -105,9 +105,13 @@ export function PendientesTutorCliente({
     }
   });
 
-  // H-69: sin búsqueda ni filtros por ahora (H-69, alcance) — orden tampoco:
-  // la paginación por "cargar más" no trae todas las filas a la vez, así
-  // que ordenar del lado del cliente sería incorrecto acá.
+  // H-88: sin columnas ordenables a propósito, no por descuido — esto es
+  // una COLA (Historia 2b), su único orden útil es por fecha de solicitud,
+  // y la API ya la entrega así (`orderBy: {createdAt: 'asc'}`,
+  // persona.service.ts) — alfabetizarla la convertiría en una lista
+  // cualquiera. Además, la paginación por "cargar más" no trae todas las
+  // filas a la vez, así que ordenar del lado del cliente por otra columna
+  // sería incorrecto igual.
   const columnas: ColumnaTabla<PersonaPendienteTutor>[] = [
     {
       id: 'nombre',

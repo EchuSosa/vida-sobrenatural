@@ -4,17 +4,30 @@ import { LibrosCliente } from './libros-cliente';
 import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
 
 type Filtro = 'activas' | 'todas';
+// 'orden' = el orden manual (H-89, drag/mover) que ya devuelve la API por
+// default — no es una columna que el Admin elija, es la ausencia de
+// override. Las demás sí son columnas reales (H-88).
+type ColumnaOrden = 'orden' | 'titulo' | 'autor' | 'anio' | 'estado';
 
 /**
  * Historia 4 (specs/003-contenido-institucional, FR-018): mismo patrón que
  * sedes/page.tsx — Server Component, filtro activas/todas por query param.
  * FR-030: cualquier rol que no sea Admin ni Pastor queda afuera, tanto del
  * menú como del acceso directo por URL.
+ *
+ * H-88/H-89: orden en la URL. Por default (`orden` ausente o `orden=orden`)
+ * se respeta el orden manual que ya trae la API (`orderBy: {orden: 'asc'}`,
+ * libro.service.ts) — el mismo que ve la web pública (FR-016) y el único
+ * que se puede reordenar (mover arriba/abajo, arrastrar). Elegir una
+ * columna (título/autor/año) la reemplaza por ese criterio alfabético/
+ * numérico — dejar de estar en ese orden natural es, a propósito, lo que
+ * también oculta mover/arrastrar en LibrosCliente: reordenar un listado que
+ * ya no está en su posición real no tendría sentido.
  */
 export default async function LibrosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ estado?: string }>;
+  searchParams: Promise<{ estado?: string; orden?: string; dir?: string }>;
 }) {
   const session = await auth();
   if (!session) {
@@ -36,12 +49,39 @@ export default async function LibrosPage({
     );
   }
 
-  const { estado } = await searchParams;
+  const { estado, orden: ordenParam, dir } = await searchParams;
   const filtro: Filtro = estado === 'todas' ? 'todas' : 'activas';
+  const ordenColumna: ColumnaOrden =
+    ordenParam === 'titulo' || ordenParam === 'autor' || ordenParam === 'anio' || ordenParam === 'estado'
+      ? ordenParam
+      : 'orden';
+  const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
 
   const pagina = await apiFetch<Pagina<Libro>>(`/libros?estado=${filtro}&take=200`, {
     headers: { Authorization: `Bearer ${session.apiToken}` },
   });
 
-  return <LibrosCliente libros={pagina.items} filtro={filtro} apiToken={session.apiToken} esAdmin={rol.includes('admin')} />;
+  // El natural (orden manual) ya llega ordenado de la API — nada que hacer.
+  const libros =
+    ordenColumna === 'orden'
+      ? pagina.items
+      : [...pagina.items].sort((a, b) => {
+          const cmp =
+            ordenColumna === 'anio'
+              ? a.anio - b.anio
+              : ordenColumna === 'estado'
+                ? Number(a.activo) - Number(b.activo)
+                : a[ordenColumna].localeCompare(b[ordenColumna], 'es');
+          return ordenDireccion === 'asc' ? cmp : -cmp;
+        });
+
+  return (
+    <LibrosCliente
+      libros={libros}
+      filtro={filtro}
+      orden={{ columna: ordenColumna, direccion: ordenDireccion }}
+      apiToken={session.apiToken}
+      esAdmin={rol.includes('admin')}
+    />
+  );
 }

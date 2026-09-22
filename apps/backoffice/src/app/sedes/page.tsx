@@ -4,7 +4,7 @@ import { SedesCliente } from './sedes-cliente';
 import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
 
 type Filtro = 'activas' | 'todas';
-type ColumnaOrden = 'nombre' | 'direccion';
+type ColumnaOrden = 'nombre' | 'direccion' | 'estado';
 
 /**
  * H-60/H-43 (revisión manual ronda 7): Server Component — el fetch de
@@ -30,12 +30,13 @@ export default async function SedesPage({
 
   const { estado, orden: ordenParam, dir } = await searchParams;
   const filtro: Filtro = estado === 'todas' ? 'todas' : 'activas';
-  const ordenColumna: ColumnaOrden = ordenParam === 'direccion' ? 'direccion' : 'nombre';
+  const ordenColumna: ColumnaOrden =
+    ordenParam === 'direccion' ? 'direccion' : ordenParam === 'estado' ? 'estado' : 'nombre';
   const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
 
   const sedes = await apiFetch<Sede[]>(`/sedes?estado=${filtro}`);
   const sedesOrdenadas = [...sedes].sort((a, b) => {
-    const cmp = String(a[ordenColumna]).localeCompare(String(b[ordenColumna]), 'es');
+    const cmp = ordenColumna === 'estado' ? Number(a.activo) - Number(b.activo) : String(a[ordenColumna]).localeCompare(String(b[ordenColumna]), 'es');
     return ordenDireccion === 'asc' ? cmp : -cmp;
   });
 
