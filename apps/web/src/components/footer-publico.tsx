@@ -36,7 +36,7 @@ export function FooterPublico() {
         </div>
         <nav aria-label={`${tf('facebook')}, ${tf('instagram')}`} className="flex gap-x-4">
           <a
-            href="https://facebook.com/iglesia.vida.sobrenatural"
+            href={tf('facebookUrl')}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={tf('facebook')}
@@ -45,7 +45,7 @@ export function FooterPublico() {
             <IconoFacebook className="size-5" />
           </a>
           <a
-            href="https://instagram.com/iglesiavs"
+            href={tf('instagramUrl')}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={tf('instagram')}

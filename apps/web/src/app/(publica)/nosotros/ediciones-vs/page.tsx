@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import type { useTranslations } from 'next-intl';
 import type { Libro } from '@vida-sobrenatural/shared-types';
 import { MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
+import { IconoFacebook, IconoInstagram } from '../../../../components/iconos-redes';
 
 export const metadata = {
   title: 'Ediciones VS — Vida Sobrenatural',
@@ -63,23 +64,27 @@ export default async function EdicionesVsPage() {
       <section className="flex flex-col gap-2">
         <h2 className="text-xl font-medium">{t('comoConseguirTitulo')}</h2>
         <p className="text-foreground">{t('comoConseguirTexto')}</p>
-        {/* Enlaces propios de Ediciones VS, distintos de los de la iglesia en el pie general. */}
-        <nav aria-label={`${t('facebookLabel')}, ${t('instagramLabel')}`} className="flex gap-4 text-sm">
+        {/* Enlaces propios de Ediciones VS, distintos de los de la iglesia en
+            el pie general (footer-publico.tsx) — mismo patrón visual (H-83):
+            solo ícono con aria-label, no texto. */}
+        <nav aria-label={`${t('facebookLabel')}, ${t('instagramLabel')}`} className="flex gap-x-4">
           <a
-            href="https://www.facebook.com/ediciones.vs.lp"
+            href={t('facebookUrl')}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium underline underline-offset-4"
+            aria-label={t('facebookLabel')}
+            className="hover:text-foreground"
           >
-            {t('facebookLabel')}
+            <IconoFacebook className="size-5" />
           </a>
           <a
-            href="https://instagram.com/edicionesvs"
+            href={t('instagramUrl')}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium underline underline-offset-4"
+            aria-label={t('instagramLabel')}
+            className="hover:text-foreground"
           >
-            {t('instagramLabel')}
+            <IconoInstagram className="size-5" />
           </a>
         </nav>
       </section>

@@ -29,7 +29,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await expect(page.getByRole('link', { name: 'Facebook de Ediciones VS' })).toHaveAttribute(
         'href',
-        'https://www.facebook.com/ediciones.vs.lp',
+        // H-83: unificado con el formato sin "www" del pie (footer-publico.tsx).
+        'https://facebook.com/ediciones.vs.lp',
       );
       await expect(page.getByRole('link', { name: 'Instagram de Ediciones VS' })).toHaveAttribute(
         'href',
