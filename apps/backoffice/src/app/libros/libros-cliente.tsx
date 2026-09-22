@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { MoreVertical, Trash2 } from 'lucide-react';
 import { type Libro, type ErrorCode, type ErrorDeCampo, apiFetch, ApiError, erroresPorCampo } from '@vida-sobrenatural/shared-types';
@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
   Button,
   buttonVariants,
+  ControlesTabla,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -35,14 +36,15 @@ import {
   useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
+import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 import { FormularioLibro, VALORES_LIBRO_VACIOS, datosLibroParaEnviar, type ValoresLibro } from '../../components/formulario-libro';
 
 type Filtro = 'activas' | 'todas';
 
 /**
  * Historia 4 (FR-018, D64): mismo patrón que SedesCliente. `libros` llega
- * ya cargado y ordenado desde page.tsx. Pastor (`esAdmin: false`) ve todo
- * pero no tiene ni el botón "Crear Libro" ni columna de acciones.
+ * ya cargado, filtrado y ordenado desde page.tsx. Pastor (`esAdmin: false`)
+ * ve todo pero no tiene ni el botón "Crear Libro" ni columna de acciones.
  */
 export function LibrosCliente({
   libros,
@@ -58,21 +60,12 @@ export function LibrosCliente({
   esAdmin: boolean;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
-
-  function actualizarParams(cambios: Record<string, string | null>) {
-    const params = new URLSearchParams(searchParams);
-    for (const [clave, valor] of Object.entries(cambios)) {
-      if (valor === null) params.delete(clave);
-      else params.set(clave, valor);
-    }
-    const query = params.toString();
-    router.push(query ? `/libros?${query}` : '/libros');
-  }
+  const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
+  const hayAlgoAplicado = busqueda.trim() !== '' || filtro === 'todas';
 
   const { enviando, ejecutar: crearLibro } = useEnvio(async (valores: ValoresLibro) => {
     setErrorAlta(null);
@@ -160,25 +153,42 @@ export function LibrosCliente({
         </div>
       </div>
 
-      <div className="flex gap-2" role="group" aria-label="Filtrar por estado">
-        <Button
-          variant={filtro === 'activas' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => actualizarParams({ estado: null })}
-        >
-          Activos
-        </Button>
-        <Button variant={filtro === 'todas' ? 'default' : 'outline'} size="sm" onClick={() => actualizarParams({ estado: 'todas' })}>
-          Todos
-        </Button>
-      </div>
+      <ControlesTabla
+        busqueda={busqueda}
+        onBuscarChange={setBusqueda}
+        etiquetaBusqueda="Buscar por título o autor/a"
+        placeholderBusqueda="Ej. Antídotos, Natalia Spetale"
+        filtros={
+          <div className="flex gap-2" role="group" aria-label="Filtrar por estado">
+            <Button
+              variant={filtro === 'activas' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => actualizarParams({ estado: null })}
+            >
+              Activos
+            </Button>
+            <Button variant={filtro === 'todas' ? 'default' : 'outline'} size="sm" onClick={() => actualizarParams({ estado: 'todas' })}>
+              Todos
+            </Button>
+          </div>
+        }
+        hayAlgoAplicado={hayAlgoAplicado}
+        onLimpiar={() => limpiar(['estado'])}
+        cantidadResultados={libros.length}
+      />
 
       <TablaDatos
         columnas={columnas}
         datos={libros}
         obtenerId={(libro) => libro.id}
         etiqueta="Libros"
-        mensajeVacio={filtro === 'activas' ? 'Todavía no hay Libros activos.' : 'Todavía no hay Libros cargados.'}
+        mensajeVacio={
+          busqueda.trim()
+            ? `No encontramos Libros que coincidan con "${busqueda.trim()}".`
+            : filtro === 'activas'
+              ? 'Todavía no hay Libros activos.'
+              : 'Todavía no hay Libros cargados.'
+        }
         orden={orden}
         onOrdenar={(columnaId) =>
           actualizarParams({

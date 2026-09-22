@@ -2,15 +2,16 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { type Libro, type ErrorCode, apiFetch, ApiError, formatearFechaHora } from '@vida-sobrenatural/shared-types';
-import { Button, MigaDePan, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
+import { Button, ControlesTabla, MigaDePan, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
+import { useControlesTablaUrl } from '../../../hooks/use-controles-tabla-url';
 
 /**
  * D119: mismo patrón que la papelera de Sedes. Pastor (`esAdmin: false`) ve
- * la papelera sin poder restaurar. H-88: orden en la URL.
+ * la papelera sin poder restaurar. H-88: búsqueda/orden en la URL.
  */
 export function PapeleraCliente({
   libros,
@@ -24,21 +25,11 @@ export function PapeleraCliente({
   esAdmin: boolean;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const te = useTranslations('errors');
   const locale = useLocale();
   const procesandoRef = useRef(new Set<string>());
   const [restaurandoId, setRestaurandoId] = useState<string | null>(null);
-
-  function actualizarParams(cambios: Record<string, string | null>) {
-    const params = new URLSearchParams(searchParams);
-    for (const [clave, valor] of Object.entries(cambios)) {
-      if (valor === null) params.delete(clave);
-      else params.set(clave, valor);
-    }
-    const query = params.toString();
-    router.push(query ? `/libros/papelera?${query}` : '/libros/papelera');
-  }
+  const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
 
   async function restaurar(libro: Libro) {
     if (procesandoRef.current.has(libro.id)) return;
@@ -92,12 +83,22 @@ export function PapeleraCliente({
         Libros eliminados. Restaurar los devuelve a &quot;Todos&quot;.
       </p>
 
+      <ControlesTabla
+        busqueda={busqueda}
+        onBuscarChange={setBusqueda}
+        etiquetaBusqueda="Buscar por título o autor/a"
+        placeholderBusqueda="Ej. Antídotos, Natalia Spetale"
+        hayAlgoAplicado={busqueda.trim() !== ''}
+        onLimpiar={() => limpiar()}
+        cantidadResultados={libros.length}
+      />
+
       <TablaDatos
         columnas={columnas}
         datos={libros}
         obtenerId={(libro) => libro.id}
         etiqueta="Papelera de Libros"
-        mensajeVacio="La papelera está vacía."
+        mensajeVacio={busqueda.trim() ? `No encontramos Libros que coincidan con "${busqueda.trim()}".` : 'La papelera está vacía.'}
         orden={orden}
         onOrdenar={(columnaId) =>
           actualizarParams({

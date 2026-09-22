@@ -15,7 +15,7 @@ type ColumnaOrden = 'titulo' | 'autor' | 'eliminadoEn';
 export default async function PapeleraLibrosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ orden?: string; dir?: string }>;
+  searchParams: Promise<{ orden?: string; dir?: string; q?: string }>;
 }) {
   const session = await auth();
   if (!session) {
@@ -37,10 +37,11 @@ export default async function PapeleraLibrosPage({
     );
   }
 
-  const { orden: ordenParam, dir } = await searchParams;
+  const { orden: ordenParam, dir, q } = await searchParams;
   const ordenColumna: ColumnaOrden =
     ordenParam === 'autor' ? 'autor' : ordenParam === 'eliminadoEn' ? 'eliminadoEn' : 'titulo';
   const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
+  const busqueda = (q ?? '').trim().toLocaleLowerCase('es');
 
   let pagina: Pagina<Libro>;
   try {
@@ -62,7 +63,12 @@ export default async function PapeleraLibrosPage({
     throw e;
   }
 
-  const librosOrdenados = [...pagina.items].sort((a, b) => {
+  const itemsFiltrados = busqueda
+    ? pagina.items.filter(
+        (libro) => libro.titulo.toLocaleLowerCase('es').includes(busqueda) || libro.autor.toLocaleLowerCase('es').includes(busqueda),
+      )
+    : pagina.items;
+  const librosOrdenados = [...itemsFiltrados].sort((a, b) => {
     const cmp =
       ordenColumna === 'eliminadoEn'
         ? (a.eliminadoEn ?? '').localeCompare(b.eliminadoEn ?? '')

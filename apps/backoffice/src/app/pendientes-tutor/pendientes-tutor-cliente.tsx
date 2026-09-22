@@ -19,6 +19,7 @@ import {
   Button,
   CampoTelefono,
   ConfirmDestructiveDialog,
+  ControlesTabla,
   Input,
   MensajeErrorCampo,
   ResumenErrores,
@@ -35,6 +36,7 @@ import {
   type ValidacionCampo,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
+import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 
 // H-42 (revisión manual, revisión de código): GET /personas/pendientes-tutor pagina.
 export const TAMANIO_PAGINA = 20;
@@ -67,6 +69,7 @@ export function PendientesTutorCliente({
   const [personaParaActivar, setPersonaParaActivar] = useState<PersonaPendienteTutor | null>(null);
   const te = useTranslations('errors');
   const locale = useLocale();
+  const { busqueda, setBusqueda, limpiar } = useControlesTablaUrl();
 
   if (paginaInicial !== paginaVista) {
     setPaginaVista(paginaInicial);
@@ -77,8 +80,12 @@ export function PendientesTutorCliente({
   async function cargarMas() {
     setCargandoMas(true);
     try {
+      // H-88: `buscar` viaja también en "cargar más" — sin esto, la
+      // segunda página en adelante ignoraría el filtro y volvería a traer
+      // casos que no coinciden con la búsqueda actual.
+      const terminoActual = busqueda.trim();
       const pagina = await apiFetch<Pagina<PersonaPendienteTutor>>(
-        `/personas/pendientes-tutor?skip=${pendientes.length}&take=${TAMANIO_PAGINA}`,
+        `/personas/pendientes-tutor?skip=${pendientes.length}&take=${TAMANIO_PAGINA}${terminoActual ? `&buscar=${encodeURIComponent(terminoActual)}` : ''}`,
         { headers: { Authorization: `Bearer ${apiToken}` } },
       );
       setPendientes((actuales) => [...actuales, ...pagina.items]);
@@ -142,12 +149,24 @@ export function PendientesTutorCliente({
         activar o cerrar el caso.
       </p>
 
+      <ControlesTabla
+        busqueda={busqueda}
+        onBuscarChange={setBusqueda}
+        etiquetaBusqueda="Buscar por nombre, apellido o teléfono"
+        placeholderBusqueda="Ej. Juan Demo"
+        hayAlgoAplicado={busqueda.trim() !== ''}
+        onLimpiar={() => limpiar()}
+        cantidadResultados={total}
+      />
+
       <TablaDatos
         columnas={columnas}
         datos={pendientes}
         obtenerId={(persona) => persona.id}
         etiqueta="Casos pendientes de tutor"
-        mensajeVacio="No hay casos pendientes por ahora."
+        mensajeVacio={
+          busqueda.trim() ? `No encontramos casos que coincidan con "${busqueda.trim()}".` : 'No hay casos pendientes por ahora.'
+        }
         encabezadoAcciones="Acciones"
         acciones={(persona) => (
           <div className="flex flex-wrap justify-end gap-2">

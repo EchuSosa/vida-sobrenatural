@@ -23,7 +23,7 @@ function direccionDefaultDe(columna: ColumnaOrden): 'asc' | 'desc' {
 export default async function PalabraProfeticaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ orden?: string; dir?: string }>;
+  searchParams: Promise<{ orden?: string; dir?: string; q?: string }>;
 }) {
   const session = await auth();
   if (!session) {
@@ -48,16 +48,18 @@ export default async function PalabraProfeticaPage({
     );
   }
 
-  const { orden: ordenParam, dir } = await searchParams;
+  const { orden: ordenParam, dir, q } = await searchParams;
   const ordenColumna: ColumnaOrden =
     ordenParam === 'anio' || ordenParam === 'titulo' || ordenParam === 'estado' ? ordenParam : 'createdAt';
   const ordenDireccion: 'asc' | 'desc' = dir === 'asc' ? 'asc' : dir === 'desc' ? 'desc' : direccionDefaultDe(ordenColumna);
+  const busqueda = (q ?? '').trim().toLocaleLowerCase('es');
 
   const pagina = await apiFetch<Pagina<PalabraProfetica>>('/palabra-profetica?take=100', {
     headers: { Authorization: `Bearer ${session.apiToken}` },
   });
 
-  const historial = [...pagina.items].sort((a, b) => {
+  const itemsFiltrados = busqueda ? pagina.items.filter((p) => p.titulo.toLocaleLowerCase('es').includes(busqueda)) : pagina.items;
+  const historial = [...itemsFiltrados].sort((a, b) => {
     const cmp =
       ordenColumna === 'anio'
         ? a.anio - b.anio

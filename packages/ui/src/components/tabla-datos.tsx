@@ -13,12 +13,17 @@ import { EstadoVacio } from './estado-vacio';
  * suyo (Principio XI). `<table>` real con `<th scope="col">`, no `div`s con
  * rol — para que el smoke de axe la recorra de verdad.
  *
- * Búsqueda y filtros NO son parte de este componente: cada pantalla los
- * arma con sus propios controles (Sedes ya tiene "Activas"/"Todas") y se
- * los pasa reflejados en la URL — esta tabla solo necesita `datos` ya
- * filtrados. El orden si vive acá (es genérico a cualquier columna), pero
- * el estado de qué columna/dirección y su reflejo en la URL los decide
- * quien la usa (`onOrdenar`), no la tabla.
+ * Búsqueda y filtros NO son parte de este componente — esta tabla solo
+ * necesita `datos` ya filtrados. El orden si vive acá (es genérico a
+ * cualquier columna), pero el estado de qué columna/dirección y su reflejo
+ * en la URL los decide quien la usa (`onOrdenar`), no la tabla.
+ *
+ * H-88 (revisión manual): el comentario acá decía que "cada pantalla arma
+ * sus propios controles" de búsqueda/filtros — ese criterio (H-69) hizo que
+ * en la práctica ninguna los armara. La capa que faltaba es
+ * `ControlesTabla` + `useControlesTablaUrl` (ver controles-tabla.tsx):
+ * quien use esta tabla ahora arma QUÉ se busca y QUÉ filtros hay con esa
+ * pieza, no con controles sueltos a mano.
  *
  * Celular (H-62, H-69): cada columna puede traer su propia `className`
  * responsive (ej. "hidden sm:table-cell") para decidir qué se oculta —

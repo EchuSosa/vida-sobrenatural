@@ -13,8 +13,20 @@ import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
  * fetch inicial — no hay Server Action de "traer una página más" sin
  * volver a montar toda la ruta, así que PendientesTutorCliente la pide con
  * `apiFetch` directo, como antes.
+ *
+ * H-88 (D126): `q` filtra en la API (`buscar`), no en memoria — esta cola
+ * pagina de verdad (a diferencia de Sedes/Libros/Palabra Profética), así
+ * que la pantalla solo ve una página a la vez y filtrar acá no alcanzaría.
+ * Cuando `q` cambia, esta página se vuelve a renderizar con una
+ * `paginaInicial` nueva — PendientesTutorCliente ya sincronizaba su estado
+ * con esa prop (para router.refresh() tras Activar/Cerrar el caso), así
+ * que el mismo mecanismo reinicia la lista filtrada sin código nuevo ahí.
  */
-export default async function PendientesTutorPage() {
+export default async function PendientesTutorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const session = await auth();
   if (!session) {
     return (
@@ -25,8 +37,11 @@ export default async function PendientesTutorPage() {
     );
   }
 
+  const { q } = await searchParams;
+  const buscar = (q ?? '').trim();
+
   const pagina = await apiFetch<Pagina<PersonaPendienteTutor>>(
-    `/personas/pendientes-tutor?skip=0&take=${TAMANIO_PAGINA}`,
+    `/personas/pendientes-tutor?skip=0&take=${TAMANIO_PAGINA}${buscar ? `&buscar=${encodeURIComponent(buscar)}` : ''}`,
     { headers: { Authorization: `Bearer ${session.apiToken}` } },
   );
 

@@ -23,6 +23,7 @@ export {
   TablaEsqueleto,
   type TablaEsqueletoProps,
 } from './components/tabla-datos';
+export { ControlesTabla, type ControlesTablaProps } from './components/controles-tabla';
 export { Button, buttonVariants } from './components/ui/button';
 export { Input } from './components/ui/input';
 export { Separator } from './components/ui/separator';

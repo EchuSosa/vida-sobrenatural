@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { MoreVertical, Trash2 } from 'lucide-react';
 import { type Sede, type ErrorCode, type ErrorDeCampo, apiFetch, ApiError, erroresPorCampo } from '@vida-sobrenatural/shared-types';
@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
   Button,
   buttonVariants,
+  ControlesTabla,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -34,6 +35,7 @@ import {
   useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
+import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 import { FormularioSede, VALORES_SEDE_VACIOS, datosSedeParaEnviar, type ValoresSede } from '../../components/formulario-sede';
 
 type Filtro = 'activas' | 'todas';
@@ -62,22 +64,13 @@ export function SedesCliente({
   apiToken: string;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
   const procesandoRef = useRef(new Set<string>());
-
-  function actualizarParams(cambios: Record<string, string | null>) {
-    const params = new URLSearchParams(searchParams);
-    for (const [clave, valor] of Object.entries(cambios)) {
-      if (valor === null) params.delete(clave);
-      else params.set(clave, valor);
-    }
-    const query = params.toString();
-    router.push(query ? `/sedes?${query}` : '/sedes');
-  }
+  const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
+  const hayAlgoAplicado = busqueda.trim() !== '' || filtro === 'todas';
 
   const { enviando, ejecutar: crearSede } = useEnvio(async (valores: ValoresSede) => {
     setErrorAlta(null);
@@ -176,29 +169,46 @@ export function SedesCliente({
         </div>
       </div>
 
-      <div className="flex gap-2" role="group" aria-label="Filtrar por estado">
-        <Button
-          variant={filtro === 'activas' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => actualizarParams({ estado: null })}
-        >
-          Activas
-        </Button>
-        <Button
-          variant={filtro === 'todas' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => actualizarParams({ estado: 'todas' })}
-        >
-          Todas
-        </Button>
-      </div>
+      <ControlesTabla
+        busqueda={busqueda}
+        onBuscarChange={setBusqueda}
+        etiquetaBusqueda="Buscar por nombre"
+        placeholderBusqueda="Ej. La Plata"
+        filtros={
+          <div className="flex gap-2" role="group" aria-label="Filtrar por estado">
+            <Button
+              variant={filtro === 'activas' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => actualizarParams({ estado: null })}
+            >
+              Activas
+            </Button>
+            <Button
+              variant={filtro === 'todas' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => actualizarParams({ estado: 'todas' })}
+            >
+              Todas
+            </Button>
+          </div>
+        }
+        hayAlgoAplicado={hayAlgoAplicado}
+        onLimpiar={() => limpiar(['estado'])}
+        cantidadResultados={sedes.length}
+      />
 
       <TablaDatos
         columnas={columnas}
         datos={sedes}
         obtenerId={(sede) => sede.id}
         etiqueta="Sedes"
-        mensajeVacio={filtro === 'activas' ? 'Todavía no hay Sedes activas.' : 'Todavía no hay Sedes cargadas.'}
+        mensajeVacio={
+          busqueda.trim()
+            ? `No encontramos Sedes que coincidan con "${busqueda.trim()}".`
+            : filtro === 'activas'
+              ? 'Todavía no hay Sedes activas.'
+              : 'Todavía no hay Sedes cargadas.'
+        }
         orden={orden}
         onOrdenar={(columnaId) =>
           actualizarParams({

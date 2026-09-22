@@ -395,3 +395,55 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
   });
 }
+
+// H-88: independiente del tema — búsqueda y limpiar reflejan la URL,
+// mismo motivo que el test de orden de libros.spec.ts.
+test('buscar por nombre se refleja en la URL, filtra la tabla, y Limpiar la saca junto con el filtro de estado', async ({
+  page,
+}) => {
+  await loguearseComoAdminE2E(page);
+  const nombreUnico = `E2E Buscar ${Date.now()}`;
+  await page.goto('/sedes');
+  await page.waitForLoadState('networkidle');
+  await crearSedePorModal(page, nombreUnico);
+
+  const cajaBusqueda = page.getByRole('searchbox', { name: 'Buscar por nombre' });
+  await expect(cajaBusqueda).toBeVisible();
+  await cajaBusqueda.fill(nombreUnico);
+
+  // El hook debounea antes de escribir a la URL (300ms) — se espera la
+  // navegación en vez de una espera fija.
+  await page.waitForURL((url) => url.searchParams.get('q') === nombreUnico);
+  await expect(filaSede(page, nombreUnico)).toBeVisible();
+  // Filtrada a una sola fila, la nuestra — no "La Plata" (la del seed): su
+  // dirección también contiene "La Plata" en el texto, así que no sirve
+  // como aserción de ausencia acá, solo la cantidad total de filas.
+  await expect(page.locator('table tbody tr')).toHaveCount(1);
+  // Región viva con la cantidad — H-88: quien no ve la tabla se entera igual.
+  await expect(page.getByText('1 resultado', { exact: true })).toBeVisible();
+
+  // Combinado con el filtro de estado, para probar que Limpiar saca los dos.
+  await page.getByRole('button', { name: 'Todas' }).click();
+  await page.waitForURL(/estado=todas/);
+
+  const botonLimpiar = page.getByRole('button', { name: 'Limpiar' });
+  await expect(botonLimpiar).toBeVisible();
+  await botonLimpiar.focus();
+  await page.keyboard.press('Enter');
+
+  await page.waitForURL((url) => !url.searchParams.has('q') && !url.searchParams.has('estado'));
+  await expect(cajaBusqueda).toHaveValue('');
+  // Con el filtro limpio vuelven a estar las dos — nombre exacto (no fila
+  // entera): la dirección de la nuestra también dice "La Plata".
+  await expect(page.getByRole('cell', { name: 'La Plata', exact: true })).toBeVisible();
+  await expect(filaSede(page, nombreUnico)).toBeVisible();
+
+  // Limpieza: no dejar la Sede de prueba en la base — el ícono de Eliminar
+  // vive en la fila de la lista, no en el detalle (AccionEliminarSede).
+  await filaSede(page, nombreUnico).getByRole('button', { name: `Eliminar ${nombreUnico}` }).click();
+  await page
+    .getByRole('alertdialog', { name: `¿Eliminar ${nombreUnico}?` })
+    .getByRole('button', { name: 'Sí, eliminar' })
+    .click();
+  await expect(page.getByText('Sede eliminada.')).toBeVisible();
+});

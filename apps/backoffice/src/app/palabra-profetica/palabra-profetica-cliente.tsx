@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   type PalabraProfetica,
@@ -12,8 +12,9 @@ import {
   erroresPorCampo,
   formatearFechaHora,
 } from '@vida-sobrenatural/shared-types';
-import { Button, EstadoVacio, TablaDatos, type ColumnaTabla, type OrdenTabla, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, ControlesTabla, TablaDatos, type ColumnaTabla, type OrdenTabla, useEnvio } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
+import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 import {
   FormularioPalabraProfetica,
   VALORES_PALABRA_PROFETICA_VACIOS,
@@ -46,23 +47,13 @@ export function PalabraProfeticaCliente({
   esAdmin: boolean;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const locale = useLocale();
   const te = useTranslations('errors');
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const procesandoRef = useRef(new Set<string>());
   const [marcandoId, setMarcandoId] = useState<string | null>(null);
-
-  function actualizarParams(cambios: Record<string, string | null>) {
-    const params = new URLSearchParams(searchParams);
-    for (const [clave, valor] of Object.entries(cambios)) {
-      if (valor === null) params.delete(clave);
-      else params.set(clave, valor);
-    }
-    const query = params.toString();
-    router.push(query ? `/palabra-profetica?${query}` : '/palabra-profetica');
-  }
+  const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
 
   function onOrdenar(columnaId: string) {
     const siguienteDireccion: 'asc' | 'desc' =
@@ -160,35 +151,44 @@ export function PalabraProfeticaCliente({
 
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-medium">Historial</h2>
-        {historial.length === 0 ? (
-          <EstadoVacio mensaje="Todavía no hay ninguna Palabra Profética cargada." />
-        ) : (
-          <TablaDatos
-            columnas={columnas}
-            datos={historial}
-            obtenerId={(p) => p.id}
-            etiqueta="Historial de Palabra Profética"
-            mensajeVacio="Todavía no hay ninguna Palabra Profética cargada."
-            orden={orden}
-            onOrdenar={onOrdenar}
-            acciones={
-              esAdmin
-                ? (p) =>
-                    p.vigente ? null : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        loading={marcandoId === p.id}
-                        loadingText="Marcando…"
-                        onClick={() => marcarVigente(p)}
-                      >
-                        Marcar vigente
-                      </Button>
-                    )
-                : undefined
-            }
-          />
-        )}
+        <ControlesTabla
+          busqueda={busqueda}
+          onBuscarChange={setBusqueda}
+          etiquetaBusqueda="Buscar en el historial"
+          placeholderBusqueda="Ej. Fidelidad y crecimiento"
+          hayAlgoAplicado={busqueda.trim() !== ''}
+          onLimpiar={() => limpiar()}
+          cantidadResultados={historial.length}
+        />
+        <TablaDatos
+          columnas={columnas}
+          datos={historial}
+          obtenerId={(p) => p.id}
+          etiqueta="Historial de Palabra Profética"
+          mensajeVacio={
+            busqueda.trim()
+              ? `No encontramos ninguna Palabra Profética que coincida con "${busqueda.trim()}".`
+              : 'Todavía no hay ninguna Palabra Profética cargada.'
+          }
+          orden={orden}
+          onOrdenar={onOrdenar}
+          acciones={
+            esAdmin
+              ? (p) =>
+                  p.vigente ? null : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      loading={marcandoId === p.id}
+                      loadingText="Marcando…"
+                      onClick={() => marcarVigente(p)}
+                    >
+                      Marcar vigente
+                    </Button>
+                  )
+              : undefined
+          }
+        />
       </section>
     </div>
   );

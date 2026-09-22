@@ -86,11 +86,17 @@ export class PersonaController {
   @UseGuards(JwtNextAuthGuard, RolesGuard)
   @Roles('admin', 'discipulador')
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Cola de casos pendiente_tutor, paginada — Historia 2b, Acceptance Scenario 3 (H-42).' })
-  findPendientesTutor(@Query('skip') skipParam?: string, @Query('take') takeParam?: string) {
+  @ApiOkResponse({
+    description: 'Cola de casos pendiente_tutor, paginada — Historia 2b, Acceptance Scenario 3 (H-42). `buscar` filtra por nombre/apellido/teléfono (H-88).',
+  })
+  findPendientesTutor(
+    @Query('skip') skipParam?: string,
+    @Query('take') takeParam?: string,
+    @Query('buscar') buscar?: string,
+  ) {
     const skip = Math.max(0, Number(skipParam) || 0);
     const take = Math.min(100, Math.max(1, Number(takeParam) || PENDIENTES_TUTOR_TAKE_DEFAULT));
-    return this.personaService.findPendientesTutor(skip, take);
+    return this.personaService.findPendientesTutor(skip, take, buscar);
   }
 
   @Get('buscar')

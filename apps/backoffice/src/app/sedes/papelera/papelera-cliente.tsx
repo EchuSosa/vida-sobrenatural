@@ -2,33 +2,25 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { type Sede, type ErrorCode, apiFetch, ApiError, formatearFechaHora } from '@vida-sobrenatural/shared-types';
-import { Button, MigaDePan, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
+import { Button, ControlesTabla, MigaDePan, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
+import { useControlesTablaUrl } from '../../../hooks/use-controles-tabla-url';
 
 /**
- * H-60 (revisión manual ronda 7): `sedes` llega ya cargada y ordenada desde
- * page.tsx — isla de cliente: Restaurar y el orden que navega (H-88).
+ * H-60 (revisión manual ronda 7): `sedes` llega ya cargada, filtrada y
+ * ordenada desde page.tsx — isla de cliente: Restaurar, y la
+ * búsqueda/orden que navegan (H-88).
  */
 export function PapeleraCliente({ sedes, orden, apiToken }: { sedes: Sede[]; orden: OrdenTabla; apiToken: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const te = useTranslations('errors');
   const locale = useLocale();
   const procesandoRef = useRef(new Set<string>());
   const [restaurandoId, setRestaurandoId] = useState<string | null>(null);
-
-  function actualizarParams(cambios: Record<string, string | null>) {
-    const params = new URLSearchParams(searchParams);
-    for (const [clave, valor] of Object.entries(cambios)) {
-      if (valor === null) params.delete(clave);
-      else params.set(clave, valor);
-    }
-    const query = params.toString();
-    router.push(query ? `/sedes/papelera?${query}` : '/sedes/papelera');
-  }
+  const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
 
   async function restaurar(sede: Sede) {
     if (procesandoRef.current.has(sede.id)) return;
@@ -81,12 +73,22 @@ export function PapeleraCliente({ sedes, orden, apiToken }: { sedes: Sede[]; ord
         Sedes eliminadas. Restaurar las devuelve a &quot;Todas&quot;.
       </p>
 
+      <ControlesTabla
+        busqueda={busqueda}
+        onBuscarChange={setBusqueda}
+        etiquetaBusqueda="Buscar por nombre"
+        placeholderBusqueda="Ej. La Plata"
+        hayAlgoAplicado={busqueda.trim() !== ''}
+        onLimpiar={() => limpiar()}
+        cantidadResultados={sedes.length}
+      />
+
       <TablaDatos
         columnas={columnas}
         datos={sedes}
         obtenerId={(sede) => sede.id}
         etiqueta="Papelera de Sedes"
-        mensajeVacio="La papelera está vacía."
+        mensajeVacio={busqueda.trim() ? `No encontramos Sedes que coincidan con "${busqueda.trim()}".` : 'La papelera está vacía.'}
         orden={orden}
         onOrdenar={(columnaId) =>
           actualizarParams({

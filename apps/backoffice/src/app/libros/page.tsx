@@ -27,7 +27,7 @@ type ColumnaOrden = 'orden' | 'titulo' | 'autor' | 'anio' | 'estado';
 export default async function LibrosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ estado?: string; orden?: string; dir?: string }>;
+  searchParams: Promise<{ estado?: string; orden?: string; dir?: string; q?: string }>;
 }) {
   const session = await auth();
   if (!session) {
@@ -49,23 +49,31 @@ export default async function LibrosPage({
     );
   }
 
-  const { estado, orden: ordenParam, dir } = await searchParams;
+  const { estado, orden: ordenParam, dir, q } = await searchParams;
   const filtro: Filtro = estado === 'todas' ? 'todas' : 'activas';
   const ordenColumna: ColumnaOrden =
     ordenParam === 'titulo' || ordenParam === 'autor' || ordenParam === 'anio' || ordenParam === 'estado'
       ? ordenParam
       : 'orden';
   const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
+  const busqueda = (q ?? '').trim().toLocaleLowerCase('es');
 
   const pagina = await apiFetch<Pagina<Libro>>(`/libros?estado=${filtro}&take=200`, {
     headers: { Authorization: `Bearer ${session.apiToken}` },
   });
 
-  // El natural (orden manual) ya llega ordenado de la API — nada que hacer.
+  const itemsFiltrados = busqueda
+    ? pagina.items.filter(
+        (libro) => libro.titulo.toLocaleLowerCase('es').includes(busqueda) || libro.autor.toLocaleLowerCase('es').includes(busqueda),
+      )
+    : pagina.items;
+
+  // El natural (orden manual) ya llega ordenado de la API — nada que hacer
+  // más que filtrar (el filtrado preserva ese orden relativo, H-88).
   const libros =
     ordenColumna === 'orden'
-      ? pagina.items
-      : [...pagina.items].sort((a, b) => {
+      ? itemsFiltrados
+      : [...itemsFiltrados].sort((a, b) => {
           const cmp =
             ordenColumna === 'anio'
               ? a.anio - b.anio

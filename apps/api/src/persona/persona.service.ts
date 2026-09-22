@@ -202,9 +202,29 @@ export class PersonaService {
    * GET /personas/pendientes-tutor — Historia 2b, Acceptance Scenario 3.
    * H-42 (revisión manual, revisión de código, Restricción Técnica "acceso a
    * datos"): paginado — `skip`/`take` acotado por el controller.
+   *
+   * H-88 (D126): `buscar` filtra en la API, no en memoria — a diferencia de
+   * Sedes/Libros/Palabra Profética (listados chicos), esta cola pagina de
+   * verdad (Personas va a ser cientos), así que filtrar en el cliente solo
+   * vería la página ya cargada. Mismo patrón `OR contains insensitive` que
+   * `buscarPersonas` (H-29), acotado a los campos que esta pantalla
+   * muestra (nombre/apellido/teléfono — no email, que acá no se ve).
    */
-  async findPendientesTutor(skip: number, take: number) {
-    const where = { estado: EstadoPersona.pendiente_tutor, activo: true };
+  async findPendientesTutor(skip: number, take: number, buscar?: string) {
+    const termino = buscar?.trim();
+    const where = {
+      estado: EstadoPersona.pendiente_tutor,
+      activo: true,
+      ...(termino
+        ? {
+            OR: [
+              { nombre: { contains: termino, mode: 'insensitive' as const } },
+              { apellido: { contains: termino, mode: 'insensitive' as const } },
+              { telefono: { contains: termino, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
     const [items, total] = await Promise.all([
       this.prisma.persona.findMany({
         where,
