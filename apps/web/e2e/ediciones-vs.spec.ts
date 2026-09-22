@@ -4,16 +4,17 @@ import { auditar } from './helpers';
 /**
  * Historia 2 (specs/003-contenido-institucional): subpágina pública del
  * catálogo de Ediciones VS. Con el seed mínimo ya cargado (FR-031) siempre
- * hay 8 libros activos, ninguno con portada real todavía — el estado vacío
- * (FR-008) no tiene e2e propio por el mismo motivo que en
- * palabra-profetica.spec.ts (sin endpoint de escritura hasta la Historia 4).
+ * hay 9 libros activos, cada uno con su foto provisoria (el seed las sube
+ * por el camino real — apps/api/prisma/seed.ts) — el estado vacío (FR-008)
+ * no tiene e2e propio por el mismo motivo que en palabra-profetica.spec.ts
+ * (sin endpoint de escritura hasta la Historia 4).
  */
 
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`modo ${colorScheme}`, () => {
     test.use({ colorScheme });
 
-    test('muestra la introducción, cómo conseguir los libros y el catálogo con placeholder de portada', async ({
+    test('muestra la introducción, cómo conseguir los libros y el catálogo con sus portadas', async ({
       page,
     }) => {
       await page.goto('/nosotros/ediciones-vs');
@@ -37,8 +38,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
         'https://instagram.com/edicionesvs',
       );
 
-      // FR-007: están los 8 libros reales del catálogo del seed mínimo, cada
-      // uno por su título exacto (apps/api/prisma/seed.ts). "Al menos 8" no
+      // FR-007: están los 9 libros reales del catálogo del seed mínimo, cada
+      // uno por su título exacto (apps/api/prisma/seed.ts). "Al menos 9" no
       // alcanza: pasa igual si falta uno real y sobran dos de seed-demo
       // (D120, FR-032) — acá se afirma cada título puntual, que convive con
       // los libros hostiles del demo y sigue detectando si uno real
@@ -51,7 +52,6 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // pan (H-81/H-95) también es una lista (<ol>/<li>) y un
       // getByRole('listitem') sin acotar la contaría de más.
       const items = page.getByRole('list', { name: 'Catálogo' }).getByRole('listitem');
-      const cantidad = await items.count();
       const TITULOS_REALES = [
         'Mujer Maravilla: cuando la realidad supera a la ficción',
         'El sonido en la iglesia',
@@ -61,6 +61,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         'Discipulado Generacional',
         'Hijos de la Promesa: identidad y propósito de los hijos de Dios',
         'Diseñados para una vida saludable',
+        'Vida nueva: una experiencia personal con Jesucristo',
       ];
       for (const titulo of TITULOS_REALES) {
         // .first(): mismo artefacto ya documentado arriba para el párrafo
@@ -73,12 +74,15 @@ for (const colorScheme of ['light', 'dark'] as const) {
         items.filter({ hasText: 'Mujer Maravilla: cuando la realidad supera a la ficción' }),
       ).toContainText('por Natalia Spetale');
 
-      // FR-027: sin portada real todavía, cada libro muestra el espacio con
-      // aspecto de tapa (PlaceholderImagen aspecto="portada"), no una
-      // imagen inventada ni un espacio sin marcar — uno por cada libro
-      // listado (mismo motivo que arriba: no se asume la cantidad exacta).
-      const placeholders = page.getByRole('img', { name: /Portada de/ });
-      await expect(placeholders).toHaveCount(cantidad);
+      // FR-027: los 9 reales ya tienen su foto provisoria (el seed las sube
+      // por el camino real, H-94/D110 enmendada) — cada una con su propio
+      // texto alternativo describiendo la FOTO (FR-025), no el patrón viejo
+      // de PlaceholderImagen ("Portada de {título}"), que solo debería
+      // verse en un libro sin portada (los hostiles de seed-demo, D120,
+      // que este seed mínimo no carga). No se asume la cantidad total del
+      // catálogo — solo que los 9 reales, puntualmente, tienen foto real.
+      const fotosReales = page.getByRole('img', { name: /^Foto del libro/ });
+      await expect(fotosReales).toHaveCount(TITULOS_REALES.length);
 
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
