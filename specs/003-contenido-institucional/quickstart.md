@@ -15,27 +15,32 @@ y `contracts/` para el detalle de cada endpoint/campo.
 - Una sesión de Admin y una de Pastor/Pastora en `apps/backoffice` (usuarios ya sembrados por el seed
   de specs anteriores).
 
-## Escenario 1 — Nosotros con el contenido real (Historia 1, P1)
+## Escenario 1 — Nosotros con el contenido real (Historia 1, P1; entrada+tarjetas D122)
 
 1. Sin sesión, entrar a `apps/web` → Nosotros.
-2. Verificar que aparecen, como secciones separadas y en este orden: identidad, historia (31/10/2010,
-   La Plata), visión, misión, los cuatro valores, el sistema de trabajo (Bienvenida → Discipulado →
-   Red con el detalle de cada etapa), el llamado (Isaías 61:1-4 + referencia a Lucas 4:16-21), y la
-   mención a la congregación local (FR-001).
-3. Verificar que "Somos Familia", el equipo pastoral (con placeholder) y "En qué creemos" (pendiente)
-   siguen ahí sin cambios (FR-002).
-4. Verificar en celular (o DevTools en modo responsive) que no hay scroll horizontal.
-5. Repetir en modo oscuro.
+2. Verificar la entrada corta ("Somos Familia", un par de líneas) y la grilla de seis tarjetas —
+   Quiénes somos, Visión/misión/valores, Liderazgo, En qué creemos, Palabra Profética, Ediciones VS
+   (D122) — cada una con su espacio de imagen reservado (FR-003a) aunque hoy no haya ninguna real.
+3. Entrar a Quiénes somos: identidad, historia (31/10/2010, La Plata) y congregación local, con el
+   fondo alternado entre secciones (FR-001, FR-003b).
+4. Entrar a Visión/misión/valores: visión, misión, los cuatro valores, el sistema de trabajo
+   (Bienvenida → Discipulado → Red con el detalle de cada etapa) y el llamado (Isaías 61:1-4 +
+   referencia a Lucas 4:16-21) (FR-001, FR-003b).
+5. Entrar a Liderazgo y a En qué creemos: mismo contenido que ya existía (equipo pastoral con
+   placeholder, declaración de fe pendiente), sin cambios (FR-002).
+6. Verificar en celular (o DevTools en modo responsive) que no hay scroll horizontal, en la entrada y
+   en cada subpágina.
+7. Repetir en modo oscuro.
 
-**Resultado esperado**: SC-001 (toda la identidad/historia/visión/misión/valores sin salir de la
-página o sus subpáginas directas).
+**Resultado esperado**: SC-001 (toda la identidad/historia/visión/misión/valores sin salir de
+Nosotros o sus subpáginas directas).
 
 ## Escenario 2 — Palabra Profética y Ediciones VS, solo lectura (Historia 2, P2)
 
 Con el seed ya cargado (una Palabra Profética vigente, 8 libros activos sin portada):
 
-1. Desde Nosotros, entrar a la subpágina de Palabra Profética por su enlace (no por el menú
-   principal, que sigue en 4 ítems — FR-003).
+1. Desde Nosotros, entrar a la subpágina de Palabra Profética por su tarjeta (no por el menú
+   principal, que sigue en 4 ítems — FR-003). Su URL no cambió con D122.
 2. Verificar año/título/texto, y que el video aparece como miniatura sin cargar el reproductor hasta
    hacer clic (FR-005) — inspeccionar que el iframe de YouTube no existe en el DOM antes del clic, y
    que al hacer clic embebe desde `youtube-nocookie.com`.
@@ -131,11 +136,15 @@ Ediciones VS:
 
 ## Cierre de fase (H-45, SC-005)
 
-Con las 5 pantallas nuevas navegables (Nosotros ampliado, Palabra Profética, Ediciones VS, y las dos
-secciones del backoffice), correr Lighthouse sobre las 3 páginas públicas en simulación de celular y
-anotar los tres números frente a las metas ya fijadas en la Constitución: LCP < 2.5 s, INP < 200 ms,
-CLS < 0.1. Dejar los valores medidos documentados (ver convención ya usada en hallazgos anteriores de
-`specs/revision-manual/`) — nadie los había medido antes de este spec.
+Con las pantallas nuevas navegables (Nosotros y sus seis subpáginas —cuatro nuevas de D122 más
+Palabra Profética y Ediciones VS— y las dos secciones del backoffice), correr Lighthouse sobre las
+siete páginas públicas en simulación de celular y anotar los tres números frente a las metas ya
+fijadas en la Constitución: LCP < 2.5 s, INP < 200 ms, CLS < 0.1. Dejar los valores medidos
+documentados (ver convención ya usada en hallazgos anteriores de `specs/revision-manual/`) — nadie
+los había medido antes de este spec. Resultado: `lighthouse-resultados.md` (T061) — TBT (proxy de
+INP) y CLS cumplen la meta en las siete; LCP no la cumple en ninguna, con la misma causa raíz en
+todas (peso del bundle de cliente ya existente, no específico de D122/Historia 5) — queda para un
+lote de performance aparte.
 
 Antes de cerrar, correr las cuatro suites en verde (CLAUDE.md): `pnpm --filter api run test`,
 `pnpm --filter api run test:e2e`, y los e2e de `apps/web` y `apps/backoffice`.

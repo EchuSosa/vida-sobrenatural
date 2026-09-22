@@ -199,18 +199,18 @@ ninguna otra historia de esta spec.
 
 ### Implementation for User Story 5
 
-- [ ] T050 [P] [US5] Agregar la marca de agua del isotipo al 20% de opacidad (dos `<Image>` por tema, alternadas por CSS `dark:hidden`/`hidden dark:block`, decorativa respecto al `aria-label` ya existente) a `packages/ui/src/components/placeholder-imagen.tsx` (FR-034) (depende de T002)
-- [ ] T051 [US5] Crear `scripts/generar-iconos-marca.mjs` (`sharp`): deriva `apps/web/src/app/icon.png` (512×512), `apps/web/src/app/apple-icon.png` (180×180), `apps/web/public/icons/{icon-192.png,icon-512.png}` y `apps/backoffice/src/app/icon.png`, todos desde `packages/ui/src/assets/marca/logo-oscuro-1024.png` (research.md Decisión 8) (depende de T001)
-- [ ] T052 [US5] Correr `node scripts/generar-iconos-marca.mjs` una vez y eliminar `apps/web/src/app/favicon.ico` y `apps/backoffice/src/app/favicon.ico` (reemplazados por la convención `icon.png`, FR-035) (depende de T051)
-- [ ] T053 [US5] Crear `apps/web/src/app/manifest.ts` (nombre, `icons` 192/512 desde `public/icons/`, sin service worker ni offline — D47 fuera de alcance) (FR-036) (depende de T051)
-- [ ] T054 [US5] Actualizar `apps/web/src/components/nav-publica-header.tsx`: reemplazar el enlace de texto "Vida Sobrenatural" (desktop y título del `Sheet` en celular) por el logotipo importado de `packages/ui` (dos `<Image>` por tema); en celular, isotipo solo o logotipo con alto 24-32px (FR-037, FR-040) (depende de T002)
-- [ ] T055 [US5] Actualizar `apps/web/src/components/footer-publico.tsx`: agregar el logotipo (FR-039) (depende de T002)
-- [ ] T056 [US5] Actualizar `apps/backoffice/src/components/backoffice-shell.tsx`: agregar el logotipo a la cabecera del sidebar, hoy sin ninguna marca (FR-038) (depende de T002)
-- [ ] T057 [US5] Actualizar `apps/web/src/app/(publica)/opengraph-image.tsx`: leer el PNG origen con `fs.readFileSync` desde `packages/ui/src/assets/marca/` e incorporarlo al layout 1200×630 ya existente (research.md Decisión 9, FR-041)
-- [ ] T058 [US5] Pasada de texto alternativo: cada uso del logotipo/isotipo de T054-T057 lleva `alt="Vida Sobrenatural"` salvo que un título vecino ya lo diga, en cuyo caso queda decorativo (FR-042) (depende de T054, T055, T056)
-- [ ] T059 [P] [US5] Crear `apps/web/e2e/marca.spec.ts`: favicon, nav, pie de página, Open Graph, sin scroll horizontal a 320px con el logotipo/isotipo (reutiliza el smoke de H-62), alt vs. decorativo, `auditar()` en los dos temas
-- [ ] T060 [P] [US5] Crear `apps/backoffice/e2e/marca.spec.ts`: favicon, cabecera del sidebar, alt vs. decorativo, `auditar()` en los dos temas
-- [ ] T060a [US5] Verificar la barra de navegación y el pie de página de `apps/web`, y la cabecera del sidebar de `apps/backoffice`, contra el checklist de `docs/15-guia-ux-ui.md` — D114
+- [x] T050 [P] [US5] Agregar la marca de agua del isotipo al 20% de opacidad (dos `<Image>` por tema, alternadas por CSS `dark:hidden`/`hidden dark:block`, decorativa respecto al `aria-label` ya existente) a `packages/ui/src/components/placeholder-imagen.tsx` (FR-034) (depende de T002)
+- [x] T051 [US5] Crear `scripts/generar-iconos-marca.mjs` (`sharp`): deriva `apps/web/src/app/icon.png` (512×512), `apps/web/src/app/apple-icon.png` (180×180), `apps/web/public/icons/{icon-192.png,icon-512.png}` y `apps/backoffice/src/app/icon.png`, todos desde `packages/ui/src/assets/marca/logo-oscuro-1024.png` (research.md Decisión 8) (depende de T001)
+- [x] T052 [US5] Correr `node scripts/generar-iconos-marca.mjs` una vez y eliminar `apps/web/src/app/favicon.ico` y `apps/backoffice/src/app/favicon.ico` (reemplazados por la convención `icon.png`, FR-035) (depende de T051)
+- [x] T053 [US5] Crear `apps/web/src/app/manifest.ts` (nombre, `icons` 192/512 desde `public/icons/`, sin service worker ni offline — D47 fuera de alcance) (FR-036) (depende de T051)
+- [x] T054 [US5] Actualizar `apps/web/src/components/nav-publica-header.tsx`: reemplazar el enlace de texto "Vida Sobrenatural" (desktop y título del `Sheet` en celular) por el logotipo importado de `packages/ui` (dos `<Image>` por tema); en celular, isotipo solo o logotipo con alto 24-32px (FR-037, FR-040) (depende de T002)
+- [x] T055 [US5] Actualizar `apps/web/src/components/footer-publico.tsx`: agregar el logotipo (FR-039) (depende de T002)
+- [x] T056 [US5] Actualizar `apps/backoffice/src/components/backoffice-shell.tsx`: agregar el logotipo a la cabecera del sidebar, hoy sin ninguna marca (FR-038) (depende de T002)
+- [x] T057 [US5] Actualizar `apps/web/src/app/(publica)/opengraph-image.tsx`: leer el PNG origen con `fs.readFileSync` desde `packages/ui/src/assets/marca/` e incorporarlo al layout 1200×630 ya existente (research.md Decisión 9, FR-041)
+- [x] T058 [US5] Pasada de texto alternativo: cada uso del logotipo/isotipo de T054-T057 lleva `alt="Vida Sobrenatural"` salvo que un título vecino ya lo diga, en cuyo caso queda decorativo (FR-042) (depende de T054, T055, T056)
+- [x] T059 [P] [US5] Crear `apps/web/e2e/marca.spec.ts`: favicon, nav, pie de página, Open Graph, sin scroll horizontal a 320px con el logotipo/isotipo (reutiliza el smoke de H-62), alt vs. decorativo, `auditar()` en los dos temas
+- [x] T060 [P] [US5] Crear `apps/backoffice/e2e/marca.spec.ts`: favicon, cabecera del sidebar, alt vs. decorativo, `auditar()` en los dos temas
+- [x] T060a [US5] Verificar la barra de navegación y el pie de página de `apps/web`, y la cabecera del sidebar de `apps/backoffice`, contra el checklist de `docs/15-guia-ux-ui.md` — D114
 
 **Checkpoint**: las 5 historias funcionan de forma independiente.
 
@@ -218,9 +218,9 @@ ninguna otra historia de esta spec.
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T061 [P] Correr Lighthouse (celular) sobre Nosotros, Palabra Profética y Ediciones VS; anotar LCP/INP/CLS contra las metas de la Constitución y dejar los números documentados en `specs/003-contenido-institucional/` (H-45, SC-005)
-- [ ] T062 Correr las cuatro suites antes de cerrar la fase: `pnpm --filter api run test`, `pnpm --filter api run test:e2e`, e2e de `apps/web`, e2e de `apps/backoffice` (convención de `docs/00-README.md`, CLAUDE.md)
-- [ ] T063 Recorrer `quickstart.md` escenario por escenario (los 5 más "Datos hostiles") y confirmar cada resultado esperado
+- [x] T061 [P] Correr Lighthouse (celular) sobre Nosotros y sus seis subpáginas (Quiénes somos, Visión/misión/valores, Liderazgo, En qué creemos — nuevas de D122 — Palabra Profética, Ediciones VS); anotar LCP/INP/CLS contra las metas de la Constitución y dejar los números documentados en `specs/003-contenido-institucional/` (H-45, SC-005)
+- [x] T062 Correr las cuatro suites antes de cerrar la fase: `pnpm --filter api run test`, `pnpm --filter api run test:e2e`, e2e de `apps/web`, e2e de `apps/backoffice` (convención de `docs/00-README.md`, CLAUDE.md)
+- [x] T063 Recorrer `quickstart.md` escenario por escenario (los 5 más "Datos hostiles") y confirmar cada resultado esperado
 
 ---
 
