@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import type { PalabraProfetica } from '@vida-sobrenatural/shared-types';
-import { MigaDePan } from '@vida-sobrenatural/ui';
+import { MarkdownSeguro, MigaDePan } from '@vida-sobrenatural/ui';
 import { VideoYoutube } from '../../../../components/video-youtube';
 
 export const metadata = {
@@ -47,7 +47,16 @@ export default async function PalabraProfeticaPage() {
           <h1 className="text-3xl font-semibold tracking-tight">
             {t('titulo')} {palabra.anio} — {palabra.titulo}
           </h1>
-          <p className="whitespace-pre-line text-lg leading-7 text-foreground">{palabra.texto}</p>
+          {/* H-90/D127: Markdown renderizado en el servidor a un conjunto
+              cerrado de elementos (MarkdownSeguro, packages/ui) — nunca
+              dangerouslySetInnerHTML sobre lo guardado. Markdown vacío de
+              marcas (el texto provisorio actual) se sigue viendo igual:
+              un párrafo por bloque separado por línea en blanco, mismo
+              tamaño/interlineado que antes. */}
+          <MarkdownSeguro
+            texto={palabra.texto}
+            className="flex flex-col gap-4 text-lg leading-7 text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:text-xl [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6"
+          />
           {/* D121: el video es opcional — no se muestra nada si todavía no llegó. */}
           {palabra.youtubeVideoId && (
             <VideoYoutube videoId={palabra.youtubeVideoId} tituloVideo={palabra.titulo} />

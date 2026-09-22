@@ -10,6 +10,8 @@ export { MigaDePan, type MigaDePanProps, type TramoMiga } from './components/mig
 export { PasoIndicador, type PasoIndicadorProps } from './components/paso-indicador';
 export { CampoTelefono, OPCIONES_CODIGO_PAIS } from './components/campo-telefono';
 export { CampoAutocompletado, type CampoAutocompletadoProps } from './components/campo-autocompletado';
+export { MarkdownSeguro, type MarkdownSeguroProps } from './components/markdown-seguro';
+export { EditorMarkdown, type EditorMarkdownProps, type EtiquetasEditorMarkdown } from './components/editor-markdown';
 export { ResumenErrores, MensajeErrorCampo, type ErrorResumen } from './components/form-errors';
 export {
   ConfirmDestructiveDialog,

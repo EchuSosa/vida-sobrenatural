@@ -2,7 +2,15 @@
 
 import { useState } from 'react';
 import { type ErrorDeCampo, mensajeDeCampo } from '@vida-sobrenatural/shared-types';
-import { Button, MensajeErrorCampo, ResumenErrores, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
+import {
+  Button,
+  EditorMarkdown,
+  MensajeErrorCampo,
+  ResumenErrores,
+  useValidacionCampos,
+  type EtiquetasEditorMarkdown,
+  type ValidacionCampo,
+} from '@vida-sobrenatural/ui';
 
 export interface ValoresPalabraProfetica {
   anio: string;
@@ -37,6 +45,19 @@ const ETIQUETAS_CAMPO: Record<string, string> = {
 
 const MENSAJE_REQUERIDO = 'Revisá este dato.';
 const ANIO_MINIMO = 2010;
+
+/** H-90/D127: etiquetas de la barra de EditorMarkdown — sin default en packages/ui (D84). */
+const ETIQUETAS_EDITOR_MARKDOWN: EtiquetasEditorMarkdown = {
+  negrita: 'Negrita',
+  italica: 'Itálica',
+  enlace: 'Enlace',
+  lista: 'Lista',
+  h2: 'Subtítulo (h2)',
+  h3: 'Subtítulo (h3)',
+  vistaPrevia: 'Vista previa',
+  textoPorDefectoEnlace: 'texto del enlace',
+  urlPorDefectoEnlace: 'https://',
+};
 
 /**
  * FR-010/FR-011/FR-014 (Historia 3): año/título/texto obligatorios,
@@ -154,20 +175,22 @@ export function FormularioPalabraProfetica({
         <label htmlFor="campo-texto" className="text-sm font-medium">
           {ETIQUETAS_CAMPO.texto}
         </label>
-        <textarea
+        {/* H-90/D127: Markdown, con vista previa a través del MISMO
+            renderizador restringido (MarkdownSeguro) que usa la página
+            pública — nunca un WYSIWYG que emita HTML. */}
+        <EditorMarkdown
           id="campo-texto"
           required
-          aria-invalid={Boolean(validacion.mensajes.texto)}
-          aria-describedby={validacion.mensajes.texto ? 'campo-texto-error' : undefined}
+          ariaInvalid={Boolean(validacion.mensajes.texto)}
+          ariaDescribedby={validacion.mensajes.texto ? 'campo-texto-error' : undefined}
           value={valores.texto}
           disabled={soloLectura}
-          rows={6}
-          onChange={(e) => {
-            actualizar('texto', e.target.value);
+          etiquetas={ETIQUETAS_EDITOR_MARKDOWN}
+          onChange={(valor) => {
+            actualizar('texto', valor);
             validacion.limpiar('texto');
           }}
           onBlur={() => validacion.revalidar('texto', valores.texto, validaciones.texto)}
-          className="rounded-md border border-input bg-transparent px-3 py-2 text-sm dark:bg-input/30"
         />
         <MensajeErrorCampo id="campo-texto-error" mensaje={validacion.mensajes.texto} />
       </div>
