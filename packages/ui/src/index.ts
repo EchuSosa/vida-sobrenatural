@@ -28,6 +28,7 @@ export {
 } from './components/tabla-datos';
 export { ControlesTabla, type ControlesTablaProps } from './components/controles-tabla';
 export { Button, buttonVariants } from './components/ui/button';
+export { ButtonLink, type ButtonLinkProps } from './components/ui/button-link';
 export { Input } from './components/ui/input';
 export { Separator } from './components/ui/separator';
 export { Skeleton } from './components/ui/skeleton';

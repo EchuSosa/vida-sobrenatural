@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { buttonVariants } from '@vida-sobrenatural/ui';
+import { ButtonLink } from '@vida-sobrenatural/ui';
 
 export const metadata = {
   title: 'No encontrado — Backoffice',
@@ -14,9 +14,9 @@ export default function NoEncontrado() {
       <p className="text-muted-foreground">
         Puede que el link esté roto o que la página ya no exista.
       </p>
-      <Link href="/" className={buttonVariants({ size: 'xl', className: 'mx-auto' })}>
+      <ButtonLink render={<Link href="/" />} size="xl" className="mx-auto">
         Ir a Inicio
-      </Link>
+      </ButtonLink>
     </main>
   );
 }

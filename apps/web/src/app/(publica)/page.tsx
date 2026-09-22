@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { buttonVariants } from '@vida-sobrenatural/ui';
+import { ButtonLink } from '@vida-sobrenatural/ui';
 import { AvisoPorQuery } from '../../components/aviso-por-query';
 
 export const metadata = {
@@ -22,12 +22,12 @@ export default function InicioPage() {
         arrancá por Primeros pasos.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Link href="/primeros-pasos" className={buttonVariants({ size: 'xl' })}>
+        <ButtonLink render={<Link href="/primeros-pasos" />} size="xl">
           Ver primeros pasos
-        </Link>
-        <Link href="/visitanos" className={buttonVariants({ variant: 'outline', size: 'xl' })}>
+        </ButtonLink>
+        <ButtonLink render={<Link href="/visitanos" />} variant="outline" size="xl">
           Visitanos
-        </Link>
+        </ButtonLink>
       </div>
     </div>
   );

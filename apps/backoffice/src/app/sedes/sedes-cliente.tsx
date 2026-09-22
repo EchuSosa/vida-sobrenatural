@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
   Button,
-  buttonVariants,
+  ButtonLink,
   ControlesTabla,
   DropdownMenu,
   DropdownMenuContent,
@@ -153,9 +153,9 @@ export function SedesCliente({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Sedes</h1>
         <div className="flex gap-2">
-          <Link href="/sedes/papelera" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+          <ButtonLink render={<Link href="/sedes/papelera" />} variant="outline" size="sm">
             Papelera
-          </Link>
+          </ButtonLink>
           <Button
             size="sm"
             onClick={() => {

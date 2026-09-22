@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { buttonVariants } from '@vida-sobrenatural/ui';
+import { ButtonLink } from '@vida-sobrenatural/ui';
 import { NavPublicaHeader } from '../components/nav-publica-header';
 import { FooterPublico } from '../components/footer-publico';
 
@@ -25,12 +25,12 @@ export default function NoEncontrado() {
           Puede que el link esté roto o que la página ya no exista.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link href="/" className={buttonVariants({ size: 'xl' })}>
+          <ButtonLink render={<Link href="/" />} size="xl">
             Ir a Inicio
-          </Link>
-          <Link href="/primeros-pasos" className={buttonVariants({ variant: 'outline', size: 'xl' })}>
+          </ButtonLink>
+          <ButtonLink render={<Link href="/primeros-pasos" />} variant="outline" size="xl">
             Ver Primeros pasos
-          </Link>
+          </ButtonLink>
         </div>
       </main>
       <FooterPublico />

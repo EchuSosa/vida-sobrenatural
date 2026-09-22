@@ -346,8 +346,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
         const resultados = await auditar(page);
         expect(resultados.violations).toEqual([]);
 
-        // AlertDialogAction acá está renderizado como <Link> (role="link"),
-        // no como botón — es una navegación real a /sedes, no una acción in-place.
+        // H-100: ButtonLink (packages/ui), no un AlertDialogAction — es una
+        // navegación real a /sedes, no una acción in-place.
         await dialogo.getByRole('link', { name: 'Crear una Sede' }).click();
         await expect(dialogo).toBeHidden();
         await expect(page).toHaveURL(/\/sedes$/);

@@ -36,7 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
   Button,
-  buttonVariants,
+  ButtonLink,
   ControlesTabla,
   DropdownMenu,
   DropdownMenuContent,
@@ -347,9 +347,9 @@ export function LibrosCliente({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Libros</h1>
         <div className="flex gap-2">
-          <Link href="/libros/papelera" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+          <ButtonLink render={<Link href="/libros/papelera" />} variant="outline" size="sm">
             Papelera
-          </Link>
+          </ButtonLink>
           {esAdmin && (
             <Button
               size="sm"

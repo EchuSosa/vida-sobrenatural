@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { buttonVariants } from '@vida-sobrenatural/ui';
+import { ButtonLink } from '@vida-sobrenatural/ui';
 
 export function ContenidoRegistroListo() {
   // Sin <main id="contenido"> propio — (publica)/layout.tsx ya lo provee
@@ -17,12 +17,12 @@ export function ContenidoRegistroListo() {
         integración, fuera del alcance de la Fase de Bienvenida.
       */}
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Link href="/" className={buttonVariants({ size: 'xl' })}>
+        <ButtonLink render={<Link href="/" />} size="xl">
           Ir a Inicio
-        </Link>
-        <Link href="/primeros-pasos" className={buttonVariants({ variant: 'outline', size: 'xl' })}>
+        </ButtonLink>
+        <ButtonLink render={<Link href="/primeros-pasos" />} variant="outline" size="xl">
           Volver a Primeros pasos
-        </Link>
+        </ButtonLink>
       </div>
     </div>
   );

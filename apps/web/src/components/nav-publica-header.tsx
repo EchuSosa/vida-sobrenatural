@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
-import { Button, Marca, Sheet, SheetContent, SheetTitle, SheetTrigger, buttonVariants } from '@vida-sobrenatural/ui';
+import { Button, ButtonLink, Marca, Sheet, SheetContent, SheetTitle, SheetTrigger } from '@vida-sobrenatural/ui';
 import { NAV_PUBLICA, NAV_PUBLICA_ACCIONES } from '../config/nav-publica';
 import { MenuUsuarioPublico, ItemsUsuarioCelular } from './menu-usuario-publico';
 
@@ -93,18 +93,20 @@ export function NavPublicaHeader() {
         </nav>
         <div className="hidden items-center gap-2 md:flex">
           {acciones.map((item) => (
-            // H-01 (actualización 2026-09-18): estas acciones navegan — son
-            // <a>, no botones. Antes pasaban por <Button render={<Link>}>,
-            // que además de la advertencia de consola pisaba la semántica: el
-            // Button de Base UI siempre expone role="button" (nativeButton
-            // solo elige si además gestiona ARIA/teclado él mismo o asume que
-            // el <button> nativo ya lo hace), así que un <a> renderizado ahí
-            // dejaba de verse como link para lectores de pantalla y tests.
-            // Un <Link> con las mismas clases de estilo evita eso: se ve
-            // igual, pero conserva su rol de enlace.
-            <Link key={item.href} href={item.href} className={buttonVariants({ variant: item.href === '/dar' ? 'outline' : 'default', size: 'sm' })}>
+            // H-01/H-100 (revisión manual): estas acciones navegan — son
+            // <a>, no botones. ButtonLink (packages/ui) es un <a> de verdad
+            // con el estilo de Button, sin pasar por el Button de Base UI
+            // (que fuerza semántica/comportamiento de botón) — el arreglo
+            // durable que H-01 proponía y H-100 volvió a pedir, ya no una
+            // copia de clases a mano por archivo.
+            <ButtonLink
+              key={item.href}
+              render={<Link href={item.href} />}
+              variant={item.href === '/dar' ? 'outline' : 'default'}
+              size="sm"
+            >
               {item.label}
-            </Link>
+            </ButtonLink>
           ))}
           {/* H-38: menú de usuario (Perfil/tema/cerrar sesión) — no renderiza nada sin sesión. */}
           <MenuUsuarioPublico />
@@ -113,9 +115,14 @@ export function NavPublicaHeader() {
         {/* Celular: menú hamburguesa (accesible — FR-014, T049) */}
         <div className="flex items-center gap-2 md:hidden">
           {acciones.map((item) => (
-            <Link key={item.href} href={item.href} className={buttonVariants({ variant: item.href === '/dar' ? 'outline' : 'default', size: 'sm' })}>
+            <ButtonLink
+              key={item.href}
+              render={<Link href={item.href} />}
+              variant={item.href === '/dar' ? 'outline' : 'default'}
+              size="sm"
+            >
               {item.label}
-            </Link>
+            </ButtonLink>
           ))}
           <Sheet open={abierto} onOpenChange={setAbierto}>
             <SheetTrigger

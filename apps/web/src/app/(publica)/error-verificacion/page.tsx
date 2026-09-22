@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { buttonVariants } from '@vida-sobrenatural/ui';
+import { ButtonLink } from '@vida-sobrenatural/ui';
 
 export const metadata = {
   title: 'No pudimos verificar tu cuenta — Vida Sobrenatural',
@@ -14,9 +14,9 @@ export default function ErrorVerificacionPage() {
       <p className="text-muted-foreground">
         No pudimos verificar tu cuenta, probá de nuevo en un momento.
       </p>
-      <Link href="/registro" className={buttonVariants({ size: 'xl', className: 'w-fit' })}>
+      <ButtonLink render={<Link href="/registro" />} size="xl" className="w-fit">
         Reintentar
-      </Link>
+      </ButtonLink>
     </div>
   );
 }

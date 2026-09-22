@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl';
 import { type Sede, type ErrorCode, type ErrorDeCampo, apiFetch, ApiError, erroresPorCampo } from '@vida-sobrenatural/shared-types';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -15,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   Button,
+  ButtonLink,
   ConfirmDestructiveDialog,
   EstadoActivoBadge,
   useEnvio,
@@ -159,7 +159,11 @@ export function SedeDetalleCliente({ sede, apiToken }: { sede: Sede; apiToken: s
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Volver</AlertDialogCancel>
-            <AlertDialogAction render={<Link href="/sedes">Crear una Sede</Link>} />
+            {/* H-100/H-01: navegación real a /sedes, no una acción in-place
+                — un ButtonLink (un <a> de verdad, packages/ui), no un
+                AlertDialogAction. AlertDialogCancel ya cierra el diálogo;
+                acá no hace falta ningún manejo de cierre propio. */}
+            <ButtonLink render={<Link href="/sedes" />}>Crear una Sede</ButtonLink>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

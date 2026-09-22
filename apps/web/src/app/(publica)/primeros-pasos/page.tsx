@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
-import { buttonVariants } from '@vida-sobrenatural/ui';
+import { ButtonLink } from '@vida-sobrenatural/ui';
 import { AccionRegistro } from '../../../components/accion-registro';
 import { AvisoPorQuery } from '../../../components/aviso-por-query';
 
@@ -65,9 +65,9 @@ export default function PrimerosPasosPage() {
       </section>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Link href="/visitanos" className={buttonVariants({ size: 'xl' })}>
+        <ButtonLink render={<Link href="/visitanos" />} size="xl">
           {t('verSede')}
-        </Link>
+        </ButtonLink>
         <AccionRegistro />
       </div>
     </div>
