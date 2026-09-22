@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { PlaceholderImagen } from '@vida-sobrenatural/ui';
+import { MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
 
 export const metadata = {
   title: 'Liderazgo — Vida Sobrenatural',
@@ -14,6 +14,7 @@ export const metadata = {
  */
 export default function LiderazgoPage() {
   const t = useTranslations('liderazgo');
+  const tn = useTranslations('nosotros');
   const pastores = [
     { nombre: t('pastor1'), rol: t('pastor1Rol') },
     { nombre: t('pastor2'), rol: t('pastor2Rol') },
@@ -24,9 +25,7 @@ export default function LiderazgoPage() {
     <div className="flex flex-col">
       <section className="bg-background">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-16">
-          <Link href="/nosotros" className="text-sm font-medium underline underline-offset-4">
-            {t('volver')}
-          </Link>
+          <MigaDePan tramos={[{ label: tn('titulo'), href: '/nosotros' }, { label: t('titulo') }]} LinkComponente={Link} />
           <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
           <p className="text-foreground">{t('intro')}</p>
         </div>

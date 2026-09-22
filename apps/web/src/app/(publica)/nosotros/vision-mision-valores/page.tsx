@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { MigaDePan } from '@vida-sobrenatural/ui';
 
 export const metadata = {
   title: 'Visión, misión y valores — Vida Sobrenatural',
@@ -14,6 +15,7 @@ export const metadata = {
  */
 export default function VisionMisionValoresPage() {
   const t = useTranslations('visionMisionValores');
+  const tn = useTranslations('nosotros');
   const valores = [t('valorCalidad'), t('valorUnidad'), t('valorGenerosidad'), t('valorFe')];
   const etapas = [
     { titulo: t('sistemaTrabajoBienvenidaTitulo'), texto: t('sistemaTrabajoBienvenidaTexto') },
@@ -24,9 +26,7 @@ export default function VisionMisionValoresPage() {
   return (
     <div className="flex flex-col">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 pb-4 pt-16">
-        <Link href="/nosotros" className="text-sm font-medium underline underline-offset-4">
-          {t('volver')}
-        </Link>
+        <MigaDePan tramos={[{ label: tn('titulo'), href: '/nosotros' }, { label: t('titulo') }]} LinkComponente={Link} />
         <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
       </div>
 

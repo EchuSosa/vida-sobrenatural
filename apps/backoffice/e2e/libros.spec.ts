@@ -167,6 +167,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.waitForLoadState('networkidle');
       await expect(filaLibro(page, titulo)).toBeVisible();
 
+      // H-95: miga de pan arriba del título, no "Volver a Libros" suelto.
+      const migaLibros = page.getByRole('navigation', { name: 'Ruta' });
+      await expect(migaLibros.getByRole('link', { name: 'Libros' })).toBeVisible();
+      await expect(migaLibros.getByText('Papelera')).toBeVisible();
+
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 

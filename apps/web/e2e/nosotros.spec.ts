@@ -65,7 +65,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
-      await page.getByRole('link', { name: 'Volver a Nosotros' }).click();
+      // H-81/H-95: la miga de pan reemplaza "Volver a Nosotros".
+      await page.getByRole('navigation', { name: 'Ruta' }).getByRole('link', { name: 'Nosotros' }).click();
       await expect(page).toHaveURL(/\/nosotros$/);
     });
 
@@ -91,7 +92,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
-      await page.getByRole('link', { name: 'Volver a Nosotros' }).click();
+      // H-81/H-95: la miga de pan reemplaza "Volver a Nosotros".
+      await page.getByRole('navigation', { name: 'Ruta' }).getByRole('link', { name: 'Nosotros' }).click();
       await expect(page).toHaveURL(/\/nosotros$/);
     });
 
@@ -106,7 +108,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
-      await page.getByRole('link', { name: 'Volver a Nosotros' }).click();
+      // H-81/H-95: la miga de pan reemplaza "Volver a Nosotros".
+      await page.getByRole('navigation', { name: 'Ruta' }).getByRole('link', { name: 'Nosotros' }).click();
       await expect(page).toHaveURL(/\/nosotros$/);
     });
 
@@ -119,7 +122,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
-      await page.getByRole('link', { name: 'Volver a Nosotros' }).click();
+      // H-81/H-95: la miga de pan reemplaza "Volver a Nosotros".
+      await page.getByRole('navigation', { name: 'Ruta' }).getByRole('link', { name: 'Nosotros' }).click();
       await expect(page).toHaveURL(/\/nosotros$/);
     });
   });

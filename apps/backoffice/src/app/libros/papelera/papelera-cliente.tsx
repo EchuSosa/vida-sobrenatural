@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { type Libro, type ErrorCode, apiFetch, ApiError, formatearFechaHora } from '@vida-sobrenatural/shared-types';
-import { Button, TablaDatos, type ColumnaTabla } from '@vida-sobrenatural/ui';
+import { Button, MigaDePan, TablaDatos, type ColumnaTabla } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 
 /** D119: mismo patrón que la papelera de Sedes. Pastor (`esAdmin: false`) ve la papelera sin poder restaurar. */
@@ -48,12 +48,13 @@ export function PapeleraCliente({ libros, apiToken, esAdmin }: { libros: Libro[]
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Papelera de Libros</h1>
-        <Link href="/libros" className="text-sm text-muted-foreground underline underline-offset-4">
-          Volver a Libros
-        </Link>
-      </div>
+      {/* H-95: la miga de pan reemplaza el "Volver a X" escrito a mano — va
+          arriba del <h1>, mismo componente en toda la app. */}
+      <MigaDePan
+        tramos={[{ label: 'Libros', href: '/libros' }, { label: 'Papelera' }]}
+        LinkComponente={Link}
+      />
+      <h1 className="text-2xl font-semibold">Papelera de Libros</h1>
       <p className="text-sm text-muted-foreground">
         Libros eliminados (D119) — corregí un error de carga acá. Restaurar los devuelve a &quot;Todos&quot;.
       </p>

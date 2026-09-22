@@ -1,11 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import {
+  Marca,
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -17,8 +17,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@vida-sobrenatural/ui';
-import logotipoClaro from '@vida-sobrenatural/ui/assets/marca/logotipo-oscuro-600.png';
-import logotipoOscuro from '@vida-sobrenatural/ui/assets/marca/logotipo-blanco-600.png';
 import { itemsParaRoles, type RolBackoffice } from '../config/nav';
 import { MenuUsuario } from './selector-tema';
 
@@ -59,8 +57,7 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
           {/* FR-038 (D122): logotipo en la cabecera del sidebar, hoy sin ninguna marca. */}
           <SidebarHeader>
             <Link href="/" className="flex items-center px-2 py-1">
-              <Image src={logotipoClaro} alt="Vida Sobrenatural" className="h-6 w-auto dark:hidden" />
-              <Image src={logotipoOscuro} alt="Vida Sobrenatural" className="hidden h-6 w-auto dark:block" />
+              <Marca variante="logotipo" className="h-6" />
             </Link>
           </SidebarHeader>
           <SidebarContent>

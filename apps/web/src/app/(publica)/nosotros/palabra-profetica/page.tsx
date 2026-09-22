@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import type { PalabraProfetica } from '@vida-sobrenatural/shared-types';
+import { MigaDePan } from '@vida-sobrenatural/ui';
 import { VideoYoutube } from '../../../../components/video-youtube';
 
 export const metadata = {
@@ -23,16 +24,15 @@ async function getPalabraProfeticaVigente(): Promise<PalabraProfetica | null> {
 }
 
 export default async function PalabraProfeticaPage() {
-  const [palabra, t] = await Promise.all([
+  const [palabra, t, tn] = await Promise.all([
     getPalabraProfeticaVigente(),
     getTranslations('palabraProfetica'),
+    getTranslations('nosotros'),
   ]);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
-      <Link href="/nosotros" className="text-sm font-medium underline underline-offset-4">
-        {t('volver')}
-      </Link>
+      <MigaDePan tramos={[{ label: tn('titulo'), href: '/nosotros' }, { label: t('titulo') }]} LinkComponente={Link} />
 
       {!palabra && (
         // FR-006: estado vacío amable, no un error ni una página en blanco.

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { MigaDePan } from '@vida-sobrenatural/ui';
 
 export const metadata = {
   title: 'Quiénes somos — Vida Sobrenatural',
@@ -16,6 +17,7 @@ export const metadata = {
  */
 export default function QuienesSomosPage() {
   const t = useTranslations('quienesSomos');
+  const tn = useTranslations('nosotros');
   const identidad = [
     { label: t('identidadCristianosLabel'), texto: t('identidadCristianosTexto') },
     { label: t('identidadEvangelicosLabel'), texto: t('identidadEvangelicosTexto') },
@@ -25,9 +27,9 @@ export default function QuienesSomosPage() {
   return (
     <div className="flex flex-col">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 pb-4 pt-16">
-        <Link href="/nosotros" className="text-sm font-medium underline underline-offset-4">
-          {t('volver')}
-        </Link>
+        {/* H-81/H-95: la miga de pan reemplaza el enlace "Volver a X" — la
+            ruta sale de la jerarquía de la página, no del historial. */}
+        <MigaDePan tramos={[{ label: tn('titulo'), href: '/nosotros' }, { label: t('titulo') }]} LinkComponente={Link} />
         <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
       </div>
 

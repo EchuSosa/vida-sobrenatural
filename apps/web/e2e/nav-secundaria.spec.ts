@@ -22,9 +22,17 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await page.goto('/inicio');
         await page.waitForLoadState('networkidle');
 
+        // H-87: la barra superior de la app en celular mostraba "Vida
+        // Sobrenatural" en texto pelado, sin marca — ahora el isotipo.
+        await expect(page.locator('img[alt="Vida Sobrenatural"]:visible')).toHaveCount(1);
+        await expect(page.getByText('Vida Sobrenatural', { exact: true })).toHaveCount(0);
+
         await page.getByRole('button', { name: 'Más' }).click();
         const panel = page.getByRole('dialog');
         await expect(panel).toBeVisible();
+
+        // H-87: la cabecera del panel "Más" también lleva el isotipo.
+        await expect(panel.locator('img[alt="Vida Sobrenatural"]:visible')).toHaveCount(1);
 
         const resultadosPanel = await auditar(page);
         expect(resultadosPanel.violations).toEqual([]);

@@ -367,6 +367,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const filaPapelera = page.getByRole('row', { name: new RegExp(nombreSede) });
       await expect(filaPapelera).toBeVisible();
 
+      // H-95: miga de pan arriba del título, no "Volver a Sedes" suelto.
+      const migaSedes = page.getByRole('navigation', { name: 'Ruta' });
+      await expect(migaSedes.getByRole('link', { name: 'Sedes' })).toBeVisible();
+      await expect(migaSedes.getByText('Papelera')).toBeVisible();
+
       const resultadosPapelera = await auditar(page);
       expect(resultadosPapelera.violations).toEqual([]);
 

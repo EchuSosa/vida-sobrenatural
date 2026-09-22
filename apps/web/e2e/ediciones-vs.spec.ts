@@ -46,7 +46,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // y uno de los libros hostiles de seed-demo comparte el prefijo
       // "Antídotos contra la religión" con el real — exact evita que un
       // match parcial confunda a los dos.
-      const items = page.getByRole('listitem');
+      // Acotado a la <ul> del catálogo (aria-label="Catálogo") — la miga de
+      // pan (H-81/H-95) también es una lista (<ol>/<li>) y un
+      // getByRole('listitem') sin acotar la contaría de más.
+      const items = page.getByRole('list', { name: 'Catálogo' }).getByRole('listitem');
       const cantidad = await items.count();
       const TITULOS_REALES = [
         'Mujer Maravilla: cuando la realidad supera a la ficción',
@@ -80,9 +83,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(resultados.violations).toEqual([]);
     });
 
-    test('el enlace "Volver a Nosotros" funciona', async ({ page }) => {
+    // H-81/H-95: la miga de pan reemplaza "Volver a Nosotros".
+    test('la miga de pan vuelve a Nosotros', async ({ page }) => {
       await page.goto('/nosotros/ediciones-vs');
-      await page.getByRole('link', { name: 'Volver a Nosotros' }).click();
+      await page.getByRole('navigation', { name: 'Ruta' }).getByRole('link', { name: 'Nosotros' }).click();
       await expect(page).toHaveURL(/\/nosotros$/);
     });
   });

@@ -5,6 +5,8 @@ export { useValidacionCampos, type ValidacionCampo } from './hooks/use-validacio
 export { EstadoVacio, type EstadoVacioProps } from './components/estado-vacio';
 export { EstadoActivoBadge, type EstadoActivoBadgeProps } from './components/estado-activo-badge';
 export { PlaceholderImagen, type PlaceholderImagenProps } from './components/placeholder-imagen';
+export { Marca, type MarcaProps } from './components/marca';
+export { MigaDePan, type MigaDePanProps, type TramoMiga } from './components/miga-de-pan';
 export { PasoIndicador, type PasoIndicadorProps } from './components/paso-indicador';
 export { CampoTelefono, OPCIONES_CODIGO_PAIS } from './components/campo-telefono';
 export { ResumenErrores, MensajeErrorCampo, type ErrorResumen } from './components/form-errors';

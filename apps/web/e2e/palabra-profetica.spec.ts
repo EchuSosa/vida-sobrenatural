@@ -40,9 +40,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(resultados.violations).toEqual([]);
     });
 
-    test('el enlace "Volver a Nosotros" funciona', async ({ page }) => {
+    // H-81/H-95: la miga de pan reemplaza "Volver a Nosotros".
+    test('la miga de pan vuelve a Nosotros', async ({ page }) => {
       await page.goto('/nosotros/palabra-profetica');
-      await page.getByRole('link', { name: 'Volver a Nosotros' }).click();
+      await page.getByRole('navigation', { name: 'Ruta' }).getByRole('link', { name: 'Nosotros' }).click();
       await expect(page).toHaveURL(/\/nosotros$/);
     });
   });

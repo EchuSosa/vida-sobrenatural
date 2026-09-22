@@ -86,7 +86,6 @@
   },
   "quienesSomos": {
     "titulo": "Quiénes somos",
-    "volver": "Volver a Nosotros",
     "identidadTitulo": "Nuestra identidad",
     "identidadCristianosLabel": "Cristianos",
     "identidadCristianosTexto": "Seguidores de Jesús y no de una religión.",
@@ -102,7 +101,6 @@
   },
   "visionMisionValores": {
     "titulo": "Visión, misión y valores",
-    "volver": "Volver a Nosotros",
     "visionTitulo": "Visión",
     "visionTexto": "Llevar el Reino de Dios y su calidad de vida a toda persona y todo lugar.",
     "misionTitulo": "Misión",
@@ -128,7 +126,6 @@
   },
   "liderazgo": {
     "titulo": "Liderazgo",
-    "volver": "Volver a Nosotros",
     "intro": "Tres parejas pastorales guían Vida Sobrenatural:",
     "pastor1": "Natalia Spetale y Juan Pablo Sosa",
     "pastor1Rol": "Pastores Principales",
@@ -140,12 +137,10 @@
   },
   "enQueCreemos": {
     "titulo": "En qué creemos",
-    "volver": "Volver a Nosotros",
     "pendiente": "Todavía no publicamos nuestra declaración de fe acá — es un texto que tiene que salir directamente de la iglesia, no algo que podamos redactar por nuestra cuenta. Lo sumamos en cuanto lo tengamos."
   },
   "palabraProfetica": {
     "titulo": "Palabra Profética",
-    "volver": "Volver a Nosotros",
     "vacioTitulo": "Todavía no hay una Palabra Profética cargada",
     "vacioTexto": "En cuanto la iglesia la publique, la vas a encontrar acá.",
     "errorTitulo": "No pudimos cargar la Palabra Profética",
@@ -155,7 +150,6 @@
   },
   "edicionesVs": {
     "titulo": "Ediciones VS",
-    "volver": "Volver a Nosotros",
     "introTexto": "Nuestra editorial nació en septiembre de 2014, a partir de la publicación del libro «Mujer Maravilla: cuando la realidad supera a la ficción». Ediciones VS pertenece a la Iglesia Cristiana Vida Sobrenatural y tiene como objetivo producir materiales que lleven el Reino de Dios y su calidad de vida a todas las personas y lugares. Entendemos cada libro o producción particular como una semilla que producirá frutos de vidas tocadas, inspiradas y cambiadas para gloria de Dios.",
     "comoConseguirTitulo": "Cómo conseguir los libros",
     "comoConseguirTexto": "Todos los libros de Ediciones VS están disponibles en librerías a través de Producciones Peniel, que distribuye en toda Argentina. También podés hacer pedidos por nuestras redes.",

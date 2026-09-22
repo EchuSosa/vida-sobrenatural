@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { type Sede, type ErrorCode, apiFetch, ApiError, formatearFechaHora } from '@vida-sobrenatural/shared-types';
-import { Button, TablaDatos, type ColumnaTabla } from '@vida-sobrenatural/ui';
+import { Button, MigaDePan, TablaDatos, type ColumnaTabla } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 
 /** H-60 (revisión manual ronda 7): `sedes` llega ya cargada desde page.tsx — isla de cliente: Restaurar. */
@@ -47,12 +47,13 @@ export function PapeleraCliente({ sedes, apiToken }: { sedes: Sede[]; apiToken: 
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Papelera de Sedes</h1>
-        <Link href="/sedes" className="text-sm text-muted-foreground underline underline-offset-4">
-          Volver a Sedes
-        </Link>
-      </div>
+      {/* H-95: la miga de pan reemplaza el "Volver a X" escrito a mano — va
+          arriba del <h1>, mismo componente en toda la app. */}
+      <MigaDePan
+        tramos={[{ label: 'Sedes', href: '/sedes' }, { label: 'Papelera' }]}
+        LinkComponente={Link}
+      />
+      <h1 className="text-2xl font-semibold">Papelera de Sedes</h1>
       <p className="text-sm text-muted-foreground">
         Sedes eliminadas (D119) — corregí un error de carga acá. Restaurar las devuelve a &quot;Todas&quot;.
       </p>

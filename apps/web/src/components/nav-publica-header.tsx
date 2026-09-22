@@ -1,17 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
-import { Button, Sheet, SheetContent, SheetTitle, SheetTrigger, buttonVariants } from '@vida-sobrenatural/ui';
-import isotipoClaro from '@vida-sobrenatural/ui/assets/marca/logo-oscuro-1024.png';
-import isotipoOscuro from '@vida-sobrenatural/ui/assets/marca/logo-blanco-1024.png';
-import logotipoClaro from '@vida-sobrenatural/ui/assets/marca/logotipo-oscuro-600.png';
-import logotipoOscuro from '@vida-sobrenatural/ui/assets/marca/logotipo-blanco-600.png';
+import { Button, Marca, Sheet, SheetContent, SheetTitle, SheetTrigger, buttonVariants } from '@vida-sobrenatural/ui';
 import { NAV_PUBLICA, NAV_PUBLICA_ACCIONES } from '../config/nav-publica';
 import { MenuUsuarioPublico, ItemsUsuarioCelular } from './menu-usuario-publico';
 
@@ -36,27 +31,6 @@ export function useAccionesPublicas() {
       ? { href: '/inicio', labelKey: 'irALaApp' as const, destacado: true }
       : item,
   ).map((item) => ({ ...item, label: t(item.labelKey) }));
-}
-
-/**
- * FR-037/FR-040 (D122): logotipo en escritorio, isotipo solo en celular
- * (la proporción 7.5:1 del logotipo completo produciría scroll horizontal
- * a 320px, H-62) — claro/oscuro alternados por CSS (`dark:hidden`/
- * `hidden dark:block`, research.md Decisión 7), sin condición en JS.
- */
-function MarcaHeader() {
-  return (
-    <>
-      <span className="flex items-center gap-2 md:hidden">
-        <Image src={isotipoClaro} alt="Vida Sobrenatural" className="size-8 dark:hidden" />
-        <Image src={isotipoOscuro} alt="Vida Sobrenatural" className="hidden size-8 dark:block" />
-      </span>
-      <span className="hidden items-center md:flex">
-        <Image src={logotipoClaro} alt="Vida Sobrenatural" className="h-7 w-auto dark:hidden" />
-        <Image src={logotipoOscuro} alt="Vida Sobrenatural" className="hidden h-7 w-auto dark:block" />
-      </span>
-    </>
-  );
 }
 
 function EnlaceMenu({
@@ -95,8 +69,15 @@ export function NavPublicaHeader() {
     // el flujo normal.
     <header className="sticky top-0 z-40 border-b border-border bg-background">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" aria-current={pathname === '/' ? 'page' : undefined}>
-          <MarcaHeader />
+        {/* FR-037/FR-040 (D122): logotipo en escritorio, isotipo en celular
+            (H-80/H-87, componente Marca de packages/ui). */}
+        <Link href="/" aria-current={pathname === '/' ? 'page' : undefined} className="flex items-center">
+          <span className="md:hidden">
+            <Marca variante="isotipo" />
+          </span>
+          <span className="hidden md:block">
+            <Marca variante="logotipo" />
+          </span>
         </Link>
 
         {/* Desktop */}
@@ -152,8 +133,7 @@ export function NavPublicaHeader() {
                   duplicar texto — ahora es el título visible de la cabecera,
                   sin duplicarlo. */}
               <SheetTitle className="flex h-14 shrink-0 items-center border-b border-border px-4 text-base font-semibold">
-                <Image src={isotipoClaro} alt="Vida Sobrenatural" className="size-8 dark:hidden" />
-                <Image src={isotipoOscuro} alt="Vida Sobrenatural" className="hidden size-8 dark:block" />
+                <Marca variante="isotipo" />
               </SheetTitle>
               <nav aria-label={`${t('principal')} (celular)`} className="flex flex-col gap-4 overflow-y-auto px-4 py-4">
                 {NAV_PUBLICA.map((item) => (

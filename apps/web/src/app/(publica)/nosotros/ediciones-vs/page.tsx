@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import type { useTranslations } from 'next-intl';
 import type { Libro } from '@vida-sobrenatural/shared-types';
-import { PlaceholderImagen } from '@vida-sobrenatural/ui';
+import { MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
 
 export const metadata = {
   title: 'Ediciones VS — Vida Sobrenatural',
@@ -42,13 +42,15 @@ function LibroCard({ libro, t }: { libro: Libro; t: ReturnType<typeof useTransla
 }
 
 export default async function EdicionesVsPage() {
-  const [libros, t] = await Promise.all([getLibrosActivos(), getTranslations('edicionesVs')]);
+  const [libros, t, tn] = await Promise.all([
+    getLibrosActivos(),
+    getTranslations('edicionesVs'),
+    getTranslations('nosotros'),
+  ]);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-16">
-      <Link href="/nosotros" className="text-sm font-medium underline underline-offset-4">
-        {t('volver')}
-      </Link>
+      <MigaDePan tramos={[{ label: tn('titulo'), href: '/nosotros' }, { label: t('titulo') }]} LinkComponente={Link} />
 
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
@@ -91,7 +93,7 @@ export default async function EdicionesVsPage() {
         )}
 
         {libros.length > 0 && (
-          <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3">
+          <ul aria-label={t('catalogoTitulo')} className="grid grid-cols-2 gap-6 sm:grid-cols-3">
             {libros.map((libro) => (
               <LibroCard key={libro.id} libro={libro} t={t} />
             ))}

@@ -85,6 +85,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('link', { name: 'Conocé los ministerios' }).click();
       await expect(page).toHaveURL(/\/ministerios/);
       await expect(page.getByRole('heading', { name: 'Ministerios' })).toBeVisible();
+
+      // H-81: la miga de pan muestra siempre "Primeros pasos › Ministerios",
+      // sin depender de cómo se haya llegado (D115).
+      const miga = page.getByRole('navigation', { name: 'Ruta' });
+      await expect(miga.getByRole('link', { name: 'Primeros pasos' })).toBeVisible();
+      await expect(miga.getByText('Ministerios')).toBeVisible();
+
       await page.goBack();
 
       let resultados = await auditar(page);

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
-import { Button, Sheet, SheetTrigger, SheetContent, SheetTitle } from '@vida-sobrenatural/ui';
+import { Button, Marca, Sheet, SheetTrigger, SheetContent, SheetTitle } from '@vida-sobrenatural/ui';
 import { NAV_PUBLICA } from '../config/nav-publica';
 import { useAccionesPublicas } from './nav-publica-header';
 
@@ -44,8 +44,10 @@ export function NavAppTopBarCelular() {
     // (H-37). `fixed`, como la barra inferior (nav-app-bar.tsx) — el
     // `<main>` compensa con `pt-14` (app/(app)/layout.tsx).
     <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
-      <Link href="/inicio" className="font-semibold">
-        Vida Sobrenatural
+      {/* H-87: acá no había marca, solo el nombre en texto — isotipo, no
+          logotipo (7.5:1 produce scroll horizontal a 320px, H-62). */}
+      <Link href="/inicio">
+        <Marca variante="isotipo" />
       </Link>
       <Sheet open={abierto} onOpenChange={setAbierto}>
         <SheetTrigger
@@ -61,7 +63,8 @@ export function NavAppTopBarCelular() {
               hamburguesa público (nav-publica-header.tsx) — cabecera propia
               separada por un borde, en vez de que la lista arranque a la
               misma altura que la X. */}
-          <SheetTitle className="flex h-14 shrink-0 items-center border-b border-border px-4 text-base font-semibold">
+          <SheetTitle className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 text-base font-semibold">
+            <Marca variante="isotipo" />
             {t('mas')}
           </SheetTitle>
           <nav aria-label={t('secundario')} className="flex flex-col gap-4 overflow-y-auto px-4 py-4">
