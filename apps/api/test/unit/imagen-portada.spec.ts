@@ -27,22 +27,28 @@ describe('ImagenPortadaService', () => {
     expect(metadata.height).toBe(1200);
   });
 
-  it('una imagen apaisada se recorta centrada a 2:3, sin dejar franjas vacías', async () => {
-    const original = await crearImagenSintetica(2400, 1200);
+  // D110 enmendada: las fotos provisorias de los libros no son archivos de
+  // tapa — un recorte centrado les cortaba el libro (H-94a). `fit: 'inside'`
+  // nunca corta: escala para entrar en el máximo, preservando la
+  // proporción original.
+  it('una imagen apaisada NO se recorta — mantiene su proporción original', async () => {
+    const original = await crearImagenSintetica(2400, 1200); // 2:1
     const { buffer } = await service.procesar(original);
     const metadata = await sharp(buffer).metadata();
 
+    // Con ANCHO_PORTADA×ALTO_PORTADA como máximo, el ancho es la
+    // dimensión que ata la escala acá — 800×400 sigue siendo 2:1, sin
+    // deformar ni cortar.
     expect(metadata.width).toBe(800);
-    expect(metadata.height).toBe(1200);
+    expect(metadata.height).toBe(400);
   });
 
-  it('una imagen cuadrada se recorta centrada a 2:3', async () => {
+  it('una imagen cuadrada NO se recorta — mantiene su proporción 1:1', async () => {
     const original = await crearImagenSintetica(1600, 1600);
     const { buffer } = await service.procesar(original);
     const metadata = await sharp(buffer).metadata();
 
-    expect(metadata.width).toBe(800);
-    expect(metadata.height).toBe(1200);
+    expect(metadata.width).toBe(metadata.height);
   });
 
   it('recomprime — la salida es un JPEG válido', async () => {
