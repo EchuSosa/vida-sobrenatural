@@ -1,8 +1,41 @@
+import { readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
+import { ImagenPortadaService } from '../src/storage/imagen-portada.service.js';
+import { LocalStorageProvider } from '../src/storage/local-storage.provider.js';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
+
+// Principio XI: el seed sube portadas por el MISMO camino que una subida
+// real desde el backoffice (LibroService.subirPortada) — ImagenPortadaService
+// + StorageService, no un archivo ni una URL escritos a mano. Si ese camino
+// cambia, el seed cambia con él en vez de quedar una copia que diverge.
+const RAIZ_PORTADAS = join(dirname(fileURLToPath(import.meta.url)), 'portadas');
+const imagenPortadaService = new ImagenPortadaService();
+const storageService = new LocalStorageProvider();
+
+/**
+ * Sube la portada de un Libro ya creado, pasándola por el mismo
+ * procesamiento (redimensionar/recomprimir, sin recortar — D110 enmendada)
+ * y almacenamiento que usa `POST /libros/:id/portada`. Sólo se llama si el
+ * Libro todavía no tiene portada (idempotencia, ver `crearLibrosDemo`).
+ */
+async function sembrarPortada(libroId: string, archivo: string, portadaDescripcion: string): Promise<void> {
+  const original = await readFile(join(RAIZ_PORTADAS, archivo));
+  const procesada = await imagenPortadaService.procesar(original);
+  const subida = await storageService.subir({
+    buffer: procesada.buffer,
+    nombreOriginal: archivo,
+    mimeType: procesada.mimeType,
+  });
+  await prisma.libro.update({
+    where: { id: libroId },
+    data: { portadaUrl: subida.url, portadaDescripcion },
+  });
+}
 
 // H-09 (revisión manual, actualización 2026-09-18): datos reales de
 // docs/12-contenido-bienvenida.md / docs/09-notas-identidad-visual.md — antes
@@ -222,27 +255,101 @@ async function crearPalabraProfeticaDemo() {
  * FR-031: los 8 libros reales de Ediciones VS, orden cronológico de
  * publicación (docs/12-contenido-bienvenida.md § Ediciones VS) — el Admin
  * puede reordenarlos después (FR-016). Idempotente por `titulo`.
+ *
+ * Cada uno suma su foto provisoria (`apps/api/prisma/portadas/*.jpg` — son
+ * fotos de los libros, no archivos de tapa, ver el README de esa carpeta) y
+ * su texto alternativo, obligatorio en cuanto hay portada (FR-025) —
+ * describe la FOTO (dónde y cómo está apoyado el libro), no repite el
+ * título. Idempotente por separado de la creación del Libro: si ya tiene
+ * portada, no se vuelve a subir (`sembrarPortada` no se llama).
  */
 async function crearLibrosDemo() {
-  const libros: Array<Parameters<typeof prisma.libro.create>[0]['data']> = [
-    { titulo: 'Mujer Maravilla: cuando la realidad supera a la ficción', autor: 'Natalia Spetale', anio: 2014, orden: 1 },
-    { titulo: 'El sonido en la iglesia', autor: 'Sebastián Arena', anio: 2014, orden: 2 },
-    { titulo: 'Una vida en su presencia', autor: 'Ezequiel Rossini', anio: 2015, orden: 3 },
-    { titulo: 'El deseo de ser tres', autor: 'Julieta Peralta', anio: 2015, orden: 4 },
-    { titulo: 'Antídotos contra la religión', autor: 'Juan Pablo Sosa', anio: 2016, orden: 5 },
-    { titulo: 'Discipulado Generacional', autor: 'Rosana y Marcos Oszurko', anio: 2018, orden: 6 },
-    { titulo: 'Hijos de la Promesa: identidad y propósito de los hijos de Dios', autor: 'Ezequiel Rossini', anio: 2019, orden: 7 },
-    { titulo: 'Diseñados para una vida saludable', autor: 'María José Amiunes', anio: 2020, orden: 8 },
+  const libros: Array<
+    Parameters<typeof prisma.libro.create>[0]['data'] & { archivoPortada: string; portadaDescripcion: string }
+  > = [
+    {
+      titulo: 'Mujer Maravilla: cuando la realidad supera a la ficción',
+      autor: 'Natalia Spetale',
+      anio: 2014,
+      orden: 1,
+      archivoPortada: 'mujer-maravilla.jpg',
+      portadaDescripcion:
+        'Foto del libro «Mujer Maravilla: cuando la realidad supera a la ficción» sostenido con la mano, rodeado de moños y adornos navideños.',
+    },
+    {
+      titulo: 'El sonido en la iglesia',
+      autor: 'Sebastián Arena',
+      anio: 2014,
+      orden: 2,
+      archivoPortada: 'el-sonido-en-la-iglesia.jpg',
+      portadaDescripcion: 'Foto del libro «El sonido en la iglesia» apoyado sobre el pasto.',
+    },
+    {
+      titulo: 'Una vida en su presencia',
+      autor: 'Ezequiel Rossini',
+      anio: 2015,
+      orden: 3,
+      archivoPortada: 'una-vida-en-su-presencia.jpg',
+      portadaDescripcion: 'Foto del libro «Una vida en su presencia» de pie sobre un soporte, con un fósforo encendido delante.',
+    },
+    {
+      titulo: 'El deseo de ser tres',
+      autor: 'Julieta Peralta',
+      anio: 2015,
+      orden: 4,
+      archivoPortada: 'el-deseo-de-ser-tres.jpg',
+      portadaDescripcion: 'Foto del libro «El deseo de ser tres» sostenido con la mano, con fondo interior desenfocado.',
+    },
+    {
+      titulo: 'Antídotos contra la religión',
+      autor: 'Juan Pablo Sosa',
+      anio: 2016,
+      orden: 5,
+      archivoPortada: 'antidotos-contra-la-religion.jpg',
+      portadaDescripcion: 'Foto del libro «Antídotos contra la religión» de pie, con fondo de pared texturada gris.',
+    },
+    {
+      titulo: 'Discipulado Generacional',
+      autor: 'Rosana y Marcos Oszurko',
+      anio: 2018,
+      orden: 6,
+      archivoPortada: 'discipulado-generacional.jpg',
+      portadaDescripcion: 'Foto del libro «Discipulado Generacional» apoyado en diagonal sobre una mesa de madera.',
+    },
+    {
+      titulo: 'Hijos de la Promesa: identidad y propósito de los hijos de Dios',
+      autor: 'Ezequiel Rossini',
+      anio: 2019,
+      orden: 7,
+      archivoPortada: 'hijos-de-la-promesa.jpg',
+      portadaDescripcion:
+        'Foto del libro «Hijos de la Promesa: identidad y propósito de los hijos de Dios» apoyado en diagonal, con una taza y flores de fondo.',
+    },
+    {
+      titulo: 'Diseñados para una vida saludable',
+      autor: 'María José Amiunes',
+      anio: 2020,
+      orden: 8,
+      archivoPortada: 'disenados-para-una-vida-saludable.jpg',
+      portadaDescripcion: 'Foto del libro «Diseñados para una vida saludable» sostenido con la mano, al aire libre con plantas de fondo.',
+    },
   ];
 
-  for (const libro of libros) {
-    const existente = await prisma.libro.findFirst({ where: { titulo: libro.titulo } });
-    if (existente) {
-      console.log(`Ya existe el Libro "${existente.titulo}", no se duplica.`);
+  for (const { archivoPortada, portadaDescripcion, ...libro } of libros) {
+    let registro = await prisma.libro.findFirst({ where: { titulo: libro.titulo } });
+    if (registro) {
+      console.log(`Ya existe el Libro "${registro.titulo}", no se duplica.`);
+    } else {
+      registro = await prisma.libro.create({ data: libro });
+      console.log(`Libro creado: "${registro.titulo}" (${registro.id})`);
+    }
+
+    if (registro.portadaUrl) {
+      console.log(`"${registro.titulo}" ya tiene portada, no se vuelve a subir.`);
       continue;
     }
-    const creado = await prisma.libro.create({ data: libro });
-    console.log(`Libro creado: "${creado.titulo}" (${creado.id})`);
+    await sembrarPortada(registro.id, archivoPortada, portadaDescripcion);
+    console.log(`Portada sembrada para "${registro.titulo}".`);
   }
 }
 
