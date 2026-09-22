@@ -202,6 +202,27 @@ SEED_ADMIN_EMAIL="tu-email@gmail.com" pnpm --filter api run db:seed
 Si esa Persona ya existe, el seed solo le agrega el rol `admin`; si no existe, la crea con datos de
 ejemplo (igual que las demás Personas demo). Es idempotente — correrlo de nuevo no duplica nada.
 
+> *(actualización 2026-09-23, H-97)*: **`db:seed` no restaura, aunque el nombre lo sugiera.** Es
+> idempotente a propósito (cada sección se guarda con `findFirst`/`findUnique` y saltea lo que ya
+> existe) — eso lo hace seguro para correr en cualquier momento sin duplicar nada, pero también
+> significa que **no repara** un registro que quedó mal después de tocarlo a mano (probar límites
+> en un formulario, un dato que se borró, etc.): si ya existe, `db:seed` lo deja como está.
+>
+> Para volver a un estado conocido de verdad, están estos dos:
+>
+> ```bash
+> pnpm --filter api run db:reset        # borra la base, migra, y corre db:seed — mínimo limpio
+> pnpm --filter api run db:reset-demo   # lo mismo, más db:seed-demo encima (D120) — con volumen
+> ```
+>
+> Los dos envuelven `prisma migrate reset --force` (Prisma borra, vuelve a migrar y corre el seed
+> configurado en `prisma.config.ts` solo). **Cuál usar cuándo:**
+> - Después de verificar algo a mano y dejar datos raros → `db:reset` (o `db:reset-demo` si
+>   necesitás el volumen de nuevo).
+> - Para sumar contenido sin perder lo que ya cargaste a mano → `db:seed` / `db:seed-demo`.
+> - `db:reset`/`db:reset-demo` son **destructivos**: borran todo lo que haya en la base, incluido
+>   lo que no vino del seed. No correrlos sin confirmar contra qué base están apuntando.
+
 ## 8. Inicializar shadcn/ui (en `apps/web`, después replicar en `apps/backoffice`)
 
 ```bash
