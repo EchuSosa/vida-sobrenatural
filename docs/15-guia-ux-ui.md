@@ -163,5 +163,37 @@ Definidos en `packages/ui` como variables CSS (formato de shadcn), para modo cla
 - [ ] Funciona en celular, con teclado y con lector de pantalla.
 - [ ] Contraste verificado en modo claro y oscuro.
 
+## Miga de pan — el único sistema de ubicación (H-81, H-95, H-103)
+
+Aprobado por Echu el 2026-09-23, durante la verificación de la ronda 10. Está escrito acá **como
+patrón y no como una lista de pantallas**, porque aplicarlo a una lista es lo que hizo que quedara
+a medias dos veces.
+
+1. **Es una ruta, no un "volver".** Se lee "dónde estoy, dentro de qué": `Nosotros › Ediciones VS`.
+   El tramo anterior **es** el enlace de vuelta, y dice el nombre del destino — informa más que la
+   palabra "Volver".
+2. **Separador `›`.** La barra `/` se lee como parte de una dirección web; el chevrón se lee como
+   "adentro de". El público de esta app no es técnico y esa diferencia importa.
+3. **Arranca en la sección, no en Inicio.** Un tramo "Inicio ›" adelante no agrega claridad —el
+   logo y el menú ya llevan al inicio— y suma un escalón que nadie usa.
+4. **El último tramo es dónde estás: sin enlace**, en color de texto normal y con
+   `aria-current="page"`. Que no se pueda clickear es parte de lo que lo vuelve entendible.
+5. **Va siempre arriba del `<h1>`**, pegada al contenido. Así la persona lee dónde está antes de
+   leer qué está mirando, y el `<h1>` sigue siendo el primer encabezado del documento.
+6. **La ruta se deriva de la jerarquía del contenido, nunca del historial.** Ni `document.referrer`
+   ni un query param: la misma URL tiene que mostrar siempre la misma ruta, si no deja de servir
+   para orientarse. `/ministerios` dice "Primeros pasos › Ministerios" se llegue de donde se llegue.
+7. **En el backoffice, igual:** `Sedes › La Plata`, `Libros › Papelera`. Cuando el último tramo es
+   largo (títulos de libro), se recorta con puntos suspensivos en pantallas chicas: no es enlace y
+   el `<h1>` de abajo dice el nombre completo.
+
+**Dónde NO va, y no hay una tercera opción:**
+
+- Pantallas de **no encontrado** y de **error**: no hay jerarquía que mostrar (no se sabe qué era
+  ese id). Va un enlace suelto y explícito.
+- **Finales de flujo** (`registro/listo`): es el cierre de un recorrido, no una hoja de un árbol.
+
+Un enlace "Volver a X" escrito a mano en cualquier otro lado es un defecto, no una variante.
+
 ---
 *Creado fuera de sesión formal, antes de la Sesión 6.*
