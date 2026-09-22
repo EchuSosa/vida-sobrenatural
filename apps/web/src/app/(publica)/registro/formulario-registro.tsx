@@ -179,7 +179,9 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
       <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
         <h1 className="text-2xl font-semibold">{t('tituloNoAutenticado')}</h1>
         <p className="text-muted-foreground">{t('textoNoAutenticado')}</p>
-        <Button size="xl" className="w-fit" onClick={() => signIn('google', { callbackUrl: '/registro' })}>
+        {/* H-85: el destino ya no es /registro directo — /ingresar lo
+            resuelve en el servidor según el estado real de la Persona. */}
+        <Button size="xl" className="w-fit" onClick={() => signIn('google', { callbackUrl: '/ingresar' })}>
           {t('botones.continuarGoogle')}
         </Button>
       </div>

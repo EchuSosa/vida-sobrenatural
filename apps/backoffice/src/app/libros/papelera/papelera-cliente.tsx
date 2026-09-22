@@ -54,9 +54,12 @@ export function PapeleraCliente({ libros, apiToken, esAdmin }: { libros: Libro[]
         tramos={[{ label: 'Libros', href: '/libros' }, { label: 'Papelera' }]}
         LinkComponente={Link}
       />
+      {/* H-96: el texto de acá abajo es lo único que necesita saber quien
+          usa el backoffice — las referencias a decisiones (D119: borrado
+          recuperable) van en comentarios como este, no en la interfaz. */}
       <h1 className="text-2xl font-semibold">Papelera de Libros</h1>
       <p className="text-sm text-muted-foreground">
-        Libros eliminados (D119) — corregí un error de carga acá. Restaurar los devuelve a &quot;Todos&quot;.
+        Libros eliminados. Restaurar los devuelve a &quot;Todos&quot;.
       </p>
 
       <TablaDatos

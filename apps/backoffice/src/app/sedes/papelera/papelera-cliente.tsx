@@ -53,9 +53,12 @@ export function PapeleraCliente({ sedes, apiToken }: { sedes: Sede[]; apiToken: 
         tramos={[{ label: 'Sedes', href: '/sedes' }, { label: 'Papelera' }]}
         LinkComponente={Link}
       />
+      {/* H-96: el texto de acá abajo es lo único que necesita saber quien
+          usa el backoffice — las referencias a decisiones (D119: borrado
+          recuperable) van en comentarios como este, no en la interfaz. */}
       <h1 className="text-2xl font-semibold">Papelera de Sedes</h1>
       <p className="text-sm text-muted-foreground">
-        Sedes eliminadas (D119) — corregí un error de carga acá. Restaurar las devuelve a &quot;Todas&quot;.
+        Sedes eliminadas. Restaurar las devuelve a &quot;Todas&quot;.
       </p>
 
       <TablaDatos
