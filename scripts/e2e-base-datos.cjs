@@ -37,7 +37,7 @@ const NOMBRE_BASE_E2E = 'vidasobrenatural_e2e';
 function leerEnvE2e() {
   if (!fs.existsSync(RUTA_ENV_E2E)) {
     throw new Error(
-      `No existe ${RUTA_ENV_E2E}. Creá apps/api/.env.e2e siguiendo la convención de apps/api/.env.test (ver docs/11-setup-local.md).`,
+      `No existe ${RUTA_ENV_E2E}. Copiá apps/api/.env.e2e.example a apps/api/.env.e2e (H-98, ver docs/11-setup-local.md).`,
     );
   }
   const contenido = fs.readFileSync(RUTA_ENV_E2E, 'utf-8');

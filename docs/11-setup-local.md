@@ -226,6 +226,21 @@ ejemplo (igual que las demás Personas demo). Es idempotente — correrlo de nue
 > - `db:reset`/`db:reset-demo` son **destructivos**: borran todo lo que haya en la base, incluido
 >   lo que no vino del seed. No correrlos sin confirmar contra qué base están apuntando.
 
+**Bases para los tests de integración y los e2e (H-59/H-78, actualización 2026-09-25, H-98):**
+`apps/api/.env.test` y `apps/api/.env.e2e` **no se versionan** — mismo criterio que `apps/api/.env`
+(`.gitignore` ignora todo `.env.*`, con la excepción de los `.example`) — así que en un clon nuevo
+hay que crearlos a mano antes de poder correr esas dos suites:
+
+```bash
+cp apps/api/.env.test.example apps/api/.env.test   # antes de: pnpm --filter api run test:e2e
+cp apps/api/.env.e2e.example apps/api/.env.e2e     # antes de: los e2e de apps/web y apps/backoffice
+```
+
+Ninguno de los dos necesita secretos reales (nunca se usan contra Google real) — los valores de los
+`.example` alcanzan tal cual, sin cambiar nada. Cada uno apunta a su propia base
+(`vidasobrenatural_test`/`vidasobrenatural_e2e`, D124) — `test/global-setup.cjs` y
+`scripts/e2e-base-datos.cjs` las crean y migran solas si no existen; no hace falta armarlas a mano.
+
 ## 8. Inicializar shadcn/ui (en `apps/web`, después replicar en `apps/backoffice`)
 
 ```bash

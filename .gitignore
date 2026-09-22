@@ -19,6 +19,11 @@ out/
 .env
 .env.*
 !.env.example
+# H-98: .env.test/.env.e2e (integración y e2e de apps/api) no se versionan —
+# mismo criterio que .env — pero sus .example sí, para que un clon nuevo
+# pueda arrancar las dos suites sin adivinar las claves.
+!.env.test.example
+!.env.e2e.example
 
 # OS / editor
 .DS_Store
