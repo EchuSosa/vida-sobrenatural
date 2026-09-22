@@ -29,7 +29,16 @@ import { test as base, expect, type ConsoleMessage } from '@playwright/test';
  * filtro amplio (ej. "ignorar todo lo que empiece con [WebServer]"): eso
  * convierte esta red en decoración, exactamente lo que H-100 encontró.
  */
-const MENSAJES_PERMITIDOS: RegExp[] = [];
+const MENSAJES_PERMITIDOS: RegExp[] = [
+  // VideoYoutube (apps/web) embebe el reproductor real de YouTube al hacer
+  // clic (FR-005/D93) — el propio JS de YouTube, adentro de su iframe,
+  // pide la Permissions Policy "compute-pressure" (lectura de presión
+  // térmica del dispositivo, para adaptar la reproducción); nuestro iframe
+  // no la delega y Chromium lo loguea. No es nuestro código, y agregar
+  // "compute-pressure" al `allow` del iframe no cambia nada que nos
+  // importe — solo silenciaría este aviso.
+  /Permissions policy violation: compute-pressure is not allowed in this document\./,
+];
 
 /**
  * `permitirErrorDeConsola`: además de activar la red en cada test (es
