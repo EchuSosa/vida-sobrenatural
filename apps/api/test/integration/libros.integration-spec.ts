@@ -19,7 +19,10 @@ async function mintToken(rol: string[]): Promise<string> {
     .sign(secret);
 }
 
-async function imagenSintetica(ancho = 400, alto = 600): Promise<Buffer> {
+// H-94: 1000×1500 (2:3, por encima del mínimo de 800×1200) — el mínimo en
+// sí tiene sus propios tests en imagen-portada.spec.ts (unit); acá sólo
+// hace falta que la imagen sea válida.
+async function imagenSintetica(ancho = 1000, alto = 1500): Promise<Buffer> {
   return sharp({ create: { width: ancho, height: alto, channels: 3, background: { r: 10, g: 20, b: 30 } } })
     .jpeg()
     .toBuffer();
@@ -234,7 +237,7 @@ describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {
     const servida = await request(app.getHttpServer()).get(new URL(primeraUrl).pathname);
     expect(servida.status).toBe(200);
 
-    const imagen2 = await imagenSintetica(500, 500);
+    const imagen2 = await imagenSintetica(1600, 1600);
     const subida2 = await request(app.getHttpServer())
       .post(`/libros/${crear.body.id}/portada`)
       .set('Authorization', `Bearer ${token}`)
@@ -286,5 +289,16 @@ describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {
       .attach('portada', imagen, { filename: 'portada.jpg', contentType: 'image/jpeg' });
     expect(sinTexto.status).toBe(400);
     expect(sinTexto.body.code).toBe('LIBRO_TEXTO_ALTERNATIVO_REQUERIDO');
+
+    // H-94: una imagen más chica que el destino (800×1200) se rechaza en
+    // vez de agrandarse en silencio.
+    const imagenChica = await imagenSintetica(200, 300);
+    const dimensionInsuficiente = await request(app.getHttpServer())
+      .post(`/libros/${crear.body.id}/portada`)
+      .set('Authorization', `Bearer ${token}`)
+      .field('portadaDescripcion', 'Texto')
+      .attach('portada', imagenChica, { filename: 'chica.jpg', contentType: 'image/jpeg' });
+    expect(dimensionInsuficiente.status).toBe(400);
+    expect(dimensionInsuficiente.body.code).toBe('PORTADA_DIMENSION_INSUFICIENTE');
   });
 });

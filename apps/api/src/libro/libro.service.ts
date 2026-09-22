@@ -72,18 +72,29 @@ export class LibroService {
     return libro;
   }
 
-  /** POST /libros — FR-015. La portada no entra acá (FR-021, endpoint propio). */
-  create(dto: CrearLibroDto) {
+  /**
+   * POST /libros — FR-015. La portada no entra acá (FR-021, endpoint propio).
+   * H-89: sin `orden` explícito, va al último lugar (máximo actual + 1) en
+   * vez de 0 — con todos los registros en 0 el desempate lo decidía la
+   * base, que es lo mismo que no tener orden.
+   */
+  async create(dto: CrearLibroDto) {
+    const orden = dto.orden ?? (await this.siguienteOrden());
     return this.prisma.libro.create({
       data: {
         titulo: dto.titulo,
         autor: dto.autor,
         anio: dto.anio,
         descripcion: dto.descripcion,
-        orden: dto.orden ?? 0,
+        orden,
       },
       select: LIBRO_SELECT,
     });
+  }
+
+  private async siguienteOrden(): Promise<number> {
+    const { _max } = await this.prisma.libro.aggregate({ _max: { orden: true } });
+    return (_max.orden ?? -1) + 1;
   }
 
   /** PATCH /libros/:id — FR-017, incluye el toggle de inactivar/reactivar vía activo:true/false. */

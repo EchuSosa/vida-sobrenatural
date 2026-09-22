@@ -1,4 +1,5 @@
 import { ApiError } from './api-client.js';
+import { LIBRO_ANIO_MINIMO, LIBRO_ORDEN_MAXIMO, libroAnioMaximo } from './libro.js';
 
 export interface ErrorDeCampo {
   campo: string;
@@ -48,6 +49,10 @@ const COPIA_POR_CODIGO: Record<string, string> = {
   // `${CAMPO}_INVALIDO` por class-validator — lo lanza el service a mano
   // (AppException), pero se muestra igual bajo el campo youtubeUrl.
   YOUTUBE_URL_INVALIDA: 'Pegá la URL completa de un video de YouTube (ej. https://www.youtube.com/watch?v=...).',
+  // H-93: cubre tanto "no es un entero" como "fuera de rango" — class-validator
+  // agrupa todas las fallas de un mismo campo en un solo ValidationError.
+  ANIO_INVALIDO: `Ingresá un año entre ${LIBRO_ANIO_MINIMO} y ${libroAnioMaximo()}.`,
+  ORDEN_INVALIDO: `Ingresá un número entero entre 0 y ${LIBRO_ORDEN_MAXIMO}.`,
 };
 
 export function mensajeDeCampo(code: string, etiquetaCampo: string): string {

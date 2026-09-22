@@ -1,6 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
+import sharp from 'sharp';
 import { loguearseComoAdminE2E, loguearseComoPastorE2E, loguearseComoOtroRolE2E, auditar } from './helpers';
 
 /**
@@ -12,8 +11,21 @@ import { loguearseComoAdminE2E, loguearseComoPastorE2E, loguearseComoOtroRolE2E,
  * oscuro (Constitución Principio VII).
  */
 
-// Playwright corre estos tests con cwd = apps/backoffice.
-const PORTADA_VALIDA = readFileSync(join(process.cwd(), '../../packages/ui/src/assets/marca/logo-oscuro-1024.png'));
+// H-94: los PNG de packages/ui/src/assets/marca/ son 1024×1024 como
+// máximo — por debajo del mínimo de portada (800×1200, ver
+// imagen-portada.service.ts) desde que ese mínimo existe. Se genera acá
+// una imagen sintética válida (1000×1500, 2:3) en vez de usar un archivo
+// de marca para algo que no es. `sharp` resuelve desde el devDependency
+// de la raíz del monorepo (mismo criterio que scripts/generar-iconos-marca.mjs).
+let portadaValidaCache: Buffer | undefined;
+async function portadaValida(): Promise<Buffer> {
+  portadaValidaCache ??= await sharp({
+    create: { width: 1000, height: 1500, channels: 3, background: { r: 120, g: 90, b: 60 } },
+  })
+    .jpeg()
+    .toBuffer();
+  return portadaValidaCache;
+}
 
 async function crearLibroPorModal(page: Page, titulo: string) {
   await page.getByRole('button', { name: 'Crear Libro' }).click();
@@ -78,7 +90,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Subir portada (opcional)').setInputFiles({
         name: 'portada.png',
         mimeType: 'image/png',
-        buffer: PORTADA_VALIDA,
+        buffer: await portadaValida(),
       });
       await page.getByLabel('Texto alternativo').fill(`Tapa de ${titulo}`);
       await page.getByRole('button', { name: 'Subir portada', exact: true }).click();
@@ -92,7 +104,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Reemplazar portada (opcional)').setInputFiles({
         name: 'portada2.png',
         mimeType: 'image/png',
-        buffer: PORTADA_VALIDA,
+        buffer: await portadaValida(),
       });
       await page.getByLabel('Texto alternativo').fill(`Tapa reemplazada de ${titulo}`);
       await page.getByRole('button', { name: 'Reemplazar portada', exact: true }).click();
@@ -139,10 +151,43 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Subir portada (opcional)').setInputFiles({
         name: 'portada.png',
         mimeType: 'image/png',
-        buffer: PORTADA_VALIDA,
+        buffer: await portadaValida(),
       });
       await page.getByRole('button', { name: 'Subir portada', exact: true }).click();
       await expect(page.getByText('Completá el texto alternativo de la portada antes de subirla.')).toBeVisible();
+    });
+
+    // H-94: a diferencia de tipo/tamaño (arriba), las dimensiones sólo se
+    // pueden verificar decodificando la imagen — no hay chequeo previo del
+    // lado del cliente, así que este caso sí llega al servidor.
+    test('una imagen más chica que el mínimo de portada se rechaza al subirla, no se agranda en silencio (H-94)', async ({
+      page,
+    }) => {
+      const titulo = `e2e-libro-portada-chica-${colorScheme}-${Date.now()}`;
+      await loguearseComoAdminE2E(page);
+      await page.goto('/libros');
+      await page.waitForLoadState('networkidle');
+      await crearLibroPorModal(page, titulo);
+      await abrirDetalleDesdeFila(page, filaLibro(page, titulo));
+
+      const imagenChica = await sharp({
+        create: { width: 200, height: 300, channels: 3, background: { r: 200, g: 50, b: 50 } },
+      })
+        .jpeg()
+        .toBuffer();
+
+      await page.getByLabel('Subir portada (opcional)').setInputFiles({
+        name: 'chica.jpg',
+        mimeType: 'image/jpeg',
+        buffer: imagenChica,
+      });
+      await page.getByLabel('Texto alternativo').fill('Tapa chica');
+      await page.getByRole('button', { name: 'Subir portada', exact: true }).click();
+      await expect(
+        page.getByText('La imagen es más chica que el mínimo para una portada', { exact: false }),
+      ).toBeVisible();
+      // Sigue en el placeholder — no quedó ninguna portada agrandada/borrosa.
+      await expect(page.getByRole('img', { name: `Portada de ${titulo}` })).toBeVisible();
     });
 
     test('inactivar/reactivar y eliminar (siempre permitido) a la papelera, y restaurar', async ({ page }) => {

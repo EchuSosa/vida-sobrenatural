@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { type Libro, type ErrorDeCampo, mensajeDeCampo } from '@vida-sobrenatural/shared-types';
+import {
+  type Libro,
+  type ErrorDeCampo,
+  mensajeDeCampo,
+  LIBRO_ANIO_MINIMO,
+  LIBRO_ORDEN_MAXIMO,
+  libroAnioMaximo,
+} from '@vida-sobrenatural/shared-types';
 import { Button, MensajeErrorCampo, ResumenErrores, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
 
 export interface ValoresLibro {
@@ -17,7 +24,10 @@ export const VALORES_LIBRO_VACIOS: ValoresLibro = {
   autor: '',
   anio: String(new Date().getFullYear()),
   descripcion: '',
-  orden: '0',
+  // H-89: vacío (no "0") — así datosLibroParaEnviar no manda `orden` y la
+  // API le asigna el último lugar sola, en vez de que todo Libro nuevo
+  // nazca en 0.
+  orden: '',
 };
 
 export function libroAValoresFormulario(libro: Libro): ValoresLibro {
@@ -37,7 +47,9 @@ export function datosLibroParaEnviar(valores: ValoresLibro) {
     autor: valores.autor,
     anio: Number(valores.anio),
     descripcion: valores.descripcion.trim() || undefined,
-    orden: Number(valores.orden),
+    // H-89: vacío se omite (no se manda `orden: 0`) — la API asigna el
+    // último lugar cuando no se lo mandan explícito.
+    orden: valores.orden.trim() === '' ? undefined : Number(valores.orden),
   };
 }
 
@@ -87,13 +99,22 @@ export function FormularioLibro({
   const validaciones = {
     titulo: requerido,
     autor: requerido,
+    // H-93: mismo rango que la API (packages/shared-types) — si se
+    // escribiera dos veces, en la próxima ronda uno de los dos iba a
+    // quedar distinto.
     anio: {
-      esValido: (v: string) => v.trim() !== '' && Number.isInteger(Number(v)),
-      mensaje: 'Ingresá un año válido.',
+      esValido: (v: string) =>
+        v.trim() !== '' &&
+        Number.isInteger(Number(v)) &&
+        Number(v) >= LIBRO_ANIO_MINIMO &&
+        Number(v) <= libroAnioMaximo(),
+      mensaje: `Ingresá un año entre ${LIBRO_ANIO_MINIMO} y ${libroAnioMaximo()}.`,
     } satisfies ValidacionCampo<string>,
     orden: {
-      esValido: (v: string) => v.trim() === '' || (Number.isInteger(Number(v)) && Number(v) >= 0),
-      mensaje: 'Ingresá un número entero, 0 o más.',
+      esValido: (v: string) =>
+        v.trim() === '' ||
+        (Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= LIBRO_ORDEN_MAXIMO),
+      mensaje: `Ingresá un número entero entre 0 y ${LIBRO_ORDEN_MAXIMO}.`,
     } satisfies ValidacionCampo<string>,
   };
 
@@ -184,6 +205,7 @@ export function FormularioLibro({
           <input
             id="campo-orden"
             type="number"
+            placeholder="Al final"
             aria-invalid={Boolean(validacion.mensajes.orden)}
             aria-describedby={validacion.mensajes.orden ? 'campo-orden-error' : undefined}
             value={valores.orden}

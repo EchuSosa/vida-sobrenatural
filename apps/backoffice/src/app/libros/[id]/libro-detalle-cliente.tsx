@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { Upload } from 'lucide-react';
+import { cn } from 'cn';
 import {
   type Libro,
   type ErrorCode,
@@ -210,6 +212,7 @@ function PortadaLibro({ libro, apiToken, esAdmin }: { libro: Libro; apiToken: st
   const [portadaDescripcion, setPortadaDescripcion] = useState(libro.portadaDescripcion ?? '');
   const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
   const [errorSubida, setErrorSubida] = useState<string | null>(null);
+  const [arrastrandoSobre, setArrastrandoSobre] = useState(false);
 
   function elegirArchivo(seleccionado: File | null) {
     setErrorArchivo(null);
@@ -265,21 +268,61 @@ function PortadaLibro({ libro, apiToken, esAdmin }: { libro: Libro; apiToken: st
     }
   });
 
+  const etiquetaAccion = libro.portadaUrl ? 'Reemplazar portada' : 'Subir portada';
+  const portadaVisual = libro.portadaUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element -- portada servida por apps/api (D110)
+    <img src={libro.portadaUrl} alt={libro.portadaDescripcion ?? ''} className="aspect-[2/3] w-full rounded-md object-cover" />
+  ) : (
+    <PlaceholderImagen aspecto="portada" etiqueta={`Portada de ${libro.titulo}`} />
+  );
+
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
       <h2 className="text-sm font-medium">Portada</h2>
       <div className="flex gap-4">
-        {libro.portadaUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- portada servida por apps/api (D110)
-          <img src={libro.portadaUrl} alt={libro.portadaDescripcion ?? ''} className="aspect-[2/3] w-32 rounded-md object-cover" />
+        {esAdmin ? (
+          // H-94: el hueco de la portada ahora es el <label> del input de
+          // archivo (clickeable sin JS) y acepta arrastrar y soltar — antes
+          // no comunicaba ni con ícono, ni con texto, ni con que se podía
+          // hacer clic. Sin portada real, el ícono+texto quedan siempre
+          // visibles (es la invitación a subir); con una portada real, sólo
+          // aparecen al pasar el mouse o el foco, para no taparla siempre.
+          <label
+            htmlFor="campo-portada-archivo"
+            className={cn(
+              'group relative block w-32 shrink-0 cursor-pointer overflow-hidden rounded-md outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background',
+              arrastrandoSobre && 'ring-2 ring-ring ring-offset-2 ring-offset-background',
+            )}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setArrastrandoSobre(true);
+            }}
+            onDragLeave={() => setArrastrandoSobre(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setArrastrandoSobre(false);
+              elegirArchivo(e.dataTransfer.files?.[0] ?? null);
+            }}
+          >
+            {portadaVisual}
+            <span
+              className={cn(
+                'absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/80 px-2 text-center text-xs font-medium text-foreground',
+                libro.portadaUrl && 'opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100',
+              )}
+            >
+              <Upload className="size-5" aria-hidden="true" />
+              {etiquetaAccion}
+            </span>
+          </label>
         ) : (
-          <PlaceholderImagen aspecto="portada" etiqueta={`Portada de ${libro.titulo}`} className="w-32" />
+          <div className="w-32 shrink-0">{portadaVisual}</div>
         )}
 
         {esAdmin && (
-          <div className="flex flex-1 flex-col gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
             <label htmlFor="campo-portada-archivo" className="text-sm font-medium">
-              {libro.portadaUrl ? 'Reemplazar portada' : 'Subir portada'} (opcional)
+              {etiquetaAccion} (opcional)
             </label>
             <input
               id="campo-portada-archivo"
@@ -305,7 +348,7 @@ function PortadaLibro({ libro, apiToken, esAdmin }: { libro: Libro; apiToken: st
                 />
                 {errorSubida && <p className="text-sm text-destructive">{errorSubida}</p>}
                 <Button size="sm" loading={subiendo} loadingText="Subiendo…" onClick={subir} className="w-fit">
-                  {libro.portadaUrl ? 'Reemplazar portada' : 'Subir portada'}
+                  {etiquetaAccion}
                 </Button>
               </>
             )}

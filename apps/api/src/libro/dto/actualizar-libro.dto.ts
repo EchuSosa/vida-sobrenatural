@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { LIBRO_ANIO_MINIMO, LIBRO_ORDEN_MAXIMO, libroAnioMaximo } from '@vida-sobrenatural/shared-types';
 
 /** Body de PATCH /libros/:id — cualquier subconjunto, más el toggle de soft delete (FR-017). */
 export class ActualizarLibroDto {
@@ -16,6 +17,8 @@ export class ActualizarLibroDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
+  @Min(LIBRO_ANIO_MINIMO)
+  @Max(libroAnioMaximo())
   anio?: number;
 
   @ApiPropertyOptional()
@@ -27,6 +30,7 @@ export class ActualizarLibroDto {
   @IsOptional()
   @IsInt()
   @Min(0)
+  @Max(LIBRO_ORDEN_MAXIMO)
   orden?: number;
 
   @ApiPropertyOptional({ description: 'Inactivar/reactivar (FR-017) — soft delete de negocio, distinto de eliminar (D119).' })
