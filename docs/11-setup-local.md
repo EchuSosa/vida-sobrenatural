@@ -215,8 +215,11 @@ ejemplo (igual que las demás Personas demo). Es idempotente — correrlo de nue
 > pnpm --filter api run db:reset-demo   # lo mismo, más db:seed-demo encima (D120) — con volumen
 > ```
 >
-> Los dos envuelven `prisma migrate reset --force` (Prisma borra, vuelve a migrar y corre el seed
-> configurado en `prisma.config.ts` solo). **Cuál usar cuándo:**
+> Los dos envuelven `prisma migrate reset --force` (Prisma borra la base y vuelve a migrar) seguido
+> de `prisma db seed` explícito — en la versión instalada (Prisma 7.10.0) `migrate reset --force`
+> **no** corre solo el seed configurado en `prisma.config.ts` pese a que lo tiene declarado, así que
+> hay que encadenarlo a mano; verificado corriendo el comando y viendo la base vacía después.
+> **Cuál usar cuándo:**
 > - Después de verificar algo a mano y dejar datos raros → `db:reset` (o `db:reset-demo` si
 >   necesitás el volumen de nuevo).
 > - Para sumar contenido sin perder lo que ya cargaste a mano → `db:seed` / `db:seed-demo`.
