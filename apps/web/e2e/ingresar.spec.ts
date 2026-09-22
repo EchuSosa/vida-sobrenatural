@@ -1,7 +1,6 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { test, expect } from '@playwright/test';
 import { mintApiToken } from '@vida-sobrenatural/shared-types/auth-server';
+import { leerEnvE2e } from '../../../scripts/e2e-base-datos.cjs';
 import { loguearseComoTest, registrarPersonaDeTest } from './helpers';
 
 /**
@@ -19,27 +18,21 @@ import { loguearseComoTest, registrarPersonaDeTest } from './helpers';
  * probarlo a mano.
  */
 
-// Playwright corre estos tests con cwd = apps/web — mintApiToken() (misma
-// pieza que usa auth.ts) necesita NEXTAUTH_SECRET, que Next.js carga solo
-// para su propio proceso de servidor. El runner de Playwright es un
-// proceso Node aparte que no lo hereda, así que se lee acá a mano de
-// .env.local (sin sumar una dependencia de `dotenv` solo para esto).
+// H-78: mintApiToken() (misma pieza que usa auth.ts) necesita
+// NEXTAUTH_SECRET — el de la base de e2e (apps/api/.env.e2e), no el de
+// desarrollo. El runner de Playwright es un proceso Node aparte de las
+// apps que arrancan los `webServer` de playwright.config.ts, así que no
+// lo hereda de ahí — se lee de la misma pieza compartida que ya lo hace
+// para armar esos `webServer` (Principio XI, nada de parsear un .env
+// distinto acá).
 function nextauthSecret(): string {
-  const contenido = readFileSync(join(process.cwd(), '.env.local'), 'utf8');
-  const linea = contenido.split('\n').find((l) => l.startsWith('NEXTAUTH_SECRET='));
-  // split('=')[1] se corta en el primer '=' — el valor (base64) suele
-  // TENER un '=' de relleno al final, así que hay que partir solo en el
-  // primero, no en cualquiera.
-  const valor = linea
-    ?.slice('NEXTAUTH_SECRET='.length)
-    .trim()
-    .replace(/^"|"$/g, '');
-  if (!valor) throw new Error('NEXTAUTH_SECRET no encontrado en apps/web/.env.local');
-  process.env.NEXTAUTH_SECRET = valor;
-  return valor;
+  const { NEXTAUTH_SECRET } = leerEnvE2e();
+  if (!NEXTAUTH_SECRET) throw new Error('NEXTAUTH_SECRET no encontrado en apps/api/.env.e2e');
+  process.env.NEXTAUTH_SECRET = NEXTAUTH_SECRET;
+  return NEXTAUTH_SECRET;
 }
 
-const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:3333';
+const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:3334';
 
 /**
  * Crea una Persona pendiente_tutor directo contra la API (mismo shape que

@@ -5,6 +5,11 @@ node_modules/
 dist/
 build/
 .next/
+# H-78/D124: distDir propio de cada webServer de e2e (apps/web,
+# apps/backoffice/playwright.config.ts) — Next enlaza el lock de "una sola
+# instancia" al distDir, no al puerto, así que la app de desarrollo y las
+# de e2e necesitan distDir distintos para poder correr a la vez.
+.next-e2e*/
 out/
 
 # Turborepo

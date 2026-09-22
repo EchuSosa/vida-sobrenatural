@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
   // pestaña "Inicio" de la barra inferior en celular. Next sigue mostrando
   // errores de compilación/runtime igual sin este indicador.
   devIndicators: false,
+  // H-78/D124: los `webServer` de e2e (apps/web/playwright.config.ts,
+  // apps/backoffice/playwright.config.ts) arrancan `next dev` en este mismo
+  // directorio mientras puede haber un `next dev` de desarrollo corriendo a
+  // la vez — Next liga el lock de "una sola instancia" a `<distDir>/lock`
+  // (node_modules/next/dist/build/lockfile.js), no al puerto, así que sin un
+  // distDir propio la segunda instancia se niega a arrancar aunque el
+  // puerto sea distinto.
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {

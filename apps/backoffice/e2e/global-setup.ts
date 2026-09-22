@@ -1,17 +1,23 @@
-import { execSync } from 'node:child_process';
+import { prepararBaseE2e } from '../../../scripts/e2e-base-datos.cjs';
 
 /**
- * H-34 (revisión manual ronda 3): siembra (idempotente) la Persona
- * `e2e-admin@example.com` con rol admin+discipulador — necesaria para entrar
- * a Pendientes de tutor y Sedes vía el proveedor `test-login`. Ver
- * apps/api/scripts/sembrar-e2e-admin.ts. Mismo criterio de tolerancia a
- * fallos que global-teardown.ts: si `apps/api` no es un workspace alcanzable
- * desde acá, no bloquea la corrida — se ve en los tests que fallen después.
+ * H-78 (revisión manual): antes de esto, este globalSetup solo sembraba el
+ * fixture de e2e-admin contra la API/base de DESARROLLO (execSync
+ * heredando el entorno del shell, sin DATABASE_URL propio) — exactamente
+ * el mismo agujero que apps/web, del lado del backoffice. Ya rompió la
+ * base de desarrollo tres veces (H-17, H-67, la Palabra Profética
+ * vigente).
+ *
+ * Ahora esta corrida tiene su propia base (vidasobrenatural_e2e, compartida
+ * con apps/web) y su propia API/app (ver los `webServer` de
+ * playwright.config.ts, puertos 3335/3012 acá — 3334/3011 en apps/web,
+ * para que las dos suites no choquen si corren a la vez).
+ * `prepararBaseE2e()` (scripts/e2e-base-datos.cjs, compartida con
+ * apps/web — no duplicada, Principio XI) la crea si falta, la resetea
+ * (H-97: sembrar no alcanza para reparar) y siembra el
+ * admin/pastor/otro-rol de e2e — con una guarda que aborta ruidoso si
+ * DATABASE_URL no es exactamente la base de e2e.
  */
-export default function globalSetup() {
-  try {
-    execSync('pnpm --filter api run db:sembrar-e2e-admin', { stdio: 'inherit' });
-  } catch (error) {
-    console.warn('[global-setup] no se pudo sembrar la Persona admin de e2e:', error);
-  }
+export default async function globalSetup() {
+  await prepararBaseE2e();
 }
