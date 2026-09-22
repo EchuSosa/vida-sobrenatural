@@ -33,7 +33,10 @@ function LibroCard({ libro, t }: { libro: Libro; t: ReturnType<typeof useTransla
       ) : (
         <PlaceholderImagen aspecto="portada" etiqueta={t('portadaAlt', { titulo: libro.titulo })} />
       )}
-      <p className="font-medium">{libro.titulo}</p>
+      {/* H-84: altura mínima reservada para dos líneas — con títulos tan
+          desparejos, sin esto las tarjetas de una fila quedan de alturas
+          visiblemente distintas. */}
+      <p className="min-h-[3em] font-medium">{libro.titulo}</p>
       <p className="text-sm text-muted-foreground">
         {t('autorPor', { autor: libro.autor })} · {libro.anio}
       </p>
@@ -93,7 +96,7 @@ export default async function EdicionesVsPage() {
         )}
 
         {libros.length > 0 && (
-          <ul aria-label={t('catalogoTitulo')} className="grid grid-cols-2 gap-6 sm:grid-cols-3">
+          <ul aria-label={t('catalogoTitulo')} className="grid grid-cols-2 items-stretch gap-6 sm:grid-cols-3">
             {libros.map((libro) => (
               <LibroCard key={libro.id} libro={libro} t={t} />
             ))}

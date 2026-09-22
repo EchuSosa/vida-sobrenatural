@@ -105,6 +105,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Lorena Scerra y Ezequiel Rossini')).toBeVisible();
       await expect(page.getByText('Patricia Ryan y Ezequiel Parravicini')).toBeVisible();
 
+      // H-82: el placeholder de foto está por su role="img" y nombre
+      // accesible — el texto "Foto pendiente" ya no se muestra a quien
+      // visita la web.
+      await expect(page.getByRole('img', { name: /Foto pendiente/ })).toHaveCount(3);
+      await expect(page.getByText('Foto pendiente', { exact: false })).toHaveCount(0);
+
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 

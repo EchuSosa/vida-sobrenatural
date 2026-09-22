@@ -36,8 +36,11 @@ export default function LiderazgoPage() {
           <ul className="flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:gap-3">
             {pastores.map((pastor) => (
               <li key={pastor.nombre} className="flex flex-col gap-2 rounded-lg border border-border bg-background p-4">
-                {/* D118 (docs/17): en Liderazgo el texto va visible, no solo aria-label — acá sí es honesto decir que falta la foto. */}
-                <PlaceholderImagen aspecto="equipo" etiqueta={t('fotoPendiente')} mostrarTexto />
+                {/* H-82: el texto "Foto pendiente" ya no se muestra — el
+                    hueco con la marca de agua alcanza para comunicarlo, y
+                    mostrarlo le cuenta a quien visita la web un problema
+                    interno nuestro. La etiqueta sigue como aria-label. */}
+                <PlaceholderImagen aspecto="equipo" etiqueta={t('fotoPendiente')} />
                 <p className="font-medium">{pastor.nombre}</p>
                 <p className="text-sm text-muted-foreground">{pastor.rol}</p>
               </li>

@@ -48,6 +48,8 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
+  --color-informativo-foreground: var(--informativo-foreground);
+  --color-informativo: var(--informativo);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -83,8 +85,13 @@
   --secondary-foreground: oklch(0.255 0.030 45);
   --muted: oklch(0.950 0.012 82);
   --muted-foreground: oklch(0.480 0.028 55);
-  --accent: oklch(0.640 0.095 232);
-  --accent-foreground: oklch(1 0 0);
+  /* D123 (enmienda de D118): --accent es el neutro de hover de shadcn/Base UI,
+     no el acento de marca — mismo valor que --sidebar-accent. El celeste va
+     en --informativo. */
+  --accent: oklch(0.930 0.020 80);
+  --accent-foreground: oklch(0.255 0.030 45);
+  --informativo: oklch(0.640 0.095 232);
+  --informativo-foreground: oklch(1 0 0);
   --destructive: oklch(0.505 0.190 18);
   --destructive-foreground: oklch(1 0 0);
   --success: oklch(0.500 0.075 152);
@@ -124,8 +131,11 @@
   --secondary-foreground: oklch(0.955 0.010 85);
   --muted: oklch(0.275 0.013 50);
   --muted-foreground: oklch(0.740 0.020 70);
-  --accent: oklch(0.720 0.085 232);
-  --accent-foreground: oklch(0.205 0.012 50);
+  /* D123: mismo criterio que en :root — accent neutro (= --sidebar-accent), celeste en --informativo. */
+  --accent: oklch(0.300 0.018 55);
+  --accent-foreground: oklch(0.955 0.010 85);
+  --informativo: oklch(0.720 0.085 232);
+  --informativo-foreground: oklch(0.205 0.012 50);
   --destructive: oklch(0.660 0.170 18);
   --destructive-foreground: oklch(0.205 0.012 50);
   --success: oklch(0.700 0.075 152);

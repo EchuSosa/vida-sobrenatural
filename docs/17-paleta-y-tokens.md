@@ -4,6 +4,11 @@
 > (paleta del libro *Vida de Servicio*) y respeta D81 (contrastes WCAG 2.2 AA), D95 y D106
 > (modo claro por defecto, ambos modos verificados). Todos los contrastes de este documento
 > están **medidos**, no estimados.
+>
+> **D123 (enmienda, H-86):** `--accent` volvió a ser el neutro de hover que shadcn/Base UI
+> esperan de ese token — D118 le había puesto el celeste, y varios componentes vendorizados que
+> ya usaban `--accent` para su hover heredaron un color que no les correspondía (blanco sobre
+> celeste, ≈3.1:1, por debajo de AA). El celeste sigue existiendo, ahora como `--informativo`.
 
 ## La decisión de fondo
 
@@ -26,7 +31,7 @@ consigo misma.
 | Texto | Marrón muy oscuro | `#2f1e17` | `#f3f0e9` |
 | Primario | **Terracota** (vasija) | `#a14e2b` | `#d58966` |
 | Secundario | Beige | `#efe7d9` | `#352c25` |
-| Acento | Celeste (ola, agua) | `#4896bc` | `#6baed1` |
+| Informativo | Celeste (ola, agua) | `#4896bc` | `#6baed1` |
 | Éxito | Verde salvia | `#40704e` | `#7bac88` |
 | Advertencia | Ámbar cálido | `#a97416` | `#dbab5e` |
 | Destructivo | Rojo carmín | `#b81839` | `#e75e6a` |
@@ -47,8 +52,11 @@ consigo misma.
   --secondary-foreground: oklch(0.255 0.030 45);
   --muted: oklch(0.950 0.012 82);
   --muted-foreground: oklch(0.480 0.028 55);
-  --accent: oklch(0.640 0.095 232);
-  --accent-foreground: oklch(1 0 0);
+  /* D123: neutro de hover (= --sidebar-accent), no el celeste. */
+  --accent: oklch(0.930 0.020 80);
+  --accent-foreground: oklch(0.255 0.030 45);
+  --informativo: oklch(0.640 0.095 232);
+  --informativo-foreground: oklch(1 0 0);
   --success: oklch(0.500 0.075 152);
   --success-foreground: oklch(1 0 0);
   --warning: oklch(0.600 0.120 75);
@@ -73,8 +81,11 @@ consigo misma.
   --secondary-foreground: oklch(0.955 0.010 85);
   --muted: oklch(0.275 0.013 50);
   --muted-foreground: oklch(0.740 0.020 70);
-  --accent: oklch(0.720 0.085 232);
-  --accent-foreground: oklch(0.205 0.012 50);
+  /* D123: neutro de hover (= --sidebar-accent), no el celeste. */
+  --accent: oklch(0.300 0.018 55);
+  --accent-foreground: oklch(0.955 0.010 85);
+  --informativo: oklch(0.720 0.085 232);
+  --informativo-foreground: oklch(0.205 0.012 50);
   --success: oklch(0.700 0.075 152);
   --success-foreground: oklch(0.205 0.012 50);
   --warning: oklch(0.770 0.110 78);
@@ -154,14 +165,17 @@ Mínimos de D81: 4.5:1 para texto, 3:1 para elementos de interfaz y foco.
 | Éxito como texto | 5.5 | 6.9 |
 | Destructivo como texto | 6.2 | 5.3 |
 | Borde de campo sobre fondo | 3.2 | 3.2 |
-| Acento como elemento de interfaz | 3.1 | 7.4 |
+| Informativo como elemento de interfaz | 3.29 | 7.37 |
+| Texto del acento (hover neutro) sobre acento | 12.92 | 12.01 |
 | Anillo de foco sobre fondo | 5.5 | 6.5 |
 
 ## Reglas de uso
 
-- **El celeste no se usa para texto sobre crema.** Llega a 3.1:1: alcanza para un elemento de
-  interfaz o una decoración, no para leer. Es acento, no color de texto. (Ya estaba advertido
-  en `09`.)
+- **El celeste (`--informativo`) no se usa para texto sobre crema.** Llega a 3.29:1: alcanza para
+  un elemento de interfaz o una decoración, no para leer. (Ya estaba advertido en `09`.)
+- **`--accent` es el neutro de hover de los componentes de `packages/ui/src/components/ui/`
+  (convención de shadcn/Base UI), no un color de marca** (D123). Si algo necesita comunicar "esto
+  es informativo", usa `--informativo`, nunca `--accent`.
 - **Terracota y carmín se parecen, sobre todo con daltonismo rojo-verde.** Por eso el destructivo
   se corrió a un rojo más frío (`#b81839` en vez de un rojo anaranjado) y, como ya pide la guía,
   toda acción destructiva lleva **ícono + verbo explícito**, nunca solo el color.
@@ -177,7 +191,8 @@ Mientras falten las fotos reales (equipo pastoral, templo, congregación, portad
 el hueco **no** es un rectángulo gris. Es un bloque en `--secondary` (beige en claro, marrón en
 oscuro) con el logo de cuatro pétalos centrado al 20% de opacidad, proporción 3:2 para fotos de
 equipo y 2:3 para portadas de libros. El texto "Foto pendiente" se mantiene solo como
-`aria-label`, no visible, salvo en la sección de Liderazgo, donde es honesto decirlo.
+`aria-label`, nunca visible (H-82) — el hueco con la marca de agua ya comunica que falta la foto;
+mostrar el texto además le cuenta a quien visita la web un problema interno nuestro.
 
 Un bloque de marca se lee como diseñado; el rectángulo gris se lee como roto.
 

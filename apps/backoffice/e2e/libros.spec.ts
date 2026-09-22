@@ -22,6 +22,19 @@ async function crearLibroPorModal(page: Page, titulo: string) {
   await modal.getByLabel('Título').fill(titulo);
   await modal.getByLabel('Autor/a').fill('Autor E2E');
   await modal.getByLabel('Año').fill('2024');
+
+  // H-92: la fila de Año/Orden desbordaba el modal (flex-1 sin min-w-0) —
+  // el campo Orden quedaba cortado. Verificado acá: el campo entero cae
+  // dentro del ancho del modal.
+  const campoOrden = modal.getByLabel('Orden');
+  const cajaModal = await modal.boundingBox();
+  const cajaOrden = await campoOrden.boundingBox();
+  expect(cajaModal).not.toBeNull();
+  expect(cajaOrden).not.toBeNull();
+  if (cajaModal && cajaOrden) {
+    expect(cajaOrden.x + cajaOrden.width).toBeLessThanOrEqual(cajaModal.x + cajaModal.width + 1);
+  }
+
   await modal.getByRole('button', { name: 'Crear Libro' }).click();
   await expect(page.getByText('Libro creado.')).toBeVisible();
   await expect(modal).toBeHidden();

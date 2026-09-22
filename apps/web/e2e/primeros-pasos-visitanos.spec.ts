@@ -109,7 +109,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('link', { name: 'Liderazgo' }).click();
       await expect(page).toHaveURL(/\/nosotros\/liderazgo$/);
       await expect(page.getByText('Natalia Spetale y Juan Pablo Sosa')).toBeVisible();
-      await expect(page.getByText('Foto pendiente', { exact: false }).first()).toBeVisible();
+      // H-82: el texto "Foto pendiente" ya no se muestra — se verifica que
+      // el hueco sigue presente por su role="img" y su nombre accesible,
+      // no por texto visible.
+      await expect(page.getByRole('img', { name: /Foto pendiente/ }).first()).toBeVisible();
+      await expect(page.getByText('Foto pendiente', { exact: false })).toHaveCount(0);
       await page.goBack();
 
       await page.getByRole('link', { name: 'En qué creemos' }).click();

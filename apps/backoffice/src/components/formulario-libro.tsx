@@ -153,8 +153,10 @@ export function FormularioLibro({
         />
         <MensajeErrorCampo id="campo-autor-error" mensaje={validacion.mensajes.autor} />
       </div>
+      {/* H-92: flex-1 sin min-w-0 no puede encogerse por debajo del ancho
+          mínimo intrínseco de un <input> — la fila desbordaba el modal. */}
       <div className="flex gap-3">
-        <div className="flex flex-1 flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <label htmlFor="campo-anio" className="text-sm font-medium">
             {ETIQUETAS_CAMPO.anio}
           </label>
@@ -175,7 +177,7 @@ export function FormularioLibro({
           />
           <MensajeErrorCampo id="campo-anio-error" mensaje={validacion.mensajes.anio} />
         </div>
-        <div className="flex flex-1 flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <label htmlFor="campo-orden" className="text-sm font-medium">
             {ETIQUETAS_CAMPO.orden}
           </label>
