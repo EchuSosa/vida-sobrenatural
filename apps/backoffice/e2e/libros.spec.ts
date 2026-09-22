@@ -1,6 +1,13 @@
-import { test, expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 import sharp from 'sharp';
-import { loguearseComoAdminE2E, loguearseComoPastorE2E, loguearseComoOtroRolE2E, auditar } from './helpers';
+import {
+  test,
+  expect,
+  loguearseComoAdminE2E,
+  loguearseComoPastorE2E,
+  loguearseComoOtroRolE2E,
+  auditar,
+} from './helpers';
 
 /**
  * Historia 4 (specs/003-contenido-institucional, D64/D119/FR-020): mismo
@@ -162,7 +169,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
     // lado del cliente, así que este caso sí llega al servidor.
     test('una imagen más chica que el mínimo de portada se rechaza al subirla, no se agranda en silencio (H-94)', async ({
       page,
+      permitirErrorDeConsola,
     }) => {
+      // H-100: este test sube a propósito una imagen más chica que el
+      // mínimo para probar el rechazo del servidor — el 400 es lo
+      // esperado, no un defecto; Chromium lo loguea solo como error de
+      // consola.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 400/);
       const titulo = `e2e-libro-portada-chica-${colorScheme}-${Date.now()}`;
       await loguearseComoAdminE2E(page);
       await page.goto('/libros');

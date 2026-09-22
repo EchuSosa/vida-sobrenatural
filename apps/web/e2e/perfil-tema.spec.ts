@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loguearseComoTest, registrarPersonaDeTest } from './helpers';
+import { test, expect, loguearseComoTest, registrarPersonaDeTest } from './helpers';
 
 /**
  * Historia 5 (specs/002-base-transversal): elegir un tema en Perfil persiste

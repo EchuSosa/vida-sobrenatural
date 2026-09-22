@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { auditar } from './helpers';
+import { test, expect, auditar } from './helpers';
 
 /**
  * Historia 5 (specs/003-contenido-institucional, D122): la marca real

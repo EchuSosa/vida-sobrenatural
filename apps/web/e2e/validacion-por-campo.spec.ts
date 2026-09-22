@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loguearseComoTest, registrarPersonaDeTest, auditar } from './helpers';
+import { test, expect, loguearseComoTest, registrarPersonaDeTest, auditar } from './helpers';
 
 /**
  * H-50 (revisión manual ronda 4): errores de validación por campo — mensaje
@@ -20,7 +19,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('Perfil: un teléfono demasiado corto muestra el error debajo del campo y un resumen arriba con foco', async ({
       page,
+      permitirErrorDeConsola,
     }) => {
+      // H-100: este test manda un teléfono inválido a propósito para
+      // probar la validación del servidor — el 400 es lo esperado, no un
+      // defecto; Chromium lo loguea solo como error de consola.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 400/);
       const email = `e2e-h50-perfil-${colorScheme}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
       await page.goto('/perfil');
@@ -84,7 +88,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('Registro: un teléfono inválido cargado en el paso 2 se señala aunque el error llegue recién al enviar en el paso 4', async ({
       page,
+      permitirErrorDeConsola,
     }) => {
+      // H-100: este test manda un teléfono inválido a propósito (ver el
+      // comentario de más abajo sobre "12") para probar la validación del
+      // servidor en el paso 4 — el 400 es lo esperado, no un defecto.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 400/);
       const email = `e2e-h50-registro-${colorScheme}-${Date.now()}@example.com`;
       await loguearseComoTest(page, email);
       await page.goto('/registro');

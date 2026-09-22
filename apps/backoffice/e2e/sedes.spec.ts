@@ -1,5 +1,12 @@
-import { test, expect, type Page, type Locator } from '@playwright/test';
-import { loguearseComoAdminE2E, asegurarUnaSolaSedeActiva, reactivarSedes, auditar } from './helpers';
+import { type Page, type Locator } from '@playwright/test';
+import {
+  test,
+  expect,
+  loguearseComoAdminE2E,
+  asegurarUnaSolaSedeActiva,
+  reactivarSedes,
+  auditar,
+} from './helpers';
 
 /**
  * H-30 (revisión manual ronda 2) / H-34 (ronda 3) / H-51+H-52+H-50 (ronda 4,
@@ -82,7 +89,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('crear una Sede con un teléfono inválido muestra el error debajo del campo y un resumen arriba (H-50)', async ({
       page,
+      permitirErrorDeConsola,
     }) => {
+      // H-100: este test manda un teléfono inválido a propósito para
+      // probar la validación del servidor — el 400 es lo esperado, no un
+      // defecto.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 400/);
       const nombreSede = `e2e-sede-h50-${colorScheme}-${Date.now()}`;
 
       await loguearseComoAdminE2E(page);
@@ -231,7 +243,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Sede desactivada.')).toBeVisible();
     });
 
-    test('reactivar rechaza si otra Sede activa ya tiene el mismo nombre', async ({ page }) => {
+    test('reactivar rechaza si otra Sede activa ya tiene el mismo nombre', async ({ page, permitirErrorDeConsola }) => {
+      // H-100: este test reactiva a propósito una Sede con un nombre
+      // duplicado para probar el rechazo del servidor — el 409 es lo
+      // esperado, no un defecto.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 409/);
       const nombreSede = `e2e-sede-dup-${colorScheme}-${Date.now()}`;
 
       await loguearseComoAdminE2E(page);
@@ -286,7 +302,14 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Sede desactivada.')).toBeVisible();
     });
 
-    test('desactivar la única Sede activa la bloquea con un diálogo informativo', async ({ page }) => {
+    test('desactivar la única Sede activa la bloquea con un diálogo informativo', async ({
+      page,
+      permitirErrorDeConsola,
+    }) => {
+      // H-100: este test desactiva a propósito la única Sede activa para
+      // probar el bloqueo del servidor (SEDE_UNICA_ACTIVA) — el 409 es lo
+      // esperado, no un defecto.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 409/);
       await loguearseComoAdminE2E(page);
       // H-40: el test prepara su propio estado (exactamente una Sede activa)
       // en vez de saltearse según lo que ya tenga la base.

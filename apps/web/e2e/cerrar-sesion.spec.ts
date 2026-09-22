@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { registrarPersonaDeTest, auditar } from './helpers';
+import { test, expect, registrarPersonaDeTest, auditar } from './helpers';
 
 /**
  * H-11 (specs/002-base-transversal, revisión manual 2026-09-18): cerrar

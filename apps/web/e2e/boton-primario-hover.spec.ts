@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { auditar } from './helpers';
+import { test, expect, auditar } from './helpers';
 
 /**
  * H-56 (revisión manual, D118): el hover de un botón primario apareció

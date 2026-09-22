@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { registrarPersonaDeTest, auditar } from './helpers';
+import { test, expect, registrarPersonaDeTest, auditar } from './helpers';
 
 /**
  * H-37/H-38 (revisión manual ronda 3, docs/14-navegacion.md secciones 1 y 2):

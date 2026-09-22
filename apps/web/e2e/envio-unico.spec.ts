@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { registrarPersonaDeTest } from './helpers';
+import { test, expect, registrarPersonaDeTest } from './helpers';
 
 /**
  * H-57 (revisión manual, D118 la reveló en Sedes — varios toasts abiertos

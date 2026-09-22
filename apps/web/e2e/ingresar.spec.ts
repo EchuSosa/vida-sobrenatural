@@ -1,7 +1,6 @@
-import { test, expect } from '@playwright/test';
 import { mintApiToken } from '@vida-sobrenatural/shared-types/auth-server';
 import { leerEnvE2e } from '../../../scripts/e2e-base-datos.cjs';
-import { loguearseComoTest, registrarPersonaDeTest } from './helpers';
+import { test, expect, loguearseComoTest, registrarPersonaDeTest } from './helpers';
 
 /**
  * H-85 (reabre H-64): el único botón de ingreso de toda la web

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './helpers';
 
 /**
  * Historia 2, Acceptance Scenario 7 (specs/001-fase-bienvenida, actualización

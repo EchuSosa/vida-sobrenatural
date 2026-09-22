@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loguearseComoAdminE2E, auditar } from './helpers';
+import { test, expect, loguearseComoAdminE2E, auditar } from './helpers';
 
 /**
  * H-58 (revisión manual): el menú de usuario del backoffice era la única de

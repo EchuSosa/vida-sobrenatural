@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loguearseComoTest, auditar } from './helpers';
+import { test, expect, loguearseComoTest, auditar } from './helpers';
 
 /**
  * Único flujo E2E exigido por la Constitución (Principio VI): el registro

@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { auditar } from './helpers';
+import { test, expect, auditar } from './helpers';
 
 /**
  * Historia 1 (specs/002-base-transversal): navegación pública, traslado de
@@ -46,7 +45,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(resultados.violations).toEqual([]);
     });
 
-    test('las URLs viejas /bienvenida y /sede ya no existen (sin redirección)', async ({ page }) => {
+    test('las URLs viejas /bienvenida y /sede ya no existen (sin redirección)', async ({ page, permitirErrorDeConsola }) => {
+      // H-100: el 404 es lo que este test busca a propósito — Chromium lo
+      // loguea solo como error de consola, sin que sea un defecto nuestro.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 404/);
       const respuestaBienvenida = await page.goto('/bienvenida');
       expect(respuestaBienvenida?.status()).toBe(404);
 

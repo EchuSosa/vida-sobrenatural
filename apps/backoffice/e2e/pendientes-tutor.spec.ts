@@ -1,5 +1,11 @@
-import { test, expect } from '@playwright/test';
-import { loguearseComoAdminE2E, crearMenorPendienteTutor, crearPersonaActiva, auditar } from './helpers';
+import {
+  test,
+  expect,
+  loguearseComoAdminE2E,
+  crearMenorPendienteTutor,
+  crearPersonaActiva,
+  auditar,
+} from './helpers';
 
 /**
  * H-29 (revisión manual ronda 2) / H-34 (ronda 3 — la red de regresión que

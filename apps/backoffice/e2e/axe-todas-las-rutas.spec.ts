@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { auditar, loguearseComoAdminE2E } from './helpers';
+import { test, expect, auditar, loguearseComoAdminE2E } from './helpers';
 import { NAV_BACKOFFICE } from '../src/config/nav';
 
 /**

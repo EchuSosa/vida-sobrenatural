@@ -1,5 +1,11 @@
-import { test, expect } from '@playwright/test';
-import { loguearseComoAdminE2E, loguearseComoPastorE2E, loguearseComoOtroRolE2E, auditar } from './helpers';
+import {
+  test,
+  expect,
+  loguearseComoAdminE2E,
+  loguearseComoPastorE2E,
+  loguearseComoOtroRolE2E,
+  auditar,
+} from './helpers';
 
 /**
  * Historia 3 (specs/003-contenido-institucional, D64): alta de Palabra
@@ -48,7 +54,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('un campo obligatorio vacío o una URL de YouTube inválida muestran el error debajo del campo (FR-014)', async ({
       page,
+      permitirErrorDeConsola,
     }) => {
+      // H-100: este test manda una URL de YouTube inválida a propósito
+      // para probar la validación del servidor — el 400 es lo esperado,
+      // no un defecto.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 400/);
       await loguearseComoAdminE2E(page);
       await page.goto('/palabra-profetica');
       await page.waitForLoadState('networkidle');

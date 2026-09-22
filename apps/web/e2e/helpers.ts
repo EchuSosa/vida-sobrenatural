@@ -1,11 +1,19 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { test, expect } from '../../../scripts/e2e-fallas-en-consola';
 
 /**
  * Helpers compartidos por los e2e de registro/sesión — extraídos acá para
  * no triplicar el mismo flujo (actualización 2026-09-18, revisión manual
  * H-19/H-15/H-16/H-11).
+ *
+ * H-100/H-01: `test`/`expect` NO vienen de '@playwright/test' directo —
+ * vienen de scripts/e2e-fallas-en-consola.ts (reexportado acá), que hace
+ * fallar el test ante un console.error del navegador o una excepción sin
+ * atrapar. Cada spec de esta carpeta importa `test`/`expect` de este
+ * archivo, no de '@playwright/test'.
  */
+export { test, expect };
 
 export async function loguearseComoTest(
   page: Page,

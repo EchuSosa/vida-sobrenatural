@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { auditar, registrarPersonaDeTest } from './helpers';
+import { test, expect, auditar, registrarPersonaDeTest } from './helpers';
 import { RUTAS_PUBLICAS } from '../src/app/sitemap';
 import { NAV_APP } from '../src/config/nav-app';
 

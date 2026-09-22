@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './helpers';
 
 /**
  * H-15 (specs/001-fase-bienvenida, revisión manual 2026-09-18): /registro/listo
