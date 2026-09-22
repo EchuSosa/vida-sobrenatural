@@ -14,6 +14,7 @@ import {
   ApiError,
   erroresPorCampo,
   MIME_TIPOS_PORTADA_PERMITIDOS,
+  PORTADA_ASPECTO,
   PORTADA_TAMANO_MAXIMO_BYTES,
 } from '@vida-sobrenatural/shared-types';
 import {
@@ -270,8 +271,17 @@ function PortadaLibro({ libro, apiToken, esAdmin }: { libro: Libro; apiToken: st
 
   const etiquetaAccion = libro.portadaUrl ? 'Reemplazar portada' : 'Subir portada';
   const portadaVisual = libro.portadaUrl ? (
-    // eslint-disable-next-line @next/next/no-img-element -- portada servida por apps/api (D110)
-    <img src={libro.portadaUrl} alt={libro.portadaDescripcion ?? ''} className="aspect-[2/3] w-full rounded-md object-cover" />
+    // H-84/D125: misma caja de proporción fija + object-contain que la
+    // tarjeta pública (ediciones-vs/page.tsx) — sin esto, una foto casi
+    // cuadrada forzada con object-cover a una caja 2:3 volvía a quedar
+    // recortada acá aunque ImagenPortadaService ya no recorte (D110).
+    <div
+      className="flex w-full items-center justify-center overflow-hidden rounded-md bg-secondary"
+      style={{ aspectRatio: `${PORTADA_ASPECTO.ancho} / ${PORTADA_ASPECTO.alto}` }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- portada servida por apps/api (D110) */}
+      <img src={libro.portadaUrl} alt={libro.portadaDescripcion ?? ''} className="h-full w-full object-contain" />
+    </div>
   ) : (
     <PlaceholderImagen aspecto="portada" etiqueta={`Portada de ${libro.titulo}`} />
   );

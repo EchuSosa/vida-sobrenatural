@@ -1,3 +1,4 @@
+import { PORTADA_ASPECTO } from '@vida-sobrenatural/shared-types';
 import { Skeleton } from '@vida-sobrenatural/ui';
 
 export default function CargandoLibroDetalle() {
@@ -8,7 +9,7 @@ export default function CargandoLibroDetalle() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-7 w-24" />
       </div>
-      <Skeleton className="aspect-[2/3] w-40" />
+      <Skeleton className="w-40" style={{ aspectRatio: `${PORTADA_ASPECTO.ancho} / ${PORTADA_ASPECTO.alto}` }} />
       <div className="flex flex-col gap-4">
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-16 w-full" />

@@ -1,9 +1,17 @@
 import { cn } from 'cn';
+import { PORTADA_ASPECTO } from '@vida-sobrenatural/shared-types';
 import isotipoClaro from '../assets/marca/logo-oscuro-1024.png';
 import isotipoOscuro from '../assets/marca/logo-blanco-1024.png';
 
 export interface PlaceholderImagenProps {
-  /** 'equipo' = 3:2 (fotos de equipo/pastoral); 'portada' = 2:3 (portadas de libros) — D118, docs/17-paleta-y-tokens.md. */
+  /**
+   * 'equipo' = 3:2 (fotos de equipo/pastoral) — D118,
+   * docs/17-paleta-y-tokens.md. 'portada' = `PORTADA_ASPECTO`
+   * (shared-types) — hoy 1:1, temporal mientras el contenido son fotos
+   * provisorias de los libros (D125); nunca a mano acá, para que esta caja
+   * y la de la tarjeta real (ediciones-vs, libro-detalle-cliente) no
+   * puedan divergir.
+   */
   aspecto: 'equipo' | 'portada';
   /** Texto para aria-label siempre, y visible además cuando mostrarTexto es true (ej. Liderazgo). */
   etiqueta: string;
@@ -23,13 +31,15 @@ export interface PlaceholderImagenProps {
  * lo consumen (research.md Decisión 7 de 003-contenido-institucional).
  */
 export function PlaceholderImagen({ aspecto, etiqueta, mostrarTexto = false, className }: PlaceholderImagenProps) {
+  const aspectoCss = aspecto === 'equipo' ? '3 / 2' : `${PORTADA_ASPECTO.ancho} / ${PORTADA_ASPECTO.alto}`;
+
   return (
     <div
       role="img"
       aria-label={etiqueta}
+      style={{ aspectRatio: aspectoCss }}
       className={cn(
         'relative flex items-center justify-center overflow-hidden rounded-md bg-secondary p-2 text-center text-xs text-muted-foreground',
-        aspecto === 'equipo' ? 'aspect-[3/2]' : 'aspect-[2/3]',
         className,
       )}
     >

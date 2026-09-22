@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import type { useTranslations } from 'next-intl';
-import type { Libro } from '@vida-sobrenatural/shared-types';
+import { PORTADA_ASPECTO, type Libro } from '@vida-sobrenatural/shared-types';
 import { MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
 import { IconoFacebook, IconoInstagram } from '../../../../components/iconos-redes';
 
@@ -25,12 +25,23 @@ function LibroCard({ libro, t }: { libro: Libro; t: ReturnType<typeof useTransla
   return (
     <li className="flex flex-col gap-2">
       {libro.portadaUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- portada servida por apps/api (D110), sin loader de next/image configurado para ese host todavía
-        <img
-          src={libro.portadaUrl}
-          alt={libro.portadaDescripcion ?? t('portadaAlt', { titulo: libro.titulo })}
-          className="aspect-[2/3] w-full rounded-md object-cover"
-        />
+        // H-84/D125: caja de proporción fija (PORTADA_ASPECTO, hoy 1:1 —
+        // temporal) con la imagen centrada por `object-contain`, sobre el
+        // mismo fondo que el placeholder (`bg-secondary`) — para que el
+        // aire alrededor de una foto que no llena la caja se lea como
+        // diseñado, no como una imagen rota, y la grilla quede pareja
+        // (H-84) sea cual sea la proporción real de cada foto.
+        <div
+          className="flex w-full items-center justify-center overflow-hidden rounded-md bg-secondary"
+          style={{ aspectRatio: `${PORTADA_ASPECTO.ancho} / ${PORTADA_ASPECTO.alto}` }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- portada servida por apps/api (D110), sin loader de next/image configurado para ese host todavía */}
+          <img
+            src={libro.portadaUrl}
+            alt={libro.portadaDescripcion ?? t('portadaAlt', { titulo: libro.titulo })}
+            className="h-full w-full object-contain"
+          />
+        </div>
       ) : (
         <PlaceholderImagen aspecto="portada" etiqueta={t('portadaAlt', { titulo: libro.titulo })} />
       )}

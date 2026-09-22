@@ -1,3 +1,4 @@
+import { PORTADA_ASPECTO } from '@vida-sobrenatural/shared-types';
 import { Skeleton } from '@vida-sobrenatural/ui';
 
 // Estado de carga — Next.js lo muestra automáticamente mientras el Server
@@ -10,8 +11,7 @@ export default function CargandoEdicionesVs() {
       <Skeleton className="h-4 w-full" />
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          // eslint-disable-next-line react/no-array-index-key -- placeholders sin identidad propia
-          <Skeleton key={i} className="aspect-[2/3] w-full" />
+          <Skeleton key={i} className="w-full" style={{ aspectRatio: `${PORTADA_ASPECTO.ancho} / ${PORTADA_ASPECTO.alto}` }} />
         ))}
       </div>
     </div>

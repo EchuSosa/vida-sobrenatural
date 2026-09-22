@@ -17,14 +17,18 @@ async function crearImagenSintetica(ancho: number, alto: number): Promise<Buffer
 describe('ImagenPortadaService', () => {
   const service = new ImagenPortadaService();
 
-  it('una imagen ya vertical (2:3) queda con las mismas proporciones, sin deformar', async () => {
+  it('una imagen vertical (2:3) mantiene su proporción original, sin deformar', async () => {
+    // D125 (PORTADA_ASPECTO temporal 1:1): la caja de salida es cuadrada,
+    // así que una imagen 2:3 ya no la llena — se verifica la proporción
+    // (no deformada) y no en píxeles exactos, para no depender del redondeo.
     const original = await crearImagenSintetica(1000, 1500);
     const { buffer, mimeType } = await service.procesar(original);
     const metadata = await sharp(buffer).metadata();
 
     expect(mimeType).toBe('image/jpeg');
-    expect(metadata.width).toBe(800);
-    expect(metadata.height).toBe(1200);
+    expect(metadata.height).toBe(800);
+    expect(metadata.width).toBeLessThanOrEqual(800);
+    expect(metadata.width! / metadata.height!).toBeCloseTo(1000 / 1500, 2);
   });
 
   // D110 enmendada: las fotos provisorias de los libros no son archivos de
@@ -84,12 +88,12 @@ describe('ImagenPortadaService', () => {
   });
 
   it('H-94a: el lado corto exactamente en el mínimo (800) se acepta, sin agrandar', async () => {
-    const original = await crearImagenSintetica(800, 1200); // lado corto 800
+    const original = await crearImagenSintetica(800, 800); // lado corto 800
     const { buffer } = await service.procesar(original);
     const metadata = await sharp(buffer).metadata();
 
     expect(metadata.width).toBe(800);
-    expect(metadata.height).toBe(1200);
+    expect(metadata.height).toBe(800);
   });
 
   it('H-94a: el lado corto justo por debajo del mínimo (799) se rechaza', async () => {
