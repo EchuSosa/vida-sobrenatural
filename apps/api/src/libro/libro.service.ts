@@ -97,6 +97,43 @@ export class LibroService {
     return (_max.orden ?? -1) + 1;
   }
 
+  /**
+   * PATCH /libros/reordenar — H-89. Recibe el orden nuevo COMPLETO (todos
+   * los ids del conjunto, en su posición nueva) y lo persiste en una sola
+   * transacción: mover un libro del puesto 9 al 1 cambia nueve registros, y
+   * si se corta a la mitad (un PATCH por fila, o la conexión se cae a
+   * mitad de camino) queda un orden inconsistente — la única portada
+   * correcta es que todos los cambios entren juntos o ninguno entre.
+   *
+   * El conjunto que se reordena es el de Libros activos y no eliminados
+   * (D119) — el mismo que ve la web pública (FR-016) y el único que el
+   * backoffice deja reordenar (con un filtro/búsqueda o "Todos" aplicado,
+   * el frontend ni muestra la acción: reordenar un listado que no es la
+   * posición real no tendría sentido). Se valida acá también, no solo en
+   * el cliente: los `ids` recibidos tienen que ser EXACTAMENTE ese
+   * conjunto — ni de menos, ni de más, ni ajenos.
+   */
+  async reordenar(ids: string[]) {
+    const actuales = await this.prisma.libro.findMany({
+      where: { eliminadoEn: null, activo: true },
+      select: { id: true },
+    });
+    const idsActuales = new Set(actuales.map((libro) => libro.id));
+    const idsNuevos = new Set(ids);
+    const mismoConjunto = idsActuales.size === idsNuevos.size && [...idsActuales].every((id) => idsNuevos.has(id));
+    if (!mismoConjunto) {
+      throw new AppException(
+        'LIBRO_ORDEN_CONJUNTO_INVALIDO',
+        400,
+        'El orden nuevo no coincide con los Libros activos actuales — puede que la lista haya cambiado mientras reordenabas.',
+      );
+    }
+
+    await this.prisma.$transaction(ids.map((id, indice) => this.prisma.libro.update({ where: { id }, data: { orden: indice } })));
+
+    return this.findAll('activas', 0, ids.length);
+  }
+
   /** PATCH /libros/:id — FR-017, incluye el toggle de inactivar/reactivar vía activo:true/false. */
   async update(id: string, dto: ActualizarLibroDto) {
     const existente = await this.prisma.libro.findUnique({ where: { id } });

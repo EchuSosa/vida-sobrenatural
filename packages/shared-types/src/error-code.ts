@@ -45,6 +45,10 @@ export type ErrorCode =
   // más chico que el mínimo (800px) — agrandarla la deja borrosa, así que
   // se rechaza en vez de tolerarla.
   | 'PORTADA_DIMENSION_INSUFICIENTE'
+  // revision-manual H-89: PATCH /libros/reordenar recibió un conjunto de
+  // ids que no coincide exactamente con los Libros activos actuales (de
+  // menos, de más, o ajenos) — la lista cambió mientras se reordenaba.
+  | 'LIBRO_ORDEN_CONJUNTO_INVALIDO'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */

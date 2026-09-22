@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Skeleton } from './ui/skeleton';
@@ -115,6 +115,16 @@ export interface TablaDatosProps<T> {
   encabezadoAcciones?: string;
   orden?: OrdenTabla;
   onOrdenar?: (columnaId: string) => void;
+  /**
+   * H-89: reemplaza el `<tr>` de cada fila por este componente — la única
+   * forma de que un hook por fila (ej. `useSortable` de dnd-kit) se pueda
+   * llamar sin romper las Reglas de los Hooks (cada fila necesita ser su
+   * propia instancia de componente, no una función invocada dentro de un
+   * `.map()`). Tiene que renderizar un `<tr>` real (o reenviar `children`
+   * a uno) — TablaDatos no sabe nada de dnd-kit ni de cómo arrastrar,
+   * sigue siendo agnóstica; solo cede el nodo de la fila a quien la usa.
+   */
+  EnvoltorioFila?: ComponentType<{ fila: T; children: ReactNode }>;
 }
 
 export function TablaDatos<T>({
@@ -130,6 +140,7 @@ export function TablaDatos<T>({
   encabezadoAcciones = 'Acciones',
   orden,
   onOrdenar,
+  EnvoltorioFila,
 }: TablaDatosProps<T>) {
   // Los cuatro estados (Principio VIII) — error lo maneja quien usa la
   // tabla (no le llega ni `datos` ni `cargando` hasta resolverlo). La
@@ -188,16 +199,27 @@ export function TablaDatos<T>({
           </tr>
         </thead>
         <tbody>
-          {datos.map((fila) => (
-            <tr key={obtenerId(fila)} className="border-b border-border last:border-0 hover:bg-muted/50">
-              {columnas.map((columna) => (
-                <td key={columna.id} className={cn('px-3 py-3', columna.className)}>
-                  {columna.celda(fila)}
-                </td>
-              ))}
-              {acciones && <td className="px-3 py-3 text-right">{acciones(fila)}</td>}
-            </tr>
-          ))}
+          {datos.map((fila) => {
+            const celdas = (
+              <>
+                {columnas.map((columna) => (
+                  <td key={columna.id} className={cn('px-3 py-3', columna.className)}>
+                    {columna.celda(fila)}
+                  </td>
+                ))}
+                {acciones && <td className="px-3 py-3 text-right">{acciones(fila)}</td>}
+              </>
+            );
+            return EnvoltorioFila ? (
+              <EnvoltorioFila key={obtenerId(fila)} fila={fila}>
+                {celdas}
+              </EnvoltorioFila>
+            ) : (
+              <tr key={obtenerId(fila)} className="border-b border-border last:border-0 hover:bg-muted/50">
+                {celdas}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

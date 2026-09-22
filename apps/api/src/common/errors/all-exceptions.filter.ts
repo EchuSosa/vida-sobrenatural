@@ -50,6 +50,7 @@ const TITULOS: Record<ErrorCode, string> = {
   PORTADA_TAMANO_EXCEDIDO: 'Archivo demasiado pesado',
   LIBRO_TEXTO_ALTERNATIVO_REQUERIDO: 'Falta el texto alternativo',
   PORTADA_DIMENSION_INSUFICIENTE: 'Imagen demasiado chica',
+  LIBRO_ORDEN_CONJUNTO_INVALIDO: 'Conjunto de orden inválido',
   ERROR_INTERNO: 'Error interno',
 };
 

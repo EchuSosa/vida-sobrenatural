@@ -301,4 +301,67 @@ describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {
     expect(dimensionInsuficiente.status).toBe(400);
     expect(dimensionInsuficiente.body.code).toBe('PORTADA_DIMENSION_INSUFICIENTE');
   });
+
+  /**
+   * H-89: PATCH /libros/reordenar. El conjunto de Libros activos de esta
+   * base de test acumula fixtures de tests anteriores en este mismo
+   * archivo (sin limpiar entre tests, solo en `afterAll`) — en vez de
+   * asumir cuáles son, se lee el conjunto real primero (`activosAntes`) y
+   * se arma el pedido a partir de eso, así el test no depende del orden en
+   * que corren los demás.
+   */
+  it('persiste el orden nuevo completo, y rechaza un conjunto que no coincide (H-89)', async () => {
+    const token = await mintToken(['admin']);
+
+    const activosAntes = await request(app.getHttpServer()).get('/libros?estado=activas&take=200');
+    const idsPrevios: string[] = activosAntes.body.items.map((libro: { id: string }) => libro.id);
+
+    const nuevos: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      const crear = await request(app.getHttpServer())
+        .post('/libros')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ titulo: `Integ reordenar ${i} ${Date.now()}`, autor: 'Autor', anio: 2020 });
+      idsCreados.push(crear.body.id);
+      nuevos.push(crear.body.id);
+    }
+
+    // Los tres nuevos primero, en orden inverso al de creación — para que
+    // el resultado no pueda confundirse con "quedó como estaba".
+    const ordenPedido = [...nuevos].reverse().concat(idsPrevios);
+
+    const reordenado = await request(app.getHttpServer())
+      .patch('/libros/reordenar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ids: ordenPedido });
+    expect(reordenado.status).toBe(200);
+
+    const despues = await request(app.getHttpServer()).get('/libros?estado=activas&take=200');
+    const idsDespues: string[] = despues.body.items.map((libro: { id: string }) => libro.id);
+    expect(idsDespues).toEqual(ordenPedido);
+
+    // Sin faltantes: le saco uno.
+    const sinUno = await request(app.getHttpServer())
+      .patch('/libros/reordenar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ids: ordenPedido.slice(1) });
+    expect(sinUno.status).toBe(400);
+    expect(sinUno.body.code).toBe('LIBRO_ORDEN_CONJUNTO_INVALIDO');
+
+    // Sin ajenos: le sumo un id que no está en el conjunto activo.
+    const conAjeno = await request(app.getHttpServer())
+      .patch('/libros/reordenar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ids: [...ordenPedido, '11111111-1111-4111-8111-111111111111'] });
+    expect(conAjeno.status).toBe(400);
+    expect(conAjeno.body.code).toBe('LIBRO_ORDEN_CONJUNTO_INVALIDO');
+
+    // Sin repetidos: mismo tamaño, pero un id dos veces en vez de otro —
+    // rechazado por el DTO (ArrayUnique), antes de llegar al service.
+    const conRepetido = await request(app.getHttpServer())
+      .patch('/libros/reordenar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ids: [ordenPedido[0], ordenPedido[0], ...ordenPedido.slice(2)] });
+    expect(conRepetido.status).toBe(400);
+  });
 });

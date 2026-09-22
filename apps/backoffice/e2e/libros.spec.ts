@@ -288,3 +288,87 @@ test('ordenar por una columna se refleja en la URL y sobrevive a un F5', async (
   const aniosTrasReload = (await celdasAnio.allInnerTexts()).map(Number);
   expect(aniosTrasReload).toEqual(aniosOrdenados);
 });
+
+// H-89: mover un Libro de posición, y que se refleje en la web pública.
+// Independiente del tema, como el test de orden de arriba.
+test('mover un Libro con "Mover arriba" cambia su posición y se ve en la web pública', async ({ page, request }) => {
+  await loguearseComoAdminE2E(page);
+  await page.goto('/libros');
+  await page.waitForLoadState('networkidle');
+
+  const celdasTitulo = page.locator('table tbody tr td:nth-child(2)');
+  const ordenAntes = await celdasTitulo.allInnerTexts();
+  expect(ordenAntes.length).toBeGreaterThanOrEqual(2);
+
+  // El último sube un lugar — el botón "Mover arriba" de su fila.
+  const ultimoTitulo = ordenAntes[ordenAntes.length - 1];
+  const penultimoTitulo = ordenAntes[ordenAntes.length - 2];
+  await page.getByRole('button', { name: `Mover ${ultimoTitulo} hacia arriba` }).click();
+
+  // Región viva (H-89: "se anuncien a lectores de pantalla").
+  await expect(page.getByText(`${ultimoTitulo}, posición ${ordenAntes.length - 1} de ${ordenAntes.length}.`)).toBeAttached();
+
+  await expect(async () => {
+    const ordenDespues = await celdasTitulo.allInnerTexts();
+    expect(ordenDespues[ordenDespues.length - 1]).toBe(penultimoTitulo);
+    expect(ordenDespues[ordenDespues.length - 2]).toBe(ultimoTitulo);
+  }).toPass();
+
+  // Se ve en la web pública — misma base (vidasobrenatural_e2e), su propia
+  // instancia de apps/web (PLAYWRIGHT_WEB_BASE_URL, helpers.ts).
+  const webBaseUrl = process.env.PLAYWRIGHT_WEB_BASE_URL ?? 'http://localhost:3001';
+  const publica = await request.get(`${webBaseUrl}/nosotros/ediciones-vs`);
+  expect(publica.ok()).toBe(true);
+  const html = await publica.text();
+  // El penúltimo (ahora último) tiene que aparecer DESPUÉS del que subió,
+  // en el HTML servido — orden real, no solo presencia de los dos.
+  expect(html.indexOf(ultimoTitulo)).toBeGreaterThan(-1);
+  expect(html.indexOf(penultimoTitulo)).toBeGreaterThan(html.indexOf(ultimoTitulo));
+
+  // Restaura el orden original, para no dejar la base de e2e desordenada
+  // para otros tests de esta misma suite.
+  await page.getByRole('button', { name: `Mover ${ultimoTitulo} hacia abajo` }).click();
+  await expect(async () => {
+    const ordenRestaurado = await celdasTitulo.allInnerTexts();
+    expect(ordenRestaurado).toEqual(ordenAntes);
+  }).toPass();
+});
+
+// H-89 (paso 2): la alternativa por teclado de dnd-kit no es un detalle —
+// es el requisito que no era negociable. Espacio levanta el asa enfocada,
+// una flecha la mueve, Espacio la suelta (KeyboardSensor default).
+test('arrastrar un Libro con el asa, por teclado (Espacio, flecha, Espacio), cambia su posición', async ({ page }) => {
+  await loguearseComoAdminE2E(page);
+  await page.goto('/libros');
+  await page.waitForLoadState('networkidle');
+
+  const celdasTitulo = page.locator('table tbody tr td:nth-child(2)');
+  const ordenAntes = await celdasTitulo.allInnerTexts();
+  expect(ordenAntes.length).toBeGreaterThanOrEqual(2);
+
+  const primerTitulo = ordenAntes[0];
+  const segundoTitulo = ordenAntes[1];
+  const asa = page.getByRole('button', { name: `Arrastrar para reordenar ${primerTitulo}` });
+  await asa.focus();
+  // dnd-kit mide/renderiza entre cada tecla (un frame real) — sin una
+  // pausa entre teclas, la flecha puede llegar antes de que termine de
+  // registrar el "levantar" y se pierde (verificado: sin esto, el drop
+  // termina "sobre sí mismo", sin moverse).
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(150);
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(150);
+  await page.keyboard.press('Space');
+
+  await expect(async () => {
+    const ordenDespues = await celdasTitulo.allInnerTexts();
+    expect(ordenDespues[0]).toBe(segundoTitulo);
+    expect(ordenDespues[1]).toBe(primerTitulo);
+  }).toPass();
+
+  // Restaura el orden original.
+  await page.getByRole('button', { name: `Mover ${primerTitulo} hacia arriba` }).click();
+  await expect(async () => {
+    expect(await celdasTitulo.allInnerTexts()).toEqual(ordenAntes);
+  }).toPass();
+});

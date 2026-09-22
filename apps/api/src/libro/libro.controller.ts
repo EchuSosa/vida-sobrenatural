@@ -5,6 +5,7 @@ import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiQuery
 import { LibroService } from './libro.service.js';
 import { CrearLibroDto } from './dto/crear-libro.dto.js';
 import { ActualizarLibroDto } from './dto/actualizar-libro.dto.js';
+import { ReordenarLibrosDto } from './dto/reordenar-libros.dto.js';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
@@ -59,6 +60,21 @@ export class LibroController {
   @ApiCreatedResponse({ description: 'FR-015 — solo Admin. La portada entra por su propio endpoint (FR-021).' })
   create(@Body() dto: CrearLibroDto) {
     return this.libroService.create(dto);
+  }
+
+  /**
+   * H-89: antes de `:id` a propósito — si fuera después, Nest lo tomaría
+   * como un `PATCH /libros/:id` con id literal "reordenar".
+   */
+  @Patch('reordenar')
+  @UseGuards(JwtNextAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description: 'FR-016 — persiste el orden nuevo completo (todos los ids del conjunto activo) en una sola transacción.',
+  })
+  reordenar(@Body() dto: ReordenarLibrosDto) {
+    return this.libroService.reordenar(dto.ids);
   }
 
   @Patch(':id')
