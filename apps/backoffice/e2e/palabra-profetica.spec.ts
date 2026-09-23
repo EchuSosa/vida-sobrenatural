@@ -118,3 +118,135 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
   });
 }
+
+// H-90/D127 (revisión manual): TipTap reemplaza el <textarea> con botones
+// que insertaban sintaxis — WYSIWYG de verdad, pero D127 se mantiene: se
+// sigue guardando Markdown. Independiente del tema, como el resto de los
+// tests de esta app que no dependen de contraste/color.
+test('el editor de Texto: negrita, itálica, enlace, lista, h2 y h3 con la barra (nunca h1, nunca javascript:), y se ve bien en la web pública', async ({
+  page,
+}) => {
+  const titulo = `e2e-pp-editor-${Date.now()}`;
+  await loguearseComoAdminE2E(page);
+  await page.goto('/palabra-profetica');
+  await page.waitForLoadState('networkidle');
+
+  await page.getByLabel('Año').fill('2027');
+  await page.getByLabel('Título').fill(titulo);
+
+  const editor = page.getByLabel('Texto');
+  const botonNegrita = page.getByRole('button', { name: 'Negrita' });
+  const botonItalica = page.getByRole('button', { name: 'Itálica' });
+  const botonEnlace = page.getByRole('button', { name: 'Enlace' });
+  const botonLista = page.getByRole('button', { name: 'Lista' });
+  const botonH2 = page.getByRole('button', { name: 'Subtítulo (h2)' });
+  const botonH3 = page.getByRole('button', { name: 'Subtítulo (h3)' });
+
+  // H2, con el estado del botón reflejado en aria-pressed — no solo color
+  // (D81/H-55): el <button> es de verdad, con teclado alcanza igual. La
+  // marca se activa ANTES de escribir (clic, después tipear) en vez de
+  // "escribir y después seleccionar": es como se usa de verdad (Google
+  // Docs, Word), y evita que un clic en la barra deseleccione el texto
+  // recién tipeado antes de que el comando llegue a aplicarse.
+  await editor.click();
+  await expect(botonH2).toHaveAttribute('aria-pressed', 'false');
+  await botonH2.click();
+  await expect(botonH2).toHaveAttribute('aria-pressed', 'true');
+  // Sin tilde a propósito: el tipeo sintético de Playwright para un
+  // carácter acentuado no siempre deja el editor en el mismo estado que un
+  // teclado real, y acá lo que se prueba es el toggle de marcas por la
+  // barra, no la fidelidad de Unicode (que ya se ejercita en el resto de
+  // la app con textos reales en español).
+  await page.keyboard.type('Un subtitulo');
+  await page.keyboard.press('Enter');
+  await expect(botonH2).toHaveAttribute('aria-pressed', 'false'); // Enter sale del heading — párrafo nuevo.
+
+  // Negrita e itálica, cada una sobre su propio tramo de texto.
+  await botonNegrita.click();
+  await expect(botonNegrita).toHaveAttribute('aria-pressed', 'true');
+  await page.keyboard.type('negrita ');
+  await botonNegrita.click();
+  await expect(botonNegrita).toHaveAttribute('aria-pressed', 'false');
+  await botonItalica.click();
+  await page.keyboard.type('italica');
+  await botonItalica.click();
+  await expect(editor.locator('strong')).toHaveText('negrita ');
+  await expect(editor.locator('em')).toHaveText('italica');
+  await page.keyboard.press('Enter');
+
+  // H3
+  await botonH3.click();
+  await page.keyboard.type('Un subtitulo mas chico');
+  await page.keyboard.press('Enter');
+
+  // Lista
+  await botonLista.click();
+  await expect(botonLista).toHaveAttribute('aria-pressed', 'true');
+  await page.keyboard.type('primero');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('segundo');
+  await expect(editor.locator('li')).toHaveCount(2);
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter'); // Enter en un ítem vacío sale de la lista.
+
+  // Enlace, sin nada seleccionado — inserta el texto por defecto ya
+  // convertido en enlace (mismo comportamiento que el editor viejo, con un
+  // paso menos: ahí había que completar la URL a mano).
+  page.once('dialog', (dialog) => dialog.accept('https://ejemplo.org/mas-info'));
+  await botonEnlace.click();
+  await expect(editor.getByRole('link')).toHaveAttribute('href', 'https://ejemplo.org/mas-info');
+  // El cursor ya queda colapsado justo después del enlace (alternarEnlace,
+  // editor-markdown.tsx) — "End" es un no-op acá, se deja por claridad.
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
+
+  // H-90/D127: un enlace javascript: se rechaza en el ORIGEN — ni siquiera
+  // se puede crear desde el editor (además de que markdown-seguro.tsx lo
+  // rechazaría igual al renderizar, defensa en dos capas).
+  const enlacesAntes = await editor.getByRole('link').count();
+  page.once('dialog', (dialog) => dialog.accept('javascript:alert(1)'));
+  await botonEnlace.click();
+  await expect(editor.getByRole('link')).toHaveCount(enlacesAntes);
+
+  // H-90/D127: nunca h1 — ni con la barra (no hay botón) ni escribiendo el
+  // atajo de Markdown a mano.
+  await expect(page.getByRole('button', { name: /^Título \(h1\)$/ })).toHaveCount(0);
+  await page.keyboard.type('# Esto no debería ser un h1');
+  await expect(editor.locator('h1')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Crear' }).click();
+  await expect(page.getByText('Palabra Profética creada.')).toBeVisible();
+
+  const fila = page.getByRole('row', { name: new RegExp(titulo) });
+  await fila.getByRole('button', { name: 'Marcar vigente' }).click();
+  await expect(page.getByText(`"${titulo}" marcada vigente.`)).toBeVisible();
+
+  // El round-trip completo — Markdown guardado, releído y renderizado por
+  // markdown-seguro.tsx (sin tocar) en la página pública — confirma que
+  // TipTap serializa Markdown de verdad, no HTML ni el JSON de ProseMirror.
+  const webBaseUrl = process.env.PLAYWRIGHT_WEB_BASE_URL ?? 'http://localhost:3001';
+  await page.goto(`${webBaseUrl}/nosotros/palabra-profetica`);
+  await page.waitForLoadState('networkidle');
+
+  await expect(page.getByRole('heading', { level: 2, name: 'Un subtitulo' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Un subtitulo mas chico' })).toBeVisible();
+  await expect(page.locator('strong', { hasText: 'negrita' })).toBeVisible();
+  await expect(page.locator('em', { hasText: 'italica' })).toBeVisible();
+  // `.filter({ hasText })`, no `getByRole(..., { name })`: "listitem" no es
+  // un rol que compute nombre accesible a partir de su contenido (a
+  // diferencia de heading/link/button) — el `name` de `getByRole` quedaba
+  // vacío pese a que el texto estaba ahí (confirmado con
+  // `getByRole('listitem').allTextContents()` mostrando "primero" mientras
+  // la misma consulta con `{ name: 'primero' }` no encontraba nada).
+  await expect(page.getByRole('listitem').filter({ hasText: 'primero' })).toBeVisible();
+  await expect(page.getByRole('listitem').filter({ hasText: 'segundo' })).toBeVisible();
+  const enlacePublico = page.getByRole('link', { name: 'texto del enlace' });
+  await expect(enlacePublico).toHaveAttribute('href', 'https://ejemplo.org/mas-info');
+  await expect(enlacePublico).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(page.getByText('# Esto no debería ser un h1')).toBeVisible(); // texto plano, no un h1.
+  await expect(page.locator('h1')).toHaveCount(1); // el <h1> de la página misma — ninguno viene del texto guardado.
+  await expect(page.locator('a[href^="javascript:"]')).toHaveCount(0);
+
+  const resultados = await auditar(page);
+  expect(resultados.violations).toEqual([]);
+});

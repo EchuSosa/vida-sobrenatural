@@ -54,7 +54,6 @@ const ETIQUETAS_EDITOR_MARKDOWN: EtiquetasEditorMarkdown = {
   lista: 'Lista',
   h2: 'Subtítulo (h2)',
   h3: 'Subtítulo (h3)',
-  vistaPrevia: 'Vista previa',
   textoPorDefectoEnlace: 'texto del enlace',
   urlPorDefectoEnlace: 'https://',
 };
@@ -172,15 +171,20 @@ export function FormularioPalabraProfetica({
         <MensajeErrorCampo id="campo-titulo-error" mensaje={validacion.mensajes.titulo} />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="campo-texto" className="text-sm font-medium">
+        {/* id además de htmlFor: un <div contenteditable role="textbox">
+            (EditorMarkdown) no es un elemento "labelable" del HTML — el
+            `for` solo lo asocia visualmente/por convención con el resto de
+            los campos; el nombre accesible real lo arma `aria-labelledby`
+            (EditorMarkdown, ver el comentario ahí). */}
+        <label id="etiqueta-campo-texto" htmlFor="campo-texto" className="text-sm font-medium">
           {ETIQUETAS_CAMPO.texto}
         </label>
-        {/* H-90/D127: Markdown, con vista previa a través del MISMO
-            renderizador restringido (MarkdownSeguro) que usa la página
-            pública — nunca un WYSIWYG que emita HTML. */}
+        {/* H-90/D127 (revisión manual): editor TipTap — WYSIWYG, guarda
+            Markdown (nunca HTML ni el JSON de ProseMirror). La página
+            pública sigue renderizando con MarkdownSeguro, sin cambios. */}
         <EditorMarkdown
           id="campo-texto"
-          required
+          ariaLabelledby="etiqueta-campo-texto"
           ariaInvalid={Boolean(validacion.mensajes.texto)}
           ariaDescribedby={validacion.mensajes.texto ? 'campo-texto-error' : undefined}
           value={valores.texto}
