@@ -32,6 +32,7 @@ export {
   type OrdenManualControlesProps,
 } from './components/controles-tabla';
 export { Paginacion, type PaginacionProps } from './components/paginacion';
+export { HeroConFoto, type HeroConFotoProps } from './components/hero-con-foto';
 export { Button, buttonVariants } from './components/ui/button';
 export { ButtonLink, type ButtonLinkProps } from './components/ui/button-link';
 export { Input } from './components/ui/input';

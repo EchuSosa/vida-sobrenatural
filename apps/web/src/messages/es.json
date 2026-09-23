@@ -36,7 +36,23 @@
     "temaOscuro": "Oscuro",
     "cerrarSesion": "Cerrar sesión"
   },
+  "inicio": {
+    "tarjetaPrimerosPasosTitulo": "Primeros pasos",
+    "tarjetaPrimerosPasosDescripcion": "Qué es la Bienvenida y cómo sigue el proceso de integración en Vida Sobrenatural.",
+    "tarjetaPrimerosPasosAlt": "Equipo de bienvenida frente al cartel \"Estás en casa\"",
+    "tarjetaNosotrosTitulo": "Nosotros",
+    "tarjetaNosotrosDescripcion": "Quiénes somos, en qué creemos y nuestro liderazgo.",
+    "tarjetaNosotrosAlt": "Pareja mayor entre la congregación",
+    "tarjetaEventosTitulo": "Eventos",
+    "tarjetaEventosDescripcion": "Próximos eventos de Vida Sobrenatural.",
+    "tarjetaEventosAlt": "Jóvenes con las manos levantadas en un culto",
+    "tarjetaVisitanosTitulo": "Visitanos",
+    "tarjetaVisitanosDescripcion": "Dirección, horarios y contacto de Vida Sobrenatural.",
+    "tarjetaVisitanosAlt": "Congregación con manos levantadas frente al escenario",
+    "heroAlt": "Congregación de Vida Sobrenatural durante un culto, vista desde atrás"
+  },
   "primerosPasos": {
+    "cabeceraAlt": "Voluntarias del equipo de bienvenida sonriendo",
     "titulo": "Bienvenido/a a Vida Sobrenatural",
     "fraseTexto": "Siempre que lo llamamos, Dios nos responde. Él nos infunde ánimo y renueva nuestras fuerzas.",
     "fraseAutor": "Juan Pablo Sosa",
@@ -58,6 +74,7 @@
     "avisoYaRegistrado": "Ya estás registrada, no hace falta completarlo de nuevo."
   },
   "visitanos": {
+    "cabeceraAlt": "Congregación con manos levantadas frente al escenario",
     "titulo": "Visitanos",
     "sinSedes": "Todavía no cargamos la información de la Sede. Volvé a intentarlo más tarde.",
     "errorCargaTitulo": "No pudimos cargar la información de tu Sede",

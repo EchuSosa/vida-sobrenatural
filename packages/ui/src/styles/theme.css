@@ -61,6 +61,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-velo-heroe: var(--velo-heroe);
+  --color-velo-heroe-texto: var(--velo-heroe-texto);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -115,6 +117,19 @@
   --sidebar-accent-foreground: oklch(0.255 0.030 45);
   --sidebar-border: oklch(0.885 0.015 80);
   --sidebar-ring: oklch(0.520 0.120 42);
+  /**
+   * `HeroConFoto` (packages/ui/src/components/hero-con-foto.tsx): velo
+   * parejo sobre una foto para que el texto encima sea legible (docs/
+   * claude_20-fotos-web-publica.md, regla 2). A propósito, el MISMO valor
+   * en :root y en .dark (no se redefine ahí abajo) — es una foto real, no
+   * una superficie de UI: la persona necesita el mismo contraste sin
+   * importar el tema del sitio, y --primary-foreground (que sí cambia por
+   * tema) daría texto oscuro sobre foto en modo oscuro. El porqué del
+   * valor de opacidad (0.65, medido, no elegido a ojo) está en el
+   * comentario del componente.
+   */
+  --velo-heroe: oklch(0.255 0.030 45);
+  --velo-heroe-texto: oklch(1 0 0);
 }
 
 .dark {
