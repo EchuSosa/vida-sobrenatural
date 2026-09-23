@@ -4,6 +4,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import noRawTailwindColors from "../../eslint-rules/no-raw-tailwind-colors.mjs";
 import noLinkEnBotonBaseUi from "../../eslint-rules/no-link-en-boton-base-ui.mjs";
+import noDangerouslySetInnerHtml from "../../eslint-rules/no-dangerously-set-inner-html.mjs";
 
 /**
  * H-61 (revisión manual): packages/ui no tenía config propia — es donde
@@ -18,12 +19,15 @@ const eslintConfig = defineConfig([
   reactHooks.configs.flat["recommended-latest"],
   {
     plugins: {
-      local: { rules: { ...noRawTailwindColors.rules, ...noLinkEnBotonBaseUi.rules } },
+      local: {
+        rules: { ...noRawTailwindColors.rules, ...noLinkEnBotonBaseUi.rules, ...noDangerouslySetInnerHtml.rules },
+      },
       "@eslint-community/eslint-comments": eslintComments,
     },
     rules: {
       "local/no-raw-tailwind-colors": "error",
       "local/no-link-en-boton-base-ui": "error",
+      "local/no-dangerously-set-inner-html": "error",
       "@eslint-community/eslint-comments/require-description": "error",
     },
   },

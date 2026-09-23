@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "check:decisiones": "node scripts/chequear-decisiones-duplicadas.mjs"
+  },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "pg": "^8.23.0",

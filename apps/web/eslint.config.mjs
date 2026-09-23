@@ -5,6 +5,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import noRawTailwindColors from "../../eslint-rules/no-raw-tailwind-colors.mjs";
 import noLinkEnBotonBaseUi from "../../eslint-rules/no-link-en-boton-base-ui.mjs";
+import noDangerouslySetInnerHtml from "../../eslint-rules/no-dangerously-set-inner-html.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -19,12 +20,15 @@ const eslintConfig = defineConfig([
   // "vía de escape documentada" que pide el hallazgo, no una lista silenciosa.
   {
     plugins: {
-      local: { rules: { ...noRawTailwindColors.rules, ...noLinkEnBotonBaseUi.rules } },
+      local: {
+        rules: { ...noRawTailwindColors.rules, ...noLinkEnBotonBaseUi.rules, ...noDangerouslySetInnerHtml.rules },
+      },
       "@eslint-community/eslint-comments": eslintComments,
     },
     rules: {
       "local/no-raw-tailwind-colors": "error",
       "local/no-link-en-boton-base-ui": "error",
+      "local/no-dangerously-set-inner-html": "error",
       "@eslint-community/eslint-comments/require-description": "error",
     },
   },

@@ -17,6 +17,10 @@ export function ChurchJsonLd({ sede }: { sede: Sede }) {
   };
 
   return (
+    // H-117: patrón estándar de Next.js para JSON-LD (<script type="application/ld+json">), no
+    // HTML de usuario — distinto del campo que motivó la regla (Markdown de texto libre guardado
+    // sin sanitizar).
+    // eslint-disable-next-line local/no-dangerously-set-inner-html -- ver comentario arriba.
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(json) }} />
   );
 }
