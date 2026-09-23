@@ -8,6 +8,18 @@ export interface UseControlesTablaUrlOpciones {
   parametroBusqueda?: string;
   /** Cuánto esperar sin tipear antes de escribir la búsqueda en la URL. Default 300ms. */
   debounceMs?: number;
+  /**
+   * Claves adicionales que se borran cada vez que `setBusqueda` escribe en
+   * la URL — pensado para `['pagina']` en un listado paginado
+   * (H-101/D-paginado): cambiar la búsqueda tiene que volver a la primera
+   * página, si no, buscar algo con pocos resultados estando en la página 4
+   * muestra vacío en vez de lo que corresponde. Opcional y sin default
+   * (`[]`) a propósito: los listados que todavía filtran en memoria
+   * (Sedes, Libros, Palabra Profética, las dos papeleras) no paginan de
+   * verdad, así que no tienen nada que reiniciar acá — no cambia nada para
+   * ellos si no lo pasan.
+   */
+  clavesAReiniciarConBusqueda?: string[];
 }
 
 export interface ControlesTablaUrl {
@@ -55,6 +67,7 @@ export interface ControlesTablaUrl {
 export function useControlesTablaUrl(opciones: UseControlesTablaUrlOpciones = {}): ControlesTablaUrl {
   const parametroBusqueda = opciones.parametroBusqueda ?? 'q';
   const debounceMs = opciones.debounceMs ?? 300;
+  const clavesAReiniciarConBusqueda = opciones.clavesAReiniciarConBusqueda ?? [];
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -78,6 +91,20 @@ export function useControlesTablaUrl(opciones: UseControlesTablaUrlOpciones = {}
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
+  // Mismo criterio que `timeoutRef`: se lee solo dentro del callback del
+  // timeout de `setBusqueda`, nunca durante el render — así el array que
+  // pasa quien llama al hook (una referencia nueva en cada uno de SUS
+  // renders si lo escribe inline, como pendientes-tutor-cliente.tsx) no
+  // vuelve a crear `setBusqueda` en cada render sin necesidad. Actualizar
+  // el ref SÍ tiene que ir en un efecto (no durante el render, como
+  // `ultimoValorUrl` arriba): a diferencia de `ultimoValorUrl`, este valor
+  // no hace falta que esté al día para ESTE render — solo para cuando el
+  // timeout de `setBusqueda` dispare, más tarde.
+  const clavesAReiniciarRef = useRef(clavesAReiniciarConBusqueda);
+  useEffect(() => {
+    clavesAReiniciarRef.current = clavesAReiniciarConBusqueda;
+  });
+
   const actualizarParams = useCallback(
     (cambios: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams);
@@ -97,7 +124,9 @@ export function useControlesTablaUrl(opciones: UseControlesTablaUrlOpciones = {}
       setUltimoValorUrl(valor);
       clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
-        actualizarParams({ [parametroBusqueda]: valor });
+        const cambios: Record<string, string | null> = { [parametroBusqueda]: valor };
+        for (const clave of clavesAReiniciarRef.current) cambios[clave] = null;
+        actualizarParams(cambios);
       }, debounceMs);
     },
     [actualizarParams, parametroBusqueda, debounceMs],

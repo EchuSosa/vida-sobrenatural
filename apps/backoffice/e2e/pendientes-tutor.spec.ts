@@ -203,3 +203,81 @@ test('ordenar por Nombre se refleja en la URL, sobrevive a un F5, y se puede vol
     .click();
   await expect(page.getByText('Caso cerrado.')).toBeVisible();
 });
+
+// Cierre de H-101 (D-paginado, antes de la spec 004): reemplaza a "cargar
+// más" — no había ningún test de eso en este archivo (ni en el resto del
+// e2e de apps/backoffice) para reemplazar, así que este es nuevo, no una
+// migración de uno existente.
+//
+// TAMANIO_PAGINA (constantes.ts) es 20 — 25 casos de acá da una segunda
+// página real y parcial (20 + 5) SIN depender de cuántos otros pendientes
+// de tutor existan en la base (seed, u otros tests de este archivo): la
+// búsqueda por `terminoBusqueda` (único por corrida, en el NOMBRE de los
+// 25) acota el total a exactamente esos 25, filtrado en la API (H-88),
+// nunca en memoria.
+test('el paginado: ir a la página 2, la URL lo refleja, sobrevive a un F5, y buscar desde ahí vuelve a la página 1', async ({
+  page,
+}) => {
+  const sufijo = `${Date.now()}`;
+  const terminoBusqueda = `PagE2E${sufijo}`;
+  const CANTIDAD = 25;
+
+  await Promise.all(
+    Array.from({ length: CANTIDAD }, (_, i) =>
+      crearMenorPendienteTutor(`e2e-pag-${sufijo}-${i}@example.com`, terminoBusqueda, `Caso${i}`),
+    ),
+  );
+
+  await loguearseComoAdminE2E(page);
+  await page.goto('/pendientes-tutor');
+  await page.waitForLoadState('networkidle');
+
+  await page.getByLabel('Buscar por nombre, apellido o teléfono').fill(terminoBusqueda);
+  await page.waitForURL(new RegExp(`q=${encodeURIComponent(terminoBusqueda)}`));
+  await expect(page.getByText(`${CANTIDAD} resultados`)).toBeVisible();
+  await expect(page.getByText('Página 1 de 2')).toBeVisible();
+
+  // B2: un ENLACE de verdad — se puede ubicar por rol "link", no "button".
+  const enlacePagina2 = page.getByRole('link', { name: 'Ir a la página 2' });
+  await expect(enlacePagina2).toBeVisible();
+  await enlacePagina2.click();
+  await page.waitForURL(/pagina=2/);
+  await expect(page.getByText('Página 2 de 2')).toBeVisible();
+  // La quinta parte "de sobra" (25 - 20) es lo que tiene que verse acá — no
+  // CUÁLES 5 de los 25 (los 25 se crean en paralelo, así que el orden por
+  // fecha de creación entre ellos no es determinístico), solo que sean 5.
+  await expect(page.locator('table tbody tr')).toHaveCount(5);
+
+  // Un F5 en la página 2 sigue en la página 2 (C3/C5) — no vuelve a la 1.
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  expect(page.url()).toContain('pagina=2');
+  await expect(page.getByText('Página 2 de 2')).toBeVisible();
+
+  // Buscar desde la página 2 vuelve a la página 1 (C3) — acá, a una
+  // búsqueda más angosta (por apellido, "Caso2" matchea Caso2/20..24: 6 de
+  // los 25) que ya no tiene segunda página, así que si el reinicio no
+  // funcionara, esta búsqueda mostraría vacío en vez de esos 6 casos.
+  await page.getByLabel('Buscar por nombre, apellido o teléfono').fill('Caso2');
+  await page.waitForURL((url) => !url.search.includes('pagina=2'));
+  await expect(page.getByText('6 resultados')).toBeVisible();
+  await expect(page.getByText('Página', { exact: false })).toHaveCount(0); // una sola página — Paginacion no renderiza nada (totalPaginas<=1).
+  await expect(page.getByRole('row', { name: /Caso20/ })).toBeVisible();
+
+  // Limpieza — cierra los 25 casos vía la API (admin), no clic por clic:
+  // 25 confirmaciones en el sheet harían este test innecesariamente lento.
+  const sesion = await (await page.request.get('/api/auth/session')).json();
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
+  const listado = await (
+    await page.request.get(`${apiBaseUrl}/personas/pendientes-tutor?skip=0&take=${CANTIDAD}&buscar=${encodeURIComponent(terminoBusqueda)}`, {
+      headers: { Authorization: `Bearer ${sesion.apiToken}` },
+    })
+  ).json();
+  await Promise.all(
+    listado.items.map((persona: { id: string }) =>
+      page.request.patch(`${apiBaseUrl}/personas/${persona.id}/marcar-inactiva`, {
+        headers: { Authorization: `Bearer ${sesion.apiToken}` },
+      }),
+    ),
+  );
+});

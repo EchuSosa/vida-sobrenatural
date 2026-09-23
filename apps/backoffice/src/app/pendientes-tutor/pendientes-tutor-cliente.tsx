@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   type PersonaPendienteTutor,
@@ -23,6 +24,7 @@ import {
   ControlesTabla,
   Input,
   MensajeErrorCampo,
+  Paginacion,
   ResumenErrores,
   Sheet,
   SheetContent,
@@ -39,69 +41,61 @@ import {
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
-import { TAMANIO_PAGINA } from './constantes';
 
 /**
- * H-60 (revisión manual ronda 7): `paginaInicial` llega ya cargada desde
- * page.tsx (Server Component) — isla de cliente: "Cargar más" (la única
- * excepción real, ver comentario en page.tsx), Activar y Cerrar el caso.
- * Después de Activar/Cerrar el caso, `router.refresh()` vuelve a pedir la
- * primera página al servidor (mismo comportamiento que ya tenía esto antes
- * de H-60: cargarPendientes() también reiniciaba a la página 1) — el efecto
- * de abajo sincroniza el estado local con la nueva prop.
+ * Cierre de H-101 (D-paginado, antes de la spec 004): `pagina` llega ya
+ * cargada desde page.tsx (Server Component) — SIN isla de cliente que
+ * traiga datos. "Cargar más" (H-42/H-43, la excepción que esto tenía
+ * antes) desapareció junto con el estado que acumulaba: no hay más
+ * `apiFetch` en este archivo para pedir la lista, ni estado que
+ * sincronizar con una prop que cambia — la única prop que cambia
+ * (`pagina`, en cada request nueva) YA es la fuente de verdad completa de
+ * lo que hay que mostrar, sin acumular nada de una request a la anterior.
+ *
+ * Lo que sigue en cliente es solo lo que de verdad lo necesita:
+ * interactividad (Activar, Cerrar el caso, sus diálogos) y la
+ * sincronización de `busqueda`/orden/página con la URL. Después de
+ * Activar/Cerrar el caso, `router.refresh()` vuelve a pedir la MISMA URL
+ * al servidor (misma página, mismo orden, misma búsqueda) — si esa acción
+ * dejó la página actual vacía (era el último caso de la última página),
+ * page.tsx ya resuelve eso solo: el mecanismo de "`?pagina=` más allá de
+ * la última real" (ver su comentario) redirige a la nueva última página
+ * válida, sin código extra acá.
  */
 export function PendientesTutorCliente({
-  paginaInicial,
+  pagina,
+  paginaActual,
+  totalPaginas,
   apiToken,
   orden,
 }: {
-  paginaInicial: Pagina<PersonaPendienteTutor>;
+  pagina: Pagina<PersonaPendienteTutor>;
+  paginaActual: number;
+  totalPaginas: number;
   apiToken: string;
   orden: OrdenTabla;
 }) {
   const router = useRouter();
-  // "Ajustar estado cuando cambia una prop" (https://react.dev/learn/you-might-not-need-an-effect)
-  // — router.refresh() (tras Activar/Cerrar el caso) manda una `paginaInicial`
-  // nueva; se sincroniza acá, durante el render, en vez de en un efecto
-  // (que dispararía un render en cascada de más). Cambiar `orden` (H-88
-  // revisado) también manda una `paginaInicial` nueva — mismo mecanismo,
-  // sin código extra: la página se reinicia en vez de apilar sobre el
-  // cursor del orden anterior.
-  const [paginaVista, setPaginaVista] = useState(paginaInicial);
-  const [pendientes, setPendientes] = useState(paginaInicial.items);
-  const [total, setTotal] = useState(paginaInicial.total);
-  const [cargandoMas, setCargandoMas] = useState(false);
+  const pathname = usePathname();
+  const searchParamsNav = useSearchParams();
   const [personaParaActivar, setPersonaParaActivar] = useState<PersonaPendienteTutor | null>(null);
   const te = useTranslations('errors');
   const locale = useLocale();
-  const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
+  // C3: cambiar la búsqueda tiene que volver a la página 1 (si no, buscar
+  // algo con 3 resultados estando en la página 4 muestra vacío) — mismo
+  // motivo para `limpiar(['pagina'])` y para el `pagina: null` explícito en
+  // `onOrdenar`, más abajo.
+  const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl({
+    clavesAReiniciarConBusqueda: ['pagina'],
+  });
 
-  if (paginaInicial !== paginaVista) {
-    setPaginaVista(paginaInicial);
-    setPendientes(paginaInicial.items);
-    setTotal(paginaInicial.total);
-  }
-
-  async function cargarMas() {
-    setCargandoMas(true);
-    try {
-      // H-88: `buscar` viaja también en "cargar más" — sin esto, la
-      // segunda página en adelante ignoraría el filtro y volvería a traer
-      // casos que no coinciden con la búsqueda actual. Mismo motivo para
-      // `orden`/`dir` (H-88 revisado): sin ellos, la segunda página en
-      // adelante volvería al orden por defecto en vez de seguir el elegido.
-      const terminoActual = busqueda.trim();
-      const pagina = await apiFetch<Pagina<PersonaPendienteTutor>>(
-        `/personas/pendientes-tutor?skip=${pendientes.length}&take=${TAMANIO_PAGINA}&orden=${orden.columna}&dir=${orden.direccion}${terminoActual ? `&buscar=${encodeURIComponent(terminoActual)}` : ''}`,
-        { headers: { Authorization: `Bearer ${apiToken}` } },
-      );
-      setPendientes((actuales) => [...actuales, ...pagina.items]);
-      setTotal(pagina.total);
-    } catch (e) {
-      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos cargar más casos.');
-    } finally {
-      setCargandoMas(false);
-    }
+  /** B2: `Paginacion` (packages/ui) no puede armar la URL — se la pasamos desde acá, enlace de verdad, no un botón con onClick. */
+  function construirHrefPagina(numeroPagina: number): string {
+    const params = new URLSearchParams(searchParamsNav);
+    if (numeroPagina <= 1) params.delete('pagina');
+    else params.set('pagina', String(numeroPagina));
+    const query = params.toString();
+    return query ? `${pathname}?${query}` : pathname;
   }
 
   // H-57: el guard va también en el envío, no solo en el botón que lo
@@ -169,13 +163,13 @@ export function PendientesTutorCliente({
         etiquetaBusqueda="Buscar por nombre, apellido o teléfono"
         placeholderBusqueda="Ej. Juan Demo"
         hayAlgoAplicado={busqueda.trim() !== ''}
-        onLimpiar={() => limpiar()}
-        cantidadResultados={total}
+        onLimpiar={() => limpiar(['pagina'])}
+        cantidadResultados={pagina.total}
       />
 
       <TablaDatos
         columnas={columnas}
-        datos={pendientes}
+        datos={pagina.items}
         obtenerId={(persona) => persona.id}
         etiqueta="Casos pendientes de tutor"
         mensajeVacio={
@@ -186,6 +180,8 @@ export function PendientesTutorCliente({
           actualizarParams({
             orden: columnaId === 'createdAt' ? null : columnaId,
             dir: orden.columna === columnaId && orden.direccion === 'asc' ? 'desc' : null,
+            // C3: cambiar el orden también vuelve a la página 1 — mismo motivo que la búsqueda.
+            pagina: null,
           })
         }
         encabezadoAcciones="Acciones"
@@ -210,11 +206,7 @@ export function PendientesTutorCliente({
         )}
       />
 
-      {pendientes.length < total && (
-        <Button variant="outline" onClick={cargarMas} disabled={cargandoMas} className="self-start">
-          {cargandoMas ? 'Cargando…' : `Cargar más (${pendientes.length} de ${total})`}
-        </Button>
-      )}
+      <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} renderEnlace={(p) => <Link href={construirHrefPagina(p)} />} etiquetaNav="Paginado de casos pendientes de tutor" />
 
       <ActivarDialog
         key={personaParaActivar?.id ?? 'cerrado'}
