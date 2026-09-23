@@ -268,6 +268,31 @@ git add .
 git commit -m "Setup inicial: monorepo (web + backoffice + api) con Prisma + Docker Compose + Spec Kit"
 ```
 
+## 11. Si una corrida de e2e queda "colgada" y bloquea la siguiente
+
+H-110 (revisión manual): cortar una corrida de `pnpm --filter web run test:e2e` o
+`pnpm --filter backoffice run test:e2e` con Ctrl-C podía dejar vivos los servidores que Playwright
+había levantado (`next dev`, la API) — la corrida siguiente fallaba con algo como
+`http://localhost:3334 is already used`. La base de datos de e2e no corre riesgo en ese corte (la
+resetea `globalSetup` en cada corrida, D124) — es solo un proceso que quedó escuchando un puerto.
+
+Causa confirmada: los `webServer.command` de `apps/web/playwright.config.ts` y
+`apps/backoffice/playwright.config.ts` que encadenan dos comandos con `&&` corrían por debajo de un
+shell (`sh -c "A && B"`) que **no** se reemplazaba a sí mismo por `B` — quedaba como padre de `B`, y
+al cortar la corrida Playwright mataba ese shell sin que la señal bajara a su hijo. Ya arreglado
+(esos comandos usan `exec` antes del segundo paso, para que el shell se reemplace por el proceso
+real en vez de quedar de padre) — no debería volver a pasar. Si igual queda algo colgado (por
+ejemplo, cortando el proceso de otra forma que no sea Ctrl-C), la salida rápida:
+
+```bash
+lsof -ti:3334,3335,3011,3012,3013 | xargs kill
+```
+
+Esos son los puertos fijos de e2e — 3334/3011 (`apps/web`), 3335/3012/3013 (`apps/backoffice`, este
+último la instancia auxiliar de `apps/web` que usa para crear datos de prueba vía el flujo real de
+registro) — distintos de los de desarrollo (3001/3002/3333, D104), así que este comando nunca toca
+un servidor de desarrollo que esté corriendo.
+
 ---
 
 **Con esto, recién ahí:** abrir el repo con Claude Code y correr `/speckit.constitution` para escribir la Constitución del proyecto.

@@ -66,7 +66,16 @@ export default defineConfig({
       },
     },
     {
-      command: `pnpm --filter @vida-sobrenatural/shared-types run build && pnpm --filter web exec next dev -p ${PUERTO_APP}`,
+      // H-110: `exec` antes del segundo comando — sin él, `sh -c "A && B"`
+      // no puede exec-arse a sí mismo en B (tiene que quedar vivo para
+      // decidir si corre B después de A), así que B queda como HIJO de ese
+      // shell. Al cortar la corrida, Playwright mata el PID que arrancó
+      // (el shell) y `sh` no reenvía la señal a sus hijos — `next dev`
+      // sobrevive, huérfano, todavía escuchando el puerto (confirmado
+      // reproduciendo el corte a mano). Con `exec`, el shell se REEMPLAZA
+      // por B en vez de quedar como padre — matar ese PID mata al que
+      // realmente sirve.
+      command: `pnpm --filter @vida-sobrenatural/shared-types run build && exec pnpm --filter web exec next dev -p ${PUERTO_APP}`,
       port: PUERTO_APP,
       reuseExistingServer: false,
       timeout: 90_000,
