@@ -87,16 +87,21 @@ export class PersonaController {
   @Roles('admin', 'discipulador')
   @ApiBearerAuth()
   @ApiOkResponse({
-    description: 'Cola de casos pendiente_tutor, paginada — Historia 2b, Acceptance Scenario 3 (H-42). `buscar` filtra por nombre/apellido/teléfono (H-88).',
+    description:
+      'Cola de casos pendiente_tutor, paginada — Historia 2b, Acceptance Scenario 3 (H-42). `buscar` filtra por nombre/apellido/teléfono (H-88). `orden` (nombre|createdAt, default createdAt) y `dir` (asc|desc, default asc) ordenan en la base (H-88 revisado).',
   })
   findPendientesTutor(
     @Query('skip') skipParam?: string,
     @Query('take') takeParam?: string,
     @Query('buscar') buscar?: string,
+    @Query('orden') ordenParam?: string,
+    @Query('dir') dirParam?: string,
   ) {
     const skip = Math.max(0, Number(skipParam) || 0);
     const take = Math.min(100, Math.max(1, Number(takeParam) || PENDIENTES_TUTOR_TAKE_DEFAULT));
-    return this.personaService.findPendientesTutor(skip, take, buscar);
+    const orden: 'nombre' | 'createdAt' = ordenParam === 'nombre' ? 'nombre' : 'createdAt';
+    const dir: 'asc' | 'desc' = dirParam === 'desc' ? 'desc' : 'asc';
+    return this.personaService.findPendientesTutor(skip, take, buscar, orden, dir);
   }
 
   @Get('buscar')

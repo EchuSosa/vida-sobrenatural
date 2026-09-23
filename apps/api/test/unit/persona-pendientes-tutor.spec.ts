@@ -38,4 +38,26 @@ describe('PersonaService.findPendientesTutor (H-42)', () => {
     expect(whereFindMany).toEqual(whereCount);
     expect(whereFindMany).toEqual({ estado: 'pendiente_tutor', activo: true });
   });
+
+  // Revisión del criterio de H-88: orden/dirección viajan a la base, igual
+  // que buscar (no en memoria — esta cola pagina de verdad).
+  it('sin orden/dirección explícitos, ordena por createdAt asc (el default de siempre)', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const service = await crearServicio({ persona: { findMany, count } });
+
+    await service.findPendientesTutor(0, 20);
+
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ orderBy: { createdAt: 'asc' } }));
+  });
+
+  it('con orden="nombre" y dirección "desc", arma el orderBy correspondiente', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const service = await crearServicio({ persona: { findMany, count } });
+
+    await service.findPendientesTutor(0, 20, undefined, 'nombre', 'desc');
+
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ orderBy: { nombre: 'desc' } }));
+  });
 });

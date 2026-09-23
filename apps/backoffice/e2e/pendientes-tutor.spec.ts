@@ -134,3 +134,72 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
   });
 }
+
+// Revisión del criterio de H-88: orden por columna (nombre y fecha de
+// solicitud), resuelto en la API — no en memoria, esta cola pagina de
+// verdad. Independiente del tema, como el resto de los tests de orden de
+// esta app.
+test('ordenar por Nombre se refleja en la URL, sobrevive a un F5, y se puede volver a Solicitado', async ({ page }) => {
+  const sufijo = `orden-${Date.now()}`;
+  const emailZeta = `e2e-zeta-${sufijo}@example.com`;
+  const emailAlfa = `e2e-alfa-${sufijo}@example.com`;
+  // Orden de creación (y por lo tanto de fecha de solicitud) a propósito
+  // AL REVÉS del alfabético — si "Nombre" y "Solicitado" dieran el mismo
+  // resultado, el test no probaría nada.
+  await crearMenorPendienteTutor(emailZeta, 'Zeta', `Orden${sufijo}`);
+  await crearMenorPendienteTutor(emailAlfa, 'Alfa', `Orden${sufijo}`);
+
+  await loguearseComoAdminE2E(page);
+  await page.goto('/pendientes-tutor');
+  await page.waitForLoadState('networkidle');
+
+  const filaZeta = page.getByRole('row', { name: /Zeta/ });
+  const filaAlfa = page.getByRole('row', { name: /Alfa/ });
+
+  // El listado ya trae otros casos (seed, y los de tests anteriores de
+  // este archivo) — no importa la posición absoluta, solo el orden
+  // RELATIVO entre Zeta y Alfa, que es lo que cada columna decide distinto.
+  const nombres = page.locator('table tbody tr td:first-child');
+  async function posicionesRelativas() {
+    const textos = await nombres.allTextContents();
+    return { zeta: textos.findIndex((t) => t.includes('Zeta')), alfa: textos.findIndex((t) => t.includes('Alfa')) };
+  }
+
+  // Default (fecha de solicitud, sin nada en la URL): Zeta se creó primero.
+  await expect(filaZeta).toBeVisible();
+  await expect(filaAlfa).toBeVisible();
+  let posiciones = await posicionesRelativas();
+  expect(posiciones.zeta).toBeLessThan(posiciones.alfa);
+
+  await page.getByRole('button', { name: 'Nombre' }).click();
+  await page.waitForURL(/orden=nombre/);
+  posiciones = await posicionesRelativas();
+  expect(posiciones.alfa).toBeLessThan(posiciones.zeta);
+
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  expect(page.url()).toContain('orden=nombre');
+  posiciones = await posicionesRelativas();
+  expect(posiciones.alfa).toBeLessThan(posiciones.zeta);
+
+  // H-88 revisado: nombrar el estado y ofrecer la vuelta — acá alcanza con
+  // que el propio encabezado de la columna por defecto permita volver.
+  await page.getByRole('button', { name: 'Solicitado' }).click();
+  await page.waitForURL((url) => !url.search.includes('orden=nombre'));
+  posiciones = await posicionesRelativas();
+  expect(posiciones.zeta).toBeLessThan(posiciones.alfa);
+
+  // Limpieza — cierra los dos casos para no dejar filas de más.
+  await filaZeta.getByRole('button', { name: 'Cerrar el caso' }).click();
+  await page
+    .getByRole('alertdialog', { name: /¿Cerrar el caso de/ })
+    .getByRole('button', { name: 'Sí, cerrar el caso' })
+    .click();
+  await expect(page.getByText('Caso cerrado.')).toBeVisible();
+  await filaAlfa.getByRole('button', { name: 'Cerrar el caso' }).click();
+  await page
+    .getByRole('alertdialog', { name: /¿Cerrar el caso de/ })
+    .getByRole('button', { name: 'Sí, cerrar el caso' })
+    .click();
+  await expect(page.getByText('Caso cerrado.')).toBeVisible();
+});

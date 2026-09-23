@@ -153,6 +153,8 @@ export interface PersonaPendienteTutor {
   telefono: string;
   fechaNacimiento: string;
   sedeId: string;
+  /** Fecha de solicitud — createdAt de la Persona. Columna ordenable (H-88 revisado). */
+  createdAt: string;
 }
 
 /**

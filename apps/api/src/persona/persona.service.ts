@@ -41,6 +41,7 @@ const PENDIENTE_TUTOR_SELECT = {
   telefono: true,
   fechaNacimiento: true,
   sedeId: true,
+  createdAt: true,
 } as const;
 
 @Injectable()
@@ -214,8 +215,22 @@ export class PersonaService {
    * vería la página ya cargada. Mismo patrón `OR contains insensitive` que
    * `buscarPersonas` (H-29), acotado a los campos que esta pantalla
    * muestra (nombre/apellido/teléfono — no email, que acá no se ve).
+   *
+   * Revisión del criterio de H-88: esa vez se decidió dejar esta pantalla
+   * sin columnas ordenables porque "pagina de verdad" y "ordenar en
+   * cliente sería incorrecto acá" — lo primero es cierto, lo segundo no
+   * era la conclusión correcta. `orden`/`direccion` viajan igual que
+   * `buscar` — ordenar EN el servidor, no en memoria — por el mismo
+   * motivo: ordenar solo la página ya cargada daría un orden roto apenas
+   * hubiera una segunda página.
    */
-  async findPendientesTutor(skip: number, take: number, buscar?: string) {
+  async findPendientesTutor(
+    skip: number,
+    take: number,
+    buscar?: string,
+    orden: 'nombre' | 'createdAt' = 'createdAt',
+    direccion: 'asc' | 'desc' = 'asc',
+  ) {
     const termino = buscar?.trim();
     const where = {
       estado: EstadoPersona.pendiente_tutor,
@@ -234,7 +249,7 @@ export class PersonaService {
       this.prisma.persona.findMany({
         where,
         select: PENDIENTE_TUTOR_SELECT,
-        orderBy: { createdAt: 'asc' },
+        orderBy: { [orden]: direccion },
         skip,
         take,
       }),

@@ -146,7 +146,7 @@ export async function reactivarSedes(page: Page, ids: string[]) {
  * `APIRequestContext` propio, apuntado a `apps/web`, independiente de la
  * `page` del test (que navega `apps/backoffice`).
  */
-export async function crearMenorPendienteTutor(email: string) {
+export async function crearMenorPendienteTutor(email: string, nombre = 'E2E', apellido = 'Menor') {
   const ctx = await playwrightRequest.newContext({ baseURL: WEB_BASE_URL });
   try {
     const csrfResponse = await ctx.get('/api/auth/csrf');
@@ -163,8 +163,8 @@ export async function crearMenorPendienteTutor(email: string) {
     const response = await ctx.post(`${API_BASE_URL}/personas`, {
       headers: { Authorization: `Bearer ${session.apiToken}`, 'Content-Type': 'application/json' },
       data: {
-        apellido: 'Menor',
-        nombre: 'E2E',
+        apellido,
+        nombre,
         genero: 'femenino',
         fechaNacimiento: '2012-01-01',
         telefono: '+54 9 221 9000001',

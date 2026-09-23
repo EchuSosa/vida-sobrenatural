@@ -3,6 +3,8 @@ import { apiFetch, type Pagina, type PersonaPendienteTutor } from '@vida-sobrena
 import { PendientesTutorCliente } from './pendientes-tutor-cliente';
 import { TAMANIO_PAGINA } from './constantes';
 
+type ColumnaOrden = 'nombre' | 'createdAt';
+
 /**
  * H-29 (revisión manual, actualización 2026-09-20, D94/D102/D108): activar
  * y cerrar el caso (H-70) pasan del alert/prompt/confirm nativo del
@@ -21,20 +23,34 @@ import { TAMANIO_PAGINA } from './constantes';
  * `paginaInicial` nueva — PendientesTutorCliente ya sincronizaba su estado
  * con esa prop (para router.refresh() tras Activar/Cerrar el caso), así
  * que el mismo mecanismo reinicia la lista filtrada sin código nuevo ahí.
+ *
+ * Revisión del criterio de H-88: `orden`/`dir` viajan igual que `q`, por el
+ * mismo motivo — ordenar la página ya cargada (en memoria) daría un orden
+ * roto en cuanto hubiera una segunda página, así que el orden también lo
+ * resuelve la API. Default `createdAt` (el orden de siempre, "cola") si no
+ * hay nada explícito en la URL.
  */
 export default async function PendientesTutorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; orden?: string; dir?: string }>;
 }) {
   const session = await requerirSesion();
-  const { q } = await searchParams;
+  const { q, orden: ordenParam, dir } = await searchParams;
   const buscar = (q ?? '').trim();
+  const ordenColumna: ColumnaOrden = ordenParam === 'nombre' ? 'nombre' : 'createdAt';
+  const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
 
   const pagina = await apiFetch<Pagina<PersonaPendienteTutor>>(
-    `/personas/pendientes-tutor?skip=0&take=${TAMANIO_PAGINA}${buscar ? `&buscar=${encodeURIComponent(buscar)}` : ''}`,
+    `/personas/pendientes-tutor?skip=0&take=${TAMANIO_PAGINA}&orden=${ordenColumna}&dir=${ordenDireccion}${buscar ? `&buscar=${encodeURIComponent(buscar)}` : ''}`,
     { headers: { Authorization: `Bearer ${session.apiToken}` } },
   );
 
-  return <PendientesTutorCliente paginaInicial={pagina} apiToken={session.apiToken} />;
+  return (
+    <PendientesTutorCliente
+      paginaInicial={pagina}
+      apiToken={session.apiToken}
+      orden={{ columna: ordenColumna, direccion: ordenDireccion }}
+    />
+  );
 }

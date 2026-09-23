@@ -14,6 +14,7 @@ import {
   erroresPorCampo,
   mensajeDeCampo,
   formatearFechaCorta,
+  formatearFechaHora,
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
@@ -31,6 +32,7 @@ import {
   SheetFooter,
   TablaDatos,
   type ColumnaTabla,
+  type OrdenTabla,
   useEnvio,
   useValidacionCampos,
   type ValidacionCampo,
@@ -51,15 +53,20 @@ import { TAMANIO_PAGINA } from './constantes';
 export function PendientesTutorCliente({
   paginaInicial,
   apiToken,
+  orden,
 }: {
   paginaInicial: Pagina<PersonaPendienteTutor>;
   apiToken: string;
+  orden: OrdenTabla;
 }) {
   const router = useRouter();
   // "Ajustar estado cuando cambia una prop" (https://react.dev/learn/you-might-not-need-an-effect)
   // — router.refresh() (tras Activar/Cerrar el caso) manda una `paginaInicial`
   // nueva; se sincroniza acá, durante el render, en vez de en un efecto
-  // (que dispararía un render en cascada de más).
+  // (que dispararía un render en cascada de más). Cambiar `orden` (H-88
+  // revisado) también manda una `paginaInicial` nueva — mismo mecanismo,
+  // sin código extra: la página se reinicia en vez de apilar sobre el
+  // cursor del orden anterior.
   const [paginaVista, setPaginaVista] = useState(paginaInicial);
   const [pendientes, setPendientes] = useState(paginaInicial.items);
   const [total, setTotal] = useState(paginaInicial.total);
@@ -67,7 +74,7 @@ export function PendientesTutorCliente({
   const [personaParaActivar, setPersonaParaActivar] = useState<PersonaPendienteTutor | null>(null);
   const te = useTranslations('errors');
   const locale = useLocale();
-  const { busqueda, setBusqueda, limpiar } = useControlesTablaUrl();
+  const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
 
   if (paginaInicial !== paginaVista) {
     setPaginaVista(paginaInicial);
@@ -80,10 +87,12 @@ export function PendientesTutorCliente({
     try {
       // H-88: `buscar` viaja también en "cargar más" — sin esto, la
       // segunda página en adelante ignoraría el filtro y volvería a traer
-      // casos que no coinciden con la búsqueda actual.
+      // casos que no coinciden con la búsqueda actual. Mismo motivo para
+      // `orden`/`dir` (H-88 revisado): sin ellos, la segunda página en
+      // adelante volvería al orden por defecto en vez de seguir el elegido.
       const terminoActual = busqueda.trim();
       const pagina = await apiFetch<Pagina<PersonaPendienteTutor>>(
-        `/personas/pendientes-tutor?skip=${pendientes.length}&take=${TAMANIO_PAGINA}${terminoActual ? `&buscar=${encodeURIComponent(terminoActual)}` : ''}`,
+        `/personas/pendientes-tutor?skip=${pendientes.length}&take=${TAMANIO_PAGINA}&orden=${orden.columna}&dir=${orden.direccion}${terminoActual ? `&buscar=${encodeURIComponent(terminoActual)}` : ''}`,
         { headers: { Authorization: `Bearer ${apiToken}` } },
       );
       setPendientes((actuales) => [...actuales, ...pagina.items]);
@@ -110,17 +119,17 @@ export function PendientesTutorCliente({
     }
   });
 
-  // H-88: sin columnas ordenables a propósito, no por descuido — esto es
-  // una COLA (Historia 2b), su único orden útil es por fecha de solicitud,
-  // y la API ya la entrega así (`orderBy: {createdAt: 'asc'}`,
-  // persona.service.ts) — alfabetizarla la convertiría en una lista
-  // cualquiera. Además, la paginación por "cargar más" no trae todas las
-  // filas a la vez, así que ordenar del lado del cliente por otra columna
-  // sería incorrecto igual.
+  // Revisión del criterio de H-88: "ordenar en cliente sería incorrecto
+  // acá" (sigue siendo cierto — esto es una cola que pagina de verdad) NO
+  // significaba "no ordenar" — significaba que el orden tiene que
+  // resolverlo la API, igual que ya hace `buscar` (ver page.tsx). Nombre y
+  // fecha de solicitud (createdAt) son las dos columnas ordenables; el
+  // orden por defecto sigue siendo por fecha de solicitud, como siempre.
   const columnas: ColumnaTabla<PersonaPendienteTutor>[] = [
     {
       id: 'nombre',
       encabezado: 'Nombre',
+      ordenable: true,
       celda: (persona) => (
         <span className="font-medium">
           {persona.nombre} {persona.apellido}
@@ -136,6 +145,13 @@ export function PendientesTutorCliente({
           {persona.telefono} — Nació: {formatearFechaCorta(persona.fechaNacimiento, locale)}
         </span>
       ),
+    },
+    {
+      id: 'createdAt',
+      encabezado: 'Solicitado',
+      ordenable: true,
+      className: 'hidden sm:table-cell',
+      celda: (persona) => formatearFechaHora(persona.createdAt, locale),
     },
   ];
 
@@ -164,6 +180,13 @@ export function PendientesTutorCliente({
         etiqueta="Casos pendientes de tutor"
         mensajeVacio={
           busqueda.trim() ? `No encontramos casos que coincidan con "${busqueda.trim()}".` : 'No hay casos pendientes por ahora.'
+        }
+        orden={orden}
+        onOrdenar={(columnaId) =>
+          actualizarParams({
+            orden: columnaId === 'createdAt' ? null : columnaId,
+            dir: orden.columna === columnaId && orden.direccion === 'asc' ? 'desc' : null,
+          })
         }
         encabezadoAcciones="Acciones"
         acciones={(persona) => (
