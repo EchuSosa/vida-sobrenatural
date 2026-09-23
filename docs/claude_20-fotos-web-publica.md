@@ -73,6 +73,16 @@ Subpágina **Liderazgo**: `retratos/retrato-pastor-jp` (Juan Pablo Sosa) y `retr
 - `reserva/placa-institucional` — banner con logo y dirección, listo para **imagen Open Graph** por defecto (`opengraph-image`), no para el layout.
 - `reserva/collage-alabanza-mujeres` — collage, demasiado cargado.
 
+## Un archivo por foto, a propósito
+
+El material llegó con dos versiones de varias fotos (`nombre.webp` y `nombre-1x.webp`, más chica).
+**Las 17 versiones `-1x` se eliminaron** al mover las fotos a `src/assets/`: `next/image` arma el
+`srcset` solo a partir de un archivo, así que una versión chica hecha a mano no la sirve nadie —
+y si se importara esa, se estaría capando la calidad sin ganar nada.
+
+Queda escrito porque el día que lleguen los originales del fotógrafo pueden venir otra vez con
+variantes de tamaño: **no hay que sumarlas**. Un archivo por foto, el más grande disponible.
+
 ## Reglas
 
 1. Ninguna foto de conferencias o campañas (Mujeres de Impulso, Indestructibles) en la interfaz: son identidad de evento y van solo dentro de su Evento.
