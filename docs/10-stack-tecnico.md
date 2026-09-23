@@ -91,10 +91,10 @@ Los frontends necesitan saber dónde está la API — en el `.env.local` de cada
 
 ## Monitoreo: Sentry (D101)
 
-- SDK oficial para Next.js (`apps/web`, `apps/backoffice`) y para NestJS (`apps/api`), con source maps.
+- **Instalado, dormido** (H-112, revisión manual ronda 10): el SDK está en las tres apps (`@sentry/nextjs` en `apps/web`/`apps/backoffice`, `@sentry/nestjs` en `apps/api`) y corre en cada arranque, pero no manda nada a ningún lado — `Sentry.init({ dsn: process.env.SENTRY_DSN, ... })` no envía eventos si `dsn` es `undefined`, y ninguna de las tres apps define esa variable hoy. No es que falte instalarlo: falta activarlo.
 - `sendDefaultPii: false`, filtro `beforeSend` que elimina datos personales (emails, teléfonos, direcciones, cuerpos de formularios), sin grabación de sesiones. Usuario identificado solo por ID interno.
-- Desactivado en local; activo en staging/producción con etiqueta de entorno. Plan gratuito.
-- Variables de entorno: `SENTRY_DSN` (por app), `SENTRY_ENVIRONMENT`.
+- **Para activarlo** cuando exista hosting con Sentry configurado (D75): completar `SENTRY_DSN`/`SENTRY_ENVIRONMENT` en `apps/api/.env` y `NEXT_PUBLIC_SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_ENVIRONMENT` en `apps/web/.env.local` y `apps/backoffice/.env.local` (comentadas, opcionales, en los `.env*.example` de cada app). Ningún cambio de código hace falta.
+- Variables de entorno: `SENTRY_DSN`/`SENTRY_ENVIRONMENT` en `apps/api` (servidor); `NEXT_PUBLIC_SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_ENVIRONMENT` en `apps/web` y `apps/backoffice` (cliente — de ahí el prefijo `NEXT_PUBLIC_`, expuesto al navegador a propósito).
 
 ## Integraciones con redes sociales
 

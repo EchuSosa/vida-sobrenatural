@@ -15,6 +15,10 @@ Sentry.init({
   },
 });
 
+// H-112: el propio SDK lo pide ("ACTION REQUIRED...") para instrumentar
+// navegaciones — sin esto, el aviso se repite en cada corrida de e2e/dev.
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+
 function quitarDatosPersonales<T extends { request?: { data?: unknown } }>(event: T): T {
   if (event.request?.data && typeof event.request.data === 'object') {
     const data = { ...(event.request.data as Record<string, unknown>) };
