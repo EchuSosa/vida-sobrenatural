@@ -46,7 +46,11 @@ Las fotos **no se recortan de nuevo en CSS** salvo por diferencia mínima de pro
 | Palabra Profética | `cards/card-pastora-oracion` | Pastora orando con el micrófono por una mujer |
 | Ediciones VS | sin foto: se usa la primera portada de libro cargada, o el placeholder | — |
 
-Subpágina **Liderazgo**: `retratos/retrato-pastor-jp` (Juan Pablo Sosa) y `retratos/retrato-predicador-swoosh`. El resto del equipo pastoral sigue con placeholder 1:1 hasta tener retratos.
+Subpágina **Liderazgo**: solo `retratos/retrato-pastor-jp` (Juan Pablo Sosa), con alt *"Juan Pablo Sosa hablando con micrófono en el escenario, con el swoosh blanco de la marca de fondo"* — escrito mirando la foto, no deducido del nombre del archivo. El resto del equipo sigue con placeholder 1:1 hasta tener retratos.
+
+> **`retrato-predicador-swoosh` se sacó de esta página el 2026-09-23** y pasó a `reserva/predicador-invitado.webp`. **No es un pastor de Vida Sobrenatural**: es un pastor invitado que vino a dar una charla. Estuvo brevemente en la posición que nombra a Lorena Scerra y Ezequiel Rossini, y aunque su alt no afirmaba ninguna identidad, **la posición en la grilla la afirma igual** — presentar la cara de una persona real como parte del liderazgo de la iglesia es tergiversarla. No vuelve a la UI.
+
+> **Para la diseñadora:** las tarjetas de Liderazgo son **por pareja** (dos nombres cada una), pero las fotos disponibles son **individuales**. Hoy la primera tarjeta muestra a una persona y nombra a dos. O las fotos pasan a ser de la pareja, o las tarjetas pasan a ser por persona; hoy queda así a propósito, como mock.
 
 ### Primeros pasos
 | Bloque | Archivo | Alt |
@@ -72,6 +76,7 @@ Subpágina **Liderazgo**: `retratos/retrato-pastor-jp` (Juan Pablo Sosa) y `retr
 ### Reserva (no usar en la UI)
 - `reserva/placa-institucional` — banner con logo y dirección, listo para **imagen Open Graph** por defecto (`opengraph-image`), no para el layout.
 - `reserva/collage-alabanza-mujeres` — collage, demasiado cargado.
+- `reserva/predicador-invitado` — pastor invitado a una charla, **no** del equipo de la iglesia. Está acá para que no se use por error como retrato de liderazgo ni como imagen genérica de "alguien predicando": es una persona identificable y real, y cualquier uso en la UI insinúa una pertenencia que no existe.
 
 ## Un archivo por foto, a propósito
 
