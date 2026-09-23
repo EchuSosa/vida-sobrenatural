@@ -1,0 +1,19 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "NEXT_PUBLIC_API_BASE_URL",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "NEXT_PUBLIC_SENTRY_ENVIRONMENT",
+        "SENTRY_AUTH_TOKEN"
+      ]
+    },
+    "typecheck": {
+      "description": "Next.js genera LayoutProps/PageProps recién con un build propio — \"^build\" (dependencias) no alcanza, hace falta \"build\" (esta app). Verificado: tsc fallaba con \"Cannot find name 'LayoutProps'\" antes de un next build, y pasaba limpio después, sin tocar código.",
+      "dependsOn": ["^build", "build"]
+    }
+  }
+}
