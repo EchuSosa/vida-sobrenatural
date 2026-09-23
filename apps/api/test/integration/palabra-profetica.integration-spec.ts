@@ -164,22 +164,67 @@ describe('POST/PATCH /palabra-profetica (integración) — Historia 3', () => {
     idsCreados.push(response.body.id);
   });
 
-  it('Pastor recibe 403 al intentar crear', async () => {
+  // D129 (revisión manual): esto reemplaza un test que afirmaba lo
+  // contrario ("Pastor recibe 403 al intentar crear") — no es un defecto
+  // encontrado, es la decisión: Pastor administra la Palabra Profética
+  // igual que Admin. Cubre las tres escrituras contra la API directo (la
+  // pantalla no tiene UI de edición aparte del alta — solo POST y
+  // /marcar-vigente).
+  it('D129: Pastor puede crear, editar y marcar vigente — las tres, igual que Admin', async () => {
     const token = await mintToken(['pastor']);
-    const response = await request(app.getHttpServer())
+
+    const crear = await request(app.getHttpServer())
       .post('/palabra-profetica')
       .set('Authorization', `Bearer ${token}`)
-      .send({ anio: 2026, titulo: 'No debería crearse', texto: 'texto' });
-    expect(response.status).toBe(403);
+      .send({ anio: 2026, titulo: `Integ pastor ${Date.now()}`, texto: 'texto de pastor' });
+    expect(crear.status).toBe(201);
+    idsCreados.push(crear.body.id);
+
+    const editar = await request(app.getHttpServer())
+      .patch(`/palabra-profetica/${crear.body.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ texto: 'texto editado por el pastor' });
+    expect(editar.status).toBe(200);
+    expect(editar.body.texto).toBe('texto editado por el pastor');
+
+    const marcar = await request(app.getHttpServer())
+      .patch(`/palabra-profetica/${crear.body.id}/marcar-vigente`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(marcar.status).toBe(200);
+    expect(marcar.body.vigente).toBe(true);
   });
 
-  it('otro rol recibe 403 al intentar crear', async () => {
+  // D129: este es el caso que importa — ampliar un permiso (Pastor, arriba)
+  // es fácil de hacer de más; alguien sin admin ni pastor no debería poder
+  // ninguna de las tres escrituras.
+  it('D129: un rol sin admin ni pastor recibe 403 en las tres escrituras', async () => {
     const token = await mintToken(['discipulador']);
-    const response = await request(app.getHttpServer())
+
+    const existente = await prisma.palabraProfetica.create({
+      data: { anio: 2025, titulo: `Integ otro rol ${Date.now()}`, texto: 'texto' },
+    });
+    idsCreados.push(existente.id);
+
+    const crear = await request(app.getHttpServer())
       .post('/palabra-profetica')
       .set('Authorization', `Bearer ${token}`)
       .send({ anio: 2026, titulo: 'No debería crearse', texto: 'texto' });
-    expect(response.status).toBe(403);
+    expect(crear.status).toBe(403);
+
+    const editar = await request(app.getHttpServer())
+      .patch(`/palabra-profetica/${existente.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ texto: 'no debería guardarse' });
+    expect(editar.status).toBe(403);
+
+    const marcar = await request(app.getHttpServer())
+      .patch(`/palabra-profetica/${existente.id}/marcar-vigente`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(marcar.status).toBe(403);
+
+    const enBase = await prisma.palabraProfetica.findUnique({ where: { id: existente.id } });
+    expect(enBase?.texto).toBe('texto');
+    expect(enBase?.vigente).toBe(false);
   });
 
   // H-117/H-93: sin límite, cualquiera podía mandar megabytes en `texto`.

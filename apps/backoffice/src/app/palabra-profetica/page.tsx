@@ -12,8 +12,9 @@ function direccionDefaultDe(columna: ColumnaOrden): 'asc' | 'desc' {
 /**
  * Historia 3 (specs/003-contenido-institucional, D64): Server Component —
  * GET /palabra-profetica (historial completo, paginado) pasa al servidor.
- * Admin edita, Pastor lee (FR-028/FR-029) — la distinción vive en el
- * cliente (`esAdmin`), el guard real está en la API.
+ * D129 (revisión manual): Admin y Pastor administran los dos — la
+ * distinción vive en el cliente (`puedeAdministrarPalabraProfetica`), el
+ * guard real está en la API.
  *
  * H-88: orden en la URL. `createdAt` es la única columna con default
  * `desc` (la API ya ordena así, FR-013) — las demás arrancan `asc` cuando
@@ -62,14 +63,17 @@ export default async function PalabraProfeticaPage({
     return ordenDireccion === 'asc' ? cmp : -cmp;
   });
 
-  const esAdmin = rol.includes('admin');
+  // D129: Admin y Pastor administran los dos — nombrado por lo que
+  // significa (puede crear/editar/marcar vigente esta sección), no por el
+  // rol, para que el nombre siga siendo cierto si algún día se suma otro.
+  const puedeAdministrarPalabraProfetica = rol.includes('admin') || rol.includes('pastor');
 
   return (
     <PalabraProfeticaCliente
       historial={historial}
       orden={{ columna: ordenColumna, direccion: ordenDireccion }}
       apiToken={session.apiToken}
-      esAdmin={esAdmin}
+      puedeAdministrarPalabraProfetica={puedeAdministrarPalabraProfetica}
     />
   );
 }

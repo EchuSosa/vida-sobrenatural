@@ -30,21 +30,21 @@ function direccionDefaultDe(columna: string): 'asc' | 'desc' {
 /**
  * Historia 3 (D64): `historial` llega ya cargado y ordenado desde page.tsx
  * (Server Component). Isla de cliente: el formulario de alta, el botón
- * "Marcar vigente" de cada fila, y el orden que navega (H-88). Pastor
- * (`esAdmin: false`) ve todo, sin ningún control habilitado — el formulario
- * queda `inert` (FormularioPalabraProfetica) y la columna de acciones no se
- * renderiza.
+ * "Marcar vigente" de cada fila, y el orden que navega (H-88). D129
+ * (revisión manual): Admin y Pastor administran los dos
+ * (`puedeAdministrarPalabraProfetica`) — cualquier otro rol ni siquiera
+ * llega a esta pantalla (page.tsx).
  */
 export function PalabraProfeticaCliente({
   historial,
   orden,
   apiToken,
-  esAdmin,
+  puedeAdministrarPalabraProfetica,
 }: {
   historial: PalabraProfetica[];
   orden: OrdenTabla;
   apiToken: string;
-  esAdmin: boolean;
+  puedeAdministrarPalabraProfetica: boolean;
 }) {
   const router = useRouter();
   const locale = useLocale();
@@ -135,7 +135,14 @@ export function PalabraProfeticaCliente({
       <h1 className="text-2xl font-semibold">Palabra Profética</h1>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-xl font-medium">{esAdmin ? 'Cargar una nueva' : 'Alta (solo Admin)'}</h2>
+        <h2 className="text-xl font-medium">
+          {/* D129: Admin y Pastor administran los dos — hoy nadie que
+              llegue a esta pantalla ve la rama de solo lectura (page.tsx ya
+              bloquea cualquier otro rol antes de renderizar esto), pero el
+              texto sigue siendo correcto si algún día se suma un rol
+              nuevo con acceso de lectura. */}
+          {puedeAdministrarPalabraProfetica ? 'Cargar una nueva' : 'Alta (sin permiso para cargar)'}
+        </h2>
         <FormularioPalabraProfetica
           valoresIniciales={VALORES_PALABRA_PROFETICA_VACIOS}
           onGuardar={crear}
@@ -144,7 +151,7 @@ export function PalabraProfeticaCliente({
           textoEnviando="Creando…"
           error={errorAlta}
           erroresCampo={erroresCampoAlta}
-          soloLectura={!esAdmin}
+          soloLectura={!puedeAdministrarPalabraProfetica}
         />
       </section>
 
@@ -172,7 +179,7 @@ export function PalabraProfeticaCliente({
           orden={orden}
           onOrdenar={onOrdenar}
           acciones={
-            esAdmin
+            puedeAdministrarPalabraProfetica
               ? (p) =>
                   p.vigente ? null : (
                     <Button

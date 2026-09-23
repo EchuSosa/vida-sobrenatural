@@ -8,11 +8,12 @@ import {
 } from './helpers';
 
 /**
- * Historia 3 (specs/003-contenido-institucional, D64): alta de Palabra
+ * Historia 3 (specs/003-contenido-institucional): alta de Palabra
  * Profética, marcar vigente desmarca la anterior sola (FR-012, SC-006),
- * validación por campo (FR-014), Pastor solo lectura (FR-029), otro rol
- * bloqueado (FR-030). Corre en modo claro y oscuro (Constitución Principio
- * VII).
+ * validación por campo (FR-014), otro rol bloqueado (FR-030). D64 (Pastor
+ * solo lectura por defecto) queda reemplazado para esta pantalla por D129
+ * (revisión manual): Pastor administra igual que Admin. Corre en modo
+ * claro y oscuro (Constitución Principio VII).
  */
 
 for (const colorScheme of ['light', 'dark'] as const) {
@@ -88,19 +89,37 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(errorYoutube).toHaveCount(0);
     });
 
-    test('Pastor ve el historial pero no puede editar (D64)', async ({ page }) => {
+    // D129 (revisión manual): reemplaza un test que afirmaba lo contrario
+    // ("Pastor ve el historial pero no puede editar") — no es un defecto
+    // encontrado, es la decisión: Pastor administra la Palabra Profética
+    // igual que Admin (crear y marcar vigente desde la pantalla; la
+    // edición parcial vía API está cubierta en el integration spec, esta
+    // pantalla no tiene una UI de edición aparte del alta).
+    test('D129: Pastor puede crear una Palabra Profética y marcarla vigente, igual que Admin', async ({ page }) => {
+      const titulo = `e2e-pp-pastor-${colorScheme}-${Date.now()}`;
+
       await loguearseComoPastorE2E(page);
       await page.goto('/palabra-profetica');
       await page.waitForLoadState('networkidle');
 
       await expect(page.getByRole('heading', { name: 'Palabra Profética' })).toBeVisible();
-      // El formulario está deshabilitado — sin botón "Crear" habilitado.
-      await expect(page.getByRole('button', { name: 'Crear' })).toHaveCount(0);
-      // Sin botones "Marcar vigente" en ninguna fila.
-      await expect(page.getByRole('button', { name: 'Marcar vigente' })).toHaveCount(0);
+      await page.getByLabel('Año').fill('2027');
+      await page.getByLabel('Título').fill(titulo);
+      await page.getByLabel('Texto').fill('Texto de prueba cargado por el Pastor.');
+      await page.getByRole('button', { name: 'Crear' }).click();
+      await expect(page.getByText('Palabra Profética creada.')).toBeVisible();
+
+      const fila = page.getByRole('row', { name: new RegExp(titulo) });
+      await expect(fila).toBeVisible();
+      await expect(fila.getByText('No vigente')).toBeVisible();
 
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
+
+      await fila.getByRole('button', { name: 'Marcar vigente' }).click();
+      await expect(page.getByText(`"${titulo}" marcada vigente.`)).toBeVisible();
+      const filaVigente = page.getByRole('row', { name: new RegExp(titulo) });
+      await expect(filaVigente.getByText('Vigente', { exact: true })).toBeVisible();
     });
 
     test('otro rol no encuentra la sección en el menú y el acceso directo por URL se lo niega (FR-030)', async ({

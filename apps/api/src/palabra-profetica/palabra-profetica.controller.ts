@@ -49,27 +49,34 @@ export class PalabraProfeticaController {
     return this.palabraProfeticaService.findHistorial(skip, take);
   }
 
+  /** D129: Admin y Pastor, las dos — la Palabra Profética la escribe un pastor, no debería depender de pedirle a quien administra el sistema que apriete guardar. */
   @Post()
   @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'pastor')
   @ApiBearerAuth()
-  @ApiCreatedResponse({ description: 'FR-010 — Historia 3, solo Admin. youtubeUrl es opcional (D121).' })
+  @ApiCreatedResponse({ description: 'FR-010 — Historia 3, Admin o Pastor (D129). youtubeUrl es opcional (D121).' })
   create(@Body() dto: CrearPalabraProfeticaDto) {
     return this.palabraProfeticaService.create(dto);
   }
 
+  /** D129: Admin y Pastor, las dos. */
   @Patch(':id')
   @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'pastor')
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'FR-010/FR-011 — edición parcial, no toca `vigente` (ver /marcar-vigente).' })
+  @ApiOkResponse({ description: 'FR-010/FR-011 — edición parcial (Admin o Pastor, D129), no toca `vigente` (ver /marcar-vigente).' })
   update(@Param('id') id: string, @Body() dto: ActualizarPalabraProfeticaDto) {
     return this.palabraProfeticaService.update(id, dto);
   }
 
+  /**
+   * D129: Admin y Pastor, las dos — se evaluó y se descartó dejar esto
+   * solo en Admin (separar "escribir" de "publicar"); acá el pastor que
+   * escribe la palabra del año es quien decide cuál rige.
+   */
   @Patch(':id/marcar-vigente')
   @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'pastor')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'FR-012, SC-006 — desmarca la anterior en la misma transacción, sin paso manual aparte.' })
   marcarVigente(@Param('id') id: string) {

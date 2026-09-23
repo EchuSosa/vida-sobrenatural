@@ -83,7 +83,7 @@ export function FormularioPalabraProfetica({
   textoEnviando: string;
   error?: string | null;
   erroresCampo?: ErrorDeCampo[] | null;
-  /** D64: Pastor ve el formulario pero no puede editar ni enviar. */
+  /** D129: hoy solo llega en `true` si algún rol futuro sin permiso de administrar llegara a ver esta pantalla — Admin y Pastor administran los dos. */
   soloLectura?: boolean;
 }) {
   const [valores, setValores] = useState(valoresIniciales);
