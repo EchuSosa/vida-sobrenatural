@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ButtonLink, HeroConFoto } from '@vida-sobrenatural/ui';
 import { AccionRegistro } from '../../../components/accion-registro';
 import { AvisoPorQuery } from '../../../components/aviso-por-query';
-import imgCabecera from '@/assets/images/cards/card-bienvenida-equipo.webp';
+import { FOTOS_HEROE } from '@/assets/images/fotos-heroe';
 
 // docs/claude_20-fotos-web-publica.md: la caja respeta la proporción de
 // `cards/` (4:3, R2) — ninguna imagen de esa carpeta se estira a 16:9.
@@ -30,10 +30,13 @@ export default function PrimerosPasosPage() {
           de los siete bloques que asigna el documento, esta es la ÚNICA
           que existe como sección propia hoy (R5 del lote de fotos — ver el
           reporte de la conversación para el resto). El <h1> ya existente
-          pasa a vivir sobre la foto, mismo componente/velo que Inicio. */}
+          pasa a vivir sobre la foto, mismo componente/velo que Inicio.
+          H-123: la foto sale de FOTOS_HEROE (@/assets/images/
+          fotos-heroe.ts), no de un import directo — ver el comentario de
+          ese archivo. */}
       <HeroConFoto
         className="aspect-[4/3]"
-        foto={<Image src={imgCabecera} alt={t('cabeceraAlt')} fill sizes={SIZES_CABECERA} priority className="object-cover" />}
+        foto={<Image src={FOTOS_HEROE.primerosPasos} alt={t('cabeceraAlt')} fill sizes={SIZES_CABECERA} priority className="object-cover" />}
       >
         <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
       </HeroConFoto>

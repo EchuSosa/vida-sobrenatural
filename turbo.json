@@ -63,6 +63,17 @@
     "//#check:app-de-test-sin-configurar": {
       "description": "H-121: mismo criterio que //#check:decisiones y //#check:imports-prohibidos — guardia del paquete raíz, cache:false a propósito.",
       "cache": false
+    },
+    "//#check:contraste-velo": {
+      "description": "H-123: a diferencia de las otras guardias de arriba, ESTA sí se cachea — decodificar varios WebP con sharp no es gratis, y las entradas son obvias y completas: el registro de fotos, las carpetas de origen (por si el archivo que declara el registro cambió de contenido sin cambiar de nombre — la regla 4 de docs/claude_20-fotos-web-publica.md ya avisa que eso va a pasar cuando lleguen los originales del fotógrafo), el archivo de tokens de theme.css, y el script mismo.",
+      "cache": true,
+      "inputs": [
+        "scripts/chequear-contraste-velo.mjs",
+        "apps/web/src/assets/images/fotos-heroe.ts",
+        "apps/web/src/assets/images/hero/**",
+        "apps/web/src/assets/images/cards/**",
+        "packages/ui/src/styles/theme.css"
+      ]
     }
   }
 }

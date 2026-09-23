@@ -4,7 +4,7 @@ import type { useTranslations } from 'next-intl';
 import type { Sede } from '@vida-sobrenatural/shared-types';
 import { HeroConFoto } from '@vida-sobrenatural/ui';
 import { ChurchJsonLd } from '../../../components/church-json-ld';
-import imgCabecera from '@/assets/images/cards/card-culto-manos.webp';
+import { FOTOS_HEROE } from '@/assets/images/fotos-heroe';
 
 // docs/claude_20-fotos-web-publica.md: la caja respeta la proporción de
 // `cards/` (4:3, R2). Misma foto que la tarjeta Visitanos de Inicio —
@@ -60,10 +60,11 @@ export default async function VisitanosPage() {
           Familias/niños), esta es la ÚNICA que existe como sección propia
           hoy (R5 del lote de fotos — ver el reporte de la conversación
           para el resto). Mismo componente/velo que Inicio y Primeros
-          pasos. */}
+          pasos. H-123: la foto sale de FOTOS_HEROE (@/assets/images/
+          fotos-heroe.ts), no de un import directo. */}
       <HeroConFoto
         className="aspect-[4/3]"
-        foto={<Image src={imgCabecera} alt={t('cabeceraAlt')} fill sizes={SIZES_CABECERA} priority className="object-cover" />}
+        foto={<Image src={FOTOS_HEROE.visitanos} alt={t('cabeceraAlt')} fill sizes={SIZES_CABECERA} priority className="object-cover" />}
       >
         <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
       </HeroConFoto>

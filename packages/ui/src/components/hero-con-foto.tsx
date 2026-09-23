@@ -3,7 +3,7 @@ import { cn } from '../lib/utils';
 
 /**
  * Lote de fotos reales (docs/claude_20-fotos-web-publica.md, regla 2 —
- * corregida en este mismo commit: apuntaba a un archivo y a un H-número
+ * corregida en el commit 97f662d: apuntaba a un archivo y a un H-número
  * que no existen). Tres páginas de este lote llevan una cabecera con texto
  * sobre foto (Inicio, Primeros pasos, Visitanos) — un componente
  * compartido acá en vez de escribir el velo tres veces: la próxima que lo
@@ -24,34 +24,23 @@ import { cn } from '../lib/utils';
  * EL VELO — provisorio de este lote, no una decisión de diseño cerrada.
  * La diseñadora lo va a revisar cuando lleguen las fotos definitivas.
  *
- * - Opacidad PAREJA sobre toda la foto, no un degradé: un degradé se ve
- *   mejor, pero el contraste real depende de en qué línea exacta cae el
- *   texto, y eso varía con el texto de cada página y con el recorte de
- *   cada foto — no se puede garantizar. Con un velo parejo, el peor caso
- *   es medible una sola vez y vale para cualquier posición del texto
- *   adentro del marco.
- * - Medido, no mirado (WCAG 2.2 AA: 4.5:1 texto normal, 3:1 texto grande
- *   — párrafo y `<h1>` respectivamente). Contra las tres fotos de
- *   `hero/` (aunque este lote solo use `hero-culto-congregacion`, D122 ya
- *   usa `hero-adoracion-mujeres` y el documento deja `hero-multitud-bn`
- *   como alternativa futura — si una opacidad sirve para la foto clara y
- *   arruina la oscura, ese es el número que importa, no el de la foto que
- *   tocó esta vez): parche de ~1/48 del ancho (una foto reducida a 48×27,
- *   el promedio de cada bloque en vez de un píxel suelto de brillo
- *   espurio), el más claro de cada una, velado con `--velo-heroe` en
- *   sRGB y comparado contra blanco (`--velo-heroe-texto`):
- *
- *   | Foto                      | Zona más clara (sRGB) | α=0.55  | α=0.65  |
- *   |---------------------------|------------------------|---------|---------|
- *   | hero-culto-congregacion   | 203,222,204            | 4.71:1  | 6.16:1  |
- *   | hero-multitud-bn          | 255,255,255 (blanco)   | 3.69:1  | 5.02:1  |
- *   | hero-adoracion-mujeres    | 222,219,220            | 4.59:1  | 6.06:1  |
- *
- *   `hero-multitud-bn` (blanco y negro, la más clara de las tres) es la
- *   que manda: a 0.55 no llega a 4.5:1 para texto normal (sí a las otras
- *   dos, y sí llegaría para texto GRANDE — 3.69 > 3 — si esta página
- *   nunca pusiera texto normal encima). Con **α=0.65** las tres pasan
- *   4.5:1 con margen — script y método en el propio commit, no a mano.
+ * - Opacidad PAREJA sobre toda la foto (`--velo-heroe-opacidad`, único
+ *   valor — ver theme.css), no un degradé: un degradé se ve mejor, pero
+ *   el contraste real depende de en qué línea exacta cae el texto, y eso
+ *   varía con el texto de cada página y con el recorte de cada foto — no
+ *   se puede garantizar. Con un velo parejo, el peor caso es medible una
+ *   sola vez y vale para cualquier posición del texto adentro del marco.
+ * - H-123: medido, no mirado — pero la medición YA NO vive acá ni en
+ *   ningún comentario. `pnpm run check:contraste-velo`
+ *   (scripts/chequear-contraste-velo.mjs, adentro de `pnpm check`) mide
+ *   de verdad, en cada corrida, el contraste contra CADA foto declarada
+ *   en `apps/web/src/assets/images/fotos-heroe.ts` — el registro único
+ *   del que las páginas toman su imagen de héroe. Si esto tuviera una
+ *   tabla de números fijos acá (como tenía antes de H-123), esos números
+ *   podrían divergir en silencio de la realidad el día que cambien las
+ *   fotos, el velo o el umbral — exactamente lo que encontró H-123, y el
+ *   mismo animal que `breaks: false` en H-122. El script es la única
+ *   fuente de verdad; si querés los números de hoy, correlo.
  */
 export interface HeroConFotoProps {
   foto: ReactNode;
@@ -74,7 +63,20 @@ export function HeroConFoto({ foto, children, className }: HeroConFotoProps) {
     <div className={cn('relative isolate flex flex-col justify-end gap-4 p-6 text-velo-heroe-texto sm:p-10', className)}>
       <div className="absolute inset-0 -z-10 overflow-hidden rounded-lg">
         {foto}
-        <div className="absolute inset-0 bg-velo-heroe/65" aria-hidden="true" />
+        {/*
+          H-123: la opacidad NO es un modificador de Tailwind (`/65`) a
+          propósito — un modificador así queda escrito en la clase, un
+          número aparte del token `--velo-heroe-opacidad`, y el día que
+          alguien cambie uno y no el otro, componente y
+          chequear-contraste-velo.mjs divergen en silencio. `color-mix`
+          en `style` lee el MISMO token que lee el script — un solo
+          lugar, sin importar por dónde se mire.
+        */}
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: 'color-mix(in oklab, var(--velo-heroe) var(--velo-heroe-opacidad), transparent)' }}
+          aria-hidden="true"
+        />
       </div>
       {children}
     </div>

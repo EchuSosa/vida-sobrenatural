@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import { ButtonLink, HeroConFoto } from '@vida-sobrenatural/ui';
 import { AvisoPorQuery } from '../../components/aviso-por-query';
-import imgHero from '@/assets/images/hero/hero-culto-congregacion.webp';
+import { FOTOS_HEROE } from '@/assets/images/fotos-heroe';
 import imgCardPrimerosPasos from '@/assets/images/cards/card-bienvenida-estas-en-casa.webp';
 import imgCardNosotros from '@/assets/images/cards/card-comunidad-pareja-mayor.webp';
 import imgCardEventos from '@/assets/images/cards/card-jovenes-manos.webp';
@@ -47,6 +47,11 @@ const SIZES_HERO = '(min-width: 768px) 768px, 100vw';
  * `hero/hero-multitud-bn` (el documento lo anota como "héroe alternativo
  * — A/B o modo oscuro") NO se usa acá: no hay A/B testing ni una decisión
  * de foto distinta por tema en esta app. Queda sin usar a propósito.
+ *
+ * H-123: la foto del héroe sale de `FOTOS_HEROE` (@/assets/images/
+ * fotos-heroe.ts), no de un import directo — es el registro único del que
+ * también lee scripts/chequear-contraste-velo.mjs para saber contra qué
+ * fotos medir el velo.
  *
  * `cards/card-culto-manos` (tarjeta Visitanos, acá) es la MISMA foto que
  * la cabecera de /visitanos — a propósito (la tarjeta anticipa la
@@ -97,7 +102,7 @@ export default function InicioPage() {
 
       <HeroConFoto
         className="aspect-video"
-        foto={<Image src={imgHero} alt={t('heroAlt')} fill sizes={SIZES_HERO} priority className="object-cover" />}
+        foto={<Image src={FOTOS_HEROE.inicio} alt={t('heroAlt')} fill sizes={SIZES_HERO} priority className="object-cover" />}
       >
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Vida Sobrenatural — La Plata</h1>
         <p className="text-lg leading-7">

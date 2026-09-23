@@ -68,9 +68,12 @@ consigo misma.
   --ring: oklch(0.520 0.120 42);
   /* Velo de HeroConFoto (docs/claude_20-fotos-web-publica.md) — mismo
      valor en :root y en .dark a propósito, no se redefine abajo: es una
-     foto real, no una superficie de UI que cambia con el tema. */
+     foto real, no una superficie de UI que cambia con el tema.
+     --velo-heroe-opacidad (H-123): única fuente del α — scripts/
+     chequear-contraste-velo.mjs lo lee de acá, no lo repite a mano. */
   --velo-heroe: oklch(0.255 0.030 45);
   --velo-heroe-texto: oklch(1 0 0);
+  --velo-heroe-opacidad: 65%;
 }
 
 .dark {
@@ -174,11 +177,15 @@ Mínimos de D81: 4.5:1 para texto, 3:1 para elementos de interfaz y foco.
 | Texto del acento (hover neutro) sobre acento | 12.92 | 12.01 |
 | Anillo de foco sobre fondo | 5.5 | 6.5 |
 
-**Velo de `HeroConFoto`** (`--velo-heroe`/`--velo-heroe-texto`, packages/ui/src/components/hero-con-foto.tsx):
-no entra en esta tabla — el fondo no es un token fijo, es una foto, así que el contraste depende de
-cuál. Medido contra las tres fotos de `hero/` (el detalle del método, en el comentario del
-componente): con α=0.65, entre 5.0:1 y 6.2:1 según la foto — todas por encima de 4.5:1 (texto
-normal). Provisorio de este lote — la diseñadora lo revisa cuando lleguen las fotos definitivas.
+**Velo de `HeroConFoto`** (`--velo-heroe`/`--velo-heroe-texto`/`--velo-heroe-opacidad`,
+packages/ui/src/components/hero-con-foto.tsx): no entra en esta tabla — el fondo no es un token fijo,
+es una foto, así que el contraste depende de cuál. H-123: la medición dejó de ser una tabla escrita a
+mano acá o en el componente — `pnpm run check:contraste-velo` (adentro de `pnpm check`,
+scripts/chequear-contraste-velo.mjs) la corre de verdad, contra las fotos declaradas en
+`apps/web/src/assets/images/fotos-heroe.ts`, leyendo `--velo-heroe`/`--velo-heroe-opacidad` de este
+mismo archivo de tema — no hay números fijos que puedan quedar desactualizados. Umbral: 4.5:1 (texto
+normal — el héroe siempre puede llevar un párrafo, no solo el `<h1>`). Provisorio de este lote — la
+diseñadora lo revisa cuando lleguen las fotos definitivas.
 
 ## Reglas de uso
 

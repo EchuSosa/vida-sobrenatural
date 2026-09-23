@@ -12,7 +12,8 @@
     "check:decisiones": "node scripts/chequear-decisiones-duplicadas.mjs",
     "check:imports-prohibidos": "node scripts/chequear-imports-prohibidos.mjs",
     "check:app-de-test-sin-configurar": "node scripts/chequear-app-de-test-sin-configurar.mjs",
-    "check": "turbo run lint typecheck test check:decisiones check:imports-prohibidos check:app-de-test-sin-configurar --continue"
+    "check:contraste-velo": "node scripts/chequear-contraste-velo.mjs",
+    "check": "turbo run lint typecheck test check:decisiones check:imports-prohibidos check:app-de-test-sin-configurar check:contraste-velo --continue"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

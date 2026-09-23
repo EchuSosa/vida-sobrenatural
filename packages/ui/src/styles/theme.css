@@ -124,12 +124,19 @@
    * en :root y en .dark (no se redefine ahí abajo) — es una foto real, no
    * una superficie de UI: la persona necesita el mismo contraste sin
    * importar el tema del sitio, y --primary-foreground (que sí cambia por
-   * tema) daría texto oscuro sobre foto en modo oscuro. El porqué del
-   * valor de opacidad (0.65, medido, no elegido a ojo) está en el
-   * comentario del componente.
+   * tema) daría texto oscuro sobre foto en modo oscuro.
+   *
+   * H-123: `--velo-heroe-opacidad` es la ÚNICA fuente del α del velo —
+   * antes vivía como modificador de Tailwind (`bg-velo-heroe/65`, un
+   * número aparte, no un token) y scripts/chequear-contraste-velo.mjs
+   * (que corre con `pnpm check`) mide el contraste real leyendo este
+   * archivo, así que script y componente no pueden divergir en silencio
+   * (mismo riesgo que `breaks: false`, H-122). Cambiar este valor sin
+   * correr ese script dejaría el contraste medido desactualizado.
    */
   --velo-heroe: oklch(0.255 0.030 45);
   --velo-heroe-texto: oklch(1 0 0);
+  --velo-heroe-opacidad: 65%;
 }
 
 .dark {
