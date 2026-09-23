@@ -19,6 +19,17 @@ const PUERTO_API = 3334;
 // directo) lee esto de process.env — sin esto, seguiría apuntando por
 // defecto a localhost:3333 (desarrollo).
 process.env.API_BASE_URL = `http://localhost:${PUERTO_API}`;
+// H-114 (revisión manual): globalSetup corre en ESTE proceso, antes de
+// levantar ningún webServer — el `API_PUBLIC_URL` que el webServer de la
+// API recibe más abajo (env propio, scopeado a ese proceso hijo) no le
+// llega al `prisma db seed` que dispara `prepararBaseE2e()`
+// (scripts/e2e-base-datos.cjs), porque ese seed corre en un execSync
+// aparte, ANTES de que exista ningún webServer. Sin esto, LocalStorageProvider
+// (instanciado a mano en prisma/seed.ts, sin pasar por Nest) usaba su
+// default (localhost:3333, la API de desarrollo) para las portadas
+// sembradas — URLs que no resuelven en esta corrida, connection refused
+// en cada página que las muestra (/nosotros/ediciones-vs acá).
+process.env.API_PUBLIC_URL = `http://localhost:${PUERTO_API}`;
 
 export default defineConfig({
   testDir: './e2e',

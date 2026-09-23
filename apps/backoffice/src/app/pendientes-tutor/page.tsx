@@ -1,6 +1,7 @@
 import { auth } from '../../auth';
 import { apiFetch, type Pagina, type PersonaPendienteTutor } from '@vida-sobrenatural/shared-types';
-import { PendientesTutorCliente, TAMANIO_PAGINA } from './pendientes-tutor-cliente';
+import { PendientesTutorCliente } from './pendientes-tutor-cliente';
+import { TAMANIO_PAGINA } from './constantes';
 import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
 
 /**

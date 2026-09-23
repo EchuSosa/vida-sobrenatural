@@ -37,9 +37,7 @@ import {
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
-
-// H-42 (revisión manual, revisión de código): GET /personas/pendientes-tutor pagina.
-export const TAMANIO_PAGINA = 20;
+import { TAMANIO_PAGINA } from './constantes';
 
 /**
  * H-60 (revisión manual ronda 7): `paginaInicial` llega ya cargada desde
