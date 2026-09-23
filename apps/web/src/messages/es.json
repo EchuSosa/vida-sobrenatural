@@ -73,14 +73,19 @@
     "tarjetaImagenAlt": "Imagen de {titulo}",
     "tarjetaQuienesSomosTitulo": "Quiénes somos",
     "tarjetaQuienesSomosDescripcion": "Nuestra identidad, nuestra historia y qué significa para nosotros pertenecer a una congregación local.",
+    "tarjetaQuienesSomosAlt": "Personas riendo durante un culto",
     "tarjetaVisionMisionValoresTitulo": "Visión, misión y valores",
     "tarjetaVisionMisionValoresDescripcion": "Hacia dónde vamos, cómo trabajamos con cada persona y el llamado que nos mueve.",
+    "tarjetaVisionMisionValoresAlt": "Mujeres adorando entre la congregación",
     "tarjetaLiderazgoTitulo": "Liderazgo",
     "tarjetaLiderazgoDescripcion": "Las parejas pastorales que guían Vida Sobrenatural.",
+    "tarjetaLiderazgoAlt": "Pareja pastoral hablando al micrófono",
     "tarjetaEnQueCreemosTitulo": "En qué creemos",
     "tarjetaEnQueCreemosDescripcion": "Nuestra declaración de fe.",
+    "tarjetaEnQueCreemosAlt": "Manos escribiendo en un cuaderno sobre una Biblia abierta",
     "tarjetaPalabraProfeticaTitulo": "Palabra Profética",
     "tarjetaPalabraProfeticaDescripcion": "La palabra vigente para la iglesia, con su video cuando lo hay.",
+    "tarjetaPalabraProfeticaAlt": "Pastora orando con el micrófono por una mujer",
     "tarjetaEdicionesVsTitulo": "Ediciones VS",
     "tarjetaEdicionesVsDescripcion": "El catálogo de libros de nuestra editorial."
   },
@@ -133,7 +138,9 @@
     "pastor2Rol": "Pastores",
     "pastor3": "Patricia Ryan y Ezequiel Parravicini",
     "pastor3Rol": "Pastores",
-    "fotoPendiente": "Foto pendiente — falta el material real de la iglesia."
+    "fotoPendiente": "Foto pendiente — falta el material real de la iglesia.",
+    "pastor1FotoAlt": "Juan Pablo Sosa",
+    "pastor2FotoAlt": "Predicador de Vida Sobrenatural, con el swoosh de la marca de fondo"
   },
   "enQueCreemos": {
     "titulo": "En qué creemos",

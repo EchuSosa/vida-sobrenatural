@@ -41,6 +41,16 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(page.getByRole('link', { name: nombre })).toBeVisible();
       }
 
+      // docs/claude_20-fotos-web-publica.md: cinco de las seis tarjetas ya
+      // tienen foto real; Ediciones VS sigue con el placeholder (no agrega
+      // una consulta a la API solo para la imagen de una tarjeta).
+      await expect(page.getByAltText('Personas riendo durante un culto')).toBeVisible();
+      await expect(page.getByAltText('Mujeres adorando entre la congregación')).toBeVisible();
+      await expect(page.getByAltText('Pareja pastoral hablando al micrófono')).toBeVisible();
+      await expect(page.getByAltText('Manos escribiendo en un cuaderno sobre una Biblia abierta')).toBeVisible();
+      await expect(page.getByAltText('Pastora orando con el micrófono por una mujer')).toBeVisible();
+      await expect(page.getByRole('img', { name: 'Imagen de Ediciones VS' })).toBeVisible();
+
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
 
@@ -104,10 +114,15 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Lorena Scerra y Ezequiel Rossini')).toBeVisible();
       await expect(page.getByText('Patricia Ryan y Ezequiel Parravicini')).toBeVisible();
 
-      // H-82: el placeholder de foto está por su role="img" y nombre
+      // docs/claude_20-fotos-web-publica.md: dos de las tres parejas ya
+      // tienen retrato real (alt provisorio — el documento no lo da, ver
+      // el comentario en liderazgo/page.tsx); pastor3 sigue con
+      // placeholder. H-82: el placeholder está por su role="img" y nombre
       // accesible — el texto "Foto pendiente" ya no se muestra a quien
       // visita la web.
-      await expect(page.getByRole('img', { name: /Foto pendiente/ })).toHaveCount(3);
+      await expect(page.getByAltText('Juan Pablo Sosa')).toBeVisible();
+      await expect(page.getByAltText('Predicador de Vida Sobrenatural, con el swoosh de la marca de fondo')).toBeVisible();
+      await expect(page.getByRole('img', { name: /Foto pendiente/ })).toHaveCount(1);
       await expect(page.getByText('Foto pendiente', { exact: false })).toHaveCount(0);
 
       const resultados = await auditar(page);

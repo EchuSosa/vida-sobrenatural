@@ -1,6 +1,9 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
+import imgPastorJp from '@/assets/images/retratos/retrato-pastor-jp.webp';
+import imgPredicadorSwoosh from '@/assets/images/retratos/retrato-predicador-swoosh.webp';
 
 export const metadata = {
   title: 'Liderazgo — Vida Sobrenatural',
@@ -11,14 +14,26 @@ export const metadata = {
  * D122/H-77: subpágina nueva de Nosotros — antes era la sección "Liderazgo"
  * de la página larga, sin cambios de contenido (FR-002). Fondo alternado
  * entre secciones con los tokens existentes (D118).
+ *
+ * docs/claude_20-fotos-web-publica.md: dos de las tres parejas ya tienen
+ * retrato real (1:1, carpeta `retratos/`); pastor3 sigue con placeholder.
+ * `pastor1FotoAlt`/`pastor2FotoAlt` (es.json) son **provisorios**: el
+ * documento no da el alt de estos dos archivos, y de `retrato-predicador-swoosh`
+ * ni siquiera dice a cuál de las tres parejas corresponde (solo que es "un
+ * predicador" con el swoosh de la marca) — se lo puso en la posición de
+ * pastor2 por orden, no por identidad confirmada. PENDIENTE: que Echu
+ * confirme (a) el texto alternativo real de los dos retratos y (b) si
+ * retrato-predicador-swoosh es efectivamente parte de la pareja de pastor2
+ * (Lorena Scerra y Ezequiel Rossini) o de otra — no inventar la escena ni la
+ * identidad mientras tanto (ya pasó una vez).
  */
 export default function LiderazgoPage() {
   const t = useTranslations('liderazgo');
   const tn = useTranslations('nosotros');
   const pastores = [
-    { nombre: t('pastor1'), rol: t('pastor1Rol') },
-    { nombre: t('pastor2'), rol: t('pastor2Rol') },
-    { nombre: t('pastor3'), rol: t('pastor3Rol') },
+    { nombre: t('pastor1'), rol: t('pastor1Rol'), imagen: imgPastorJp, alt: t('pastor1FotoAlt') },
+    { nombre: t('pastor2'), rol: t('pastor2Rol'), imagen: imgPredicadorSwoosh, alt: t('pastor2FotoAlt') },
+    { nombre: t('pastor3'), rol: t('pastor3Rol'), imagen: null, alt: null },
   ];
 
   return (
@@ -36,15 +51,23 @@ export default function LiderazgoPage() {
           <ul className="flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:gap-3">
             {pastores.map((pastor) => (
               <li key={pastor.nombre} className="flex flex-col gap-2 rounded-lg border border-border bg-background p-4">
-                {/* H-82: el texto "Foto pendiente" ya no se muestra — el
-                    hueco con la marca de agua alcanza para comunicarlo, y
-                    mostrarlo le cuenta a quien visita la web un problema
-                    interno nuestro. La etiqueta sigue como aria-label.
-                    aspecto="retrato" (1:1, no "equipo"): acá va a convivir
-                    con retratos reales ya cargados (docs/claude_20-fotos-web-publica.md,
-                    carpeta retratos/), y la caja se ajusta a la proporción
-                    de esa carpeta, no al revés. */}
-                <PlaceholderImagen aspecto="retrato" etiqueta={t('fotoPendiente')} />
+                {pastor.imagen && pastor.alt ? (
+                  <div className="relative aspect-square w-full overflow-hidden rounded-md">
+                    <Image
+                      src={pastor.imagen}
+                      alt={pastor.alt}
+                      fill
+                      sizes="(min-width: 640px) 33vw, 100vw"
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  // H-82: el texto "Foto pendiente" ya no se muestra — el
+                  // hueco con la marca de agua alcanza para comunicarlo, y
+                  // mostrarlo le cuenta a quien visita la web un problema
+                  // interno nuestro. La etiqueta sigue como aria-label.
+                  <PlaceholderImagen aspecto="retrato" etiqueta={t('fotoPendiente')} />
+                )}
                 <p className="font-medium">{pastor.nombre}</p>
                 <p className="text-sm text-muted-foreground">{pastor.rol}</p>
               </li>

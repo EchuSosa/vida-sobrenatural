@@ -7,17 +7,18 @@ export interface PlaceholderImagenProps {
   /**
    * 'equipo' = 3:2 (fotos de equipo/pastoral, grupales) — D118,
    * docs/17-paleta-y-tokens.md. 'retrato' = 1:1 (retratos individuales,
-   * carpeta `retratos/` — docs/claude_20-fotos-web-publica.md): la caja se
-   * ajusta a la proporción de la carpeta, no al revés (mismo criterio que
-   * ese documento), para que un placeholder pueda convivir en la misma
-   * grilla con una foto real ya cargada (ej. Liderazgo) sin que la fila
-   * quede con proporciones distintas. 'portada' = `PORTADA_ASPECTO`
-   * (shared-types) — hoy 1:1, temporal mientras el contenido son fotos
-   * provisorias de los libros (D125); nunca a mano acá, para que esta caja
-   * y la de la tarjeta real (ediciones-vs, libro-detalle-cliente) no
-   * puedan divergir.
+   * carpeta `retratos/` — docs/claude_20-fotos-web-publica.md). 'tarjeta' =
+   * 4:3 (carpeta `cards/`, mismo documento): para cuando un placeholder
+   * convive en la misma grilla con tarjetas que ya tienen foto real (ej.
+   * Ediciones VS en /nosotros, la única de las seis sin foto asignada) — la
+   * caja se ajusta a la proporción de la carpeta, no al revés (mismo
+   * criterio que ese documento), para que ninguna fila quede con
+   * proporciones distintas. 'portada' = `PORTADA_ASPECTO` (shared-types) —
+   * hoy 1:1, temporal mientras el contenido son fotos provisorias de los
+   * libros (D125); nunca a mano acá, para que esta caja y la de la tarjeta
+   * real (ediciones-vs, libro-detalle-cliente) no puedan divergir.
    */
-  aspecto: 'equipo' | 'retrato' | 'portada';
+  aspecto: 'equipo' | 'retrato' | 'tarjeta' | 'portada';
   /** Texto para aria-label siempre, y visible además cuando mostrarTexto es true (ej. Liderazgo). */
   etiqueta: string;
   mostrarTexto?: boolean;
@@ -37,7 +38,13 @@ export interface PlaceholderImagenProps {
  */
 export function PlaceholderImagen({ aspecto, etiqueta, mostrarTexto = false, className }: PlaceholderImagenProps) {
   const aspectoCss =
-    aspecto === 'equipo' ? '3 / 2' : aspecto === 'retrato' ? '1 / 1' : `${PORTADA_ASPECTO.ancho} / ${PORTADA_ASPECTO.alto}`;
+    aspecto === 'equipo'
+      ? '3 / 2'
+      : aspecto === 'retrato'
+        ? '1 / 1'
+        : aspecto === 'tarjeta'
+          ? '4 / 3'
+          : `${PORTADA_ASPECTO.ancho} / ${PORTADA_ASPECTO.alto}`;
 
   return (
     <div
