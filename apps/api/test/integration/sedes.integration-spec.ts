@@ -236,3 +236,48 @@ describe('DELETE /sedes/:id (integración) — D119, eliminar es distinto de ina
     expect(todas.body.map((s: { id: string }) => s.id)).toContain(sedeId);
   });
 });
+
+describe('POST /sedes (integración) — al menos un dato de contacto (H-104)', () => {
+  let app: INestApplication<App>;
+  let prisma: PrismaService;
+  const idsSedeParaLimpiar: string[] = [];
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    await app.init();
+    prisma = moduleFixture.get(PrismaService);
+  });
+
+  afterAll(async () => {
+    if (idsSedeParaLimpiar.length > 0) {
+      await prisma.sede.deleteMany({ where: { id: { in: idsSedeParaLimpiar } } });
+    }
+    await app.close();
+  });
+
+  // H-104: sin `errors` en los dos campos, el cliente no tenía forma de
+  // marcar ni contactoTelefono ni contactoEmail — caía al banner genérico.
+  // Se marcan los dos porque completar cualquiera de los dos resuelve el
+  // error.
+  it('responde 400 con errors en contactoTelefono y contactoEmail si no se completa ninguno', async () => {
+    const token = await mintAdminToken();
+    const response = await request(app.getHttpServer())
+      .post('/sedes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ nombre: `Sede integ sin contacto ${Date.now()}`, direccion: 'Dirección', horarios: 'Domingos 10 hs' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.code).toBe('CONTACTO_SEDE_REQUERIDO');
+    expect(response.body.errors).toEqual([
+      { campo: 'contactoTelefono', code: 'CONTACTO_SEDE_REQUERIDO' },
+      { campo: 'contactoEmail', code: 'CONTACTO_SEDE_REQUERIDO' },
+    ]);
+
+    if (response.body.id) idsSedeParaLimpiar.push(response.body.id);
+  });
+});

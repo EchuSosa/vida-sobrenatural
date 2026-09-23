@@ -53,6 +53,11 @@ const COPIA_POR_CODIGO: Record<string, string> = {
   // agrupa todas las fallas de un mismo campo en un solo ValidationError.
   ANIO_INVALIDO: `Ingresá un año entre ${LIBRO_ANIO_MINIMO} y ${libroAnioMaximo()}.`,
   ORDEN_INVALIDO: `Ingresá un número entero entre 0 y ${LIBRO_ORDEN_MAXIMO}.`,
+  // H-104: mismo criterio que YOUTUBE_URL_INVALIDA arriba — una excepción
+  // de negocio lanzada a mano (no derivada de class-validator), mostrada
+  // igual bajo el campo que corresponde.
+  CONSENTIMIENTO_REQUERIDO: 'Tenés que marcar la casilla para continuar.',
+  CONTACTO_SEDE_REQUERIDO: 'Completá al menos un teléfono o un email de contacto.',
 };
 
 export function mensajeDeCampo(code: string, etiquetaCampo: string): string {

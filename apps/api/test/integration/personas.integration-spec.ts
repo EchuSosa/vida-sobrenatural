@@ -5,6 +5,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
 
 async function mintToken(email: string): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -27,6 +28,11 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    // H-104: faltaba acá (a diferencia de sedes/libros/palabra-profetica) —
+    // sin el filtro, `response.body` no trae `code`/`errors`, así que un
+    // test que los verificara habría fallado por un motivo ajeno a lo que
+    // prueba. Mismo registro que las otras suites de integración.
+    app.useGlobalFilters(new AllExceptionsFilter());
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     await app.init();
 
@@ -82,6 +88,25 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
     expect(enBaseDeDatos?.estado).toBe('activa');
     expect(enBaseDeDatos?.rol).toEqual(['miembro_registrado']);
     expect(enBaseDeDatos?.fotoUrl).toBe('https://lh3.googleusercontent.com/a/foto-de-test');
+  });
+
+  // H-104: sin `errors: [{campo, code}]` el cliente no tiene forma de
+  // marcar la casilla de consentimiento ni de sumarla al resumen — cae al
+  // banner genérico de arriba, invisible sin scrollear (H-104 lo encontró
+  // así).
+  it('responde 400 con errors:[{campo:"consentimientoDatos"}] si un adulto no tilda el consentimiento (FR-013/H-104)', async () => {
+    const email = `integ-sin-consentimiento-${Date.now()}@example.com`;
+    emailsCreados.push(email);
+    const token = await mintToken(email);
+
+    const response = await request(app.getHttpServer())
+      .post('/personas')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...bodyAdultoValido(), consentimientoDatos: false });
+
+    expect(response.status).toBe(400);
+    expect(response.body.code).toBe('CONSENTIMIENTO_REQUERIDO');
+    expect(response.body.errors).toEqual([{ campo: 'consentimientoDatos', code: 'CONSENTIMIENTO_REQUERIDO' }]);
   });
 
   it('responde 409 ante un segundo registro con el mismo email (constraint único real)', async () => {

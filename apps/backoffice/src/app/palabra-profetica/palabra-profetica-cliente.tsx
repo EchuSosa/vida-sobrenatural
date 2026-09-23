@@ -76,10 +76,9 @@ export function PalabraProfeticaCliente({
       toast('Palabra Profética creada.');
       router.refresh();
     } catch (e) {
-      if (e instanceof ApiError && e.code === 'YOUTUBE_URL_INVALIDA') {
-        setErroresCampoAlta([{ campo: 'youtubeUrl', code: e.code }]);
-        return;
-      }
+      // H-104: YOUTUBE_URL_INVALIDA ya viaja con `errors: [{campo:
+      // 'youtubeUrl', ...}]` desde el servicio — sin caso especial acá,
+      // el mismo mecanismo que cualquier otro campo.
       const campos = erroresPorCampo(e);
       if (campos) {
         setErroresCampoAlta(campos);

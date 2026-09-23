@@ -276,6 +276,9 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
             profesion: t('campos.profesion'),
             profesionDetalle: t('campos.profesionDetalle'),
             tiempoCongregacion: t('campos.tiempoCongregacion'),
+            // H-104: la casilla de consentimiento participa del sistema de
+            // errores como cualquier otro campo.
+            consentimientoDatos: t('campos.consentimiento'),
           };
           validacion.reemplazar(
             Object.fromEntries(campos.map(({ campo, code }) => [campo, mensajeDeCampo(code, etiquetas[campo] ?? campo)])),

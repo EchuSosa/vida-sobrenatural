@@ -130,10 +130,14 @@ export class PalabraProfeticaService {
     if (!youtubeUrl || youtubeUrl.trim() === '') return null;
     const id = extraerIdDeYoutube(youtubeUrl);
     if (!id) {
+      // H-104: `errors` con el campo — antes el cliente lo mapeaba a mano
+      // con un `if (e.code === 'YOUTUBE_URL_INVALIDA')` propio en vez de
+      // pasar por erroresPorCampo/reemplazar como cualquier otro campo.
       throw new AppException(
         'YOUTUBE_URL_INVALIDA',
         400,
         'Esa URL no parece ser de un video de YouTube — pegá la URL completa (ej. https://www.youtube.com/watch?v=...).',
+        [{ campo: 'youtubeUrl', code: 'YOUTUBE_URL_INVALIDA' }],
       );
     }
     return id;

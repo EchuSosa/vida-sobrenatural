@@ -3,14 +3,32 @@
 import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 import { type Sede, formatearFechaCorta } from '@vida-sobrenatural/shared-types';
+import { MensajeErrorCampo } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../../../hooks/use-opciones-registro';
 import type { UseFormularioRegistroResult } from '../../../hooks/use-formulario-registro';
 import type { DatosFormulario } from './tipos';
 
-/** H-44: JSX del paso 4 (resumen + consentimiento), movido tal cual desde formulario-registro.tsx — sin cambios. */
+/**
+ * H-44/H-104: JSX del paso 4 (resumen + consentimiento). La casilla de
+ * consentimiento participa del sistema de errores como cualquier otro
+ * campo (id, aria-invalid, mensaje al lado) — antes quedaba afuera: un
+ * envío sin tildarla solo mostraba el aviso genérico arriba, sin marcar
+ * la casilla ni mover el foco.
+ */
 export function Paso4Resumen({ form }: { form: UseFormularioRegistroResult }) {
-  const { t, locale, datos, apellidoEfectivo, nombreEfectivo, opciones, sedes, setPaso, esProbablementeMayorDeEdad, actualizar } =
-    form;
+  const {
+    t,
+    locale,
+    datos,
+    apellidoEfectivo,
+    nombreEfectivo,
+    opciones,
+    sedes,
+    setPaso,
+    esProbablementeMayorDeEdad,
+    actualizar,
+    validacion,
+  } = form;
 
   return (
     <div className="flex flex-col gap-4">
@@ -25,15 +43,28 @@ export function Paso4Resumen({ form }: { form: UseFormularioRegistroResult }) {
       />
 
       {esProbablementeMayorDeEdad && (
-        <label className="flex items-start gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            checked={datos.consentimientoDatos}
-            onChange={(e) => actualizar('consentimientoDatos', e.target.checked)}
-            className="mt-1"
-          />
-          {t('campos.consentimiento')}
-        </label>
+        <div className="flex flex-col gap-1">
+          {/* Sin `required`: un bloqueo nativo del navegador (tooltip
+              propio, sin nuestro estilo) evitaría que el envío llegara a
+              enterarse y mostrara el resumen/foco/mensaje del sistema de
+              errores — justo lo que H-104 pide que sea consistente en
+              toda la app. El servidor (CONSENTIMIENTO_REQUERIDO) sigue
+              siendo la fuente de verdad, como el resto de las reglas de
+              negocio que tampoco son expresables con HTML nativo. */}
+          <label htmlFor="campo-consentimientoDatos" className="flex items-start gap-2 text-sm text-foreground">
+            <input
+              id="campo-consentimientoDatos"
+              type="checkbox"
+              checked={datos.consentimientoDatos}
+              onChange={(e) => actualizar('consentimientoDatos', e.target.checked)}
+              aria-invalid={Boolean(validacion.mensajes.consentimientoDatos)}
+              aria-describedby={validacion.mensajes.consentimientoDatos ? 'campo-consentimientoDatos-error' : undefined}
+              className="mt-1"
+            />
+            {t('campos.consentimiento')}
+          </label>
+          <MensajeErrorCampo id="campo-consentimientoDatos-error" mensaje={validacion.mensajes.consentimientoDatos} />
+        </div>
       )}
     </div>
   );

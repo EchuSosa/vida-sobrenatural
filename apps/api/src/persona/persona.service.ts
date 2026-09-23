@@ -144,11 +144,16 @@ export class PersonaService {
     const esMayorDeEdad = calcularEdad(fechaNacimiento) >= EDAD_MINIMA;
 
     if (esMayorDeEdad && !dto.consentimientoDatos) {
-      // FR-013: el consentimiento del propio adulto es obligatorio en el formulario.
+      // FR-013: el consentimiento del propio adulto es obligatorio en el
+      // formulario. H-104: `errors` con el campo — sin esto, el cliente no
+      // tiene forma de mostrarlo junto a la casilla ni de sumarlo al
+      // resumen (erroresPorCampo lo descarta si no viene, y cae al banner
+      // genérico de arriba, invisible sin scrollear).
       throw new AppException(
         'CONSENTIMIENTO_REQUERIDO',
         400,
         'Se requiere el consentimiento de almacenamiento de datos para completar el registro.',
+        [{ campo: 'consentimientoDatos', code: 'CONSENTIMIENTO_REQUERIDO' }],
       );
     }
 

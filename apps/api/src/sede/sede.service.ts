@@ -115,10 +115,16 @@ export class SedeService {
     const contactoTelefono = dto.contactoTelefono ?? existente.contactoTelefono;
     const contactoEmail = dto.contactoEmail ?? existente.contactoEmail;
     if (!contactoTelefono && !contactoEmail) {
+      // H-104: `errors` en los dos campos — completar cualquiera de los dos
+      // resuelve el error, así que se marcan los dos en vez de elegir uno.
       throw new AppException(
         'CONTACTO_SEDE_REQUERIDO',
         400,
         'La Sede debe tener al menos un teléfono o email de contacto.',
+        [
+          { campo: 'contactoTelefono', code: 'CONTACTO_SEDE_REQUERIDO' },
+          { campo: 'contactoEmail', code: 'CONTACTO_SEDE_REQUERIDO' },
+        ],
       );
     }
 
@@ -200,10 +206,15 @@ export class SedeService {
 
   private validarAlMenosUnContacto(dto: CrearSedeDto) {
     if (!dto.contactoTelefono && !dto.contactoEmail) {
+      // H-104: mismo `errors` en los dos campos que el guard de update() de arriba.
       throw new AppException(
         'CONTACTO_SEDE_REQUERIDO',
         400,
         'La Sede debe tener al menos un teléfono o email de contacto.',
+        [
+          { campo: 'contactoTelefono', code: 'CONTACTO_SEDE_REQUERIDO' },
+          { campo: 'contactoEmail', code: 'CONTACTO_SEDE_REQUERIDO' },
+        ],
       );
     }
   }

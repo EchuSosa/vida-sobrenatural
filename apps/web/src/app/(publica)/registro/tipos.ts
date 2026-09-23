@@ -20,6 +20,9 @@ export const CAMPO_A_PASO: Record<string, number> = {
   profesion: 3,
   profesionDetalle: 3,
   tiempoCongregacion: 3,
+  // H-104: la casilla de consentimiento participa del sistema de errores
+  // como cualquier otro campo — vive en el paso 4 (resumen).
+  consentimientoDatos: 4,
 };
 
 export interface DatosFormulario {

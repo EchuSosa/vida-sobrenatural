@@ -139,5 +139,63 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);
     });
+
+    // H-104: antes, enviar sin tildar el consentimiento solo mostraba un
+    // aviso genérico arriba, sin marcar la casilla ni mover el foco — desde
+    // donde la persona está mirando (recién llenó el paso 4), apretar
+    // "Registrarme" no parecía hacer nada.
+    test('Registro: enviar sin tildar el consentimiento marca la casilla, suma el resumen y mueve el foco (H-104)', async ({
+      page,
+      permitirErrorDeConsola,
+    }) => {
+      // El propio test manda el registro sin consentimiento a propósito —
+      // el 400 es lo esperado, no un defecto.
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 400/);
+      const email = `e2e-h104-registro-${colorScheme}-${Date.now()}@example.com`;
+      await loguearseComoTest(page, email);
+      await page.goto('/registro');
+
+      await page.getByLabel('Apellido').fill('García');
+      await page.getByLabel('Nombre').fill('Ana');
+      await page.getByLabel('Género').selectOption('femenino');
+      await page.getByLabel('Fecha de nacimiento').fill('1990-05-20');
+      await page.getByRole('button', { name: 'Siguiente' }).click();
+
+      await page.getByLabel('Código de país').selectOption('+54');
+      await page.getByLabel('Número de teléfono').fill('92211234567');
+      await page.getByLabel('Dirección').fill('Calle 1 y 50');
+      await page.getByLabel('Sede').selectOption({ index: 1 });
+      await page.getByRole('button', { name: 'Siguiente' }).click();
+
+      await page.getByLabel('Estado civil').selectOption('soltero_a');
+      await page.getByLabel('Profesión').selectOption('otro');
+      await page.getByLabel('¿Cuál?').fill('Apicultora');
+      await page.getByLabel('Tiempo congregándote').selectOption('menos_6_meses');
+      await page.getByRole('button', { name: 'Siguiente' }).click();
+
+      // Sin tildar la casilla — directo a enviar.
+      const casilla = page.getByRole('checkbox');
+      await expect(casilla).not.toBeChecked();
+      await page.getByRole('button', { name: 'Registrarme' }).click();
+
+      const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos:' });
+      await expect(resumen).toBeVisible();
+      await expect(resumen).toBeFocused();
+      await expect(casilla).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.getByText('Tenés que marcar la casilla para continuar.')).toHaveCount(2);
+
+      // El enlace del resumen lleva el foco a la casilla — mismo mecanismo
+      // que cualquier otro campo (ResumenErrores).
+      await resumen.getByRole('link', { name: 'Tenés que marcar la casilla para continuar.' }).click();
+      await expect(casilla).toBeFocused();
+
+      const resultados = await auditar(page);
+      expect(resultados.violations).toEqual([]);
+
+      // Se recupera: tildarla la saca del sistema de errores, y el envío sigue andando.
+      await casilla.check();
+      await page.getByRole('button', { name: 'Registrarme' }).click();
+      await expect(page).toHaveURL(/\/registro\/listo/);
+    });
   });
 }

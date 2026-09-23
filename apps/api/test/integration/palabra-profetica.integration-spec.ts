@@ -134,6 +134,10 @@ describe('POST/PATCH /palabra-profetica (integración) — Historia 3', () => {
       .send({ anio: 2026, titulo: 'Integ inválida', texto: 'texto', youtubeUrl: 'https://vimeo.com/123' });
     expect(response.status).toBe(400);
     expect(response.body.code).toBe('YOUTUBE_URL_INVALIDA');
+    // H-104: sin `errors`, el backoffice necesitaba un caso especial a mano
+    // (`if (e.code === 'YOUTUBE_URL_INVALIDA')`) para mostrarlo bajo el
+    // campo en vez del mismo mecanismo que cualquier otro campo.
+    expect(response.body.errors).toEqual([{ campo: 'youtubeUrl', code: 'YOUTUBE_URL_INVALIDA' }]);
 
     const enBase = await prisma.palabraProfetica.findFirst({ where: { titulo: 'Integ inválida' } });
     expect(enBase).toBeNull();
