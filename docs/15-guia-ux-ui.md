@@ -116,6 +116,7 @@ Los estados siempre llevan texto + ícono (nunca solo color, D81).
 - Indicar claramente cuando el Admin está actuando **en nombre de otra Persona** (D97), con el nombre visible durante toda la acción.
 - Atajos de teclado para acciones frecuentes (opcional, sin reemplazar los botones).
 - Densidad de información mayor que en la app de la Persona, pero con la misma jerarquía de botones.
+- **Una acción que nombra un verbo ejecuta ese verbo** (revisión manual, H-107/H-108/H-109): "Crear una Sede" abre el formulario de alta, no un listado desde donde hay que buscarlo; renombrar la acción a algo más vago ("Ir a Sedes") no es una alternativa válida, dejaría el trabajo a medias igual. Y **cuando una acción deja algo a medio terminar, la confirmación ofrece el paso siguiente y el listado muestra lo que falta**: crear un Libro sin portada ofrece "Subir portada" al confirmar, y el listado marca (texto + ícono, D81) cuáles la tienen pendiente — no alcanza con que el placeholder de la portada se vea prolijo (eso es correcto en la web pública, D118, pero en el backoffice un placeholder sin más marca no se distingue de un pendiente real). Mismo criterio para un estado sin nombre: si el orden manual de una tabla no tiene nombre ("Orden propio"), no se lo puede señalar ni ofrecer la vuelta cuando otro orden lo reemplaza.
 
 ## Tokens de diseño
 

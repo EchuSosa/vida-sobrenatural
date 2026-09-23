@@ -160,11 +160,13 @@ export function SedeDetalleCliente({ sede, apiToken }: { sede: Sede; apiToken: s
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Volver</AlertDialogCancel>
-            {/* H-100/H-01: navegación real a /sedes, no una acción in-place
-                — un ButtonLink (un <a> de verdad, packages/ui), no un
-                AlertDialogAction. AlertDialogCancel ya cierra el diálogo;
-                acá no hace falta ningún manejo de cierre propio. */}
-            <ButtonLink render={<Link href="/sedes" />}>Crear una Sede</ButtonLink>
+            {/* H-100/H-01: navegación real (un <a> de verdad, packages/ui),
+                no una acción in-place — no un AlertDialogAction.
+                AlertDialogCancel ya cierra el diálogo; acá no hace falta
+                ningún manejo de cierre propio. H-109: "Crear una Sede"
+                nombra un verbo — tiene que ejecutarlo, no dejar a la
+                persona en el listado para que lo busque. */}
+            <ButtonLink render={<Link href="/sedes?crear=1" />}>Crear una Sede</ButtonLink>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

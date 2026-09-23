@@ -6,6 +6,21 @@ import { cn } from '../lib/utils';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 
+export interface OrdenManualControlesProps {
+  /**
+   * Nombre visible del orden manual — H-107: sin nombre, es "la ausencia
+   * de un filtro" y no se puede señalar ("volvé a ahí"). "Orden propio",
+   * "Orden manual", el que le quede mejor a la pantalla.
+   */
+  nombre: string;
+  /** true si hoy se está viendo el orden manual — no hace falta ninguna línea acá, es el estado de siempre. */
+  enOrdenPropio: boolean;
+  /** Encabezado visible de la columna por la que se está ordenando — solo se usa cuando `enOrdenPropio` es false. */
+  columnaActiva?: string;
+  /** Vuelve al orden manual — típicamente limpia el parámetro de orden de columna. */
+  onVolver: () => void;
+}
+
 export interface ControlesTablaProps {
   /** Valor actual del cuadro de búsqueda — controlado, sin estado propio (H-88/D126). */
   busqueda: string;
@@ -24,6 +39,14 @@ export interface ControlesTablaProps {
   cantidadResultados: number;
   /** Default: "N resultado(s)". Pisable si una pantalla necesita otra forma (ej. "N de M casos"). */
   etiquetaResultados?: (cantidad: number) => string;
+  /**
+   * H-107: solo en listados con orden manual (hoy, únicamente Libros,
+   * D126) — cuando un orden de columna reemplaza al orden manual, va acá
+   * la línea que explica qué se está viendo y ofrece la vuelta en un
+   * clic, en el mismo lugar donde vivían los controles que desaparecieron
+   * (así una pantalla nueva con orden manual no tiene que reinventarlo).
+   */
+  ordenManual?: OrdenManualControlesProps;
   className?: string;
 }
 
@@ -62,6 +85,7 @@ export function ControlesTabla({
   onLimpiar,
   cantidadResultados,
   etiquetaResultados,
+  ordenManual,
   className,
 }: ControlesTablaProps) {
   const mensajeResultados = (etiquetaResultados ?? mensajeResultadosDefault)(cantidadResultados);
@@ -98,6 +122,22 @@ export function ControlesTabla({
       <p aria-live="polite" className="text-sm text-muted-foreground">
         {mensajeResultados}
       </p>
+      {/* H-107: sin esto, "ordenado por columna" y "orden manual desapareció"
+          se sentían como que algo se rompió — hasta para quien pidió la
+          función y conoce la decisión. */}
+      {ordenManual && !ordenManual.enOrdenPropio && (
+        <p className="text-sm text-muted-foreground">
+          Estás viendo por {ordenManual.columnaActiva?.toLocaleLowerCase('es')}. Para cambiar el orden,{' '}
+          <button
+            type="button"
+            onClick={ordenManual.onVolver}
+            className="underline underline-offset-2 hover:no-underline"
+          >
+            volvé a {ordenManual.nombre}
+          </button>
+          .
+        </p>
+      )}
     </div>
   );
 }

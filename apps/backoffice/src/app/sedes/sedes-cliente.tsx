@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { MoreVertical, Trash2 } from 'lucide-react';
 import { type Sede, type ErrorCode, type ErrorDeCampo, apiFetch, ApiError, erroresPorCampo } from '@vida-sobrenatural/shared-types';
@@ -64,13 +64,27 @@ export function SedesCliente({
   apiToken: string;
 }) {
   const router = useRouter();
-  const [modalAbierto, setModalAbierto] = useState(false);
+  const searchParams = useSearchParams();
+  // H-109: el diálogo "Necesitás al menos una Sede activa" ofrecía "Crear
+  // una Sede" y llevaba solo al listado — dejaba el trabajo a medias
+  // (renombrarlo a "Ir a Sedes" también, por eso no se hizo). El estado
+  // inicial lee `?crear=1` una sola vez, al montar: es un enlace de
+  // entrada, no algo que deba seguir reaccionando a cambios en la URL.
+  const [modalAbierto, setModalAbierto] = useState(() => searchParams.get('crear') === '1');
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
   const procesandoRef = useRef(new Set<string>());
   const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
   const hayAlgoAplicado = busqueda.trim() !== '' || filtro === 'todas';
+
+  // Limpia `?crear=1` de la URL una vez leído, para que cerrar el modal (o
+  // volver con el botón "atrás") no lo vuelva a abrir solo.
+  useEffect(() => {
+    if (searchParams.get('crear') === '1') {
+      router.replace('/sedes');
+    }
+  }, [searchParams, router]);
 
   const { enviando, ejecutar: crearSede } = useEnvio(async (valores: ValoresSede) => {
     setErrorAlta(null);

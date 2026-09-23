@@ -26,7 +26,11 @@ export {
   TablaEsqueleto,
   type TablaEsqueletoProps,
 } from './components/tabla-datos';
-export { ControlesTabla, type ControlesTablaProps } from './components/controles-tabla';
+export {
+  ControlesTabla,
+  type ControlesTablaProps,
+  type OrdenManualControlesProps,
+} from './components/controles-tabla';
 export { Button, buttonVariants } from './components/ui/button';
 export { ButtonLink, type ButtonLinkProps } from './components/ui/button-link';
 export { Input } from './components/ui/input';

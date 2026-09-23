@@ -350,10 +350,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
         const resultados = await auditar(page);
         expect(resultados.violations).toEqual([]);
 
-        // H-100: ButtonLink (packages/ui), no un AlertDialogAction — es una
-        // navegación real a /sedes, no una acción in-place.
+        // H-100/H-109: ButtonLink (packages/ui), no un AlertDialogAction —
+        // es una navegación real a /sedes?crear=1, y ese destino abre el
+        // formulario de alta directo (nombrar el verbo "Crear" y no
+        // ejecutarlo dejaría el trabajo a medias).
         await dialogo.getByRole('link', { name: 'Crear una Sede' }).click();
         await expect(dialogo).toBeHidden();
+        await expect(page.getByRole('dialog', { name: 'Crear Sede' })).toBeVisible();
         await expect(page).toHaveURL(/\/sedes$/);
         // La navegación de arriba es client-side (<Link>) — esperar a que
         // asiente antes de que el finally use page.request, o esa llamada

@@ -104,7 +104,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
         buffer: await portadaValida(),
       });
       await page.getByLabel('Texto alternativo').fill(`Tapa de ${titulo}`);
-      await page.getByRole('button', { name: 'Subir portada', exact: true }).click();
+      // H-108: acotado a #contenido (el landmark principal, siempre
+      // presente) — "Subir portada" también es el texto de la acción del
+      // toast de alta, que puede seguir visible unos segundos.
+      await page.locator('#contenido').getByRole('button', { name: 'Subir portada', exact: true }).click();
       await expect(page.getByText('Portada guardada.')).toBeVisible();
       await expect(page.getByRole('img', { name: `Tapa de ${titulo}` })).toBeVisible();
 
@@ -164,7 +167,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         mimeType: 'image/png',
         buffer: await portadaValida(),
       });
-      await page.getByRole('button', { name: 'Subir portada', exact: true }).click();
+      await page.locator('#contenido').getByRole('button', { name: 'Subir portada', exact: true }).click();
       await expect(page.getByText('Completá el texto alternativo de la portada antes de subirla.')).toBeVisible();
     });
 
@@ -199,7 +202,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         buffer: imagenChica,
       });
       await page.getByLabel('Texto alternativo').fill('Tapa chica');
-      await page.getByRole('button', { name: 'Subir portada', exact: true }).click();
+      await page.locator('#contenido').getByRole('button', { name: 'Subir portada', exact: true }).click();
       await expect(
         page.getByText('La imagen es más chica que el mínimo para una portada', { exact: false }),
       ).toBeVisible();
@@ -366,6 +369,43 @@ test('ordenar por una columna se refleja en la URL y sobrevive a un F5', async (
   expect(page.url()).toContain('orden=anio');
   const aniosTrasReload = (await celdasAnio.allInnerTexts()).map(Number);
   expect(aniosTrasReload).toEqual(aniosOrdenados);
+
+  // H-107: con un orden de columna activo, los controles de reordenar a
+  // mano desaparecen (esperado) pero no sin explicación — línea nombrando
+  // el estado ("Orden propio") y ofreciendo la vuelta en un clic.
+  await expect(page.getByText('Estás viendo por año.', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'volvé a Orden propio' }).click();
+  await page.waitForURL((url) => !url.search.includes('orden=anio'));
+  await expect(page.getByText('Estás viendo por', { exact: false })).toHaveCount(0);
+});
+
+// H-108: la confirmación de alta ofrece el paso siguiente en un clic (sin
+// forzar la navegación — se puede seguir creando desde el listado), y el
+// listado marca qué libros todavía no tienen portada.
+test('crear un Libro sin portada: el listado lo marca "Falta portada" y el toast ofrece subirla', async ({ page }) => {
+  await loguearseComoAdminE2E(page);
+  await page.goto('/libros');
+  await page.waitForLoadState('networkidle');
+
+  const titulo = `e2e-sin-portada-${Date.now()}`;
+  await page.getByRole('button', { name: 'Crear Libro' }).click();
+  const modal = page.getByRole('dialog', { name: 'Crear Libro' });
+  await modal.getByLabel('Título').fill(titulo);
+  await modal.getByLabel('Autor/a').fill('Autor E2E');
+  await modal.getByLabel('Año').fill('2024');
+  await modal.getByRole('button', { name: 'Crear Libro' }).click();
+  await expect(modal).toBeHidden();
+
+  const fila = page.getByRole('row', { name: new RegExp(titulo) });
+  await expect(fila.getByText('Falta portada')).toBeVisible();
+
+  const toast = page.getByText('Libro creado.');
+  await expect(toast).toBeVisible();
+  // Acotado a la región de notificaciones (sonner) — "Subir portada" es
+  // también el nombre del botón de subida real, en la pantalla de detalle.
+  await page.getByRole('region', { name: 'Notifications alt+T' }).getByRole('button', { name: 'Subir portada' }).click();
+  await page.waitForURL(/\/libros\/[^/]+$/);
+  await expect(page.getByRole('heading', { name: titulo })).toBeVisible();
 });
 
 // H-89: mover un Libro de posición, y que se refleje en la web pública.

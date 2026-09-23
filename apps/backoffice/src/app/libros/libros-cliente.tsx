@@ -4,7 +4,7 @@ import { createContext, useContext, useId, useState, type ReactNode } from 'reac
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ArrowDown, ArrowUp, GripVertical, MoreVertical, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, GripVertical, ImageOff, MoreVertical, Trash2 } from 'lucide-react';
 import {
   DndContext,
   KeyboardSensor,
@@ -283,12 +283,20 @@ export function LibrosCliente({
     setErrorAlta(null);
     setErroresCampoAlta(null);
     try {
-      await apiFetch('/libros', {
+      const creado = await apiFetch<Libro>('/libros', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         body: JSON.stringify(datosLibroParaEnviar(valores)),
       });
-      toast('Libro creado.');
+      // H-108: el aviso previo del modal ("la portada se sube después,
+      // desde su detalle") se lee al EMPEZAR el formulario — para cuando
+      // se termina de crear, hace dos minutos que se leyó. La continuación
+      // va en la confirmación, que es la que sí se lee en ese momento. Se
+      // queda en el listado (no navega a la fuerza) por si se están
+      // cargando varios libros seguidos.
+      toast('Libro creado.', {
+        action: { label: 'Subir portada', onClick: () => router.push(`/libros/${creado.id}`) },
+      });
       setModalAbierto(false);
       router.refresh();
     } catch (e) {
@@ -324,7 +332,18 @@ export function LibrosCliente({
           // eslint-disable-next-line @next/next/no-img-element -- portada servida por apps/api (D110)
           <img src={libro.portadaUrl} alt={libro.portadaDescripcion ?? ''} className="h-16 w-auto rounded object-cover" />
         ) : (
-          <PlaceholderImagen aspecto="portada" etiqueta={`Portada de ${libro.titulo}`} className="h-16 w-auto" />
+          <div className="flex flex-col items-start gap-1">
+            <PlaceholderImagen aspecto="portada" etiqueta={`Portada de ${libro.titulo}`} className="h-16 w-auto" />
+            {/* H-108: el mismo PlaceholderImagen que en la web pública se ve
+                "diseñado, no roto" (D118) — correcto ahí, porque ahí no hay
+                nada pendiente. Acá sí lo hay, y sin esta marca no se
+                distingue un libro sin portada de uno que la tiene: texto +
+                ícono, nunca solo el placeholder (Principio VII). */}
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+              <ImageOff className="size-3.5" aria-hidden="true" />
+              Falta portada
+            </span>
+          </div>
         ),
     },
     { id: 'titulo', encabezado: 'Título', ordenable: true, celda: (libro) => <span className="font-medium">{libro.titulo}</span> },
@@ -387,6 +406,16 @@ export function LibrosCliente({
         hayAlgoAplicado={hayAlgoAplicado}
         onLimpiar={() => limpiar(['estado'])}
         cantidadResultados={libros.length}
+        // H-107: el orden manual (D126) tiene nombre — sin él, ordenar por
+        // columna hacía desaparecer las flechas/el arrastre sin ninguna
+        // explicación, y ni quien pidió la función lo reconocía como algo
+        // deliberado.
+        ordenManual={{
+          nombre: 'Orden propio',
+          enOrdenPropio: orden.columna === 'orden',
+          columnaActiva: columnas.find((columna) => columna.id === orden.columna)?.encabezado,
+          onVolver: () => actualizarParams({ orden: null, dir: null }),
+        }}
       />
 
       <EnvoltorioDnd puedeReordenar={puedeReordenar} sensors={sensors} onDragEnd={onDragEnd} libros={libros}>
