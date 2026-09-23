@@ -1,12 +1,11 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignJWT } from 'jose';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
-import { validationExceptionFactory } from '../../src/common/errors/validation-exception-factory.js';
+import { configurarApp } from '../../src/configurar-app.js';
 
 async function mintToken(claims: {
   email: string;
@@ -35,10 +34,7 @@ describe('GET/PATCH /personas/me (integración, Historia 5)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalFilters(new AllExceptionsFilter());
-    app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, transform: true, exceptionFactory: validationExceptionFactory }),
-    );
+    configurarApp(app);
     await app.init();
 
     prisma = moduleFixture.get(PrismaService);

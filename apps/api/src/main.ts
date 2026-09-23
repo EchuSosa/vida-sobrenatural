@@ -2,13 +2,11 @@ import 'dotenv/config';
 import './instrument.js';
 import { randomUUID } from 'node:crypto';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { pinoHttp } from 'pino-http';
 import { AppModule } from './app.module.js';
-import { AllExceptionsFilter } from './common/errors/all-exceptions.filter.js';
-import { validationExceptionFactory } from './common/errors/validation-exception-factory.js';
+import { configurarApp } from './configurar-app.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -40,14 +38,7 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      exceptionFactory: validationExceptionFactory,
-    }),
-  );
+  configurarApp(app);
   // D110/FR-026: las portadas de Libro se sirven públicas (sin sesión) desde
   // su propia ruta — distinta del endpoint de subida (POST /libros/:id/portada,
   // que sí exige rol Admin). STORAGE_DIR es el mismo directorio que usa

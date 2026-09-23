@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignJWT } from 'jose';
@@ -8,7 +8,7 @@ import { rm } from 'node:fs/promises';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
+import { configurarApp } from '../../src/configurar-app.js';
 
 async function mintToken(rol: string[]): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -41,8 +41,7 @@ describe('GET /libros (integración)', () => {
       imports: [AppModule],
     }).compile();
     app = moduleFixture.createNestApplication();
-    app.useGlobalFilters(new AllExceptionsFilter());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    configurarApp(app);
     await app.init();
     prisma = moduleFixture.get(PrismaService);
   });
@@ -161,8 +160,7 @@ describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {
       imports: [AppModule],
     }).compile();
     app = moduleFixture.createNestApplication<NestExpressApplication>();
-    app.useGlobalFilters(new AllExceptionsFilter());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    configurarApp(app);
     // T037/main.ts: la ruta estática de portadas no la agrega el módulo,
     // sólo bootstrap() — createNestApplication() no la ejecuta, así que
     // este test la repite (mismo criterio que los filtros/pipes de arriba).

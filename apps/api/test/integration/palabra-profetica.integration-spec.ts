@@ -1,12 +1,11 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignJWT } from 'jose';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
-import { validationExceptionFactory } from '../../src/common/errors/validation-exception-factory.js';
+import { configurarApp } from '../../src/configurar-app.js';
 
 async function mintToken(rol: string[]): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -30,7 +29,7 @@ describe('GET /palabra-profetica (integración)', () => {
       imports: [AppModule],
     }).compile();
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    configurarApp(app);
     await app.init();
     prisma = moduleFixture.get(PrismaService);
     // Ninguna Palabra Profética debe quedar vigente de una corrida anterior.
@@ -84,12 +83,7 @@ describe('POST/PATCH /palabra-profetica (integración) — Historia 3', () => {
       imports: [AppModule],
     }).compile();
     app = moduleFixture.createNestApplication();
-    app.useGlobalFilters(new AllExceptionsFilter());
-    // exceptionFactory: sin esto, un 400 de class-validator (ej. `texto`
-    // demasiado largo) no trae `errors: [{campo, code}]` — el pipe por
-    // defecto de NestJS no lo arma; `main.ts` en producción ya lo pasa
-    // (mismo criterio que personas-me.integration-spec.ts).
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, exceptionFactory: validationExceptionFactory }));
+    configurarApp(app);
     await app.init();
     prisma = moduleFixture.get(PrismaService);
   });

@@ -1,11 +1,11 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignJWT } from 'jose';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
+import { configurarApp } from '../../src/configurar-app.js';
 
 async function mintAdminToken(): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -27,7 +27,7 @@ describe('PATCH /sedes/:id (integración) — soft delete real (Principio III)',
       imports: [AppModule],
     }).compile();
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    configurarApp(app);
     await app.init();
     prisma = moduleFixture.get(PrismaService);
   });
@@ -131,8 +131,7 @@ describe('DELETE /sedes/:id (integración) — D119, eliminar es distinto de ina
       imports: [AppModule],
     }).compile();
     app = moduleFixture.createNestApplication();
-    app.useGlobalFilters(new AllExceptionsFilter());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    configurarApp(app);
     await app.init();
     prisma = moduleFixture.get(PrismaService);
   });
@@ -247,8 +246,7 @@ describe('POST /sedes (integración) — al menos un dato de contacto (H-104)', 
       imports: [AppModule],
     }).compile();
     app = moduleFixture.createNestApplication();
-    app.useGlobalFilters(new AllExceptionsFilter());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    configurarApp(app);
     await app.init();
     prisma = moduleFixture.get(PrismaService);
   });

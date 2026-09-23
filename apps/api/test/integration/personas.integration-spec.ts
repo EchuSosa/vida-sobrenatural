@@ -1,11 +1,11 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignJWT } from 'jose';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
+import { configurarApp } from '../../src/configurar-app.js';
 
 async function mintToken(email: string): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -28,12 +28,7 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    // H-104: faltaba acá (a diferencia de sedes/libros/palabra-profetica) —
-    // sin el filtro, `response.body` no trae `code`/`errors`, así que un
-    // test que los verificara habría fallado por un motivo ajeno a lo que
-    // prueba. Mismo registro que las otras suites de integración.
-    app.useGlobalFilters(new AllExceptionsFilter());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    configurarApp(app);
     await app.init();
 
     prisma = moduleFixture.get(PrismaService);
