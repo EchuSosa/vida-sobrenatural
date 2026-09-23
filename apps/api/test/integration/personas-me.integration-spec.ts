@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignJWT } from 'jose';
 import request from 'supertest';
-import type { App } from 'supertest/types';
+import type { Server } from 'node:http';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { configurarApp } from '../../src/configurar-app.js';
@@ -22,7 +22,7 @@ async function mintToken(claims: {
 }
 
 describe('GET/PATCH /personas/me (integración, Historia 5)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication<Server>;
   let prisma: PrismaService;
   let sedeId: string;
   let personaId: string;

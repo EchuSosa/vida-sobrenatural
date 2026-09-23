@@ -5,7 +5,7 @@ import { SignJWT } from 'jose';
 import request from 'supertest';
 import sharp from 'sharp';
 import { rm } from 'node:fs/promises';
-import type { App } from 'supertest/types';
+import type { Server } from 'node:http';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { configurarApp } from '../../src/configurar-app.js';
@@ -32,7 +32,7 @@ async function imagenSintetica(ancho = 1000, alto = 1500): Promise<Buffer> {
 // lectura en este tramo; las de escritura y portada (US4) van en la misma
 // suite cuando se implementen esos endpoints.
 describe('GET /libros (integración)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication<Server>;
   let prisma: PrismaService;
   const idsCreados: string[] = [];
 

@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignJWT } from 'jose';
 import request from 'supertest';
-import type { App } from 'supertest/types';
+import type { Server } from 'node:http';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { configurarApp } from '../../src/configurar-app.js';
@@ -20,7 +20,7 @@ async function mintToken(rol: string[]): Promise<string> {
 // variantes de lectura en este tramo; las de escritura (US3) van en la
 // misma suite cuando se implementen esos endpoints.
 describe('GET /palabra-profetica (integración)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication<Server>;
   let prisma: PrismaService;
   const idsCreados: string[] = [];
 
@@ -74,7 +74,7 @@ describe('GET /palabra-profetica (integración)', () => {
 });
 
 describe('POST/PATCH /palabra-profetica (integración) — Historia 3', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication<Server>;
   let prisma: PrismaService;
   const idsCreados: string[] = [];
 
