@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { Server } from 'node:http';
 import { AppModule } from './../src/app.module.js';
+import { configurarApp } from '../src/configurar-app.js';
 
 /**
  * H-120: `supertest/types` (el scaffold que trae `nest new`) no existe
@@ -26,6 +27,7 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    configurarApp(app);
     await app.init();
   });
 

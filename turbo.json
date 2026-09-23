@@ -59,6 +59,10 @@
     "//#check:imports-prohibidos": {
       "description": "H-120: mismo criterio que //#check:decisiones — guardia del paquete raíz, cache:false a propósito.",
       "cache": false
+    },
+    "//#check:app-de-test-sin-configurar": {
+      "description": "H-121: mismo criterio que //#check:decisiones y //#check:imports-prohibidos — guardia del paquete raíz, cache:false a propósito.",
+      "cache": false
     }
   }
 }
