@@ -87,6 +87,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await abrirDetalleDesdeFila(page, fila);
 
       await expect(page.getByRole('heading', { name: titulo })).toBeVisible();
+      // H-103: miga de pan arriba del título, no un "← Volver a Libros" suelto.
+      const migaLibro = page.getByRole('navigation', { name: 'Ruta' });
+      await expect(migaLibro.getByRole('link', { name: 'Libros' })).toBeVisible();
+      await expect(migaLibro.getByText(titulo)).toBeVisible();
       await expect(page.getByText('Activo', { exact: true })).toBeVisible();
       // Sin portada real todavía — placeholder con aspecto de tapa (FR-027).
       await expect(page.getByRole('img', { name: `Portada de ${titulo}` })).toBeVisible();

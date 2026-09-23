@@ -17,6 +17,7 @@ import {
   ButtonLink,
   ConfirmDestructiveDialog,
   EstadoActivoBadge,
+  MigaDePan,
   useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
@@ -96,9 +97,9 @@ export function SedeDetalleCliente({ sede, apiToken }: { sede: Sede; apiToken: s
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
-      <Link href="/sedes" className="text-sm text-muted-foreground underline underline-offset-4">
-        ← Volver a Sedes
-      </Link>
+      {/* H-103/docs/15-guia-ux-ui.md: la miga de pan es el único sistema de
+          ubicación — reemplaza al "← Volver a Sedes" escrito a mano. */}
+      <MigaDePan tramos={[{ label: 'Sedes', href: '/sedes' }, { label: sede.nombre }]} LinkComponente={Link} />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">

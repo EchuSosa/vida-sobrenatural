@@ -63,6 +63,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await abrirDetalleDesdeFila(page, fila);
 
       await expect(page.getByRole('heading', { name: nombreSede })).toBeVisible();
+      // H-103: miga de pan arriba del título, no un "← Volver a Sedes" suelto.
+      const migaSede = page.getByRole('navigation', { name: 'Ruta' });
+      await expect(migaSede.getByRole('link', { name: 'Sedes' })).toBeVisible();
+      await expect(migaSede.getByText(nombreSede)).toBeVisible();
       // exact: true — "Activa" sin acotar matchea "Desactivar"/"Reactivar" por substring.
       await expect(page.getByText('Activa', { exact: true })).toBeVisible();
 

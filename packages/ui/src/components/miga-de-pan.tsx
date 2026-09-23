@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from 'react';
+import { cn } from '../lib/utils';
 
 export interface TramoMiga {
   label: string;
@@ -35,12 +36,26 @@ export function MigaDePan({ tramos, etiqueta = 'Ruta', LinkComponente }: MigaDeP
         {tramos.map((tramo, indice) => {
           const esUltimo = indice === tramos.length - 1;
           return (
-            <li key={tramo.label} className="flex items-center gap-1.5">
+            <li
+              key={tramo.label}
+              // H-103/docs/15-guia-ux-ui.md punto 7: el último tramo (título
+              // de Libro, nombre de Sede) se recorta con puntos suspensivos
+              // en pantallas chicas — `min-w-0` es lo que deja que un hijo
+              // flex se achique por debajo de su ancho de contenido, sin eso
+              // `truncate` no tiene efecto adentro de un flex.
+              className={cn('flex items-center gap-1.5', esUltimo && 'min-w-0')}
+            >
+              {/* H-103/docs/15-guia-ux-ui.md: separador ›, no / — la barra se
+                  lee como parte de una dirección web, el chevrón como
+                  "adentro de" (el público de esta app no es técnico). */}
               {indice > 0 && (
-                <span aria-hidden="true">/</span>
+                <span aria-hidden="true">›</span>
               )}
               {esUltimo || !tramo.href ? (
-                <span aria-current={esUltimo ? 'page' : undefined} className={esUltimo ? 'font-medium text-foreground' : undefined}>
+                <span
+                  aria-current={esUltimo ? 'page' : undefined}
+                  className={cn(esUltimo && 'truncate font-medium text-foreground')}
+                >
                   {tramo.label}
                 </span>
               ) : (
