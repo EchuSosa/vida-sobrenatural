@@ -11,7 +11,7 @@
     "test:e2e": "turbo run test:e2e",
     "check:decisiones": "node scripts/chequear-decisiones-duplicadas.mjs",
     "check:imports-prohibidos": "node scripts/chequear-imports-prohibidos.mjs",
-    "check": "turbo run lint typecheck test && pnpm run check:decisiones && pnpm run check:imports-prohibidos"
+    "check": "turbo run lint typecheck test --continue && pnpm run check:decisiones && pnpm run check:imports-prohibidos"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
