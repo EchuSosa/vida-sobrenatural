@@ -31,7 +31,9 @@ const eslintConfig = defineConfig([
       "@eslint-community/eslint-comments/require-description": "error",
     },
   },
-  globalIgnores(["dist/**"]),
+  // H-115 (revisión manual): .turbo/** — logs de turbo (H-101), hoy solo
+  // texto sin nada que lintear, agregado por las dudas.
+  globalIgnores(["dist/**", ".turbo/**"]),
 ]);
 
 export default eslintConfig;

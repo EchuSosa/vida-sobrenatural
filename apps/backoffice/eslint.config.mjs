@@ -52,6 +52,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // H-115 (revisión manual): distDir propio por instancia de Playwright
+    // (H-78/D124, .gitignore) — sin esto, lint recorre los chunks
+    // generados de una corrida de e2e como si fueran código propio.
+    ".next-e2e*/**",
+    // Logs de turbo (H-101) — hoy solo texto, sin nada que lintear, pero
+    // por las dudas si turbo algún día escribe algo más ahí.
+    ".turbo/**",
   ]),
 ]);
 
