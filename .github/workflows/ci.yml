@@ -1,0 +1,183 @@
+name: CI
+
+# H-101 (revisión manual): esta workflow es un ENVOLTORIO de los scripts de
+# la raíz (package.json) — si un paso hace algo que no se puede correr
+# localmente con el mismo comando, está mal hecho. `verificacion` es
+# literalmente `pnpm check`; `integracion` y `e2e` son los mismos
+# `pnpm --filter <app> run test:e2e` que ya corren en local, con Postgres y
+# los .env que esos comandos ya esperaban encontrar.
+#
+# Node 22: no hay .nvmrc ni "engines" en ningún package.json del repo — se
+# fija acá por lo que se usó en esta sesión (nvm use 22), no por una fuente
+# del propio repo. Hallazgo aparte, no se agrega .nvmrc en este lote (no lo
+# pidió el prompt).
+#
+# NO VERIFICADO EN GITHUB ACTIONS: no se pusheó nada, así que esta workflow
+# nunca corrió de verdad. Lo que SÍ está verificado, corriendo cada comando
+# tal cual en local: `pnpm check` (parte B/C), los cinco specs de
+# integración (parte E), y las suites de e2e de apps/web y apps/backoffice
+# (sesiones anteriores de este mismo trabajo). Lo que NO se pudo verificar:
+# el comportamiento de los `services:` de Postgres en un runner real, los
+# tiempos de arranque, la instalación de los browsers de Playwright en el
+# entorno de GitHub Actions, y cualquier diferencia de red/sistema de
+# archivos entre este entorno local y un runner de Actions.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  verificacion:
+    name: Verificación (lint, typecheck, test, check:decisiones, check:imports-prohibidos)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # Sin "version:" a propósito — pnpm/action-setup lee "packageManager"
+        # de package.json (pnpm@12.5.1) cuando no se le pasa una versión
+        # explícita, así que el pin de la raíz (parte B) es la única fuente.
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Instalar dependencias (lockfile congelado)
+        run: pnpm install --frozen-lockfile
+
+      # H-101: cache de turbo entre corridas de CI — sin remote cache (no hay
+      # cuenta de Vercel configurada), esto solo ayuda a una corrida que
+      # repite sobre el mismo commit o un estado muy parecido, pero es
+      # gratis y es lo que turbo espera que un CI declare.
+      - name: Cache de turbo
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            apps/*/.turbo
+            packages/*/.turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: pnpm check (lint + typecheck + test + check:decisiones + check:imports-prohibidos)
+        run: pnpm run check
+
+  integracion:
+    name: Integración (API contra Postgres)
+    runs-on: ubuntu-latest
+    needs: verificacion
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: vidasobrenatural
+          POSTGRES_PASSWORD: vidasobrenatural_dev
+          POSTGRES_DB: vidasobrenatural
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Instalar dependencias (lockfile congelado)
+        run: pnpm install --frozen-lockfile
+
+      # F4: el guard de scripts/e2e-base-datos.cjs (usado por los e2e de
+      # Playwright, no por este job) exige DATABASE_URL apuntando EXACTO a
+      # "vidasobrenatural_e2e" o aborta — acá el equivalente es
+      # apps/api/test/global-setup.cjs, que lee apps/api/.env.test y NO
+      # tiene ese guard (crea/migra la base que diga DATABASE_URL, sin
+      # verificar el nombre) — de todos modos se usa
+      # "vidasobrenatural_test", el mismo nombre que docs/11-setup-local.md
+      # documenta para esta suite. No son secretos reales (ver el propio
+      # .env.test.example): valores fijos, no un GitHub Secret.
+      - name: Crear apps/api/.env.test
+        run: |
+          cat > apps/api/.env.test <<'EOF'
+          DATABASE_URL="postgresql://vidasobrenatural:vidasobrenatural_dev@localhost:5432/vidasobrenatural_test?schema=public"
+          NEXTAUTH_SECRET="test-secret"
+          INTERNAL_API_SECRET="test-internal"
+          EOF
+
+      - name: Build de shared-types
+        run: pnpm --filter @vida-sobrenatural/shared-types run build
+
+      - name: Specs de integración (los cinco de la parte E + app.e2e-spec.ts)
+        run: pnpm --filter api run test:e2e
+
+  e2e:
+    name: E2E (web + backoffice, Playwright)
+    runs-on: ubuntu-latest
+    needs: verificacion
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: vidasobrenatural
+          POSTGRES_PASSWORD: vidasobrenatural_dev
+          POSTGRES_DB: vidasobrenatural
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Instalar dependencias (lockfile congelado)
+        run: pnpm install --frozen-lockfile
+
+      # F4: este SÍ es el guard real de H-78 (scripts/e2e-base-datos.cjs,
+      # leído por apps/web/playwright.config.ts y
+      # apps/backoffice/playwright.config.ts vía globalSetup) — exige que
+      # apps/api/.env.e2e exista y que su DATABASE_URL apunte EXACTO a
+      # "vidasobrenatural_e2e", o aborta la corrida entera antes de levantar
+      # ningún servidor. El ajuste correcto es este archivo, nunca el guard.
+      - name: Crear apps/api/.env.e2e
+        run: |
+          cat > apps/api/.env.e2e <<'EOF'
+          DATABASE_URL="postgresql://vidasobrenatural:vidasobrenatural_dev@localhost:5432/vidasobrenatural_e2e?schema=public"
+          NEXTAUTH_SECRET="e2e-secret"
+          INTERNAL_API_SECRET="e2e-internal"
+          STORAGE_DIR="./storage/portadas-e2e"
+          EOF
+
+      - name: Build de shared-types
+        run: pnpm --filter @vida-sobrenatural/shared-types run build
+
+      # Solo Chromium: los dos playwright.config.ts declaran un único
+      # project ({ name: 'chromium', use: devices['Desktop Chrome'] }).
+      - name: Instalar Chromium de Playwright
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: E2E de apps/web
+        run: pnpm --filter web run test:e2e
+
+      - name: E2E de apps/backoffice
+        run: pnpm --filter backoffice run test:e2e
