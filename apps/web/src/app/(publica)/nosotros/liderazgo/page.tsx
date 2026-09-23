@@ -39,8 +39,12 @@ export default function LiderazgoPage() {
                 {/* H-82: el texto "Foto pendiente" ya no se muestra — el
                     hueco con la marca de agua alcanza para comunicarlo, y
                     mostrarlo le cuenta a quien visita la web un problema
-                    interno nuestro. La etiqueta sigue como aria-label. */}
-                <PlaceholderImagen aspecto="equipo" etiqueta={t('fotoPendiente')} />
+                    interno nuestro. La etiqueta sigue como aria-label.
+                    aspecto="retrato" (1:1, no "equipo"): acá va a convivir
+                    con retratos reales ya cargados (docs/claude_20-fotos-web-publica.md,
+                    carpeta retratos/), y la caja se ajusta a la proporción
+                    de esa carpeta, no al revés. */}
+                <PlaceholderImagen aspecto="retrato" etiqueta={t('fotoPendiente')} />
                 <p className="font-medium">{pastor.nombre}</p>
                 <p className="text-sm text-muted-foreground">{pastor.rol}</p>
               </li>

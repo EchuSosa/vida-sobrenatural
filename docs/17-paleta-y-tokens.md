@@ -190,9 +190,12 @@ Mínimos de D81: 4.5:1 para texto, 3:1 para elementos de interfaz y foco.
 Mientras falten las fotos reales (equipo pastoral, templo, congregación, portadas de los libros),
 el hueco **no** es un rectángulo gris. Es un bloque en `--secondary` (beige en claro, marrón en
 oscuro) con el logo de cuatro pétalos centrado al 20% de opacidad, proporción 3:2 para fotos de
-equipo y 2:3 para portadas de libros. El texto "Foto pendiente" se mantiene solo como
-`aria-label`, nunca visible (H-82) — el hueco con la marca de agua ya comunica que falta la foto;
-mostrar el texto además le cuenta a quien visita la web un problema interno nuestro.
+equipo grupales, 1:1 para retratos individuales (carpeta `retratos/`,
+`docs/claude_20-fotos-web-publica.md` — necesario para que un placeholder conviva en la misma
+grilla con un retrato real ya cargado, ej. Liderazgo) y 2:3 para portadas de libros. El texto "Foto
+pendiente" se mantiene solo como `aria-label`, nunca visible (H-82) — el hueco con la marca de agua
+ya comunica que falta la foto; mostrar el texto además le cuenta a quien visita la web un problema
+interno nuestro.
 
 Un bloque de marca se lee como diseñado; el rectángulo gris se lee como roto.
 
