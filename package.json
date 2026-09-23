@@ -1,6 +1,16 @@
 {
+  "name": "vida-sobrenatural-app",
+  "private": true,
+  "packageManager": "pnpm@12.5.1",
   "scripts": {
-    "check:decisiones": "node scripts/chequear-decisiones-duplicadas.mjs"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "check:decisiones": "node scripts/chequear-decisiones-duplicadas.mjs",
+    "check": "turbo run lint typecheck test && pnpm run check:decisiones"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

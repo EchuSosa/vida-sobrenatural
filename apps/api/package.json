@@ -17,6 +17,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "oxlint --type-aware src/ test/",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest --config ./jest.config.cjs",
     "test:watch": "jest --config ./jest.config.cjs --watch",
     "test:cov": "jest --config ./jest.config.cjs --coverage",
