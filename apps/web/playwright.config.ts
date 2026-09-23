@@ -37,10 +37,6 @@ export default defineConfig({
   // antes de levantar los `webServer` de abajo — scripts/e2e-base-datos.cjs,
   // compartido con apps/backoffice (Principio XI).
   globalSetup: './e2e/global-setup.ts',
-  // H-17: borra las Personas que estos e2e crean (email con prefijo `e2e-`)
-  // al terminar toda la corrida — con base propia queda redundante, se deja
-  // como cinturón (ver e2e/global-teardown.ts).
-  globalTeardown: './e2e/global-teardown.ts',
   webServer: [
     {
       command: 'pnpm --filter api run start:dev',

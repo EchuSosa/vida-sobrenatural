@@ -46,9 +46,6 @@ export default defineConfig({
   // de levantar los `webServer` de abajo — scripts/e2e-base-datos.cjs,
   // compartido con apps/web (Principio XI).
   globalSetup: './e2e/global-setup.ts',
-  // Misma limpieza por prefijo `e2e-` que ya usa apps/web al terminar — con
-  // base propia queda redundante, se deja como cinturón.
-  globalTeardown: './e2e/global-teardown.ts',
   webServer: [
     {
       command: 'pnpm --filter api run start:dev',
