@@ -47,6 +47,12 @@ test('negrita, itálica, listas, h2 y h3 sí se renderizan (el conjunto permitid
   assert.ok(html.includes('<ul>') && html.includes('<li>uno</li>'), html);
 });
 
+test('H-117: una cita (blockquote) se renderiza como tal, no como párrafo plano', () => {
+  const html = render('Antes de la cita.\n\n> Un versículo citado aparte del cuerpo.\n\nDespués de la cita.');
+  assert.ok(html.includes('<blockquote>'), html);
+  assert.ok(html.includes('Un versículo citado aparte del cuerpo.'), html);
+});
+
 test('Markdown vacío de marcas (texto plano) se sigue leyendo como texto plano', () => {
   const html = render('Un texto provisorio, sin ninguna marca de Markdown.');
   assert.ok(html.includes('Un texto provisorio, sin ninguna marca de Markdown.'), html);

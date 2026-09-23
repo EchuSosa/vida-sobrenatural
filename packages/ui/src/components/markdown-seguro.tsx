@@ -10,12 +10,15 @@ import { cn } from '../lib/utils';
  * el mismo componente, sin duplicar la lista de elementos permitidos en
  * dos lugares (Principio XI).
  *
- * Permitido: negrita, itálica, párrafos, listas, enlaces, h2 y h3. NUNCA
- * h1 (la página ya tiene el suyo — dos h1 rompen la jerarquía de
- * encabezados, axe lo marca). `unwrapDisallowed`: lo que no está en la
- * lista no desaparece silenciosamente ni revienta — se muestra como texto
- * plano, sin la marca que no le corresponde (un h1 escrito a mano se ve
- * como texto, no como título; sigue siendo inofensivo).
+ * Permitido: negrita, itálica, párrafos, listas, enlaces, h2, h3 y citas
+ * (blockquote — H-117: el contenido real de la Palabra Profética separa
+ * versículos y citas largas del cuerpo, y sin esto el pastor no podía
+ * escribir su documento como lo escribe). NUNCA h1 (la página ya tiene el
+ * suyo — dos h1 rompen la jerarquía de encabezados, axe lo marca).
+ * `unwrapDisallowed`: lo que no está en la lista no desaparece
+ * silenciosamente ni revienta — se muestra como texto plano, sin la marca
+ * que no le corresponde (un h1 escrito a mano se ve como texto, no como
+ * título; sigue siendo inofensivo).
  *
  * `react-markdown` no usa `dangerouslySetInnerHTML`: parsea a un árbol y
  * arma elementos de React nodo por nodo. HTML crudo en el texto guardado
@@ -24,7 +27,7 @@ import { cn } from '../lib/utils';
  * escapado, nunca ejecutable.
  */
 
-const ELEMENTOS_PERMITIDOS = ['p', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'h2', 'h3'];
+const ELEMENTOS_PERMITIDOS = ['p', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'h2', 'h3', 'blockquote'];
 
 /** Solo http/https — ni `javascript:`, ni `mailto:`, ni un esquema relativo sin protocolo. */
 function esquemaPermitido(url: string): boolean {

@@ -33,11 +33,13 @@ function obtenerMarkdown(editor: Editor): string {
  * exactamente lo que D127 evitó con react-markdown del lado del
  * renderizador (`markdown-seguro.tsx`, sin tocar).
  *
- * El conjunto de marcas es el mismo que ya fijaba D127 (negrita, itálica,
- * párrafos, listas, enlaces, h2 y h3, NUNCA h1) — pero acá se aplica en el
- * ORIGEN, no solo al renderizar: `StarterKit.configure` desactiva todo lo
- * que no está en esa lista (blockquote, code, codeBlock, horizontalRule,
- * strike, underline, listas numeradas) y `heading: { levels: [2, 3] }`
+ * El conjunto de marcas es el que fija D127 (negrita, itálica, párrafos,
+ * listas, enlaces, citas, h2 y h3, NUNCA h1 — citas sumadas por H-117: el
+ * contenido real separa versículos y citas largas del cuerpo) — pero acá
+ * se aplica en el ORIGEN, no solo al renderizar: `StarterKit.configure`
+ * desactiva todo lo que no está en esa lista (code, codeBlock,
+ * horizontalRule, strike, underline, listas numeradas) y
+ * `heading: { levels: [2, 3] }`
  * hace que el editor no pueda producir un h1 en absoluto — al toolbar de
  * antes le sobra "Vista previa": con TipTap el área de edición YA se ve
  * como el resultado final (estilos de `[&_h2]:...`/`[&_ul]:...` calcados
@@ -57,6 +59,7 @@ export interface EtiquetasEditorMarkdown {
   italica: string;
   enlace: string;
   lista: string;
+  cita: string;
   h2: string;
   h3: string;
   /** Texto de reemplazo cuando se aplica "enlace" sin nada seleccionado. */
@@ -96,6 +99,7 @@ interface EstadoBarra {
   italica: boolean;
   enlace: boolean;
   lista: boolean;
+  cita: boolean;
   h2: boolean;
   h3: boolean;
 }
@@ -131,8 +135,10 @@ export function EditorMarkdown({
         // en el conjunto que fija D127, y dejarlo prendido en el editor
         // (aunque markdown-seguro.tsx después lo ignore al renderizar)
         // produciría el peor caso posible: se ve bien mientras se
-        // escribe, y desaparece o se aplana al publicar.
-        blockquote: false,
+        // escribe, y desaparece o se aplana al publicar. `blockquote` SÍ
+        // queda prendido (H-117): el contenido real de la Palabra
+        // Profética separa versículos y citas largas del cuerpo — sin
+        // esto, el pastor no podía escribir su documento como lo escribe.
         code: false,
         codeBlock: false,
         horizontalRule: false,
@@ -183,7 +189,7 @@ export function EditorMarkdown({
           'min-h-40 rounded-md border border-input bg-transparent px-3 py-2 text-base outline-none aria-invalid:border-destructive dark:bg-input/30',
           // Calcado de la página pública (nosotros/palabra-profetica/page.tsx)
           // para que editar y publicar se vean igual — Principio XI.
-          'flex flex-col gap-4 leading-7 text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-6',
+          'flex flex-col gap-4 leading-7 text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground',
           '[&_p.is-editor-empty:first-child::before]:pointer-events-none [&_p.is-editor-empty:first-child::before]:float-left [&_p.is-editor-empty:first-child::before]:h-0 [&_p.is-editor-empty:first-child::before]:text-muted-foreground [&_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]',
         ),
       },
@@ -221,6 +227,7 @@ export function EditorMarkdown({
             italica: editor.isActive('italic'),
             enlace: editor.isActive('link'),
             lista: editor.isActive('bulletList'),
+            cita: editor.isActive('blockquote'),
             h2: editor.isActive('heading', { level: 2 }),
             h3: editor.isActive('heading', { level: 3 }),
           }
@@ -247,6 +254,12 @@ export function EditorMarkdown({
       etiqueta: etiquetas.lista,
       clave: 'lista',
       onClick: (e) => e.chain().focus().toggleBulletList().run(),
+    },
+    {
+      etiqueta: etiquetas.cita,
+      clave: 'cita',
+      // Mismo atajo estándar que fija @tiptap/extension-blockquote (Mod-Shift-B).
+      onClick: (e) => e.chain().focus().toggleBlockquote().run(),
     },
     {
       etiqueta: etiquetas.h2,

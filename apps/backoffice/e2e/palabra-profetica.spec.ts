@@ -123,7 +123,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 // que insertaban sintaxis — WYSIWYG de verdad, pero D127 se mantiene: se
 // sigue guardando Markdown. Independiente del tema, como el resto de los
 // tests de esta app que no dependen de contraste/color.
-test('el editor de Texto: negrita, itálica, enlace, lista, h2 y h3 con la barra (nunca h1, nunca javascript:), y se ve bien en la web pública', async ({
+test('el editor de Texto: negrita, itálica, enlace, lista, cita, h2 y h3 con la barra (nunca h1, nunca javascript:), y se ve bien en la web pública', async ({
   page,
 }) => {
   const titulo = `e2e-pp-editor-${Date.now()}`;
@@ -139,6 +139,7 @@ test('el editor de Texto: negrita, itálica, enlace, lista, h2 y h3 con la barra
   const botonItalica = page.getByRole('button', { name: 'Itálica' });
   const botonEnlace = page.getByRole('button', { name: 'Enlace' });
   const botonLista = page.getByRole('button', { name: 'Lista' });
+  const botonCita = page.getByRole('button', { name: 'Cita' });
   const botonH2 = page.getByRole('button', { name: 'Subtítulo (h2)' });
   const botonH3 = page.getByRole('button', { name: 'Subtítulo (h3)' });
 
@@ -188,6 +189,21 @@ test('el editor de Texto: negrita, itálica, enlace, lista, h2 y h3 con la barra
   await expect(editor.locator('li')).toHaveCount(2);
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter'); // Enter en un ítem vacío sale de la lista.
+
+  // Cita (H-117: el contenido real separa versículos y citas largas del
+  // cuerpo — blockquote en la lista permitida, botón propio con el mismo
+  // atajo estándar que fija @tiptap/extension-blockquote, Mod-Shift-B).
+  await botonCita.click();
+  await expect(botonCita).toHaveAttribute('aria-pressed', 'true');
+  await page.keyboard.type('Una cita citada aparte del cuerpo.');
+  await expect(editor.locator('blockquote')).toHaveText('Una cita citada aparte del cuerpo.');
+  // Enter en un párrafo vacío DENTRO de la cita la saca (mismo mecanismo
+  // genérico de ProseMirror que ya sacaba de la lista, no algo propio de
+  // blockquote) — dos Enter, no uno: el primero abre un párrafo vacío
+  // todavía adentro, el segundo lo levanta afuera.
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await expect(botonCita).toHaveAttribute('aria-pressed', 'false');
 
   // Enlace, sin nada seleccionado — inserta el texto por defecto ya
   // convertido en enlace (mismo comportamiento que el editor viejo, con un
@@ -240,6 +256,7 @@ test('el editor de Texto: negrita, itálica, enlace, lista, h2 y h3 con la barra
   // la misma consulta con `{ name: 'primero' }` no encontraba nada).
   await expect(page.getByRole('listitem').filter({ hasText: 'primero' })).toBeVisible();
   await expect(page.getByRole('listitem').filter({ hasText: 'segundo' })).toBeVisible();
+  await expect(page.locator('blockquote', { hasText: 'Una cita citada aparte del cuerpo.' })).toBeVisible();
   const enlacePublico = page.getByRole('link', { name: 'texto del enlace' });
   await expect(enlacePublico).toHaveAttribute('href', 'https://ejemplo.org/mas-info');
   await expect(enlacePublico).toHaveAttribute('rel', 'noopener noreferrer');

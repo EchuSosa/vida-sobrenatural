@@ -55,7 +55,7 @@ export default async function PalabraProfeticaPage() {
               tamaño/interlineado que antes. */}
           <MarkdownSeguro
             texto={palabra.texto}
-            className="flex flex-col gap-4 text-lg leading-7 text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:text-xl [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6"
+            className="flex flex-col gap-4 text-lg leading-7 text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:text-xl [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground"
           />
           {/* D121: el video es opcional — no se muestra nada si todavía no llegó. */}
           {palabra.youtubeVideoId && (

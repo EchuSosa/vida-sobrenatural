@@ -52,6 +52,7 @@ const ETIQUETAS_EDITOR_MARKDOWN: EtiquetasEditorMarkdown = {
   italica: 'Itálica',
   enlace: 'Enlace',
   lista: 'Lista',
+  cita: 'Cita',
   h2: 'Subtítulo (h2)',
   h3: 'Subtítulo (h3)',
   textoPorDefectoEnlace: 'texto del enlace',
