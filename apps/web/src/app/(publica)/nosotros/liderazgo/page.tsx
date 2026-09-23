@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
 import imgPastorJp from '@/assets/images/retratos/retrato-pastor-jp.webp';
-import imgPredicadorSwoosh from '@/assets/images/retratos/retrato-predicador-swoosh.webp';
 
 export const metadata = {
   title: 'Liderazgo — Vida Sobrenatural',
@@ -32,7 +31,14 @@ export default function LiderazgoPage() {
   const tn = useTranslations('nosotros');
   const pastores = [
     { nombre: t('pastor1'), rol: t('pastor1Rol'), imagen: imgPastorJp, alt: t('pastor1FotoAlt') },
-    { nombre: t('pastor2'), rol: t('pastor2Rol'), imagen: imgPredicadorSwoosh, alt: t('pastor2FotoAlt') },
+    // 2026-09-23: `retratos/retrato-predicador-swoosh.webp` estaba acá y se
+    // sacó. El documento no dice a quién retrata, y la foto muestra a UNA
+    // persona en una posición que nombra a DOS. Que el alt no afirmara una
+    // identidad no alcanzaba: la posición en la grilla la afirma igual, y con
+    // más fuerza que cualquier texto. Una cara real presentada como líder de
+    // la iglesia sin que nadie lo haya confirmado es exactamente lo que D98
+    // no permite. Vuelve cuando Echu confirme de quién es la foto.
+    { nombre: t('pastor2'), rol: t('pastor2Rol'), imagen: null, alt: null },
     { nombre: t('pastor3'), rol: t('pastor3Rol'), imagen: null, alt: null },
   ];
 
