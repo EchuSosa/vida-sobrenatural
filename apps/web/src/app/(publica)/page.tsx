@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
-import { ButtonLink, HeroConFoto } from '@vida-sobrenatural/ui';
+import { ButtonLink, HeroConFoto, HeroConFotoBoton } from '@vida-sobrenatural/ui';
 import { AvisoPorQuery } from '../../components/aviso-por-query';
 import { FOTOS_HEROE } from '@/assets/images/fotos-heroe';
 import imgCardPrimerosPasos from '@/assets/images/cards/card-bienvenida-estas-en-casa.webp';
@@ -113,24 +113,13 @@ export default function InicioPage() {
           <ButtonLink render={<Link href="/primeros-pasos" />} size="xl">
             Ver primeros pasos
           </ButtonLink>
-          {/* La variante "outline" está pensada para el fondo normal de la
-              página (hereda text-foreground, borde/fondo de tema) — acá
-              adentro del velo eso queda mal en los dos sentidos: sin
-              override de texto, hereda blanco (--velo-heroe-texto) sobre
-              un bg-background casi blanco (invisible); y su borde/fondo
-              propios (border-border, dark:border-input) casi no se
-              distinguen del velo oscuro en modo oscuro (encontrado
-              probando esto, no a ojo). Mismo criterio que el resto del
-              velo: colores fijos de --velo-heroe-texto, NO de tema — es
-              una foto, no una superficie de UI que cambia con el modo. */}
-          <ButtonLink
-            render={<Link href="/visitanos" />}
-            variant="outline"
-            size="xl"
-            className="border-velo-heroe-texto/60 bg-velo-heroe-texto/10 text-velo-heroe-texto hover:bg-velo-heroe-texto/20 hover:text-velo-heroe-texto dark:border-velo-heroe-texto/60 dark:bg-velo-heroe-texto/10 dark:hover:bg-velo-heroe-texto/20"
-          >
+          {/* H-123: pieza propia (HeroConFotoBoton, packages/ui) en vez
+              del override de seis clases que estaba antes acá — la
+              próxima cabecera con botón la reusa, no se olvida de
+              ninguna de las seis. */}
+          <HeroConFotoBoton render={<Link href="/visitanos" />} size="xl">
             Visitanos
-          </ButtonLink>
+          </HeroConFotoBoton>
         </div>
       </HeroConFoto>
 

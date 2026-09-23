@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '../lib/utils';
+import { ButtonLink, type ButtonLinkProps } from './ui/button-link';
 
 /**
  * Lote de fotos reales (docs/claude_20-fotos-web-publica.md, regla 2 —
@@ -80,5 +81,39 @@ export function HeroConFoto({ foto, children, className }: HeroConFotoProps) {
       </div>
       {children}
     </div>
+  );
+}
+
+/**
+ * H-123 (antes, H-101): un botón dentro del velo necesita colores FIJOS de
+ * `--velo-heroe-texto`, no de tema — es una foto, no una superficie de UI
+ * que cambia con el modo. La variante "outline" de `Button` está pensada
+ * para el fondo normal de la página: no fija su propio color de texto en
+ * reposo (hereda `text-foreground` del `<body>`) ni tiene borde/fondo
+ * pensados para ir sobre una foto oscurecida — sobre el velo, eso deja
+ * texto invisible (blanco sobre un `bg-background` casi blanco) y, ya
+ * corregido eso, un borde casi indistinguible del velo oscuro en modo
+ * oscuro (los dos, encontrados probando en navegador real, no a ojo).
+ *
+ * Mismo motivo que `ButtonLink` (H-100/H-01): una pieza propia acá, no un
+ * override de seis clases repetido en cada sitio que pone un botón sobre
+ * un héroe — la próxima cabecera con botón lo usa, no lo reinventa (y no
+ * se olvida de ninguna de las seis).
+ */
+export type HeroConFotoBotonProps = Omit<ButtonLinkProps, 'variant'>;
+
+// `variant` queda excluido del tipo (no solo ignorado en runtime): esta
+// pieza ES la variante para este contexto, no una que se pueda pisar por
+// accidente pasando otra.
+export function HeroConFotoBoton({ className, ...props }: HeroConFotoBotonProps) {
+  return (
+    <ButtonLink
+      variant="outline"
+      className={cn(
+        'border-velo-heroe-texto/60 bg-velo-heroe-texto/10 text-velo-heroe-texto hover:bg-velo-heroe-texto/20 hover:text-velo-heroe-texto dark:border-velo-heroe-texto/60 dark:bg-velo-heroe-texto/10 dark:hover:bg-velo-heroe-texto/20',
+        className,
+      )}
+      {...props}
+    />
   );
 }
