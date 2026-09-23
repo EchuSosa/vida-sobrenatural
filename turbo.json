@@ -51,6 +51,14 @@
         "STORAGE_DIR",
         "PORT"
       ]
+    },
+    "//#check:decisiones": {
+      "description": "H-120: guardia del paquete raíz (//), no de un workspace — así check (package.json raíz) es UNA sola invocación de turbo con --continue, sin encadenar && detrás de turbo. cache:false a propósito: corre en milisegundos, y un cache hit equivocado en una guardia arquitectónica es peor que correrla siempre.",
+      "cache": false
+    },
+    "//#check:imports-prohibidos": {
+      "description": "H-120: mismo criterio que //#check:decisiones — guardia del paquete raíz, cache:false a propósito.",
+      "cache": false
     }
   }
 }
