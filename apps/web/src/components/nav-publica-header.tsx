@@ -80,8 +80,10 @@ export function NavPublicaHeader() {
           </span>
         </Link>
 
-        {/* Desktop */}
-        <nav aria-label={t('principal')} className="hidden items-center gap-6 md:flex">
+        {/* Desktop — H-105: el corte con el hamburguesa sube a `lg` (1024px);
+            a `md` (768, iPad Mini vertical) el contenido no entraba cómodo
+            ("Primeros pasos" se partía en dos líneas). */}
+        <nav aria-label={t('principal')} className="hidden items-center gap-6 lg:flex">
           {NAV_PUBLICA.map((item) => (
             <EnlaceMenu
               key={item.href}
@@ -91,7 +93,7 @@ export function NavPublicaHeader() {
             />
           ))}
         </nav>
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           {acciones.map((item) => (
             // H-01/H-100 (revisión manual): estas acciones navegan — son
             // <a>, no botones. ButtonLink (packages/ui) es un <a> de verdad
@@ -112,8 +114,8 @@ export function NavPublicaHeader() {
           <MenuUsuarioPublico />
         </div>
 
-        {/* Celular: menú hamburguesa (accesible — FR-014, T049) */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* Celular Y tablet (hasta 1023px, H-105): menú hamburguesa (accesible — FR-014, T049) */}
+        <div className="flex items-center gap-2 lg:hidden">
           {acciones.map((item) => (
             <ButtonLink
               key={item.href}
