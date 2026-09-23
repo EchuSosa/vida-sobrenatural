@@ -1,9 +1,15 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
-import { ButtonLink } from '@vida-sobrenatural/ui';
+import { ButtonLink, HeroConFoto } from '@vida-sobrenatural/ui';
 import { AccionRegistro } from '../../../components/accion-registro';
 import { AvisoPorQuery } from '../../../components/aviso-por-query';
+import imgCabecera from '@/assets/images/cards/card-bienvenida-equipo.webp';
+
+// docs/claude_20-fotos-web-publica.md: la caja respeta la proporción de
+// `cards/` (4:3, R2) — ninguna imagen de esa carpeta se estira a 16:9.
+const SIZES_CABECERA = '(min-width: 768px) 768px, 100vw';
 
 export const metadata = {
   title: 'Primeros pasos — Vida Sobrenatural',
@@ -20,7 +26,17 @@ export default function PrimerosPasosPage() {
       <Suspense fallback={null}>
         <AvisoPorQuery param="ya_registrado" valor="1" mensaje={t('avisoYaRegistrado')} />
       </Suspense>
-      <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
+      {/* docs/claude_20-fotos-web-publica.md, "Primeros pasos" › Cabecera:
+          de los siete bloques que asigna el documento, esta es la ÚNICA
+          que existe como sección propia hoy (R5 del lote de fotos — ver el
+          reporte de la conversación para el resto). El <h1> ya existente
+          pasa a vivir sobre la foto, mismo componente/velo que Inicio. */}
+      <HeroConFoto
+        className="aspect-[4/3]"
+        foto={<Image src={imgCabecera} alt={t('cabeceraAlt')} fill sizes={SIZES_CABECERA} priority className="object-cover" />}
+      >
+        <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
+      </HeroConFoto>
 
       {/* H-02 (revisión manual, actualización 2026-09-18): copy real de
           docs/12-contenido-bienvenida.md, sección "Hero". */}
