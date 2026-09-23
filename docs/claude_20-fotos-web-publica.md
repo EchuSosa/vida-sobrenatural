@@ -26,15 +26,16 @@ Las fotos **no se recortan de nuevo en CSS** salvo por diferencia mínima de pro
 
 ## Dónde va cada una
 
-### Inicio
-| Uso | Archivo | Alt |
-|---|---|---|
-| Héroe principal | `hero/hero-culto-congregacion` | Congregación de Vida Sobrenatural durante un culto, vista desde atrás |
-| Héroe alternativo (A/B o modo oscuro) | `hero/hero-multitud-bn` | Congregación en blanco y negro con el swoosh de la marca |
-| Tarjeta Primeros pasos | `cards/card-bienvenida-estas-en-casa` | Equipo de bienvenida frente al cartel "Estás en casa" |
-| Tarjeta Nosotros | `cards/card-comunidad-pareja-mayor` | Pareja mayor entre la congregación |
-| Tarjeta Eventos | `cards/card-jovenes-manos` | Jóvenes con las manos levantadas en un culto |
-| Tarjeta Visitanos | `cards/card-culto-manos` | Congregación con manos levantadas frente al escenario |
+### Inicio — aplicado 2026-09-23
+
+| Uso | Archivo | Alt | Estado |
+|---|---|---|---|
+| Héroe principal | `hero/hero-culto-congregacion` | Congregación de Vida Sobrenatural durante un culto, vista desde atrás | ✅ aplicado (héroe, `priority`, LCP verificado con build de producción) |
+| Héroe alternativo (A/B o modo oscuro) | `hero/hero-multitud-bn` | Congregación en blanco y negro con el swoosh de la marca | Sin usar, a propósito — no hay A/B testing ni una decisión de foto distinta por tema en esta app. Usada solo para medir el peor caso de contraste del velo de `HeroConFoto` (ver `packages/ui/src/components/hero-con-foto.tsx`). |
+| Tarjeta Primeros pasos | `cards/card-bienvenida-estas-en-casa` | Equipo de bienvenida frente al cartel "Estás en casa" | ✅ aplicado (tarjeta, lazy) |
+| Tarjeta Nosotros | `cards/card-comunidad-pareja-mayor` | Pareja mayor entre la congregación | ✅ aplicado (tarjeta, lazy) |
+| Tarjeta Eventos | `cards/card-jovenes-manos` | Jóvenes con las manos levantadas en un culto | ✅ aplicado (tarjeta, lazy) |
+| Tarjeta Visitanos | `cards/card-culto-manos` | Congregación con manos levantadas frente al escenario | ✅ aplicado (tarjeta, lazy) — misma foto que la Cabecera de Visitanos, a propósito (ver esa sección) |
 
 ### Nosotros (página de entrada, seis tarjetas — D122)
 | Tarjeta | Archivo | Alt |
@@ -52,23 +53,37 @@ Subpágina **Liderazgo**: solo `retratos/retrato-pastor-jp` (Juan Pablo Sosa), c
 
 > **Para la diseñadora:** las tarjetas de Liderazgo son **por pareja** (dos nombres cada una), pero las fotos disponibles son **individuales**. Hoy la primera tarjeta muestra a una persona y nombra a dos. O las fotos pasan a ser de la pareja, o las tarjetas pasan a ser por persona; hoy queda así a propósito, como mock.
 
-### Primeros pasos
-| Bloque | Archivo | Alt |
-|---|---|---|
-| Cabecera | `cards/card-bienvenida-equipo` | Voluntarias del equipo de bienvenida sonriendo |
-| Bienvenida | `retratos/retrato-bienvenida-hola` | Voluntaria con credencial "hola! bienvenido a casa" |
-| Vida Nueva (discipulado) | `cards/card-estudio-biblico` | Mujer leyendo la Biblia en el culto |
-| Vida de Servicio / Ministerios | `cards/card-alabanza-escenario` | Equipo de alabanza en el escenario |
-| Grupos de Extensión | `cards/card-grupos-mesa` | Mesa servida con pan, vino y flores |
-| Bautismo | `cards/card-bautismo` (retrato: `retratos/retrato-bautismo`) | Recién bautizados abrazándose con remeras "Sí, yo creo" |
-| Preguntas frecuentes | `cards/card-abrazo-bienvenida` | Dos mujeres abrazándose en la entrada |
+### Primeros pasos — aplicado 2026-09-23, parcial
 
-### Visitanos
-| Bloque | Archivo | Alt |
-|---|---|---|
-| Cabecera | `cards/card-culto-manos` | Congregación con manos levantadas frente al escenario |
-| "Queremos conocerte" | `cards/card-abrazo-hombres` | Dos hombres saludándose con un abrazo |
-| Familias / niños | `cards/card-ninos-globo`, `cards/card-familia-padre-hijas` | Padre con su hijo en hombros sosteniendo un globo · Padre abrazando a sus dos hijas |
+De los siete bloques de abajo, la página solo tiene HOY una sección propia para el primero
+(Cabecera — el resto del contenido es un `<h1>` + una cita + un párrafo de intro + una sola sección
+compartida "¿Cómo sigue el proceso?" con los cuatro pasos como ítems de una lista, no como bloques
+propios). Los otros seis quedan sin aplicar — no se armó ninguna sección nueva para ponerles una foto
+(Principio de este lote: la foto ilustra contenido que ya existe, no al revés). Para desbloquearlos
+hace falta contenido real de la iglesia por cada uno (D98) antes de poder escribir la sección.
+
+| Bloque | Archivo | Alt | Estado |
+|---|---|---|---|
+| Cabecera | `cards/card-bienvenida-equipo` | Voluntarias del equipo de bienvenida sonriendo | ✅ aplicado (envuelve el `<h1>` existente en `HeroConFoto`, `priority`, LCP verificado) |
+| Bienvenida | `retratos/retrato-bienvenida-hola` | Voluntaria con credencial "hola! bienvenido a casa" | ⏸️ pendiente — no existe una sección "Bienvenida" propia en la página hoy |
+| Vida Nueva (discipulado) | `cards/card-estudio-biblico` | Mujer leyendo la Biblia en el culto | ⏸️ pendiente — es un ítem de la lista "¿Cómo sigue el proceso?", no un bloque propio |
+| Vida de Servicio / Ministerios | `cards/card-alabanza-escenario` | Equipo de alabanza en el escenario | ⏸️ pendiente — mismo motivo que Vida Nueva |
+| Grupos de Extensión | `cards/card-grupos-mesa` | Mesa servida con pan, vino y flores | ⏸️ pendiente — no existe ninguna sección "Grupos de Extensión" en la página hoy |
+| Bautismo | `cards/card-bautismo` (retrato: `retratos/retrato-bautismo`) | Recién bautizados abrazándose con remeras "Sí, yo creo" | ⏸️ pendiente — no existe ninguna sección "Bautismo" en la página hoy |
+| Preguntas frecuentes | `cards/card-abrazo-bienvenida` | Dos mujeres abrazándose en la entrada | ⏸️ pendiente — no existe ninguna sección de preguntas frecuentes en la página hoy |
+
+### Visitanos — aplicado 2026-09-23, parcial
+
+Mismo caso que Primeros pasos: de los tres bloques, la página solo tiene HOY una sección propia
+(Cabecera — el `<h1>` "Visitanos"). "Queremos conocerte" y Familias/niños no existen como secciones;
+la página de hoy es el título más la lista de Sedes (dirección, horarios, contacto), sin ese
+contenido adicional.
+
+| Bloque | Archivo | Alt | Estado |
+|---|---|---|---|
+| Cabecera | `cards/card-culto-manos` | Congregación con manos levantadas frente al escenario | ✅ aplicado (envuelve el `<h1>` existente en `HeroConFoto`, `priority`, LCP verificado) — misma foto que la tarjeta Visitanos de Inicio, a propósito: la tarjeta anticipa esta página. No coinciden en el mismo viewport — rutas distintas. |
+| "Queremos conocerte" | `cards/card-abrazo-hombres` | Dos hombres saludándose con un abrazo | ⏸️ pendiente — no existe esa sección en la página hoy |
+| Familias / niños | `cards/card-ninos-globo`, `cards/card-familia-padre-hijas` | Padre con su hijo en hombros sosteniendo un globo · Padre abrazando a sus dos hijas | ⏸️ pendiente — no existe esa sección en la página hoy |
 
 ### Sin asignar (disponibles para módulos nuevos)
 `card-adoracion-mano-alzada`, `card-alabanza-cantante`, `card-alabanza-banda`, `card-comunidad-dos-mujeres`, `card-comunidad-hombres-celular`, `card-ninos`, `card-oracion-abrazo`, `retrato-adoracion-mujer`, `retrato-familia-padre-hijas`.
@@ -91,7 +106,7 @@ variantes de tamaño: **no hay que sumarlas**. Un archivo por foto, el más gran
 ## Reglas
 
 1. Ninguna foto de conferencias o campañas (Mujeres de Impulso, Indestructibles) en la interfaz: son identidad de evento y van solo dentro de su Evento.
-2. Texto sobre foto solo en los héroes, con el velo definido en `claude_17` para garantizar contraste (H-82).
+2. Texto sobre foto solo en los héroes, con el velo de `HeroConFoto` (`packages/ui/src/components/hero-con-foto.tsx`) para garantizar contraste — valores de opacidad medidos contra las tres fotos de `hero/`, no elegidos a ojo; ver el comentario del componente y el commit que lo agregó. (Corregido: esta regla apuntaba antes a `claude_17` y a un `H-82` que no existen — el archivo real es `docs/17-paleta-y-tokens.md`, y no tiene ninguna definición de velo.)
 3. Las tarjetas no llevan filtro ni tinte: las fotos ya vienen con la gradación cálida de la marca.
 4. Cuando lleguen los originales, se regeneran los WebP con los mismos nombres y proporciones; ningún componente cambia.
 
