@@ -23,7 +23,14 @@ async function getLibrosActivos(): Promise<Libro[]> {
 
 function LibroCard({ libro, t }: { libro: Libro; t: ReturnType<typeof useTranslations> }) {
   return (
-    <li className="flex flex-col gap-2">
+    // H-102: subgrid, no una altura mínima a ojo — la tarjeta declara sus
+    // propias 3 filas (imagen, título, datos) pero deja que la GRILLA DE LA
+    // PÁGINA las mida (`grid-rows-subgrid` + `row-span-3`); el alto de cada
+    // fila pasa a ser el del contenido más alto de esa fila, en toda la
+    // grilla — no un número fijo que reserva siempre el peor caso. En una
+    // sola columna (celular) cada tarjeta es su propia fila, así que esto
+    // no cambia nada ahí — se resuelve solo, sin media query.
+    <li className="grid grid-rows-subgrid gap-2 row-span-3">
       {libro.portadaUrl ? (
         // H-84/D125: caja de proporción fija (PORTADA_ASPECTO, hoy 1:1 —
         // temporal) con la imagen centrada por `object-contain`, sobre el
@@ -45,10 +52,7 @@ function LibroCard({ libro, t }: { libro: Libro; t: ReturnType<typeof useTransla
       ) : (
         <PlaceholderImagen aspecto="portada" etiqueta={t('portadaAlt', { titulo: libro.titulo })} />
       )}
-      {/* H-84: altura mínima reservada para dos líneas — con títulos tan
-          desparejos, sin esto las tarjetas de una fila quedan de alturas
-          visiblemente distintas. */}
-      <p className="min-h-[3em] font-medium">{libro.titulo}</p>
+      <p className="font-medium">{libro.titulo}</p>
       <p className="text-sm text-muted-foreground">
         {t('autorPor', { autor: libro.autor })} · {libro.anio}
       </p>
