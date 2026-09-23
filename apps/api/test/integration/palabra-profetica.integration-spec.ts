@@ -6,6 +6,7 @@ import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { AllExceptionsFilter } from '../../src/common/errors/all-exceptions.filter.js';
+import { validationExceptionFactory } from '../../src/common/errors/validation-exception-factory.js';
 
 async function mintToken(rol: string[]): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -84,7 +85,11 @@ describe('POST/PATCH /palabra-profetica (integración) — Historia 3', () => {
     }).compile();
     app = moduleFixture.createNestApplication();
     app.useGlobalFilters(new AllExceptionsFilter());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    // exceptionFactory: sin esto, un 400 de class-validator (ej. `texto`
+    // demasiado largo) no trae `errors: [{campo, code}]` — el pipe por
+    // defecto de NestJS no lo arma; `main.ts` en producción ya lo pasa
+    // (mismo criterio que personas-me.integration-spec.ts).
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, exceptionFactory: validationExceptionFactory }));
     await app.init();
     prisma = moduleFixture.get(PrismaService);
   });
@@ -175,5 +180,19 @@ describe('POST/PATCH /palabra-profetica (integración) — Historia 3', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ anio: 2026, titulo: 'No debería crearse', texto: 'texto' });
     expect(response.status).toBe(403);
+  });
+
+  // H-117/H-93: sin límite, cualquiera podía mandar megabytes en `texto`.
+  it('rechaza un texto de más de 50.000 caracteres sin guardar nada', async () => {
+    const token = await mintToken(['admin']);
+    const response = await request(app.getHttpServer())
+      .post('/palabra-profetica')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ anio: 2026, titulo: 'Integ texto demasiado largo', texto: 'a'.repeat(50_001) });
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toEqual([{ campo: 'texto', code: 'TEXTO_INVALIDO' }]);
+
+    const enBase = await prisma.palabraProfetica.findFirst({ where: { titulo: 'Integ texto demasiado largo' } });
+    expect(enBase).toBeNull();
   });
 });

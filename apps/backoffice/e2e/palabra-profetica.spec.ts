@@ -119,6 +119,31 @@ for (const colorScheme of ['light', 'dark'] as const) {
   });
 }
 
+// H-117/H-93: `texto` no tenía límite — 50.000 caracteres deja holgura de
+// sobra sobre los 12.409 de la Palabra Profética 2021 real. Independiente
+// del tema, como "el editor de Texto" más abajo.
+test('un texto de más de 50.000 caracteres muestra el error debajo del campo, sin enviar', async ({ page }) => {
+  await loguearseComoAdminE2E(page);
+  await page.goto('/palabra-profetica');
+  await page.waitForLoadState('networkidle');
+
+  await page.getByLabel('Año').fill('2027');
+  await page.getByLabel('Título').fill(`e2e-pp-largo-${Date.now()}`);
+  // .fill() en vez de .type(): 50.001 caracteres tecleados uno por uno
+  // sería insoportablemente lento, y acá lo que se prueba es la
+  // validación por longitud, no el tipeo real (ya cubierto en "el editor
+  // de Texto").
+  await page.getByLabel('Texto').fill('a'.repeat(50_001));
+  await page.getByLabel('Texto').blur();
+
+  const errorTexto = page.locator('#campo-texto-error');
+  await expect(errorTexto).toContainText('no puede superar los 50.000 caracteres');
+
+  // H-72: se corrige y el error se limpia al escribir.
+  await page.getByLabel('Texto').fill('texto corto');
+  await expect(errorTexto).toHaveCount(0);
+});
+
 // H-90/D127 (revisión manual): TipTap reemplaza el <textarea> con botones
 // que insertaban sintaxis — WYSIWYG de verdad, pero D127 se mantiene: se
 // sigue guardando Markdown. Independiente del tema, como el resto de los

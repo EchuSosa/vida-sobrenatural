@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { PALABRA_PROFETICA_TEXTO_MAXIMO } from '@vida-sobrenatural/shared-types';
 
 const ANIO_FUNDACION = 2010;
 const ANIO_MAXIMO = new Date().getFullYear() + 1;
@@ -20,6 +21,10 @@ export class CrearPalabraProfeticaDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
+  // H-117/H-93: sin límite, cualquiera podía mandar megabytes — la
+  // Palabra Profética 2021 real tiene 12.409 caracteres, este límite deja
+  // holgura de sobra (packages/shared-types).
+  @MaxLength(PALABRA_PROFETICA_TEXTO_MAXIMO)
   texto!: string;
 
   @ApiPropertyOptional({ description: 'D121: opcional — puede llegar después del anuncio, o no llegar nunca.' })

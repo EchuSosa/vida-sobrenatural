@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { PALABRA_PROFETICA_TEXTO_MAXIMO } from '@vida-sobrenatural/shared-types';
 
 const ANIO_FUNDACION = 2010;
 const ANIO_MAXIMO = new Date().getFullYear() + 1;
@@ -21,6 +22,7 @@ export class ActualizarPalabraProfeticaDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  @MaxLength(PALABRA_PROFETICA_TEXTO_MAXIMO)
   texto?: string;
 
   @ApiPropertyOptional({ description: 'D121: opcional.' })

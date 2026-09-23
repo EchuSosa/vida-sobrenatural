@@ -186,7 +186,12 @@ export function EditorMarkdown({
         ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
         ...(placeholder ? { 'data-placeholder': placeholder } : {}),
         class: cn(
-          'min-h-40 rounded-md border border-input bg-transparent px-3 py-2 text-base outline-none aria-invalid:border-destructive dark:bg-input/30',
+          // H-117: min-h-40 (160px) obligaba a scrollear todo el tiempo
+          // para un texto real (la Palabra Profética 2021 tiene 12.409
+          // caracteres) — sin `max-h` ni `overflow` acá, ya crecía con el
+          // contenido; lo único que faltaba era una altura INICIAL más
+          // cómoda.
+          'min-h-96 rounded-md border border-input bg-transparent px-3 py-2 text-base outline-none aria-invalid:border-destructive dark:bg-input/30',
           // Calcado de la página pública (nosotros/palabra-profetica/page.tsx)
           // para que editar y publicar se vean igual — Principio XI.
           'flex flex-col gap-4 leading-7 text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground',

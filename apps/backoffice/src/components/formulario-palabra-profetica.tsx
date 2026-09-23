@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { type ErrorDeCampo, mensajeDeCampo } from '@vida-sobrenatural/shared-types';
+import { type ErrorDeCampo, mensajeDeCampo, PALABRA_PROFETICA_TEXTO_MAXIMO } from '@vida-sobrenatural/shared-types';
 import {
   Button,
   EditorMarkdown,
@@ -108,7 +108,17 @@ export function FormularioPalabraProfetica({
       mensaje: `Ingresá un año entre ${ANIO_MINIMO} y ${new Date().getFullYear() + 1}.`,
     } satisfies ValidacionCampo<string>,
     titulo: requerido,
-    texto: requerido,
+    // H-117/H-93: el mensaje depende de CUÁL de las dos reglas falla —
+    // `ValidacionCampo` es un solo mensaje fijo, así que se arma acá, con
+    // el valor actual ya en scope (este objeto se reconstruye en cada
+    // render, igual que el resto de `validaciones`).
+    texto: {
+      esValido: (v: string) => v.trim() !== '' && v.length <= PALABRA_PROFETICA_TEXTO_MAXIMO,
+      mensaje:
+        valores.texto.trim() === ''
+          ? MENSAJE_REQUERIDO
+          : `El texto no puede superar los ${PALABRA_PROFETICA_TEXTO_MAXIMO.toLocaleString('es-AR')} caracteres (tiene ${valores.texto.length.toLocaleString('es-AR')}).`,
+    } satisfies ValidacionCampo<string>,
   };
 
   function actualizar<K extends keyof ValoresPalabraProfetica>(campo: K, valor: ValoresPalabraProfetica[K]) {
