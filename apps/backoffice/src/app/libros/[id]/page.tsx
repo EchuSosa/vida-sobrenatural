@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation';
-import { auth } from '../../../auth';
+import { requerirSesion } from '../../../auth';
 import { apiFetch, ApiError, type Libro } from '@vida-sobrenatural/shared-types';
 import { LibroDetalleCliente } from './libro-detalle-cliente';
-import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
 
 /**
  * Historia 4: detalle + edición de un Libro + subida de portada. Mismo
@@ -11,16 +10,7 @@ import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
  * afuera también acá.
  */
 export default async function LibroDetallePage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">Libro</h1>
-        <BotonIngresarGoogle />
-      </div>
-    );
-  }
-
+  const session = await requerirSesion();
   const rol = session.user.rol;
   if (!rol.includes('admin') && !rol.includes('pastor')) {
     return (

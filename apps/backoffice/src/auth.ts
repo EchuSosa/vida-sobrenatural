@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
+import { notFound } from 'next/navigation';
 import {
   testLoginHabilitado,
   buscarPersonaPorEmail,
@@ -132,3 +133,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
+/**
+ * H-116 (revisión manual): el chequeo "¿hay sesión?" ya lo hace
+ * `apps/backoffice/src/app/layout.tsx`, para todo el backoffice — ninguna
+ * `page.tsx` vuelve a llamarlo (regla `local/no-session-check-en-page`,
+ * `eslint-rules/no-session-check-en-page.mjs`). Lo que sigue necesitando
+ * cada página es el objeto de sesión ya tipado como no-nulo (`apiToken`,
+ * `user.rol`) sin repetir el `if (!session)` que eso exigiría con `auth()`
+ * a mano.
+ *
+ * El caso sin sesión SÍ pasa acá, y seguido — no es un bug del layout.
+ * Verificado armando un build de producción y mirando el log del server:
+ * Next.js arma el árbol de una ruta de adentro hacia afuera, así que
+ * `page.tsx` (el "children" del layout) se ejecuta igual aunque el layout
+ * después decida no usar ese resultado — el layout no evita la ejecución,
+ * solo decide qué mandar. Con un `throw new Error(...)` común, esa
+ * ejecución fantasma dejaba un stack trace de "esto no debería pasar
+ * nunca" en el log de CADA visita sin sesión a una pantalla protegida —
+ * ruido real, no un caso raro. `notFound()` (next/navigation, estable,
+ * sin flag experimental) corta el segmento en el momento sin loguear nada
+ * — Next lo reconoce como control de flujo de ruteo, no como una
+ * excepción de la aplicación — y la respuesta final la sigue decidiendo el
+ * layout, que en la rama sin sesión ni siquiera llega a mirar `children`.
+ */
+export async function requerirSesion() {
+  const session = await auth();
+  if (!session) {
+    notFound();
+  }
+  return session;
+}

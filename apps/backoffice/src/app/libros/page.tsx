@@ -1,7 +1,6 @@
-import { auth } from '../../auth';
+import { requerirSesion } from '../../auth';
 import { apiFetch, type Libro, type Pagina } from '@vida-sobrenatural/shared-types';
 import { LibrosCliente } from './libros-cliente';
-import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
 
 type Filtro = 'activas' | 'todas';
 // 'orden' = el orden manual (H-89, drag/mover) que ya devuelve la API por
@@ -29,16 +28,7 @@ export default async function LibrosPage({
 }: {
   searchParams: Promise<{ estado?: string; orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await auth();
-  if (!session) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">Libros</h1>
-        <BotonIngresarGoogle />
-      </div>
-    );
-  }
-
+  const session = await requerirSesion();
   const rol = session.user.rol;
   if (!rol.includes('admin') && !rol.includes('pastor')) {
     return (

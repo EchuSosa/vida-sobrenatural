@@ -5,6 +5,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import noRawTailwindColors from "../../eslint-rules/no-raw-tailwind-colors.mjs";
 import noLinkEnBotonBaseUi from "../../eslint-rules/no-link-en-boton-base-ui.mjs";
+import noSessionCheckEnPage from "../../eslint-rules/no-session-check-en-page.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -19,7 +20,7 @@ const eslintConfig = defineConfig([
   // "vía de escape documentada" que pide el hallazgo, no una lista silenciosa.
   {
     plugins: {
-      local: { rules: { ...noRawTailwindColors.rules, ...noLinkEnBotonBaseUi.rules } },
+      local: { rules: { ...noRawTailwindColors.rules, ...noLinkEnBotonBaseUi.rules, ...noSessionCheckEnPage.rules } },
       "@eslint-community/eslint-comments": eslintComments,
     },
     rules: {
@@ -27,6 +28,13 @@ const eslintConfig = defineConfig([
       "local/no-link-en-boton-base-ui": "error",
       "@eslint-community/eslint-comments/require-description": "error",
     },
+  },
+  // H-116: solo los page.tsx de app/ — el chequeo de sesión vive en el
+  // layout raíz; BackofficeShell (fuera de app/) sí necesita su propio
+  // `if (!session)` como guarda de tipos, no está cubierto a propósito.
+  {
+    files: ["src/app/**/page.tsx"],
+    rules: { "local/no-session-check-en-page": "error" },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([

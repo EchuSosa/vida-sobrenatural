@@ -22,25 +22,23 @@ import { MenuUsuario } from './selector-tema';
 
 /**
  * Shell del backoffice — sidebar filtrado por rol (Historia 1, FR-004).
- * Sin sesión, no se muestra sidebar: cada página maneja su propio estado de
- * "necesitás iniciar sesión" (patrón ya existente en /sedes, /pendientes-tutor).
+ *
+ * H-116: este componente solo se renderiza dentro de la rama "hay sesión"
+ * de `apps/backoffice/src/app/layout.tsx` (que ya chequeó `auth()` y
+ * sembró `SessionProvider` con esa sesión) — antes cada página decidía por
+ * su cuenta si mostrar sidebar o su propio "necesitás iniciar sesión"; esa
+ * decisión ahora es del layout, una sola vez. El `if (!session)` de acá no
+ * es una pantalla alternativa: es una guarda de tipos para un estado que,
+ * con esa garantía, no debería poder darse.
  */
 export function BackofficeShell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const t = useTranslations('nav');
-  const roles = (session?.user.rol ?? []) as RolBackoffice[];
 
-  if (!session) {
-    // Sin Sidebar en este caso — no hay otro <main> en juego, así que este
-    // sigue siendo el único landmark "main" de la página.
-    return (
-      <main id="contenido" className="flex-1">
-        {children}
-      </main>
-    );
-  }
+  if (!session) return null;
 
+  const roles = session.user.rol as RolBackoffice[];
   const items = itemsParaRoles(roles);
 
   return (

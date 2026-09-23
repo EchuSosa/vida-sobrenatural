@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider, useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { auth } from "../auth";
 import { Providers } from "./providers";
 import { BackofficeShell } from "../components/backoffice-shell";
+import { PantallaSinSesion } from "../components/pantalla-sin-sesion";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,8 +24,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
-  const t = useTranslations('nav');
+/**
+ * H-116 (revisión manual): el chequeo de sesión sube acá — un solo lugar,
+ * no nueve copias por `page.tsx` (y otras ocho sin ninguna). Sin sesión,
+ * se muestra `PantallaSinSesion` (una sola pantalla real, no un `<h1>`
+ * suelto por página) en vez de `children`; con sesión, `BackofficeShell`
+ * sigue decidiendo el sidebar como antes. El chequeo de ROL se queda en
+ * cada página (cada una pide un rol distinto) — lo único que sube es
+ * "¿hay sesión o no?". `session` se pasa a `Providers`/`SessionProvider`
+ * para que el cliente no vuelva a pedirla (evita el parpadeo de
+ * `status: 'loading'`).
+ */
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const session = await auth();
+  const t = await getTranslations('nav');
   return (
     <html
       lang="es"
@@ -46,8 +61,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </a>
         </nav>
         <NextIntlClientProvider>
-          <Providers>
-            <BackofficeShell>{children}</BackofficeShell>
+          <Providers session={session}>
+            {session ? (
+              <BackofficeShell>{children}</BackofficeShell>
+            ) : (
+              // Sin Sidebar acá — no hay otro <main> en juego, así que este
+              // es el único landmark "main" de la página (mismo criterio
+              // que tenía BackofficeShell para este caso).
+              <main id="contenido" className="flex-1">
+                <PantallaSinSesion />
+              </main>
+            )}
           </Providers>
         </NextIntlClientProvider>
       </body>

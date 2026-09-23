@@ -1,7 +1,6 @@
-import { auth } from '../../auth';
+import { requerirSesion } from '../../auth';
 import { apiFetch, type PalabraProfetica, type Pagina } from '@vida-sobrenatural/shared-types';
 import { PalabraProfeticaCliente } from './palabra-profetica-cliente';
-import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
 
 type ColumnaOrden = 'anio' | 'titulo' | 'estado' | 'createdAt';
 
@@ -25,15 +24,7 @@ export default async function PalabraProfeticaPage({
 }: {
   searchParams: Promise<{ orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await auth();
-  if (!session) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">Palabra Profética</h1>
-        <BotonIngresarGoogle />
-      </div>
-    );
-  }
+  const session = await requerirSesion();
 
   // FR-030: cualquier rol que no sea Admin ni Pastor queda afuera, tanto
   // del menú (config/nav.ts) como del acceso directo por URL — el GET no

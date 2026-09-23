@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { auth } from '../../../auth';
+import { requerirSesion } from '../../../auth';
 import { apiFetch, ApiError, type Libro, type Pagina } from '@vida-sobrenatural/shared-types';
 import { PapeleraCliente } from './papelera-cliente';
-import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
 
 type ColumnaOrden = 'titulo' | 'autor' | 'eliminadoEn';
 
@@ -17,16 +16,7 @@ export default async function PapeleraLibrosPage({
 }: {
   searchParams: Promise<{ orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await auth();
-  if (!session) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">Papelera de Libros</h1>
-        <BotonIngresarGoogle />
-      </div>
-    );
-  }
-
+  const session = await requerirSesion();
   const rol = session.user.rol;
   if (!rol.includes('admin') && !rol.includes('pastor')) {
     return (

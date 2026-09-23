@@ -1,8 +1,7 @@
-import { auth } from '../../auth';
+import { requerirSesion } from '../../auth';
 import { apiFetch, type Pagina, type PersonaPendienteTutor } from '@vida-sobrenatural/shared-types';
 import { PendientesTutorCliente } from './pendientes-tutor-cliente';
 import { TAMANIO_PAGINA } from './constantes';
-import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
 
 /**
  * H-29 (revisión manual, actualización 2026-09-20, D94/D102/D108): activar
@@ -28,16 +27,7 @@ export default async function PendientesTutorPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const session = await auth();
-  if (!session) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">Casos pendientes de tutor</h1>
-        <BotonIngresarGoogle />
-      </div>
-    );
-  }
-
+  const session = await requerirSesion();
   const { q } = await searchParams;
   const buscar = (q ?? '').trim();
 

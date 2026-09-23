@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation';
-import { auth } from '../../../auth';
+import { requerirSesion } from '../../../auth';
 import { apiFetch, ApiError, type Sede } from '@vida-sobrenatural/shared-types';
 import { SedeDetalleCliente } from './sede-detalle-cliente';
-import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
 
 /**
  * H-52 (revisión manual ronda 4): detalle + edición de una Sede. H-60/H-43
@@ -13,16 +12,7 @@ import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
  * y Desactivar/Reactivar (D119).
  */
 export default async function SedeDetallePage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">Sede</h1>
-        <BotonIngresarGoogle />
-      </div>
-    );
-  }
-
+  const session = await requerirSesion();
   const { id } = await params;
   let sede: Sede;
   try {

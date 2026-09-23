@@ -1,7 +1,6 @@
-import { auth } from '../../auth';
+import { requerirSesion } from '../../auth';
 import { apiFetch, type Sede } from '@vida-sobrenatural/shared-types';
 import { SedesCliente } from './sedes-cliente';
-import { BotonIngresarGoogle } from '../../components/boton-ingresar-google';
 
 type Filtro = 'activas' | 'todas';
 type ColumnaOrden = 'nombre' | 'direccion' | 'estado';
@@ -23,16 +22,7 @@ export default async function SedesPage({
 }: {
   searchParams: Promise<{ estado?: string; orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await auth();
-  if (!session) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">Sedes</h1>
-        <BotonIngresarGoogle />
-      </div>
-    );
-  }
-
+  const session = await requerirSesion();
   const { estado, orden: ordenParam, dir, q } = await searchParams;
   const filtro: Filtro = estado === 'todas' ? 'todas' : 'activas';
   const ordenColumna: ColumnaOrden =

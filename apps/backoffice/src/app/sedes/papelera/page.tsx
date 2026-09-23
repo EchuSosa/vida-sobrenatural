@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { auth } from '../../../auth';
+import { requerirSesion } from '../../../auth';
 import { apiFetch, ApiError, type Sede } from '@vida-sobrenatural/shared-types';
 import { PapeleraCliente } from './papelera-cliente';
-import { BotonIngresarGoogle } from '../../../components/boton-ingresar-google';
 
 type ColumnaOrden = 'nombre' | 'eliminadoEn';
 
@@ -23,16 +22,7 @@ export default async function PapeleraSedesPage({
 }: {
   searchParams: Promise<{ orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await auth();
-  if (!session) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">Papelera de Sedes</h1>
-        <BotonIngresarGoogle />
-      </div>
-    );
-  }
-
+  const session = await requerirSesion();
   const { orden: ordenParam, dir, q } = await searchParams;
   const ordenColumna: ColumnaOrden = ordenParam === 'eliminadoEn' ? 'eliminadoEn' : 'nombre';
   const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
