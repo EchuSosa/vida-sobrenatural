@@ -1,7 +1,16 @@
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import type { useTranslations } from 'next-intl';
 import type { Sede } from '@vida-sobrenatural/shared-types';
+import { HeroConFoto } from '@vida-sobrenatural/ui';
 import { ChurchJsonLd } from '../../../components/church-json-ld';
+import imgCabecera from '@/assets/images/cards/card-culto-manos.webp';
+
+// docs/claude_20-fotos-web-publica.md: la caja respeta la proporción de
+// `cards/` (4:3, R2). Misma foto que la tarjeta Visitanos de Inicio —
+// a propósito (la tarjeta anticipa esta página); no ocurren en el mismo
+// viewport, están en rutas distintas (/ y /visitanos).
+const SIZES_CABECERA = '(min-width: 768px) 768px, 100vw';
 
 export const metadata = {
   title: 'Visitanos — Vida Sobrenatural',
@@ -46,7 +55,18 @@ export default async function VisitanosPage() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
+      {/* docs/claude_20-fotos-web-publica.md, "Visitanos": de los tres
+          bloques que asigna el documento (Cabecera, "Queremos conocerte",
+          Familias/niños), esta es la ÚNICA que existe como sección propia
+          hoy (R5 del lote de fotos — ver el reporte de la conversación
+          para el resto). Mismo componente/velo que Inicio y Primeros
+          pasos. */}
+      <HeroConFoto
+        className="aspect-[4/3]"
+        foto={<Image src={imgCabecera} alt={t('cabeceraAlt')} fill sizes={SIZES_CABECERA} priority className="object-cover" />}
+      >
+        <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
+      </HeroConFoto>
 
       {sedes.length === 0 && (
         // Edge case del spec 001: todavía no hay ninguna Sede cargada por el Admin.
