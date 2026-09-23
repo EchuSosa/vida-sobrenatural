@@ -114,15 +114,17 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Lorena Scerra y Ezequiel Rossini')).toBeVisible();
       await expect(page.getByText('Patricia Ryan y Ezequiel Parravicini')).toBeVisible();
 
-      // docs/claude_20-fotos-web-publica.md: dos de las tres parejas ya
-      // tienen retrato real (alt provisorio — el documento no lo da, ver
-      // el comentario en liderazgo/page.tsx); pastor3 sigue con
-      // placeholder. H-82: el placeholder está por su role="img" y nombre
-      // accesible — el texto "Foto pendiente" ya no se muestra a quien
-      // visita la web.
+      // docs/claude_20-fotos-web-publica.md: solo pastor1 (Juan Pablo Sosa)
+      // tiene retrato real confirmado (alt provisorio — el documento no lo
+      // da, ver el comentario en liderazgo/page.tsx). retrato-predicador-swoosh
+      // se sacó de pastor2: el documento no dice a qué pareja pertenece, y
+      // mostrar una cara real en una posición que nombra a dos personas sin
+      // esa confirmación no es aceptable (D98) — pastor2 y pastor3 quedan
+      // con placeholder. H-82: el placeholder está por su role="img" y
+      // nombre accesible — el texto "Foto pendiente" ya no se muestra a
+      // quien visita la web.
       await expect(page.getByAltText('Juan Pablo Sosa')).toBeVisible();
-      await expect(page.getByAltText('Predicador de Vida Sobrenatural, con el swoosh de la marca de fondo')).toBeVisible();
-      await expect(page.getByRole('img', { name: /Foto pendiente/ })).toHaveCount(1);
+      await expect(page.getByRole('img', { name: /Foto pendiente/ })).toHaveCount(2);
       await expect(page.getByText('Foto pendiente', { exact: false })).toHaveCount(0);
 
       const resultados = await auditar(page);

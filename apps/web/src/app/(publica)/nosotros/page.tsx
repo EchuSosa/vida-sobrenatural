@@ -32,7 +32,15 @@ const SIZES_TARJETA = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
  * pero eso agregaría una consulta a la API a una página que hoy no consulta
  * nada) — su `PlaceholderImagen` pasa de aspecto="equipo" a "tarjeta" (4:3,
  * no 3:2) para que la grilla quede pareja con las cinco que sí tienen foto.
- * Ninguna es `priority`: ninguna es el LCP de esta página (el `<h1>` lo es).
+ *
+ * 2026-09-23 (H-79): la PRIMERA tarjeta (Quiénes somos) lleva `priority` —
+ * Next detectó en runtime que su imagen es el LCP real de esta página, no
+ * el `<h1>`. H-79 sigue abierto (el LCP no cumple en ninguna pública);
+ * cargarla en diferido empeoraba a propósito la métrica que se está
+ * midiendo. Las otras cuatro fotos siguen lazy. Si el día de mañana se
+ * reordenan las tarjetas, `priority` tiene que moverse con la que quede
+ * primera — no es una propiedad fija de "Quiénes somos", es de la
+ * posición.
  */
 export default function NosotrosPage() {
   const t = useTranslations('nosotros');
@@ -91,7 +99,7 @@ export default function NosotrosPage() {
       </div>
 
       <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {tarjetas.map((tarjeta) => (
+        {tarjetas.map((tarjeta, index) => (
           <li key={tarjeta.href}>
             <Link
               href={tarjeta.href}
@@ -99,7 +107,18 @@ export default function NosotrosPage() {
             >
               {tarjeta.imagen && tarjeta.alt ? (
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md">
-                  <Image src={tarjeta.imagen} alt={tarjeta.alt} fill sizes={SIZES_TARJETA} className="object-cover" />
+                  {/* H-79: `priority` en la primera tarjeta, el LCP real de
+                      esta página — ver el comentario de arriba. `index === 0`
+                      y no un flag fijo por tarjeta: si el orden cambia,
+                      `priority` se mueve solo con la que quede primera. */}
+                  <Image
+                    src={tarjeta.imagen}
+                    alt={tarjeta.alt}
+                    fill
+                    sizes={SIZES_TARJETA}
+                    priority={index === 0}
+                    className="object-cover"
+                  />
                 </div>
               ) : (
                 <PlaceholderImagen aspecto="tarjeta" etiqueta={t('tarjetaImagenAlt', { titulo: tarjeta.titulo })} />
