@@ -196,5 +196,54 @@ a medias dos veces.
 
 Un enlace "Volver a X" escrito a mano en cualquier otro lado es un defecto, no una variante.
 
+## Listados paginados — el patrón para que uno nuevo no nazca con "cargar más" (H-101)
+
+Cierre de la revisión manual, antes de la spec 004 (que trae cinco listados nuevos). Escrito **como
+patrón, no como lista de pantallas** — mismo motivo que la Miga de pan arriba: aplicado pantalla por
+pantalla, dos veces terminó a medias.
+
+1. **El paginado lo resuelve la API, nunca el cliente.** `skip`/`take` (o su equivalente) viajan en
+   cada pedido; el cliente nunca trae todo y filtra en memoria. Esto no es una preferencia de
+   performance — es lo único que hace que la búsqueda y el orden sigan siendo correctos cuando el
+   listado crece más allá de una pantalla (ver el punto 5, más abajo).
+2. **La búsqueda y el orden también los resuelve la API**, por el mismo motivo que el paginado: filtrar
+   u ordenar solo la página que ya está en el cliente da un resultado incompleto o un orden roto en
+   cuanto hay una segunda página. Los tres (paginado, búsqueda, orden) van juntos — no tiene sentido
+   resolver uno server-side y los otros dos en memoria.
+3. **La página vive en la URL, 1-based** (`?pagina=2`) — es lo que ve la persona, aunque la API reciba
+   un `skip` calculado a partir de eso (`(página - 1) × tamaño`). Query param propio, igual que `q`
+   (búsqueda) y `orden`/`dir` — se puede compartir, sobrevive a un F5 y al botón de atrás.
+4. **Cambiar la búsqueda o el orden vuelve a la página 1.** Si no, buscar algo con pocos resultados
+   estando en una página avanzada muestra vacío en vez de lo que corresponde — un defecto que aparece
+   siempre que se prueba esto a mano, y nunca en el camino feliz de un test que no lo piensa.
+5. **Un `?pagina=` inválido o fuera de rango no es un 404.** Cae en la página válida más cercana (1 si
+   no es un número válido; la última real si pide una que no existe) — más amable que un error para el
+   caso real: volver a un link viejo después de que el listado se vació un poco, o una acción (cerrar,
+   eliminar) que deja vacía la página en la que se estaba. La URL se corrige con un redirect real, no
+   solo el contenido — un F5 después tiene que seguir mostrando lo mismo.
+6. **Los controles de página son enlaces de verdad, nunca botones con `onClick`.** El punto entero de
+   que la página esté en la URL se pierde si no se puede abrir en pestaña nueva, compartir, o si el
+   botón de atrás del navegador hace cualquier cosa.
+7. **En palabras, no solo números** — "Página 2 de 7", Anterior/Siguiente con su texto (no solo
+   flechas), áreas de click generosas: mismo criterio de diseño para personas grandes que el resto de
+   la app (`Botones`, arriba).
+8. **Un componente agnóstico en `packages/ui` (`Paginacion`) + quien lo usa arma la URL** — mismo
+   criterio de capas que `ControlesTabla`/`useControlesTablaUrl` (H-88/D126, sección `Backoffice`):
+   `packages/ui` no depende de Next, así que no sabe construir un `next/link` ni leer `useSearchParams`;
+   el componente recibe cómo armar cada enlace (mismo patrón que `ButtonLink` con su prop `render`), y
+   quien lo usa (`apps/backoffice`) decide la URL real.
+
+**Primera implementación real, para mirar el código:** Pendientes de tutor (H-101) —
+`apps/backoffice/src/app/pendientes-tutor/`. Reemplazó a un "cargar más" que acumulaba estado en
+cliente.
+
+**Dónde este patrón TODAVÍA no llegó, a propósito:** Sedes, Libros, Palabra Profética y sus dos
+papeleras siguen trayendo todo el listado y filtrando en memoria — hoy funciona porque todo entra en
+una pantalla, pero es un riesgo silencioso: mientras el volumen sea chico, la búsqueda cubre todos los
+registros por CIRCUNSTANCIA (entran todos en memoria), no porque el mecanismo lo garantice. El día que
+uno de esos cinco crezca, la búsqueda pasa a ser "sobre lo que ya se cargó" sin que ningún test lo note
+— nada en el mecanismo actual distingue "estoy viendo todo" de "estoy viendo una parte". Migrarlos
+necesita que sus endpoints acepten `skip`/`take` — fuera de este lote, se solapa con la spec 004.
+
 ---
 *Creado fuera de sesión formal, antes de la Sesión 6.*
