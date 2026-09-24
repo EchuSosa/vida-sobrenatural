@@ -49,6 +49,22 @@ export type ErrorCode =
   // ids que no coincide exactamente con los Libros activos actuales (de
   // menos, de más, o ajenos) — la lista cambió mientras se reordenaba.
   | 'LIBRO_ORDEN_CONJUNTO_INVALIDO'
+  // specs/005-roles-permisos-acceso, D133/H-128: otorgar un rol de cargo a
+  // una Persona menor de edad (FR-011).
+  | 'PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO'
+  // specs/005-roles-permisos-acceso, D131/FR-002: quitar el rol admin (o
+  // desactivar) a la Persona con adminSembrado=true.
+  | 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO'
+  // specs/005-roles-permisos-acceso, FR-010: un Admin intenta quitarse a sí
+  // mismo el rol admin.
+  | 'ADMIN_NO_PUEDE_AUTO_REVOCARSE'
+  // specs/005-roles-permisos-acceso, FR-009: quitar el rol discipulador a
+  // una Persona con discipulados activos a cargo.
+  | 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'
+  // specs/005-roles-permisos-acceso, FR-009/H-127: fallo cerrado mientras la
+  // consulta real contra el spec 004 no existe — quitar discipulador se
+  // rechaza siempre, no porque se haya verificado que tiene discipulados.
+  | 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */

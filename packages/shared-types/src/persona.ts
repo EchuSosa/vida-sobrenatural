@@ -28,6 +28,18 @@ export type TiempoCongregacion =
 
 export type EstadoPersona = 'activa' | 'pendiente_tutor';
 
+/**
+ * D133/H-128: ninguna Persona menor de esta edad puede recibir un rol de
+ * cargo (`RolDeCargo`, `permisos.ts`). Constante propia — **no** reutiliza
+ * `EDAD_MINIMA` de `apps/api/src/persona/persona.service.ts`, que ya
+ * significa otras dos cosas ahí (umbral de auto-registro, mayoría de edad
+ * del tutor): aunque hoy coincidan en el valor (18), son tres reglas
+ * independientes que deben poder moverse por separado. Vive acá, no en la
+ * API, porque FR-024 exige el mismo umbral también del lado del
+ * backoffice (research.md #7 del spec 005).
+ */
+export const EDAD_MINIMA_ROL_DE_CARGO = 18;
+
 /** Base Transversal (specs/002-base-transversal) — solo "es" en el MVP (D84). */
 export type Idioma = 'es';
 
