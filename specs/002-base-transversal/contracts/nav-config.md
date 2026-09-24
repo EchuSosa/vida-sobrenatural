@@ -1,5 +1,7 @@
 # Contract: Configuración de navegación (para features futuras)
 
+> **Actualizado por el spec 005 (2026-09-24).** Este contrato está escrito para que una feature futura sepa cómo sumarse a un menú, así que se mantiene al día en vez de quedar como registro histórico. El ítem del backoffice **ya no lleva un arreglo `roles`**: lleva un `permiso`, y los roles que ese permiso habilita viven en `CATALOGO_PERMISOS` (`packages/shared-types/src/permisos.ts`, D132). El resto del contrato —los tres menús, la web pública, la app con sesión— sigue vigente tal cual.
+
 Este es el "contrato" que permite que una feature futura se agregue a uno de los tres menús sin
 tocar el layout ni el componente de navegación — el objetivo explícito de este spec (Historia 1,
 "dejar lista la base común"). Ver `research.md`, Decisión 11.
@@ -37,11 +39,11 @@ interface ItemNavBackoffice {
   href: string;
   labelKey: string;
   icon: LucideIcon;
-  roles: Array<'admin' | 'discipulador' | 'lider_curso' | 'pastor'>;
+  permiso: Permiso | 'cualquier-sesion'; // D132 — los roles salen de CATALOGO_PERMISOS[permiso]
 }
 ```
 
-El layout del backoffice filtra este array contra `session.user.rol` (ya presente en la sesión, sin
+El layout del backoffice resuelve `CATALOGO_PERMISOS[permiso]` y filtra el resultado contra `session.user.rol` (ya presente en la sesión, sin
 llamada adicional a la API) y muestra la unión de ítems cuando una Persona tiene más de un rol —
 nunca hay que tocar el componente de menú para que una Persona con un rol nuevo vea sus ítems: basta
 con que su `rol` incluya el valor correspondiente en la base.
