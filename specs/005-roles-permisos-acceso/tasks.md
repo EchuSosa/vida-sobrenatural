@@ -139,10 +139,10 @@ documentos del plan; las tareas de abajo ya asumen la versión corregida:
 **Independent Test**: sesión Pastor recorre pantallas del backoffice, ve contenido, no ve acciones de gestión salvo en Palabra Profética.
 
 - [ ] T044 [US5] Auditoría de las pantallas con acciones reales (Libros, Palabra Profética, Sedes, Personas): confirmar que cada acción de crear/editar/eliminar/gestionar está condicionada a un permiso de **gestión** (`libros.gestionar`, `sedes.gestionar`, `personas.gestionar_roles` — todos sin `pastor`) y no al permiso de **ver** (`libros.ver`, `sedes.ver`, `personas.ver` — con `pastor`), excepto `palabra_profetica.editar` que sí incluye `pastor` (D129). Es una verificación sobre lo ya construido en las Historias 2/3, no código nuevo en el caso general.
-- [ ] T045 [US5] **Caso sin resolver, documentado a propósito, no decidido en esta tarea**: `mis-discipulados`, `mi-disponibilidad` y `mis-grupos` son pantallas personales del Discipulador/Líder de curso con sesión — Historia 5 pide que el Pastor pueda ver "cualquier pantalla", pero ninguna Acceptance Scenario aclara qué debería mostrarle una pantalla que hoy es inherentemente "mis X" (¿los discipulados de todos, agregados? ¿un estado vacío explicando por qué no aplica?). No se cambia el acceso de estas tres pantallas en esta tarea — queda como pregunta para una decisión de producto/spec, no una implementación a ciegas.
+- [ ] T045 [US5] **Resuelto por D134** (`docs/05-decisiones.md`, tomada tras reportar esto como caso abierto): las pantallas `mi-*` (`mis-discipulados`, `mi-disponibilidad`, `mis-grupos`) se recortan por **identidad** (quien mira), no por rol — "ver todo" (Historia 5) no anula eso, da acceso a las vistas administrativas, no al escritorio de otra Persona (D134-a). Extender `CATALOGO_PERMISOS` para que `mis_discipulados.ver`, `mi_disponibilidad.ver` y `mis_grupos.ver` (T009) incluyan también `pastor` — el Pastor pasa a poder navegar a las tres. Verificar que las tres pantallas consultan siempre por el `personaId` de la sesión actual (nunca "todos", nunca una rama especial `if (rol.includes('pastor'))`): a un Pastor le muestran las suyas, que son ninguna. Si no hay discipulados/disponibilidad/grupos propios, la pantalla renderiza el mismo `EstadoVacio` que vería cualquier Discipulador/Líder de curso sin asignaciones — sin mensaje ni copy especial para el caso del Pastor. La vista administrativa de discipulados (quién discipula a quién, encuentros, capítulos — sin el texto de las notas, D134-b) es trabajo del spec 004, no de esta tarea.
 - [ ] T046 [US5] Test e2e `apps/backoffice/e2e/pastor-solo-lectura.spec.ts`: sesión Pastor navega Libros, Palabra Profética, Sedes y Personas — ve contenido, no ve botones de crear/editar/eliminar salvo en Palabra Profética (donde sí los ve, D129).
 
-**Checkpoint**: acceso del Pastor verificado y consistente en las pantallas con acciones reales; el caso de las pantallas "mis X" queda marcado, no resuelto.
+**Checkpoint**: acceso del Pastor verificado y consistente en las pantallas con acciones reales, y en las tres pantallas `mi-*` (D134) — sin excepción por rol en ninguna.
 
 ---
 
@@ -213,6 +213,6 @@ punta a punta — el MVP funcional de este spec.
 2. Historia 1 (parcial) + Historia 2 → MVP, demo posible.
 3. Historia 3 → deja de haber duplicación en los 18+5 sitios existentes.
 4. Historia 4 → ninguna pantalla nueva nace sin declarar su permiso.
-5. Historia 5 → confirma/documenta el acceso de solo lectura del Pastor (con el caso abierto de T045).
+5. Historia 5 → confirma/documenta el acceso de solo lectura del Pastor, incluidas las pantallas `mi-*` recortadas por identidad (D134, T045).
 6. Historia 6 → auditoría y lugar único de roles de estado.
 7. Polish.
