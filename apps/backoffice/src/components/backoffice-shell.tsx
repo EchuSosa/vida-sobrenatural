@@ -17,7 +17,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@vida-sobrenatural/ui';
-import { itemsParaRoles, type RolBackoffice } from '../config/nav';
+import type { RolDeCargo } from '@vida-sobrenatural/shared-types';
+import { itemsParaRoles } from '../config/nav';
 import { MenuUsuario } from './selector-tema';
 
 /**
@@ -38,7 +39,7 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
 
   if (!session) return null;
 
-  const roles = session.user.rol as RolBackoffice[];
+  const roles = session.user.rol as RolDeCargo[];
   const items = itemsParaRoles(roles);
 
   return (

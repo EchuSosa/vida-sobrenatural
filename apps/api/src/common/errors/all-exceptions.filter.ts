@@ -51,6 +51,12 @@ const TITULOS: Record<ErrorCode, string> = {
   LIBRO_TEXTO_ALTERNATIVO_REQUERIDO: 'Falta el texto alternativo',
   PORTADA_DIMENSION_INSUFICIENTE: 'Imagen demasiado chica',
   LIBRO_ORDEN_CONJUNTO_INVALIDO: 'Conjunto de orden inválido',
+  // specs/005-roles-permisos-acceso (D131/D133/H-127).
+  PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO: 'La Persona es menor de edad',
+  NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO: 'No se puede degradar al Admin sembrado',
+  ADMIN_NO_PUEDE_AUTO_REVOCARSE: 'Un Admin no puede quitarse su propio rol',
+  DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS: 'Tiene discipulados activos a cargo',
+  DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS: 'No se puede verificar discipulados activos',
   ERROR_INTERNO: 'Error interno',
 };
 

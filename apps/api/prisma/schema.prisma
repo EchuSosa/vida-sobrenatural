@@ -183,6 +183,13 @@ model Persona {
   // Persona pasa a `activa`.
   rol String[] @default([])
 
+  // specs/005-roles-permisos-acceso, D131/FR-002: true únicamente para la
+  // Persona creada/actualizada por `scripts/recrear-admin.ts` — nunca
+  // seteado desde la app en runtime. El servicio de otorgar/quitar rol
+  // rechaza cualquier intento de quitarle `admin` o desactivarla mientras
+  // este campo sea true, sin importar quién lo pida.
+  adminSembrado Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

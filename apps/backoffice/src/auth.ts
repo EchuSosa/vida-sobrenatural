@@ -7,6 +7,7 @@ import {
   buscarPersonaPorEmail,
   mintApiToken,
 } from '@vida-sobrenatural/shared-types/auth-server';
+import { CATALOGO_PERMISOS, type Permiso } from '@vida-sobrenatural/shared-types';
 
 /**
  * H-41 (revisión manual, revisión de código): `testLoginHabilitado()`,
@@ -160,6 +161,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 export async function requerirSesion() {
   const session = await auth();
   if (!session) {
+    notFound();
+  }
+  return session;
+}
+
+/**
+ * research.md #3 del spec 005: hermano de `requerirSesion()` (H-116) —
+ * llama primero a esa, después resuelve `permiso` contra `CATALOGO_PERMISOS`
+ * (D132) y compara con los roles de la sesión. `notFound()` si no lo tiene,
+ * mismo criterio que `requerirSesion` (nunca un mensaje que revele que la
+ * pantalla existe a quien no puede verla).
+ */
+export async function requerirPermiso(permiso: Permiso) {
+  const session = await requerirSesion();
+  const rolesConPermiso = CATALOGO_PERMISOS[permiso];
+  const tieneRol = rolesConPermiso.some((rol) => session.user.rol.includes(rol));
+  if (!tieneRol) {
     notFound();
   }
   return session;
