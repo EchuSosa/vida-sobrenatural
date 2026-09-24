@@ -1,23 +1,48 @@
 # Contrato: búsqueda de Personas y otorgar/quitar rol de cargo (Historia 2)
 
 Extiende `apps/api/src/persona/` (o un módulo nuevo `roles/` que dependa de `persona/`, a decidir
-en `tasks.md` según tamaño). Todos los endpoints requieren el permiso `personas.gestionar_roles`
-(nombre provisorio del catálogo, FR-006/FR-007) vía `@RequierePermiso`.
+en `tasks.md` según tamaño). Los dos endpoints de otorgar/quitar rol requieren el permiso
+`personas.gestionar_roles` (nombre provisorio del catálogo, FR-006/FR-007) vía
+`@RequierePermiso` — exclusivo del rol `admin`. `GET /personas/buscar` es una excepción: al ser
+un endpoint existente reusado (ver abajo), mantiene su propio permiso (`personas.buscar`,
+`admin`+`discipulador`), no `personas.gestionar_roles`.
 
-## `GET /personas/buscar?q=...`
+## `GET /personas/buscar?q=...` (EXTENSIÓN de un endpoint existente, no uno nuevo)
 
-**Uso**: FR-005 — encontrar a quién ascender.
+**Corrección sobre la versión anterior de este contrato**: este endpoint **ya existe**
+(`persona.controller.ts`, `buscarPersonas` — H-29/D108, construido para elegir a quién vincular
+como tutor de un `pendiente_tutor`), con `@Roles('admin', 'discipulador')` y un `select` que hoy
+NO incluye `rol` ni filtra por edad. FR-005 no pide un endpoint nuevo, solo que el Admin pueda
+buscar — reusar este es preferible a duplicar la misma búsqueda de Personas en dos sitios (mismo
+espíritu que D132/Principio XI, aplicado a un endpoint y no a una regla de rol).
 
-**Request**: `q` (string, nombre u otro dato identificatorio), paginado (H-42).
+**Uso**: FR-005 — encontrar a quién ascender (además de su uso ya existente, H-29).
 
-**Response**: lista acotada — lo mínimo para identificar a la Persona (id, nombre, apellido,
-email, roles actuales), **no** el perfil completo (Fuera de alcance, Flujo 9).
+**Request**: `q` (string, nombre u otro dato identificatorio) — sin cambios de forma.
 
-**Regla FR-024**: excluye a las Personas menores de edad
-(`calcularEdad(fechaNacimiento) < EDAD_MINIMA_ROL_DE_CARGO` — constante propia de D133 en
-`packages/shared-types`, no la `EDAD_MINIMA` de `persona.service.ts`, ver research.md #7),
-sin importar su `estado` — no es un parámetro de filtro opcional, es el comportamiento por defecto
-y único de este endpoint (consecuencia de FR-011, no una opción de UI).
+**Response (EXTENDIDA)**: agregar `rol` al `select` existente (`BUSQUEDA_PERSONA_SELECT` en
+`persona.service.ts`, hoy `id`/`nombre`/`apellido`/`email`/`telefono`) — sigue siendo lo mínimo
+para identificar a la Persona y ver sus roles actuales, **no** el perfil completo (Fuera de
+alcance, Flujo 9).
+
+**Regla FR-024 (nueva, agregada a la búsqueda existente)**: excluye a las Personas menores de edad
+— filtro `where: { fechaNacimiento: { lte: <hoy menos EDAD_MINIMA_ROL_DE_CARGO años> } }` (mismo
+criterio exacto que `calcularEdad()`, expresado como comparación de fecha para que Postgres filtre
+sin traer filas de más — H-42), sin seleccionar `fechaNacimiento` en la respuesta (no hace falta
+exponerla). Constante `EDAD_MINIMA_ROL_DE_CARGO` de `packages/shared-types` (D133, no la
+`EDAD_MINIMA` de `persona.service.ts` — ver research.md #7). No es un parámetro opcional, es el
+comportamiento por defecto del endpoint.
+
+**Efecto colateral deseado sobre H-29**: excluir menores de esta búsqueda también mejora el caso
+de uso original (elegir un tutor) — un tutor es, por definición del dominio, alguien que se hace
+cargo de un menor, no otro menor. No es una regresión; es una restricción que faltaba ahí también.
+Revisar/actualizar los tests existentes de `buscarPersonas` (Constitución: un test que rompe por
+un cambio de modelo se arregla en el mismo commit que el cambio).
+
+**Permiso**: se mantiene `admin`/`discipulador` (sin cambios) — la restricción real de Historia 2
+no está en poder *buscar*, sino en poder *otorgar/quitar* (abajo), que sí queda exclusivo del
+Admin. Migra a `@RequierePermiso` como parte de la Historia 3 (uno de los 18 sitios existentes),
+sin cambiar los roles que ya tiene.
 
 ## `POST /personas/:id/roles`
 

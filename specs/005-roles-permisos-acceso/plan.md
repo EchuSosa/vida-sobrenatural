@@ -27,7 +27,7 @@ auditoría de cada cambio de rol de cargo.
 
 **Storage**: PostgreSQL vía Prisma (ya existente). Este spec agrega un modelo (`CambioDeRol`, auditoría — Historia 6) y extiende `Persona` con un flag para el Admin sembrado indegradable; el catálogo de permisos en sí **no** es una entidad de base de datos (D132).
 
-**Testing**: Jest (unit + integración, `apps/api`) y Playwright (e2e, `apps/backoffice`) — Principio VI. La verificación mecánica de FR-017 ("ninguna pantalla nueva nace sin protección") se implementa como un test de Jest/Node que recorre `apps/backoffice/src/app/**/page.tsx` y lo cruza contra el registro de permisos por pantalla, en la línea del ESLint `local/no-session-check-en-page` (H-116) pero para la pregunta inversa ("¿está declarada?", no "¿repite un chequeo prohibido?").
+**Testing**: Jest (unit + integración, `apps/api`) y Playwright (e2e, `apps/backoffice`) — Principio VI. La verificación mecánica de FR-017 ("ninguna pantalla nueva nace sin protección") se implementa como una regla de ESLint (`eslint-rules/pantalla-declara-permiso.mjs`), no un test de Jest — `apps/backoffice` no tiene Jest configurado, y ESLint ya es el mecanismo establecido en este repo para este tipo de chequeo por `page.tsx` (misma familia que `local/no-session-check-en-page`, H-116, pero para la pregunta inversa: "¿está declarada?", no "¿repite un chequeo prohibido?"). El registro contra el que se cruza es `NAV_BACKOFFICE` (`apps/backoffice/src/config/nav.ts`), ya existente — no uno nuevo (research.md #3).
 
 **Target Platform**: Docker Compose local (dev); despliegue real todavía no definido en `docs/10-stack-tecnico.md` más allá de "instalación por iglesia" (D130) — no es parte de este spec resolver el hosting, solo el camino de instalación de datos/Admin dentro de la app.
 
@@ -119,8 +119,14 @@ apps/api/scripts/
 apps/backoffice/src/
 ├── auth.ts                    # EXTENDIDO — requerirPermiso(permiso) además de requerirSesion()
 │                               # (Historia 4), leyendo el mismo CATALOGO_PERMISOS.
-├── permisos-por-pantalla.ts   # NUEVO — registro de qué permiso (o "cualquier sesión") requiere
-│                               # cada page.tsx (FR-016/FR-017): la base del chequeo mecánico.
+├── config/
+│   └── nav.ts                  # EXTENDIDO, no un archivo nuevo (research.md #3, hallazgo de
+│                                # revisión): NAV_BACKOFFICE ya es el registro ruta→acceso que
+│                                # Historia 4 necesita (lo usan itemsParaRoles() y
+│                                # axe-todas-las-rutas.spec.ts). `roles: RolBackoffice[]` pasa a
+│                                # `permiso: Permiso | 'cualquier-sesion'` (FR-016/FR-017); se
+│                                # agregan entradas `enMenu: false` para /libros/[id] y
+│                                # /sedes/[id], hoy sin ninguna.
 └── app/
     └── personas/
         └── page.tsx            # EXTENDIDO — hoy un placeholder ("vista unificada", fuera de

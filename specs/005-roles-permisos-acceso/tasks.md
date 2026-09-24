@@ -1,0 +1,218 @@
+# Tasks: Roles, permisos y acceso al backoffice
+
+**Input**: Design documents from `/specs/005-roles-permisos-acceso/`
+
+**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
+
+**Tests**: no pedidos explícitamente en el spec, pero la Constitución (Principio VI) exige test
+unitario para lógica de negocio con ramas, test de integración para cambios en cascada contra la
+base, y e2e para flujos críticos — se incluyen con ese criterio, no exhaustivos.
+
+**Organización**: agrupadas por historia de usuario (spec.md), en su orden de prioridad.
+
+## Hallazgos de esta sesión que cambian el plan (ya corregidos en research.md/data-model.md/contracts/, resumidos acá para quien lea las tareas)
+
+Verificando el plan contra el código antes de generar las tareas aparecieron tres conflictos que
+no existían al escribir `research.md` la primera vez — los tres ya están corregidos en los
+documentos del plan; las tareas de abajo ya asumen la versión corregida:
+
+1. **`GET /personas/buscar` ya existe** (`persona.controller.ts`, H-29/D108, para elegir tutor) —
+   no es un endpoint nuevo de este spec. Se **extiende**, no se duplica (contracts/roles-personas-api.md).
+2. **`NAV_BACKOFFICE` (`apps/backoffice/src/config/nav.ts`) ya es el registro ruta→acceso** que
+   Historia 4 necesita — usado hoy por el sidebar y por el smoke de accesibilidad
+   (`axe-todas-las-rutas.spec.ts`). Se **extiende** (campo `roles` → `permiso`), no se crea un
+   `permisos-por-pantalla.ts` nuevo (habría sido la misma duplicación que este spec existe para
+   eliminar, cometida por el propio spec).
+3. **`apps/backoffice` no tiene Jest configurado.** La verificación mecánica de FR-017 se
+   construye como una regla de ESLint (`eslint-rules/pantalla-declara-permiso.mjs`, misma familia
+   que `no-session-check-en-page.mjs` de H-116), no como un test de Jest.
+
+---
+
+## Phase 1: Setup
+
+- [ ] T001 [P] Crear `packages/shared-types/src/permisos.ts`: `RolDeCargo` (unión de los 4 roles de cargo), `Permiso` (unión vacía por ahora, se completa historia por historia), `CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]>` vacío — exportar los tres desde `packages/shared-types/src/index.ts`.
+- [ ] T002 [P] Agregar `EDAD_MINIMA_ROL_DE_CARGO = 18` a `packages/shared-types/src/persona.ts` (D133/H-128) — constante propia, **no** reutiliza `EDAD_MINIMA` de `apps/api/src/persona/persona.service.ts` (esa ya significa otras dos cosas ahí).
+- [ ] T003 [P] Agregar a `packages/shared-types/src/error-code.ts` los códigos nuevos de este spec (Principio X — un código por regla, comentario citando D131/D133/H-127 según corresponda): `PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO`, `NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO`, `ADMIN_NO_PUEDE_AUTO_REVOCARSE`, `DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS`, `DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS`.
+
+---
+
+## Phase 2: Foundational (Blocking Prerequisites)
+
+**⚠️ CRITICAL**: ninguna historia arranca hasta que esta fase esté completa.
+
+- [ ] T004 Extender `apps/api/prisma/schema.prisma`: `Persona.adminSembrado Boolean @default(false)` (data-model.md; FR-002).
+- [ ] T005 Generar y aplicar la migración de Prisma para T004 (`pnpm --filter api run db:migrate`).
+- [ ] T006 [P] Crear `apps/api/src/auth/permisos.decorator.ts`: `@RequierePermiso(permiso: Permiso)` — mismo patrón `SetMetadata` que `roles.decorator.ts` (depende de T001).
+- [ ] T007 Crear `apps/api/src/auth/permisos.guard.ts`: resuelve el permiso requerido contra `CATALOGO_PERMISOS` y compara con `request.user.rol`; si el permiso pedido no existe en el catálogo, **deniega** (fail-closed, Constitution Check Principio V) — depende de T001, T006.
+- [ ] T008 [P] Test unitario `apps/api/src/auth/permisos.guard.spec.ts`: un permiso no declarado en el catálogo deniega; un permiso declarado autoriza solo a los roles listados; ningún rol autoriza si `requiredRoles` está vacío (Principio VI) — depende de T007.
+- [ ] T009 Extender `apps/backoffice/src/config/nav.ts` (NO crear un archivo nuevo — research.md #3): renombrar `ItemNavBackoffice.roles: RolBackoffice[]` a `permiso: Permiso | 'cualquier-sesion'`; reescribir `itemsParaRoles(roles)` para resolver los roles efectivos de cada ítem vía `CATALOGO_PERMISOS[permiso]` antes de filtrar. Registrar en `CATALOGO_PERMISOS` (T001) un permiso `.ver` por cada ruta **preservando exactamente los roles que ya tiene hoy** (refactor sin cambio de comportamiento): `inicio.ver` (admin,pastor) → `/`; `personas.ver` (admin,pastor) → `/personas`; `pendientes_tutor.ver` (admin,discipulador,pastor) → `/pendientes-tutor`; `solicitudes.ver` (admin,pastor) → `/solicitudes`; `grupos.ver` (admin,pastor) → `/grupos`; `eventos.ver` (admin,pastor) → `/eventos`; `notificaciones.ver` (admin,pastor) → `/notificaciones`; `sedes.ver` (admin,pastor) → `/sedes` y `/sedes/[id]` (agregar esta última con `enMenu:false`, hoy sin entrada); `sedes.papelera.ver` (admin) → `/sedes/papelera`; `palabra_profetica.ver` (admin,pastor) → `/palabra-profetica`; `libros.ver` (admin,pastor) → `/libros` y `/libros/[id]` (agregar con `enMenu:false`, hoy sin entrada); `libros.papelera.ver` (admin) → `/libros/papelera`; `catalogos.ver` (admin,pastor) → `/catalogos`; `mis_discipulados.ver` (discipulador) → `/mis-discipulados`; `mi_disponibilidad.ver` (discipulador) → `/mi-disponibilidad`; `mis_grupos.ver` (lider_curso) → `/mis-grupos`. Depende de T001.
+- [ ] T010 Extender `apps/backoffice/src/auth.ts`: `requerirPermiso(permiso: Permiso)` — llama primero a `requerirSesion()`, después resuelve `CATALOGO_PERMISOS[permiso]` contra `session.user.rol`, `notFound()` si no lo tiene (mismo criterio que `requerirSesion`, research.md #3). Depende de T001.
+- [ ] T011 [P] Verificar (manual o script) que `pnpm --filter backoffice run test:e2e -- axe-todas-las-rutas` sigue en verde tras T009 — el refactor de `nav.ts` no debe cambiar qué ve cada rol en el sidebar.
+
+**Checkpoint**: catálogo, guard/decorator de la API, y registro de rutas del backoffice listos — las historias pueden empezar.
+
+---
+
+## Phase 3: User Story 1 - Instalar la iglesia con un Admin que funciona (Priority: P1) 🎯 MVP
+
+**Goal**: FR-001 a FR-004 — Admin sembrado indegradable + comando CLI de recuperación, documentado como parte de instalar el sistema.
+
+**Independent Test**: instalar desde cero, verificar Admin funcional sin tocar la base a mano; correr el comando en una instalación existente.
+
+**Nota de dependencia cruzada**: verificar que el Admin sembrado es indegradable (Acceptance Scenario 2) requiere el endpoint de quitar rol de la Historia 2 (T021/T023) — el enforcement de FR-002 se construye ahí (misma guarda que FR-010, mismo servicio), no acá. Esta historia entrega el script/CLI y la documentación, que son útiles y verificables por sí solos (Acceptance Scenarios 1, 3, 4) sin depender de la Historia 2.
+
+- [ ] T012 [P] [US1] Crear `apps/api/scripts/recrear-admin.ts`: script `tsx` idempotente (mismo patrón que `sembrar-e2e-admin.ts`) — recibe un email, crea la Persona con rol `admin` y `adminSembrado=true` si no existe, o se los agrega/confirma si ya existe (contracts/cli-recrear-admin.md).
+- [ ] T013 [US1] Agregar el script `db:recrear-admin` a `apps/api/package.json` (ej. `"db:recrear-admin": "tsx scripts/recrear-admin.ts"`) — depende de T012.
+- [ ] T014 [US1] Documentar el camino de instalación (FR-004): crear `docs/18-instalacion.md` (o el archivo/sección que corresponda según la convención de `docs/00-README.md`) con los pasos de FR-001 (primera instalación) y FR-003 (recuperación), explícitamente distinto de `specs/revision-manual/COMO-ARRANCAR.md` (atajo de entorno de desarrollo, D130 lo pide separado).
+- [ ] T015 [US1] Test de integración `apps/api/test/recrear-admin.e2e-spec.ts`: correr el script contra la base de test, verificar que crea la Persona; correrlo de nuevo, verificar que no duplica (idempotencia).
+- [ ] T016 [US1] Test de integración `apps/api/test/roles-admin-sembrado.e2e-spec.ts`: **depende de T021/T023 (Historia 2)** — `DELETE /personas/:id/roles/admin` sobre una Persona con `adminSembrado=true` devuelve `NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO`, sin importar quién lo pida (Acceptance Scenario 2).
+
+**Checkpoint**: comando CLI y documentación de instalación funcionando; la garantía de indegradabilidad queda verificada en conjunto con la Historia 2 (T016).
+
+---
+
+## Phase 4: User Story 2 - Encontrar y ascender a una Persona a un rol de cargo (Priority: P1)
+
+**Goal**: FR-005 a FR-011, FR-024 — búsqueda de Personas (extendiendo el endpoint existente), otorgar/quitar rol de cargo con las tres reglas de `/speckit.clarify` más el fallo cerrado de H-127.
+
+**Independent Test**: Admin busca una Persona, le otorga y le quita un rol de cargo; verificar los cuatro rechazos (menor de edad, admin sembrado, auto-revocación de admin, discipulador sin verificación).
+
+- [ ] T017 [US2] Extender `BUSQUEDA_PERSONA_SELECT` en `apps/api/src/persona/persona.service.ts`: agregar `rol` (para mostrar "roles actuales", FR-005) — no agregar `fechaNacimiento` al select.
+- [ ] T018 [US2] Extender `buscarPersonas(q)` en `apps/api/src/persona/persona.service.ts`: agregar al `where` el filtro FR-024 — `fechaNacimiento: { lte: <hoy menos EDAD_MINIMA_ROL_DE_CARGO años> } ` (mismo criterio exacto que `calcularEdad()`, expresado como fecha para que Postgres filtre sin traer de más, H-42). Depende de T002, T017.
+- [ ] T019 [US2] Revisar y actualizar los tests existentes de `buscarPersonas` (`persona.service.spec.ts`) tras T017/T018 — Constitución: un test que rompe por un cambio de modelo se arregla en el mismo commit que el cambio. Agregar un caso: una Persona menor de edad no aparece en el resultado aunque coincida el término de búsqueda.
+- [ ] T020 [P] [US2] Crear `apps/api/src/persona/dto/otorgar-rol.dto.ts`: `{ rol: RolDeCargo }` con `class-validator` (`@IsIn` de los 4 valores).
+- [ ] T021 [US2] Crear `apps/api/src/persona/roles.service.ts`, método `otorgarRol(personaId, rol, adminId)`: FR-006 (independiente de cualquier otro paso); FR-011 (rechaza si `calcularEdad(persona.fechaNacimiento) < EDAD_MINIMA_ROL_DE_CARGO`, código `PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO`); si ya tiene el rol, no duplica, responde éxito idempotente (Edge Case de spec.md). Depende de T002, T020.
+- [ ] T022 [US2] Mismo archivo, método `quitarRol(personaId, rol, adminId)`: FR-007; **FR-002** — rechaza (`NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO`) si la Persona destino tiene `adminSembrado=true` y `rol=admin`; **FR-010** — rechaza (`ADMIN_NO_PUEDE_AUTO_REVOCARSE`) si `rol=admin` y `personaId === adminId` (no aplica a otros roles de cargo); **FR-009/H-127** — si `rol=discipulador`, rechaza **siempre** por ahora (`DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS`, fallo cerrado — la consulta real contra el spec 004 todavía no existe, contracts/roles-personas-api.md). Depende de T021 (mismo archivo).
+- [ ] T023 [P] [US2] Test unitario `apps/api/src/persona/roles.service.spec.ts`: cubre las cuatro ramas de negocio de T021/T022 (menor de edad, admin sembrado, auto-revocación de admin, discipulador fallo cerrado) más el caso idempotente de otorgar un rol ya existente y el caso "quitar otro rol de cargo de uno mismo si permitido" (Principio VI). Depende de T021, T022.
+- [ ] T024 [US2] Crear `apps/api/src/persona/roles.controller.ts` (`@Controller('personas')`, junto a `PersonaController` en el mismo módulo): `POST /personas/:id/roles` y `DELETE /personas/:id/roles/:rol`, ambos con `@RequierePermiso('personas.gestionar_roles')`. Registrar `personas.gestionar_roles: ['admin']` en `CATALOGO_PERMISOS` (T001). Depende de T006, T007, T021, T022.
+- [ ] T025 [US2] Migrar el `@Roles('admin', 'discipulador')` de `GET /personas/buscar` (persona.controller.ts) a `@RequierePermiso('personas.buscar')`; registrar `personas.buscar: ['admin', 'discipulador']` en `CATALOGO_PERMISOS` (sin cambiar quién puede buscar — solo cómo se declara, contracts/roles-personas-api.md). Depende de T006, T007.
+- [ ] T026 [US2] Test de integración `apps/api/test/roles-personas.e2e-spec.ts`: otorgar un rol, quitarlo, los cuatro rechazos (menor de edad, admin sembrado, auto-revocación, discipulador), `GET /personas/buscar` excluyendo menores. Depende de T024, T025.
+- [ ] T027 [US2] Reescribir `apps/backoffice/src/app/personas/page.tsx` (hoy un placeholder `EstadoVacio`, fuera de alcance la vista unificada completa de Flujo 9): Server Component con `requerirPermiso('personas.ver')`, búsqueda por `q` (mismo patrón de URL/paginación que `apps/backoffice/src/app/sedes/page.tsx`), reusando `TablaDatos`/`ControlesTabla` de `packages/ui`. Depende de T009, T010, T024, T025.
+- [ ] T028 [US2] Crear `apps/backoffice/src/app/personas/personas-cliente.tsx`: Client Component con la tabla de resultados y, **solo si la sesión tiene el permiso `personas.gestionar_roles`** (chequeo vía `CATALOGO_PERMISOS`, no un `rol.includes` a mano), un modal por fila para otorgar/quitar un rol de cargo — muestra los cuatro mensajes de rechazo (T003) de forma legible, no un 403 genérico. Depende de T027.
+- [ ] T029 [US2] Verificar `apps/backoffice/src/app/personas/page.tsx`/`personas-cliente.tsx` contra el checklist de `docs/15-guia-ux-ui.md` (cuatro estados, una sola acción principal, orden de botones, tono, teclado/lector de pantalla, contraste en los dos temas).
+
+**Checkpoint**: Historia 2 funcional de punta a punta (con T016 de la Historia 1 verificando la indegradabilidad del Admin sembrado sobre este mismo endpoint).
+
+---
+
+## Phase 5: User Story 3 - Que la interfaz y la API nunca discrepen sobre quién puede hacer qué (Priority: P1)
+
+**Goal**: FR-012 a FR-015 — migrar los 18 `@Roles` existentes y los chequeos ad hoc del backoffice al catálogo único.
+
+**Independent Test**: cambiar quién tiene un permiso existente en un solo lugar y verlo reflejado en la API y el backoffice a la vez (el caso D129).
+
+- [ ] T030 [P] [US3] Migrar `apps/api/src/libro/libro.controller.ts`: reemplazar los 7 `@Roles('admin')` por `@RequierePermiso('libros.gestionar')`; registrar `libros.gestionar: ['admin']` en `CATALOGO_PERMISOS`.
+- [ ] T031 [P] [US3] Migrar `apps/api/src/palabra-profetica/palabra-profetica.controller.ts`: reemplazar los 3 `@Roles('admin', 'pastor')` por `@RequierePermiso('palabra_profetica.editar')`; registrar `palabra_profetica.editar: ['admin', 'pastor']` (D129 ya implementado — esta migración no cambia el resultado, solo su fuente).
+- [ ] T032 [P] [US3] Migrar `apps/api/src/persona/persona.controller.ts`: los `@Roles('admin', 'discipulador')` de `GET /pendientes-tutor`, `PATCH /:id/activar` y `PATCH /:id/marcar-inactiva` a `@RequierePermiso('pendientes_tutor.gestionar')`; registrar `pendientes_tutor.gestionar: ['admin', 'discipulador']`. (El cuarto `@Roles` de este controller, `GET /buscar`, ya se migró en T025 de la Historia 2 — no repetir.)
+- [ ] T033 [P] [US3] Migrar `apps/api/src/sede/sede.controller.ts`: reemplazar los 4 `@Roles('admin')` por `@RequierePermiso('sedes.gestionar')`; registrar `sedes.gestionar: ['admin']`.
+- [ ] T034 [US3] Migrar `apps/backoffice/src/app/libros/page.tsx`, `libros/[id]/page.tsx` y `libros/papelera/page.tsx`: reemplazar el `if (!rol.includes('admin') && !rol.includes('pastor'))` a mano por `requerirPermiso('libros.ver')` (ya registrado en T009); las acciones de editar/eliminar/portada dentro de la pantalla se condicionan a `libros.gestionar` (T030), no a `libros.ver`.
+- [ ] T035 [US3] Migrar `apps/backoffice/src/app/palabra-profetica/page.tsx`: mismo patrón — `requerirPermiso('palabra_profetica.ver')` para la pantalla, `palabra_profetica.editar` (T031) para las acciones (siguen incluyendo a `pastor`, D129).
+- [ ] T036 [US3] Migrar `apps/backoffice/src/app/sedes/papelera/page.tsx`: reemplazar el `try/catch` de `SIN_PERMISO` por `requerirPermiso('sedes.papelera.ver')` — decisión de este spec: chequear antes de pedir los datos, no reaccionar al error después (mismo criterio que las demás pantallas protegidas, FR-016).
+- [ ] T037 [US3] Verificar con `grep -rn "@Roles(" apps/api/src/` que da cero resultados (SC-005) y con una revisión manual que ningún archivo de `apps/backoffice` declara una lista de roles propia fuera de lo que resuelve `requerirPermiso`/`itemsParaRoles` (FR-013).
+- [ ] T038 [US3] Verificar T034/T035/T036 contra el checklist de `docs/15-guia-ux-ui.md` — el mecanismo de protección cambia, el contenido visual no; confirmar que ningún estado (cargando/vacío/error/éxito) se rompió con el cambio.
+
+**Checkpoint**: catálogo único gobernando los 18 sitios de la API y los 5 de backoffice que hoy declaraban un rol a mano.
+
+---
+
+## Phase 6: User Story 4 - Ninguna pantalla nueva del backoffice nace sin protección por rol (Priority: P2)
+
+**Goal**: FR-016/FR-017 — mecanismo uniforme (`requerirPermiso`, ya construido en Foundational) + detección mecánica de una pantalla sin declarar.
+
+**Independent Test**: pantalla de prueba protegida por un permiso del catálogo; un rol sin ese permiso queda afuera; una pantalla sin entrada en `NAV_BACKOFFICE` hace fallar el lint.
+
+- [ ] T039 [US4] Crear `eslint-rules/pantalla-declara-permiso.mjs` (misma familia que `no-session-check-en-page.mjs`, H-116): recorre cada `page.tsx` bajo `apps/backoffice/src/app/`, deriva su ruta del path del archivo, importa `NAV_BACKOFFICE` de `apps/backoffice/src/config/nav.ts` y falla si esa ruta no tiene entrada — resolver en esta tarea cómo el runtime de ESLint (`.mjs`) importa un módulo TypeScript (`nav.ts`); research.md #3 lo deja como detalle de construcción, no de diseño.
+- [ ] T040 [US4] Wire de T039 en `apps/backoffice/eslint.config.mjs` (mismo patrón que `local/no-session-check-en-page`, línea 8/46 de ese archivo).
+- [ ] T041 [P] [US4] Test de la regla T039 (fixture `page.tsx` sin entrada en `NAV_BACKOFFICE` → debe fallar; con entrada → debe pasar) — seguir la convención de test que ya usen las demás reglas de `eslint-rules/` (verificar en esta tarea si existe un archivo `*.test.mjs` hermano para alguna regla existente y replicar esa forma).
+- [ ] T042 [US4] Correr `pnpm --filter backoffice run lint` sobre el estado actual del repo (con T009/T030-T036 ya aplicados) y confirmar cero violaciones — las 17 rutas existentes ya tienen entrada desde T009.
+- [ ] T043 [US4] Documentar en el propio `pantalla-declara-permiso.mjs` (comentario de cabecera, mismo estilo que `no-session-check-en-page.mjs`) el criterio y la historia de origen (H-116 resolvió sesión; esta regla resuelve permiso).
+
+**Checkpoint**: cualquier `page.tsx` nuevo que no declare su permiso en `NAV_BACKOFFICE` rompe el lint — no depende de que alguien lo recuerde.
+
+---
+
+## Phase 7: User Story 5 - El Pastor ve todo el backoffice, sin gestionarlo (Priority: P2)
+
+**Goal**: FR-018 — confirmar/ajustar que el Pastor tiene acceso de solo lectura consistente, con la excepción ya decidida de Palabra Profética (D129).
+
+**Independent Test**: sesión Pastor recorre pantallas del backoffice, ve contenido, no ve acciones de gestión salvo en Palabra Profética.
+
+- [ ] T044 [US5] Auditoría de las pantallas con acciones reales (Libros, Palabra Profética, Sedes, Personas): confirmar que cada acción de crear/editar/eliminar/gestionar está condicionada a un permiso de **gestión** (`libros.gestionar`, `sedes.gestionar`, `personas.gestionar_roles` — todos sin `pastor`) y no al permiso de **ver** (`libros.ver`, `sedes.ver`, `personas.ver` — con `pastor`), excepto `palabra_profetica.editar` que sí incluye `pastor` (D129). Es una verificación sobre lo ya construido en las Historias 2/3, no código nuevo en el caso general.
+- [ ] T045 [US5] **Caso sin resolver, documentado a propósito, no decidido en esta tarea**: `mis-discipulados`, `mi-disponibilidad` y `mis-grupos` son pantallas personales del Discipulador/Líder de curso con sesión — Historia 5 pide que el Pastor pueda ver "cualquier pantalla", pero ninguna Acceptance Scenario aclara qué debería mostrarle una pantalla que hoy es inherentemente "mis X" (¿los discipulados de todos, agregados? ¿un estado vacío explicando por qué no aplica?). No se cambia el acceso de estas tres pantallas en esta tarea — queda como pregunta para una decisión de producto/spec, no una implementación a ciegas.
+- [ ] T046 [US5] Test e2e `apps/backoffice/e2e/pastor-solo-lectura.spec.ts`: sesión Pastor navega Libros, Palabra Profética, Sedes y Personas — ve contenido, no ve botones de crear/editar/eliminar salvo en Palabra Profética (donde sí los ve, D129).
+
+**Checkpoint**: acceso del Pastor verificado y consistente en las pantallas con acciones reales; el caso de las pantallas "mis X" queda marcado, no resuelto.
+
+---
+
+## Phase 8: User Story 6 - Saber quién otorgó o quitó un rol, y cuándo (Priority: P3)
+
+**Goal**: FR-019 a FR-023 — lugar único de escritura de roles de estado, y auditoría de cambios de rol de cargo.
+
+**Independent Test**: otorgar y quitar un rol de cargo, verificar un registro consultable de ambas acciones.
+
+- [ ] T047 [US6] Agregar el modelo `CambioDeRol` a `apps/api/prisma/schema.prisma` (id, `personaId` FK indexada, `rol String`, `accion` enum `AccionCambioRol {otorgado, quitado}`, `realizadoPorId String`, `createdAt` — sin `updatedAt`, sin soft delete, data-model.md).
+- [ ] T048 [US6] Generar y aplicar la migración de Prisma para T047.
+- [ ] T049 [US6] Crear `apps/api/src/cambio-de-rol/cambio-de-rol.service.ts`: `registrar(personaId, rol, accion, realizadoPorId)` (solo `INSERT`, nunca `UPDATE`/`DELETE`) y `listar(personaId?, skip, take)`. Depende de T047/T048.
+- [ ] T050 [US6] Conectar `roles.service.ts` (T021/T022, Historia 2) para que `otorgarRol`/`quitarRol` llamen a `cambioDeRolService.registrar(...)` después de cada cambio exitoso (FR-022) — modifica los métodos ya construidos en la Historia 2, no los reescribe. Depende de T021, T022, T049.
+- [ ] T051 [US6] Crear `apps/api/src/cambio-de-rol/cambio-de-rol.controller.ts`: `GET /cambios-de-rol?personaId=...`, paginado (H-42), `@RequierePermiso('personas.gestionar_roles')` (mismo permiso que otorgar/quitar — sin pantalla de auditoría separada, spec.md no pide esa granularidad). Depende de T006, T007, T049.
+- [ ] T052 [P] [US6] Test unitario `cambio-de-rol.service.spec.ts`: `registrar` inserta sin tocar filas previas; `listar` pagina y filtra por `personaId`.
+- [ ] T053 [US6] Test de integración: otorgar y quitar un rol (endpoints de la Historia 2) deja dos filas en `CambioDeRol`, consultables vía `GET /cambios-de-rol`. Depende de T050, T051.
+- [ ] T054 [US6] Un lugar único donde el sistema escribe los roles de **estado** (FR-019): crear `apps/api/src/persona/roles-de-estado.service.ts` con `otorgarRolDeEstado(personaId, rol)` — sin condición de negocio propia (a diferencia de los roles de cargo, siempre se otorga, nunca se quita, FR-019).
+- [ ] T055 [US6] Migrar las dos escrituras existentes de `miembro_registrado` (registro, Flujo 2; alta por Admin) para que pasen por T054 en vez de escribir `Persona.rol` directo — ubicar los dos sitios exactos en `persona.service.ts` antes de tocarlos (FR-020).
+- [ ] T056 [US6] Extender `apps/backoffice/src/app/personas/personas-cliente.tsx` (Historia 2, T028): agregar una acción "Ver historial de roles" por fila que abre un modal con lo que devuelve `GET /cambios-de-rol?personaId=...` (Acceptance Scenario 3). Depende de T028, T051.
+- [ ] T057 [US6] Verificar T056 (modificación de `personas-cliente.tsx`) contra el checklist de `docs/15-guia-ux-ui.md`.
+
+**Checkpoint**: todas las historias completas — cambios de rol auditados, escritura de roles de estado centralizada.
+
+---
+
+## Phase 9: Polish & Cross-Cutting Concerns
+
+- [ ] T058 [P] Actualizar `docs/03-roles-permisos.md` si hace falta tras la implementación real (verificar que sigue coincidiendo con D131/D133 y con los permisos nuevos del catálogo — no debería requerir cambios de fondo, solo confirmar).
+- [ ] T059 [P] Swagger: confirmar que los endpoints nuevos (`POST/DELETE /personas/:id/roles`, `GET /cambios-de-rol`) quedan documentados con `@ApiOkResponse`/`@ApiCreatedResponse` describiendo la historia que los agrega, mismo estilo que el resto de `persona.controller.ts`.
+- [ ] T060 Revisar que ningún `console.log`/dato personal quede en logs de los nuevos servicios (Principio X, Sentry sin datos personales).
+- [ ] T061 Correr `pnpm --filter backoffice run lint` y confirmar cero violaciones de `pantalla-declara-permiso` (T039) sobre el estado final del árbol de `apps/backoffice/src/app/`.
+- [ ] T062 Correr `specs/005-roles-permisos-acceso/quickstart.md` completo (los 6 escenarios) contra un entorno local levantado.
+- [ ] T063 Correr las tres suites de la convención de `docs/00-README.md` antes de dar la fase por cerrada: `pnpm --filter api run test`, `pnpm --filter api run test:e2e` (config aparte), y los e2e de `apps/backoffice` (`pnpm --filter backoffice exec playwright test`) — las tres en verde (Governance, D114).
+
+---
+
+## Dependencies & Execution Order
+
+### Fases
+
+- **Setup (1)**: sin dependencias.
+- **Foundational (2)**: depende de Setup — bloquea todas las historias.
+- **Historia 1 (3)** y **Historia 2 (4)**: dependen de Foundational; T016 de la Historia 1 depende además de T021/T023 de la Historia 2 (cruce explícito, documentado ahí).
+- **Historia 3 (5)**: depende de Foundational; T032 depende de T025 (Historia 2) para no migrar `GET /buscar` dos veces.
+- **Historia 4 (6)**: depende de Foundational (T009) y, para T042 (cero violaciones), de que la Historia 3 (5) ya haya migrado las pantallas ad hoc.
+- **Historia 5 (7)**: depende de las Historias 2 y 3 (los permisos de gestión vs. ver que audita ya deben existir).
+- **Historia 6 (8)**: depende de la Historia 2 (T021/T022, que T050 modifica).
+- **Polish (9)**: depende de todas las historias que se decida incluir en esta iteración.
+
+### Historias P1 entre sí
+
+Aunque spec.md numera Historia 1, 2, 3 en ese orden, la secuencia de construcción real es
+**Foundational → Historia 2 → Historia 1 (cierre de T016) → Historia 3** — Foundational ya deja
+el mecanismo de permisos listo (T001-T010) para que la Historia 2 lo use desde el primer
+endpoint nuevo, en vez de escribir `@Roles` y migrar después.
+
+## Implementation Strategy
+
+### MVP (Historia 1 + Historia 2)
+
+Setup → Foundational → Historia 1 (T012-T015, sin T016 todavía) → Historia 2 completa → T016
+(cierra la Historia 1). Con esto, un Admin sembrado ya puede otorgar/quitar roles de cargo de
+punta a punta — el MVP funcional de este spec.
+
+### Incremental
+
+1. Setup + Foundational.
+2. Historia 1 (parcial) + Historia 2 → MVP, demo posible.
+3. Historia 3 → deja de haber duplicación en los 18+5 sitios existentes.
+4. Historia 4 → ninguna pantalla nueva nace sin declarar su permiso.
+5. Historia 5 → confirma/documenta el acceso de solo lectura del Pastor (con el caso abierto de T045).
+6. Historia 6 → auditoría y lugar único de roles de estado.
+7. Polish.

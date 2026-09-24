@@ -60,13 +60,13 @@ Con la sesión de Admin:
 ## 4. Protección por pantalla (Historia 4)
 
 ```bash
-pnpm --filter backoffice run test -- permisos-por-pantalla
+pnpm --filter backoffice run lint
 ```
 
-(nombre exacto del test a fijar en `tasks.md`)
-
 **Esperado**: pasa mientras toda ruta bajo `apps/backoffice/src/app/**/page.tsx` tenga una entrada
-en `permisos-por-pantalla.ts`. Crear una `page.tsx` de prueba sin agregarla al registro y
+en `NAV_BACKOFFICE` (`apps/backoffice/src/config/nav.ts`) — verificado por la regla de ESLint
+`eslint-rules/pantalla-declara-permiso.mjs` (research.md #3), no un test de Jest (`apps/backoffice`
+no tiene Jest configurado). Crear una `page.tsx` de prueba sin agregarla al registro y
 verificar que el test falla (FR-017) — después borrar la página de prueba.
 
 ## 5. Acceso de solo lectura del Pastor (Historia 5)

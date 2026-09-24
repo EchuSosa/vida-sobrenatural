@@ -61,14 +61,30 @@ filtra "qué hizo este Admin".
 
 ## Registro de permisos por pantalla (backoffice, no es una entidad de base de datos — FR-016/FR-017)
 
-`apps/backoffice/src/permisos-por-pantalla.ts`: mapa de ruta (segmento bajo `app/`) a
-`Permiso | 'cualquier-sesion'`. Se consulta en dos momentos:
+**Revisado (no es un archivo nuevo)**: `NAV_BACKOFFICE` (`apps/backoffice/src/config/nav.ts`) ya
+es este registro — mapea cada ruta real del backoffice a quién puede acceder, y ya lo consumen
+tanto el sidebar (`itemsParaRoles`) como el smoke de accesibilidad
+(`apps/backoffice/e2e/axe-todas-las-rutas.spec.ts`). Este spec lo **extiende**, no crea uno
+paralelo (research.md #3 — la decisión original de un archivo nuevo se descartó al encontrar
+este):
+
+- `ItemNavBackoffice.roles: RolBackoffice[]` pasa a `ItemNavBackoffice.permiso: Permiso | 'cualquier-sesion'`.
+- `itemsParaRoles(roles)` resuelve los roles efectivos de cada ítem vía `CATALOGO_PERMISOS[permiso]`
+  antes de filtrar, en vez de leer una lista de roles declarada ahí mismo.
+- Las dos rutas reales sin entrada hoy (`/libros/[id]`, `/sedes/[id]`) se agregan con
+  `enMenu: false` (mismo patrón que `/sedes/papelera`).
+
+Se consulta en dos momentos:
 
 1. En runtime, indirectamente, vía `requerirPermiso(permiso)` que cada `page.tsx` invoca (mismo
-   dato, pasado explícito, no leído del mapa en runtime — el mapa es para el chequeo mecánico, no
-   para que la página "descubra" su propio permiso).
-2. En un test que recorre el árbol de archivos y verifica que toda ruta con `page.tsx` tiene una
-   entrada — falla si falta, exactamente el mecanismo que pide FR-017.
+   dato, pasado explícito, no leído de `NAV_BACKOFFICE` en runtime — ese registro es para el
+   chequeo mecánico y el menú, no para que la página "descubra" su propio permiso).
+2. En una regla de ESLint (`eslint-rules/pantalla-declara-permiso.mjs`, misma familia que
+   `no-session-check-en-page.mjs` de H-116) que recorre cada `page.tsx` de
+   `apps/backoffice/src/app/` y verifica que su ruta tiene una entrada en `NAV_BACKOFFICE` — falla
+   si falta, exactamente el mecanismo que pide FR-017. No un test de Jest: `apps/backoffice` no
+   tiene Jest configurado (solo Playwright e2e), y ESLint ya es el mecanismo establecido en este
+   repo para este tipo de chequeo mecánico por archivo (research.md #3).
 
 ## Estados y transiciones
 

@@ -43,27 +43,57 @@ cada controller (en vez de un decorador + Guard) — descartado porque pierde la
 `@Roles` (declarativo, visible en la firma del endpoint, documentado por Swagger) sin ganar nada
 a cambio.
 
-## 3. Cómo protege una pantalla del backoffice (Historia 4, FR-016/FR-017)
+## 3. Cómo protege una pantalla del backoffice (Historia 4, FR-016/FR-017) — REVISADA
 
-**Decisión de dos partes**:
-1. `requerirPermiso(permiso)` en `apps/backoffice/src/auth.ts`, hermano de `requerirSesion()`
-   (H-116) — llama primero a `requerirSesion()`, después chequea el permiso contra el mismo
-   `CATALOGO_PERMISOS`, y usa `notFound()` igual que `requerirSesion()` si no lo tiene (mismo
-   criterio ya documentado ahí: evitar log de stack trace en un caso esperado y frecuente).
-2. Un registro explícito `apps/backoffice/src/permisos-por-pantalla.ts` que mapea cada ruta a un
-   `Permiso` o al valor explícito `'cualquier-sesion'` (para pantallas como la Historia 5, el
-   Pastor, o pantallas sin restricción de rol) — y un test que recorre
-   `apps/backoffice/src/app/**/page.tsx` y falla si alguna ruta no tiene entrada.
+**Hallazgo que cambia la decisión original**: `apps/backoffice/src/config/nav.ts` ya tiene
+`NAV_BACKOFFICE: ItemNavBackoffice[]` — un registro único de ruta → `roles: RolBackoffice[]`, con
+un comentario explícito que dice por qué las rutas secundarias (ej. `/sedes/papelera`) están ahí
+con `enMenu: false` en vez de en una lista aparte: *"quedan en NAV_BACKOFFICE (una sola fuente de
+verdad, Principio XI) para que el smoke de axe/scroll horizontal (H-61) las recorra igual, sin
+mantener una segunda lista a mano"*. Y en efecto, `apps/backoffice/e2e/axe-todas-las-rutas.spec.ts`
+ya recorre `NAV_BACKOFFICE` para auditar con axe y chequear scroll horizontal cada ruta — con su
+propio comentario: *"la lista de rutas sale de nav.ts, no de un array a mano que se desactualice
+(Principio XI)"*. La decisión original de este documento (un archivo nuevo,
+`permisos-por-pantalla.ts`) habría creado exactamente la segunda lista que ese comentario dice
+que no debe existir — la misma clase de duplicación que este spec entero existe para eliminar,
+ahora cometida por el propio spec. Se descarta esa parte de la decisión.
+
+**Decisión (revisada)**:
+1. `requerirPermiso(permiso)` en `apps/backoffice/src/auth.ts` — sin cambios respecto a la
+   decisión original: hermano de `requerirSesion()` (H-116), llama primero a `requerirSesion()`,
+   después chequea el permiso contra `CATALOGO_PERMISOS`, `notFound()` si no lo tiene.
+2. **`NAV_BACKOFFICE` se extiende, no se duplica**: el campo `roles: RolBackoffice[]` de cada
+   `ItemNavBackoffice` pasa a ser `permiso: Permiso | 'cualquier-sesion'` — el nombre con el que
+   Historia 3 ya nombra la misma idea, en vez de una lista de roles cruda repetida acá aparte del
+   catálogo. `itemsParaRoles()` resuelve los roles efectivos de cada ítem vía
+   `CATALOGO_PERMISOS[permiso]` (o cualquier rol, si `'cualquier-sesion'`) antes de filtrar por
+   los roles de la Persona — mismo resultado que hoy, una fuente menos.
+3. Dos rutas reales hoy sin entrada en `NAV_BACKOFFICE` (`/libros/[id]`, `/sedes/[id]` — no están
+   en el menú, y tampoco están marcadas `enMenu: false` como sí lo está `/sedes/papelera`) se
+   agregan con `enMenu: false`, mismo patrón que las demás rutas secundarias.
+4. El mecanismo de FR-017 (verificado: `apps/backoffice` **no tiene Jest configurado**, solo
+   Playwright e2e en `apps/backoffice/e2e/` — un test "de archivos" en Jest exigiría montar un
+   framework de test nuevo para un solo chequeo) se implementa como **una regla de ESLint más**,
+   `eslint-rules/pantalla-declara-permiso.mjs`, en la misma familia que
+   `no-session-check-en-page.mjs` (H-116): se dispara sobre cada `page.tsx` de
+   `apps/backoffice/src/app/`, deriva la ruta del archivo por su path, y falla si esa ruta no
+   tiene entrada en `NAV_BACKOFFICE`. Revisa la decisión original de este documento (que
+   descartaba un enfoque solo-ESLint por "prohíbe un patrón, no exige presencia") — verificado
+   que sí se puede: un rule de ESLint corre en Node con resolución de módulos completa, así que
+   puede importar `NAV_BACKOFFICE` como datos de referencia igual que cualquier otro módulo, no
+   solo inspeccionar el AST del archivo que audita. Queda para la tarea de implementación resolver
+   el detalle de cómo ese import cruza de `.mjs` a `nav.ts` (TypeScript) dentro del runtime de
+   ESLint del repo — no cambia la decisión, es un detalle de construcción.
 
 **Rationale**: El chequeo de sesión (H-116) resolvió su parte con un guard centralizado en el
 layout porque la pregunta es binaria y aplica a *todas* las pantallas por igual. El chequeo de
 **permiso** no puede vivir solo en el layout porque cada pantalla necesita uno *distinto* (o
 ninguno) — por eso hace falta la combinación de un helper (para no repetir el chequeo a mano,
-FR-016) *más* un registro auditable (para que "me olvidé de escribirlo" se note, FR-017: un
-`page.tsx` nuevo que no aparece en el registro es indistinguible de un error hasta que el test lo
-marca). Un enfoque solo-ESLint (como `no-session-check-en-page`) no alcanza acá porque esa regla
-prohíbe un patrón; esta necesita *exigir la presencia* de una entrada, que es más fácil de
-expresar como test sobre el sistema de archivos que como regla de AST.
+FR-016) *más* un registro auditable (para que "me olvidé de escribirlo" se note, FR-017). Ese
+registro ya existía — `NAV_BACKOFFICE` — construido para un propósito adyacente (el menú lateral
+y el smoke de accesibilidad) con la misma forma exacta que este spec necesita (ruta → quién puede
+acceder). Extenderlo, en vez de crear uno nuevo, es la aplicación directa de Principio XI a la
+propia Historia 4, no solo a la matriz de permisos de la API.
 
 **Alternativas consideradas**: Middleware de Next.js (`middleware.ts`) centralizado con un mapa
 ruta→permiso — se descarta por ahora porque el middleware de Next corre en el Edge runtime, más
