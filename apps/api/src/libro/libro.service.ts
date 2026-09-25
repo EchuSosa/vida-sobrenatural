@@ -35,7 +35,8 @@ export class LibroService {
   /**
    * FR-007/FR-008 (`estado=activas`, default — lo único que usa
    * `apps/web`), D117/H-51 (`estado=todas`, backoffice), D119
-   * (`estado=papelera`). H-42: paginado + `select` explícito, ordenado por
+   * (`'papelera'`, que llega solo desde `GET /libros/papelera`, protegido —
+   * H-129). H-42: paginado + `select` explícito, ordenado por
    * `orden` (define la posición en el listado público, FR-016).
    */
   async findAll(estado: 'activas' | 'todas' | 'papelera', skip: number, take: number) {

@@ -18,8 +18,6 @@ import { ActualizarPreferenciasDto } from './dto/actualizar-preferencias.dto.js'
 import { ActualizarPerfilDto } from './dto/actualizar-perfil.dto.js';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import { InternalLookupGuard } from '../auth/internal-lookup.guard.js';
-import { RolesGuard } from '../auth/roles.guard.js';
-import { Roles } from '../auth/roles.decorator.js';
 import { PermisosGuard } from '../auth/permisos.guard.js';
 import { RequierePermiso } from '../auth/permisos.decorator.js';
 import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
@@ -88,8 +86,8 @@ export class PersonaController {
   }
 
   @Get('pendientes-tutor')
-  @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin', 'discipulador')
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('pendientes_tutor.gestionar')
   @ApiBearerAuth()
   @ApiOkResponse({
     description:
@@ -132,7 +130,7 @@ export class PersonaController {
     return this.personaService.listarPersonas(skip, take, buscar, orden, dir, soloMayoresParam === 'true');
   }
 
-  // T025: mismos roles que tenía con @Roles('admin', 'discipulador') — solo
+  // T025: mismos roles que tenía antes (admin y discipulador) — solo
   // cambia cómo se declara (catálogo, D132), no quién puede buscar.
   @Get('buscar')
   @UseGuards(JwtNextAuthGuard, PermisosGuard)
@@ -144,8 +142,8 @@ export class PersonaController {
   }
 
   @Patch(':id/activar')
-  @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin', 'discipulador')
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('pendientes_tutor.gestionar')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'FR-008 — activa manualmente un pendiente_tutor (Flujo 7, camino A).' })
   activar(@Param('id') id: string, @Body() dto: ActivarPersonaDto) {
@@ -153,8 +151,8 @@ export class PersonaController {
   }
 
   @Patch(':id/marcar-inactiva')
-  @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin', 'discipulador')
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('pendientes_tutor.gestionar')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'FR-014 — cierra un pendiente_tutor no autorizado (soft delete).' })
   marcarInactiva(@Param('id') id: string) {

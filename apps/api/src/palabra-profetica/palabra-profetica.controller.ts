@@ -5,8 +5,8 @@ import { PalabraProfeticaService } from './palabra-profetica.service.js';
 import { CrearPalabraProfeticaDto } from './dto/crear-palabra-profetica.dto.js';
 import { ActualizarPalabraProfeticaDto } from './dto/actualizar-palabra-profetica.dto.js';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
-import { RolesGuard } from '../auth/roles.guard.js';
-import { Roles } from '../auth/roles.decorator.js';
+import { PermisosGuard } from '../auth/permisos.guard.js';
+import { RequierePermiso } from '../auth/permisos.decorator.js';
 
 /** H-42: default de paginación del historial, acotado a un máximo de 100 (mismo criterio que pendientes-tutor). */
 const HISTORIAL_TAKE_DEFAULT = 20;
@@ -51,8 +51,8 @@ export class PalabraProfeticaController {
 
   /** D129: Admin y Pastor, las dos — la Palabra Profética la escribe un pastor, no debería depender de pedirle a quien administra el sistema que apriete guardar. */
   @Post()
-  @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin', 'pastor')
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('palabra_profetica.editar')
   @ApiBearerAuth()
   @ApiCreatedResponse({ description: 'FR-010 — Historia 3, Admin o Pastor (D129). youtubeUrl es opcional (D121).' })
   create(@Body() dto: CrearPalabraProfeticaDto) {
@@ -61,8 +61,8 @@ export class PalabraProfeticaController {
 
   /** D129: Admin y Pastor, las dos. */
   @Patch(':id')
-  @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin', 'pastor')
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('palabra_profetica.editar')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'FR-010/FR-011 — edición parcial (Admin o Pastor, D129), no toca `vigente` (ver /marcar-vigente).' })
   update(@Param('id') id: string, @Body() dto: ActualizarPalabraProfeticaDto) {
@@ -75,8 +75,8 @@ export class PalabraProfeticaController {
    * escribe la palabra del año es quien decide cuál rige.
    */
   @Patch(':id/marcar-vigente')
-  @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin', 'pastor')
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('palabra_profetica.editar')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'FR-012, SC-006 — desmarca la anterior en la misma transacción, sin paso manual aparte.' })
   marcarVigente(@Param('id') id: string) {

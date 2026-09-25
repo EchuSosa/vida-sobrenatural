@@ -27,7 +27,7 @@ export interface Libro {
   portadaUrl: string | null;
   portadaDescripcion: string | null;
   activo: boolean;
-  /** D119: `null` si no está eliminado — GET /libros y /libros/:id nunca devuelven uno eliminado, solo GET /libros?estado=papelera. */
+  /** D119: `null` si no está eliminado — GET /libros y /libros/:id nunca devuelven uno eliminado, solo GET /libros/papelera (Admin, H-129). */
   eliminadoEn: string | null;
 }
 

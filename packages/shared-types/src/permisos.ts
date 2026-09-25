@@ -43,7 +43,13 @@ export type Permiso =
   | 'personas.gestionar_roles'
   // Historia 2 (T025): GET /personas/buscar, el buscador de tutor (H-29) —
   // mismos roles que ya tenía con `@Roles`, solo cambia cómo se declara.
-  | 'personas.buscar';
+  | 'personas.buscar'
+  // Historia 3 (T030-T033): los `@Roles` que quedaban en la API, migrados
+  // con los mismos roles que declaraban — solo cambia la fuente (D132).
+  | 'libros.gestionar'
+  | 'palabra_profetica.editar'
+  | 'pendientes_tutor.gestionar'
+  | 'sedes.gestionar';
 
 export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'inicio.ver': ['admin', 'pastor'],
@@ -64,6 +70,11 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'mis_grupos.ver': ['lider_curso'],
   'personas.gestionar_roles': ['admin'],
   'personas.buscar': ['admin', 'discipulador'],
+  'libros.gestionar': ['admin'],
+  // D129: el Pastor carga y edita la Palabra Profética igual que el Admin.
+  'palabra_profetica.editar': ['admin', 'pastor'],
+  'pendientes_tutor.gestionar': ['admin', 'discipulador'],
+  'sedes.gestionar': ['admin'],
 };
 
 /**

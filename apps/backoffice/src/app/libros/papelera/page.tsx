@@ -35,7 +35,7 @@ export default async function PapeleraLibrosPage({
 
   let pagina: Pagina<Libro>;
   try {
-    pagina = await apiFetch<Pagina<Libro>>('/libros?estado=papelera&take=200', {
+    pagina = await apiFetch<Pagina<Libro>>('/libros/papelera?take=200', {
       headers: { Authorization: `Bearer ${session.apiToken}` },
     });
   } catch (e) {

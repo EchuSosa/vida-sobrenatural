@@ -7,14 +7,16 @@ import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { configurarApp } from '../../src/configurar-app.js';
 
-async function mintAdminToken(): Promise<string> {
+async function mintToken(rol: string[]): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-  return new SignJWT({ email: 'admin-integ@example.com', personaId: 'x', estado: 'activa', rol: ['admin'] })
+  return new SignJWT({ email: `${rol.join('-')}-integ@example.com`, personaId: 'x', estado: 'activa', rol })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1h')
     .sign(secret);
 }
+
+const mintAdminToken = () => mintToken(['admin']);
 
 describe('PATCH /sedes/:id (integración) — soft delete real (Principio III)', () => {
   let app: INestApplication<Server>;
@@ -208,13 +210,34 @@ describe('DELETE /sedes/:id (integración) — D119, eliminar es distinto de ina
     const todas = await request(app.getHttpServer()).get('/sedes?estado=todas');
     expect(todas.body.map((s: { id: string }) => s.id)).not.toContain(sedeId);
 
-    const papelera = await request(app.getHttpServer())
-      .get('/sedes?estado=papelera')
-      .set('Authorization', `Bearer ${token}`);
+    const papelera = await request(app.getHttpServer()).get('/sedes/papelera').set('Authorization', `Bearer ${token}`);
+    expect(papelera.status).toBe(200);
     expect(papelera.body.map((s: { id: string }) => s.id)).toContain(sedeId);
 
     const detalle = await request(app.getHttpServer()).get(`/sedes/${sedeId}`);
     expect(detalle.status).toBe(404);
+  });
+
+  // H-129: la papelera es del Admin — antes `GET /sedes?estado=papelera` la
+  // devolvía a cualquiera, sin sesión. El listado público sigue sin guard.
+  it('la papelera exige sedes.papelera.ver: sin sesión 401, Pastor y sin cargo 403, y ?estado=papelera en el público da 400', async () => {
+    const sinSesion = await request(app.getHttpServer()).get('/sedes/papelera');
+    expect(sinSesion.status).toBe(401);
+
+    for (const rol of [['pastor'], ['miembro_registrado']]) {
+      const respuesta = await request(app.getHttpServer())
+        .get('/sedes/papelera')
+        .set('Authorization', `Bearer ${await mintToken(rol)}`);
+      expect(respuesta.status).toBe(403);
+      expect(respuesta.body.code).toBe('SIN_PERMISO');
+    }
+
+    const porParametro = await request(app.getHttpServer()).get('/sedes?estado=papelera');
+    expect(porParametro.status).toBe(400);
+    expect(porParametro.body.errors).toEqual([{ campo: 'estado', code: 'ESTADO_INVALIDO' }]);
+
+    const publico = await request(app.getHttpServer()).get('/sedes');
+    expect(publico.status).toBe(200);
   });
 
   it('restaura una Sede eliminada — vuelve a aparecer en Todas', async () => {

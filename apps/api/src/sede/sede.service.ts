@@ -53,9 +53,10 @@ export class SedeService {
    * usa el listado del backoffice para incluir las inactivas (D117, H-51).
    * `'papelera'` (D119) es la única forma de ver una Sede eliminada — ni
    * 'activas' ni 'todas' la incluyen nunca, "desaparece de todas las vistas
-   * normales" es literal. Sigue siendo un GET público sin guard nuevo: qué
-   * Sedes existen no es información sensible, a diferencia de datos de
-   * Persona (la papelera sí la gatea el controller — D119: "para el Admin").
+   * normales" es literal. `'activas'`/`'todas'` salen por `GET /sedes`,
+   * público (qué Sedes existen no es información sensible); `'papelera'`
+   * sale solo por `GET /sedes/papelera`, que exige `sedes.papelera.ver`
+   * (Admin) en el controller — H-129: antes el público también la devolvía.
    */
   findAll(estado: 'activas' | 'todas' | 'papelera' = 'activas') {
     const where =

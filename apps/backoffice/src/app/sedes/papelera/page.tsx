@@ -30,7 +30,7 @@ export default async function PapeleraSedesPage({
 
   let sedes: Sede[];
   try {
-    sedes = await apiFetch<Sede[]>('/sedes?estado=papelera', {
+    sedes = await apiFetch<Sede[]>('/sedes/papelera', {
       headers: { Authorization: `Bearer ${session.apiToken}` },
     });
   } catch (e) {

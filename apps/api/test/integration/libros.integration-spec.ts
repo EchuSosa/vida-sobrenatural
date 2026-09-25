@@ -89,7 +89,7 @@ describe('GET /libros (integración)', () => {
     expect(response.body.items.map((l: { id: string }) => l.id)).toContain(inactivo.id);
   });
 
-  it('estado=papelera devuelve solo los eliminados', async () => {
+  it('GET /libros/papelera (Admin) devuelve los eliminados', async () => {
     const eliminado = await prisma.libro.create({
       data: {
         titulo: `Integ papelera ${Date.now()}`,
@@ -101,9 +101,32 @@ describe('GET /libros (integración)', () => {
     });
     idsCreados.push(eliminado.id);
 
-    const response = await request(app.getHttpServer()).get('/libros?estado=papelera&take=200');
+    const response = await request(app.getHttpServer())
+      .get('/libros/papelera?take=100')
+      .set('Authorization', `Bearer ${await mintToken(['admin'])}`);
     expect(response.status).toBe(200);
     expect(response.body.items.map((l: { id: string }) => l.id)).toContain(eliminado.id);
+  });
+
+  // H-129: la papelera es del Admin — antes el público la devolvía a
+  // cualquiera, sin sesión. El listado público sigue sin guard.
+  it('la papelera exige libros.papelera.ver: sin sesión 401, Pastor 403, y ?estado=papelera en el público da 400', async () => {
+    const sinSesion = await request(app.getHttpServer()).get('/libros/papelera');
+    expect(sinSesion.status).toBe(401);
+
+    const pastor = await request(app.getHttpServer())
+      .get('/libros/papelera')
+      .set('Authorization', `Bearer ${await mintToken(['pastor'])}`);
+    expect(pastor.status).toBe(403);
+    expect(pastor.body.code).toBe('SIN_PERMISO');
+
+    const porParametro = await request(app.getHttpServer()).get('/libros?estado=papelera');
+    expect(porParametro.status).toBe(400);
+    expect(porParametro.body.code).toBe('VALIDACION');
+    expect(porParametro.body.errors).toEqual([{ campo: 'estado', code: 'ESTADO_INVALIDO' }]);
+
+    const publico = await request(app.getHttpServer()).get('/libros');
+    expect(publico.status).toBe(200);
   });
 
   it('GET /libros/:id devuelve 404 para uno eliminado (D119)', async () => {
@@ -212,7 +235,7 @@ describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {
       .set('Authorization', `Bearer ${token}`);
     expect(eliminar.status).toBe(200);
 
-    const enPapelera = await request(app.getHttpServer()).get('/libros?estado=papelera&take=200');
+    const enPapelera = await request(app.getHttpServer()).get('/libros/papelera?take=100').set('Authorization', `Bearer ${token}`);
     expect(enPapelera.body.items.map((l: { id: string }) => l.id)).toContain(crear.body.id);
 
     const restaurar = await request(app.getHttpServer())
