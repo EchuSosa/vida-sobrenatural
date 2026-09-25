@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Param, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ROLES_DE_CARGO, type RolDeCargo } from '@vida-sobrenatural/shared-types';
 import { RolesService } from './roles.service.js';
 import { OtorgarRolDto } from './dto/otorgar-rol.dto.js';
@@ -45,7 +45,12 @@ export class RolesController {
   }
 
   @Post(':id/roles')
-  @ApiOkResponse({ description: 'FR-006 — otorga un rol de cargo (idempotente si ya lo tiene). Rechaza a menores de edad (FR-011).' })
+  // T059: 201 es lo que Nest responde a un POST (y lo que verifican los tests);
+  // antes se documentaba como 200.
+  @ApiCreatedResponse({
+    description:
+      'specs/005, Historia 2/6 — FR-006: otorga un rol de cargo (idempotente si ya lo tiene: no cambia nada ni deja registro). Cada otorgamiento real queda en el historial (GET /cambios-de-rol, FR-022), en la misma transacción. Rechaza: sesión sin Persona (403 SESION_SIN_PERSONA, antes que cualquier otra regla), menor de edad (409, FR-011).',
+  })
   otorgarRol(@Param('id') id: string, @Body() dto: OtorgarRolDto, @Req() request: AuthenticatedRequest) {
     const autor = this.autorDeSesion(request);
     return this.rolesService.otorgarRol(id, dto.rol, autor);
@@ -54,7 +59,7 @@ export class RolesController {
   @Delete(':id/roles/:rol')
   @ApiOkResponse({
     description:
-      'FR-007 — quita un rol de cargo (idempotente si no lo tiene). Rechaza: Admin sembrado (FR-002), auto-revocación de admin (FR-010), discipulador siempre por ahora (FR-009/H-127).',
+      'specs/005, Historia 2/6 — FR-007: quita un rol de cargo (idempotente si no lo tiene: no cambia nada ni deja registro). Cada quita real queda en el historial (GET /cambios-de-rol, FR-022), en la misma transacción. Rechaza: sesión sin Persona (403 SESION_SIN_PERSONA, antes que cualquier otra regla), Admin sembrado (409, FR-002), auto-revocación de admin (409, FR-010), discipulador siempre por ahora (409, FR-009/H-127), un rol que no es de cargo (400).',
   })
   quitarRol(@Param('id') id: string, @Param('rol') rol: string, @Req() request: AuthenticatedRequest) {
     const autor = this.autorDeSesion(request);

@@ -98,7 +98,7 @@ export class PersonaController {
   @ApiBearerAuth()
   @ApiOkResponse({
     description:
-      'Cola de casos pendiente_tutor, paginada — Historia 2b, Acceptance Scenario 3 (H-42). `buscar` filtra por nombre/apellido/teléfono (H-88). `orden` (nombre|createdAt, default createdAt) y `dir` (asc|desc, default asc) ordenan en la base (H-88 revisado).',
+      'Cola de casos pendiente_tutor, paginada — Historia 2b, Acceptance Scenario 3 (H-42). `buscar` filtra por nombre/apellido/teléfono (H-88). `orden` (nombre|createdAt, default createdAt) y `dir` (asc|desc, default asc) ordenan en la base (H-88 revisado). Permiso: `pendientes_tutor.ver` (Admin, Discipulador y Pastor — specs/005 T070, D64); es la única lista compuesta enteramente por menores de edad. Activar y cerrar el caso piden `pendientes_tutor.gestionar`.',
   })
   findPendientesTutor(
     @Query('skip') skipParam?: string,
