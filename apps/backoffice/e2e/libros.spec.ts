@@ -342,7 +342,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await page.goto('/libros');
       await page.waitForLoadState('networkidle');
-      await expect(page.getByText('Necesitás el rol Admin o Pastor', { exact: false })).toBeVisible();
+      // specs/005 (T034/T035): requerirPermiso responde 404 — nunca un
+      // mensaje que revele que la pantalla existe a quien no puede verla.
+      await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Crear Libro' })).toHaveCount(0);
     });
   });
@@ -530,4 +532,19 @@ test('cancelar un arrastre con Escape anuncia que el libro volvió a su lugar, y
   await expect(liveRegion).toHaveText(`Cancelaste el arrastre — "${primerTitulo}" volvió a la posición 1 de ${ordenAntes.length}.`);
   // Sin persistir nada — ni un solo PATCH de por medio.
   expect(await celdasTitulo.allInnerTexts()).toEqual(ordenAntes);
+});
+
+// H-129 (specs/005, T034 corregida/T064): la papelera de Libros es del
+// Admin (`libros.papelera.ver`). Antes el Pastor entraba — la pantalla
+// pedía Admin o Pastor y la API la devolvía a cualquiera. Ahora, 404; el
+// listado de Libros (`libros.ver`) lo sigue viendo.
+test('la papelera de Libros es solo del Admin: el Pastor recibe 404 y sigue viendo el listado', async ({ page }) => {
+  await loguearseComoPastorE2E(page);
+  await page.goto('/libros/papelera');
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toBeVisible();
+
+  await page.goto('/libros');
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByRole('heading', { name: 'Libros' })).toBeVisible();
 });

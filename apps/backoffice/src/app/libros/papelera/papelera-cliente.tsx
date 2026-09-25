@@ -10,19 +10,21 @@ import { toast } from 'sonner';
 import { useControlesTablaUrl } from '../../../hooks/use-controles-tabla-url';
 
 /**
- * D119: mismo patrón que la papelera de Sedes. Pastor (`esAdmin: false`) ve
- * la papelera sin poder restaurar. H-88: búsqueda/orden en la URL.
+ * D119: mismo patrón que la papelera de Sedes. Entrar pide
+ * `libros.papelera.ver` (page.tsx, H-129) y restaurar pide
+ * `libros.gestionar` (`puedeGestionar`) — hoy los dos son del Admin, pero
+ * son permisos distintos a propósito. H-88: búsqueda/orden en la URL.
  */
 export function PapeleraCliente({
   libros,
   orden,
   apiToken,
-  esAdmin,
+  puedeGestionar,
 }: {
   libros: Libro[];
   orden: OrdenTabla;
   apiToken: string;
-  esAdmin: boolean;
+  puedeGestionar: boolean;
 }) {
   const router = useRouter();
   const te = useTranslations('errors');
@@ -107,7 +109,7 @@ export function PapeleraCliente({
           })
         }
         acciones={
-          esAdmin
+          puedeGestionar
             ? (libro) => (
                 <Button
                   variant="outline"

@@ -195,7 +195,7 @@ function EnvoltorioDnd({
 
 /**
  * Historia 4 (FR-018, D64): mismo patrón que SedesCliente. `libros` llega
- * ya cargado, filtrado y ordenado desde page.tsx. Pastor (`esAdmin: false`)
+ * ya cargado, filtrado y ordenado desde page.tsx. Pastor (`puedeGestionar: false`)
  * ve todo pero no tiene ni el botón "Crear Libro" ni columna de acciones.
  */
 export function LibrosCliente({
@@ -203,13 +203,13 @@ export function LibrosCliente({
   filtro,
   orden,
   apiToken,
-  esAdmin,
+  puedeGestionar,
 }: {
   libros: Libro[];
   filtro: Filtro;
   orden: OrdenTabla;
   apiToken: string;
-  esAdmin: boolean;
+  puedeGestionar: boolean;
 }) {
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -224,7 +224,7 @@ export function LibrosCliente({
   // ordenada aplicados, lo que se ve en pantalla no es la posición real
   // (page.tsx ya lo explica del lado del servidor); mostrar ahí los
   // controles de reordenar invitaría a "reordenar" algo que no existe.
-  const puedeReordenar = esAdmin && filtro === 'activas' && orden.columna === 'orden' && busqueda.trim() === '';
+  const puedeReordenar = puedeGestionar && filtro === 'activas' && orden.columna === 'orden' && busqueda.trim() === '';
 
   // H-91: sin pegarle a la API de nuevo — `libros` ya trae todo lo que
   // necesita para sugerir (esta pantalla sí carga el listado completo).
@@ -369,7 +369,7 @@ export function LibrosCliente({
           <ButtonLink render={<Link href="/libros/papelera" />} variant="outline" size="sm">
             Papelera
           </ButtonLink>
-          {esAdmin && (
+          {puedeGestionar && (
             <Button
               size="sm"
               onClick={() => {
@@ -439,7 +439,7 @@ export function LibrosCliente({
           })
         }
         acciones={
-          esAdmin
+          puedeGestionar
             ? (libro) => {
                 const indice = libros.findIndex((l) => l.id === libro.id);
                 return (
@@ -499,7 +499,7 @@ export function LibrosCliente({
         {anuncioOrden}
       </p>
 
-      {esAdmin && (
+      {puedeGestionar && (
         <Sheet open={modalAbierto} onOpenChange={setModalAbierto}>
           <SheetContent side="right">
             <SheetHeader>

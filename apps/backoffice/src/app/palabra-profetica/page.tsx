@@ -1,4 +1,4 @@
-import { requerirSesion } from '../../auth';
+import { requerirPermiso, tienePermisoSesion } from '../../auth';
 import { apiFetch, type PalabraProfetica, type Pagina } from '@vida-sobrenatural/shared-types';
 import { PalabraProfeticaCliente } from './palabra-profetica-cliente';
 
@@ -12,9 +12,10 @@ function direccionDefaultDe(columna: ColumnaOrden): 'asc' | 'desc' {
 /**
  * Historia 3 (specs/003-contenido-institucional, D64): Server Component —
  * GET /palabra-profetica (historial completo, paginado) pasa al servidor.
- * D129 (revisión manual): Admin y Pastor administran los dos — la
- * distinción vive en el cliente (`puedeAdministrarPalabraProfetica`), el
- * guard real está en la API.
+ * D129 (revisión manual): Admin y Pastor administran los dos. Entrar pide
+ * `palabra_profetica.ver` y crear/editar/marcar vigente piden
+ * `palabra_profetica.editar` — los dos contra el catálogo (D132, specs/005
+ * T035); la API exige el mismo `palabra_profetica.editar` en las escrituras.
  *
  * H-88: orden en la URL. `createdAt` es la única columna con default
  * `desc` (la API ya ordena así, FR-013) — las demás arrancan `asc` cuando
@@ -25,20 +26,10 @@ export default async function PalabraProfeticaPage({
 }: {
   searchParams: Promise<{ orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await requerirSesion();
-
-  // FR-030: cualquier rol que no sea Admin ni Pastor queda afuera, tanto
-  // del menú (config/nav.ts) como del acceso directo por URL — el GET no
-  // tiene guard en la API (igual que Sedes), así que la barrera es acá.
-  const rol = session.user.rol;
-  if (!rol.includes('admin') && !rol.includes('pastor')) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold">Palabra Profética</h1>
-        <p className="text-muted-foreground">Necesitás el rol Admin o Pastor para ver esta sección.</p>
-      </div>
-    );
-  }
+  // FR-030: sin `palabra_profetica.ver`, 404 — desde el menú o por URL
+  // directa. El GET del historial es público en la API a propósito (la web
+  // muestra la vigente), así que la barrera de la PANTALLA es esta.
+  const session = await requerirPermiso('palabra_profetica.ver');
 
   const { orden: ordenParam, dir, q } = await searchParams;
   const ordenColumna: ColumnaOrden =
@@ -63,10 +54,10 @@ export default async function PalabraProfeticaPage({
     return ordenDireccion === 'asc' ? cmp : -cmp;
   });
 
-  // D129: Admin y Pastor administran los dos — nombrado por lo que
-  // significa (puede crear/editar/marcar vigente esta sección), no por el
-  // rol, para que el nombre siga siendo cierto si algún día se suma otro.
-  const puedeAdministrarPalabraProfetica = rol.includes('admin') || rol.includes('pastor');
+  // D129: nombrado por lo que significa (puede crear/editar/marcar vigente),
+  // no por el rol — y resuelto contra el catálogo, así que quién puede lo
+  // decide `palabra_profetica.editar` en un solo lugar para la API y acá.
+  const puedeAdministrarPalabraProfetica = tienePermisoSesion(session, 'palabra_profetica.editar');
 
   return (
     <PalabraProfeticaCliente

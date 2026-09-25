@@ -132,7 +132,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await page.goto('/palabra-profetica');
       await page.waitForLoadState('networkidle');
-      await expect(page.getByText('Necesitás el rol Admin o Pastor', { exact: false })).toBeVisible();
+      // specs/005 (T034/T035): requerirPermiso responde 404 — nunca un
+      // mensaje que revele que la pantalla existe a quien no puede verla.
+      await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toBeVisible();
       await expect(page.getByLabel('Año')).toHaveCount(0);
     });
   });

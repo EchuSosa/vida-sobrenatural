@@ -1,25 +1,17 @@
 import { notFound } from 'next/navigation';
-import { requerirSesion } from '../../../auth';
+import { requerirPermiso, tienePermisoSesion } from '../../../auth';
 import { apiFetch, ApiError, type Libro } from '@vida-sobrenatural/shared-types';
 import { LibroDetalleCliente } from './libro-detalle-cliente';
 
 /**
  * Historia 4: detalle + edición de un Libro + subida de portada. Mismo
  * patrón que sedes/[id]/page.tsx — Server Component, `notFound()` para un
- * id inexistente o eliminado (D119). FR-030: rol fuera de Admin/Pastor,
- * afuera también acá.
+ * id inexistente o eliminado (D119). FR-030: entrar pide `libros.ver`
+ * (404 si no); editar y la portada piden `libros.gestionar` — los dos
+ * contra el catálogo (D132, specs/005 T034).
  */
 export default async function LibroDetallePage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requerirSesion();
-  const rol = session.user.rol;
-  if (!rol.includes('admin') && !rol.includes('pastor')) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold">Libro</h1>
-        <p className="text-muted-foreground">Necesitás el rol Admin o Pastor para ver esta sección.</p>
-      </div>
-    );
-  }
+  const session = await requerirPermiso('libros.ver');
 
   const { id } = await params;
   let libro: Libro;
@@ -41,7 +33,7 @@ export default async function LibroDetallePage({ params }: { params: Promise<{ i
     <LibroDetalleCliente
       libro={libro}
       apiToken={session.apiToken}
-      esAdmin={rol.includes('admin')}
+      puedeGestionar={tienePermisoSesion(session, 'libros.gestionar')}
       autoresSugeridos={autoresSugeridos}
     />
   );

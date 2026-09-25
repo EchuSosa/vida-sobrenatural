@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth';
+import NextAuth, { type Session } from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import { notFound } from 'next/navigation';
@@ -7,7 +7,7 @@ import {
   buscarPersonaPorEmail,
   mintApiToken,
 } from '@vida-sobrenatural/shared-types/auth-server';
-import { CATALOGO_PERMISOS, type Permiso } from '@vida-sobrenatural/shared-types';
+import { tienePermiso, type Permiso } from '@vida-sobrenatural/shared-types';
 
 /**
  * H-41 (revisión manual, revisión de código): `testLoginHabilitado()`,
@@ -175,10 +175,18 @@ export async function requerirSesion() {
  */
 export async function requerirPermiso(permiso: Permiso) {
   const session = await requerirSesion();
-  const rolesConPermiso = CATALOGO_PERMISOS[permiso];
-  const tieneRol = rolesConPermiso.some((rol) => session.user.rol.includes(rol));
-  if (!tieneRol) {
+  if (!tienePermisoSesion(session, permiso)) {
     notFound();
   }
   return session;
+}
+
+/**
+ * specs/005, T066: qué mostrar DENTRO de una pantalla (ej. los controles de
+ * edición) según un permiso del catálogo. Es la única forma en que una
+ * pantalla pregunta por roles — la regla `sin-rol-de-sesion-en-pantallas`
+ * prohíbe leer `session.user.rol` fuera de este archivo y del shell.
+ */
+export function tienePermisoSesion(session: Session, permiso: Permiso): boolean {
+  return tienePermiso(session.user.rol, permiso);
 }

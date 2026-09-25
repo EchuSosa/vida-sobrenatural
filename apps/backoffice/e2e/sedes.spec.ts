@@ -3,6 +3,8 @@ import {
   test,
   expect,
   loguearseComoAdminE2E,
+  loguearseComoPastorE2E,
+  loguearseComoOtroRolE2E,
   asegurarUnaSolaSedeActiva,
   reactivarSedes,
   auditar,
@@ -476,4 +478,17 @@ test('buscar por nombre se refleja en la URL, filtra la tabla, y Limpiar la saca
     .getByRole('button', { name: 'Sí, eliminar' })
     .click();
   await expect(page.getByText('Sede eliminada.')).toBeVisible();
+});
+
+// H-129 (specs/005, T036/T064): la papelera es del Admin. Antes entraba
+// cualquier sesión (la pantalla solo pedía sesión y la API devolvía la
+// papelera a cualquiera); ahora, sin `sedes.papelera.ver`, 404.
+test('la papelera de Sedes es solo del Admin: un Pastor y otro rol reciben 404', async ({ page }) => {
+  for (const loguearse of [loguearseComoPastorE2E, loguearseComoOtroRolE2E]) {
+    await loguearse(page);
+    await page.goto('/sedes/papelera');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toBeVisible();
+    await expect(page.getByRole('table')).toHaveCount(0);
+  }
 });

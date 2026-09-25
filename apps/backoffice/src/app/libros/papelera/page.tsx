@@ -1,31 +1,24 @@
-import Link from 'next/link';
-import { requerirSesion } from '../../../auth';
-import { apiFetch, ApiError, type Libro, type Pagina } from '@vida-sobrenatural/shared-types';
+import { requerirPermiso, tienePermisoSesion } from '../../../auth';
+import { apiFetch, type Libro, type Pagina } from '@vida-sobrenatural/shared-types';
 import { PapeleraCliente } from './papelera-cliente';
 
 type ColumnaOrden = 'titulo' | 'autor' | 'eliminadoEn';
 
 /**
- * D119: papelera de Libros. Mismo patrón que sedes/papelera/page.tsx —
- * distingue el 403 (SIN_PERMISO) del resto: "Reintentar" no serviría de
- * nada ahí. H-88: orden en la URL, en memoria (D126) — mismo criterio que
- * el resto de los listados chicos.
+ * D119: papelera de Libros, del Admin. H-129/T034: entrar pide
+ * `libros.papelera.ver` ANTES de pedir los datos (404 si no lo tiene), y
+ * `GET /libros/papelera` exige el mismo permiso en la API (Principio V) —
+ * antes la pantalla dejaba entrar al Pastor y la API devolvía la papelera
+ * a cualquiera. Restaurar pide `libros.gestionar`. Cualquier otro error de
+ * la API cae en error.tsx (reintentar). H-88: orden en la URL, en memoria
+ * (D126) — mismo criterio que el resto de los listados chicos.
  */
 export default async function PapeleraLibrosPage({
   searchParams,
 }: {
   searchParams: Promise<{ orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await requerirSesion();
-  const rol = session.user.rol;
-  if (!rol.includes('admin') && !rol.includes('pastor')) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold">Papelera de Libros</h1>
-        <p className="text-muted-foreground">Necesitás el rol Admin o Pastor para ver esta sección.</p>
-      </div>
-    );
-  }
+  const session = await requerirPermiso('libros.papelera.ver');
 
   const { orden: ordenParam, dir, q } = await searchParams;
   const ordenColumna: ColumnaOrden =
@@ -33,25 +26,9 @@ export default async function PapeleraLibrosPage({
   const ordenDireccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
   const busqueda = (q ?? '').trim().toLocaleLowerCase('es');
 
-  let pagina: Pagina<Libro>;
-  try {
-    pagina = await apiFetch<Pagina<Libro>>('/libros/papelera?take=200', {
-      headers: { Authorization: `Bearer ${session.apiToken}` },
-    });
-  } catch (e) {
-    if (e instanceof ApiError && e.code === 'SIN_PERMISO') {
-      return (
-        <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16 text-center">
-          <h1 className="text-2xl font-semibold">Papelera de Libros</h1>
-          <p className="text-muted-foreground">Necesitás el rol Admin para ver la papelera.</p>
-          <Link href="/libros" className="text-sm underline underline-offset-4">
-            Volver a Libros
-          </Link>
-        </div>
-      );
-    }
-    throw e;
-  }
+  const pagina = await apiFetch<Pagina<Libro>>('/libros/papelera?take=200', {
+    headers: { Authorization: `Bearer ${session.apiToken}` },
+  });
 
   const itemsFiltrados = busqueda
     ? pagina.items.filter(
@@ -71,7 +48,7 @@ export default async function PapeleraLibrosPage({
       libros={librosOrdenados}
       orden={{ columna: ordenColumna, direccion: ordenDireccion }}
       apiToken={session.apiToken}
-      esAdmin={rol.includes('admin')}
+      puedeGestionar={tienePermisoSesion(session, 'libros.gestionar')}
     />
   );
 }

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
-import { requerirPermiso } from '../../auth';
-import { apiFetch, tienePermiso, type Pagina, type PersonaListado } from '@vida-sobrenatural/shared-types';
+import { requerirPermiso, tienePermisoSesion } from '../../auth';
+import { apiFetch, type Pagina, type PersonaListado } from '@vida-sobrenatural/shared-types';
 import { PersonasCliente } from './personas-cliente';
 import { TAMANIO_PAGINA } from './constantes';
 
@@ -70,7 +70,7 @@ export default async function PersonasPage({
       orden={{ columna: ordenColumna, direccion: ordenDireccion }}
       // T028: qué mostrar se decide leyendo el catálogo (D132), nunca un
       // `rol.includes('admin')` — la API vuelve a chequear el mismo permiso.
-      puedeGestionarRoles={tienePermiso(session.user.rol, 'personas.gestionar_roles')}
+      puedeGestionarRoles={tienePermisoSesion(session, 'personas.gestionar_roles')}
     />
   );
 }

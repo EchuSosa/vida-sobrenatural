@@ -43,18 +43,18 @@ const TAMANO_MAXIMO_MB = Math.round(PORTADA_TAMANO_MAXIMO_BYTES / (1024 * 1024))
  * Historia 4 (D64): `libro` llega ya cargado desde page.tsx. Isla de
  * cliente: formulario de edición, subir/reemplazar/quitar portada,
  * inactivar/reactivar y eliminar (D119, FR-020: siempre permitido, sin la
- * rama "bloqueada" que sí tiene Sede). Pastor (`esAdmin: false`) ve todo
+ * rama "bloqueada" que sí tiene Sede). Pastor (`puedeGestionar: false`) ve todo
  * sin ningún control habilitado.
  */
 export function LibroDetalleCliente({
   libro,
   apiToken,
-  esAdmin,
+  puedeGestionar,
   autoresSugeridos,
 }: {
   libro: Libro;
   apiToken: string;
-  esAdmin: boolean;
+  puedeGestionar: boolean;
   /** H-91: ya viene resuelto de page.tsx (H-60 — se busca en el servidor). */
   autoresSugeridos: string[];
 }) {
@@ -134,7 +134,7 @@ export function LibroDetalleCliente({
           <EstadoActivoBadge activo={libro.activo} textoActivo="Activo" textoInactivo="Inactivo" />
         </div>
 
-        {esAdmin &&
+        {puedeGestionar &&
           (libro.activo ? (
             <ConfirmDestructiveDialog
               trigger={
@@ -164,7 +164,7 @@ export function LibroDetalleCliente({
           ))}
       </div>
 
-      <PortadaLibro libro={libro} apiToken={apiToken} esAdmin={esAdmin} />
+      <PortadaLibro libro={libro} apiToken={apiToken} puedeGestionar={puedeGestionar} />
 
       <FormularioLibro
         key={libro.id}
@@ -175,11 +175,11 @@ export function LibroDetalleCliente({
         textoEnviando="Guardando…"
         error={errorGuardar}
         erroresCampo={erroresCampoGuardar}
-        soloLectura={!esAdmin}
+        soloLectura={!puedeGestionar}
         autoresSugeridos={autoresSugeridos}
       />
 
-      {esAdmin && (
+      {puedeGestionar && (
         <div className="border-t border-border pt-6">
           <AlertDialog>
             <AlertDialogTrigger
@@ -219,7 +219,7 @@ export function LibroDetalleCliente({
  * sólo para no hacer un viaje al servidor con un archivo obviamente
  * inválido. Texto alternativo obligatorio en cuanto hay portada (FR-025).
  */
-function PortadaLibro({ libro, apiToken, esAdmin }: { libro: Libro; apiToken: string; esAdmin: boolean }) {
+function PortadaLibro({ libro, apiToken, puedeGestionar }: { libro: Libro; apiToken: string; puedeGestionar: boolean }) {
   const router = useRouter();
   const te = useTranslations('errors');
   const [archivo, setArchivo] = useState<File | null>(null);
@@ -303,7 +303,7 @@ function PortadaLibro({ libro, apiToken, esAdmin }: { libro: Libro; apiToken: st
     <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
       <h2 className="text-sm font-medium">Portada</h2>
       <div className="flex gap-4">
-        {esAdmin ? (
+        {puedeGestionar ? (
           // H-94: el hueco de la portada ahora es el <label> del input de
           // archivo (clickeable sin JS) y acepta arrastrar y soltar — antes
           // no comunicaba ni con ícono, ni con texto, ni con que se podía
@@ -342,7 +342,7 @@ function PortadaLibro({ libro, apiToken, esAdmin }: { libro: Libro; apiToken: st
           <div className="w-32 shrink-0">{portadaVisual}</div>
         )}
 
-        {esAdmin && (
+        {puedeGestionar && (
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <label htmlFor="campo-portada-archivo" className="text-sm font-medium">
               {etiquetaAccion} (opcional)

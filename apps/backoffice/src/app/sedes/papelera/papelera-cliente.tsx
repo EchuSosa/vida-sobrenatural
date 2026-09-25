@@ -12,9 +12,21 @@ import { useControlesTablaUrl } from '../../../hooks/use-controles-tabla-url';
 /**
  * H-60 (revisión manual ronda 7): `sedes` llega ya cargada, filtrada y
  * ordenada desde page.tsx — isla de cliente: Restaurar, y la
- * búsqueda/orden que navegan (H-88).
+ * búsqueda/orden que navegan (H-88). Restaurar pide `sedes.gestionar`
+ * (`puedeGestionar`), distinto de `sedes.papelera.ver`, que es entrar —
+ * hoy los dos son del Admin, pero son permisos separados a propósito.
  */
-export function PapeleraCliente({ sedes, orden, apiToken }: { sedes: Sede[]; orden: OrdenTabla; apiToken: string }) {
+export function PapeleraCliente({
+  sedes,
+  orden,
+  apiToken,
+  puedeGestionar,
+}: {
+  sedes: Sede[];
+  orden: OrdenTabla;
+  apiToken: string;
+  puedeGestionar: boolean;
+}) {
   const router = useRouter();
   const te = useTranslations('errors');
   const locale = useLocale();
@@ -96,17 +108,21 @@ export function PapeleraCliente({ sedes, orden, apiToken }: { sedes: Sede[]; ord
             dir: orden.columna === columnaId && orden.direccion === 'asc' ? 'desc' : null,
           })
         }
-        acciones={(sede) => (
-          <Button
-            variant="outline"
-            size="sm"
-            loading={restaurandoId === sede.id}
-            loadingText="Restaurando…"
-            onClick={() => restaurar(sede)}
-          >
-            Restaurar
-          </Button>
-        )}
+        acciones={
+          puedeGestionar
+            ? (sede) => (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  loading={restaurandoId === sede.id}
+                  loadingText="Restaurando…"
+                  onClick={() => restaurar(sede)}
+                >
+                  Restaurar
+                </Button>
+              )
+            : undefined
+        }
       />
     </div>
   );

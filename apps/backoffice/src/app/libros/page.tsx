@@ -1,4 +1,4 @@
-import { requerirSesion } from '../../auth';
+import { requerirPermiso, tienePermisoSesion } from '../../auth';
 import { apiFetch, type Libro, type Pagina } from '@vida-sobrenatural/shared-types';
 import { LibrosCliente } from './libros-cliente';
 
@@ -11,8 +11,10 @@ type ColumnaOrden = 'orden' | 'titulo' | 'autor' | 'anio' | 'estado';
 /**
  * Historia 4 (specs/003-contenido-institucional, FR-018): mismo patrón que
  * sedes/page.tsx — Server Component, filtro activas/todas por query param.
- * FR-030: cualquier rol que no sea Admin ni Pastor queda afuera, tanto del
- * menú como del acceso directo por URL.
+ * FR-030: entrar pide `libros.ver` y editar/eliminar/reordenar/portada
+ * piden `libros.gestionar` — los dos resueltos contra el catálogo (D132,
+ * specs/005 T034), nunca un `rol.includes` a mano. Sin `libros.ver`, 404
+ * (requerirPermiso), tanto desde el menú como por URL directa.
  *
  * H-88/H-89: orden en la URL. Por default (`orden` ausente o `orden=orden`)
  * se respeta el orden manual que ya trae la API (`orderBy: {orden: 'asc'}`,
@@ -28,16 +30,7 @@ export default async function LibrosPage({
 }: {
   searchParams: Promise<{ estado?: string; orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await requerirSesion();
-  const rol = session.user.rol;
-  if (!rol.includes('admin') && !rol.includes('pastor')) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold">Libros</h1>
-        <p className="text-muted-foreground">Necesitás el rol Admin o Pastor para ver esta sección.</p>
-      </div>
-    );
-  }
+  const session = await requerirPermiso('libros.ver');
 
   const { estado, orden: ordenParam, dir, q } = await searchParams;
   const filtro: Filtro = estado === 'todas' ? 'todas' : 'activas';
@@ -79,7 +72,7 @@ export default async function LibrosPage({
       filtro={filtro}
       orden={{ columna: ordenColumna, direccion: ordenDireccion }}
       apiToken={session.apiToken}
-      esAdmin={rol.includes('admin')}
+      puedeGestionar={tienePermisoSesion(session, 'libros.gestionar')}
     />
   );
 }
