@@ -7,6 +7,7 @@ import noRawTailwindColors from "../../eslint-rules/no-raw-tailwind-colors.mjs";
 import noLinkEnBotonBaseUi from "../../eslint-rules/no-link-en-boton-base-ui.mjs";
 import noSessionCheckEnPage from "../../eslint-rules/no-session-check-en-page.mjs";
 import noDangerouslySetInnerHtml from "../../eslint-rules/no-dangerously-set-inner-html.mjs";
+import sinRolDeSesionEnPantallas from "../../eslint-rules/sin-rol-de-sesion-en-pantallas.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -27,6 +28,7 @@ const eslintConfig = defineConfig([
           ...noLinkEnBotonBaseUi.rules,
           ...noSessionCheckEnPage.rules,
           ...noDangerouslySetInnerHtml.rules,
+          ...sinRolDeSesionEnPantallas.rules,
         },
       },
       "@eslint-community/eslint-comments": eslintComments,
@@ -44,6 +46,16 @@ const eslintConfig = defineConfig([
   {
     files: ["src/app/**/page.tsx"],
     rules: { "local/no-session-check-en-page": "error" },
+  },
+  // specs/005, T066 (FR-013): ninguna pantalla lee session.user.rol — el
+  // acceso se decide con requerirPermiso()/tienePermisoSesion() contra el
+  // catálogo. Solo quedan afuera los dos lugares que SÍ tienen que leerlo:
+  // auth.ts (arma la sesión y resuelve el permiso) y el shell (filtra el
+  // menú con itemsParaRoles, que también lee el catálogo).
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/auth.ts", "src/components/backoffice-shell.tsx"],
+    rules: { "local/sin-rol-de-sesion-en-pantallas": "error" },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([
