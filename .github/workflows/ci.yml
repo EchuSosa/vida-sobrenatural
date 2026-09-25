@@ -59,6 +59,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
+      # H-143: este install también genera el cliente de Prisma — el
+      # postinstall de apps/api es `prisma skills sync` + `prisma generate`
+      # (src/generated/prisma está en .gitignore). Sin eso, typecheck y test
+      # no tenían cliente en un runner limpio. Es el mismo comando que en
+      # local (criterio de H-101): nada de un paso `prisma generate` propio
+      # de CI.
       - name: Instalar dependencias (lockfile congelado)
         run: pnpm install --frozen-lockfile
 
