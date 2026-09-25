@@ -57,7 +57,7 @@ test.describe('Pastor: solo lectura (T046)', () => {
     await page.waitForLoadState('networkidle');
     await expect(page.getByRole('heading', { name: 'Personas', level: 1 })).toBeVisible();
     await expect(page.locator('table tbody tr').first()).toBeVisible();
-    await sinControles(page, [/^Cambiar roles/]);
+    await sinControles(page, [/^Cambiar roles/, /^Ver el historial de roles/]);
   });
 
   test('Sedes: ve el listado y abre el detalle, sin crear, inactivar, eliminar, editar ni ir a la papelera (H-133)', async ({ page }) => {

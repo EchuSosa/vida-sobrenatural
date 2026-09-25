@@ -81,6 +81,8 @@
     "vacioBusqueda": "No encontramos Personas que coincidan con \"{busqueda}\".",
     "cambiarRoles": "Cambiar roles",
     "cambiarRolesDe": "Cambiar roles de {nombre}",
+    "verHistorial": "Historial",
+    "verHistorialDe": "Ver el historial de roles de {nombre}",
     "roles": {
       "admin": "Admin",
       "pastor": "Pastor/a",
@@ -116,6 +118,22 @@
       "titulo": "No pudimos cargar las Personas",
       "texto": "Podés reintentar en unos segundos. Código de referencia:",
       "reintentar": "Reintentar"
+    },
+    "historial": {
+      "titulo": "Historial de roles de {nombre}",
+      "descripcion": "Quién otorgó o quitó cada rol de cargo, y cuándo. Lo más reciente, primero.",
+      "cargando": "Cargando el historial…",
+      "vacio": "Todavía no hay cambios de rol registrados para {nombre}.",
+      "notaAntiguedad": "Los cambios hechos antes de que existiera este registro no aparecen acá.",
+      "error": "No pudimos cargar el historial. Probá de nuevo en un momento.",
+      "reintentar": "Reintentar",
+      "otorgado": "Otorgado",
+      "quitado": "Quitado",
+      "porAdmin": "Lo hizo {nombre}",
+      "autorQueYaNoEsta": "Lo hizo una Persona que ya no está en el sistema",
+      "fueraDeLaApp": "Se hizo fuera de la aplicación, con el comando de recuperación, por quien tuviera acceso al servidor.",
+      "masRecientes": "Se muestran los {cantidad} cambios más recientes de {total}.",
+      "cerrar": "Cerrar"
     }
   },
   "aterrizaje": {

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
+  type CambioDeRolListado,
   type ErrorCode,
   type Pagina,
   type PersonaListado,
@@ -12,6 +13,7 @@ import {
   ROLES_DE_CARGO,
   apiFetch,
   ApiError,
+  formatearFechaHora,
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
@@ -31,7 +33,7 @@ import {
   useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert, Minus, Plus } from 'lucide-react';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 
 function rolesDeCargo(rol: string[]): RolDeCargo[] {
@@ -69,6 +71,7 @@ export function PersonasCliente({
   const pathname = usePathname();
   const searchParamsNav = useSearchParams();
   const [personaParaRoles, setPersonaParaRoles] = useState<PersonaListado | null>(null);
+  const [personaParaHistorial, setPersonaParaHistorial] = useState<PersonaListado | null>(null);
   // Cambiar la búsqueda o el orden vuelve a la página 1 (docs/15, "Listados paginados", punto 4).
   const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl({
     clavesAReiniciarConBusqueda: ['pagina'],
@@ -158,16 +161,29 @@ export function PersonasCliente({
         {...(puedeGestionarRoles
           ? {
               encabezadoAcciones: t('columnas.acciones'),
+              // Historia 6 (T056): "Historial" pide el mismo permiso que
+              // cambiar roles (GET /cambios-de-rol, personas.gestionar_roles).
               acciones: (persona: PersonaListado) => (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="max-sm:h-11"
-                  aria-label={t('cambiarRolesDe', { nombre: `${persona.nombre} ${persona.apellido}` })}
-                  onClick={() => setPersonaParaRoles(persona)}
-                >
-                  {t('cambiarRoles')}
-                </Button>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="max-sm:h-11"
+                    aria-label={t('cambiarRolesDe', { nombre: `${persona.nombre} ${persona.apellido}` })}
+                    onClick={() => setPersonaParaRoles(persona)}
+                  >
+                    {t('cambiarRoles')}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="max-sm:h-11"
+                    aria-label={t('verHistorialDe', { nombre: `${persona.nombre} ${persona.apellido}` })}
+                    onClick={() => setPersonaParaHistorial(persona)}
+                  >
+                    {t('verHistorial')}
+                  </Button>
+                </div>
               ),
             }
           : {})}
@@ -189,7 +205,153 @@ export function PersonasCliente({
           onCambio={() => router.refresh()}
         />
       )}
+      {puedeGestionarRoles && (
+        <HistorialDialog
+          // Clave propia: con 'cerrado' a secas chocaba con la del RolesDialog hermano.
+          key={`historial-${personaParaHistorial?.id ?? 'cerrado'}`}
+          persona={personaParaHistorial}
+          apiToken={apiToken}
+          onCerrar={() => setPersonaParaHistorial(null)}
+        />
+      )}
     </div>
+  );
+}
+
+const HISTORIAL_TAKE = 100;
+
+/**
+ * specs/005, Historia 6 (T056, Acceptance Scenario 3): quién otorgó o quitó
+ * cada rol de cargo de esta Persona, y cuándo — lo que devuelve
+ * GET /cambios-de-rol. Cuatro estados (Principio VIII): cargando (anunciado
+ * a lectores de pantalla), error con Reintentar, vacío y éxito. El vacío
+ * aclara que los cambios anteriores a este registro no aparecen: un historial
+ * vacío no significa "nunca se tocó". La acción se lee con ícono + texto,
+ * nunca solo con color (D81). La fila del comando de recuperación dice en
+ * palabras que se hizo fuera de la aplicación (H-141), no una celda vacía.
+ */
+function HistorialDialog({
+  persona,
+  apiToken,
+  onCerrar,
+}: {
+  persona: PersonaListado | null;
+  apiToken: string;
+  onCerrar: () => void;
+}) {
+  const t = useTranslations('personas');
+  const locale = useLocale();
+  // Nace en 'cargando' (el diálogo se remonta por persona, key en el padre):
+  // el efecto solo pide los datos; "Reintentar" vuelve a 'cargando' desde el
+  // clic y suma un intento, que re-dispara el efecto.
+  const [estado, setEstado] = useState<'cargando' | 'error' | 'listo'>('cargando');
+  const [pagina, setPagina] = useState<Pagina<CambioDeRolListado> | null>(null);
+  const [intento, setIntento] = useState(0);
+  const nombre = persona ? `${persona.nombre} ${persona.apellido}` : '';
+
+  useEffect(() => {
+    if (!persona) return;
+    let vigente = true;
+    apiFetch<Pagina<CambioDeRolListado>>(`/cambios-de-rol?personaId=${encodeURIComponent(persona.id)}&take=${HISTORIAL_TAKE}`, {
+      headers: { Authorization: `Bearer ${apiToken}` },
+    })
+      .then((resultado) => {
+        if (!vigente) return;
+        setPagina(resultado);
+        setEstado('listo');
+      })
+      .catch(() => {
+        if (vigente) setEstado('error');
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [persona, apiToken, intento]);
+
+  const reintentar = () => {
+    setEstado('cargando');
+    setIntento((n) => n + 1);
+  };
+
+  const autor = (cambio: CambioDeRolListado) => {
+    if (cambio.origen === 'recuperacion_cli') return t('historial.fueraDeLaApp');
+    if (!cambio.realizadoPor?.nombre) return t('historial.autorQueYaNoEsta');
+    return t('historial.porAdmin', { nombre: `${cambio.realizadoPor.nombre} ${cambio.realizadoPor.apellido ?? ''}`.trim() });
+  };
+
+  return (
+    <Sheet open={!!persona} onOpenChange={(abierto) => !abierto && onCerrar()}>
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>{t('historial.titulo', { nombre })}</SheetTitle>
+          <SheetDescription>{t('historial.descripcion')}</SheetDescription>
+        </SheetHeader>
+
+        <div className="flex flex-col gap-3 overflow-y-auto px-4" aria-busy={estado === 'cargando'}>
+          {estado === 'cargando' && (
+            <p role="status" className="text-sm text-muted-foreground">
+              {t('historial.cargando')}
+            </p>
+          )}
+
+          {estado === 'error' && (
+            <div role="alert" className="flex flex-col gap-3 rounded-md border border-destructive/40 bg-destructive/10 p-3">
+              <p className="flex items-start gap-2 text-sm text-destructive">
+                <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                {t('historial.error')}
+              </p>
+              <Button variant="outline" size="sm" className="w-fit max-sm:h-11" onClick={reintentar}>
+                {t('historial.reintentar')}
+              </Button>
+            </div>
+          )}
+
+          {estado === 'listo' && pagina && pagina.items.length === 0 && (
+            <div className="flex flex-col gap-1">
+              <p className="text-sm">{t('historial.vacio', { nombre })}</p>
+              <p className="text-sm text-muted-foreground">{t('historial.notaAntiguedad')}</p>
+            </div>
+          )}
+
+          {estado === 'listo' && pagina && pagina.items.length > 0 && (
+            <>
+              <ol className="flex flex-col gap-2">
+                {pagina.items.map((cambio) => {
+                  const Icono = cambio.accion === 'otorgado' ? Plus : Minus;
+                  const etiquetaRol = (ROLES_DE_CARGO as readonly string[]).includes(cambio.rol)
+                    ? t(`roles.${cambio.rol as RolDeCargo}`)
+                    : cambio.rol;
+                  return (
+                    <li key={cambio.id} className="flex flex-col gap-1 rounded-md border border-border p-3">
+                      <p className="flex items-center gap-2 font-medium">
+                        <Icono aria-hidden="true" className="size-4 shrink-0" />
+                        {t(`historial.${cambio.accion}`)}: {etiquetaRol}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <time dateTime={cambio.createdAt}>{formatearFechaHora(cambio.createdAt, locale)}</time>
+                      </p>
+                      <p className="text-sm text-muted-foreground">{autor(cambio)}</p>
+                    </li>
+                  );
+                })}
+              </ol>
+              {pagina.total > pagina.items.length && (
+                <p className="text-sm text-muted-foreground">
+                  {t('historial.masRecientes', { cantidad: pagina.items.length, total: pagina.total })}
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">{t('historial.notaAntiguedad')}</p>
+            </>
+          )}
+        </div>
+
+        <SheetFooter>
+          <Button variant="ghost" className="max-sm:h-11" onClick={onCerrar}>
+            {t('historial.cerrar')}
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
 
