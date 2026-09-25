@@ -20,10 +20,15 @@ import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import { InternalLookupGuard } from '../auth/internal-lookup.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
+import { PermisosGuard } from '../auth/permisos.guard.js';
+import { RequierePermiso } from '../auth/permisos.decorator.js';
 import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
 
 /** H-42: default de paginación de GET /personas/pendientes-tutor, acotado a un máximo de 100. */
 const PENDIENTES_TUTOR_TAKE_DEFAULT = 20;
+
+/** specs/005, Historia 2: mismo criterio de paginación para GET /personas. */
+const PERSONAS_TAKE_DEFAULT = 20;
 
 @ApiTags('personas')
 @Controller('personas')
@@ -104,9 +109,34 @@ export class PersonaController {
     return this.personaService.findPendientesTutor(skip, take, buscar, orden, dir);
   }
 
+  @Get()
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('personas.ver')
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description:
+      'Listado paginado de Personas activas — specs/005, Historia 2 (FR-005). `buscar` filtra por nombre/apellido/email/teléfono; `orden` (apellido|nombre, default apellido) y `dir` (asc|desc) ordenan en la base. `soloMayores=true` excluye a los menores de edad (FR-024) — opcional, por defecto false: lo pide la pantalla de ascender roles, no es el comportamiento del endpoint.',
+  })
+  listarPersonas(
+    @Query('skip') skipParam?: string,
+    @Query('take') takeParam?: string,
+    @Query('buscar') buscar?: string,
+    @Query('orden') ordenParam?: string,
+    @Query('dir') dirParam?: string,
+    @Query('soloMayores') soloMayoresParam?: string,
+  ) {
+    const skip = Math.max(0, Number(skipParam) || 0);
+    const take = Math.min(100, Math.max(1, Number(takeParam) || PERSONAS_TAKE_DEFAULT));
+    const orden: 'apellido' | 'nombre' = ordenParam === 'nombre' ? 'nombre' : 'apellido';
+    const dir: 'asc' | 'desc' = dirParam === 'desc' ? 'desc' : 'asc';
+    return this.personaService.listarPersonas(skip, take, buscar, orden, dir, soloMayoresParam === 'true');
+  }
+
+  // T025: mismos roles que tenía con @Roles('admin', 'discipulador') — solo
+  // cambia cómo se declara (catálogo, D132), no quién puede buscar.
   @Get('buscar')
-  @UseGuards(JwtNextAuthGuard, RolesGuard)
-  @Roles('admin', 'discipulador')
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('personas.buscar')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Búsqueda acotada de Personas — H-29, D108 (elegir a quién vincular como tutor).' })
   buscarPersonas(@Query('q') q: string) {

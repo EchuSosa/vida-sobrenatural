@@ -179,11 +179,31 @@ export type ActivarPersonaInput =
   | { tutorPersonaId: string; tutorNombre?: never; tutorApellido?: never; tutorTelefono?: never }
   | { tutorPersonaId?: never; tutorNombre: string; tutorApellido: string; tutorTelefono: string };
 
-/** Elemento de GET /personas/buscar?q= — H-29 (D108), elegir a quién vincular. */
+/**
+ * Elemento de GET /personas/buscar?q= — H-29 (D108), elegir a quién vincular.
+ * `rol`: specs/005 (T017, FR-005) — los roles actuales, lo mínimo para
+ * identificar a la Persona correcta sin mostrar su perfil completo.
+ */
 export interface BusquedaPersona {
   id: string;
   nombre: string;
   apellido: string;
   email: string;
   telefono: string;
+  rol: string[];
+}
+
+/**
+ * Elemento de GET /personas (paginado, `Pagina<PersonaListado>`) — specs/005,
+ * Historia 2: el listado de la pantalla Personas. Mismos campos que
+ * `BusquedaPersona` hoy, pero es otro caso de uso (listar vs. elegir un
+ * tutor) y cada uno puede crecer por su lado — ver persona.service.ts.
+ */
+export interface PersonaListado {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+  rol: string[];
 }

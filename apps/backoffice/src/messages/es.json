@@ -23,6 +23,11 @@
     "LIBRO_TEXTO_ALTERNATIVO_REQUERIDO": "Completá el texto alternativo de la portada antes de subirla.",
     "PORTADA_DIMENSION_INSUFICIENTE": "La imagen es más chica que el mínimo para una portada (el lado corto tiene que ser de al menos 800px) — probá con una de mejor resolución.",
     "LIBRO_ORDEN_CONJUNTO_INVALIDO": "La lista cambió mientras reordenabas — recargá la página e intentá de nuevo.",
+    "PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO": "Esta Persona es menor de 18 años, y a un menor de edad no se le puede dar un rol de cargo.",
+    "NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO": "Esta Persona es el Admin principal de la instalación: su rol de Admin no se puede quitar desde acá. Es lo que asegura que la iglesia nunca se quede sin alguien que administre.",
+    "ADMIN_NO_PUEDE_AUTO_REVOCARSE": "No podés quitarte tu propio rol de Admin. Si hace falta, pedíselo a otro Admin.",
+    "DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS": "Esta Persona tiene discipulados a cargo. Reasignalos antes de quitarle el rol de Discipulador.",
+    "DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS": "Todavía no se puede quitar el rol de Discipulador: el sistema aún no puede revisar si esta Persona tiene discipulados a cargo, y quitárselo sin revisar podría dejar a alguien sin acompañamiento.",
     "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
   },
   "nav": {
@@ -55,6 +60,61 @@
       "soltado": "Soltaste \"{titulo}\" en la posición {posicion} de {total}.",
       "soltadoSinPosicion": "Soltaste \"{titulo}\".",
       "cancelado": "Cancelaste el arrastre — \"{titulo}\" volvió a la posición {posicion} de {total}."
+    }
+  },
+  "personas": {
+    "titulo": "Personas",
+    "descripcion": "Buscá a una Persona para ver sus roles de cargo. Acá aparecen solo las mayores de 18 años, porque a un menor de edad no se le puede dar un rol de cargo.",
+    "etiquetaBusqueda": "Buscar por nombre, apellido, email o teléfono",
+    "placeholderBusqueda": "Ej. Ana García",
+    "etiquetaTabla": "Personas",
+    "etiquetaPaginacion": "Paginado de Personas",
+    "columnas": {
+      "nombre": "Nombre",
+      "contacto": "Contacto",
+      "roles": "Roles de cargo",
+      "acciones": "Acciones"
+    },
+    "sinRolDeCargo": "Sin rol de cargo",
+    "vacio": "Todavía no hay Personas mayores de edad registradas.",
+    "vacioBusqueda": "No encontramos Personas que coincidan con \"{busqueda}\".",
+    "cambiarRoles": "Cambiar roles",
+    "cambiarRolesDe": "Cambiar roles de {nombre}",
+    "roles": {
+      "admin": "Admin",
+      "pastor": "Pastor/a",
+      "discipulador": "Discipulador/a",
+      "lider_curso": "Líder de curso"
+    },
+    "descripcionRoles": {
+      "admin": "Gestiona todo el backoffice, incluidos los roles.",
+      "pastor": "Ve toda la información del backoffice, sin gestionarlo.",
+      "discipulador": "Acompaña a sus discípulos en Vida Nueva.",
+      "lider_curso": "Lleva adelante un Grupo de Vida de Servicio."
+    },
+    "modal": {
+      "titulo": "Roles de {nombre}",
+      "descripcion": "Otorgá o quitá cada rol por separado: cada cambio se aplica en el momento.",
+      "tiene": "Tiene este rol",
+      "noTiene": "No lo tiene",
+      "otorgar": "Otorgar",
+      "otorgarRol": "Otorgar el rol de {rol}",
+      "otorgando": "Otorgando…",
+      "quitar": "Quitar",
+      "quitarRol": "Quitar el rol de {rol}",
+      "cerrar": "Cerrar",
+      "exitoOtorgado": "{nombre} ahora tiene el rol de {rol}.",
+      "exitoQuitado": "{nombre} ya no tiene el rol de {rol}.",
+      "errorGenerico": "No pudimos cambiar el rol. Probá de nuevo en un momento.",
+      "confirmarQuitarTitulo": "¿Quitarle el rol de {rol} a {nombre}?",
+      "confirmarQuitarDescripcion": "Va a dejar de tener el acceso que le da ese rol. Sus otros roles no cambian.",
+      "confirmarQuitar": "Sí, quitar el rol",
+      "volver": "Volver"
+    },
+    "error": {
+      "titulo": "No pudimos cargar las Personas",
+      "texto": "Podés reintentar en unos segundos. Código de referencia:",
+      "reintentar": "Reintentar"
     }
   }
 }

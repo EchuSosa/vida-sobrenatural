@@ -7,7 +7,8 @@ import {
   OrigenAlta,
   TipoRelacionFamiliar,
 } from '../generated/prisma/enums.js';
-import { calcularEdad } from './calcular-edad.js';
+import { EDAD_MINIMA_ROL_DE_CARGO } from '@vida-sobrenatural/shared-types';
+import { calcularEdad, nacidosAntesDeParaEdad } from './calcular-edad.js';
 import { AppException } from '../common/errors/app-exception.js';
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import type { ActivarPersonaDto } from './dto/activar-persona.dto.js';
@@ -15,12 +16,27 @@ import type { ActualizarPerfilDto } from './dto/actualizar-perfil.dto.js';
 
 const EDAD_MINIMA = 18;
 
+// specs/005 (T017, FR-005): `rol` para ver los roles actuales. Sin
+// `fechaNacimiento`: no hace falta exponerla para identificar a nadie.
 const BUSQUEDA_PERSONA_SELECT = {
   id: true,
   nombre: true,
   apellido: true,
   email: true,
   telefono: true,
+  rol: true,
+} as const;
+
+// specs/005, Historia 2: el listado de la pantalla Personas. Hoy coincide
+// con BUSQUEDA_PERSONA_SELECT, pero es otro caso de uso — la vista de
+// Flujo 9 va a sumar columnas acá sin que el buscador de tutor cambie.
+const PERSONA_LISTADO_SELECT = {
+  id: true,
+  nombre: true,
+  apellido: true,
+  email: true,
+  telefono: true,
+  rol: true,
 } as const;
 
 // D112: inversa de cada tipo de Relación Familiar (para detectar el
@@ -259,12 +275,79 @@ export class PersonaService {
   }
 
   /**
+   * GET /personas — specs/005, Historia 2 (FR-005): el listado paginado de la
+   * pantalla Personas. Endpoint propio y no una extensión de `buscarPersonas`
+   * (ver abajo): aquel devuelve 10 resultados sin total para elegir un tutor;
+   * este pagina de verdad (Personas es el listado que más va a crecer), con
+   * búsqueda y orden resueltos acá, en la base — mismo patrón que
+   * `findPendientesTutor` (H-42/H-88).
+   *
+   * `soloMayores` (FR-024) es opcional y por defecto `false`: el significado
+   * natural de este endpoint es "listar Personas", y esconder gente tiene que
+   * ser algo que una pantalla pide explícitamente. La vista de Flujo 9 va a
+   * necesitar ver a los menores (un `pendiente_tutor` es menor por definición
+   * y hay que poder activarlo).
+   *
+   * Dos capas distintas, que no hay que confundir:
+   * - FR-011 es la GARANTÍA: `RolesService.otorgarRol` rechaza darle un rol
+   *   de cargo a un menor, venga el pedido por donde venga.
+   * - FR-024 es solo la COMODIDAD de no mostrar en el listado de ascender
+   *   roles a alguien a quien no se va a poder ascender.
+   * Sacar este filtro no toca la protección; sacar el chequeo de otorgarRol,
+   * sí.
+   */
+  async listarPersonas(
+    skip: number,
+    take: number,
+    buscar?: string,
+    orden: 'nombre' | 'apellido' = 'apellido',
+    direccion: 'asc' | 'desc' = 'asc',
+    soloMayores = false,
+  ) {
+    const termino = buscar?.trim();
+    const where = {
+      activo: true,
+      ...(soloMayores ? { fechaNacimiento: { lt: nacidosAntesDeParaEdad(EDAD_MINIMA_ROL_DE_CARGO) } } : {}),
+      ...(termino
+        ? {
+            OR: [
+              { nombre: { contains: termino, mode: 'insensitive' as const } },
+              { apellido: { contains: termino, mode: 'insensitive' as const } },
+              { email: { contains: termino, mode: 'insensitive' as const } },
+              { telefono: { contains: termino, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
+    // Desempate por el otro campo del nombre y por id: sin un orden total,
+    // Postgres puede repetir o saltear filas entre una página y la siguiente.
+    const segundo = orden === 'apellido' ? 'nombre' : 'apellido';
+    const [items, total] = await Promise.all([
+      this.prisma.persona.findMany({
+        where,
+        select: PERSONA_LISTADO_SELECT,
+        orderBy: [{ [orden]: direccion }, { [segundo]: direccion }, { id: 'asc' }],
+        skip,
+        take,
+      }),
+      this.prisma.persona.count({ where }),
+    ]);
+    return { items, total };
+  }
+
+  /**
    * GET /personas/buscar?q= — Historia 2b, H-29 (D108): elegir el tutor a
    * vincular. `take: 10` alcanza mientras la tabla es chica — H-42: este
    * `OR` con `contains` recorre la tabla entera (Postgres no puede usar un
    * índice B-tree normal para `LIKE '%texto%'`); si `Persona` crece a miles
    * de filas, va a necesitar un índice de texto (`pg_trgm` + índice GIN por
    * trigram) en vez de (o además de) subir `take`.
+   *
+   * specs/005: a propósito NO filtra por EDAD_MINIMA_ROL_DE_CARGO (D133).
+   * Esa regla es de otro caso de uso (ascender roles, que usa
+   * `listarPersonas`); si gobernara esta búsqueda, un cambio del umbral de
+   * D133 movería en silencio quién puede ser tutor (la forma de H-128). La
+   * mayoría de edad del tutor la garantiza `activar`, con su propia regla.
    */
   buscarPersonas(q: string) {
     const termino = q.trim();

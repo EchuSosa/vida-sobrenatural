@@ -9,6 +9,13 @@
 export type RolDeCargo = 'admin' | 'pastor' | 'discipulador' | 'lider_curso';
 
 /**
+ * Los cuatro valores de `RolDeCargo` como lista — Historia 2: la valida el
+ * DTO de `POST /personas/:id/roles` y la recorre el modal de roles del
+ * backoffice, sin que ninguno de los dos escriba los cuatro a mano.
+ */
+export const ROLES_DE_CARGO: readonly RolDeCargo[] = ['admin', 'pastor', 'discipulador', 'lider_curso'];
+
+/**
  * Foundational (T009): un permiso `.ver` por cada ruta hoy protegida de
  * `apps/backoffice/src/config/nav.ts` — refactor sin cambio de
  * comportamiento, mismos roles que cada ruta ya tenía. Historia 2/3 suman
@@ -31,7 +38,12 @@ export type Permiso =
   | 'catalogos.ver'
   | 'mis_discipulados.ver'
   | 'mi_disponibilidad.ver'
-  | 'mis_grupos.ver';
+  | 'mis_grupos.ver'
+  // Historia 2: otorgar/quitar roles de cargo (FR-006/FR-007) — solo Admin.
+  | 'personas.gestionar_roles'
+  // Historia 2 (T025): GET /personas/buscar, el buscador de tutor (H-29) —
+  // mismos roles que ya tenía con `@Roles`, solo cambia cómo se declara.
+  | 'personas.buscar';
 
 export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'inicio.ver': ['admin', 'pastor'],
@@ -50,4 +62,15 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'mis_discipulados.ver': ['discipulador'],
   'mi_disponibilidad.ver': ['discipulador'],
   'mis_grupos.ver': ['lider_curso'],
+  'personas.gestionar_roles': ['admin'],
+  'personas.buscar': ['admin', 'discipulador'],
 };
+
+/**
+ * ¿Alguno de estos roles tiene el permiso? — para decidir qué mostrar en una
+ * pantalla (ej. el modal de roles de Personas) leyendo el catálogo, nunca un
+ * `rol.includes('admin')` a mano.
+ */
+export function tienePermiso(roles: readonly string[], permiso: Permiso): boolean {
+  return CATALOGO_PERMISOS[permiso].some((rol) => roles.includes(rol));
+}
