@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { requerirPermiso } from '../../../auth';
+import { requerirPermiso, tienePermisoSesion } from '../../../auth';
 import { apiFetch, ApiError, type Sede } from '@vida-sobrenatural/shared-types';
 import { SedeDetalleCliente } from './sede-detalle-cliente';
 
@@ -25,5 +25,13 @@ export default async function SedeDetallePage({ params }: { params: Promise<{ id
     throw e;
   }
 
-  return <SedeDetalleCliente sede={sede} apiToken={session.apiToken} />;
+  return (
+    <SedeDetalleCliente
+      sede={sede}
+      apiToken={session.apiToken}
+      // H-133: editar, desactivar y reactivar piden sedes.gestionar — quien
+      // solo ve (el Pastor) recibe los datos en solo lectura.
+      puedeGestionar={tienePermisoSesion(session, 'sedes.gestionar')}
+    />
+  );
 }

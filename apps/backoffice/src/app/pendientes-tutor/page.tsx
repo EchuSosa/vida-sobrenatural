@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { requerirPermiso } from '../../auth';
+import { requerirPermiso, tienePermisoSesion } from '../../auth';
 import { apiFetch, type Pagina, type PersonaPendienteTutor } from '@vida-sobrenatural/shared-types';
 import { PendientesTutorCliente } from './pendientes-tutor-cliente';
 import { TAMANIO_PAGINA } from './constantes';
@@ -84,6 +84,9 @@ export default async function PendientesTutorPage({
       totalPaginas={totalPaginas}
       apiToken={session.apiToken}
       orden={{ columna: ordenColumna, direccion: ordenDireccion }}
+      // T070: ver la lista es pendientes_tutor.ver (incluye al Pastor, D64);
+      // Activar y Cerrar el caso son pendientes_tutor.gestionar.
+      puedeGestionar={tienePermisoSesion(session, 'pendientes_tutor.gestionar')}
     />
   );
 }

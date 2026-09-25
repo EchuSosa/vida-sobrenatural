@@ -326,7 +326,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await expect(page.getByRole('heading', { name: 'Libros' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Crear Libro' })).toHaveCount(0);
-      await expect(page.getByRole('button', { name: /^Acciones para/ })).toHaveCount(0);
+      // specs/005 (T044): el menú de cada fila SÍ está — "Ver detalle" es
+      // navegación (libros.ver) —, pero sin acciones. Antes esta línea exigía
+      // que no hubiera menú, y fijaba que el Pastor no pudiera abrir el detalle.
+      await expect(page.getByRole('button', { name: /^Eliminar / })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: /^Mover .* hacia arriba$/ })).toHaveCount(0);
 
       const resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);

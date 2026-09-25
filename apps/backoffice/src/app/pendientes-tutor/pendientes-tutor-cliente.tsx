@@ -68,12 +68,15 @@ export function PendientesTutorCliente({
   totalPaginas,
   apiToken,
   orden,
+  puedeGestionar,
 }: {
   pagina: Pagina<PersonaPendienteTutor>;
   paginaActual: number;
   totalPaginas: number;
   apiToken: string;
   orden: OrdenTabla;
+  /** T070: Activar y Cerrar el caso — `pendientes_tutor.gestionar`. El Pastor ve la lista (D64) sin estas acciones. */
+  puedeGestionar: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -184,8 +187,8 @@ export function PendientesTutorCliente({
             pagina: null,
           })
         }
-        encabezadoAcciones="Acciones"
-        acciones={(persona) => (
+        encabezadoAcciones={puedeGestionar ? 'Acciones' : undefined}
+        acciones={puedeGestionar ? (persona) => (
           <div className="flex flex-wrap justify-end gap-2">
             <Button size="sm" onClick={() => setPersonaParaActivar(persona)}>
               Activar
@@ -203,7 +206,7 @@ export function PendientesTutorCliente({
               onConfirmar={() => marcarInactiva(persona.id)}
             />
           </div>
-        )}
+        ) : undefined}
       />
 
       <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} renderEnlace={(p) => <Link href={construirHrefPagina(p)} />} etiquetaNav="Paginado de casos pendientes de tutor" />

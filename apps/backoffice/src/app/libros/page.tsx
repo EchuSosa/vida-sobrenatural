@@ -73,6 +73,8 @@ export default async function LibrosPage({
       orden={{ columna: ordenColumna, direccion: ordenDireccion }}
       apiToken={session.apiToken}
       puedeGestionar={tienePermisoSesion(session, 'libros.gestionar')}
+      // T071: el enlace a /libros/papelera, con el permiso de ABRIRLA — ver LibrosCliente.
+      puedeAbrirPapelera={tienePermisoSesion(session, 'libros.papelera.ver')}
     />
   );
 }

@@ -57,11 +57,17 @@ export function SedesCliente({
   filtro,
   orden,
   apiToken,
+  puedeGestionar,
+  puedeAbrirPapelera,
 }: {
   sedes: Sede[];
   filtro: Filtro;
   orden: OrdenTabla;
   apiToken: string;
+  /** H-133: crear, inactivar, reactivar y eliminar — `sedes.gestionar`. */
+  puedeGestionar: boolean;
+  /** T071: el enlace a /sedes/papelera — `sedes.papelera.ver`, el permiso de abrirla. */
+  puedeAbrirPapelera: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -167,19 +173,28 @@ export function SedesCliente({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Sedes</h1>
         <div className="flex gap-2">
-          <ButtonLink render={<Link href="/sedes/papelera" />} variant="outline" size="sm">
-            Papelera
-          </ButtonLink>
-          <Button
-            size="sm"
-            onClick={() => {
-              setErrorAlta(null);
-              setErroresCampoAlta(null);
-              setModalAbierto(true);
-            }}
-          >
-            Crear Sede
-          </Button>
+          {/* Un control se condiciona al permiso de LO QUE PROVOCA. "Papelera" es
+              navegación, no una acción: va con el permiso de ABRIR esa pantalla
+              (`sedes.papelera.ver`), no con el de gestionar. Hoy los dos son solo del
+              Admin y ninguna prueba distingue una opción de la otra — este
+              comentario es lo que impide unificarlos cuando se separen (H-129/T071). */}
+          {puedeAbrirPapelera && (
+            <ButtonLink render={<Link href="/sedes/papelera" />} variant="outline" size="sm">
+              Papelera
+            </ButtonLink>
+          )}
+          {puedeGestionar && (
+            <Button
+              size="sm"
+              onClick={() => {
+                setErrorAlta(null);
+                setErroresCampoAlta(null);
+                setModalAbierto(true);
+              }}
+            >
+              Crear Sede
+            </Button>
+          )}
         </div>
       </div>
 
@@ -241,15 +256,18 @@ export function SedesCliente({
                 }
               />
               <DropdownMenuContent align="end">
+                {/* "Ver detalle" es navegación (sedes.ver, quien ve el listado ya lo
+                    tiene); Inactivar/Reactivar/Eliminar son acciones (sedes.gestionar). */}
                 <DropdownMenuItem render={<Link href={`/sedes/${sede.id}`}>Ver detalle</Link>} />
-                {sede.activo ? (
-                  <DropdownMenuItem onClick={() => cambiarActivo(sede, false)}>Inactivar</DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem onClick={() => cambiarActivo(sede, true)}>Reactivar</DropdownMenuItem>
-                )}
+                {puedeGestionar &&
+                  (sede.activo ? (
+                    <DropdownMenuItem onClick={() => cambiarActivo(sede, false)}>Inactivar</DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={() => cambiarActivo(sede, true)}>Reactivar</DropdownMenuItem>
+                  ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <AccionEliminarSede sede={sede} apiToken={apiToken} />
+            {puedeGestionar && <AccionEliminarSede sede={sede} apiToken={apiToken} />}
           </div>
         )}
       />

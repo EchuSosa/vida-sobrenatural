@@ -198,6 +198,20 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
       expect((await servidor().get('/personas').set('Authorization', `Bearer ${await token('p', ['pastor'])}`)).status).toBe(200);
       expect((await servidor().get('/personas').set('Authorization', `Bearer ${await token('d', ['discipulador'])}`)).status).toBe(403);
     });
+
+    // T070 (D64): la lista de pendientes de tutor — la única compuesta
+    // enteramente por menores — la lee quien tiene pendientes_tutor.ver
+    // (incluido el Pastor); activar y cerrar siguen en .gestionar.
+    it('GET /personas/pendientes-tutor lo leen admin, discipulador y pastor; activar y cerrar no son del pastor', async () => {
+      const tokenPastor = await token('p', ['pastor']);
+      expect((await servidor().get('/personas/pendientes-tutor').set('Authorization', `Bearer ${tokenPastor}`)).status).toBe(200);
+      expect((await servidor().get('/personas/pendientes-tutor').set('Authorization', `Bearer ${await token('d', ['discipulador'])}`)).status).toBe(200);
+      expect((await servidor().get('/personas/pendientes-tutor').set('Authorization', `Bearer ${await token('l', ['lider_curso'])}`)).status).toBe(403);
+      const activar = await servidor().patch(`/personas/${ids.menor}/activar`).set('Authorization', `Bearer ${tokenPastor}`).send({});
+      const cerrar = await servidor().patch(`/personas/${ids.menor}/marcar-inactiva`).set('Authorization', `Bearer ${tokenPastor}`);
+      expect(activar.status).toBe(403);
+      expect(cerrar.status).toBe(403);
+    });
   });
 
   describe('listado paginado (GET /personas) y búsqueda de tutor (GET /personas/buscar)', () => {

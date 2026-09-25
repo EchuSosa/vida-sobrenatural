@@ -1,4 +1,4 @@
-import { requerirPermiso } from '../../auth';
+import { requerirPermiso, tienePermisoSesion } from '../../auth';
 import { apiFetch, type Sede } from '@vida-sobrenatural/shared-types';
 import { SedesCliente } from './sedes-cliente';
 
@@ -44,6 +44,10 @@ export default async function SedesPage({
       filtro={filtro}
       orden={{ columna: ordenColumna, direccion: ordenDireccion }}
       apiToken={session.apiToken}
+      // H-133: acciones con sedes.gestionar; el enlace a la papelera con el
+      // permiso de ABRIRLA (T071) — ver el comentario en SedesCliente.
+      puedeGestionar={tienePermisoSesion(session, 'sedes.gestionar')}
+      puedeAbrirPapelera={tienePermisoSesion(session, 'sedes.papelera.ver')}
     />
   );
 }

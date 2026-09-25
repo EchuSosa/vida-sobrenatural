@@ -31,7 +31,16 @@ import { FormularioSede, sedeAValoresFormulario, datosSedeParaEnviar, type Valor
  * cliente (el diálogo de "única Sede activa", por ejemplo) — mismo
  * mecanismo que ya usa error.tsx (H-04).
  */
-export function SedeDetalleCliente({ sede, apiToken }: { sede: Sede; apiToken: string }) {
+export function SedeDetalleCliente({
+  sede,
+  apiToken,
+  puedeGestionar,
+}: {
+  sede: Sede;
+  apiToken: string;
+  /** H-133: `sedes.gestionar` — sin él, ni Desactivar/Reactivar ni el formulario editable. */
+  puedeGestionar: boolean;
+}) {
   const router = useRouter();
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
   const [erroresCampoGuardar, setErroresCampoGuardar] = useState<ErrorDeCampo[] | null>(null);
@@ -107,7 +116,7 @@ export function SedeDetalleCliente({ sede, apiToken }: { sede: Sede; apiToken: s
           <EstadoActivoBadge activo={sede.activo} />
         </div>
 
-        {sede.activo ? (
+        {!puedeGestionar ? null : sede.activo ? (
           <ConfirmDestructiveDialog
             trigger={
               <Button
@@ -150,6 +159,7 @@ export function SedeDetalleCliente({ sede, apiToken }: { sede: Sede; apiToken: s
         textoEnviando="Guardando…"
         error={errorGuardar}
         erroresCampo={erroresCampoGuardar}
+        soloLectura={!puedeGestionar}
       />
 
       <AlertDialog open={avisoUnicaActiva} onOpenChange={setAvisoUnicaActiva}>

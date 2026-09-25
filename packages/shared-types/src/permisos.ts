@@ -54,6 +54,9 @@ export type Permiso =
 export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'inicio.ver': ['admin', 'pastor'],
   'personas.ver': ['admin', 'pastor'],
+  // D64: el Pastor ve esta lista (GET /personas/pendientes-tutor, T070) —
+  // la única compuesta enteramente por menores, con sus datos de contacto y
+  // el teléfono del tutor. Restringirla es enmendar D64, no este valor.
   'pendientes_tutor.ver': ['admin', 'discipulador', 'pastor'],
   'solicitudes.ver': ['admin', 'pastor'],
   'grupos.ver': ['admin', 'pastor'],

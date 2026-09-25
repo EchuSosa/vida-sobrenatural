@@ -75,6 +75,7 @@ export function FormularioSede({
   textoEnviando,
   error,
   erroresCampo,
+  soloLectura = false,
 }: {
   valoresIniciales: ValoresSede;
   onGuardar: (valores: ValoresSede) => void;
@@ -84,6 +85,12 @@ export function FormularioSede({
   error?: string | null;
   /** H-50: `{campo, code}` de un 400 de validación — ver `erroresPorCampo` en shared-types. */
   erroresCampo?: ErrorDeCampo[] | null;
+  /**
+   * H-133: quien puede ver la Sede pero no gestionarla (`sedes.gestionar`) ve
+   * los datos sin poder editarlos — mismo mecanismo que FormularioLibro:
+   * `inert` en el form, campos deshabilitados y sin botón de guardar.
+   */
+  soloLectura?: boolean;
 }) {
   const [valores, setValores] = useState(valoresIniciales);
   // H-72 (revisión manual ronda 7): un error se limpia al escribir y se
@@ -133,9 +140,11 @@ export function FormularioSede({
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (soloLectura) return;
         onGuardar(valores);
       }}
       className="flex flex-col gap-3"
+      inert={soloLectura}
     >
       {error && (
         <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -152,6 +161,7 @@ export function FormularioSede({
           aria-invalid={Boolean(validacion.mensajes.nombre)}
           aria-describedby={validacion.mensajes.nombre ? 'campo-nombre-error' : undefined}
           value={valores.nombre}
+          disabled={soloLectura}
           onChange={(e) => {
             actualizar('nombre', e.target.value);
             validacion.limpiar('nombre');
@@ -169,6 +179,7 @@ export function FormularioSede({
           aria-invalid={Boolean(validacion.mensajes.direccion)}
           aria-describedby={validacion.mensajes.direccion ? 'campo-direccion-error' : undefined}
           value={valores.direccion}
+          disabled={soloLectura}
           onChange={(e) => {
             actualizar('direccion', e.target.value);
             validacion.limpiar('direccion');
@@ -186,6 +197,7 @@ export function FormularioSede({
           aria-invalid={Boolean(validacion.mensajes.horarios)}
           aria-describedby={validacion.mensajes.horarios ? 'campo-horarios-error' : undefined}
           value={valores.horarios}
+          disabled={soloLectura}
           onChange={(e) => {
             actualizar('horarios', e.target.value);
             validacion.limpiar('horarios');
@@ -228,6 +240,7 @@ export function FormularioSede({
           aria-invalid={Boolean(validacion.mensajes.contactoEmail)}
           aria-describedby={validacion.mensajes.contactoEmail ? 'campo-contactoEmail-error' : undefined}
           value={valores.contactoEmail}
+          disabled={soloLectura}
           onChange={(e) => {
             actualizar('contactoEmail', e.target.value);
             validacion.limpiar('contactoEmail');
@@ -240,12 +253,15 @@ export function FormularioSede({
         placeholder="Descripción para la Bienvenida (opcional)"
         aria-label={ETIQUETAS_CAMPO.descripcionBienvenida}
         value={valores.descripcionBienvenida}
+        disabled={soloLectura}
         onChange={(e) => actualizar('descripcionBienvenida', e.target.value)}
         className="rounded-md border border-input bg-transparent px-3 py-2 text-sm dark:bg-input/30"
       />
-      <Button type="submit" loading={enviando} loadingText={textoEnviando} className="w-fit">
-        {textoBoton}
-      </Button>
+      {!soloLectura && (
+        <Button type="submit" loading={enviando} loadingText={textoEnviando} className="w-fit">
+          {textoBoton}
+        </Button>
+      )}
     </form>
   );
 }

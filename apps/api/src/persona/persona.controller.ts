@@ -86,8 +86,15 @@ export class PersonaController {
   }
 
   @Get('pendientes-tutor')
+  // D64 / specs/005 (T070): el Pastor LEE esta lista — sale de D64 ("el Pastor
+  // ve toda la información del sistema, incluidos los datos de contacto").
+  // Es la ÚNICA lista del sistema compuesta enteramente por MENORES de edad,
+  // con sus datos de contacto y el teléfono del tutor. Si algún día se
+  // restringe quién la ve, la decisión a tocar es D64 (y
+  // `pendientes_tutor.ver` en el catálogo), no este endpoint.
+  // Activar y cerrar el caso (abajo) siguen pidiendo pendientes_tutor.gestionar.
   @UseGuards(JwtNextAuthGuard, PermisosGuard)
-  @RequierePermiso('pendientes_tutor.gestionar')
+  @RequierePermiso('pendientes_tutor.ver')
   @ApiBearerAuth()
   @ApiOkResponse({
     description:

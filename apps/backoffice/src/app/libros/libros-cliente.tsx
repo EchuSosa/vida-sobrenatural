@@ -195,8 +195,16 @@ function EnvoltorioDnd({
 
 /**
  * Historia 4 (FR-018, D64): mismo patrón que SedesCliente. `libros` llega
- * ya cargado, filtrado y ordenado desde page.tsx. Pastor (`puedeGestionar: false`)
- * ve todo pero no tiene ni el botón "Crear Libro" ni columna de acciones.
+ * ya cargado, filtrado y ordenado desde page.tsx.
+ *
+ * Cada control con el permiso de LO QUE PROVOCA (specs/005, T044): "Ver
+ * detalle" es navegación y va con `libros.ver` (quien ve este listado ya lo
+ * tiene), así que el menú de cada fila está para todos; Crear Libro,
+ * reordenar, Inactivar/Reactivar y Eliminar son acciones y van con
+ * `libros.gestionar` (`puedeGestionar`). Antes todo el menú dependía de
+ * `puedeGestionar`, y el Pastor no tenía cómo abrir el detalle desde acá —
+ * este comentario decía que "ve todo", y eso hacía parecer deliberada la
+ * omisión.
  */
 export function LibrosCliente({
   libros,
@@ -204,12 +212,15 @@ export function LibrosCliente({
   orden,
   apiToken,
   puedeGestionar,
+  puedeAbrirPapelera,
 }: {
   libros: Libro[];
   filtro: Filtro;
   orden: OrdenTabla;
   apiToken: string;
   puedeGestionar: boolean;
+  /** T071: el enlace a /libros/papelera — `libros.papelera.ver`, el permiso de abrirla (desde H-129, solo Admin). */
+  puedeAbrirPapelera: boolean;
 }) {
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -366,9 +377,16 @@ export function LibrosCliente({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Libros</h1>
         <div className="flex gap-2">
-          <ButtonLink render={<Link href="/libros/papelera" />} variant="outline" size="sm">
-            Papelera
-          </ButtonLink>
+          {/* Un control se condiciona al permiso de LO QUE PROVOCA. "Papelera" es
+              navegación, no una acción: va con el permiso de ABRIR esa pantalla
+              (`libros.papelera.ver`), no con el de gestionar. Hoy los dos son solo del
+              Admin y ninguna prueba distingue una opción de la otra — este
+              comentario es lo que impide unificarlos cuando se separen (H-129/T071). */}
+          {puedeAbrirPapelera && (
+            <ButtonLink render={<Link href="/libros/papelera" />} variant="outline" size="sm">
+              Papelera
+            </ButtonLink>
+          )}
           {puedeGestionar && (
             <Button
               size="sm"
@@ -438,9 +456,7 @@ export function LibrosCliente({
             dir: orden.columna === columnaId && orden.direccion === 'asc' ? 'desc' : null,
           })
         }
-        acciones={
-          puedeGestionar
-            ? (libro) => {
+        acciones={(libro) => {
                 const indice = libros.findIndex((l) => l.id === libro.id);
                 return (
                   <div className="flex items-center justify-end gap-1">
@@ -477,19 +493,18 @@ export function LibrosCliente({
                       />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem render={<Link href={`/libros/${libro.id}`}>Ver detalle</Link>} />
-                        {libro.activo ? (
-                          <DropdownMenuItem onClick={() => cambiarActivo(libro, false)}>Inactivar</DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem onClick={() => cambiarActivo(libro, true)}>Reactivar</DropdownMenuItem>
-                        )}
+                        {puedeGestionar &&
+                          (libro.activo ? (
+                            <DropdownMenuItem onClick={() => cambiarActivo(libro, false)}>Inactivar</DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem onClick={() => cambiarActivo(libro, true)}>Reactivar</DropdownMenuItem>
+                          ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <AccionEliminarLibro libro={libro} apiToken={apiToken} />
+                    {puedeGestionar && <AccionEliminarLibro libro={libro} apiToken={apiToken} />}
                   </div>
                 );
-              }
-            : undefined
-        }
+              }}
         EnvoltorioFila={puedeReordenar ? FilaLibroSortable : undefined}
       />
       </EnvoltorioDnd>
