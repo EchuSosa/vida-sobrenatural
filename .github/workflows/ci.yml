@@ -34,6 +34,18 @@ jobs:
   verificacion:
     name: Verificación (lint, typecheck, test, check:decisiones, check:imports-prohibidos)
     runs-on: ubuntu-latest
+    # H-137: en CI turbo corre TODO, sin leer caché. Una caché de turbo es
+    # correcta solo si las entradas declaradas de cada tarea están completas,
+    # y nada lo verifica: `api:lint`/`api:test` no miraban `scripts/`, así que
+    # un cambio ahí se "verificaba" repitiendo un resultado viejo (H-130: 8
+    # warnings reportados como 1). `scripts/**` ya está en globalDependencies,
+    # pero eso arregla ese caso, no la clase: la próxima entrada que falte va
+    # a dar el mismo verde falso, y en CI nadie mira. Forzar no cuesta nada
+    # acá: sin remote cache, la caché solo ayudaba a una corrida sobre el
+    # mismo commit. Local mantiene la caché (ahí sí acelera, y quien corre
+    # ve lo que corre).
+    env:
+      TURBO_FORCE: 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -50,20 +62,9 @@ jobs:
       - name: Instalar dependencias (lockfile congelado)
         run: pnpm install --frozen-lockfile
 
-      # H-101: cache de turbo entre corridas de CI — sin remote cache (no hay
-      # cuenta de Vercel configurada), esto solo ayuda a una corrida que
-      # repite sobre el mismo commit o un estado muy parecido, pero es
-      # gratis y es lo que turbo espera que un CI declare.
-      - name: Cache de turbo
-        uses: actions/cache@v4
-        with:
-          path: |
-            .turbo
-            apps/*/.turbo
-            packages/*/.turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            turbo-${{ runner.os }}-
+      # H-137: ya no se restaura la caché de turbo (H-101 la había sumado). Con
+      # TURBO_FORCE (arriba) turbo nunca la lee, así que el paso restauraría
+      # archivos que nadie usa, y su comentario afirmaría que ayuda.
 
       - name: pnpm check (lint + typecheck + test + check:decisiones + check:imports-prohibidos)
         run: pnpm run check
@@ -101,12 +102,13 @@ jobs:
 
       # F4: el guard de scripts/e2e-base-datos.cjs (usado por los e2e de
       # Playwright, no por este job) exige DATABASE_URL apuntando EXACTO a
-      # "vidasobrenatural_e2e" o aborta — acá el equivalente es
-      # apps/api/test/global-setup.cjs, que lee apps/api/.env.test y NO
-      # tiene ese guard (crea/migra la base que diga DATABASE_URL, sin
-      # verificar el nombre) — de todos modos se usa
-      # "vidasobrenatural_test", el mismo nombre que docs/11-setup-local.md
-      # documenta para esta suite. No son secretos reales (ver el propio
+      # "vidasobrenatural_e2e" o aborta. El equivalente de esta suite es
+      # verificarBaseDeTest (scripts/destino-de-test.cjs, H-130), que corre
+      # en apps/api/test/global-setup.cjs y en cada worker: aborta si
+      # DATABASE_URL no es exactamente "vidasobrenatural_test" — por eso el
+      # nombre de abajo no es opcional. STORAGE_DIR no se define acá a
+      # propósito: el globalSetup crea la carpeta de la corrida en el
+      # temporal del sistema. No son secretos reales (ver el propio
       # .env.test.example): valores fijos, no un GitHub Secret.
       - name: Crear apps/api/.env.test
         run: |
