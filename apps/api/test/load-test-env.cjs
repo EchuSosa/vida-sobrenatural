@@ -1,4 +1,14 @@
 // Carga apps/api/.env.test antes de correr los tests de integración/e2e —
 // apunta DATABASE_URL a una base de datos de test separada (Constitución,
 // Principio VI).
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env.test') });
+//
+// H-130: corre dentro de CADA worker de Jest, antes de cada archivo de test
+// — es el proceso que efectivamente escribe y borra, así que es acá donde se
+// verifica que los dos destinos son de test: la base, y la carpeta de
+// archivos (con el token de la corrida, que el worker hereda del
+// globalSetup).
+const { cargarEntornoDeTest } = require('./entorno-de-test.cjs');
+const { verificarDestinoDeTest } = require('../../../scripts/destino-de-test.cjs');
+
+cargarEntornoDeTest();
+verificarDestinoDeTest(process.env.STORAGE_DIR, 'STORAGE_DIR');

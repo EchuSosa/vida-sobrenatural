@@ -8,6 +8,9 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '..',
   globalSetup: '<rootDir>/test/global-setup.cjs',
+  // H-130: borra la carpeta de archivos de ESTA corrida, verificada — no un
+  // afterAll de un spec, porque la carpeta es de la corrida entera.
+  globalTeardown: '<rootDir>/test/global-teardown.cjs',
   setupFiles: ['<rootDir>/test/load-test-env.cjs'],
   testRegex: '(/test/.*\\.e2e-spec\\.ts$|/test/integration/.*\\.integration-spec\\.ts$)',
   extensionsToTreatAsEsm: ['.ts'],

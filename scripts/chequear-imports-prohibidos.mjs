@@ -56,6 +56,39 @@ const REGLAS = [
     ],
     comoCorregir: 'Usá configurarApp(app) (apps/api/src/configurar-app.ts) en vez de instanciar esto a mano.',
   },
+  {
+    // H-130: un teardown que borra archivos tiene que pasar por la guarda
+    // que verifica que su destino es de test (scripts/destino-de-test.cjs:
+    // borrarDestinoDeTest) — un `rm(process.env.X ?? './default')` suelto
+    // en un spec borró la carpeta de portadas de desarrollo durante seis
+    // días. Esta regla hace que el próximo `rm` en una suite no pueda
+    // escribirse sin que alguien lo vea.
+    //
+    // Lo que esta regla NO cubre — que nadie la lea como más de lo que es:
+    // - Solo ve imports CON NOMBRE (`import { rm } from 'node:fs/promises'`).
+    //   No ve `import * as fs from 'node:fs'`, `import fs from 'node:fs'`
+    //   (y después `fs.rmSync`), ni `require('node:fs')` en un .cjs.
+    // - No ve un borrado por otro camino: `child_process` (`rm -rf`,
+    //   `execSync('rimraf …')`), ni librerías como fs-extra, rimraf o del.
+    // - No mira qué se borra ni dónde: solo que el import está.
+    // - Solo recorre apps/api/test, apps/backoffice/e2e y apps/web/e2e; un
+    //   script de mantenimiento en otro lado (ej. apps/api/scripts/) no.
+    descripcion: 'borrado de archivos en una suite sin pasar por la guarda de destino de test (H-130)',
+    directorios: ['apps/api/test', 'apps/backoffice/e2e', 'apps/web/e2e'],
+    extensiones: ['.ts'],
+    importsProhibidos: ['node:fs', 'fs', 'node:fs/promises', 'fs/promises'].flatMap((modulo) =>
+      ['rm', 'rmSync', 'rmdir', 'rmdirSync', 'unlink', 'unlinkSync'].map((nombre) => ({ modulo, nombre })),
+    ),
+    permitidoEn: [
+      // El test de la propia guarda: limpia solo carpetas que él mismo creó
+      // con mkdtemp, para poder probar los casos de rechazo (una carpeta
+      // ajena, un symlink que sale del temporal) sin pasar por la guarda
+      // que justamente los rechaza.
+      'apps/api/test/unit/destino-de-test.spec.ts',
+    ],
+    comoCorregir:
+      'Borrá con borrarDestinoDeTest(ruta) de scripts/destino-de-test.cjs, que verifica que la ruta es la carpeta temporal de esta corrida antes de borrar — nunca con un default.',
+  },
 ];
 
 /**

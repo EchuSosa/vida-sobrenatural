@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SignJWT } from 'jose';
 import request from 'supertest';
 import sharp from 'sharp';
-import { rm } from 'node:fs/promises';
 import type { Server } from 'node:http';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
@@ -187,14 +186,15 @@ describe('POST/PATCH/DELETE /libros (integración) — Historia 4', () => {
     // T037/main.ts: la ruta estática de portadas no la agrega el módulo,
     // sólo bootstrap() — createNestApplication() no la ejecuta, así que
     // este test la repite (mismo criterio que los filtros/pipes de arriba).
-    app.useStaticAssets(process.env.STORAGE_DIR ?? './storage/portadas', { prefix: '/archivos/portadas/' });
+    // H-130: sin default — load-test-env.cjs ya verificó en este worker que
+    // STORAGE_DIR es la carpeta temporal de esta corrida.
+    app.useStaticAssets(process.env.STORAGE_DIR as string, { prefix: '/archivos/portadas/' });
     await app.init();
     prisma = moduleFixture.get(PrismaService);
   });
 
   afterAll(async () => {
     await prisma.libro.deleteMany({ where: { id: { in: idsCreados } } });
-    await rm(process.env.STORAGE_DIR ?? './storage/portadas', { recursive: true, force: true });
     await app.close();
   });
 

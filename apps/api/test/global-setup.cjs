@@ -1,7 +1,8 @@
 const path = require('node:path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env.test') });
 const { execSync } = require('node:child_process');
 const { Client } = require('pg');
+const { cargarEntornoDeTest } = require('./entorno-de-test.cjs');
+const { crearDestinoDeTest } = require('../../../scripts/destino-de-test.cjs');
 
 /**
  * H-59 (revisión manual): la suite de integración necesita su propia base
@@ -15,6 +16,15 @@ const { Client } = require('pg');
  * `globalSetup` en el proceso principal, antes de levantar los workers.
  */
 module.exports = async function globalSetup() {
+  // H-130: antes de crear o migrar nada — este mismo proceso corre
+  // `prisma migrate deploy` contra DATABASE_URL, y una exportada en la
+  // terminal le gana a .env.test (dotenv no la pisa).
+  cargarEntornoDeTest();
+  // H-130: la carpeta de archivos de ESTA corrida, en el temporal del
+  // sistema, con marca y token. Se escribe en process.env ANTES de que Jest
+  // levante los workers, que la heredan al nacer; pisa un STORAGE_DIR
+  // exportado en la terminal a propósito. La borra global-teardown.cjs.
+  crearDestinoDeTest('STORAGE_DIR');
   const url = new URL(process.env.DATABASE_URL);
   const nombreBase = url.pathname.replace(/^\//, '');
 
