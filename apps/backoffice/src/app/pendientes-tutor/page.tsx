@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { requerirSesion } from '../../auth';
+import { requerirPermiso } from '../../auth';
 import { apiFetch, type Pagina, type PersonaPendienteTutor } from '@vida-sobrenatural/shared-types';
 import { PendientesTutorCliente } from './pendientes-tutor-cliente';
 import { TAMANIO_PAGINA } from './constantes';
@@ -46,7 +46,9 @@ export default async function PendientesTutorPage({
 }: {
   searchParams: Promise<{ q?: string; orden?: string; dir?: string; pagina?: string }>;
 }) {
-  const session = await requerirSesion();
+  // H-132: antes solo pedía sesión — cualquier Persona logueada entraba por
+  // URL a una lista de menores con sus datos de contacto.
+  const session = await requerirPermiso('pendientes_tutor.ver');
   const { q, orden: ordenParam, dir, pagina: paginaParam } = await searchParams;
   const buscar = (q ?? '').trim();
   const ordenColumna: ColumnaOrden = ordenParam === 'nombre' ? 'nombre' : 'createdAt';

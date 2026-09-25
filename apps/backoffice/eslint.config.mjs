@@ -8,6 +8,7 @@ import noLinkEnBotonBaseUi from "../../eslint-rules/no-link-en-boton-base-ui.mjs
 import noSessionCheckEnPage from "../../eslint-rules/no-session-check-en-page.mjs";
 import noDangerouslySetInnerHtml from "../../eslint-rules/no-dangerously-set-inner-html.mjs";
 import sinRolDeSesionEnPantallas from "../../eslint-rules/sin-rol-de-sesion-en-pantallas.mjs";
+import pantallaDeclaraPermiso from "../../eslint-rules/pantalla-declara-permiso.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -29,6 +30,7 @@ const eslintConfig = defineConfig([
           ...noSessionCheckEnPage.rules,
           ...noDangerouslySetInnerHtml.rules,
           ...sinRolDeSesionEnPantallas.rules,
+          ...pantallaDeclaraPermiso.rules,
         },
       },
       "@eslint-community/eslint-comments": eslintComments,
@@ -47,14 +49,25 @@ const eslintConfig = defineConfig([
     files: ["src/app/**/page.tsx"],
     rules: { "local/no-session-check-en-page": "error" },
   },
+  // specs/005, T039/T040 (H-132): toda page.tsx llama a requerirPermiso(X)
+  // con la X de su entrada en NAV_BACKOFFICE. Rutas explícitas, sin default
+  // (H-130): si nav.ts no se puede leer, el lint aborta — nunca pasa en verde.
+  {
+    files: ["src/app/**/page.tsx"],
+    rules: {
+      "local/pantalla-declara-permiso": ["error", { nav: "src/config/nav.ts", app: "src/app" }],
+    },
+  },
   // specs/005, T066 (FR-013): ninguna pantalla lee session.user.rol — el
   // acceso se decide con requerirPermiso()/tienePermisoSesion() contra el
-  // catálogo. Solo quedan afuera los dos lugares que SÍ tienen que leerlo:
-  // auth.ts (arma la sesión y resuelve el permiso) y el shell (filtra el
-  // menú con itemsParaRoles, que también lee el catálogo).
+  // catálogo. Solo quedan afuera los lugares que SÍ tienen que leerlo:
+  // auth.ts (arma la sesión y resuelve el permiso), el shell (filtra el
+  // menú con itemsParaRoles) y el botón del 404 (H-134: resuelve el destino
+  // de aterrizaje con itemDeAterrizaje, del mismo catálogo — de cliente
+  // porque un not-found async rompe en desarrollo, ver ese archivo).
   {
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/auth.ts", "src/components/backoffice-shell.tsx"],
+    ignores: ["src/auth.ts", "src/components/backoffice-shell.tsx", "src/components/boton-aterrizaje.tsx"],
     rules: { "local/sin-rol-de-sesion-en-pantallas": "error" },
   },
   // Override default ignores of eslint-config-next.

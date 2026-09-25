@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { test, expect, auditar, loguearseComoAdminE2E } from './helpers';
 import { NAV_BACKOFFICE } from '../src/config/nav';
 
@@ -12,6 +13,19 @@ import { NAV_BACKOFFICE } from '../src/config/nav';
  * escribiendo la misma clave de localStorage que lee next-themes, ver el
  * mismo comentario en apps/web/e2e/axe-todas-las-rutas.spec.ts.
  */
+/**
+ * H-132: el smoke audita la PANTALLA, no el 404. Con las 18 rutas exigiendo
+ * su permiso, una sesión sin ese permiso cae en "No encontramos esta
+ * sección" y el smoke terminaría auditando el 404 en su lugar, en silencio
+ * (e2e-admin tiene admin + discipulador + lider_curso para alcanzar todas).
+ * Las rutas dinámicas (`/sedes/[id]`) se visitan con el `[id]` literal y SÍ
+ * son un 404 de su segmento — se auditan así, a propósito.
+ */
+async function esperarPaginaReal(page: Page, href: string) {
+  if (href.includes('[')) return;
+  await expect(page.getByRole('heading', { name: 'No encontramos esta sección' }), `${href}: la sesión del smoke recibió 404`).toHaveCount(0);
+}
+
 for (const tema of ['claro', 'oscuro'] as const) {
   test.describe(`modo ${tema}`, () => {
     test.beforeEach(async ({ page }) => {
@@ -25,6 +39,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       for (const item of NAV_BACKOFFICE) {
         await page.goto(item.href);
         await page.waitForLoadState('networkidle');
+        await esperarPaginaReal(page, item.href);
         const { violations } = await auditar(page);
         expect(violations, `${item.href}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
       }
@@ -51,6 +66,7 @@ for (const viewport of ANCHOS_CELULAR) {
       for (const item of NAV_BACKOFFICE) {
         await page.goto(item.href);
         await page.waitForLoadState('networkidle');
+        await esperarPaginaReal(page, item.href);
         const sinDesborde = await page.evaluate(
           () => document.scrollingElement!.scrollWidth <= window.innerWidth,
         );

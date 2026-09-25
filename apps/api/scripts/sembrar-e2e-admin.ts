@@ -60,7 +60,10 @@ async function main() {
     throw new Error('sembrar-e2e-admin: no hay ninguna Sede activa — corré db:seed primero.');
   }
 
-  await sembrarPersona(EMAIL_ADMIN_E2E, 'E2E', ['admin', 'discipulador'], sede.id);
+  // H-132: con `lider_curso` además, esta Persona alcanza las 18 rutas del
+  // backoffice — el smoke de axe (axe-todas-las-rutas.spec.ts) las recorre
+  // con ella y exige que ninguna le dé 404.
+  await sembrarPersona(EMAIL_ADMIN_E2E, 'E2E', ['admin', 'discipulador', 'lider_curso'], sede.id);
   await sembrarPersona(EMAIL_PASTOR_E2E, 'Pastor', ['pastor'], sede.id);
   await sembrarPersona(EMAIL_OTRO_ROL_E2E, 'OtroRol', ['discipulador'], sede.id);
 }

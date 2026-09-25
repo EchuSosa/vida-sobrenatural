@@ -116,5 +116,12 @@
       "texto": "Podés reintentar en unos segundos. Código de referencia:",
       "reintentar": "Reintentar"
     }
+  },
+  "aterrizaje": {
+    "sinAccesoTitulo": "Tu cuenta no tiene acceso al backoffice",
+    "sinAccesoDescripcion": "El backoffice es para quienes tienen un rol de servicio en la iglesia. Si creés que deberías poder entrar, pedíselo a quien administra el sistema en tu Sede.",
+    "noEncontradoTitulo": "No encontramos esta sección",
+    "noEncontradoDescripcion": "Puede que el link esté roto o que la página ya no exista.",
+    "irA": "Ir a {seccion}"
   }
 }

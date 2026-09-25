@@ -1,4 +1,4 @@
-import { requerirSesion } from '../../auth';
+import { requerirPermiso } from '../../auth';
 import { apiFetch, type Sede } from '@vida-sobrenatural/shared-types';
 import { SedesCliente } from './sedes-cliente';
 
@@ -22,7 +22,8 @@ export default async function SedesPage({
 }: {
   searchParams: Promise<{ estado?: string; orden?: string; dir?: string; q?: string }>;
 }) {
-  const session = await requerirSesion();
+  // H-132: antes solo pedía sesión — cualquier Persona logueada veía el listado por URL.
+  const session = await requerirPermiso('sedes.ver');
   const { estado, orden: ordenParam, dir, q } = await searchParams;
   const filtro: Filtro = estado === 'todas' ? 'todas' : 'activas';
   const ordenColumna: ColumnaOrden =

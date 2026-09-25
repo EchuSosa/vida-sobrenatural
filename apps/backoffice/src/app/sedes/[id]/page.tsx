@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { requerirSesion } from '../../../auth';
+import { requerirPermiso } from '../../../auth';
 import { apiFetch, ApiError, type Sede } from '@vida-sobrenatural/shared-types';
 import { SedeDetalleCliente } from './sede-detalle-cliente';
 
@@ -12,7 +12,8 @@ import { SedeDetalleCliente } from './sede-detalle-cliente';
  * y Desactivar/Reactivar (D119).
  */
 export default async function SedeDetallePage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requerirSesion();
+  // H-132: antes solo pedía sesión — cualquier Persona logueada veía el detalle por URL.
+  const session = await requerirPermiso('sedes.ver');
   const { id } = await params;
   let sede: Sede;
   try {

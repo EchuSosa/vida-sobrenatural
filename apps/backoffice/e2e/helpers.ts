@@ -35,6 +35,16 @@ export async function loguearseComoOtroRolE2E(page: Page) {
   await loguearseComoE2E(page, 'e2e-otro-rol@example.com');
 }
 
+/**
+ * H-134: una sesión con `rol = []` — una cuenta que no existe como Persona
+ * (el test-login, igual que Google, deja pasar cualquier email verificado y
+ * `buscarPersonaPorEmail` devuelve null). Email único por llamada, así nunca
+ * choca con una Persona sembrada.
+ */
+export async function loguearseSinPersonaE2E(page: Page) {
+  await loguearseComoE2E(page, `e2e-sin-persona-${Date.now()}@example.com`);
+}
+
 async function loguearseComoE2E(page: Page, email: string) {
   const csrfResponse = await page.request.get('/api/auth/csrf');
   const { csrfToken } = await csrfResponse.json();

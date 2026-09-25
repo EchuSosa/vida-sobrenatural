@@ -8,6 +8,7 @@ import {
   mintApiToken,
 } from '@vida-sobrenatural/shared-types/auth-server';
 import { tienePermiso, type Permiso } from '@vida-sobrenatural/shared-types';
+import { itemDeAterrizaje, type ItemNavBackoffice } from './config/nav';
 
 /**
  * H-41 (revisión manual, revisión de código): `testLoginHabilitado()`,
@@ -189,4 +190,13 @@ export async function requerirPermiso(permiso: Permiso) {
  */
 export function tienePermisoSesion(session: Session, permiso: Permiso): boolean {
   return tienePermiso(session.user.rol, permiso);
+}
+
+/**
+ * H-134: el ítem de aterrizaje de esta sesión (ver `itemDeAterrizaje` en
+ * config/nav.ts) — lo usan `/` y not-found.tsx, el mismo resolutor para los
+ * dos. `null` = la sesión no tiene ninguna pantalla del backoffice.
+ */
+export function aterrizajeDeSesion(session: Session): ItemNavBackoffice | null {
+  return itemDeAterrizaje(session.user.rol);
 }

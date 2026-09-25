@@ -1,3 +1,4 @@
+// Fixture de pantalla-declara-permiso.test.mjs: `git show 7fbeea2:apps/backoffice/src/config/nav.ts` (antes de la Historia 3, H-129). No editar.
 import {
   Home,
   Users,
@@ -112,17 +113,4 @@ export function itemsParaRoles(roles: string[]): ItemNavBackoffice[] {
     vistos.add(item.href);
     return true;
   });
-}
-
-/**
- * H-134: a dónde aterriza una sesión que no pidió una ruta concreta — `/`
- * (callback de NextAuth, dominio a secas) y el botón del 404. Es el PRIMER
- * ítem del menú de esos roles, derivado de `itemsParaRoles` — nunca un
- * destino fijo, para que siga siendo correcto cuando cambien los roles del
- * catálogo. `null` si no hay ninguno (ej. una cuenta de Google que no es
- * Persona, `rol = []`): quien lo use tiene que mostrar una pantalla terminal,
- * nunca redirigir — si no, es un redirect infinito.
- */
-export function itemDeAterrizaje(roles: string[]): ItemNavBackoffice | null {
-  return itemsParaRoles(roles)[0] ?? null;
 }
