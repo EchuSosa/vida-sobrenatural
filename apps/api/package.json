@@ -32,6 +32,7 @@
     "db:contar": "tsx scripts/contar.ts",
     "db:limpiar-e2e": "tsx scripts/limpiar-e2e.ts",
     "db:sembrar-e2e-admin": "tsx scripts/sembrar-e2e-admin.ts",
+    "db:recrear-admin": "tsx scripts/recrear-admin.ts",
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {

@@ -22,6 +22,7 @@ Documentación de producto, previa a los specs técnicos (metodología SDD). Cad
 | [14-navegacion.md](14-navegacion.md) | Menús de la web pública, la app con sesión y el backoffice; nombres visibles del proceso |
 | [15-guia-ux-ui.md](15-guia-ux-ui.md) | Guía de UX/UI: botones, estados, formularios, tono, tokens, modo oscuro, checklist por pantalla |
 | [16-sistemas-transversales.md](16-sistemas-transversales.md) | Sistemas de notificaciones (Avisos, push, email), errores (Problem Details, Sentry) y feedback de acciones |
+| [21-instalacion.md](21-instalacion.md) | Instalar el sistema para una iglesia: primera instalación y recuperación del Admin (D130/D131) — distinto del atajo de desarrollo |
 | [diagrama-er.mermaid](diagrama-er.mermaid) | Diagrama ER completo (entidades, atributos, cardinalidades) |
 | [diagrama-arquitectura.mermaid](diagrama-arquitectura.mermaid) | Diagrama de arquitectura (apps del monorepo, API, tareas programadas, base de datos, servicios externos) |
 
