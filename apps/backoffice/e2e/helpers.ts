@@ -16,7 +16,12 @@ export { test, expect };
 const WEB_BASE_URL = process.env.PLAYWRIGHT_WEB_BASE_URL ?? 'http://localhost:3001';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
-/** Login vía test-login como la Persona admin+discipulador de e2e (globalSetup la siembra). */
+/**
+ * Login vía test-login como e2e-admin (globalSetup la siembra): hoy tiene
+ * admin + discipulador + lider_curso, no solo admin — un test que la usa no
+ * prueba que "el Admin" pueda algo, sino que alguna de las tres pueda
+ * (H-138, T073).
+ */
 export async function loguearseComoAdminE2E(page: Page) {
   await loguearseComoE2E(page, 'e2e-admin@example.com');
 }

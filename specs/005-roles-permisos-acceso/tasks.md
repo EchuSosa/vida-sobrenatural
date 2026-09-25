@@ -199,6 +199,7 @@ documentos del plan; las tareas de abajo ya asumen la versión corregida:
 - [ ] T061 Correr `pnpm --filter backoffice run lint` y confirmar cero violaciones de `pantalla-declara-permiso` (T039) sobre el estado final del árbol de `apps/backoffice/src/app/`.
 - [ ] T062 Correr `specs/005-roles-permisos-acceso/quickstart.md` completo (los 6 escenarios) contra un entorno local levantado.
 - [ ] T063 Correr las tres suites de la convención de `docs/00-README.md` antes de dar la fase por cerrada: `pnpm --filter api run test`, `pnpm --filter api run test:e2e` (config aparte), y los e2e de `apps/backoffice` (`pnpm --filter backoffice exec playwright test`) — las tres en verde (Governance, D114).
+- [ ] T073 (H-138) Una Persona de e2e por rol de cargo: `loguearseComoAdminE2E` con `['admin']` a secas (hoy `e2e-admin` tiene admin + discipulador + lider_curso, `apps/api/scripts/sembrar-e2e-admin.ts`), y una Persona para cada uno de los otros roles. En un spec sobre qué rol puede qué, ningún e2e distingue hoy "el Admin puede X" de "alguna de estas tres puede X". El smoke de axe (`axe-todas-las-rutas.spec.ts`, para el que se sumó `lider_curso`) tiene que resolver su cobertura de otra forma — por ejemplo, recorrer cada ruta con una sesión que tenga su permiso.
 
 ---
 

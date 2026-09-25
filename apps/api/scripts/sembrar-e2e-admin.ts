@@ -4,8 +4,11 @@ import { PrismaClient } from '../src/generated/prisma/client.js';
 
 /**
  * H-34 (revisión manual ronda 3): los e2e de `apps/backoffice` necesitan una
- * Persona con rol admin+discipulador para entrar a Pendientes de tutor y
- * Sedes vía el proveedor `test-login` — no existe un seed de demo con ese
+ * Persona con rol de cargo para entrar vía el proveedor `test-login`. Hoy
+ * e2e-admin tiene admin + discipulador + lider_curso (ver más abajo: el
+ * tercero lo sumó H-132 para que el smoke de axe alcance las 18 rutas) —
+ * con tres roles, ningún e2e distingue "el Admin puede X" de "alguna de
+ * las tres puede X" (H-138, T073: una Persona por rol) — no existe un seed de demo con ese
  * rol (H-12: `SEED_ADMIN_EMAIL` promueve el email real de quien corre el
  * seed, no sirve para un fixture portable de test). Email con el prefijo
  * `e2e-` para que `db:limpiar-e2e` la borre al final de la corrida, igual
