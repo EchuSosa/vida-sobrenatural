@@ -13,14 +13,40 @@ function haceAnios(anios: number): Date {
 }
 
 async function crearServicio(persona: Record<string, unknown> | null) {
-  const findUnique = jest.fn().mockResolvedValue(persona);
-  const update = jest.fn().mockImplementation(({ data }: { data: { rol: string[] } }) =>
-    Promise.resolve({ id: persona?.id, rol: data.rol }),
-  );
+  // H-142: RolesService lee con `SELECT … FOR UPDATE` y escribe con un UPDATE
+  // condicionado (`array_append`/`array_remove`), todo con $queryRaw dentro de
+  // la transacción. El mock simula esa semántica: el SELECT devuelve la
+  // Persona (o nada); el UPDATE escribe SOLO si su condición se cumple — y en
+  // ese caso llama a `update` con el arreglo resultante, así "escribió X" /
+  // "no escribió nada" se sigue leyendo igual en cada test.
+  const findUnique = jest.fn();
+  const update = jest.fn();
+  const $queryRaw = jest.fn((strings: TemplateStringsArray, ...valores: unknown[]) => {
+    const sql = strings.join('?');
+    if (sql.includes('FOR UPDATE')) {
+      findUnique();
+      return Promise.resolve(persona ? [persona] : []);
+    }
+    const rol = valores[0] as string;
+    const actuales = (persona?.rol as string[]) ?? [];
+    if (sql.includes('array_append')) {
+      if (actuales.includes(rol)) return Promise.resolve([]);
+      const nuevo = [...actuales, rol];
+      update({ where: { id: persona?.id }, data: { rol: nuevo } });
+      return Promise.resolve([{ id: persona?.id, rol: nuevo }]);
+    }
+    if (sql.includes('array_remove')) {
+      if (!actuales.includes(rol)) return Promise.resolve([]);
+      const nuevo = actuales.filter((r) => r !== rol);
+      update({ where: { id: persona?.id }, data: { rol: nuevo } });
+      return Promise.resolve([{ id: persona?.id, rol: nuevo }]);
+    }
+    throw new Error(`SQL inesperado en el test: ${sql}`);
+  });
   // Historia 6 (T050): cada cambio real se registra en CambioDeRol dentro de
   // la misma transacción — el mock ejecuta la función con el mismo cliente.
   const registrar = jest.fn().mockResolvedValue(undefined);
-  const prisma: Record<string, unknown> = { persona: { findUnique, update } };
+  const prisma: Record<string, unknown> = { $queryRaw };
   prisma.$transaction = (fn: (tx: unknown) => unknown) => fn(prisma);
   const moduleRef = await Test.createTestingModule({
     providers: [RolesService, { provide: PrismaService, useValue: prisma }, { provide: CambioDeRolService, useValue: { registrar } }],

@@ -62,7 +62,7 @@ operación de la app escribe un `UPDATE` ni un `DELETE` sobre esta tabla, solo `
 **Qué se registra** (al implementar): cada cambio REAL de un rol de cargo — un otorgamiento o
 una quita que efectivamente modificó `Persona.rol` —, en la misma transacción que el cambio. Un
 pedido idempotente (otorgar un rol que ya tiene, quitar uno que no tiene) no es un cambio y no
-deja fila. Caminos: `POST`/`DELETE /personas/:id/roles` (`backoffice`, con autor) y
+deja fila — y la decisión la toma el propio `UPDATE` atómico (`array_append`/`array_remove` condicionado, con la fila bloqueada), no una lectura previa: dos cambios simultáneos no pueden perder uno ni registrar un cambio que no ocurrió (H-142). Caminos: `POST`/`DELETE /personas/:id/roles` (`backoffice`, con autor) y
 `db:recrear-admin` cuando agrega `admin` (`recuperacion_cli`, sin autor). El seed de desarrollo
 (`SEED_ADMIN_EMAIL`) queda afuera porque no es un camino de instalación de una iglesia.
 

@@ -385,4 +385,77 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
       ).rejects.toThrow(/cambios_de_rol_cli_sin_autor|check constraint/i);
     });
   });
+  // H-142: otorgarRol/quitarRol leían AFUERA de la transacción y escribían el
+  // arreglo entero desde ese snapshot. Dos cambios simultáneos: uno se perdía
+  // y los DOS dejaban su fila de auditoría — el historial decía una cosa y la
+  // Persona otra. El caso serio: una quita concurrente con un otorgamiento se
+  // perdía y el historial decía que el rol se había revocado. Cada escenario
+  // se repite con una Persona nueva, para que la carrera no pase por suerte.
+  describe('H-142: cambios de rol concurrentes — ninguno se pierde y el historial coincide con la Persona', () => {
+    const REPETICIONES = 5;
+    let n = 0;
+    const personaNueva = async (rol: string[]) =>
+      prisma.persona.create({
+        data: {
+          email: `integ-roles-h142-${sufijo}-${n++}@example.com`,
+          nombre: 'Hebe',
+          apellido,
+          genero: 'femenino',
+          fechaNacimiento: new Date('1990-05-05'),
+          telefono: '+5492211234567',
+          direccion: 'Calle 1 y 50',
+          sedeId,
+          estadoCivil: 'soltero_a',
+          profesion: 'otro',
+          tiempoCongregacion: 'menos_6_meses',
+          estado: 'activa',
+          activo: true,
+          consentimientoDatos: true,
+          rol,
+        },
+      });
+    const otorgar = (id: string, rol: string) =>
+      servidor().post(`/personas/${id}/roles`).set('Authorization', `Bearer ${tokenAdmin}`).send({ rol });
+    const quitar = (id: string, rol: string) =>
+      servidor().delete(`/personas/${id}/roles/${rol}`).set('Authorization', `Bearer ${tokenAdmin}`);
+    const historial = (personaId: string) =>
+      prisma.cambioDeRol.findMany({ where: { personaId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] });
+
+    it('cuatro otorgamientos simultáneos de roles distintos dejan los cuatro roles y cuatro filas', async () => {
+      for (let i = 0; i < REPETICIONES; i++) {
+        const p = await personaNueva(['miembro_registrado']);
+        const respuestas = await Promise.all(['admin', 'pastor', 'discipulador', 'lider_curso'].map((r) => otorgar(p.id, r)));
+        for (const r of respuestas) expect(r.status).toBeLessThan(300);
+        const final = await prisma.persona.findUniqueOrThrow({ where: { id: p.id } });
+        expect([...final.rol].sort()).toEqual(['admin', 'discipulador', 'lider_curso', 'miembro_registrado', 'pastor']);
+        const filas = await historial(p.id);
+        expect(filas.map((f) => `${f.accion}:${f.rol}`).sort()).toEqual(['otorgado:admin', 'otorgado:discipulador', 'otorgado:lider_curso', 'otorgado:pastor']);
+      }
+    });
+
+    it('una quita concurrente con un otorgamiento no se pierde, y el historial dice lo mismo que la Persona', async () => {
+      for (let i = 0; i < REPETICIONES; i++) {
+        const p = await personaNueva(['miembro_registrado', 'pastor']);
+        const [q, o] = await Promise.all([quitar(p.id, 'pastor'), otorgar(p.id, 'lider_curso')]);
+        expect(q.status).toBe(200);
+        expect(o.status).toBeLessThan(300);
+        const final = await prisma.persona.findUniqueOrThrow({ where: { id: p.id } });
+        expect(final.rol).not.toContain('pastor');
+        expect(final.rol).toContain('lider_curso');
+        const filas = await historial(p.id);
+        expect(filas.map((f) => `${f.accion}:${f.rol}`).sort()).toEqual(['otorgado:lider_curso', 'quitado:pastor']);
+      }
+    });
+
+    it('tres otorgamientos simultáneos del MISMO rol dejan el rol una vez y una sola fila', async () => {
+      for (let i = 0; i < REPETICIONES; i++) {
+        const p = await personaNueva(['miembro_registrado']);
+        const respuestas = await Promise.all([otorgar(p.id, 'pastor'), otorgar(p.id, 'pastor'), otorgar(p.id, 'pastor')]);
+        for (const r of respuestas) expect(r.status).toBeLessThan(300);
+        const final = await prisma.persona.findUniqueOrThrow({ where: { id: p.id } });
+        expect(final.rol.filter((r) => r === 'pastor')).toHaveLength(1);
+        expect(await historial(p.id)).toHaveLength(1);
+      }
+    });
+  });
 });
