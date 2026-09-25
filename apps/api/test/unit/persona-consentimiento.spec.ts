@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { conTransaccion, proveedorRolesDeEstado } from './persona-servicio-de-test.js';
 import type { RegistroPersonaDto } from '../../src/persona/dto/registro-persona.dto.js';
 import type { ActivarPersonaDto } from '../../src/persona/dto/activar-persona.dto.js';
 
@@ -42,7 +43,7 @@ describe('PersonaService — consentimiento (fecha/origen) y origenAlta (FR-013,
       persona: { create: crear },
     };
     const moduleRef = await Test.createTestingModule({
-      providers: [PersonaService, { provide: PrismaService, useValue: prismaMock }],
+      providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado()],
     }).compile();
     const service = moduleRef.get(PersonaService);
 
@@ -62,7 +63,7 @@ describe('PersonaService — consentimiento (fecha/origen) y origenAlta (FR-013,
       persona: { create: crear },
     };
     const moduleRef = await Test.createTestingModule({
-      providers: [PersonaService, { provide: PrismaService, useValue: prismaMock }],
+      providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado()],
     }).compile();
     const service = moduleRef.get(PersonaService);
 
@@ -83,7 +84,7 @@ describe('PersonaService — consentimiento (fecha/origen) y origenAlta (FR-013,
       },
     };
     const moduleRef = await Test.createTestingModule({
-      providers: [PersonaService, { provide: PrismaService, useValue: prismaMock }],
+      providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado()],
     }).compile();
     const service = moduleRef.get(PersonaService);
 

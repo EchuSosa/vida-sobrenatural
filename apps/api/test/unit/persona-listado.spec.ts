@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { proveedorRolesDeEstado } from './persona-servicio-de-test.js';
 import { calcularEdad, nacidosAntesDeParaEdad } from '../../src/persona/calcular-edad.js';
 
 /**
@@ -13,7 +14,7 @@ async function crearServicio() {
   const findMany = jest.fn().mockResolvedValue([]);
   const count = jest.fn().mockResolvedValue(0);
   const moduleRef = await Test.createTestingModule({
-    providers: [PersonaService, { provide: PrismaService, useValue: { persona: { findMany, count } } }],
+    providers: [PersonaService, { provide: PrismaService, useValue: { persona: { findMany, count } } }, proveedorRolesDeEstado()],
   }).compile();
   return { service: moduleRef.get(PersonaService), findMany, count };
 }

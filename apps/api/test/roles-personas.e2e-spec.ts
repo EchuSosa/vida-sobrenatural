@@ -250,4 +250,50 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
       expect(respuesta.body[0]).not.toHaveProperty('fechaNacimiento');
     });
   });
+  // H-139: el pisado es ALCANZABLE, no teórico. La guarda de edad de
+  // otorgarRol mira la fecha de nacimiento, no el estado (H-128, está bien
+  // que así sea): alguien que se registró a los 17 queda pendiente_tutor con
+  // rol [], cumple 18 esperando al tutor, un Admin le otorga un rol de cargo
+  // (pasa), y después llega la autorización. `activar` escribía
+  // `rol = ['miembro_registrado']` y el rol de cargo desaparecía sin error.
+  describe('H-139: activar agrega miembro_registrado, no pisa los roles que ya tiene', () => {
+    it('quien se registró a los 17, cumplió 18 esperando al tutor y recibió un rol de cargo, lo conserva al activarse', async () => {
+      const unDiaMas = new Date(haceAnios(18).getTime() - 24 * 60 * 60 * 1000);
+      const persona = await prisma.persona.create({
+        data: {
+          email: `integ-roles-h139-${sufijo}@example.com`,
+          nombre: 'Flor',
+          apellido,
+          genero: 'femenino',
+          fechaNacimiento: unDiaMas,
+          telefono: '+5492211234567',
+          direccion: 'Calle 1 y 50',
+          sedeId,
+          estadoCivil: 'soltero_a',
+          profesion: 'otro',
+          tiempoCongregacion: 'menos_6_meses',
+          estado: 'pendiente_tutor',
+          activo: true,
+          consentimientoDatos: false,
+          rol: [],
+        },
+      });
+
+      const otorgar = await servidor()
+        .post(`/personas/${persona.id}/roles`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
+        .send({ rol: 'pastor' });
+      expect(otorgar.status).toBeLessThan(300);
+
+      const activar = await servidor()
+        .patch(`/personas/${persona.id}/activar`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
+        .send({ tutorNombre: 'Tutora', tutorApellido: apellido, tutorTelefono: '+5492217654321' });
+      expect(activar.status).toBe(200);
+
+      const final = await prisma.persona.findUniqueOrThrow({ where: { id: persona.id } });
+      expect(final.estado).toBe('activa');
+      expect(final.rol).toEqual(expect.arrayContaining(['pastor', 'miembro_registrado']));
+    });
+  });
 });

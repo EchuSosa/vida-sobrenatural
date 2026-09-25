@@ -134,6 +134,10 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
 
     expect(response.status).toBe(201);
     expect(response.body).toMatchObject({ estado: 'pendiente_tutor' });
+    // FR-020: el menor nace sin roles — miembro_registrado recién al activarse
+    // (vía el lugar único, RolesDeEstadoService).
+    const enBaseDeDatos = await prisma.persona.findUnique({ where: { email } });
+    expect(enBaseDeDatos?.rol).toEqual([]);
   });
 
   it('responde 400 si profesion=otro sin profesionDetalle', async () => {

@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { conTransaccion, proveedorRolesDeEstado } from './persona-servicio-de-test.js';
 import { AppException } from '../../src/common/errors/app-exception.js';
 import type { RegistroPersonaDto } from '../../src/persona/dto/registro-persona.dto.js';
 
@@ -35,7 +36,7 @@ describe('PersonaService.create — dedup por email (FR-009)', () => {
     };
 
     const moduleRef = await Test.createTestingModule({
-      providers: [PersonaService, { provide: PrismaService, useValue: prismaMock }],
+      providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado()],
     }).compile();
     const service = moduleRef.get(PersonaService);
 
@@ -59,7 +60,7 @@ describe('PersonaService.create — dedup por email (FR-009)', () => {
     };
 
     const moduleRef = await Test.createTestingModule({
-      providers: [PersonaService, { provide: PrismaService, useValue: prismaMock }],
+      providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado()],
     }).compile();
     const service = moduleRef.get(PersonaService);
 

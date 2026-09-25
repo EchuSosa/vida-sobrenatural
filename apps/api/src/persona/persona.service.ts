@@ -9,6 +9,7 @@ import {
 } from '../generated/prisma/enums.js';
 import { EDAD_MINIMA_ROL_DE_CARGO } from '@vida-sobrenatural/shared-types';
 import { calcularEdad, nacidosAntesDeParaEdad } from './calcular-edad.js';
+import { RolesDeEstadoService } from './roles-de-estado.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import type { ActivarPersonaDto } from './dto/activar-persona.dto.js';
@@ -43,7 +44,9 @@ const PERSONA_LISTADO_SELECT = {
 // "duplicado espejo" — el mismo vínculo cargado desde el otro lado). `tutor`
 // no tiene un valor inverso en el enum ("a_cargo" se resuelve en código al
 // consultar, no se guarda) — no puede haber espejo para ese tipo.
-const INVERSO_RELACION: Partial<Record<TipoRelacionFamiliar, TipoRelacionFamiliar>> = {
+const INVERSO_RELACION: Partial<
+  Record<TipoRelacionFamiliar, TipoRelacionFamiliar>
+> = {
   [TipoRelacionFamiliar.hijo_a]: TipoRelacionFamiliar.padre_madre,
   [TipoRelacionFamiliar.padre_madre]: TipoRelacionFamiliar.hijo_a,
   [TipoRelacionFamiliar.conyuge]: TipoRelacionFamiliar.conyuge,
@@ -62,7 +65,10 @@ const PENDIENTE_TUTOR_SELECT = {
 
 @Injectable()
 export class PersonaService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly rolesDeEstado: RolesDeEstadoService,
+  ) {}
 
   /** GET /personas/by-email — uso interno, ver contracts/auth-integration.md. */
   async findByEmail(email: string) {
@@ -70,10 +76,20 @@ export class PersonaService {
       where: { email },
       // temaPreferido: para que NextAuth pueda hidratar session.user.temaPreferido
       // sin flash (specs/002-base-transversal, research.md Decisión 3).
-      select: { id: true, estado: true, activo: true, rol: true, temaPreferido: true },
+      select: {
+        id: true,
+        estado: true,
+        activo: true,
+        rol: true,
+        temaPreferido: true,
+      },
     });
     if (!persona) {
-      throw new AppException('NO_ENCONTRADO', 404, 'No existe una Persona con ese email.');
+      throw new AppException(
+        'NO_ENCONTRADO',
+        404,
+        'No existe una Persona con ese email.',
+      );
     }
     return persona;
   }
@@ -81,7 +97,11 @@ export class PersonaService {
   /** GET /personas/me — Historia 5 (specs/002-base-transversal). */
   async obtenerPerfilPropio(personaId: string | null) {
     if (!personaId) {
-      throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
+      throw new AppException(
+        'NO_ENCONTRADO',
+        404,
+        'Esta sesión todavía no tiene una Persona asociada.',
+      );
     }
     const persona = await this.prisma.persona.findUnique({
       where: { id: personaId },
@@ -104,15 +124,26 @@ export class PersonaService {
       },
     });
     if (!persona) {
-      throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
+      throw new AppException(
+        'NO_ENCONTRADO',
+        404,
+        'Esta sesión todavía no tiene una Persona asociada.',
+      );
     }
     return persona;
   }
 
   /** PATCH /personas/me — H-35, Flujo 11 (FR-028/FR-029): cualquier subconjunto de los 4 campos. */
-  async actualizarPerfilPropio(personaId: string | null, dto: ActualizarPerfilDto) {
+  async actualizarPerfilPropio(
+    personaId: string | null,
+    dto: ActualizarPerfilDto,
+  ) {
     if (!personaId) {
-      throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
+      throw new AppException(
+        'NO_ENCONTRADO',
+        404,
+        'Esta sesión todavía no tiene una Persona asociada.',
+      );
     }
     return this.prisma.persona.update({
       where: { id: personaId },
@@ -137,9 +168,16 @@ export class PersonaService {
   }
 
   /** PATCH /personas/me/preferencias — Historia 5, FR-027/FR-028. */
-  async actualizarPreferenciasPropias(personaId: string | null, temaPreferido: TemaPreferido) {
+  async actualizarPreferenciasPropias(
+    personaId: string | null,
+    temaPreferido: TemaPreferido,
+  ) {
     if (!personaId) {
-      throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
+      throw new AppException(
+        'NO_ENCONTRADO',
+        404,
+        'Esta sesión todavía no tiene una Persona asociada.',
+      );
     }
     return this.prisma.persona.update({
       where: { id: personaId },
@@ -154,7 +192,11 @@ export class PersonaService {
       where: { id: dto.sedeId, activo: true },
     });
     if (!sede) {
-      throw new AppException('SEDE_INVALIDA', 400, 'La Sede indicada no existe o no está activa.');
+      throw new AppException(
+        'SEDE_INVALIDA',
+        400,
+        'La Sede indicada no existe o no está activa.',
+      );
     }
 
     const fechaNacimiento = new Date(dto.fechaNacimiento);
@@ -175,38 +217,56 @@ export class PersonaService {
     }
 
     try {
-      return await this.prisma.persona.create({
-        data: {
-          email: emailDeSesion,
-          nombre: dto.nombre,
-          apellido: dto.apellido,
-          genero: dto.genero,
-          fechaNacimiento,
-          telefono: dto.telefono,
-          direccion: dto.direccion,
-          sedeId: dto.sedeId,
-          estadoCivil: dto.estadoCivil,
-          profesion: dto.profesion,
-          // Solo tiene sentido cuando profesion = otro — el DTO ya lo exige
-          // en ese caso y lo deja opcional en cualquier otro (ver dto).
-          profesionDetalle: dto.profesionDetalle,
-          tiempoCongregacion: dto.tiempoCongregacion,
-          fotoUrl: dto.fotoUrl,
-          estado: esMayorDeEdad ? EstadoPersona.activa : EstadoPersona.pendiente_tutor,
-          // El menor no autoconsiente (FR-013) — su consentimiento llega recién
-          // al activar, vía el tutor (ver `activar` más abajo).
-          consentimientoDatos: esMayorDeEdad ? dto.consentimientoDatos : false,
-          // Actualización 2026-09-17 (FR-013): fecha/origen solo cuando el
-          // consentimiento se da acá mismo (mayor de edad, origen 'app').
-          consentimientoDatosFecha: esMayorDeEdad ? new Date() : null,
-          consentimientoDatosOrigen: esMayorDeEdad ? OrigenConsentimiento.app : null,
-          // Actualización 2026-09-17 (FR-015, D97): esta fase solo produce
-          // autorregistro — el alta por Admin es una feature propia.
-          origenAlta: OrigenAlta.autorregistro,
-          altaPor: null,
-          rol: esMayorDeEdad ? ['miembro_registrado'] : [],
-        },
-        select: { id: true, estado: true },
+      // FR-020/H-139: el rol de estado no va en el `create` — lo escribe el
+      // lugar único, en la misma transacción (nace sin roles; si es mayor de
+      // edad, recibe miembro_registrado).
+      return await this.prisma.$transaction(async (tx) => {
+        const creada = await tx.persona.create({
+          data: {
+            email: emailDeSesion,
+            nombre: dto.nombre,
+            apellido: dto.apellido,
+            genero: dto.genero,
+            fechaNacimiento,
+            telefono: dto.telefono,
+            direccion: dto.direccion,
+            sedeId: dto.sedeId,
+            estadoCivil: dto.estadoCivil,
+            profesion: dto.profesion,
+            // Solo tiene sentido cuando profesion = otro — el DTO ya lo exige
+            // en ese caso y lo deja opcional en cualquier otro (ver dto).
+            profesionDetalle: dto.profesionDetalle,
+            tiempoCongregacion: dto.tiempoCongregacion,
+            fotoUrl: dto.fotoUrl,
+            estado: esMayorDeEdad
+              ? EstadoPersona.activa
+              : EstadoPersona.pendiente_tutor,
+            // El menor no autoconsiente (FR-013) — su consentimiento llega recién
+            // al activar, vía el tutor (ver `activar` más abajo).
+            consentimientoDatos: esMayorDeEdad
+              ? dto.consentimientoDatos
+              : false,
+            // Actualización 2026-09-17 (FR-013): fecha/origen solo cuando el
+            // consentimiento se da acá mismo (mayor de edad, origen 'app').
+            consentimientoDatosFecha: esMayorDeEdad ? new Date() : null,
+            consentimientoDatosOrigen: esMayorDeEdad
+              ? OrigenConsentimiento.app
+              : null,
+            // Actualización 2026-09-17 (FR-015, D97): esta fase solo produce
+            // autorregistro — el alta por Admin es una feature propia.
+            origenAlta: OrigenAlta.autorregistro,
+            altaPor: null,
+          },
+          select: { id: true, estado: true },
+        });
+        if (esMayorDeEdad) {
+          await this.rolesDeEstado.otorgarRolDeEstado(
+            creada.id,
+            'miembro_registrado',
+            tx,
+          );
+        }
+        return creada;
       });
     } catch (error) {
       // FR-009: además del chequeo previo (evitado aquí a propósito para no
@@ -214,7 +274,11 @@ export class PersonaService {
       // verdad ante un registro simultáneo con el mismo email (condición de
       // carrera — ver spec.md, Edge Cases).
       if (isUniqueConstraintViolation(error, 'email')) {
-        throw new AppException('EMAIL_DUPLICADO', 409, 'Ya existe una Persona registrada con este email.');
+        throw new AppException(
+          'EMAIL_DUPLICADO',
+          409,
+          'Ya existe una Persona registrada con este email.',
+        );
       }
       throw error;
     }
@@ -307,7 +371,13 @@ export class PersonaService {
     const termino = buscar?.trim();
     const where = {
       activo: true,
-      ...(soloMayores ? { fechaNacimiento: { lt: nacidosAntesDeParaEdad(EDAD_MINIMA_ROL_DE_CARGO) } } : {}),
+      ...(soloMayores
+        ? {
+            fechaNacimiento: {
+              lt: nacidosAntesDeParaEdad(EDAD_MINIMA_ROL_DE_CARGO),
+            },
+          }
+        : {}),
       ...(termino
         ? {
             OR: [
@@ -326,7 +396,11 @@ export class PersonaService {
       this.prisma.persona.findMany({
         where,
         select: PERSONA_LISTADO_SELECT,
-        orderBy: [{ [orden]: direccion }, { [segundo]: direccion }, { id: 'asc' }],
+        orderBy: [
+          { [orden]: direccion },
+          { [segundo]: direccion },
+          { id: 'asc' },
+        ],
         skip,
         take,
       }),
@@ -380,10 +454,12 @@ export class PersonaService {
     const persona = await this.buscarPendienteTutorActivoOFallar(id);
 
     const tieneVinculo = !!dto.tutorPersonaId;
-    const tieneTexto = !!dto.tutorNombre || !!dto.tutorApellido || !!dto.tutorTelefono;
+    const tieneTexto =
+      !!dto.tutorNombre || !!dto.tutorApellido || !!dto.tutorTelefono;
     if (
       tieneVinculo === tieneTexto ||
-      (tieneTexto && !(dto.tutorNombre && dto.tutorApellido && dto.tutorTelefono))
+      (tieneTexto &&
+        !(dto.tutorNombre && dto.tutorApellido && dto.tutorTelefono))
     ) {
       throw new AppException(
         'ACTIVAR_TUTOR_INVALIDO',
@@ -402,23 +478,38 @@ export class PersonaService {
       // manual del Admin/Discipulador con el tutor.
       consentimientoDatosFecha: new Date(),
       consentimientoDatosOrigen: OrigenConsentimiento.presencial,
-      rol: ['miembro_registrado'],
+      // FR-020/H-139: SIN `rol` acá. Antes decía `rol: ['miembro_registrado']`
+      // y PISABA el arreglo: un rol de cargo otorgado mientras la Persona
+      // esperaba al tutor (la guarda de edad mira la fecha, no el estado,
+      // H-128) desaparecía sin error. Lo agrega el lugar único, abajo.
     };
 
     if (!dto.tutorPersonaId) {
-      return this.prisma.persona.update({
-        where: { id: persona.id },
-        data: {
-          ...datosBase,
-          tutorNombre: dto.tutorNombre,
-          tutorApellido: dto.tutorApellido,
-          tutorTelefono: dto.tutorTelefono,
-        },
-        select: { id: true, estado: true },
+      return this.prisma.$transaction(async (tx) => {
+        const actualizada = await tx.persona.update({
+          where: { id: persona.id },
+          data: {
+            ...datosBase,
+            tutorNombre: dto.tutorNombre,
+            tutorApellido: dto.tutorApellido,
+            tutorTelefono: dto.tutorTelefono,
+          },
+          select: { id: true, estado: true },
+        });
+        await this.rolesDeEstado.otorgarRolDeEstado(
+          persona.id,
+          'miembro_registrado',
+          tx,
+        );
+        return actualizada;
       });
     }
 
-    const tutor = await this.validarVinculoFamiliar(persona.id, dto.tutorPersonaId, TipoRelacionFamiliar.tutor);
+    const tutor = await this.validarVinculoFamiliar(
+      persona.id,
+      dto.tutorPersonaId,
+      TipoRelacionFamiliar.tutor,
+    );
     // H-74 (revisión manual ronda 8, D35): invariante propia de "tutor", no
     // de un vínculo familiar en general — un tutor tiene que ser un
     // miembro ya verificado (`estado: activa`, no otro pendiente_tutor sin
@@ -427,7 +518,10 @@ export class PersonaService {
     // también, pero es una comodidad de UI, no la barrera real: la barrera
     // real es acá, del lado del servidor, para quien llame a este endpoint
     // directamente.
-    if (tutor.estado !== EstadoPersona.activa || calcularEdad(tutor.fechaNacimiento) < EDAD_MINIMA) {
+    if (
+      tutor.estado !== EstadoPersona.activa ||
+      calcularEdad(tutor.fechaNacimiento) < EDAD_MINIMA
+    ) {
       throw new AppException(
         'TUTOR_INVALIDO',
         400,
@@ -435,21 +529,32 @@ export class PersonaService {
       );
     }
 
-    const [, actualizada] = await this.prisma.$transaction([
-      this.prisma.relacionFamiliar.create({
+    const tutorPersonaId = dto.tutorPersonaId;
+    return this.prisma.$transaction(async (tx) => {
+      await tx.relacionFamiliar.create({
         data: {
           personaId: persona.id,
-          familiarId: dto.tutorPersonaId,
+          familiarId: tutorPersonaId,
           tipoRelacion: TipoRelacionFamiliar.tutor,
         },
-      }),
-      this.prisma.persona.update({
+      });
+      const actualizada = await tx.persona.update({
         where: { id: persona.id },
-        data: { ...datosBase, tutorNombre: null, tutorApellido: null, tutorTelefono: null },
+        data: {
+          ...datosBase,
+          tutorNombre: null,
+          tutorApellido: null,
+          tutorTelefono: null,
+        },
         select: { id: true, estado: true },
-      }),
-    ]);
-    return actualizada;
+      });
+      await this.rolesDeEstado.otorgarRolDeEstado(
+        persona.id,
+        'miembro_registrado',
+        tx,
+      );
+      return actualizada;
+    });
   }
 
   /**
@@ -462,31 +567,63 @@ export class PersonaService {
    * (ej. "tutor" — ver `activar`) NO van acá, van del lado que sí las
    * conoce.
    */
-  private async validarVinculoFamiliar(personaId: string, familiarId: string, tipo: TipoRelacionFamiliar) {
+  private async validarVinculoFamiliar(
+    personaId: string,
+    familiarId: string,
+    tipo: TipoRelacionFamiliar,
+  ) {
     if (personaId === familiarId) {
-      throw new AppException('RELACION_FAMILIAR_INVALIDA', 400, 'Una Persona no puede vincularse consigo misma.');
+      throw new AppException(
+        'RELACION_FAMILIAR_INVALIDA',
+        400,
+        'Una Persona no puede vincularse consigo misma.',
+      );
     }
-    const familiar = await this.prisma.persona.findUnique({ where: { id: familiarId } });
+    const familiar = await this.prisma.persona.findUnique({
+      where: { id: familiarId },
+    });
     if (!familiar) {
-      throw new AppException('NO_ENCONTRADO', 404, 'La Persona a vincular no existe.');
+      throw new AppException(
+        'NO_ENCONTRADO',
+        404,
+        'La Persona a vincular no existe.',
+      );
     }
 
     const duplicadoLiteral = await this.prisma.relacionFamiliar.findUnique({
-      where: { personaId_familiarId_tipoRelacion: { personaId, familiarId, tipoRelacion: tipo } },
+      where: {
+        personaId_familiarId_tipoRelacion: {
+          personaId,
+          familiarId,
+          tipoRelacion: tipo,
+        },
+      },
     });
     if (duplicadoLiteral) {
-      throw new AppException('RELACION_FAMILIAR_INVALIDA', 409, 'Ese vínculo ya existe.');
+      throw new AppException(
+        'RELACION_FAMILIAR_INVALIDA',
+        409,
+        'Ese vínculo ya existe.',
+      );
     }
 
     const inversa = INVERSO_RELACION[tipo];
     if (inversa) {
       const duplicadoEspejo = await this.prisma.relacionFamiliar.findUnique({
         where: {
-          personaId_familiarId_tipoRelacion: { personaId: familiarId, familiarId: personaId, tipoRelacion: inversa },
+          personaId_familiarId_tipoRelacion: {
+            personaId: familiarId,
+            familiarId: personaId,
+            tipoRelacion: inversa,
+          },
         },
       });
       if (duplicadoEspejo) {
-        throw new AppException('RELACION_FAMILIAR_INVALIDA', 409, 'Ese vínculo ya existe (cargado desde el otro lado).');
+        throw new AppException(
+          'RELACION_FAMILIAR_INVALIDA',
+          409,
+          'Ese vínculo ya existe (cargado desde el otro lado).',
+        );
       }
     }
 
@@ -506,8 +643,16 @@ export class PersonaService {
 
   private async buscarPendienteTutorActivoOFallar(id: string) {
     const persona = await this.prisma.persona.findUnique({ where: { id } });
-    if (!persona || persona.estado !== EstadoPersona.pendiente_tutor || !persona.activo) {
-      throw new AppException('PERSONA_NO_PENDIENTE_TUTOR', 409, 'La Persona no está en estado pendiente_tutor.');
+    if (
+      !persona ||
+      persona.estado !== EstadoPersona.pendiente_tutor ||
+      !persona.activo
+    ) {
+      throw new AppException(
+        'PERSONA_NO_PENDIENTE_TUTOR',
+        409,
+        'La Persona no está en estado pendiente_tutor.',
+      );
     }
     return persona;
   }
@@ -519,10 +664,21 @@ export class PersonaService {
  * (el nombre del índice/constraint de Postgres, ej. "personas_email_key").
  */
 function isUniqueConstraintViolation(error: unknown, field: string): boolean {
-  if (typeof error !== 'object' || error === null || (error as { code?: unknown }).code !== 'P2002') {
+  if (
+    typeof error !== 'object' ||
+    error === null ||
+    (error as { code?: unknown }).code !== 'P2002'
+  ) {
     return false;
   }
-  const meta = (error as { meta?: { driverAdapterError?: { cause?: { constraint?: { index?: string } } } } }).meta;
-  const constraintIndex = meta?.driverAdapterError?.cause?.constraint?.index ?? '';
+  const meta = (
+    error as {
+      meta?: {
+        driverAdapterError?: { cause?: { constraint?: { index?: string } } };
+      };
+    }
+  ).meta;
+  const constraintIndex =
+    meta?.driverAdapterError?.cause?.constraint?.index ?? '';
   return constraintIndex.includes(field);
 }

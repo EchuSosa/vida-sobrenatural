@@ -9,6 +9,15 @@
 export type RolDeCargo = 'admin' | 'pastor' | 'discipulador' | 'lider_curso';
 
 /**
+ * Roles de ESTADO del proceso (D131, FR-019): los escribe el sistema como
+ * consecuencia de un evento de dominio, nunca un Admin — por un único lugar,
+ * `RolesDeEstadoService.otorgarRolDeEstado` (apps/api). Hoy solo
+ * `miembro_registrado`; FR-021: no se suma ninguno cuyo evento de origen
+ * (Vida Nueva, Vida de Servicio, Ministerios) todavía no existe.
+ */
+export type RolDeEstado = 'miembro_registrado';
+
+/**
  * Los cuatro valores de `RolDeCargo` como lista — Historia 2: la valida el
  * DTO de `POST /personas/:id/roles` y la recorre el modal de roles del
  * backoffice, sin que ninguno de los dos escriba los cuatro a mano.

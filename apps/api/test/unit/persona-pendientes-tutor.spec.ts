@@ -1,12 +1,13 @@
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { conTransaccion, proveedorRolesDeEstado } from './persona-servicio-de-test.js';
 
 /** H-42 (revisión manual, revisión de código): findPendientesTutor pagina. */
 
 async function crearServicio(prismaMock: Record<string, unknown>) {
   const moduleRef = await Test.createTestingModule({
-    providers: [PersonaService, { provide: PrismaService, useValue: prismaMock }],
+    providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado()],
   }).compile();
   return moduleRef.get(PersonaService);
 }

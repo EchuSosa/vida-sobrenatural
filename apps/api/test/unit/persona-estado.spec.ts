@@ -1,11 +1,12 @@
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { conTransaccion, proveedorRolesDeEstado } from './persona-servicio-de-test.js';
 import { AppException } from '../../src/common/errors/app-exception.js';
 
-async function crearServicio(prismaMock: Record<string, unknown>) {
+async function crearServicio(prismaMock: Record<string, unknown>, otorgarRolDeEstado: jest.Mock = jest.fn().mockResolvedValue(undefined)) {
   const moduleRef = await Test.createTestingModule({
-    providers: [PersonaService, { provide: PrismaService, useValue: prismaMock }],
+    providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado(otorgarRolDeEstado)],
   }).compile();
   return moduleRef.get(PersonaService);
 }
@@ -14,13 +15,14 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
   describe('activar', () => {
     it('pasa una Persona pendiente_tutor a activa, guarda datos del tutor y setea consentimientoDatos=true', async () => {
       const update = jest.fn().mockResolvedValue({ id: 'p1', estado: 'activa' });
+      const otorgarRolDeEstado = jest.fn().mockResolvedValue(undefined);
       const prismaMock = {
         persona: {
           findUnique: jest.fn().mockResolvedValue({ id: 'p1', estado: 'pendiente_tutor', activo: true }),
           update,
         },
       };
-      const service = await crearServicio(prismaMock);
+      const service = await crearServicio(prismaMock, otorgarRolDeEstado);
 
       const resultado = await service.activar('p1', {
         tutorNombre: 'María',
@@ -38,10 +40,14 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
             tutorApellido: 'Pérez',
             tutorTelefono: '+5492211111111',
             consentimientoDatos: true,
-            rol: ['miembro_registrado'],
           }),
         }),
       );
+      // H-139/FR-020: el update NO escribe `rol` (antes esta aserción exigía
+      // `rol: ['miembro_registrado']` — fijaba el pisado como comportamiento
+      // esperado); el rol de estado llega por el lugar único, que agrega.
+      expect(update.mock.calls[0][0].data).not.toHaveProperty('rol');
+      expect(otorgarRolDeEstado).toHaveBeenCalledWith('p1', 'miembro_registrado', expect.anything());
     });
 
     it('rechaza activar una Persona que no está en pendiente_tutor', async () => {
@@ -170,9 +176,9 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
           findUnique: jest.fn().mockResolvedValue(null),
           create: crearRelacion,
         },
-        $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
       };
-      const service = await crearServicio(prismaMock);
+      const otorgarRolDeEstado = jest.fn().mockResolvedValue(undefined);
+      const service = await crearServicio(prismaMock, otorgarRolDeEstado);
 
       const resultado = await service.activar('p1', { tutorPersonaId: 'p2' });
 
@@ -185,6 +191,8 @@ describe('PersonaService — transiciones de estado (FR-008, FR-014)', () => {
           data: expect.objectContaining({ tutorNombre: null, tutorApellido: null, tutorTelefono: null, estado: 'activa' }),
         }),
       );
+      expect(updatePersona.mock.calls[0][0].data).not.toHaveProperty('rol');
+      expect(otorgarRolDeEstado).toHaveBeenCalledWith('p1', 'miembro_registrado', expect.anything());
     });
 
     // H-74 (revisión manual ronda 8, D35): el tutor propuesto tiene que ser
