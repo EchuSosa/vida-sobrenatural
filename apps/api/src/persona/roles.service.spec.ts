@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { RolesService } from './roles.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { CambioDeRolService } from '../cambio-de-rol/cambio-de-rol.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 
 const ADULTA = new Date('1985-06-15');
@@ -16,10 +17,15 @@ async function crearServicio(persona: Record<string, unknown> | null) {
   const update = jest.fn().mockImplementation(({ data }: { data: { rol: string[] } }) =>
     Promise.resolve({ id: persona?.id, rol: data.rol }),
   );
+  // Historia 6 (T050): cada cambio real se registra en CambioDeRol dentro de
+  // la misma transacción — el mock ejecuta la función con el mismo cliente.
+  const registrar = jest.fn().mockResolvedValue(undefined);
+  const prisma: Record<string, unknown> = { persona: { findUnique, update } };
+  prisma.$transaction = (fn: (tx: unknown) => unknown) => fn(prisma);
   const moduleRef = await Test.createTestingModule({
-    providers: [RolesService, { provide: PrismaService, useValue: { persona: { findUnique, update } } }],
+    providers: [RolesService, { provide: PrismaService, useValue: prisma }, { provide: CambioDeRolService, useValue: { registrar } }],
   }).compile();
-  return { service: moduleRef.get(RolesService), findUnique, update };
+  return { service: moduleRef.get(RolesService), findUnique, update, registrar };
 }
 
 async function codigoDeError(promesa: Promise<unknown>): Promise<string | undefined> {
@@ -31,21 +37,27 @@ async function codigoDeError(promesa: Promise<unknown>): Promise<string | undefi
 describe('RolesService (specs/005, Historia 2)', () => {
   describe('otorgarRol', () => {
     it('agrega el rol sin quitar los que ya tenía (acumulativo, FR-006)', async () => {
-      const { service, update } = await crearServicio({ id: 'p1', rol: ['miembro_registrado'], fechaNacimiento: ADULTA, adminSembrado: false });
+      const { service, update, registrar } = await crearServicio({ id: 'p1', rol: ['miembro_registrado'], fechaNacimiento: ADULTA, adminSembrado: false });
 
       const resultado = await service.otorgarRol('p1', 'discipulador', 'admin-1');
 
       expect(resultado.rol).toEqual(['miembro_registrado', 'discipulador']);
       expect(update).toHaveBeenCalledWith(expect.objectContaining({ data: { rol: ['miembro_registrado', 'discipulador'] } }));
+      // FR-022 (T050): el autor viaja y se registra — antes se descartaba (`_adminId`, H-140).
+      expect(registrar).toHaveBeenCalledWith(
+        { personaId: 'p1', rol: 'discipulador', accion: 'otorgado', actor: { origen: 'backoffice', realizadoPorId: 'admin-1' } },
+        expect.anything(),
+      );
     });
 
     it('si ya tiene el rol, responde éxito sin duplicarlo ni escribir (Edge Case idempotente)', async () => {
-      const { service, update } = await crearServicio({ id: 'p1', rol: ['pastor'], fechaNacimiento: ADULTA, adminSembrado: false });
+      const { service, update, registrar } = await crearServicio({ id: 'p1', rol: ['pastor'], fechaNacimiento: ADULTA, adminSembrado: false });
 
       const resultado = await service.otorgarRol('p1', 'pastor', 'admin-1');
 
       expect(resultado).toEqual({ id: 'p1', rol: ['pastor'] });
       expect(update).not.toHaveBeenCalled();
+      expect(registrar).not.toHaveBeenCalled(); // no hubo cambio, no hay nada que registrar
     });
 
     it('rechaza a una Persona menor de edad (FR-011), aunque esté activa', async () => {
@@ -70,12 +82,16 @@ describe('RolesService (specs/005, Historia 2)', () => {
 
   describe('quitarRol', () => {
     it('quita solo ese rol y conserva los demás (FR-007)', async () => {
-      const { service, update } = await crearServicio({ id: 'p1', rol: ['miembro_registrado', 'pastor', 'lider_curso'], fechaNacimiento: ADULTA, adminSembrado: false });
+      const { service, update, registrar } = await crearServicio({ id: 'p1', rol: ['miembro_registrado', 'pastor', 'lider_curso'], fechaNacimiento: ADULTA, adminSembrado: false });
 
       const resultado = await service.quitarRol('p1', 'pastor', 'admin-1');
 
       expect(resultado.rol).toEqual(['miembro_registrado', 'lider_curso']);
       expect(update).toHaveBeenCalledTimes(1);
+      expect(registrar).toHaveBeenCalledWith(
+        { personaId: 'p1', rol: 'pastor', accion: 'quitado', actor: { origen: 'backoffice', realizadoPorId: 'admin-1' } },
+        expect.anything(),
+      );
     });
 
     it('rechaza quitarle admin al Admin sembrado, lo pida quien lo pida (FR-002)', async () => {
@@ -125,10 +141,11 @@ describe('RolesService (specs/005, Historia 2)', () => {
     });
 
     it('si no tenía el rol, responde éxito sin escribir (idempotente)', async () => {
-      const { service, update } = await crearServicio({ id: 'p1', rol: ['miembro_registrado'], fechaNacimiento: ADULTA, adminSembrado: false });
+      const { service, update, registrar } = await crearServicio({ id: 'p1', rol: ['miembro_registrado'], fechaNacimiento: ADULTA, adminSembrado: false });
 
       await expect(service.quitarRol('p1', 'pastor', 'admin-1')).resolves.toEqual({ id: 'p1', rol: ['miembro_registrado'] });
       expect(update).not.toHaveBeenCalled();
+      expect(registrar).not.toHaveBeenCalled();
     });
   });
 });

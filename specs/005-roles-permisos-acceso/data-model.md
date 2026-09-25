@@ -46,7 +46,8 @@ un deploy, igual que cualquier otra constante de dominio en `packages/shared-typ
 | `personaId` | `String` | La Persona a la que se le otorgó/quitó el rol. FK a `Persona`, indexada (H-42: campo de filtro frecuente — "historial de cambios de esta Persona"). |
 | `rol` | `String` | El rol de cargo afectado (`admin`/`pastor`/`discipulador`/`lider_curso`). |
 | `accion` | `enum AccionCambioRol { otorgado, quitado }` | |
-| `realizadoPorId` | `String` | El Admin que ejecutó la acción. FK lógica a `Persona` (mismo criterio que `Persona.altaPor` ya existente — referencia sin `@relation` de Prisma, D97) o FK real — a decidir en `tasks.md` según si hace falta hacer JOIN para mostrar el nombre del Admin en la pantalla de auditoría (Historia 6, Acceptance Scenario 3). |
+| `origen` | `enum OrigenCambioRol { backoffice, recuperacion_cli }` | *Agregado al implementar (H-141).* Por qué camino se hizo: un Admin desde la app, o el comando `db:recrear-admin` (FR-003). |
+| `realizadoPorId` | `String?` | El Admin que ejecutó la acción — FK lógica a `Persona` (mismo criterio que `Persona.altaPor`, D97); el nombre se resuelve con una segunda consulta al listar. *Nullable solo por la fila del CLI* (H-141: lo corre quien tenga acceso al servidor, y la app no puede nombrarlo — no se inventa un autor). La invariante la sostienen dos CHECK en la base (H-140): `origen = backoffice` ⇒ `realizadoPorId IS NOT NULL`, y `origen = recuperacion_cli` ⇒ `realizadoPorId IS NULL`. En el código, un actor discriminado (`ActorDeCambioDeRol`), nunca un autor opcional con un origen al lado. |
 | `createdAt` | `DateTime @default(now())` | Cuándo. No hay `updatedAt` — la fila nunca se edita. |
 
 **Sin soft delete** (a diferencia de la mayoría de las entidades del dominio, Principio III): esta
@@ -55,9 +56,15 @@ un evento ya ocurrido — no hay nada que "eliminar lógicamente" en un hecho pa
 operación de la app escribe un `UPDATE` ni un `DELETE` sobre esta tabla, solo `INSERT` (FR-023:
 "sin perderse ni sobrescribirse").
 
-**Índices** (H-42): `@@index([personaId])` (consulta "historial de esta Persona"); evaluar en
-`tasks.md` si hace falta `@@index([realizadoPorId])` según si la pantalla de auditoría también
-filtra "qué hizo este Admin".
+**Índices** (H-42): `@@index([personaId])` (consulta "historial de esta Persona"). Sin
+`@@index([realizadoPorId])`: la pantalla de la Historia 6 no filtra "qué hizo este Admin".
+
+**Qué se registra** (al implementar): cada cambio REAL de un rol de cargo — un otorgamiento o
+una quita que efectivamente modificó `Persona.rol` —, en la misma transacción que el cambio. Un
+pedido idempotente (otorgar un rol que ya tiene, quitar uno que no tiene) no es un cambio y no
+deja fila. Caminos: `POST`/`DELETE /personas/:id/roles` (`backoffice`, con autor) y
+`db:recrear-admin` cuando agrega `admin` (`recuperacion_cli`, sin autor). El seed de desarrollo
+(`SEED_ADMIN_EMAIL`) queda afuera porque no es un camino de instalación de una iglesia.
 
 ## Registro de permisos por pantalla (backoffice, no es una entidad de base de datos — FR-016/FR-017)
 

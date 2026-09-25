@@ -167,6 +167,15 @@ async function crearPersonasDemo(sedeId: string) {
  * quickstarts). Si la Persona ya existe (por ej. ya se había registrado),
  * solo le agrega el rol sin tocar el resto de sus datos; si no existe, la
  * crea con datos de ejemplo, igual que las demás Personas demo.
+ *
+ * specs/005, Historia 6 (H-141): este otorgamiento de `admin` NO se registra
+ * en CambioDeRol. El motivo no es "es de desarrollo" (eso es una afirmación
+ * sobre el entorno, y ya nos quemamos con eso — H-78, H-121): es que el seed
+ * no es un camino de instalación de una iglesia. El camino de instalación y
+ * recuperación es `db:recrear-admin` (FR-003), y ése sí se audita. Si
+ * SEED_ADMIN_EMAIL alguna vez se vuelve un camino de instalación, necesita lo
+ * mismo: `registrarCambioDeRol` con `{ origen: 'recuperacion_cli' }` (o un
+ * origen propio).
  */
 async function promoverAdminDemo(sedeId: string) {
   const email = process.env.SEED_ADMIN_EMAIL;

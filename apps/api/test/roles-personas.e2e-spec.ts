@@ -93,6 +93,9 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
   });
 
   afterAll(async () => {
+    // Historia 6: la FK de cambios_de_rol es RESTRICT — primero el historial
+    // de las Personas de esta corrida (base de test, verificada por H-130).
+    await prisma.cambioDeRol.deleteMany({ where: { persona: { apellido } } });
     await prisma.persona.deleteMany({ where: { apellido } });
     await prisma.sede.delete({ where: { id: sedeId } });
     await app.close();
@@ -294,6 +297,92 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
       const final = await prisma.persona.findUniqueOrThrow({ where: { id: persona.id } });
       expect(final.estado).toBe('activa');
       expect(final.rol).toEqual(expect.arrayContaining(['pastor', 'miembro_registrado']));
+    });
+  });
+  // H-140: el chequeo de AUTOR va primero. Con `?? null`, para una sesión sin
+  // Persona `personaId === adminId` era `personaId === null` — falso siempre:
+  // FR-010 no existía para esa sesión. Ahora ni llega a FR-010.
+  describe('H-140: una sesión sin Persona no cambia roles — la corta el chequeo de autor, primero', () => {
+    it('quitarse admin a sí misma sin Persona: SESION_SIN_PERSONA (no FR-010), sin cambio ni registro', async () => {
+      const filasAntes = await prisma.cambioDeRol.count({ where: { personaId: ids.admin } });
+      const respuesta = await servidor()
+        .delete(`/personas/${ids.admin}/roles/admin`)
+        .set('Authorization', `Bearer ${await token(null, ['admin'])}`);
+      expect(respuesta.status).toBe(403);
+      expect(respuesta.body.code).toBe('SESION_SIN_PERSONA');
+      expect((await prisma.persona.findUniqueOrThrow({ where: { id: ids.admin } })).rol).toContain('admin');
+      expect(await prisma.cambioDeRol.count({ where: { personaId: ids.admin } })).toBe(filasAntes);
+    });
+
+    it('otorgar sin Persona: SESION_SIN_PERSONA, sin cambio ni registro', async () => {
+      const respuesta = await servidor()
+        .post(`/personas/${ids.adulta}/roles`)
+        .set('Authorization', `Bearer ${await token(null, ['admin'])}`)
+        .send({ rol: 'pastor' });
+      expect(respuesta.status).toBe(403);
+      expect(respuesta.body.code).toBe('SESION_SIN_PERSONA');
+      expect((await prisma.persona.findUniqueOrThrow({ where: { id: ids.adulta } })).rol).not.toContain('pastor');
+    });
+  });
+
+  // T053 (FR-022/FR-023): otorgar y quitar dejan cada uno su fila, con quién,
+  // qué rol, a quién y cuándo — consultable, el más reciente primero.
+  describe('auditoría de cambios de rol (Historia 6)', () => {
+    it('otorgar y quitar dejan dos filas consultables vía GET /cambios-de-rol, con el Admin que lo hizo', async () => {
+      const gala = await prisma.persona.create({
+        data: {
+          email: `integ-roles-auditoria-${sufijo}@example.com`,
+          nombre: 'Gala',
+          apellido,
+          genero: 'femenino',
+          fechaNacimiento: new Date('1992-03-03'),
+          telefono: '+5492211234567',
+          direccion: 'Calle 1 y 50',
+          sedeId,
+          estadoCivil: 'soltero_a',
+          profesion: 'otro',
+          tiempoCongregacion: 'menos_6_meses',
+          estado: 'activa',
+          activo: true,
+          consentimientoDatos: true,
+          rol: ['miembro_registrado'],
+        },
+      });
+      const otorgar = await servidor().post(`/personas/${gala.id}/roles`).set('Authorization', `Bearer ${tokenAdmin}`).send({ rol: 'lider_curso' });
+      expect(otorgar.status).toBeLessThan(300);
+      // Idempotente: otorgar otra vez no es un cambio, no deja fila.
+      await servidor().post(`/personas/${gala.id}/roles`).set('Authorization', `Bearer ${tokenAdmin}`).send({ rol: 'lider_curso' });
+      const quitar = await servidor().delete(`/personas/${gala.id}/roles/lider_curso`).set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(quitar.status).toBe(200);
+
+      const historial = await servidor().get(`/cambios-de-rol?personaId=${gala.id}`).set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(historial.status).toBe(200);
+      expect(historial.body.total).toBe(2);
+      expect(historial.body.items.map((f: { accion: string }) => f.accion)).toEqual(['quitado', 'otorgado']);
+      for (const fila of historial.body.items) {
+        expect(fila).toMatchObject({ personaId: gala.id, rol: 'lider_curso', origen: 'backoffice', realizadoPor: { id: ids.admin, nombre: 'Adela' } });
+        expect(typeof fila.createdAt).toBe('string');
+      }
+    });
+
+    it('el historial es del Admin (personas.gestionar_roles): Pastor y Discipulador reciben 403', async () => {
+      expect((await servidor().get('/cambios-de-rol').set('Authorization', `Bearer ${await token('p', ['pastor'])}`)).status).toBe(403);
+      expect((await servidor().get('/cambios-de-rol').set('Authorization', `Bearer ${await token('d', ['discipulador'])}`)).status).toBe(403);
+    });
+
+    it('no hay escritura directa sobre el historial (sin POST/PATCH/DELETE)', async () => {
+      expect((await servidor().post('/cambios-de-rol').set('Authorization', `Bearer ${tokenAdmin}`).send({})).status).toBe(404);
+      expect((await servidor().delete('/cambios-de-rol').set('Authorization', `Bearer ${tokenAdmin}`)).status).toBe(404);
+    });
+
+    // H-140: la invariante del actor la sostiene la BASE, no un comentario.
+    it('la base rechaza una fila de backoffice sin autor, y una del CLI con autor', async () => {
+      await expect(
+        prisma.cambioDeRol.create({ data: { personaId: ids.adulta, rol: 'pastor', accion: 'otorgado', origen: 'backoffice', realizadoPorId: null } }),
+      ).rejects.toThrow(/cambios_de_rol_backoffice_con_autor|check constraint/i);
+      await expect(
+        prisma.cambioDeRol.create({ data: { personaId: ids.adulta, rol: 'admin', accion: 'otorgado', origen: 'recuperacion_cli', realizadoPorId: ids.admin } }),
+      ).rejects.toThrow(/cambios_de_rol_cli_sin_autor|check constraint/i);
     });
   });
 });

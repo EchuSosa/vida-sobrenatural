@@ -26,6 +26,7 @@
     "PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO": "Esta Persona es menor de 18 años, y a un menor de edad no se le puede dar un rol de cargo.",
     "NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO": "Esta Persona es el Admin principal de la instalación: su rol de Admin no se puede quitar desde acá. Es lo que asegura que la iglesia nunca se quede sin alguien que administre.",
     "ADMIN_NO_PUEDE_AUTO_REVOCARSE": "No podés quitarte tu propio rol de Admin. Si hace falta, pedíselo a otro Admin.",
+    "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS": "Esta Persona tiene discipulados a cargo. Reasignalos antes de quitarle el rol de Discipulador.",
     "DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS": "Todavía no se puede quitar el rol de Discipulador: el sistema aún no puede revisar si esta Persona tiene discipulados a cargo, y quitárselo sin revisar podría dejar a alguien sin acompañamiento.",
     "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."

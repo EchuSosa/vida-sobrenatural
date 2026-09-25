@@ -3,6 +3,7 @@ import { parseArgs } from 'node:util';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { EDAD_MINIMA_ROL_DE_CARGO } from '@vida-sobrenatural/shared-types';
 import { PrismaClient } from '../src/generated/prisma/client.js';
+import { registrarCambioDeRol } from '../src/cambio-de-rol/registrar-cambio-de-rol.js';
 import { calcularEdad } from '../src/persona/calcular-edad.js';
 
 /**
@@ -87,22 +88,44 @@ async function main() {
 
   if (existente) {
     if (!existente.activo) {
-      fallar(`${email} está dada de baja (activo = false) — no se le otorga el rol a una Persona que no puede entrar.`);
+      fallar(
+        `${email} está dada de baja (activo = false) — no se le otorga el rol a una Persona que no puede entrar.`,
+      );
     }
     rechazarSiEsMenor(existente.fechaNacimiento);
 
     if (existente.rol.includes('admin') && existente.adminSembrado) {
-      console.log(`recrear-admin: ${email} ya es el Admin sembrado — no se cambió nada.`);
+      console.log(
+        `recrear-admin: ${email} ya es el Admin sembrado — no se cambió nada.`,
+      );
       return;
     }
-    await prisma.persona.update({
-      where: { id: existente.id },
-      data: {
-        rol: existente.rol.includes('admin') ? existente.rol : [...existente.rol, 'admin'],
-        adminSembrado: true,
-      },
+    const agregaAdmin = !existente.rol.includes('admin');
+    await prisma.$transaction(async (tx) => {
+      await tx.persona.update({
+        where: { id: existente.id },
+        data: {
+          rol: agregaAdmin ? [...existente.rol, 'admin'] : existente.rol,
+          adminSembrado: true,
+        },
+      });
+      // H-141: otorgar `admin` a una Persona existente, sin actor autenticado,
+      // y además irrevocable desde el backoffice (adminSembrado, FR-002) — el
+      // camino más consecuente del sistema. Se audita con el mismo criterio
+      // que FR-011 aplica "sin importar el camino". Sin autor: lo corre quien
+      // tenga acceso al servidor, y la app no puede nombrarlo.
+      if (agregaAdmin) {
+        await registrarCambioDeRol(tx, {
+          personaId: existente.id,
+          rol: 'admin',
+          accion: 'otorgado',
+          actor: { origen: 'recuperacion_cli' },
+        });
+      }
     });
-    console.log(`recrear-admin: ${email} ahora es el Admin sembrado (se conservan sus otros roles).`);
+    console.log(
+      `recrear-admin: ${email} ahora es el Admin sembrado (se conservan sus otros roles).`,
+    );
     return;
   }
 
@@ -111,7 +134,9 @@ async function main() {
   const genero = values.genero?.trim();
   const fechaTexto = values['fecha-nacimiento']?.trim();
   if (!nombre || !apellido || !genero || !fechaTexto) {
-    fallar(`no existe ninguna Persona con el email ${email}: para crearla hacen falta --nombre, --apellido, --genero y --fecha-nacimiento.`);
+    fallar(
+      `no existe ninguna Persona con el email ${email}: para crearla hacen falta --nombre, --apellido, --genero y --fecha-nacimiento.`,
+    );
   }
   if (!GENEROS.includes(genero as (typeof GENEROS)[number])) {
     fallar(`--genero tiene que ser uno de: ${GENEROS.join(', ')}.`);
@@ -122,26 +147,41 @@ async function main() {
   }
   rechazarSiEsMenor(fechaNacimiento);
 
-  const sede = await prisma.sede.findFirst({ where: { activo: true, eliminadoEn: null }, orderBy: { createdAt: 'asc' } });
+  const sede = await prisma.sede.findFirst({
+    where: { activo: true, eliminadoEn: null },
+    orderBy: { createdAt: 'asc' },
+  });
   if (!sede) {
-    fallar('no hay ninguna Sede activa — la Persona necesita una. Ver docs/21-instalacion.md, paso "Sede".');
+    fallar(
+      'no hay ninguna Sede activa — la Persona necesita una. Ver docs/21-instalacion.md, paso "Sede".',
+    );
   }
 
-  const creada = await prisma.persona.create({
-    data: {
-      ...DATOS_PROVISORIOS,
-      email,
-      nombre,
-      apellido,
-      genero: genero as (typeof GENEROS)[number],
-      fechaNacimiento,
-      sedeId: sede.id,
-      estado: 'activa',
-      activo: true,
-      consentimientoDatos: false,
-      rol: ['admin'],
-      adminSembrado: true,
-    },
+  const creada = await prisma.$transaction(async (tx) => {
+    const nueva = await tx.persona.create({
+      data: {
+        ...DATOS_PROVISORIOS,
+        email,
+        nombre,
+        apellido,
+        genero: genero as (typeof GENEROS)[number],
+        fechaNacimiento,
+        sedeId: sede.id,
+        estado: 'activa',
+        activo: true,
+        consentimientoDatos: false,
+        rol: ['admin'],
+        adminSembrado: true,
+      },
+    });
+    // H-141: la creación también es un otorgamiento de `admin` — se audita igual.
+    await registrarCambioDeRol(tx, {
+      personaId: nueva.id,
+      rol: 'admin',
+      accion: 'otorgado',
+      actor: { origen: 'recuperacion_cli' },
+    });
+    return nueva;
   });
   console.log(
     `recrear-admin: Admin sembrado creado — ${creada.email} (${creada.id}), Sede ${sede.nombre}. ` +

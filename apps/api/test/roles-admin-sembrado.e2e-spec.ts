@@ -14,8 +14,10 @@ import { configurarApp } from '../src/configurar-app.js';
  * `NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO` SIN IMPORTAR QUIÉN LO PIDA: otro
  * Admin, el propio sembrado (FR-002 se evalúa antes que FR-010, así que el
  * código que recibe es el de sembrado, no el de auto-revocación) o una
- * sesión sin Persona asociada. La guarda es solo sobre `admin`: sus otros
- * roles de cargo se quitan normalmente.
+ * tercera sesión Admin. Una sesión SIN Persona ni llega a esta guarda: la
+ * corta antes el chequeo de autor (SESION_SIN_PERSONA, Historia 6/H-140 —
+ * probado en roles-personas.e2e-spec.ts). La guarda es solo sobre `admin`:
+ * sus otros roles de cargo se quitan normalmente.
  */
 async function token(personaId: string | null, rol: string[]): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -32,7 +34,7 @@ describe('Admin sembrado indegradable (integración, contra base de datos de tes
   let sedeId: string;
   const sufijo = Date.now();
   const apellido = `Sembradointeg${sufijo}`;
-  const ids: Record<'otroAdmin' | 'sembrado', string> = { otroAdmin: '', sembrado: '' };
+  const ids: Record<'otroAdmin' | 'terceraAdmin' | 'sembrado', string> = { otroAdmin: '', terceraAdmin: '', sembrado: '' };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -70,10 +72,13 @@ describe('Admin sembrado indegradable (integración, contra base de datos de tes
       ids[clave] = persona.id;
     };
     await crear('otroAdmin', 'Adela', ['miembro_registrado', 'admin'], false);
+    await crear('terceraAdmin', 'Clara', ['admin'], false);
     await crear('sembrado', 'Berta', ['admin', 'pastor'], true);
   });
 
   afterAll(async () => {
+    // Historia 6: la FK de cambios_de_rol es RESTRICT — primero el historial.
+    await prisma.cambioDeRol.deleteMany({ where: { persona: { apellido } } });
     await prisma.persona.deleteMany({ where: { apellido } });
     await prisma.sede.delete({ where: { id: sedeId } });
     await app.close();
@@ -87,7 +92,11 @@ describe('Admin sembrado indegradable (integración, contra base de datos de tes
   it.each([
     ['otro Admin', () => token(ids.otroAdmin, ['miembro_registrado', 'admin'])],
     ['el propio Admin sembrado (FR-002 antes que FR-010)', () => token(ids.sembrado, ['admin', 'pastor'])],
-    ['una sesión Admin sin Persona asociada', () => token(null, ['admin'])],
+    // Historia 6 (H-140): antes este caso era "una sesión Admin SIN Persona".
+    // Ahora el chequeo de autor va primero y lo corta con SESION_SIN_PERSONA
+    // antes de llegar a FR-002 — eso se prueba en roles-personas.e2e-spec.ts.
+    // Acá el caso es otra sesión Admin identificada, con su propia Persona.
+    ['una tercera sesión Admin, con su propia Persona', () => token(ids.terceraAdmin, ['admin'])],
   ])('lo pida %s: 409 NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO y el rol queda', async (_quien, crearToken) => {
     const respuesta = await quitarAdminAlSembrado(await crearToken());
     expect(respuesta.status).toBe(409);

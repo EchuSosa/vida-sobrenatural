@@ -199,6 +199,10 @@ model Persona {
   relacionesComoSujeto   RelacionFamiliar[] @relation("RelacionFamiliarSujeto")
   relacionesComoFamiliar RelacionFamiliar[] @relation("RelacionFamiliarVinculado")
 
+  // specs/005, Historia 6: el historial de cambios de rol de CARGO de esta
+  // Persona (CambioDeRol, abajo). Prisma exige el lado inverso de la relación.
+  cambiosDeRol CambioDeRol[]
+
   // H-42 (revisión manual, revisión de código): PostgreSQL no indexa las
   // claves foráneas por sí solo — `sedeId` lo necesita como FK.
   // `estado` es el filtro de `findPendientesTutor` (y de cualquier consulta
@@ -331,4 +335,41 @@ model Libro {
   // H-42: el listado público ordena por este campo en cada visita.
   @@index([orden])
   @@map("libros")
+}
+
+// specs/005-roles-permisos-acceso, Historia 6 (FR-022/FR-023): auditoría de
+// los cambios de rol de CARGO. Solo INSERT — ninguna operación de la app hace
+// UPDATE ni DELETE sobre esta tabla ("sin perderse ni sobrescribirse"), y por
+// eso no tiene updatedAt ni soft delete: es el registro de un hecho pasado.
+enum AccionCambioRol {
+  otorgado
+  quitado
+}
+
+// H-141: por qué camino se hizo el cambio. `backoffice` = un Admin desde la
+// app (con autor, siempre); `recuperacion_cli` = el comando db:recrear-admin
+// (FR-003), corrido por quien tenga acceso al servidor — sin autor que la
+// app pueda identificar, y eso es inherente, no un dato faltante.
+enum OrigenCambioRol {
+  backoffice
+  recuperacion_cli
+}
+
+model CambioDeRol {
+  id        String          @id @default(uuid())
+  personaId String
+  persona   Persona         @relation(fields: [personaId], references: [id])
+  rol       String
+  accion    AccionCambioRol
+  origen    OrigenCambioRol
+  // Referencia lógica al id de la Persona Admin (mismo criterio que
+  // Persona.altaPor, D97). Nullable SOLO por la fila del CLI: la invariante
+  // "toda fila de backoffice tiene autor" la sostiene un CHECK en la base
+  // (migración 20260925204725_cambio_de_rol), no este comentario (H-140).
+  realizadoPorId String?
+  createdAt      DateTime @default(now())
+
+  // H-42: el filtro frecuente es "el historial de esta Persona".
+  @@index([personaId])
+  @@map("cambios_de_rol")
 }

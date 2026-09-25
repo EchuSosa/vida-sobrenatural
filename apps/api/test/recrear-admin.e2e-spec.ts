@@ -44,6 +44,8 @@ describe('db:recrear-admin (integración, contra base de datos de test)', () => 
   });
 
   afterAll(async () => {
+    // Historia 6: la FK de cambios_de_rol es RESTRICT — primero el historial.
+    await prisma.cambioDeRol.deleteMany({ where: { persona: { email: { in: [emailNuevo, emailExistente, emailMenor] } } } });
     await prisma.persona.deleteMany({ where: { email: { in: [emailNuevo, emailExistente, emailMenor] } } });
     await prisma.sede.delete({ where: { id: sedeId } });
     await prisma.$disconnect();
@@ -84,6 +86,13 @@ describe('db:recrear-admin (integración, contra base de datos de test)', () => 
     expect(await prisma.persona.count({ where: { email: emailNuevo } })).toBe(1);
     const despues = await prisma.persona.findUniqueOrThrow({ where: { email: emailNuevo } });
     expect(despues.updatedAt).toEqual(creada.updatedAt);
+
+    // H-141: la creación es un otorgamiento de admin — queda auditada, sin
+    // autor (lo corrió quien tenga acceso al servidor). La segunda corrida no
+    // cambió nada: no suma fila.
+    const historial = await prisma.cambioDeRol.findMany({ where: { personaId: creada.id } });
+    expect(historial).toHaveLength(1);
+    expect(historial[0]).toMatchObject({ rol: 'admin', accion: 'otorgado', origen: 'recuperacion_cli', realizadoPorId: null });
   });
 
   it('a una Persona que ya existe le agrega admin sin quitarle sus otros roles, pidiendo solo el email', async () => {
@@ -95,6 +104,13 @@ describe('db:recrear-admin (integración, contra base de datos de test)', () => 
     const persona = await prisma.persona.findUniqueOrThrow({ where: { email: emailExistente } });
     expect(persona.rol).toEqual(['miembro_registrado', 'pastor', 'admin']);
     expect(persona.adminSembrado).toBe(true);
+
+    // H-141: el camino más consecuente del sistema (admin a una Persona
+    // existente, sin actor autenticado, e irrevocable por FR-002) ya no
+    // queda afuera de la auditoría.
+    const historial = await prisma.cambioDeRol.findMany({ where: { personaId: persona.id } });
+    expect(historial).toHaveLength(1);
+    expect(historial[0]).toMatchObject({ rol: 'admin', accion: 'otorgado', origen: 'recuperacion_cli', realizadoPorId: null });
   });
 
   it('no le otorga el rol a una Persona menor de edad (FR-011, venga por donde venga)', async () => {
@@ -109,5 +125,6 @@ describe('db:recrear-admin (integración, contra base de datos de test)', () => 
     const persona = await prisma.persona.findUniqueOrThrow({ where: { email: emailMenor } });
     expect(persona.rol).toEqual([]);
     expect(persona.adminSembrado).toBe(false);
+    expect(await prisma.cambioDeRol.count({ where: { personaId: persona.id } })).toBe(0);
   });
 });

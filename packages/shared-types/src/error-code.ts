@@ -58,6 +58,11 @@ export type ErrorCode =
   // specs/005-roles-permisos-acceso, FR-010: un Admin intenta quitarse a sí
   // mismo el rol admin.
   | 'ADMIN_NO_PUEDE_AUTO_REVOCARSE'
+  // specs/005, Historia 6 (H-140): otorgar/quitar un rol de cargo desde una
+  // sesión sin Persona asociada — el Admin tiene el permiso, pero el sistema
+  // no puede identificar quién hace el cambio (ni registrarlo, FR-022, ni
+  // aplicar FR-010), así que no lo hace. No es SIN_PERMISO.
+  | 'SESION_SIN_PERSONA'
   // specs/005-roles-permisos-acceso, FR-009: quitar el rol discipulador a
   // una Persona con discipulados activos a cargo.
   | 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'

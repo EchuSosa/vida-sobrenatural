@@ -55,6 +55,7 @@ const TITULOS: Record<ErrorCode, string> = {
   PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO: 'La Persona es menor de edad',
   NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO: 'No se puede degradar al Admin sembrado',
   ADMIN_NO_PUEDE_AUTO_REVOCARSE: 'Un Admin no puede quitarse su propio rol',
+  SESION_SIN_PERSONA: 'La sesión no tiene una Persona asociada',
   DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS: 'Tiene discipulados activos a cargo',
   DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS: 'No se puede verificar discipulados activos',
   ERROR_INTERNO: 'Error interno',
