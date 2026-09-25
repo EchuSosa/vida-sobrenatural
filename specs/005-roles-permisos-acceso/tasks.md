@@ -71,7 +71,7 @@ documentos del plan; las tareas de abajo ya asumen la versión corregida:
 - [ ] T013 [US1] Agregar el script `db:recrear-admin` a `apps/api/package.json` (ej. `"db:recrear-admin": "tsx scripts/recrear-admin.ts"`) — depende de T012.
 - [ ] T014 [US1] Documentar el camino de instalación (FR-004): crear `docs/18-instalacion.md` (o el archivo/sección que corresponda según la convención de `docs/00-README.md`) con los pasos de FR-001 (primera instalación) y FR-003 (recuperación), explícitamente distinto de `specs/revision-manual/COMO-ARRANCAR.md` (atajo de entorno de desarrollo, D130 lo pide separado).
 - [ ] T015 [US1] Test de integración `apps/api/test/recrear-admin.e2e-spec.ts`: correr el script contra la base de test, verificar que crea la Persona; correrlo de nuevo, verificar que no duplica (idempotencia).
-- [ ] T016 [US1] Test de integración `apps/api/test/roles-admin-sembrado.e2e-spec.ts`: **depende de T021/T023 (Historia 2)** — `DELETE /personas/:id/roles/admin` sobre una Persona con `adminSembrado=true` devuelve `NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO`, sin importar quién lo pida (Acceptance Scenario 2).
+- [x] T016 [US1] Test de integración `apps/api/test/roles-admin-sembrado.e2e-spec.ts`: **depende de T021/T023 (Historia 2)** — `DELETE /personas/:id/roles/admin` sobre una Persona con `adminSembrado=true` devuelve `NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO`, sin importar quién lo pida (Acceptance Scenario 2).
 
 **Checkpoint**: comando CLI y documentación de instalación funcionando; la garantía de indegradabilidad queda verificada en conjunto con la Historia 2 (T016).
 
