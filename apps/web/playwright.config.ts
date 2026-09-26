@@ -36,7 +36,12 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: 'list',
+  // H-147 (el patrón de H-146): además de la salida en consola, cada corrida
+  // deja un JSON en disco, con la fecha en el nombre para que una corrida que
+  // falla no la pise la siguiente. No va en `test-results/`: esa carpeta la
+  // vacía Playwright al empezar cada corrida. Acá vive H-145 (perfil-tema,
+  // intermitente): la próxima aparición tiene que dejar rastro.
+  reporter: [['list'], ['json', { outputFile: `reportes-e2e/corrida-${new Date().toISOString().replace(/[:.]/g, '-')}.json` }]],
   // H-20 (revisión manual, D111 en docs/05-decisiones.md): más de un worker
   // comparte estado de sesión entre corridas paralelas contra la misma
   // API/base y produce fallas espurias. Aislarlo (storage state o datos

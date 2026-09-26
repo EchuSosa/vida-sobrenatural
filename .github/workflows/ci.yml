@@ -199,7 +199,23 @@ jobs:
       - name: E2E de apps/web
         run: pnpm --filter web run test:e2e
 
+      # H-147: apps/web también deja su informe — es la suite de H-145, la
+      # única con una intermitencia conocida. Se sube siempre, sobre todo si
+      # falló.
+      - name: Guardar el informe de la corrida de e2e de apps/web
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-e2e-web
+          path: apps/web/reportes-e2e/
+          if-no-files-found: warn
+
+      # H-147: `if: always()` en el paso que PRODUCE el informe, no solo en el
+      # que lo sube. Sin esto, una falla en el e2e de apps/web salteaba este
+      # paso, reportes-e2e/ quedaba vacío y la subida de abajo corría igual
+      # (con un warning): una falla en una suite dejaba sin informe a las dos.
       - name: E2E de apps/backoffice
+        if: always()
         run: pnpm --filter backoffice run test:e2e
 
       # H-146: mismo motivo que el informe de integración.

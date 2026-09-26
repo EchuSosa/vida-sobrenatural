@@ -13,6 +13,8 @@
 # testing
 /coverage
 /test-results/
+# H-147: informes JSON de cada corrida de e2e (playwright.config.ts).
+/reportes-e2e/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
