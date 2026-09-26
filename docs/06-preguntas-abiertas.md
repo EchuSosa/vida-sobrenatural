@@ -11,14 +11,11 @@ Temas identificados pero no resueltos todavía — a definir en próximas sesion
 - **Completar el inventario de contenido** (criterio en D98): `12-contenido-bienvenida.md` ya cubre Bienvenida, culto, Palabra Profética, Liderazgo y redes. Falta: preguntas frecuentes de Primeros pasos, descripción de cada Ministerio, y marcar qué textos son reales y cuáles provisorios. Además, alinear ese documento con la navegación nueva (D91, D92): la sección "¿Cómo sigue el proceso?" pasa a vivir en **Primeros pasos**, y los botones deben seguir la guía de UX (D94).
 - **Guion de la demo** para la presentación a los pastores, apoyado en los escenarios del seed (D99).
 
-## Técnicas (a resolver en la Sesión 6 / `/speckit.plan`)
+## Técnicas
 
-- **¿Cómo valida la API (NestJS) la sesión creada por NextAuth (Next.js)?** Opciones típicas: JWT firmado emitido por NextAuth y verificado por la API con un secreto/clave compartida, o que la API emita su propio token después del login. Afecta a las tres apps y a la seguridad de todo el sistema. Ver `13-requisitos-no-funcionales.md`, sección Seguridad, y D88 (login fail-closed).
-- **¿Se adelanta al MVP un registro de auditoría mínimo** para acciones sensibles del Admin (cambiar roles, activar cuentas, verificar Pagos, Completitud Manual, acciones en nombre de otra Persona)? Hoy la auditoría completa está en Fase 2, pero estas acciones afectan datos de personas reales desde el día uno. (Parte de esto ya queda cubierto por `creado_por` / `alta_por`, D97.)
-- **Proveedor de email transaccional** (D96) y herramienta de captura en local (ej. Mailpit).
-- **Dirección visual** (estilo editorial del libro, estilo de Instagram, o sistema propio con logo + swoosh como constantes) — ver `09-notas-identidad-visual.md`. Propuesta a evaluar: sistema propio con la paleta del libro, verificando contrastes en modo claro y oscuro (D81, D95).
+- **Proveedor de email transaccional** (D96). La captura en local ya está decidida (Mailpit en Docker Compose, D105): falta el proveedor real para producción.
 - **Dominio** (D85): candidato `vidasobrenatural.org.ar`. Al definirlo: verificar requisitos de NIC Argentina para `.org.ar`, averiguar quién administra `vidasobrenatural.com`, planificar redirecciones y configurar SPF/DKIM para el email.
-- **Convenciones del repositorio**: estrategia de ramas, formato de commits, ESLint/Prettier, migraciones de Prisma, entornos (local / staging / producción) y archivo de contexto para Claude Code (`CLAUDE.md`) que apunte a esta documentación y a la regla de revisar la última numeración antes de agregar decisiones (D103).
+- **Convenciones del repositorio — lo que queda**: estrategia de ramas, formato de mensajes de commit y entornos (local / staging / producción). Ya resueltos: linting (ESLint con reglas propias en `eslint-rules/`, oxlint en `apps/api`), migraciones de Prisma, y `CLAUDE.md`, que apunta a esta documentación y a la regla de revisar la última numeración antes de agregar decisiones (D103). **Las dos primeras dejaron de ser teóricas**: el repo ya tiene remoto en GitHub y una workflow de CI que corre en `push` a `main` y en cada pull request, así que "estrategia de ramas" ahora decide si CI corre sobre trabajo terminado o a medio hacer.
 
 ## Antes de producción — Operación
 
