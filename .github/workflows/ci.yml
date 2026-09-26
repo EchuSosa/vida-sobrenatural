@@ -12,15 +12,15 @@ name: CI
 # del propio repo. Hallazgo aparte, no se agrega .nvmrc en este lote (no lo
 # pidió el prompt).
 #
-# NO VERIFICADO EN GITHUB ACTIONS: no se pusheó nada, así que esta workflow
-# nunca corrió de verdad. Lo que SÍ está verificado, corriendo cada comando
-# tal cual en local: `pnpm check` (parte B/C), los cinco specs de
-# integración (parte E), y las suites de e2e de apps/web y apps/backoffice
-# (sesiones anteriores de este mismo trabajo). Lo que NO se pudo verificar:
-# el comportamiento de los `services:` de Postgres en un runner real, los
-# tiempos de arranque, la instalación de los browsers de Playwright en el
-# entorno de GitHub Actions, y cualquier diferencia de red/sistema de
-# archivos entre este entorno local y un runner de Actions.
+# VERIFICADO EN GITHUB ACTIONS (2026-09-26): primera corrida real, los tres
+# jobs en verde sobre 1103801 (evento `push` a main) —
+# https://github.com/EchuSosa/vida-sobrenatural/actions/runs/36249270319
+# Probó, en un runner real: los `services:` de Postgres, la instalación de
+# los browsers de Playwright y el cliente de Prisma generado en el install
+# (H-143), además de `pnpm check` con TURBO_FORCE (H-137).
+# SIGUE SIN VERIFICAR (una corrida verde prueba que CI puede ponerse en verde,
+# no que pueda ponerse en rojo): que un test roto ponga el job en rojo, que los
+# informes (H-146) se suban cuando hay falla, y el trigger `pull_request`.
 
 on:
   push:
