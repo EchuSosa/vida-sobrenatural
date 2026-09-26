@@ -210,12 +210,17 @@ jobs:
           path: apps/web/reportes-e2e/
           if-no-files-found: warn
 
-      # H-147: `if: always()` en el paso que PRODUCE el informe, no solo en el
-      # que lo sube. Sin esto, una falla en el e2e de apps/web salteaba este
+      # H-147: un `if:` en el paso que PRODUCE el informe, no solo en el que
+      # lo sube. Sin esto, una falla en el e2e de apps/web salteaba este
       # paso, reportes-e2e/ quedaba vacío y la subida de abajo corría igual
       # (con un warning): una falla en una suite dejaba sin informe a las dos.
+      # `!cancelled()` y no `always()`: corre aunque el paso anterior haya
+      # fallado, pero NO si alguien canceló la corrida (con `always()`,
+      # cancelar no frenaba esta suite de varios minutos). Las subidas de
+      # informes sí usan `always()`: cuestan segundos y el informe de una
+      # corrida cancelada también sirve.
       - name: E2E de apps/backoffice
-        if: always()
+        if: ${{ !cancelled() }}
         run: pnpm --filter backoffice run test:e2e
 
       # H-146: mismo motivo que el informe de integración.
