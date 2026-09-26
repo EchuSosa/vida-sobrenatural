@@ -33,7 +33,7 @@ import {
   useEnvio,
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
-import { CircleAlert, Minus, Plus } from 'lucide-react';
+import { CircleAlert, Lock, Minus, Plus } from 'lucide-react';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 
 function rolesDeCargo(rol: string[]): RolDeCargo[] {
@@ -435,6 +435,13 @@ function RolesDialog({
           <ul className="flex flex-col gap-3">
             {ROLES_DE_CARGO.map((rol) => {
               const tiene = roles.includes(rol);
+              // T062 (D132): "¿tiene el rol?" no alcanza para ofrecer "Quitar" —
+              // la pregunta es "¿se le puede quitar, a ella, pedido por mí,
+              // ahora?". La responde la API con `puedeQuitarRol` (shared-types),
+              // la misma función con la que después rechazaría: la pantalla no
+              // ofrece lo que va a fallar. Por los cuatro roles, así sigue
+              // valiendo después de otorgar uno acá.
+              const quitar = persona?.quitar[rol];
               const etiquetaRol = t(`roles.${rol}`);
               return (
                 <li key={rol} className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
@@ -442,8 +449,18 @@ function RolesDialog({
                     <span className="font-medium">{etiquetaRol}</span>
                     <span className="text-sm text-muted-foreground">{t(`descripcionRoles.${rol}`)}</span>
                     <EstadoActivoBadge activo={tiene} textoActivo={t('modal.tiene')} textoInactivo={t('modal.noTiene')} />
+                    {tiene && quitar && !quitar.puede && (
+                      // En lugar del botón, el motivo en palabras (ícono + texto,
+                      // D81) — el mismo mensaje con el que la API rechazaría.
+                      // Debajo del estado y no en la columna de la acción: ahí
+                      // aplastaba la descripción del rol.
+                      <p className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                        <span>{te(quitar.motivo)}</span>
+                      </p>
+                    )}
                   </div>
-                  {tiene ? (
+                  {tiene && quitar && !quitar.puede ? null : tiene ? (
                     <ConfirmDestructiveDialog
                       trigger={
                         <Button

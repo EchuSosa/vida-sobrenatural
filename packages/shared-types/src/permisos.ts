@@ -1,3 +1,5 @@
+import type { ErrorCode } from './error-code.js';
+
 /**
  * Catálogo único de permisos (D132) — tanto `apps/api` (`PermisosGuard`)
  * como `apps/backoffice` (`requerirPermiso`, `itemsParaRoles`) resuelven
@@ -96,4 +98,51 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
  */
 export function tienePermiso(roles: readonly string[], permiso: Permiso): boolean {
   return CATALOGO_PERMISOS[permiso].some((rol) => roles.includes(rol));
+}
+
+/**
+ * Por qué no se le puede quitar un rol de cargo a una Persona — cada motivo
+ * es el código de error con el que la API rechaza el pedido.
+ */
+export type MotivoNoQuitable = Extract<
+  ErrorCode,
+  | 'SESION_SIN_PERSONA'
+  | 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS'
+  | 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO'
+  | 'ADMIN_NO_PUEDE_AUTO_REVOCARSE'
+>;
+
+export type ResultadoQuitarRol = { puede: true } | { puede: false; motivo: MotivoNoQuitable };
+
+/**
+ * specs/005, T062 (D132): "¿se le puede quitar ESTE rol a ESTA Persona, pedido
+ * por ESTE autor, ahora?" — no "¿lo tiene?". Una sola respuesta para los dos
+ * lados, igual que CATALOGO_PERMISOS para el acceso: `RolesService.quitarRol`
+ * la usa para RECHAZAR, y el listado de Personas la expone por rol para que la
+ * pantalla NO OFREZCA lo que va a fallar (ofrecer una acción que va a fallar
+ * es peor que no ofrecerla — H-133). Antes el modal decidía con `tiene` y
+ * ofrecía "Quitar" en tres casos que la API siempre rechaza.
+ *
+ * El orden importa y es el de la API:
+ * 1. Sin autor identificable, nada (H-140 — `autorId` null es "no sé quién es",
+ *    nunca "no es él").
+ * 2. `discipulador`: SIEMPRE no, por ahora (FR-009/H-127, fallo cerrado) — la
+ *    consulta de discipulados activos es del spec 004. Cuando exista, entra
+ *    ACÁ (como dato de `persona`) y la API y la pantalla cambian juntas; nadie
+ *    tiene que acordarse de sacar un condicional de la pantalla.
+ * 3. `admin` del Admin sembrado (FR-002).
+ * 4. `admin` de uno mismo (FR-010).
+ * No mira si la Persona TIENE el rol: quitar uno que no tiene es un no-op
+ * idempotente, y la pantalla ya ofrece "Otorgar" en ese caso.
+ */
+export function puedeQuitarRol(
+  rol: RolDeCargo,
+  persona: { id: string; adminSembrado: boolean },
+  autorId: string | null,
+): ResultadoQuitarRol {
+  if (autorId === null) return { puede: false, motivo: 'SESION_SIN_PERSONA' };
+  if (rol === 'discipulador') return { puede: false, motivo: 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS' };
+  if (rol === 'admin' && persona.adminSembrado) return { puede: false, motivo: 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO' };
+  if (rol === 'admin' && persona.id === autorId) return { puede: false, motivo: 'ADMIN_NO_PUEDE_AUTO_REVOCARSE' };
+  return { puede: true };
 }

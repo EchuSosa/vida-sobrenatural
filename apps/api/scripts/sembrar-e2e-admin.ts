@@ -23,11 +23,14 @@ import { PrismaClient } from '../src/generated/prisma/client.js';
 const EMAIL_ADMIN_E2E = 'e2e-admin@example.com';
 const EMAIL_PASTOR_E2E = 'e2e-pastor@example.com';
 const EMAIL_OTRO_ROL_E2E = 'e2e-otro-rol@example.com';
+// specs/005, T062: un Admin sembrado (FR-002) — para verificar que la pantalla
+// no le ofrece a nadie quitarle el rol de Admin.
+const EMAIL_SEMBRADO_E2E = 'e2e-sembrado@example.com';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-async function sembrarPersona(email: string, apellido: string, rol: string[], sedeId: string) {
+async function sembrarPersona(email: string, apellido: string, rol: string[], sedeId: string, adminSembrado = false) {
   const existente = await prisma.persona.findUnique({ where: { email } });
   if (existente) {
     console.log(`sembrar-e2e-admin: ${email} ya existe, no se duplica.`);
@@ -52,6 +55,7 @@ async function sembrarPersona(email: string, apellido: string, rol: string[], se
       activo: true,
       consentimientoDatos: true,
       rol,
+      adminSembrado,
     },
   });
   console.log(`sembrar-e2e-admin: Persona creada ${creada.email} (${creada.id}), rol=${rol.join(',')}.`);
@@ -69,6 +73,7 @@ async function main() {
   await sembrarPersona(EMAIL_ADMIN_E2E, 'E2E', ['admin', 'discipulador', 'lider_curso'], sede.id);
   await sembrarPersona(EMAIL_PASTOR_E2E, 'Pastor', ['pastor'], sede.id);
   await sembrarPersona(EMAIL_OTRO_ROL_E2E, 'OtroRol', ['discipulador'], sede.id);
+  await sembrarPersona(EMAIL_SEMBRADO_E2E, 'Sembrado', ['admin'], sede.id, true);
 }
 
 main()

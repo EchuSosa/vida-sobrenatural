@@ -10,7 +10,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { PersonaService } from './persona.service.js';
 import { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import { ActivarPersonaDto } from './dto/activar-persona.dto.js';
@@ -35,7 +40,9 @@ export class PersonaController {
 
   @Get('by-email')
   @UseGuards(InternalLookupGuard)
-  @ApiOkResponse({ description: 'Uso interno — ver contracts/auth-integration.md.' })
+  @ApiOkResponse({
+    description: 'Uso interno — ver contracts/auth-integration.md.',
+  })
   findByEmail(@Query('email') email: string) {
     return this.personaService.findByEmail(email);
   }
@@ -43,8 +50,14 @@ export class PersonaController {
   @Post()
   @UseGuards(JwtNextAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({ description: 'Registro inicial — Historia 2 y 2b (FR-005 a FR-009, FR-013).' })
-  create(@Body() dto: RegistroPersonaDto, @Req() request: AuthenticatedRequest) {
+  @ApiCreatedResponse({
+    description:
+      'Registro inicial — Historia 2 y 2b (FR-005 a FR-009, FR-013).',
+  })
+  create(
+    @Body() dto: RegistroPersonaDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
     // El email del registro es siempre el de la sesión autenticada, nunca el
     // que mande el cliente en el body (ver contracts/personas-api.md).
     if (!request.user?.email) {
@@ -56,25 +69,39 @@ export class PersonaController {
   @Get('me')
   @UseGuards(JwtNextAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Perfil propio — Historia 5 (specs/002-base-transversal).' })
+  @ApiOkResponse({
+    description: 'Perfil propio — Historia 5 (specs/002-base-transversal).',
+  })
   obtenerPerfilPropio(@Req() request: AuthenticatedRequest) {
     // Autorización por registro (Constitución Principio V): siempre la propia
     // Persona del token, nunca un :id de la URL.
-    return this.personaService.obtenerPerfilPropio(request.user?.personaId ?? null);
+    return this.personaService.obtenerPerfilPropio(
+      request.user?.personaId ?? null,
+    );
   }
 
   @Patch('me')
   @UseGuards(JwtNextAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Self-edit de Perfil — Flujo 11 (H-35, FR-028/FR-029).' })
-  actualizarPerfilPropio(@Body() dto: ActualizarPerfilDto, @Req() request: AuthenticatedRequest) {
-    return this.personaService.actualizarPerfilPropio(request.user?.personaId ?? null, dto);
+  @ApiOkResponse({
+    description: 'Self-edit de Perfil — Flujo 11 (H-35, FR-028/FR-029).',
+  })
+  actualizarPerfilPropio(
+    @Body() dto: ActualizarPerfilDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.personaService.actualizarPerfilPropio(
+      request.user?.personaId ?? null,
+      dto,
+    );
   }
 
   @Patch('me/preferencias')
   @UseGuards(JwtNextAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Cambiar temaPreferido — Historia 5, FR-027/FR-028.' })
+  @ApiOkResponse({
+    description: 'Cambiar temaPreferido — Historia 5, FR-027/FR-028.',
+  })
   actualizarPreferenciasPropias(
     @Body() dto: ActualizarPreferenciasDto,
     @Req() request: AuthenticatedRequest,
@@ -108,10 +135,20 @@ export class PersonaController {
     @Query('dir') dirParam?: string,
   ) {
     const skip = Math.max(0, Number(skipParam) || 0);
-    const take = Math.min(100, Math.max(1, Number(takeParam) || PENDIENTES_TUTOR_TAKE_DEFAULT));
-    const orden: 'nombre' | 'createdAt' = ordenParam === 'nombre' ? 'nombre' : 'createdAt';
+    const take = Math.min(
+      100,
+      Math.max(1, Number(takeParam) || PENDIENTES_TUTOR_TAKE_DEFAULT),
+    );
+    const orden: 'nombre' | 'createdAt' =
+      ordenParam === 'nombre' ? 'nombre' : 'createdAt';
     const dir: 'asc' | 'desc' = dirParam === 'desc' ? 'desc' : 'asc';
-    return this.personaService.findPendientesTutor(skip, take, buscar, orden, dir);
+    return this.personaService.findPendientesTutor(
+      skip,
+      take,
+      buscar,
+      orden,
+      dir,
+    );
   }
 
   @Get()
@@ -129,12 +166,28 @@ export class PersonaController {
     @Query('orden') ordenParam?: string,
     @Query('dir') dirParam?: string,
     @Query('soloMayores') soloMayoresParam?: string,
+    @Req() request?: AuthenticatedRequest,
   ) {
     const skip = Math.max(0, Number(skipParam) || 0);
-    const take = Math.min(100, Math.max(1, Number(takeParam) || PERSONAS_TAKE_DEFAULT));
-    const orden: 'apellido' | 'nombre' = ordenParam === 'nombre' ? 'nombre' : 'apellido';
+    const take = Math.min(
+      100,
+      Math.max(1, Number(takeParam) || PERSONAS_TAKE_DEFAULT),
+    );
+    const orden: 'apellido' | 'nombre' =
+      ordenParam === 'nombre' ? 'nombre' : 'apellido';
     const dir: 'asc' | 'desc' = dirParam === 'desc' ? 'desc' : 'asc';
-    return this.personaService.listarPersonas(skip, take, buscar, orden, dir, soloMayoresParam === 'true');
+    // T062: quién mira decide qué roles se le pueden quitar a cada Persona
+    // (FR-010). Sin Persona en la sesión → null, que `puedeQuitarRol` responde
+    // con SESION_SIN_PERSONA (no es un default que compara contra null, H-140).
+    return this.personaService.listarPersonas(
+      skip,
+      take,
+      buscar,
+      orden,
+      dir,
+      soloMayoresParam === 'true',
+      request?.user?.personaId ?? null,
+    );
   }
 
   // T025: mismos roles que tenía antes (admin y discipulador) — solo
@@ -143,7 +196,10 @@ export class PersonaController {
   @UseGuards(JwtNextAuthGuard, PermisosGuard)
   @RequierePermiso('personas.buscar')
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Búsqueda acotada de Personas — H-29, D108 (elegir a quién vincular como tutor).' })
+  @ApiOkResponse({
+    description:
+      'Búsqueda acotada de Personas — H-29, D108 (elegir a quién vincular como tutor).',
+  })
   buscarPersonas(@Query('q') q: string) {
     return this.personaService.buscarPersonas(q ?? '');
   }
@@ -152,7 +208,10 @@ export class PersonaController {
   @UseGuards(JwtNextAuthGuard, PermisosGuard)
   @RequierePermiso('pendientes_tutor.gestionar')
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'FR-008 — activa manualmente un pendiente_tutor (Flujo 7, camino A).' })
+  @ApiOkResponse({
+    description:
+      'FR-008 — activa manualmente un pendiente_tutor (Flujo 7, camino A).',
+  })
   activar(@Param('id') id: string, @Body() dto: ActivarPersonaDto) {
     return this.personaService.activar(id, dto);
   }
@@ -161,7 +220,10 @@ export class PersonaController {
   @UseGuards(JwtNextAuthGuard, PermisosGuard)
   @RequierePermiso('pendientes_tutor.gestionar')
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'FR-014 — cierra un pendiente_tutor no autorizado (soft delete).' })
+  @ApiOkResponse({
+    description:
+      'FR-014 — cierra un pendiente_tutor no autorizado (soft delete).',
+  })
   marcarInactiva(@Param('id') id: string) {
     return this.personaService.marcarInactiva(id);
   }

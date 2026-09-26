@@ -41,12 +41,14 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(panel.getByRole('button', { name: 'Quitar el rol de Líder de curso' })).toBeVisible();
       await expect(panel.getByText('Tiene este rol')).toHaveCount(1);
 
-      // FR-009/H-127: quitar Discipulador se rechaza siempre por ahora — el
-      // mensaje tiene que ser el propio, no un error genérico.
+      // FR-009/H-127 + T062: quitar Discipulador se rechaza siempre por ahora, así
+      // que la pantalla ya NO lo ofrece — dice por qué, con el mismo mensaje con
+      // el que la API rechazaría. (Antes este test apretaba "Quitar" y esperaba
+      // el rechazo: codificaba como esperado que se ofreciera algo que falla.)
       await panel.getByRole('button', { name: 'Otorgar el rol de Discipulador/a' }).click();
-      await panel.getByRole('button', { name: 'Quitar el rol de Discipulador/a' }).click();
-      await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, quitar el rol' }).click();
-      await expect(panel.getByRole('alert')).toContainText('Todavía no se puede quitar el rol de Discipulador');
+      await expect(panel.getByRole('button', { name: 'Otorgar el rol de Discipulador/a' })).toHaveCount(0);
+      await expect(panel.getByRole('button', { name: 'Quitar el rol de Discipulador/a' })).toHaveCount(0);
+      await expect(panel.getByText('Todavía no se puede quitar el rol de Discipulador')).toBeVisible();
       expect((await auditar(page, ['region'])).violations).toEqual([]);
 
       await panel.getByRole('button', { name: 'Quitar el rol de Líder de curso' }).click();
@@ -173,5 +175,36 @@ test.describe('historial de roles (T056)', () => {
     await expect(fila).toContainText('Otorgado: Admin');
     await expect(fila).toContainText('Se hizo fuera de la aplicación, con el comando de recuperación, por quien tuviera acceso al servidor.');
     await expect(fila).not.toContainText('Lo hizo');
+  });
+});
+
+// T062 (D132): la pantalla no ofrece "Quitar" donde la API va a rechazar —
+// decide con `puedeQuitarRol` (la misma función), no con "¿lo tiene?". El caso
+// de Discipulador (3) lo cubre el test del Admin que otorga y quita, arriba.
+test.describe('T062: el modal no ofrece quitar lo que no se puede quitar', () => {
+  test('caso 1: al Admin sembrado nadie le puede quitar el rol de Admin (FR-002)', async ({ page }) => {
+    await loguearseComoAdminE2E(page);
+    await page.goto('/personas?q=e2e-sembrado@example.com');
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('main').getByRole('button', { name: 'Cambiar roles de E2E Sembrado' }).click();
+    const panel = page.getByRole('dialog');
+    await expect(panel.getByText('Tiene este rol')).toHaveCount(1);
+    await expect(panel.getByRole('button', { name: 'Quitar el rol de Admin' })).toHaveCount(0);
+    await expect(panel.getByText('Esta Persona es el Admin principal de la instalación')).toBeVisible();
+    // Sus otros roles sí se pueden otorgar.
+    await expect(panel.getByRole('button', { name: 'Otorgar el rol de Pastor/a' })).toBeVisible();
+  });
+
+  test('caso 2: una Admin no puede quitarse su propio rol de Admin (FR-010), pero sí otro rol propio', async ({ page }) => {
+    await loguearseComoAdminE2E(page);
+    await page.goto('/personas?q=e2e-admin@example.com');
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('main').getByRole('button', { name: 'Cambiar roles de E2E E2E' }).click();
+    const panel = page.getByRole('dialog');
+    await expect(panel.getByRole('button', { name: 'Quitar el rol de Admin' })).toHaveCount(0);
+    await expect(panel.getByText('No podés quitarte tu propio rol de Admin')).toBeVisible();
+    // Discipulador (caso 3) tampoco; Líder de curso, que sí se puede, sí se ofrece.
+    await expect(panel.getByRole('button', { name: 'Quitar el rol de Discipulador/a' })).toHaveCount(0);
+    await expect(panel.getByRole('button', { name: 'Quitar el rol de Líder de curso' })).toBeVisible();
   });
 });

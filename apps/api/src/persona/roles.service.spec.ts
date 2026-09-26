@@ -156,13 +156,23 @@ describe('RolesService (specs/005, Historia 2)', () => {
     // H-127: fallo cerrado. Se prueba que rechaza SIN consultar nada — ni
     // siquiera si la Persona existe o si tiene el rol: no hay ninguna
     // condición que lo deje pasar mientras el spec 004 no exista.
-    it('rechaza SIEMPRE quitar discipulador, sin consultar la base (FR-009/H-127, fallo cerrado)', async () => {
-      const { service, findUnique, update } = await crearServicio({ id: 'p1', rol: ['discipulador'], fechaNacimiento: ADULTA, adminSembrado: false });
+    // T062: la regla vive en `puedeQuitarRol` (shared-types), la misma que usa
+    // la pantalla, y se evalúa sobre la Persona leída con la fila bloqueada.
+    // Antes este test exigía además "sin consultar la base": eso cambió a
+    // propósito — la garantía (se rechaza SIEMPRE, nunca escribe) no.
+    it('rechaza SIEMPRE quitar discipulador, sin escribir (FR-009/H-127, fallo cerrado)', async () => {
+      const { service, update } = await crearServicio({ id: 'p1', rol: ['discipulador'], fechaNacimiento: ADULTA, adminSembrado: false });
 
       expect(await codigoDeError(service.quitarRol('p1', 'discipulador', 'admin-1'))).toBe('DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS');
-      expect(await codigoDeError(service.quitarRol('no-existe', 'discipulador', 'admin-1'))).toBe('DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS');
+      // Antes que FR-010: quitarse discipulador a uno mismo también se rechaza por FR-009.
       expect(await codigoDeError(service.quitarRol('p1', 'discipulador', 'p1'))).toBe('DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS');
-      expect(findUnique).not.toHaveBeenCalled();
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    it('una Persona que no existe responde NO_ENCONTRADO, también para discipulador (no hay rol que proteger)', async () => {
+      const { service, update } = await crearServicio(null);
+
+      expect(await codigoDeError(service.quitarRol('no-existe', 'discipulador', 'admin-1'))).toBe('NO_ENCONTRADO');
       expect(update).not.toHaveBeenCalled();
     });
 

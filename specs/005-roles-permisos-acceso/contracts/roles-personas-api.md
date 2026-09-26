@@ -106,6 +106,18 @@ de Flujo 9 va a sumar columnas acá sin tocar el buscador de tutor.
 **Quién pide `soloMayores=true`**: la pantalla Personas, porque su propósito en este spec es
 ascender (FR-024). La vista de Flujo 9 no lo va a pedir.
 
+**`quitar` (agregado al cerrar el spec, T062)**: cada ítem trae además
+`quitar: Record<RolDeCargo, { puede: true } | { puede: false; motivo }>` — para cada uno de los
+cuatro roles de cargo, si **quien mira** se lo puede quitar a esa Persona y, si no, por qué. Lo
+calcula `puedeQuitarRol` (`packages/shared-types/src/permisos.ts`), **la misma función** con la que
+`DELETE /personas/:id/roles/:rol` rechaza — así la pantalla no ofrece "Quitar" donde la API va a
+responder 409 (antes decidía con "¿lo tiene?", y lo ofrecía para el Admin sembrado, para el propio
+Admin y para Discipulador siempre). Motivos: `SESION_SIN_PERSONA`,
+`DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS`, `NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO`,
+`ADMIN_NO_PUEDE_AUTO_REVOCARSE`. `adminSembrado` se lee para evaluarlo, pero no se expone. Cuando el
+spec 004 conecte la consulta de discipulados activos, cambia esa función y los dos lados cambian
+juntos.
+
 ## `GET /personas/buscar?q=...` (EXISTENTE — buscador de tutor, H-29/D108)
 
 **Cambios de este spec** (y solo estos):

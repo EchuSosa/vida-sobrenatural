@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import {
   EDAD_MINIMA_ROL_DE_CARGO,
+  puedeQuitarRol,
+  type MotivoNoQuitable,
   type RolDeCargo,
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
@@ -8,6 +10,32 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { calcularEdad } from './calcular-edad.js';
 import { CambioDeRolService } from '../cambio-de-rol/cambio-de-rol.service.js';
+
+/** T062: el estado HTTP y el detalle de cada motivo de `puedeQuitarRol`. */
+const RECHAZOS_DE_QUITAR: Record<
+  MotivoNoQuitable,
+  { estado: number; detalle: string }
+> = {
+  SESION_SIN_PERSONA: {
+    estado: 403,
+    detalle:
+      'La sesión no tiene una Persona asociada: el sistema no puede registrar quién hace el cambio, así que no lo hace.',
+  },
+  DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS: {
+    estado: 409,
+    detalle:
+      'Todavía no se puede quitar el rol de Discipulador: el sistema aún no puede verificar si esta Persona tiene discipulados a cargo.',
+  },
+  NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO: {
+    estado: 409,
+    detalle:
+      'Esta Persona es el Admin sembrado de la instalación: su rol de Admin no se puede quitar desde el backoffice.',
+  },
+  ADMIN_NO_PUEDE_AUTO_REVOCARSE: {
+    estado: 409,
+    detalle: 'Un Admin no puede quitarse a sí mismo el rol de Admin.',
+  },
+};
 
 export interface RolesDePersona {
   id: string;
@@ -95,46 +123,19 @@ export class RolesService {
    * `array_remove` condicionado.
    */
   async quitarRol(personaId: string, rol: RolDeCargo, realizadoPorId: string) {
-    // FR-009/H-127 — FALLO CERRADO, incondicional y antes que cualquier otra
-    // cosa: "tiene discipulados activos a cargo" es una consulta contra el
-    // spec 004, que todavía no existe. Mientras no exista, quitar
-    // `discipulador` se rechaza SIEMPRE — no porque se haya verificado que
-    // tiene discipulados, sino porque no se puede verificar que no los
-    // tenga. Nada de "si no encontré nada, dejo pasar". La tarea del spec
-    // 004 que conecte la consulta real reemplaza este bloque; hasta
-    // entonces, no se le agrega ninguna condición.
-    if (rol === 'discipulador') {
-      throw new AppException(
-        'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS',
-        409,
-        'Todavía no se puede quitar el rol de Discipulador: el sistema aún no puede verificar si esta Persona tiene discipulados a cargo.',
-      );
-    }
-
     return this.prisma.$transaction(async (tx) => {
       const persona = await this.bloquearOFallar(tx, personaId);
 
-      if (rol === 'admin' && persona.adminSembrado) {
-        // FR-002 (D131): la garantía de que la iglesia nunca se queda sin
-        // alguien que pueda administrar — sin importar quién lo pida. Leído con
-        // la fila bloqueada: vale aunque db:recrear-admin la marque a la vez.
-        throw new AppException(
-          'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO',
-          409,
-          'Esta Persona es el Admin sembrado de la instalación: su rol de Admin no se puede quitar desde el backoffice.',
-        );
-      }
-      // H-140: con el autor obligatorio por tipo, esta comparación ya no puede
-      // ser `personaId === null` (falsa siempre): antes, para una sesión sin
-      // Persona, FR-010 no existía — respondía "no es él" cuando la respuesta
-      // era "no sé quién es". Ese caso lo corta el controller, primero.
-      if (rol === 'admin' && personaId === realizadoPorId) {
-        // FR-010: solo `admin` — quitarse otro rol de cargo a uno mismo sí se puede.
-        throw new AppException(
-          'ADMIN_NO_PUEDE_AUTO_REVOCARSE',
-          409,
-          'Un Admin no puede quitarse a sí mismo el rol de Admin.',
-        );
+      // T062 (D132): la MISMA función con la que la pantalla decide si ofrece
+      // "Quitar" — no tres guardas escritas acá y otras tres allá. Evaluada con
+      // la fila bloqueada (H-142): FR-002 vale aunque db:recrear-admin la marque
+      // a la vez. Incluye FR-009/H-127 (discipulador: fallo cerrado hasta el
+      // spec 004, que cambia la regla en ese único lugar), FR-002 y FR-010 —
+      // ver el orden y el porqué en `puedeQuitarRol` (shared-types).
+      const evaluacion = puedeQuitarRol(rol, persona, realizadoPorId);
+      if (!evaluacion.puede) {
+        const { estado, detalle } = RECHAZOS_DE_QUITAR[evaluacion.motivo];
+        throw new AppException(evaluacion.motivo, estado, detalle);
       }
 
       const cambiada = await tx.$queryRaw<RolesDePersona[]>`

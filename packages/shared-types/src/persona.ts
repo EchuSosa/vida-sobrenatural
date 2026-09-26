@@ -1,3 +1,4 @@
+import type { RolDeCargo, ResultadoQuitarRol } from './permisos.js';
 /**
  * Formato de teléfono estructurado (D90) — código de país (+...) y dígitos.
  * Usado por `Persona.telefono` y, desde H-30 (revisión manual, actualización
@@ -206,4 +207,11 @@ export interface PersonaListado {
   email: string;
   telefono: string;
   rol: string[];
+  /**
+   * specs/005, T062: para cada rol de cargo, si quien mira se lo puede quitar
+   * a esta Persona y, si no, por qué — `puedeQuitarRol` (permisos.ts), la
+   * misma función con la que la API rechaza. Por los cuatro roles, no solo
+   * los que tiene: así sigue valiendo después de otorgarle uno en el modal.
+   */
+  quitar: Record<RolDeCargo, ResultadoQuitarRol>;
 }

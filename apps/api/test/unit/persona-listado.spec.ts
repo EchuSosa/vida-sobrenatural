@@ -88,7 +88,13 @@ describe('PersonaService.listarPersonas (GET /personas)', () => {
     findMany.mockResolvedValue([{ id: 'p1' }]);
     count.mockResolvedValue(41);
 
-    await expect(service.listarPersonas(0, 20)).resolves.toEqual({ items: [{ id: 'p1' }], total: 41 });
+    const sinPersona = { puede: false, motivo: 'SESION_SIN_PERSONA' };
+    // T062: cada ítem trae, por rol de cargo, si quien mira se lo puede quitar
+    // (sin autor → SESION_SIN_PERSONA, H-140). El detalle, en puede-quitar-rol.spec.ts.
+    await expect(service.listarPersonas(0, 20)).resolves.toEqual({
+      items: [{ id: 'p1', quitar: { admin: sinPersona, pastor: sinPersona, discipulador: sinPersona, lider_curso: sinPersona } }],
+      total: 41,
+    });
   });
 });
 

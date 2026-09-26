@@ -458,4 +458,45 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
       }
     });
   });
+  // T062 (D132): el listado trae, por rol, si quien mira se lo puede quitar —
+  // la misma `puedeQuitarRol` con la que DELETE rechaza. Los tres casos que el
+  // modal ofrecía y la API siempre rechazaba.
+  describe('T062: el listado dice qué roles se le pueden quitar a cada Persona, para quien mira', () => {
+    const quitarDe = async (id: string, tokenQueMira: string) => {
+      const respuesta = await servidor().get(`/personas?buscar=${apellido}&take=100`).set('Authorization', `Bearer ${tokenQueMira}`);
+      expect(respuesta.status).toBe(200);
+      return respuesta.body.items.find((p: { id: string }) => p.id === id).quitar;
+    };
+
+    it('caso 1: el admin del Admin sembrado no se puede quitar (FR-002), y DELETE lo rechaza con el mismo motivo', async () => {
+      const quitar = await quitarDe(ids.sembrado, tokenAdmin);
+      expect(quitar.admin).toEqual({ puede: false, motivo: 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO' });
+      const rechazo = await servidor().delete(`/personas/${ids.sembrado}/roles/admin`).set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(rechazo.body.code).toBe(quitar.admin.motivo);
+    });
+
+    it('caso 2: el admin propio no se puede quitar (FR-010) — el de otra Persona sí', async () => {
+      expect((await quitarDe(ids.admin, tokenAdmin)).admin).toEqual({ puede: false, motivo: 'ADMIN_NO_PUEDE_AUTO_REVOCARSE' });
+      // Mirado por OTRA Admin identificada, esa misma Persona sí.
+      expect((await quitarDe(ids.admin, await token(ids.adulta, ['admin']))).admin).toEqual({ puede: true });
+      const rechazo = await servidor().delete(`/personas/${ids.admin}/roles/admin`).set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(rechazo.body.code).toBe('ADMIN_NO_PUEDE_AUTO_REVOCARSE');
+    });
+
+    it('caso 3: discipulador no se puede quitar a nadie, por ahora (FR-009/H-127), y DELETE lo rechaza con el mismo motivo', async () => {
+      for (const id of [ids.discipuladora, ids.adulta, ids.admin]) {
+        expect((await quitarDe(id, tokenAdmin)).discipulador).toEqual({ puede: false, motivo: 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS' });
+      }
+      const rechazo = await servidor().delete(`/personas/${ids.discipuladora}/roles/discipulador`).set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(rechazo.body.code).toBe('DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS');
+    });
+
+    it('lo que sí se puede quitar dice que sí, y el listado no expone adminSembrado', async () => {
+      const respuesta = await servidor().get(`/personas?buscar=${apellido}&take=100`).set('Authorization', `Bearer ${tokenAdmin}`);
+      const adulta = respuesta.body.items.find((p: { id: string }) => p.id === ids.adulta);
+      expect(adulta.quitar.pastor).toEqual({ puede: true });
+      expect(adulta.quitar.lider_curso).toEqual({ puede: true });
+      expect(adulta).not.toHaveProperty('adminSembrado');
+    });
+  });
 });

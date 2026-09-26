@@ -7,7 +7,13 @@ import {
   OrigenAlta,
   TipoRelacionFamiliar,
 } from '../generated/prisma/enums.js';
-import { EDAD_MINIMA_ROL_DE_CARGO } from '@vida-sobrenatural/shared-types';
+import {
+  EDAD_MINIMA_ROL_DE_CARGO,
+  ROLES_DE_CARGO,
+  puedeQuitarRol,
+  type ResultadoQuitarRol,
+  type RolDeCargo,
+} from '@vida-sobrenatural/shared-types';
 import { calcularEdad, nacidosAntesDeParaEdad } from './calcular-edad.js';
 import { RolesDeEstadoService } from './roles-de-estado.service.js';
 import { AppException } from '../common/errors/app-exception.js';
@@ -38,6 +44,8 @@ const PERSONA_LISTADO_SELECT = {
   email: true,
   telefono: true,
   rol: true,
+  // T062: solo para evaluar `puedeQuitarRol` (FR-002) — no se expone.
+  adminSembrado: true,
 } as const;
 
 // D112: inversa de cada tipo de Relación Familiar (para detectar el
@@ -367,6 +375,9 @@ export class PersonaService {
     orden: 'nombre' | 'apellido' = 'apellido',
     direccion: 'asc' | 'desc' = 'asc',
     soloMayores = false,
+    // T062: quién mira — `puedeQuitarRol` depende de él (FR-010). null = una
+    // sesión sin Persona, que no puede quitar nada (SESION_SIN_PERSONA, H-140).
+    autorId: string | null = null,
   ) {
     const termino = buscar?.trim();
     const where = {
@@ -406,7 +417,21 @@ export class PersonaService {
       }),
       this.prisma.persona.count({ where }),
     ]);
-    return { items, total };
+    // T062 (D132): por cada rol de cargo, si quien mira se lo puede quitar y,
+    // si no, por qué — la misma función con la que quitarRol rechaza. La
+    // pantalla no ofrece lo que la API va a rechazar.
+    return {
+      items: items.map(({ adminSembrado, ...persona }) => ({
+        ...persona,
+        quitar: Object.fromEntries(
+          ROLES_DE_CARGO.map((rol) => [
+            rol,
+            puedeQuitarRol(rol, { id: persona.id, adminSembrado }, autorId),
+          ]),
+        ) as Record<RolDeCargo, ResultadoQuitarRol>,
+      })),
+      total,
+    };
   }
 
   /**
