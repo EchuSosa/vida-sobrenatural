@@ -17,10 +17,9 @@ const WEB_BASE_URL = process.env.PLAYWRIGHT_WEB_BASE_URL ?? 'http://localhost:30
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
 /**
- * Login vía test-login como e2e-admin (globalSetup la siembra): hoy tiene
- * admin + discipulador + lider_curso, no solo admin — un test que la usa no
- * prueba que "el Admin" pueda algo, sino que alguna de las tres pueda
- * (H-138, T073).
+ * Login vía test-login como e2e-admin (globalSetup la siembra): `admin` a
+ * secas (T073/H-138) — lo que un test prueba con esta sesión, lo prueba del
+ * rol Admin, no de una suma de roles.
  */
 export async function loguearseComoAdminE2E(page: Page) {
   await loguearseComoE2E(page, 'e2e-admin@example.com');
@@ -35,9 +34,18 @@ export async function loguearseComoPastorE2E(page: Page) {
   await loguearseComoE2E(page, 'e2e-pastor@example.com');
 }
 
-/** Un rol que no es ni Admin ni Pastor — bloqueado del todo en las dos secciones nuevas (FR-030). */
+/**
+ * La Persona con `discipulador` a secas. El nombre viene de cuando se usaba
+ * como "un rol que no es ni Admin ni Pastor" (FR-030) — sigue sirviendo para
+ * eso, y es además el Discipulador de e2e (T073).
+ */
 export async function loguearseComoOtroRolE2E(page: Page) {
   await loguearseComoE2E(page, 'e2e-otro-rol@example.com');
+}
+
+/** T073: la Persona con `lider_curso` a secas. */
+export async function loguearseComoLiderCursoE2E(page: Page) {
+  await loguearseComoE2E(page, 'e2e-lider-curso@example.com');
 }
 
 /**

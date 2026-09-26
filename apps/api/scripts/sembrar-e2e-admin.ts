@@ -4,11 +4,10 @@ import { PrismaClient } from '../src/generated/prisma/client.js';
 
 /**
  * H-34 (revisión manual ronda 3): los e2e de `apps/backoffice` necesitan una
- * Persona con rol de cargo para entrar vía el proveedor `test-login`. Hoy
- * e2e-admin tiene admin + discipulador + lider_curso (ver más abajo: el
- * tercero lo sumó H-132 para que el smoke de axe alcance las 18 rutas) —
- * con tres roles, ningún e2e distingue "el Admin puede X" de "alguna de
- * las tres puede X" (H-138, T073: una Persona por rol) — no existe un seed de demo con ese
+ * Persona con rol de cargo para entrar vía el proveedor `test-login`. Una
+ * Persona POR ROL de cargo (specs/005, T073/H-138): e2e-admin es `admin` a
+ * secas — antes tenía admin + discipulador + lider_curso, y ningún e2e podía
+ * distinguir "el Admin puede X" de "alguna de las tres puede X". No existe un seed de demo con ese
  * rol (H-12: `SEED_ADMIN_EMAIL` promueve el email real de quien corre el
  * seed, no sirve para un fixture portable de test). Email con el prefijo
  * `e2e-` para que `db:limpiar-e2e` la borre al final de la corrida, igual
@@ -22,7 +21,10 @@ import { PrismaClient } from '../src/generated/prisma/client.js';
  */
 const EMAIL_ADMIN_E2E = 'e2e-admin@example.com';
 const EMAIL_PASTOR_E2E = 'e2e-pastor@example.com';
+// El Discipulador de e2e (el nombre viene de cuando era "otro rol, ni Admin
+// ni Pastor"; hoy es la Persona con `discipulador` a secas).
 const EMAIL_OTRO_ROL_E2E = 'e2e-otro-rol@example.com';
+const EMAIL_LIDER_CURSO_E2E = 'e2e-lider-curso@example.com';
 // specs/005, T062: un Admin sembrado (FR-002) — para verificar que la pantalla
 // no le ofrece a nadie quitarle el rol de Admin.
 const EMAIL_SEMBRADO_E2E = 'e2e-sembrado@example.com';
@@ -67,12 +69,13 @@ async function main() {
     throw new Error('sembrar-e2e-admin: no hay ninguna Sede activa — corré db:seed primero.');
   }
 
-  // H-132: con `lider_curso` además, esta Persona alcanza las 18 rutas del
-  // backoffice — el smoke de axe (axe-todas-las-rutas.spec.ts) las recorre
-  // con ella y exige que ninguna le dé 404.
-  await sembrarPersona(EMAIL_ADMIN_E2E, 'E2E', ['admin', 'discipulador', 'lider_curso'], sede.id);
+  // T073 (H-138): una Persona por rol de cargo, cada una con UN solo rol. El
+  // smoke de axe ya no depende de un superusuario: recorre cada ruta con la
+  // Persona que tiene su permiso (axe-todas-las-rutas.spec.ts).
+  await sembrarPersona(EMAIL_ADMIN_E2E, 'E2E', ['admin'], sede.id);
   await sembrarPersona(EMAIL_PASTOR_E2E, 'Pastor', ['pastor'], sede.id);
   await sembrarPersona(EMAIL_OTRO_ROL_E2E, 'OtroRol', ['discipulador'], sede.id);
+  await sembrarPersona(EMAIL_LIDER_CURSO_E2E, 'LiderCurso', ['lider_curso'], sede.id);
   await sembrarPersona(EMAIL_SEMBRADO_E2E, 'Sembrado', ['admin'], sede.id, true);
 }
 

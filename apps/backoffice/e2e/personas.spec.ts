@@ -195,16 +195,19 @@ test.describe('T062: el modal no ofrece quitar lo que no se puede quitar', () =>
     await expect(panel.getByRole('button', { name: 'Otorgar el rol de Pastor/a' })).toBeVisible();
   });
 
-  test('caso 2: una Admin no puede quitarse su propio rol de Admin (FR-010), pero sí otro rol propio', async ({ page }) => {
+  test('caso 2: una Admin no puede quitarse su propio rol de Admin (FR-010)', async ({ page }) => {
+    // e2e-admin es `admin` a secas (T073): lo que no tiene se ofrece para
+    // otorgar. Que otro rol propio SÍ se pueda quitar lo cubren los unitarios de
+    // puedeQuitarRol y la integración (no se le otorgan roles a esta Persona
+    // acá: la comparten los demás specs).
     await loguearseComoAdminE2E(page);
     await page.goto('/personas?q=e2e-admin@example.com');
     await page.waitForLoadState('networkidle');
     await page.getByRole('main').getByRole('button', { name: 'Cambiar roles de E2E E2E' }).click();
     const panel = page.getByRole('dialog');
+    await expect(panel.getByText('Tiene este rol')).toHaveCount(1);
     await expect(panel.getByRole('button', { name: 'Quitar el rol de Admin' })).toHaveCount(0);
     await expect(panel.getByText('No podés quitarte tu propio rol de Admin')).toBeVisible();
-    // Discipulador (caso 3) tampoco; Líder de curso, que sí se puede, sí se ofrece.
-    await expect(panel.getByRole('button', { name: 'Quitar el rol de Discipulador/a' })).toHaveCount(0);
-    await expect(panel.getByRole('button', { name: 'Quitar el rol de Líder de curso' })).toBeVisible();
+    await expect(panel.getByRole('button', { name: 'Otorgar el rol de Líder de curso' })).toBeVisible();
   });
 });
