@@ -32,4 +32,8 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/\\.pnpm/(?!(@nestjs\\+|rxjs@|jose@))'],
   testEnvironment: 'node',
+  // H-146: la salida de cada corrida queda SIEMPRE en disco (un JSON por
+  // corrida, con cuáles tests fallaron) — antes una corrida que fallaba no
+  // dejaba nada, y 14 fallas simultáneas quedaron sin diagnóstico posible.
+  reporters: ['default', ['<rootDir>/test/reporter-a-archivo.cjs', { directorio: 'test-results/integracion' }]],
 };

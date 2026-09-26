@@ -47,7 +47,11 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: 'list',
+  // H-146 (aplicado también acá): además de la salida en consola, cada
+  // corrida deja un JSON en disco, con la fecha en el nombre para que una
+  // corrida que falla no la pise la siguiente. No va en `test-results/`: esa
+  // carpeta la vacía Playwright al empezar cada corrida.
+  reporter: [['list'], ['json', { outputFile: `reportes-e2e/corrida-${new Date().toISOString().replace(/[:.]/g, '-')}.json` }]],
   // H-20/D111 (specs/002-base-transversal, docs/05-decisiones.md): mismo
   // motivo que apps/web/playwright.config.ts — más de un worker comparte
   // estado de sesión entre corridas paralelas contra la misma API/base.

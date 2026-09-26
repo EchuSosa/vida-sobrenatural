@@ -6,3 +6,6 @@ node_modules
 
 # StorageService, proveedor local de dev (D110, research.md Decisión 3) — no durable, no se versiona.
 /storage
+
+# H-146: informes de cada corrida de la suite de integración (test/reporter-a-archivo.cjs).
+/test-results

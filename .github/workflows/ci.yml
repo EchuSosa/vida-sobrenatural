@@ -130,6 +130,18 @@ jobs:
       - name: Specs de integración (los cinco de la parte E + app.e2e-spec.ts)
         run: pnpm --filter api run test:e2e
 
+      # H-146: el informe de la corrida (test/reporter-a-archivo.cjs) queda en
+      # disco, pero en un runner el disco desaparece con el job. Se sube SIEMPRE
+      # — sobre todo si falló: es cuando hace falta saber cuáles fallaron, antes
+      # de apretar "re-run".
+      - name: Guardar el informe de la corrida de integración
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-integracion
+          path: apps/api/test-results/integracion/
+          if-no-files-found: warn
+
   e2e:
     name: E2E (web + backoffice, Playwright)
     runs-on: ubuntu-latest
@@ -189,3 +201,12 @@ jobs:
 
       - name: E2E de apps/backoffice
         run: pnpm --filter backoffice run test:e2e
+
+      # H-146: mismo motivo que el informe de integración.
+      - name: Guardar el informe de la corrida de e2e del backoffice
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-e2e-backoffice
+          path: apps/backoffice/reportes-e2e/
+          if-no-files-found: warn
