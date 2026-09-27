@@ -61,7 +61,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
  * este lote la habría cazado la suite anterior — esta línea caza la familia
  * entera de "algo desborda en celular". 320 px es el piso real (H-62), 375
  * es el iPhone SE con el que se hizo la ronda de verificación. No hace
- * falta repetir por tema: el desborde es de layout, no de color.
+ * falta repetir por tema: el desborde es de layout, no de color. *
+ * H-149: un test por ruta, por el mismo motivo que el smoke de axe de arriba
+ * — que el informe nombre la ruta que desborda o se pasa de tiempo.
  */
 const ANCHOS_CELULAR = [
   { width: 320, height: 568 },
@@ -72,27 +74,31 @@ for (const viewport of ANCHOS_CELULAR) {
   test.describe(`sin scroll horizontal a ${viewport.width}px`, () => {
     test.use({ viewport });
 
-    test('rutas públicas', async ({ page }) => {
+    test.describe('rutas públicas', () => {
       for (const ruta of RUTAS_PUBLICAS) {
-        await page.goto(ruta);
-        await page.waitForLoadState('networkidle');
-        const sinDesborde = await page.evaluate(
-          () => document.scrollingElement!.scrollWidth <= window.innerWidth,
-        );
-        expect(sinDesborde, `${ruta}: hay scroll horizontal a ${viewport.width}px`).toBe(true);
+        test(ruta, async ({ page }) => {
+          await page.goto(ruta);
+          await page.waitForLoadState('networkidle');
+          const sinDesborde = await page.evaluate(
+            () => document.scrollingElement!.scrollWidth <= window.innerWidth,
+          );
+          expect(sinDesborde, `${ruta}: hay scroll horizontal a ${viewport.width}px`).toBe(true);
+        });
       }
     });
 
-    test('rutas de la app con sesión', async ({ page }) => {
-      const email = `e2e-scroll-${viewport.width}-${Date.now()}@example.com`;
-      await registrarPersonaDeTest(page, email);
+    test.describe('rutas de la app con sesión', () => {
       for (const item of NAV_APP) {
-        await page.goto(item.href);
-        await page.waitForLoadState('networkidle');
-        const sinDesborde = await page.evaluate(
-          () => document.scrollingElement!.scrollWidth <= window.innerWidth,
-        );
-        expect(sinDesborde, `${item.href}: hay scroll horizontal a ${viewport.width}px`).toBe(true);
+        test(item.href, async ({ page }) => {
+          const email = `e2e-scroll-${viewport.width}${item.href.replace(/\//g, '-')}-${Date.now()}@example.com`;
+          await registrarPersonaDeTest(page, email);
+          await page.goto(item.href);
+          await page.waitForLoadState('networkidle');
+          const sinDesborde = await page.evaluate(
+            () => document.scrollingElement!.scrollWidth <= window.innerWidth,
+          );
+          expect(sinDesborde, `${item.href}: hay scroll horizontal a ${viewport.width}px`).toBe(true);
+        });
       }
     });
   });

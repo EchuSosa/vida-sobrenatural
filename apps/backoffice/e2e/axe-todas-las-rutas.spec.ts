@@ -34,21 +34,7 @@ function sesionPara(item: ItemNavBackoffice) {
   return sesion;
 }
 
-/** Recorre NAV_BACKOFFICE iniciando sesión, en cada ruta, con la Persona que puede abrirla. */
-async function recorrerRutas(page: Page, enCadaRuta: (item: ItemNavBackoffice) => Promise<void>) {
-  let rolActual: RolDeCargo | null = null;
-  for (const item of NAV_BACKOFFICE) {
-    const sesion = sesionPara(item);
-    if (sesion.rol !== rolActual) {
-      await page.context().clearCookies();
-      await sesion.loguearse(page);
-      rolActual = sesion.rol;
-    }
-    await abrirRuta(page, item);
-    await enCadaRuta(item);
-  }
-}
-
+/** Abre la ruta y comprueba que la sesión llegó a la pantalla, no al 404 (H-132, abajo). */
 async function abrirRuta(page: Page, item: ItemNavBackoffice) {
   await page.goto(item.href);
   await page.waitForLoadState('networkidle');
@@ -106,7 +92,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
 /**
  * H-62 (revisión manual ronda 5, punto 5): mismo chequeo que
  * apps/web/e2e/axe-todas-las-rutas.spec.ts — ver el comentario ahí. 320 px
- * es el piso real, 375 el iPhone SE de la ronda de verificación.
+ * es el piso real, 375 el iPhone SE de la ronda de verificación. *
+ * H-149: un test por ruta, igual que el smoke de axe de arriba.
  */
 const ANCHOS_CELULAR = [
   { width: 320, height: 568 },
@@ -117,11 +104,13 @@ for (const viewport of ANCHOS_CELULAR) {
   test.describe(`sin scroll horizontal a ${viewport.width}px`, () => {
     test.use({ viewport });
 
-    test('todas las rutas del backoffice', async ({ page }) => {
-      await recorrerRutas(page, async (item) => {
+    for (const item of NAV_BACKOFFICE) {
+      test(item.href, async ({ page }) => {
+        await sesionPara(item).loguearse(page);
+        await abrirRuta(page, item);
         const sinDesborde = await page.evaluate(() => document.scrollingElement!.scrollWidth <= window.innerWidth);
         expect(sinDesborde, `${item.href}: hay scroll horizontal a ${viewport.width}px`).toBe(true);
       });
-    });
+    }
   });
 }
