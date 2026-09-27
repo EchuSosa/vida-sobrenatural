@@ -49,8 +49,44 @@ export function crearAxeBuilder(page: Page, reglasDeshabilitadas: string[] = [])
   for (const regla of reglasDeshabilitadas) {
     rules[regla] = { enabled: false };
   }
-  return new AxeBuilder({ page }).options({ rules });
+  const builder = new AxeBuilder({ page }).options({ rules });
+  for (const { iframe } of EMBEDS_DE_TERCEROS) {
+    // [iframe, '*']: excluye cada elemento del documento de ADENTRO del
+    // iframe, no el elemento <iframe> — ése es nuestro (su `title`, regla
+    // frame-title) y se sigue auditando. NO `[iframe, 'html']`: axe 4.13 lo
+    // acepta y no excluye nada (reproducido aislado: las mismas violaciones
+    // que sin exclusión); `'*'` y `'body'` sí. Excluir el <iframe> entero
+    // también funciona, pero deja de evaluar frame-title.
+    //
+    // Lo que axe sigue evaluando adentro, porque son reglas de documento que
+    // ningún selector de contexto saca: html-lang-valid, landmark-one-main,
+    // page-has-heading-one y bypass. Hoy pasan; si YouTube las rompe, el
+    // informe lo va a mostrar con target [iframe, …].
+    builder.exclude([iframe, '*']);
+  }
+  return builder;
 }
+
+/**
+ * H-150: embeds de terceros en los que axe NO desciende — lista declarada,
+ * una entrada por embed, con su motivo. No es "excluir todos los iframes":
+ * eso dejaría de auditar en silencio un iframe propio el día que exista.
+ *
+ * Se excluye sólo lo que carga el tercero adentro del iframe. Nuestro markup
+ * alrededor del video se sigue auditando: el botón "Ver el video" y la
+ * miniatura (antes del clic; axe-todas-las-rutas los recorre así), y el
+ * contenedor y el propio <iframe> (después del clic).
+ */
+const EMBEDS_DE_TERCEROS = [
+  {
+    iframe: 'iframe[src*="youtube-nocookie.com"]',
+    motivo:
+      'El reproductor de YouTube (components/video-youtube.tsx) inyecta su propio DOM, con violaciones que no ' +
+      'son nuestras ni podemos arreglar (div con aria-label y sin role, aria-prohibited-attr). Auditarlo hacía ' +
+      'depender el resultado de cuánto había inyectado YouTube en ese instante: palabra-profetica.spec.ts salía ' +
+      'flaky con 48 violaciones (H-149, H-150).',
+  },
+] as const;
 
 /**
  * H-76 (revisión manual ronda 8): H-21 (el toast) y H-73 (el panel de Sede,
