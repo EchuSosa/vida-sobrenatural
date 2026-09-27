@@ -149,12 +149,6 @@ function SidebarProvider({
   )
 }
 
-/**
- * H-151: los textos que sólo oye un lector de pantalla (título y descripción
- * del panel en celular, nombre del botón que lo abre) llegan como props desde
- * el `next-intl` de cada app — antes eran "Sidebar", "Displays the mobile
- * sidebar." y "Toggle Sidebar", fijos y en inglés (D84).
- */
 function Sidebar({
   side = "left",
   variant = "sidebar",
@@ -162,15 +156,11 @@ function Sidebar({
   className,
   children,
   dir,
-  tituloMovil,
-  descripcionMovil,
   ...props
 }: React.ComponentProps<"div"> & {
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
-  tituloMovil: string
-  descripcionMovil: string
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
@@ -197,18 +187,17 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground"
+          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
           side={side}
-          showCloseButton={false}
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>{tituloMovil}</SheetTitle>
-            <SheetDescription>{descripcionMovil}</SheetDescription>
+            <SheetTitle>Sidebar</SheetTitle>
+            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
@@ -265,9 +254,8 @@ function Sidebar({
 function SidebarTrigger({
   className,
   onClick,
-  etiqueta,
   ...props
-}: React.ComponentProps<typeof Button> & { etiqueta: string }) {
+}: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -284,22 +272,22 @@ function SidebarTrigger({
       {...props}
     >
       <PanelLeftIcon />
-      <span className="sr-only">{etiqueta}</span>
+      <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
 }
 
-function SidebarRail({ className, etiqueta, ...props }: React.ComponentProps<"button"> & { etiqueta: string }) {
+function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   const { toggleSidebar } = useSidebar()
 
   return (
     <button
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      aria-label={etiqueta}
+      aria-label="Toggle Sidebar"
       tabIndex={-1}
       onClick={toggleSidebar}
-      title={etiqueta}
+      title="Toggle Sidebar"
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",

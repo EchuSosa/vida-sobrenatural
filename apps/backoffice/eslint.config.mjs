@@ -9,6 +9,7 @@ import noSessionCheckEnPage from "../../eslint-rules/no-session-check-en-page.mj
 import noDangerouslySetInnerHtml from "../../eslint-rules/no-dangerously-set-inner-html.mjs";
 import sinRolDeSesionEnPantallas from "../../eslint-rules/sin-rol-de-sesion-en-pantallas.mjs";
 import pantallaDeclaraPermiso from "../../eslint-rules/pantalla-declara-permiso.mjs";
+import sinTextoFijoEnSrOnly from "../../eslint-rules/sin-texto-fijo-en-sr-only.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -31,6 +32,7 @@ const eslintConfig = defineConfig([
           ...noDangerouslySetInnerHtml.rules,
           ...sinRolDeSesionEnPantallas.rules,
           ...pantallaDeclaraPermiso.rules,
+          ...sinTextoFijoEnSrOnly.rules,
         },
       },
       "@eslint-community/eslint-comments": eslintComments,
@@ -39,6 +41,8 @@ const eslintConfig = defineConfig([
       "local/no-raw-tailwind-colors": "error",
       "local/no-link-en-boton-base-ui": "error",
       "local/no-dangerously-set-inner-html": "error",
+      // H-151: texto que sólo oye un lector de pantalla, también desde next-intl (D84).
+      "local/sin-texto-fijo-en-sr-only": "error",
       "@eslint-community/eslint-comments/require-description": "error",
     },
   },

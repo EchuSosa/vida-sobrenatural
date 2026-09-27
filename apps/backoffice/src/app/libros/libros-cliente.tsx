@@ -227,6 +227,7 @@ export function LibrosCliente({
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
+  const tc = useTranslations('comun');
   const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
   const hayAlgoAplicado = busqueda.trim() !== '' || filtro === 'todas';
 
@@ -516,7 +517,7 @@ export function LibrosCliente({
 
       {puedeGestionar && (
         <Sheet open={modalAbierto} onOpenChange={setModalAbierto}>
-          <SheetContent side="right">
+          <SheetContent side="right" etiquetaCerrar={tc('cerrarPanel')}>
             <SheetHeader>
               <SheetTitle>Crear Libro</SheetTitle>
               <SheetDescription>Se agrega activo; la portada se sube después, desde su detalle.</SheetDescription>

@@ -80,6 +80,7 @@ export function SedesCliente({
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
+  const tc = useTranslations('comun');
   const procesandoRef = useRef(new Set<string>());
   const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
   const hayAlgoAplicado = busqueda.trim() !== '' || filtro === 'todas';
@@ -273,7 +274,7 @@ export function SedesCliente({
       />
 
       <Sheet open={modalAbierto} onOpenChange={setModalAbierto}>
-        <SheetContent side="right">
+        <SheetContent side="right" etiquetaCerrar={tc('cerrarPanel')}>
           <SheetHeader>
             <SheetTitle>Crear Sede</SheetTitle>
             <SheetDescription>Se agrega activa; podés editarla después desde su detalle.</SheetDescription>

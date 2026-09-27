@@ -286,5 +286,8 @@
     "cuenta": "Cuenta",
     "copiar": "Copiar {campo}",
     "copiado": "{campo} copiado"
+  },
+  "comun": {
+    "cerrarPanel": "Cerrar el panel"
   }
 }

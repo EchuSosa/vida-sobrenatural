@@ -60,6 +60,7 @@ export function NavPublicaHeader() {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
   const t = useTranslations('nav');
+  const tc = useTranslations('comun');
   const acciones = useAccionesPublicas();
 
   return (
@@ -134,7 +135,7 @@ export function NavPublicaHeader() {
                 </Button>
               }
             />
-            <SheetContent side="right" className="gap-0">
+            <SheetContent side="right" className="gap-0" etiquetaCerrar={tc('cerrarPanel')}>
               {/* H-63 (revisión manual ronda 5): cabecera propia, separada
                   por un borde, para que la lista no arranque a la misma
                   altura que la X de cerrar. H-27 pedía el título solo para

@@ -237,6 +237,7 @@ function ActivarDialog({
   onActivado: () => void;
 }) {
   const te = useTranslations('errors');
+  const tc = useTranslations('comun');
   const [busqueda, setBusqueda] = useState('');
   const [resultados, setResultados] = useState<BusquedaPersona[]>([]);
   const [tutorElegido, setTutorElegido] = useState<BusquedaPersona | null>(null);
@@ -325,7 +326,7 @@ function ActivarDialog({
 
   return (
     <Sheet open={!!persona} onOpenChange={(abierto) => !abierto && onCerrar()}>
-      <SheetContent side="right">
+      <SheetContent side="right" etiquetaCerrar={tc('cerrarPanel')}>
         <SheetHeader>
           <SheetTitle>Activar a {persona ? `${persona.nombre} ${persona.apellido}` : ''}</SheetTitle>
           <SheetDescription>

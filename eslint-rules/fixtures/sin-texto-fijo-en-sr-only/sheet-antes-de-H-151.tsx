@@ -36,25 +36,16 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   )
 }
 
-/**
- * H-151: el nombre accesible de la X ya no es un "Close" fijo en inglés
- * (D84) — llega como `etiquetaCerrar`, desde el `next-intl` de cada app.
- * Es obligatoria por tipo mientras la X se muestre: sin ella no compila.
- */
-type PropsBotonCerrar =
-  | { showCloseButton?: true; etiquetaCerrar: string }
-  | { showCloseButton: false; etiquetaCerrar?: never }
-
 function SheetContent({
   className,
   children,
   side = "right",
   showCloseButton = true,
-  etiquetaCerrar,
   ...props
 }: SheetPrimitive.Popup.Props & {
   side?: "top" | "right" | "bottom" | "left"
-} & PropsBotonCerrar) {
+  showCloseButton?: boolean
+}) {
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -81,7 +72,7 @@ function SheetContent({
           >
             <XIcon
             />
-            <span className="sr-only">{etiquetaCerrar}</span>
+            <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Popup>
