@@ -44,11 +44,15 @@ async function recorrerRutas(page: Page, enCadaRuta: (item: ItemNavBackoffice) =
       await sesion.loguearse(page);
       rolActual = sesion.rol;
     }
-    await page.goto(item.href);
-    await page.waitForLoadState('networkidle');
-    await esperarPaginaReal(page, item.href);
+    await abrirRuta(page, item);
     await enCadaRuta(item);
   }
+}
+
+async function abrirRuta(page: Page, item: ItemNavBackoffice) {
+  await page.goto(item.href);
+  await page.waitForLoadState('networkidle');
+  await esperarPaginaReal(page, item.href);
 }
 
 /**
@@ -60,7 +64,12 @@ async function recorrerRutas(page: Page, enCadaRuta: (item: ItemNavBackoffice) =
  *
  * D106/H-22: el tema por defecto es claro, no "system" — se fuerza oscuro
  * escribiendo la misma clave de localStorage que lee next-themes, ver el
- * mismo comentario en apps/web/e2e/axe-todas-las-rutas.spec.ts.
+ * mismo comentario en apps/web/e2e/axe-todas-las-rutas.spec.ts. *
+ * H-149: UN test por ruta, no uno que recorra las 18. Recorriéndolas todas
+ * en un solo `test()`, en CI no entraba en los 30 s (tres intentos, los tres
+ * timeout) y el informe decía "algo de las 18 se pasó de tiempo", no cuál.
+ * Así el informe nombra la ruta, y cada una tiene su propio presupuesto.
+ * El timeout NO se subió: eso callaba el síntoma sin decir dónde está.
  */
 /**
  * H-132: el smoke audita la PANTALLA, no el 404. Con las 18 rutas exigiendo
@@ -83,12 +92,14 @@ for (const tema of ['claro', 'oscuro'] as const) {
       }
     });
 
-    test('todas las rutas del backoffice sin violaciones de axe', async ({ page }) => {
-      await recorrerRutas(page, async (item) => {
+    for (const item of NAV_BACKOFFICE) {
+      test(`${item.href} sin violaciones de axe`, async ({ page }) => {
+        await sesionPara(item).loguearse(page);
+        await abrirRuta(page, item);
         const { violations } = await auditar(page);
         expect(violations, `${item.href}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
       });
-    });
+    }
   });
 }
 

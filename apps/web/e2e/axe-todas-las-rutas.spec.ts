@@ -12,6 +12,15 @@ import { NAV_APP } from '../src/config/nav-app';
  * no alcanza para forzar oscuro (next-themes usa el `defaultTheme` fijo
  * cuando no hay nada guardado, sin mirar el sistema). Se fuerza escribiendo
  * la misma clave de localStorage que lee next-themes antes de cada navegación.
+ *
+ * H-149: UN test por ruta, no uno que las recorra todas. Recorriéndolas en
+ * un solo `test()`, las públicas vivían al borde del timeout de 30 s en CI
+ * (un intento timedOut a los 30.143 ms, el reintento pasó en 23.850 ms) y,
+ * cuando fallaba, el informe no decía qué ruta. Así la nombra, y cada ruta
+ * tiene su propio presupuesto. El timeout NO se subió. Cada test con sesión
+ * registra su propia Persona: independiente de los demás, a costa de repetir
+ * el registro (ver apps/backoffice/e2e/axe-todas-las-rutas.spec.ts, mismo
+ * cambio).
  */
 for (const tema of ['claro', 'oscuro'] as const) {
   test.describe(`modo ${tema}`, () => {
@@ -21,23 +30,27 @@ for (const tema of ['claro', 'oscuro'] as const) {
       }
     });
 
-    test('rutas públicas sin violaciones de axe', async ({ page }) => {
+    test.describe('rutas públicas', () => {
       for (const ruta of RUTAS_PUBLICAS) {
-        await page.goto(ruta);
-        await page.waitForLoadState('networkidle');
-        const { violations } = await auditar(page);
-        expect(violations, `${ruta}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
+        test(`${ruta} sin violaciones de axe`, async ({ page }) => {
+          await page.goto(ruta);
+          await page.waitForLoadState('networkidle');
+          const { violations } = await auditar(page);
+          expect(violations, `${ruta}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
+        });
       }
     });
 
-    test('rutas de la app con sesión sin violaciones de axe', async ({ page }) => {
-      const email = `e2e-axe-${tema}-${Date.now()}@example.com`;
-      await registrarPersonaDeTest(page, email);
+    test.describe('rutas de la app con sesión', () => {
       for (const item of NAV_APP) {
-        await page.goto(item.href);
-        await page.waitForLoadState('networkidle');
-        const { violations } = await auditar(page);
-        expect(violations, `${item.href}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
+        test(`${item.href} sin violaciones de axe`, async ({ page }) => {
+          const email = `e2e-axe-${tema}${item.href.replace(/\//g, '-')}-${Date.now()}@example.com`;
+          await registrarPersonaDeTest(page, email);
+          await page.goto(item.href);
+          await page.waitForLoadState('networkidle');
+          const { violations } = await auditar(page);
+          expect(violations, `${item.href}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
+        });
       }
     });
   });
