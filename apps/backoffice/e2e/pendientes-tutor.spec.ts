@@ -299,5 +299,14 @@ test('el panel de Activar atrapa el foco y lo hace ciclar en orden (T029)', asyn
   const panel = page.getByRole('dialog');
   await expect(panel.getByLabel('Buscar tutor ya registrado (opcional)')).toBeVisible();
 
+  // El formulario valida al salir de cada campo (H-72): recorrido vacío, cada
+  // Tab agregaría un enlace al resumen de errores y cambiaría los controles a
+  // mitad de camino. Con datos válidos el panel queda quieto — y Activar,
+  // habilitado, entra en el ciclo.
+  await panel.getByLabel('Nombre del tutor').fill('Tutor');
+  await panel.getByLabel('Apellido del tutor').fill('de Prueba');
+  await panel.getByLabel('Teléfono del tutor').fill('92219000009');
+  await expect(panel.getByRole('button', { name: 'Activar' })).toBeEnabled();
+
   await verificarQueElFocoCiclaEnElPanel(page, panel);
 });

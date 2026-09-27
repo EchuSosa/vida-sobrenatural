@@ -143,7 +143,10 @@ async function obtenerApiTokenAdmin(page: Page): Promise<string> {
  *
  * La lista esperada sale del DOM del panel (controles tabulables, en orden
  * de documento), no de la mecánica del foco. Afuera del panel se registra
- * como `afuera: <elemento>`.
+ * como `afuera: <elemento>`; un control del panel que no estaba al contar,
+ * como `adentro, no contado: <elemento>`. Por eso el panel tiene que estar
+ * quieto antes de recorrerlo: si agrega controles al perder el foco un campo,
+ * el test tiene que dejarlo en un estado que no los agregue.
  */
 export async function recorrerFocoDelPanel(page: Page, panel: Locator, tecla: 'Tab' | 'Shift+Tab', vueltas = 2) {
   const controles = await panel.evaluate((dialogo) => {
@@ -161,7 +164,10 @@ export async function recorrerFocoDelPanel(page: Page, panel: Locator, tecla: 'T
       const el = document.activeElement;
       const indice = el?.getAttribute('data-foco-e2e');
       if (indice != null) return Number(indice);
-      return `afuera: ${el?.tagName.toLowerCase()} "${(el?.getAttribute('aria-label') || el?.textContent || '').trim().slice(0, 30)}"`;
+      // Un control que apareció después de contar (p. ej. el resumen de
+      // errores) está adentro pero no en la lista: no es una fuga.
+      const donde = el?.closest('[role="dialog"]') ? 'adentro, no contado' : 'afuera';
+      return `${donde}: ${el?.tagName.toLowerCase()} "${(el?.getAttribute('aria-label') || el?.textContent || '').trim().slice(0, 30)}"`;
     });
   const enUnaGuarda = () => page.evaluate(() => !!document.activeElement?.hasAttribute('data-base-ui-focus-guard'));
 
