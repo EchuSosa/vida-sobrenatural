@@ -1,4 +1,4 @@
-import { request as playwrightRequest, type Page } from '@playwright/test';
+import { request as playwrightRequest, type Locator, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from '../../../scripts/e2e-fallas-en-consola';
 
@@ -126,6 +126,77 @@ async function obtenerApiTokenAdmin(page: Page): Promise<string> {
   const sessionResponse = await page.request.get('/api/auth/session');
   const session = await sessionResponse.json();
   return session.apiToken;
+}
+
+/**
+ * T029 (H-131, corrección en e336a48): recorre un panel modal con el teclado
+ * y devuelve QUÉ control recibió el foco en cada tecla, para afirmar la
+ * secuencia — no "el foco está adentro".
+ *
+ * Por qué así: la trampa de Base UI mueve el foco desde su guarda en el
+ * próximo frame (`requestAnimationFrame`), y Playwright aprieta más rápido
+ * que eso. El `expect.poll` de abajo espera SÓLO a que el foco deje la
+ * guarda — es sincronización, no aserción: no mira si el foco quedó adentro
+ * ni dónde. Lo que se afirma después es la secuencia completa, que el poll
+ * no garantiza: con una trampa rota el foco se asienta afuera, el poll pasa
+ * igual y la secuencia no coincide.
+ *
+ * La lista esperada sale del DOM del panel (controles tabulables, en orden
+ * de documento), no de la mecánica del foco. Afuera del panel se registra
+ * como `afuera: <elemento>`.
+ */
+export async function recorrerFocoDelPanel(page: Page, panel: Locator, tecla: 'Tab' | 'Shift+Tab', vueltas = 2) {
+  const controles = await panel.evaluate((dialogo) => {
+    const selector =
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const tabulables = [...dialogo.querySelectorAll<HTMLElement>(selector)].filter(
+      (el) => el.tabIndex >= 0 && el.getClientRects().length > 0,
+    );
+    tabulables.forEach((el, i) => el.setAttribute('data-foco-e2e', String(i)));
+    return tabulables.map((el) => (el.getAttribute('aria-label') || el.textContent || el.tagName).trim());
+  });
+
+  const dondeEstaElFoco = () =>
+    page.evaluate(() => {
+      const el = document.activeElement;
+      const indice = el?.getAttribute('data-foco-e2e');
+      if (indice != null) return Number(indice);
+      return `afuera: ${el?.tagName.toLowerCase()} "${(el?.getAttribute('aria-label') || el?.textContent || '').trim().slice(0, 30)}"`;
+    });
+  const enUnaGuarda = () => page.evaluate(() => !!document.activeElement?.hasAttribute('data-base-ui-focus-guard'));
+
+  // Una tecla más que las vueltas completas: termina un paso después de
+  // donde empezó, así que el cierre del ciclo también queda afirmado.
+  const teclas = vueltas * controles.length + 1;
+  const inicial = await dondeEstaElFoco();
+  const secuencia: Array<number | string> = [];
+  for (let i = 0; i < teclas; i++) {
+    await page.keyboard.press(tecla);
+    await expect.poll(enUnaGuarda, { message: 'el foco quedó en la guarda de Base UI' }).toBe(false);
+    secuencia.push(await dondeEstaElFoco());
+  }
+  return { controles, inicial, secuencia };
+}
+
+/** La secuencia que tiene que dar recorrerFocoDelPanel: los controles del panel ciclando desde `inicial`. */
+export function secuenciaCiclica(inicial: number, cantidad: number, tecla: 'Tab' | 'Shift+Tab', teclas: number) {
+  const paso = tecla === 'Tab' ? 1 : -1;
+  return Array.from({ length: teclas }, (_, i) => (((inicial + paso * (i + 1)) % cantidad) + cantidad) % cantidad);
+}
+
+/**
+ * Afirma que el foco cicla por los controles del panel, en orden con Tab y
+ * en orden inverso con Shift+Tab, dando más de una vuelta.
+ */
+export async function verificarQueElFocoCiclaEnElPanel(page: Page, panel: Locator) {
+  for (const tecla of ['Tab', 'Shift+Tab'] as const) {
+    const { controles, inicial, secuencia } = await recorrerFocoDelPanel(page, panel, tecla);
+    expect(controles.length, `el panel tiene que tener al menos dos controles para que ciclar signifique algo: ${controles.join(' | ')}`).toBeGreaterThanOrEqual(2);
+    expect(typeof inicial, `al empezar el foco no estaba en un control del panel: ${inicial}`).toBe('number');
+    expect(secuencia, `${tecla} — controles del panel: ${controles.map((c, i) => `${i}=${c}`).join(' | ')}`).toEqual(
+      secuenciaCiclica(inicial as number, controles.length, tecla, secuencia.length),
+    );
+  }
 }
 
 /**

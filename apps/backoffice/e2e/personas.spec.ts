@@ -1,4 +1,12 @@
-import { test, expect, loguearseComoAdminE2E, loguearseComoPastorE2E, crearPersonaActiva, auditar } from './helpers';
+import {
+  test,
+  expect,
+  loguearseComoAdminE2E,
+  loguearseComoPastorE2E,
+  crearPersonaActiva,
+  auditar,
+  verificarQueElFocoCiclaEnElPanel,
+} from './helpers';
 
 /**
  * specs/005-roles-permisos-acceso, Historia 2 (T028/T029): ascender a una
@@ -209,5 +217,42 @@ test.describe('T062: el modal no ofrece quitar lo que no se puede quitar', () =>
     await expect(panel.getByRole('button', { name: 'Quitar el rol de Admin' })).toHaveCount(0);
     await expect(panel.getByText('No podés quitarte tu propio rol de Admin')).toBeVisible();
     await expect(panel.getByRole('button', { name: 'Otorgar el rol de Líder de curso' })).toBeVisible();
+  });
+});
+
+/**
+ * T029 (H-131, corrección en e336a48): el foco queda atrapado en los dos
+ * paneles de Personas. Se afirma la SECUENCIA de controles enfocados, ciclando
+ * en orden con Tab y al revés con Shift+Tab — ver verificarQueElFocoCiclaEnElPanel.
+ * Un solo tema: el foco no depende del color.
+ */
+test.describe('foco del teclado en los paneles (T029)', () => {
+  test('el panel de roles atrapa el foco y lo hace ciclar en orden', async ({ page }) => {
+    const apellido = `FocoRoles${Date.now()}`;
+    await crearPersonaActiva(`e2e-foco-roles-${Date.now()}@example.com`, apellido);
+    await loguearseComoAdminE2E(page);
+    await page.goto(`/personas?q=${apellido}`);
+    await page.waitForLoadState('networkidle');
+
+    await page.getByRole('main').getByRole('button', { name: `Cambiar roles de E2E ${apellido}` }).click();
+    const panel = page.getByRole('dialog');
+    await expect(panel.getByRole('button', { name: 'Otorgar el rol de Líder de curso' })).toBeVisible();
+
+    await verificarQueElFocoCiclaEnElPanel(page, panel);
+  });
+
+  test('el panel de historial atrapa el foco y lo hace ciclar en orden', async ({ page }) => {
+    const apellido = `FocoHistorial${Date.now()}`;
+    await crearPersonaActiva(`e2e-foco-historial-${Date.now()}@example.com`, apellido);
+    await loguearseComoAdminE2E(page);
+    await page.goto(`/personas?q=${apellido}`);
+    await page.waitForLoadState('networkidle');
+
+    await page.getByRole('main').getByRole('button', { name: `Ver el historial de roles de E2E ${apellido}` }).click();
+    const panel = page.getByRole('dialog');
+    // Estado final (vacío) antes de contar controles: mientras carga, el panel tiene otros.
+    await expect(panel.getByText(`Todavía no hay cambios de rol registrados para E2E ${apellido}.`)).toBeVisible();
+
+    await verificarQueElFocoCiclaEnElPanel(page, panel);
   });
 });

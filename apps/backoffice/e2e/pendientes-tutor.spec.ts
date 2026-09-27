@@ -5,6 +5,7 @@ import {
   crearMenorPendienteTutor,
   crearPersonaActiva,
   auditar,
+  verificarQueElFocoCiclaEnElPanel,
 } from './helpers';
 
 /**
@@ -280,4 +281,23 @@ test('el paginado: ir a la página 2, la URL lo refleja, sobrevive a un F5, y bu
       }),
     ),
   );
+});
+
+/**
+ * T029 (H-131, corrección en e336a48): el diálogo de Activar usa el mismo
+ * Sheet compartido que los paneles de Personas — mismo recorrido de foco.
+ */
+test('el panel de Activar atrapa el foco y lo hace ciclar en orden (T029)', async ({ page }) => {
+  const apellido = `Foco${Date.now()}`;
+  await crearMenorPendienteTutor(`e2e-foco-menor-${Date.now()}@example.com`, 'E2E', apellido);
+  await loguearseComoAdminE2E(page);
+  await page.goto(`/pendientes-tutor?q=${apellido}`);
+  await page.waitForLoadState('networkidle');
+
+  const fila = page.getByText(`E2E ${apellido}`).locator('..').locator('..');
+  await fila.getByRole('button', { name: 'Activar' }).click();
+  const panel = page.getByRole('dialog');
+  await expect(panel.getByLabel('Buscar tutor ya registrado (opcional)')).toBeVisible();
+
+  await verificarQueElFocoCiclaEnElPanel(page, panel);
 });

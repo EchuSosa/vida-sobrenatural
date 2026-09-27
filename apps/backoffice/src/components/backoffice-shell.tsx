@@ -44,7 +44,7 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar tituloMovil={t('menuMovilTitulo')} descripcionMovil={t('menuMovilDescripcion')}>
         {/* H-51/H-52 (revisión manual ronda 4): el menú no estaba dentro de
             un <nav> — docs/14-navegacion.md pide un <nav aria-label> por
             menú (D81), y sin esto axe marca cada ítem como contenido fuera
@@ -82,7 +82,7 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
-          <SidebarTrigger />
+          <SidebarTrigger etiqueta={t('mostrarOcultarMenu')} />
           <MenuUsuario />
         </header>
         {/* H-51/H-52: SidebarInset ya es un <main> (packages/ui) — un

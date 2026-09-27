@@ -240,6 +240,7 @@ function HistorialDialog({
   onCerrar: () => void;
 }) {
   const t = useTranslations('personas');
+  const tc = useTranslations('comun');
   const locale = useLocale();
   // Nace en 'cargando' (el diálogo se remonta por persona, key en el padre):
   // el efecto solo pide los datos; "Reintentar" vuelve a 'cargando' desde el
@@ -281,7 +282,7 @@ function HistorialDialog({
 
   return (
     <Sheet open={!!persona} onOpenChange={(abierto) => !abierto && onCerrar()}>
-      <SheetContent side="right">
+      <SheetContent side="right" etiquetaCerrar={tc('cerrarPanel')}>
         <SheetHeader>
           <SheetTitle>{t('historial.titulo', { nombre })}</SheetTitle>
           <SheetDescription>{t('historial.descripcion')}</SheetDescription>
@@ -378,6 +379,7 @@ function RolesDialog({
 }) {
   const t = useTranslations('personas');
   const te = useTranslations('errors');
+  const tc = useTranslations('comun');
   // El estado se resetea remontando (key={persona?.id} en el padre), igual que ActivarDialog.
   const [roles, setRoles] = useState<string[]>(persona?.rol ?? []);
   const [rolEnCurso, setRolEnCurso] = useState<RolDeCargo | null>(null);
@@ -413,7 +415,7 @@ function RolesDialog({
 
   return (
     <Sheet open={!!persona} onOpenChange={(abierto) => !abierto && onCerrar()}>
-      <SheetContent side="right">
+      <SheetContent side="right" etiquetaCerrar={tc('cerrarPanel')}>
         <SheetHeader>
           <SheetTitle>{t('modal.titulo', { nombre })}</SheetTitle>
           <SheetDescription>{t('modal.descripcion')}</SheetDescription>

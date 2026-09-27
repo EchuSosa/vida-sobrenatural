@@ -50,7 +50,10 @@
     "catalogos": "Catálogos",
     "misDiscipulados": "Mis discipulados",
     "miDisponibilidad": "Mi disponibilidad",
-    "misGrupos": "Mis grupos"
+    "misGrupos": "Mis grupos",
+    "menuMovilTitulo": "Menú",
+    "menuMovilDescripcion": "Las secciones del backoffice.",
+    "mostrarOcultarMenu": "Mostrar u ocultar el menú"
   },
   "libros": {
     "arrastrar": {
@@ -142,5 +145,8 @@
     "noEncontradoTitulo": "No encontramos esta sección",
     "noEncontradoDescripcion": "Puede que el link esté roto o que la página ya no exista.",
     "irA": "Ir a {seccion}"
+  },
+  "comun": {
+    "cerrarPanel": "Cerrar el panel"
   }
 }

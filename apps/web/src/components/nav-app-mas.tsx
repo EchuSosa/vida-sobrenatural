@@ -36,6 +36,7 @@ export function useItemsMas() {
 export function NavAppTopBarCelular() {
   const [abierto, setAbierto] = useState(false);
   const t = useTranslations('nav');
+  const tc = useTranslations('comun');
   const items = useItemsMas();
 
   return (
@@ -58,7 +59,7 @@ export function NavAppTopBarCelular() {
             </Button>
           }
         />
-        <SheetContent side="right" className="gap-0">
+        <SheetContent side="right" className="gap-0" etiquetaCerrar={tc('cerrarPanel')}>
           {/* H-63 (revisión manual ronda 5): mismo criterio que el menú
               hamburguesa público (nav-publica-header.tsx) — cabecera propia
               separada por un borde, en vez de que la lista arranque a la
