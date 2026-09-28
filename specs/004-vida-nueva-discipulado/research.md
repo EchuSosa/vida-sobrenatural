@@ -76,8 +76,9 @@ se cita. Cada entrada dice qué se eligió, por qué y qué se descartó. **Actu
 
 - **Decisión:** la puerta para aparecer en el cruce es la **agenda** (FR-006): `FranjaAgenda`
   (`personaId`, `diaSemana 0–6`, `inicio`/`fin` como minutos desde las 0:00, borrado lógico con
-  `eliminadaEn`). `Persona.disponibleDiscipulado Boolean @default(true)`: el toggle arranca
-  prendido porque quien no cargó agenda no aparece igual. `BloqueoDisponibilidad` con `desde`/`hasta`
+  `eliminadaEn`). `Persona.disponibleDiscipulado Boolean @default(false)`: el toggle arranca
+  **apagado** (Echu, tercera respuesta): el Discipulador carga su agenda y después lo prende él; el
+  sistema nunca lo prende ni lo apaga solo, ni al agregar la primera franja ni al borrar la última. `BloqueoDisponibilidad` con `desde`/`hasta`
   civiles, CHECK `hasta >= desde`, y `eliminadoEn` para el borrado de FR-040.
 - **Borrado lógico, no físico:** el Discipulador ve "borrar"; el modelo pone `eliminadaEn` y toda
   consulta filtra `eliminadaEn IS NULL` (Principio III). Lo que se borra nunca vuelve a aparecer.
@@ -131,7 +132,14 @@ demasiado contenido para un panel lateral y el Admin vuelve a él varias veces p
 
 ## 11. Menores de edad — resuelto por Echu (FR-044)
 
-- **Decisión:** ningún umbral. La API expone, en el detalle del discipulado del Discipulador, un
+- **Decisión:** umbral de **12 años** para pedir solo (`EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO = 12` en
+  `packages/shared-types/src/persona.ts`, constante propia — no `EDAD_MINIMA` ni
+  `EDAD_MINIMA_ROL_DE_CARGO`, H-128 — con `calcularEdad()`). `POST /discipulado/solicitudes/me`
+  rechaza con 409 `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO`; `GET /discipulado/me` devuelve
+  `{ estado: 'lo_pide_su_tutor' }` para que Mi camino no ofrezca el botón. El pedido de un menor de
+  12 entra por FR-002. **Pendiente de Echu:** si el tutor lo pide desde su propia app (nueva
+  funcionalidad, Relación Familiar) o avisándole al equipo (lo que FR-002 ya cubre). Sobre el
+  contacto: La API expone, en el detalle del discipulado del Discipulador, un
   bloque `tutor: { nombre, telefono } | null`, resuelto en **un** lugar (`contactoDe(persona)` en
   la API): primero la Relación Familiar de tipo `tutor` (D112) si existe, si no los campos de texto
   `tutorNombre`/`tutorApellido`/`tutorTelefono`. Para una Persona adulta es `null`. La edad se

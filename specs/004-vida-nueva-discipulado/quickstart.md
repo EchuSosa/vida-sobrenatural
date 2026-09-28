@@ -20,13 +20,14 @@ modelo en `data-model.md`. Esta guía no los repite. **Actualizada el 2026-09-27
 2. Dos Personas adultas con rol `discipulador` (**Personas → Cambiar roles**, mecanismo del 005):
    una del mismo género que la Persona que va a pedir, y otra del otro.
 3. Una Persona activa sin Vida Nueva, por ejemplo `demo-activa@example.com`.
+4. Para el escenario 18, una Persona menor de 12 (entrar con el login de prueba y una `fechaNacimiento` reciente).
 
 ## Escenarios
 
 | # | Qué hacer | Qué tiene que pasar | Requisitos |
 |---|---|---|---|
-| 1 | Como Discipulador 1, entrar al backoffice **desde el teléfono**, sin agenda. | Mis discipulados y Mi disponibilidad dicen que hasta que no cargue horarios no aparece, con enlace. | FR-047, FR-046 |
-| 2 | Cargar dos franjas (martes 19:00–21:00, sábado 10:00–13:00), ver el toggle prendido. | La pantalla dice que hoy el Admin lo ve como disponible. | FR-031, FR-015 |
+| 1 | Como Discipulador 1, entrar al backoffice **desde el teléfono**, sin agenda y con la disponibilidad apagada (así arranca). | Mis discipulados y Mi disponibilidad dicen que hasta que no cargue horarios y prenda la disponibilidad no aparece, con enlace. | FR-047, FR-046 |
+| 2 | Cargar dos franjas (martes 19:00–21:00, sábado 10:00–13:00). La frase pasa a "prendé tu disponibilidad". Prenderla. | La pantalla dice que hoy el Admin lo ve como disponible. El sistema no la prendió solo. | FR-031, FR-015 |
 | 3 | Como la Persona, en `apps/web` **Mi camino** → pedir Vida Nueva con "martes 18:00–20:00". Intentar sin franjas. | Sin franjas, error debajo del campo. Con franja, ve "estamos buscando un Discipulador". Un segundo pedido no crea otra Solicitud. | FR-001, FR-032, FR-026 |
 | 4 | Como Admin, **Solicitudes** → abrir la pendiente. | El cruce muestra "martes 18:00–20:00" con el Discipulador 1 (coincide 60 min) marcado como sugerido; el Discipulador 2 en "no coinciden" con "otro género" (y "no coincide el horario" si tampoco tiene esa franja). | FR-033, FR-034, FR-035 |
 | 5 | Proponer al sugerido. | La Solicitud queda "propuesta a …, hace 0 días". **No** existe Grupo todavía (Grupos sigue vacío). | FR-036 |
@@ -42,6 +43,7 @@ modelo en `data-model.md`. Esta guía no los repite. **Actualizada el 2026-09-27
 | 15 | Como Admin, **Grupos → Reasignar**: proponer al Discipulador 2 (cargarle antes una franja y darle el rol de nuevo). Como Discipulador 2, aceptar. | Hasta aceptar, el Discipulador 1 seguía viendo el Grupo. Al aceptar, el 2 ve los Encuentros anteriores y el 1 ya no lo ve. | FR-030, FR-037 |
 | 16 | Como Discipulador 2, proponer la finalización; como Admin, rechazar con motivo; proponer de nuevo; confirmar. | El rechazo se ve con su motivo; al confirmar, la Persona ve "terminado" y el Grupo queda cerrado con motivo completado. `apto_ministerio` no aparece en ningún lado. | FR-019a, FR-021, FR-022, FR-028 |
 | 17 | Como Discipulador 2, cargar un período con fin anterior al inicio; después uno que cubra hoy; borrarlo. | El primero se rechaza debajo del campo. Con el segundo, la pantalla dice que hoy no aparece. Al borrarlo, vuelve a aparecer. | FR-016, FR-017, FR-040 |
+| 18 | Como una Persona menor de 12, entrar a Mi camino. | No hay botón de pedir: dice que el pedido lo hace su mamá, papá o tutor. Como Admin, pedir en su nombre funciona. | FR-044, FR-002 |
 
 ## Suites
 

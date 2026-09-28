@@ -219,8 +219,10 @@ proponer → aceptar → Encuentro → finalizar) cruza A, B y C, así que va **
 finalización con motivo opcional (FR-019a), Personas sin acceso sin vista propia (FR-026) y
 discipulados activos calculados en el momento (D137).
 
-**Respondidas por Echu (segunda corrida, brief del 27/9 a la noche):** menores sí piden (FR-044);
-la disponibilidad pasa a ser la agenda (FR-031, toggle prendido); el reasignado ve las notas del
+**Respondidas por Echu (segunda corrida, brief del 27/9 a la noche, y corregidas por voz al
+cerrar):** menores piden solos desde los 12 años, menores de 12 en su nombre (FR-044); la
+disponibilidad pasa a ser la agenda **más** el toggle, que arranca apagado y prende el
+Discipulador (FR-031, FR-015); el reasignado ve las notas del
 anterior; se borran bloqueos y se editan Encuentros (FR-040, FR-041); `Status: Draft` queda. Más
 las decisiones nuevas: agenda y cruce, reglas de asignación (D138), propuesta y aceptación,
 celular, baja por propuesta, la Persona edita/retira, propuestas pendientes bloquean el rol,
@@ -243,6 +245,10 @@ contacto del tutor, Grupos de varias Personas, parejas como dos Solicitudes.
   texto; crear en nombre de cualquier Persona (research #8).
 
 **Pendientes de Echu** (no bloquean el lote 0):
+0. **Cómo pide el tutor de un menor de 12** (FR-044): ¿desde su propia app (una función nueva en
+   Mi camino, "pedir para mi hijo/a", apoyada en Relación Familiar D112) o avisándole al equipo, que
+   lo carga en nombre del menor (FR-002, ya en el plan)? El plan asume lo segundo hasta que Echu
+   diga; lo primero sería una Historia nueva.
 1. **El nombre `individual` del Curso** (D44) ya no significa "una Persona por Grupo" (FR-014,
    FR-045). ¿Se deja así, con la nota en la spec, o se revisa D44 y `docs/04` (por ejemplo,
    `individual` → `regular`)? Es una decisión sobre D44, no de este spec.

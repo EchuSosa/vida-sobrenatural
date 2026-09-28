@@ -10,7 +10,7 @@ aceptación, los Grupos de varias Personas y la baja.
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `disponibleDiscipulado` | `Boolean @default(true)` | FR-015. **Arranca prendido**: la puerta es la agenda (FR-006). Solo lo cambia el propio Discipulador; el sistema nunca. |
+| `disponibleDiscipulado` | `Boolean @default(false)` | FR-015. **Arranca apagado**: el Discipulador carga su agenda y lo prende él. Solo lo cambia el propio Discipulador; el sistema nunca. Agenda y toggle son las dos condiciones de FR-006. |
 | `maxPersonasPorGrupo` | `Int @default(1)` | FR-045. CHECK `1 <= x <= 6` en la migración; el 6 es `MAX_PERSONAS_POR_GRUPO_VIDA_NUEVA` de `shared-types`. Bajarlo no toca los Grupos existentes. |
 
 Relaciones inversas nuevas: `solicitudesDiscipulado`, `inscripciones`, `liderazgos`,

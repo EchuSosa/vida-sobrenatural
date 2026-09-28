@@ -21,6 +21,7 @@ Módulo nuevo `apps/api/src/solicitud-discipulado/`. Todos los errores siguen Pr
 - `Cruce`: la respuesta del cruce (abajo).
 - `EstadoMiDiscipulado`: lo que ve la Persona (FR-026 a FR-028), unión discriminada:
   - `{ estado: 'puede_pedir', ultimo?: 'rechazada' | 'retirada' | 'abandono' }`
+  - `{ estado: 'lo_pide_su_tutor' }` — menor de 12 sin Solicitud (FR-044): Mi camino no ofrece el botón.
   - `{ estado: 'buscando', solicitudId, franjas, createdAt }` — cubre `pendiente` **y** `propuesta`
     (FR-026): la Persona no distingue.
   - `{ estado: 'en_curso', grupoId, discipulador: { nombre, apellido, telefono }, desde }` (FR-027)
@@ -48,6 +49,8 @@ Módulo nuevo `apps/api/src/solicitud-discipulado/`. Todos los errores siguen Pr
   índice y se traduce a este código, no a un 500.
 - **409 `VIDA_NUEVA_EN_CURSO_O_COMPLETADA`:** Inscripción `activa` o `completada` en Vida Nueva.
   Una en `abandono` no cuenta (FR-042).
+- **409 `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO`:** menor de `EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO` (12)
+  según `calcularEdad()` (FR-044). No aplica al pedido en nombre de otra Persona.
 
 ### `PUT /discipulado/solicitudes/me/franjas` — editar horarios (FR-039)
 

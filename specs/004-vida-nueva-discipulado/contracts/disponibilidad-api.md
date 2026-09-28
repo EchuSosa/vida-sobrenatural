@@ -2,8 +2,8 @@
 
 Módulo nuevo `apps/api/src/disponibilidad/`. Todo es del propio Discipulador (D134): ningún
 endpoint recibe un `personaId`; todo se resuelve desde la sesión. Pensado para celular (FR-046).
-**Actualizado el 2026-09-27**: agenda semanal, toggle prendido por defecto, borrar períodos,
-máximo por Grupo.
+**Actualizado el 2026-09-27**: agenda semanal, toggle apagado por defecto (lo prende el
+Discipulador después de cargar su agenda), borrar períodos, máximo por Grupo.
 
 ## Tipos compartidos (`packages/shared-types/src/disponibilidad.ts`)
 
@@ -13,9 +13,11 @@ máximo por Grupo.
 - `MiDisponibilidad`:
   `{ disponible: boolean, maxPersonasPorGrupo: number, franjas: FranjaAgenda[], bloqueos: BloqueoDisponibilidad[], apareceEnElCruce: boolean, porQueNo: 'sin_agenda' | 'toggle_apagado' | 'bloqueo_vigente' | null }`.
   - `apareceEnElCruce` es exactamente FR-006 (agenda + toggle + sin bloqueo vigente).
-  - `porQueNo` es la primera razón por la que no aparece, en clave; la pantalla la dice en palabras
-    ("Hoy el Admin te ve como disponible" / "Todavía no cargaste horarios: hasta que no lo hagas
-    no aparecés para nuevos discipulados" / "Hoy no aparecés, por tu período del … al …").
+  - `porQueNo` es la primera razón por la que no aparece, en clave, en este orden: `sin_agenda`,
+    `toggle_apagado`, `bloqueo_vigente`. La pantalla la dice en palabras ("Hoy el Admin te ve como
+    disponible" / "Todavía no cargaste horarios: hasta que no lo hagas no aparecés para nuevos
+    discipulados" / "Ya tenés horarios: prendé tu disponibilidad para aparecer" / "Hoy no aparecés,
+    por tu período del … al …").
 - `MAX_PERSONAS_POR_GRUPO_VIDA_NUEVA = 6`, `MINUTOS_MINIMOS_EN_COMUN = 60`.
 - `hoyEnArgentina(): string` (`YYYY-MM-DD`, fecha civil en `America/Argentina/Buenos_Aires`),
   `bloqueoVigente(bloqueo, hoy)`.
