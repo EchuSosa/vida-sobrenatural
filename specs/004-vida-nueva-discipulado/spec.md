@@ -31,6 +31,12 @@ spec pasa a tener como dependencia. El spec 004 no avanza a `/speckit.plan` hast
 resuelto — ver FR-005, FR-006 y la Assumption sobre el rol Discipulador, actualizadas para reflejar
 esto en vez de dejarlo como un hueco propio.
 
+### Session 2026-09-27
+
+- Q: Si un Discipulador ya no puede seguir con un discipulado en curso, ¿el Admin puede pasárselo a otro Discipulador? → A: Sí. El Admin cambia el Discipulador de un Grupo en curso eligiendo del mismo listado de disponibles (FR-006). Los Encuentros ya registrados quedan en el Grupo, el cambio queda registrado y el Discipulador anterior deja de ver ese discipulado y sus datos de contacto. Es lo que destraba FR-009 del 005: para sacarle el rol a alguien con discipulados activos, primero se le reasignan.
+- Q: Si el Discipulador propone terminar un discipulado y el Admin no está de acuerdo, ¿qué puede hacer el Admin? → A: Rechazar la propuesta, con un motivo opcional. El discipulado vuelve a "en curso", el Discipulador ve que se rechazó (y el motivo, si hay) y puede volver a proponerla más adelante.
+- Q: Una Persona que el Admin dio de alta sin acceso a la app (D97), ¿no ve nada de su discipulado, y si más adelante entra con Google ve su estado como cualquiera? → A: Sí a las dos. Mientras no tenga acceso no ve nada: el seguimiento lo hacen el Admin y el Discipulador. Si después entra, ve su estado como cualquier Persona (FR-026 a FR-028), incluida la Solicitud que crearon en su nombre. No hay una vista aparte.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Pedir empezar Vida Nueva (Priority: P1)
@@ -85,6 +91,7 @@ Un Admin que revisa las Solicitudes pendientes quiere poder aprobar la de Discip
 5. **Given** que no hay ningún Discipulador disponible en el listado, **When** el Admin llega a ese paso, **Then** el sistema se lo indica claramente en vez de dejarlo elegir de una lista vacía sin explicación.
 6. **Given** una Solicitud de Discipulado, **When** el Admin la rechaza en vez de aprobarla, **Then** queda registrada como rechazada, sin crear ningún Grupo, y la Persona puede volver a pedirlo más adelante.
 7. **Given** que el Admin aprueba o rechaza una Solicitud, **When** la decisión se guarda, **Then** el sistema deja registrado todo lo necesario para que, en el futuro, dispare un aviso a la Persona dueña de la Solicitud — sin que el envío de ese aviso sea parte de esta funcionalidad.
+8. **Given** un discipulado en curso cuyo Discipulador ya no puede seguir, **When** el Admin lo reasigna eligiendo otro del listado de disponibles (FR-006), **Then** el nuevo Discipulador ve el discipulado con todos sus Encuentros anteriores, el anterior deja de verlo junto con los datos de contacto de la Persona, la Persona ve a su nuevo Discipulador, y el cambio queda registrado (FR-030).
 
 ---
 
@@ -139,6 +146,7 @@ Un Discipulador que considera que ya recorrió con su discípulo todo el conteni
 3. **Given** que el Admin confirma la finalización, **When** se confirma, **Then** la Inscripción de la Persona en ese Grupo pasa a completada.
 4. **Given** que un discipulado terminó de esta forma, **When** se confirma su finalización, **Then** el sistema NO activa "Apto para Ministerio" para esa Persona — esa activación es exclusiva de Vida de Servicio.
 5. **Given** una finalización todavía no propuesta por el Discipulador, **When** cualquiera intenta confirmarla, **Then** el sistema no lo permite — la propuesta tiene que existir primero.
+6. **Given** una finalización propuesta, **When** el Admin no está de acuerdo y la rechaza (con un motivo opcional), **Then** el discipulado vuelve a estar en curso, la Inscripción no cambia, el Discipulador ve que la propuesta fue rechazada y el motivo si lo hay, y puede volver a proponerla más adelante.
 
 ---
 
@@ -148,11 +156,11 @@ Un Discipulador que considera que ya recorrió con su discípulo todo el conteni
 - ¿Qué pasa si, al momento de aprobar, no queda ningún Discipulador disponible para elegir? (ver Historia 3, Acceptance Scenario 5).
 - ¿Qué pasa si el Admin rechaza una Solicitud de Discipulado? ¿Puede la Persona volver a pedirlo? (ver Historia 3, Acceptance Scenario 6).
 - ¿Qué pasa si un Discipulador con discipulados ya asignados se marca no disponible o carga un período de no disponibilidad? (no pierde lo que ya tiene asignado — ver Historia 4, Acceptance Scenario 5).
-- ¿Qué pasa si dos períodos de no disponibilidad de un mismo Discipulador se superponen en fechas?
-- ¿Qué pasa si se necesita cambiar al Discipulador ya asignado a un discipulado en curso (por ejemplo, porque dejó de poder continuar)? El camino feliz documentado no contempla una reasignación — queda sin resolver en este spec.
+- ¿Qué pasa si dos períodos de no disponibilidad de un mismo Discipulador se superponen en fechas? Se permiten: el Discipulador no está disponible en cualquier fecha que caiga dentro de al menos uno de sus períodos (ver Assumptions).
+- ¿Qué pasa si se necesita cambiar al Discipulador ya asignado a un discipulado en curso (por ejemplo, porque dejó de poder continuar)? El Admin lo reasigna (FR-030, Clarificación 2026-09-27): elige otro del listado de FR-006, el historial de Encuentros se conserva y el Discipulador anterior pierde el acceso a ese discipulado.
 - ¿Qué pasa si el Admin intenta quitarle el rol `discipulador` a alguien con discipulados asignados? **Resuelto por el spec 005** (FR-009 y SC-009 de `specs/005-roles-permisos-acceso/spec.md`), no por este: la quita se bloquea mientras tenga discipulados activos, con un mensaje que nombra cuáles. Lo que le toca a **este** spec es aportar la consulta de "discipulados activos de una Persona" que esa guarda necesita: hoy `puedeQuitarRol` (`packages/shared-types/src/permisos.ts`) rechaza **siempre** la quita de `discipulador` porque esa consulta no existe (falla cerrada, H-127, motivo `DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS`). Cuando este spec la construya, la guarda pasa a bloquear solo a quien de verdad tiene discipulados activos.
-- ¿Qué pasa si el Discipulador intenta proponer la finalización de un discipulado que no es el suyo, o el Admin intenta confirmar una finalización de un discipulado ajeno a la Solicitud original?
-- ¿Qué pasa con una Persona sin acceso a la app (D97) mientras su discipulado avanza? No ve nada ella misma — el Admin y el Discipulador son quienes hacen todo el seguimiento en su nombre.
+- ¿Qué pasa si el Discipulador intenta proponer la finalización de un discipulado que no es el suyo? El sistema se lo impide, igual que registrar Encuentros o ver datos de contacto de un discipulado ajeno (Historia 5, escenario 4): solo el Discipulador del Liderazgo vigente del Grupo puede proponer. El Admin confirma o rechaza sobre el Grupo mismo, así que no hay un "discipulado ajeno a la Solicitud" posible (ver Assumptions).
+- ¿Qué pasa con una Persona sin acceso a la app (D97) mientras su discipulado avanza? No ve nada ella misma — el Admin y el Discipulador son quienes hacen todo el seguimiento en su nombre. Si más adelante consigue acceso (por ejemplo, entra con Google usando el email cargado, D97/D35), ve su estado igual que cualquier Persona (FR-026 a FR-028), incluida la Solicitud que se creó en su nombre (Clarificación 2026-09-27).
 
 ## Fuera de alcance
 
@@ -185,7 +193,8 @@ Un Discipulador que considera que ya recorrió con su discípulo todo el conteni
 - **FR-016**: El sistema DEBE permitir que un Discipulador cree un período de no disponibilidad con fecha de inicio y fin, que deje de considerarlo disponible (a los efectos de FR-006) durante ese rango, y que vuelva a considerarlo disponible automáticamente al pasar la fecha de fin, sin que tenga que reactivarse manualmente.
 - **FR-017**: El sistema DEBE rechazar, con un mensaje claro, un período de no disponibilidad cuya fecha de fin sea anterior a su fecha de inicio.
 - **FR-018**: El estado de disponibilidad de un Discipulador (toggle o período de no disponibilidad) NO DEBE afectar los discipulados que ya tiene asignados — solo determina si aparece disponible para *nuevas* asignaciones (FR-006).
-- **FR-019**: El sistema DEBE permitir que un Discipulador proponga la finalización de un discipulado en curso, y que un Admin confirme esa propuesta.
+- **FR-019**: El sistema DEBE permitir que un Discipulador proponga la finalización de un discipulado en curso, y que un Admin confirme o rechace esa propuesta.
+- **FR-019a**: Cuando el Admin rechaza una finalización propuesta, el sistema DEBE devolver el discipulado a "en curso" sin tocar la Inscripción, guardar el motivo si el Admin lo cargó, mostrarle al Discipulador que la propuesta fue rechazada (con el motivo, si lo hay), y permitirle volver a proponerla más adelante.
 - **FR-020**: El sistema NO DEBE permitir confirmar la finalización de un discipulado que no fue previamente propuesta por su Discipulador.
 - **FR-021**: Cuando el Admin confirma la finalización de un discipulado, el sistema DEBE pasar la Inscripción de esa Persona a completada.
 - **FR-022**: El sistema NO DEBE activar "Apto para Ministerio" para una Persona como consecuencia de la finalización de un discipulado de Vida Nueva.
@@ -193,18 +202,19 @@ Un Discipulador que considera que ya recorrió con su discípulo todo el conteni
 - **FR-024**: Las pantallas del backoffice de un Discipulador (sus discipulados asignados, su gestión de disponibilidad) DEBEN exigir una sesión iniciada con el rol correspondiente — ninguna de las dos puede quedar accesible sin sesión, a diferencia de sus versiones actuales de placeholder.
 - **FR-025**: El sistema DEBE mostrarle al Admin, en la bandeja de Solicitudes del backoffice, un listado **genérico** de Solicitudes con las columnas de la forma base común a los cuatro tipos documentados (persona, estado, fecha, revisado_por, creado_por), con filtrado y orden — aunque hoy solo el tipo Discipulado esté conectado a datos reales. El listado DEBE admitir filtrar por tipo de Solicitud a nivel de estructura, pero el control de filtro NO DEBE mostrarse en la interfaz mientras exista un solo tipo conectado (un filtro de una sola opción no aporta nada).
 - **FR-025a**: La **resolución** de una Solicitud (qué sucede al aprobarla o rechazarla) DEBE quedar específica del tipo Discipulado en este spec — el sistema NO DEBE construir una abstracción genérica de "qué hacer al aprobar" a partir de un único tipo real conectado; esa generalización se hace cuando exista un segundo tipo con el que contrastar.
-- **FR-026**: El sistema DEBE mostrarle a la Persona el estado de su propia Solicitud de Discipulado (pendiente de revisión / aprobada / rechazada) (H-126).
+- **FR-026**: El sistema DEBE mostrarle a la Persona el estado de su propia Solicitud de Discipulado (pendiente de revisión / aprobada / rechazada) (H-126), también cuando la Solicitud la creó otra persona en su nombre (FR-002) — la vista es la misma para todas las Personas con acceso a la app; una Persona sin acceso (D97) no tiene vista propia.
 - **FR-027**: Una vez aprobada la Solicitud, el sistema DEBE mostrarle a la Persona que su discipulado está en curso y quién es el Discipulador que le fue asignado.
 - **FR-028**: Cuando se confirma la finalización de un discipulado, el sistema DEBE mostrarle a la Persona que ese proceso terminó.
 - **FR-029**: El sistema NO DEBE mostrarle a la Persona las notas que su Discipulador cargó en cada Encuentro — son un registro de seguimiento pastoral para el Discipulador y el Admin, no un informe para la persona discipulada. Mostrarle otro dato del avance (ej. los capítulos vistos) queda fuera de este spec, como una decisión aparte y explícita todavía no tomada.
+- **FR-030**: El sistema DEBE permitir que un Admin reasigne el Discipulador de un discipulado en curso, eligiendo al nuevo del listado de FR-006. Al reasignar: los Encuentros y Asistencias ya registrados quedan en el Grupo; queda registrado quién era el Discipulador anterior, quién el nuevo, quién hizo el cambio y cuándo; y el Discipulador anterior deja de tener acceso a ese discipulado y a los datos de contacto de la Persona (FR-011). La Persona ve a su nuevo Discipulador (FR-027).
 
 ### Key Entities *(include if feature involves data)*
 
 - **Solicitud de Discipulado**: el pedido de una Persona (o de un Admin/Discipulador en su nombre) para empezar Vida Nueva. Tiene un estado (pendiente / aprobada / rechazada), queda vinculada a la Persona interesada, y registra quién la creó cuando no fue la propia Persona (D97). Al aprobarse, da origen a un Grupo.
 - **Curso**: la plantilla de "Vida Nueva" que se instancia en cada Grupo. Define que su modalidad es de seguimiento por encuentros (material físico), no de liberación programada de contenido.
-- **Grupo**: la instancia concreta de un discipulado — nace al aprobarse una Solicitud. Tiene un estado, y puede tener una finalización propuesta y luego confirmada. Un Grupo admite una o más Inscripciones (D44, FR-014): en la variante individual de este spec, cada Grupo tiene exactamente una, pero el vínculo Grupo–Inscripción NO se modela como uno a uno — es lo que permite que la futura variante grupal (fuera de alcance acá) se sume como otro `Curso.tipo` sin una migración de datos.
+- **Grupo**: la instancia concreta de un discipulado — nace al aprobarse una Solicitud. Tiene un estado, y puede tener una finalización propuesta, que el Admin confirma o rechaza (FR-019a: al rechazarse vuelve a "en curso" y se puede volver a proponer). Un Grupo admite una o más Inscripciones (D44, FR-014): en la variante individual de este spec, cada Grupo tiene exactamente una, pero el vínculo Grupo–Inscripción NO se modela como uno a uno — es lo que permite que la futura variante grupal (fuera de alcance acá) se sume como otro `Curso.tipo` sin una migración de datos.
 - **Inscripción**: vincula a la Persona con su Grupo de discipulado. Tiene un estado (activa / completada, entre otros posibles) — pasa a completada cuando se confirma la finalización del Grupo.
-- **Liderazgo**: vincula al Discipulador con el Grupo que le fue asignado.
+- **Liderazgo**: vincula al Discipulador con el Grupo que le fue asignado. Una reasignación (FR-030) cierra el Liderazgo vigente y abre uno nuevo, sin borrar el anterior: así queda registrado quién lideró el Grupo y hasta cuándo.
 - **Encuentro**: el registro de una reunión entre el Discipulador y su discípulo — fecha, capítulos vistos, notas opcionales. Es el mecanismo central de seguimiento de avance en Vida Nueva.
 - **Asistencia**: registro de presente/ausente de una Persona en un Encuentro puntual — se registra siempre, también en la variante individual (FR-013), como presente por defecto (FR-013a). Es el insumo que permite dar de baja una Inscripción por exceso de faltas.
 - **Disponibilidad del Discipulador**: combina un toggle manual (si el Discipulador está dispuesto a tomar un discipulado nuevo) con períodos de no disponibilidad por rango de fechas — determina quién aparece en el listado que ve el Admin al asignar (FR-006).
@@ -227,4 +237,7 @@ Un Discipulador que considera que ya recorrió con su discípulo todo el conteni
 - El catálogo del Curso "Vida Nueva" (su plantilla, con su modalidad de seguimiento por encuentros) ya existe como dato de referencia del sistema — este spec no cubre una pantalla para crear o editar cursos, solo el ciclo de vida de Solicitudes/Grupos/Inscripciones que lo usan.
 - El libro físico "Vida Nueva" y su entrega en la primera reunión ocurren fuera de la app — el sistema no rastrea inventario ni entrega de material físico, solo el registro de que la reunión ocurrió.
 - La coordinación de horarios y el encuentro en sí ocurren fuera de la app (por teléfono, en persona); el sistema solo provee los datos de contacto necesarios para coordinarlo.
-- Este spec no resuelve la reasignación de un Discipulador ya asignado a un discipulado en curso — queda como caso sin resolver, no como parte del camino feliz. Qué pasa al quitarle el rol Discipulador a alguien con discipulados activos a su cargo lo resolvió el spec 005 (FR-009/SC-009): se bloquea. Este spec aporta la consulta de discipulados activos que esa guarda necesita (ver Edge Cases, H-127).
+- Los períodos de no disponibilidad de un mismo Discipulador pueden superponerse: no se rechazan ni se fusionan, y basta con que una fecha caiga dentro de uno para que no esté disponible. Rechazarlos obligaría a editar uno para cargar el otro, sin ganar nada.
+- Solo el Discipulador del Liderazgo vigente de un Grupo puede proponer su finalización, registrar Encuentros y ver los datos de contacto de la Persona. Después de una reasignación (FR-030) eso pasa al nuevo Discipulador.
+- La Persona no puede retirar su propia Solicitud pendiente desde la app: si cambia de idea, lo resuelve el Admin rechazándola (FR-008 le permite volver a pedirla después). Retirarla queda para cuando haya un caso real.
+- La reasignación de un Discipulador en un discipulado en curso la hace el Admin (FR-030); no hay traspaso pedido por el propio Discipulador. Qué pasa al quitarle el rol Discipulador a alguien con discipulados activos a su cargo lo resolvió el spec 005 (FR-009/SC-009): se bloquea. Este spec aporta la consulta de discipulados activos que esa guarda necesita (ver Edge Cases, H-127).
