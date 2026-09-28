@@ -35,6 +35,14 @@ export interface EditorDeFranjasProps {
   /** Prefijo de los `id`/`htmlFor`, para que dos editores en la misma página no choquen. */
   idBase?: string;
   disabled?: boolean;
+  /**
+   * Avisa cuando aparece o se va el error de rango (el texto, o `null`), para
+   * que la pantalla lo sume a su `ResumenErrores` (H-50). El campo con error
+   * es `${idBase}-hasta`.
+   */
+  onErrorChange?: (error: string | null) => void;
+  /** Mientras la pantalla guarda la franja nueva: "Agregar" en estado de carga (H-57). */
+  enviando?: boolean;
 }
 
 function aMinutos(hhmm: string): number | null {
@@ -51,11 +59,16 @@ export function minutosAHHMM(min: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja', disabled }: EditorDeFranjasProps) {
+export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja', disabled, onErrorChange, enviando }: EditorDeFranjasProps) {
   const [dia, setDia] = useState(2);
   const [desde, setDesde] = useState('19:00');
   const [hasta, setHasta] = useState('21:00');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setErrorLocal] = useState<string | null>(null);
+
+  function setError(nuevo: string | null) {
+    setErrorLocal(nuevo);
+    onErrorChange?.(nuevo);
+  }
 
   const idDia = `${idBase}-dia`;
   const idDesde = `${idBase}-desde`;
@@ -141,7 +154,7 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
             className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30"
           />
         </div>
-        <Button type="button" variant="outline" disabled={disabled} onClick={agregar} className="h-11">
+        <Button type="button" variant="outline" disabled={disabled} loading={enviando} onClick={agregar} className="h-11">
           {etiquetas.agregar}
         </Button>
       </div>
