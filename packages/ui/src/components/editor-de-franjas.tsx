@@ -103,6 +103,8 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
                 type="button"
                 variant="ghost"
                 size="sm"
+                // D81: objetivo táctil de 44 px también en "Quitar" (T012a).
+                className="h-11 min-w-11"
                 disabled={disabled}
                 onClick={() => onChange(value.filter((_, j) => j !== i))}
               >
