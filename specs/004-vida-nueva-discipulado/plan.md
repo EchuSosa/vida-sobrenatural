@@ -244,11 +244,11 @@ contacto del tutor, Grupos de varias Personas, parejas como dos Solicitudes.
 - Alinear la spec con D134; reutilizar `DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS`; capítulos como
   texto; crear en nombre de cualquier Persona (research #8).
 
+**Confirmada por Echu el 2026-09-28:** el tutor de un menor de 12 le avisa al equipo y el Admin (o
+un Discipulador) carga el pedido en nombre del menor (FR-002). No hay una función "pedir para mi
+hijo/a" en la app del tutor; si algún día hace falta, es una Historia nueva.
+
 **Pendientes de Echu** (no bloquean el lote 0):
-0. **Cómo pide el tutor de un menor de 12** (FR-044): ¿desde su propia app (una función nueva en
-   Mi camino, "pedir para mi hijo/a", apoyada en Relación Familiar D112) o avisándole al equipo, que
-   lo carga en nombre del menor (FR-002, ya en el plan)? El plan asume lo segundo hasta que Echu
-   diga; lo primero sería una Historia nueva.
 1. **El nombre `individual` del Curso** (D44) ya no significa "una Persona por Grupo" (FR-014,
    FR-045). ¿Se deja así, con la nota en la spec, o se revisa D44 y `docs/04` (por ejemplo,
    `individual` → `regular`)? Es una decisión sobre D44, no de este spec.

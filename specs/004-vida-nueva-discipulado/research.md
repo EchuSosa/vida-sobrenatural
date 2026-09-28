@@ -137,8 +137,8 @@ demasiado contenido para un panel lateral y el Admin vuelve a él varias veces p
   `EDAD_MINIMA_ROL_DE_CARGO`, H-128 — con `calcularEdad()`). `POST /discipulado/solicitudes/me`
   rechaza con 409 `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO`; `GET /discipulado/me` devuelve
   `{ estado: 'lo_pide_su_tutor' }` para que Mi camino no ofrezca el botón. El pedido de un menor de
-  12 entra por FR-002. **Pendiente de Echu:** si el tutor lo pide desde su propia app (nueva
-  funcionalidad, Relación Familiar) o avisándole al equipo (lo que FR-002 ya cubre). Sobre el
+  12 entra por FR-002. **Confirmado por Echu (2026-09-28):** el tutor le avisa al equipo y el pedido entra por FR-002;
+  no hay función para pedir desde la app del tutor. Sobre el
   contacto: La API expone, en el detalle del discipulado del Discipulador, un
   bloque `tutor: { nombre, telefono } | null`, resuelto en **un** lugar (`contactoDe(persona)` en
   la API): primero la Relación Familiar de tipo `tutor` (D112) si existe, si no los campos de texto
