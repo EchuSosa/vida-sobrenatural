@@ -10,3 +10,6 @@ export * from './api-client.js';
 export * from './api-field-error.js';
 export * from './pagina.js';
 export * from './formato.js';
+export * from './discipulado.js';
+export * from './disponibilidad.js';
+export * from './eventos-discipulado.js';

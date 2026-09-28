@@ -60,7 +60,15 @@ export type Permiso =
   | 'libros.gestionar'
   | 'palabra_profetica.editar'
   | 'pendientes_tutor.gestionar'
-  | 'sedes.gestionar';
+  | 'sedes.gestionar'
+  // specs/004-vida-nueva-discipulado (research #9): resolver Solicitudes,
+  // crear en nombre de otra Persona, gestionar Grupos, y las acciones del
+  // Discipulador sobre sus discipulados y su disponibilidad.
+  | 'solicitudes.aprobar'
+  | 'solicitudes.crear_en_nombre'
+  | 'grupos.gestionar'
+  | 'mis_discipulados.gestionar'
+  | 'mi_disponibilidad.gestionar';
 
 export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'inicio.ver': ['admin', 'pastor'],
@@ -89,6 +97,12 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'palabra_profetica.editar': ['admin', 'pastor'],
   'pendientes_tutor.gestionar': ['admin', 'discipulador'],
   'sedes.gestionar': ['admin'],
+  // specs/004-vida-nueva-discipulado.
+  'solicitudes.aprobar': ['admin'],
+  'solicitudes.crear_en_nombre': ['admin', 'discipulador'],
+  'grupos.gestionar': ['admin'],
+  'mis_discipulados.gestionar': ['discipulador'],
+  'mi_disponibilidad.gestionar': ['discipulador'],
 };
 
 /**
