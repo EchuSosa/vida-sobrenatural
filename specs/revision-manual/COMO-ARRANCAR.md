@@ -84,6 +84,14 @@ La suite de integración de la API necesita su propia base (`vidasobrenatural_te
 hay que crearla a mano (H-59): `pnpm --filter api run test:e2e` la crea y le corre las
 migraciones sola si no existe, antes de la primera corrida.
 
+## Trabajar en varios `git worktree` a la vez (lotes A–D de la 004)
+
+`scripts/lote-worktree.sh <a|b|c|d>` arma un worktree en `.worktrees/lote-<letra>/` con sus
+propias bases (`vidasobrenatural_<letra>`, `_test_<letra>`, `_e2e_<letra>`) y un
+`E2E_PUERTO_OFFSET` (10/20/30/40) en su `.env.e2e`, para que las cuatro sesiones corran
+integración y e2e sin pisarse en puertos ni en base. En el repo principal el offset es 0 y nada
+cambia.
+
 ## Si tocás `packages/shared-types`
 
 Desde H-33 ese paquete se compila a `dist/` y los tres `dev` lo construyen antes de arrancar

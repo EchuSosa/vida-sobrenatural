@@ -12,8 +12,13 @@ import { leerEnvE2e } from '../../scripts/e2e-base-datos.cjs';
  */
 const envE2e = leerEnvE2e();
 
-const PUERTO_APP = 3011;
-const PUERTO_API = 3334;
+// Offset de puertos por worktree (lotes A–D de la 004): con varios `git
+// worktree` corriendo e2e a la vez, cada uno suma su offset (10, 20, 30, 40)
+// desde su `.env.e2e` para no chocar en puertos. Con el default 0 nada cambia.
+const OFFSET_PUERTO = Number(envE2e.E2E_PUERTO_OFFSET) || 0;
+
+const PUERTO_APP = 3011 + OFFSET_PUERTO;
+const PUERTO_API = 3334 + OFFSET_PUERTO;
 
 // H-78: ingresar.spec.ts (y cualquier otro test que le pegue a la API
 // directo) lee esto de process.env — sin esto, seguiría apuntando por
