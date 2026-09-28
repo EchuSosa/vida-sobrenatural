@@ -150,11 +150,335 @@
     "cerrarPanel": "Cerrar el panel"
   },
   "solicitudes": {},
-  "grupos": {},
-  "misDiscipulados": {},
+  "grupos": {
+    "titulo": "Grupos",
+    "descripcion": "Los discipulados de Vida Nueva: quién acompaña a quién, cómo vienen y qué quedó pendiente.",
+    "filtros": {
+      "estado": "Estado",
+      "enCurso": "En curso",
+      "finalizados": "Terminados",
+      "pendiente": "Pendiente",
+      "todos": "Todos",
+      "finalizacion": "Pidieron terminar",
+      "baja": "Pidieron una baja",
+      "reasignacion": "Cambio de Discipulador propuesto"
+    },
+    "tabla": {
+      "etiqueta": "Discipulados",
+      "personas": "Personas",
+      "discipulador": "Discipulador",
+      "desde": "Desde",
+      "lugar": "Lugar",
+      "encuentros": "Encuentros",
+      "ultimoCapitulo": "Último capítulo",
+      "pendiente": "Pendiente",
+      "nadaPendiente": "Nada pendiente",
+      "sinEncuentros": "Sin encuentros",
+      "vacio": "Todavía no hay discipulados en curso.",
+      "vacioFinalizados": "Todavía no terminó ningún discipulado.",
+      "vacioFiltro": "No hay discipulados con eso pendiente.",
+      "acciones": "Acciones",
+      "ver": "Ver",
+      "verDe": "Ver el discipulado de {nombres}",
+      "paginado": "Paginado de discipulados",
+      "resultados": "{cantidad, plural, one {# discipulado} other {# discipulados}}"
+    },
+    "pendientes": {
+      "finalizacion": "Pidió terminarlo",
+      "baja": "{cantidad, plural, one {Baja pedida} other {# bajas pedidas}}",
+      "reasignacion": "Cambio propuesto a {nombre}"
+    },
+    "estado": {
+      "en_curso": "En curso",
+      "completado": "Terminado: completó",
+      "abandonado": "Terminado: se fueron todos"
+    },
+    "lugar": "{ocupado} de {maximo}",
+    "detalle": {
+      "titulo": "Discipulado de {nombres}",
+      "personas": "Personas",
+      "inscripcion": {
+        "activa": "Cursando",
+        "completada": "Completó Vida Nueva",
+        "abandono": "Dada de baja",
+        "dada_de_baja": "Dada de baja"
+      },
+      "discipulador": "Lo acompaña {nombre}",
+      "desde": "Desde el {fecha}",
+      "lugar": "{ocupado} de {maximo} lugares",
+      "horario": "Cuándo se pueden juntar",
+      "horarioAyuda": "Donde coinciden la agenda del Discipulador y los horarios de cada persona.",
+      "horarioVacio": "No hay un horario en común entre la agenda del Discipulador y los horarios de las personas.",
+      "encuentros": "Encuentros",
+      "encuentrosVacio": "Todavía no se registró ningún encuentro.",
+      "capitulos": "Capítulos: {capitulos}",
+      "faltaron": "Faltó: {nombres}",
+      "vinieronTodos": "Vinieron todos",
+      "notasPrivadas": "Las notas de cada encuentro son del Discipulador: no se muestran acá.",
+      "historial": "Historial de Discipuladores",
+      "periodo": "Del {desde} al {hasta}",
+      "vigente": "Desde el {desde} (actual)",
+      "acciones": "Qué falta decidir",
+      "nadaQueDecidir": "No hay nada pendiente para decidir en este discipulado."
+    },
+    "finalizacion": {
+      "propuesta": "{nombre} pidió darlo por terminado el {fecha}.",
+      "confirmar": "Confirmar que terminó",
+      "confirmando": "Confirmando…",
+      "confirmarTitulo": "¿Dar por terminado este discipulado?",
+      "confirmarTexto": "Las personas quedan con Vida Nueva completada y el Grupo se cierra. No se puede deshacer.",
+      "confirmarBoton": "Sí, dar por terminado",
+      "rechazar": "Rechazar el pedido",
+      "rechazarTitulo": "Rechazar el pedido de terminar",
+      "rechazarTexto": "El discipulado sigue en curso. Contale al Discipulador por qué, así sabe qué falta.",
+      "exitoConfirmada": "El discipulado quedó terminado.",
+      "exitoRechazada": "Rechazaste el pedido. El Discipulador va a ver tu motivo."
+    },
+    "baja": {
+      "propuesta": "El {fecha} pidieron su baja.",
+      "motivo": "Motivo: {motivo}",
+      "confirmar": "Confirmar la baja de {nombre}",
+      "confirmando": "Confirmando…",
+      "confirmarTitulo": "¿Dar de baja a {nombre} de este discipulado?",
+      "confirmarTexto": "{nombre} deja de cursar en este Grupo. Sigue siendo parte de la iglesia y puede volver a pedir Vida Nueva. Si era la última persona, el Grupo se cierra.",
+      "confirmarBoton": "Sí, dar de baja",
+      "rechazar": "Rechazar la baja de {nombre}",
+      "rechazarTitulo": "Rechazar la baja de {nombre}",
+      "rechazarTexto": "{nombre} sigue en el Grupo. Contale al Discipulador por qué.",
+      "exitoConfirmada": "{nombre} quedó dada de baja de este discipulado.",
+      "exitoRechazada": "Rechazaste la baja. El Discipulador va a ver tu motivo."
+    },
+    "reasignacion": {
+      "abrir": "Cambiar de Discipulador",
+      "titulo": "Cambiar de Discipulador",
+      "texto": "Elegí a quién proponerle este discipulado. Hasta que acepte, lo sigue acompañando {nombre}.",
+      "propuesta": "Le propusiste este discipulado a {nombre} el {fecha}. Hasta que acepte, lo sigue acompañando {actual}.",
+      "retirar": "Retirar la propuesta",
+      "retirando": "Retirando…",
+      "retirarTitulo": "¿Retirar la propuesta a {nombre}?",
+      "retirarTexto": "{actual} sigue acompañando este discipulado.",
+      "retirarBoton": "Sí, retirar",
+      "confirmarTitulo": "¿Proponerle este discipulado a {nombre}?",
+      "confirmarTexto": "Le va a llegar como propuesta. Cuando acepte, pasa a acompañarlo y ve los encuentros anteriores.",
+      "confirmarBoton": "Sí, proponer",
+      "proponiendo": "Proponiendo…",
+      "cargando": "Buscando Discipuladores disponibles…",
+      "errorCruce": "No pudimos cargar los Discipuladores disponibles. Cerrá el panel y probá de nuevo.",
+      "exito": "Propuesta enviada a {nombre}.",
+      "exitoRetirada": "Retiraste la propuesta."
+    },
+    "cruce": {
+      "sinDisponibles": "Hoy no hay ningún Discipulador disponible: nadie tiene la disponibilidad prendida con horarios cargados.",
+      "ningunoCoincide": "Hay Discipuladores disponibles, pero ninguno coincide con los horarios de todas las personas del Grupo. Igual podés elegir a alguno de los de abajo.",
+      "tituloNoCoinciden": "No coinciden con sus horarios o con las reglas",
+      "sugerido": "Sugerido",
+      "elegir": "Elegir",
+      "sumarAlGrupo": "Sumar a este Grupo",
+      "razones": {
+        "horario": "No coincide el horario",
+        "genero": "Otro género"
+      },
+      "lugarGrupo": "Grupo de {personas} ({ocupado} de {maximo})",
+      "coincideHorario": "coincide el horario",
+      "noCoincideHorario": "no coincide el horario"
+    },
+    "motivo": "Motivo (opcional)",
+    "motivoAyuda": "Lo ve el Discipulador. Hasta 500 caracteres.",
+    "confirmarRechazo": "Sí, rechazar",
+    "rechazando": "Rechazando…",
+    "volver": "Volver",
+    "noEncontrado": {
+      "titulo": "No encontramos este discipulado",
+      "volver": "Volver a Grupos"
+    },
+    "error": {
+      "titulo": "No pudimos cargar los Grupos",
+      "tituloDetalle": "No pudimos cargar este discipulado",
+      "texto": "Podés reintentar en unos segundos. Código de referencia:",
+      "reintentar": "Reintentar"
+    },
+    "errores": {
+      "PROPUESTA_NO_VIGENTE": "Esa propuesta ya no está vigente: ya se respondió o ya se retiró. Actualizamos la pantalla.",
+      "DISCIPULADO_NO_EN_CURSO": "Este discipulado ya terminó, así que no se puede cambiar.",
+      "FINALIZACION_NO_PROPUESTA": "Ya no hay un pedido de terminar: puede que otra persona del equipo lo haya resuelto. Actualizamos la pantalla.",
+      "BAJA_NO_PROPUESTA": "Ya no hay un pedido de baja: puede que otra persona del equipo lo haya resuelto. Actualizamos la pantalla.",
+      "REASIGNACION_AL_MISMO_DISCIPULADOR": "Esa persona ya es quien acompaña este discipulado: elegí a otra.",
+      "REASIGNACION_YA_PROPUESTA": "Ya hay un cambio de Discipulador propuesto. Retiralo antes de proponer otro.",
+      "DISCIPULADOR_NO_DISPONIBLE": "Ese Discipulador ya no está disponible. Actualizamos la lista: elegí a otra persona.",
+      "generico": "No pudimos completar la acción. Probá de nuevo en un momento."
+    },
+    "campos": {
+      "resumen": "Revisá estos campos:",
+      "MOTIVO_DEMASIADO_LARGO": "El motivo puede tener hasta 500 caracteres: acortalo un poco."
+    }
+  },
+  "misDiscipulados": {
+    "titulo": "Mis discipulados",
+    "descripcion": "Las propuestas que te hizo el equipo y las personas que acompañás.",
+    "sinAgenda": {
+      "titulo": "Todavía no cargaste tus horarios",
+      "texto": "Para que el equipo pueda proponerte a alguien, primero contanos qué días y en qué horarios podés juntarte.",
+      "accion": "Cargar mis horarios"
+    },
+    "propuestas": {
+      "titulo": "Propuestas para vos",
+      "descripcion": "El equipo te propone acompañar a estas personas. Si aceptás, vas a ver sus datos de contacto para escribirles y coordinar el primer encuentro.",
+      "edad": "{edad} años",
+      "franjasEnComun": "Horarios en común con tu agenda",
+      "sinFranjasEnComun": "No tienen horarios en común con tu agenda.",
+      "cumpleTodo": "Coincide en horario y género",
+      "noCumple": "No coincide: {reglas}",
+      "reglas": {
+        "horario": "horario",
+        "genero": "género"
+      },
+      "sumarAlGrupo": "Se suma a tu Grupo con {personas}",
+      "reasignacion": "Tomar el discipulado de {personas}",
+      "reasignacionAclaracion": "Hasta ahora lo acompañaba otra persona. Si aceptás, vas a ver lo que se registró.",
+      "propuestaEn": "Te la propusieron el {fecha}",
+      "aceptar": "Aceptar a {nombre}",
+      "aceptando": "Aceptando…",
+      "declinar": "Declinar",
+      "declinando": "Declinando…",
+      "confirmarAceptarTitulo": "¿Aceptás acompañar a {nombre}?",
+      "confirmarAceptarTexto": "Vas a ver su teléfono y su dirección para escribirle y coordinar el primer encuentro.",
+      "confirmarAceptar": "Sí, acepto",
+      "declinarTitulo": "Declinar la propuesta de {nombre}",
+      "declinarTexto": "El equipo va a buscar a otra persona. Si querés, contales por qué: solo lo ve el Admin.",
+      "motivo": "Motivo (opcional)",
+      "motivoAyuda": "Hasta 500 caracteres.",
+      "confirmarDeclinar": "Sí, declinar",
+      "volver": "Volver",
+      "exitoAceptada": "Aceptaste. Ya podés ver los datos de contacto de {nombre}.",
+      "exitoDeclinada": "Declinaste la propuesta. El equipo ya lo sabe."
+    },
+    "discipulados": {
+      "titulo": "Tus discipulados",
+      "vacio": "Todavía no acompañás a nadie. Cuando aceptes una propuesta, va a aparecer acá.",
+      "enCurso": "En curso",
+      "finalizado": "Terminado",
+      "desde": "Desde el {fecha}",
+      "lugar": "{ocupado} de {maximo} lugares",
+      "ver": "Ver el discipulado de {nombres}",
+      "finalizacionPropuesta": "Pediste darlo por terminado: falta que el Admin lo confirme.",
+      "llamar": "Llamar a {nombre}: {telefono}"
+    },
+    "detalle": {
+      "titulo": "Discipulado de {nombres}",
+      "personas": "Personas",
+      "edad": "{edad} años",
+      "telefono": "Teléfono",
+      "llamar": "Llamar a {nombre}: {telefono}",
+      "direccion": "Dirección",
+      "tutor": "Tutor o tutora",
+      "tutorAclaracion": "Es menor de edad: coordiná también con su tutor o tutora.",
+      "llamarTutor": "Llamar a {nombre}: {telefono}",
+      "lugar": "{ocupado} de {maximo} lugares en el Grupo",
+      "enCurso": "En curso desde el {fecha}",
+      "finalizado": "Este discipulado terminó. Podés ver lo registrado, pero ya no se puede cambiar.",
+      "encuentros": {
+        "titulo": "Encuentros",
+        "vacio": "Todavía no registraste ningún encuentro. Después de cada uno, anotá qué capítulos vieron.",
+        "registrar": "Registrar encuentro",
+        "editar": "Editar",
+        "editarDe": "Editar el encuentro del {fecha}",
+        "capitulos": "Capítulos: {capitulos}",
+        "notas": "Notas",
+        "sinNotas": "Sin notas.",
+        "faltaron": "Faltó: {nombres}",
+        "vinieronTodos": "Vinieron todos",
+        "editado": "Editado el {fecha}"
+      },
+      "formulario": {
+        "tituloNuevo": "Registrar encuentro",
+        "tituloEditar": "Editar el encuentro",
+        "descripcion": "Anotá cuándo se juntaron y qué vieron. Las notas solo las ves vos, y quien te reemplace si hubiera un cambio.",
+        "fecha": "Fecha",
+        "capitulos": "Capítulos",
+        "capitulosAyuda": "Por ejemplo: 1 y 2, o 3 a 5.",
+        "notas": "Notas (opcional)",
+        "notasAyuda": "Cómo está, qué conversaron, qué sigue. Hasta 2000 caracteres.",
+        "asistencia": "Asistencia",
+        "asistenciaAyuda": "Todos cuentan como presentes. Marcá solo a quien faltó.",
+        "falto": "Faltó {nombre}",
+        "guardar": "Guardar encuentro",
+        "guardarCambios": "Guardar cambios",
+        "guardando": "Guardando…",
+        "exitoNuevo": "Encuentro registrado.",
+        "exitoEditado": "Cambios guardados."
+      },
+      "finalizacion": {
+        "titulo": "Terminar el discipulado",
+        "texto": "Cuando hayan visto todo el material, pedile al Admin que lo dé por terminado.",
+        "proponer": "Pedir darlo por terminado",
+        "proponiendo": "Enviando…",
+        "confirmarTitulo": "¿Pedir que se dé por terminado?",
+        "confirmarTexto": "El Admin lo revisa y lo confirma. Mientras tanto podés seguir registrando encuentros.",
+        "confirmar": "Sí, pedirlo",
+        "enviada": "Pediste darlo por terminado el {fecha}. Falta que el Admin lo confirme.",
+        "rechazada": "El {fecha} el Admin no lo dio por terminado.",
+        "rechazadaMotivo": "Motivo: {motivo}",
+        "exito": "Listo: el Admin ya tiene tu pedido."
+      },
+      "baja": {
+        "proponer": "Pedir la baja de {nombre}",
+        "titulo": "Pedir la baja de {nombre}",
+        "texto": "Si {nombre} dejó de venir o decidió no seguir, pedile al Admin que le dé la baja de este discipulado. Sigue siendo parte de la iglesia y puede volver a empezar cuando quiera.",
+        "motivo": "Motivo (opcional)",
+        "motivoAyuda": "Solo lo ve el Admin. Hasta 500 caracteres.",
+        "confirmar": "Sí, pedir la baja",
+        "enviando": "Enviando…",
+        "propuesta": "Pediste su baja el {fecha}. Falta que el Admin la confirme.",
+        "rechazada": "El {fecha} el Admin rechazó la baja.",
+        "rechazadaMotivo": "Motivo: {motivo}",
+        "exito": "Listo: el Admin ya tiene el pedido de baja de {nombre}."
+      },
+      "volver": "Volver"
+    },
+    "noEncontrado": {
+      "titulo": "No encontramos este discipulado",
+      "texto": "Puede que ya no lo acompañes vos, o que el enlace esté mal.",
+      "volver": "Volver a Mis discipulados"
+    },
+    "error": {
+      "titulo": "No pudimos cargar tus discipulados",
+      "tituloDetalle": "No pudimos cargar este discipulado",
+      "texto": "Podés reintentar en unos segundos. Código de referencia:",
+      "reintentar": "Reintentar"
+    },
+    "errores": {
+      "PROPUESTA_NO_VIGENTE": "Esta propuesta ya no está vigente: el Admin la retiró o ya se respondió. Actualizamos la lista.",
+      "GRUPO_SIN_LUGAR": "Tu Grupo ya no tiene lugar para sumar a esta persona. Avisale al Admin para que lo reorganice.",
+      "VIDA_NUEVA_EN_CURSO_O_COMPLETADA": "Esta persona ya está cursando o terminó Vida Nueva.",
+      "DISCIPULADO_NO_EN_CURSO": "Este discipulado ya terminó, así que no se puede cambiar.",
+      "FINALIZACION_YA_PROPUESTA": "Ya pediste darlo por terminado: falta que el Admin lo confirme.",
+      "BAJA_YA_PROPUESTA": "Ya pediste la baja de esta persona: falta que el Admin la confirme.",
+      "NO_ENCONTRADO": "No encontramos lo que buscabas: puede que ya no esté a tu cargo.",
+      "SIN_PERMISO": "Ya no tenés el rol de Discipulador. Si creés que es un error, hablá con el Admin.",
+      "generico": "No pudimos completar la acción. Probá de nuevo en un momento."
+    },
+    "campos": {
+      "resumen": "Revisá estos campos:",
+      "FECHA_FUTURA": "La fecha no puede ser posterior a hoy: elegí el día en que se juntaron.",
+      "FECHA_REQUERIDA": "Elegí la fecha del encuentro.",
+      "CAPITULOS_REQUERIDO": "Escribí qué capítulos vieron, por ejemplo \"1 y 2\" (hasta 200 caracteres).",
+      "NOTAS_DEMASIADO_LARGAS": "Las notas pueden tener hasta 2000 caracteres: acortalas un poco.",
+      "INSCRIPCION_DE_OTRO_GRUPO": "La lista de personas cambió: recargá la página y volvé a marcar la asistencia.",
+      "MOTIVO_DEMASIADO_LARGO": "El motivo puede tener hasta 500 caracteres: acortalo un poco."
+    }
+  },
   "miDisponibilidad": {},
   "inicio": {
-    "pendientes": {}
+    "pendientes": {
+      "titulo": "Pendientes",
+      "descripcion": "Lo que está esperando que alguien del equipo lo mire.",
+      "propuestasDeclinadas": "{cantidad, plural, one {# propuesta declinada: hay que proponer a otra persona} other {# propuestas declinadas: hay que proponer a otras personas}}",
+      "propuestasSinRespuesta": "{cantidad, plural, one {# propuesta sin respuesta hace más de {dias} días} other {# propuestas sin respuesta hace más de {dias} días}}",
+      "finalizacionesPropuestas": "{cantidad, plural, one {# discipulado para dar por terminado} other {# discipulados para dar por terminado}}",
+      "bajasPropuestas": "{cantidad, plural, one {# baja pedida para confirmar} other {# bajas pedidas para confirmar}}",
+      "vacio": "No tenés nada pendiente.",
+      "error": "No pudimos cargar los pendientes. Probá recargar la página en unos segundos."
+    }
   },
   "franjas": {
     "dias": [
