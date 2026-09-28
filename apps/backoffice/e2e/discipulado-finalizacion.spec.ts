@@ -1,5 +1,5 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E } from './helpers';
-import { crearGrupo, crearPersona, estadoDeGrupo } from './discipulado-datos';
+import { crearGrupo, crearPersona, estadoDeGrupo, sinSesion } from './discipulado-datos';
 
 /**
  * specs/004, T053 (FR-019 a FR-021, FR-030; Historia 3, escenario 11):
@@ -16,11 +16,15 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const persona = await crearPersona(`e2e-b-fin-${sufijo}@example.com`, { nombre: 'Paula', apellido: `Fin ${sufijo}` });
       const { grupoId } = await crearGrupo([persona]);
 
+      await sinSesion(page);
+
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto(`/mis-discipulados/${grupoId}`);
       await page.getByRole('button', { name: 'Pedir darlo por terminado' }).click();
       await page.getByRole('button', { name: 'Sí, pedirlo' }).click();
       await expect(page.getByText(/Pediste darlo por terminado el .*Falta que el Admin lo confirme/)).toBeVisible();
+
+      await sinSesion(page);
 
       await loguearseComoAdminE2E(page);
       await page.goto('/grupos?pendiente=finalizacion');
@@ -35,12 +39,16 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await panel.getByRole('button', { name: 'Sí, rechazar' }).click();
       await expect(page.getByText('Rechazaste el pedido. El Discipulador va a ver tu motivo.')).toBeVisible();
 
+      await sinSesion(page);
+
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto(`/mis-discipulados/${grupoId}`);
       await expect(page.locator('#contenido').getByText('Motivo: Faltan los dos últimos capítulos', { exact: false })).toBeVisible();
       await page.getByRole('button', { name: 'Pedir darlo por terminado' }).click();
       await page.getByRole('button', { name: 'Sí, pedirlo' }).click();
       await expect(page.getByText(/Falta que el Admin lo confirme/)).toBeVisible();
+
+      await sinSesion(page);
 
       await loguearseComoAdminE2E(page);
       await page.goto(`/grupos/${grupoId}`);
@@ -60,6 +68,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const persona = await crearPersona(`e2e-b-reasig-${sufijo}@example.com`, { nombre: 'Julián', apellido: `Reasigna ${sufijo}`, genero: 'masculino' });
       const { grupoId } = await crearGrupo([persona]);
 
+      await sinSesion(page);
+
       await loguearseComoAdminE2E(page);
       await page.goto(`/grupos/${grupoId}`);
       await page.getByRole('button', { name: 'Cambiar de Discipulador' }).click();
@@ -75,9 +85,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText(/Le propusiste este discipulado a .*Hasta que acepte/)).toBeVisible();
 
       // El 1 lo sigue viendo hasta que el 2 acepte.
+      await sinSesion(page);
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto(`/mis-discipulados/${grupoId}`);
       await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Julián Reasigna ${sufijo}`) })).toBeVisible();
+
+      await sinSesion(page);
 
       await loguearseComoDiscipuladorE2E(page, 2);
       await page.goto('/mis-discipulados');
@@ -86,6 +99,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await propuesta.getByRole('button', { name: 'Aceptar a Julián' }).click();
       await page.getByRole('button', { name: 'Sí, acepto' }).click();
       await expect(page.getByText(/Aceptaste/)).toBeVisible();
+
+      await sinSesion(page);
 
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto(`/mis-discipulados/${grupoId}`);

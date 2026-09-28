@@ -1,5 +1,5 @@
 import { test, expect, auditar, loguearseComoDiscipuladorE2E } from './helpers';
-import { crearPersona, crearPropuesta, estadoDeSolicitud, sinScrollHorizontal } from './discipulado-datos';
+import { crearPersona, crearPropuesta, estadoDeSolicitud, sinScrollHorizontal, sinSesion } from './discipulado-datos';
 
 /**
  * specs/004, T037f (FR-037, FR-046, FR-047): el Discipulador responde sus
@@ -18,6 +18,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
         telefono: '+54 9 221 777 1234',
       });
       const { solicitudId } = await crearPropuesta(personaId);
+
+      await sinSesion(page);
 
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto('/mis-discipulados');
@@ -50,6 +52,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       });
       await crearPropuesta(personaId);
 
+      await sinSesion(page);
+
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto('/mis-discipulados');
       const tarjeta = page.getByRole('article', { name: new RegExp(`Martina Acepta ${sufijo}`) });
@@ -69,6 +73,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
 
     test('sin agenda ve el aviso de FR-047 con el enlace a Mi disponibilidad', async ({ page }) => {
+      await sinSesion(page);
       await loguearseComoDiscipuladorE2E(page, 'sin-agenda');
       await page.goto('/mis-discipulados');
       await expect(page.getByRole('heading', { name: 'Todavía no cargaste tus horarios' })).toBeVisible();

@@ -1,5 +1,5 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E, loguearseComoPastorE2E } from './helpers';
-import { crearEncuentro, crearGrupo, crearPersona, sinScrollHorizontal } from './discipulado-datos';
+import { crearEncuentro, crearGrupo, crearPersona, sinScrollHorizontal, sinSesion } from './discipulado-datos';
 
 /**
  * specs/004, T048 (FR-009, FR-011, FR-013a, FR-029, FR-041, D134): el
@@ -15,6 +15,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const sufijo = `${colorScheme}-${Date.now()}`;
       const persona = await crearPersona(`e2e-b-enc-${sufijo}@example.com`, { nombre: 'Lucía', apellido: `Encuentro ${sufijo}` });
       const { grupoId } = await crearGrupo([persona]);
+
+      await sinSesion(page);
 
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto(`/mis-discipulados/${grupoId}`);
@@ -62,6 +64,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const { grupoId } = await crearGrupo([persona], 'e2e-discipulador-2@example.com');
       await crearEncuentro(grupoId, { fecha: '2026-09-02', capitulos: '4 y 5', notas: `Secreto ${sufijo}` });
 
+      await sinSesion(page);
+
       await loguearseComoAdminE2E(page);
       await page.goto(`/grupos/${grupoId}`);
       await expect(page.locator('#contenido').getByText('Capítulos: 4 y 5')).toBeVisible();
@@ -72,6 +76,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto('/grupos');
       await expect(page.getByRole('row', { name: new RegExp(`Tomás Admin ${sufijo}`) })).toBeVisible();
       expect((await auditar(page)).violations).toEqual([]);
+
+      await sinSesion(page);
 
       await loguearseComoPastorE2E(page);
       await page.goto(`/grupos/${grupoId}`);
@@ -86,6 +92,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const sufijo = `${colorScheme}-${Date.now()}`;
       const persona = await crearPersona(`e2e-b-enc-ajeno-${sufijo}@example.com`, { nombre: 'Ana', apellido: `Ajena ${sufijo}` });
       const { grupoId } = await crearGrupo([persona]);
+
+      await sinSesion(page);
 
       await loguearseComoDiscipuladorE2E(page, 2);
       await page.goto(`/mis-discipulados/${grupoId}`);

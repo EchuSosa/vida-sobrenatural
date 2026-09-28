@@ -1,5 +1,5 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E } from './helpers';
-import { crearGrupo, crearPersona, estadoDeGrupo, estadoDeInscripcion, EMAIL_DISCIPULADOR_1, fijarMaximoPorGrupo } from './discipulado-datos';
+import { crearGrupo, crearPersona, estadoDeGrupo, estadoDeInscripcion, EMAIL_DISCIPULADOR_1, fijarMaximoPorGrupo, sinSesion } from './discipulado-datos';
 
 /**
  * specs/004, T054d (FR-042) y T054g (FR-048): en un Grupo de dos, el
@@ -18,6 +18,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const seVa = await crearPersona(`e2e-b-baja-sale-${sufijo}@example.com`, { nombre: 'Valeria', apellido: `Sale ${sufijo}` });
       const { grupoId, inscripciones } = await crearGrupo([sigue, seVa]);
 
+      await sinSesion(page);
+
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto(`/mis-discipulados/${grupoId}`);
       await expect(page.locator('#contenido').getByText('2 de 2 lugares en el Grupo')).toBeVisible();
@@ -30,6 +32,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await panel.getByRole('button', { name: 'Sí, pedir la baja' }).click();
       await expect(page.getByText(/Listo: el Admin ya tiene el pedido de baja de Valeria/)).toBeVisible();
       await expect(page.getByText(/Pediste su baja el .*Falta que el Admin la confirme/)).toBeVisible();
+
+      await sinSesion(page);
 
       await loguearseComoAdminE2E(page);
       await page.goto('/');

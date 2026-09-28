@@ -153,3 +153,11 @@ export async function crearEncuentro(grupoId: string, datos: { fecha: string; ca
     return rows[0].id;
   });
 }
+
+/**
+ * Cambiar de Persona a mitad de un test: sin borrar las cookies, el
+ * test-login a veces deja la sesión anterior (se vio en la suite completa).
+ */
+export async function sinSesion(page: import('@playwright/test').Page): Promise<void> {
+  await page.context().clearCookies();
+}
