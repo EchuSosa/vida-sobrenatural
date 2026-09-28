@@ -99,4 +99,10 @@ describe('verificarBaseDeTest (H-130, la de verificarBaseE2e para la integració
   it('acepta la base de test', () => {
     expect(verificarBaseDeTest('postgresql://u:p@localhost:5432/vidasobrenatural_test?schema=public')).toBe('vidasobrenatural_test');
   });
+
+  it('acepta la base de test con sufijo de worktree (_a.._d), pero no otro sufijo', () => {
+    expect(verificarBaseDeTest('postgresql://u:p@localhost:5432/vidasobrenatural_test_a?schema=public')).toBe('vidasobrenatural_test_a');
+    expect(verificarBaseDeTest('postgresql://u:p@localhost:5432/vidasobrenatural_test_d?schema=public')).toBe('vidasobrenatural_test_d');
+    expect(() => verificarBaseDeTest('postgresql://u:p@localhost:5432/vidasobrenatural_test_z')).toThrow(/no a "vidasobrenatural_test"/);
+  });
 });
