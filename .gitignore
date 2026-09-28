@@ -41,3 +41,11 @@ apps/api/.windsurf/
 apps/api/.agents/
 apps/api/.devin/
 apps/api/skills-lock.json
+
+# Encargos que deja el chat de claude.ai para /brief (no se versionan)
+BRIEF*.md
+BRIEF-ESTADO.md
+
+# Worktrees de los lotes A–D de la 004 (scripts/lote-worktree.sh) — cada uno es
+# un checkout aparte con sus propias bases y puertos; no se versionan.
+.worktrees/
