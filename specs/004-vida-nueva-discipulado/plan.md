@@ -248,15 +248,13 @@ contacto del tutor, Grupos de varias Personas, parejas como dos Solicitudes.
 un Discipulador) carga el pedido en nombre del menor (FR-002). No hay una función "pedir para mi
 hijo/a" en la app del tutor; si algún día hace falta, es una Historia nueva.
 
-**Pendientes de Echu** (no bloquean el lote 0):
-1. **El nombre `individual` del Curso** (D44) ya no significa "una Persona por Grupo" (FR-014,
-   FR-045). ¿Se deja así, con la nota en la spec, o se revisa D44 y `docs/04` (por ejemplo,
-   `individual` → `regular`)? Es una decisión sobre D44, no de este spec.
-2. **`DIAS_PROPUESTA_SIN_RESPUESTA = 3`** para señalar una propuesta en pendientes del Admin. ¿Tres
-   días está bien, o preferís otro número?
-3. **El editor de franjas**: ¿un selector de día + dos campos de hora, o una grilla semanal para
-   marcar bloques? El plan asume lo primero (más simple en celular y accesible con teclado). Se
-   decide al construir el lote 0, sin cambiar la spec.
+**Resueltas por Echu el 2026-09-28** (eran las tres pendientes de la corrida anterior):
+1. **El nombre `individual` del Curso** (D44) se **deja como está**, con la nota en la spec. No se
+   renombra ni se toca D44 ni `docs/04`.
+2. **`DIAS_PROPUESTA_SIN_RESPUESTA = 3`**: confirmado.
+3. **El editor de franjas** es un **selector de día de la semana + hora de inicio + hora de fin**,
+   con la lista de franjas cargadas y "borrar" por franja. Sin grilla. Andá con teclado y en
+   celular (ya era lo que asumía el plan, T012a).
 
 ## Complexity Tracking
 

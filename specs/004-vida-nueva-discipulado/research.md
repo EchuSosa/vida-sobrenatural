@@ -72,7 +72,7 @@ se cita. Cada entrada dice qué se eligió, por qué y qué se descartó. **Actu
   `asistencias: [{ inscripcionId, presente }]`, y lo que falte se toma como presente. La pantalla
   muestra una casilla "Faltó" sin marcar por Persona. `@@unique([encuentroId, inscripcionId])`.
 
-## 7. Disponibilidad: agenda, toggle prendido, bloqueos borrables y "hoy" — reemplaza al #7 anterior
+## 7. Disponibilidad: agenda, toggle apagado de arranque, bloqueos borrables y "hoy" — reemplaza al #7 anterior
 
 - **Decisión:** la puerta para aparecer en el cruce es la **agenda** (FR-006): `FranjaAgenda`
   (`personaId`, `diaSemana 0–6`, `inicio`/`fin` como minutos desde las 0:00, borrado lógico con
