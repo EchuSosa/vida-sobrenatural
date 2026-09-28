@@ -218,6 +218,7 @@
       "edad": "{edad} años",
       "pedidaEl": "Pedida el {fecha}.",
       "cargadaPor": "La cargó {nombre}.",
+      "revisadaPor": "La revisó {nombre}.",
       "franjasTitulo": "Sus horarios",
       "cruceTitulo": "Quién puede en sus horarios",
       "cruceAyuda": "Elegí a un Discipulador para proponerle este discipulado. Él o ella lo acepta o lo declina desde Mis discipulados.",

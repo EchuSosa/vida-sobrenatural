@@ -143,6 +143,7 @@ export function SolicitudDetalleCliente({
         <p className="text-muted-foreground">
           {td('edad', { edad: solicitud.personaEdad })} · {td('pedidaEl', { fecha: formatearFechaHora(solicitud.createdAt, locale) })}
           {solicitud.creadoPor && ` ${td('cargadaPor', { nombre: `${solicitud.creadoPor.nombre} ${solicitud.creadoPor.apellido}` })}`}
+          {solicitud.revisadoPor && ` ${td('revisadaPor', { nombre: `${solicitud.revisadoPor.nombre} ${solicitud.revisadoPor.apellido}` })}`}
         </p>
         <p className="font-medium">
           <EstadoSolicitudTexto solicitud={solicitud} />
