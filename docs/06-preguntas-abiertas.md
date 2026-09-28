@@ -4,6 +4,8 @@ Temas identificados pero no resueltos todavía — a definir en próximas sesion
 
 - ¿La verificación del Pago de un Evento **bloquea** la confirmación de la Inscripción (no se confirma hasta que el Admin verifique el comprobante), o son dos pasos **independientes** (la Inscripción puede estar confirmada mientras el pago sigue pendiente de verificación)? Ver Flujo 8, paso 7.
 
+- **Parejas o matrimonios que quieren hacer Vida Nueva juntos** (spec 004, decisión de Echu 2026-09-27): el sistema los trata como dos Solicitudes sin trato especial; si coinciden en horario, pueden terminar en el mismo Grupo (FR-045). Pregunta para el Admin: ¿alcanza con eso, o hace falta que el Admin pueda marcar que van juntos para que el cruce los proponga al mismo Discipulador? Se decide con un caso real, no antes.
+
 ## Contenido y demo (antes de presentar)
 
 - Falta el **texto real de "En qué creemos"** (declaración de fe/valores) — no se encontró en el material investigado hasta ahora. Hay que pedirlo directamente (a un pastor, o revisar "Nosotros" → "Sistema de Trabajo" del sitio anterior con más detalle). No se inventa (D98). Ver `12-contenido-bienvenida.md`.
