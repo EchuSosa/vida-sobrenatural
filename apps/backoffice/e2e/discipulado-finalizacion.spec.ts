@@ -61,7 +61,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(await estadoDeGrupo(grupoId)).toEqual({ estado: 'finalizado', motivoCierre: 'completado' });
     });
 
-    test('reasignar: el Admin propone al Discipulador 2; hasta que acepta, el 1 sigue; después ya no lo ve', async ({ page, permitirErrorDeConsola }) => {
+    test('reasignar: el Admin propone al Discipulador 2; hasta que acepta, el 1 sigue; después ya no lo ve', async ({ page, browser, permitirErrorDeConsola }) => {
       permitirErrorDeConsola(/404/);
       const sufijo = `${colorScheme}-${Date.now()}`;
       // Masculino, para que el Discipulador 2 (masculino, martes) coincida en las dos reglas.
@@ -90,15 +90,21 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto(`/mis-discipulados/${grupoId}`);
       await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Julián Reasigna ${sufijo}`) })).toBeVisible();
 
-      await sinSesion(page);
-
-      await loguearseComoDiscipuladorE2E(page, 2);
-      await page.goto('/mis-discipulados');
-      const propuesta = page.getByRole('article', { name: new RegExp(`Julián Reasigna ${sufijo}`) });
-      await expect(propuesta).toContainText('Tomar el discipulado de');
-      await propuesta.getByRole('button', { name: 'Aceptar a Julián' }).click();
-      await page.getByRole('button', { name: 'Sí, acepto' }).click();
-      await expect(page.getByText(/Aceptaste/)).toBeVisible();
+      // El Discipulador 2 en un contexto propio: en la suite completa, cambiar
+      // de Persona en la misma página llegó a mostrar la sesión anterior.
+      const contexto2 = await browser.newContext({ colorScheme });
+      const pagina2 = await contexto2.newPage();
+      try {
+        await loguearseComoDiscipuladorE2E(pagina2, 2);
+        await pagina2.goto('/mis-discipulados');
+        const propuesta = pagina2.locator('article[aria-labelledby^="propuesta-"]').filter({ hasText: `Julián Reasigna ${sufijo}` });
+        await expect(propuesta).toContainText('Tomar el discipulado de');
+        await propuesta.getByRole('button', { name: 'Aceptar a Julián' }).click();
+        await pagina2.getByRole('button', { name: 'Sí, acepto' }).click();
+        await expect(pagina2.getByText(/Aceptaste/)).toBeVisible();
+      } finally {
+        await contexto2.close();
+      }
 
       await sinSesion(page);
 
