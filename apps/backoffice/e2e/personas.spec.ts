@@ -7,6 +7,7 @@ import {
   auditar,
   verificarQueElFocoCiclaEnElPanel,
 } from './helpers';
+import { armarDiscipuladoYPropuesta } from './discipulado-en-la-base.cjs';
 
 /**
  * specs/005-roles-permisos-acceso, Historia 2 (T028/T029): ascender a una
@@ -26,12 +27,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       }
     });
 
-    test('el Admin otorga y quita un rol de cargo, y un rechazo se lee con su mensaje propio', async ({
-      page,
-      permitirErrorDeConsola,
-    }) => {
-      // El 409 del rechazo de Discipulador es el caso que se prueba acá, no una falla.
-      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 409/);
+    test('el Admin otorga y quita un rol de cargo, también Discipulador sin discipulados a cargo', async ({ page }) => {
       const sufijo = `${tema}-${Date.now()}`;
       const apellido = `Roles${sufijo}`;
       await crearPersonaActiva(`e2e-roles-${sufijo}@example.com`, apellido);
@@ -49,14 +45,14 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(panel.getByRole('button', { name: 'Quitar el rol de Líder de curso' })).toBeVisible();
       await expect(panel.getByText('Tiene este rol')).toHaveCount(1);
 
-      // FR-009/H-127 + T062: quitar Discipulador se rechaza siempre por ahora, así
-      // que la pantalla ya NO lo ofrece — dice por qué, con el mismo mensaje con
-      // el que la API rechazaría. (Antes este test apretaba "Quitar" y esperaba
-      // el rechazo: codificaba como esperado que se ofreciera algo que falla.)
+      // specs/004, T058 (D137, cierra H-127): sin discipulados ni propuestas,
+      // quitar Discipulador se ofrece y funciona. (Hasta la 004 la pantalla no
+      // lo ofrecía nunca: la guarda fallaba cerrada.) El caso con discipulados
+      // está abajo, en "T058".
       await panel.getByRole('button', { name: 'Otorgar el rol de Discipulador/a' }).click();
-      await expect(panel.getByRole('button', { name: 'Otorgar el rol de Discipulador/a' })).toHaveCount(0);
-      await expect(panel.getByRole('button', { name: 'Quitar el rol de Discipulador/a' })).toHaveCount(0);
-      await expect(panel.getByText('Todavía no se puede quitar el rol de Discipulador')).toBeVisible();
+      await panel.getByRole('button', { name: 'Quitar el rol de Discipulador/a' }).click();
+      await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, quitar el rol' }).click();
+      await expect(panel.getByRole('button', { name: 'Otorgar el rol de Discipulador/a' })).toBeVisible();
       expect((await auditar(page, ['region'])).violations).toEqual([]);
 
       await panel.getByRole('button', { name: 'Quitar el rol de Líder de curso' }).click();
@@ -64,20 +60,54 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(panel.getByRole('button', { name: 'Otorgar el rol de Líder de curso' })).toBeVisible();
 
       await panel.getByRole('button', { name: 'Cerrar', exact: true }).click();
-      await expect(page.getByRole('main').getByRole('cell', { name: 'Discipulador/a' })).toBeVisible();
 
-      // Historia 6 (T056): el historial muestra los tres cambios REALES, el más
-      // reciente primero, con quién los hizo. La quita rechazada de
-      // Discipulador no es un cambio: no deja fila.
+      // Historia 6 (T056): el historial muestra los cuatro cambios REALES, el
+      // más reciente primero, con quién los hizo.
       await page.getByRole('main').getByRole('button', { name: `Ver el historial de roles de E2E ${apellido}` }).click();
       const historial = page.getByRole('dialog');
       await expect(historial.getByRole('heading', { name: `Historial de roles de E2E ${apellido}` })).toBeVisible();
       const filas = historial.getByRole('listitem');
-      await expect(filas).toHaveCount(3);
+      await expect(filas).toHaveCount(4);
       await expect(filas.nth(0)).toContainText('Quitado: Líder de curso');
-      await expect(filas.nth(1)).toContainText('Otorgado: Discipulador/a');
-      await expect(filas.nth(2)).toContainText('Otorgado: Líder de curso');
-      for (let i = 0; i < 3; i++) await expect(filas.nth(i)).toContainText('Lo hizo');
+      await expect(filas.nth(1)).toContainText('Quitado: Discipulador/a');
+      await expect(filas.nth(2)).toContainText('Otorgado: Discipulador/a');
+      await expect(filas.nth(3)).toContainText('Otorgado: Líder de curso');
+      for (let i = 0; i < 4; i++) await expect(filas.nth(i)).toContainText('Lo hizo');
+      expect((await auditar(page, ['region'])).violations).toEqual([]);
+    });
+
+    // specs/004, T058 (FR-043, cierra H-127): con un discipulado activo y una
+    // propuesta pendiente, el panel no ofrece quitar Discipulador: nombra a
+    // cada uno, dice cómo destrabarlo y enlaza adonde se hace — el discipulado
+    // a su Grupo, la propuesta a su Solicitud. Las páginas de destino son de
+    // otros lotes: acá se verifica el href (brief del lote D).
+    test('con un discipulado y una propuesta, el panel los nombra y enlaza a cada uno (T058)', async ({ page }) => {
+      const sufijo = `${tema}-${Date.now()}`;
+      const apellido = `ConDiscipulado${sufijo}`;
+      const emails = {
+        discipuladora: `e2e-con-discipulado-${sufijo}@example.com`,
+        inscripta: `e2e-inscripta-${sufijo}@example.com`,
+        pide: `e2e-pide-${sufijo}@example.com`,
+      };
+      await crearPersonaActiva(emails.discipuladora, apellido);
+      await crearPersonaActiva(emails.inscripta, `Inscripta${sufijo}`);
+      await crearPersonaActiva(emails.pide, `Pide${sufijo}`);
+      const { grupoId, solicitudId } = await armarDiscipuladoYPropuesta(emails);
+
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/personas?q=${apellido}`);
+      await page.waitForLoadState('networkidle');
+      await page.getByRole('main').getByRole('button', { name: `Cambiar roles de E2E ${apellido}` }).click();
+      const panel = page.getByRole('dialog');
+
+      await expect(panel.getByRole('button', { name: 'Quitar el rol de Discipulador/a' })).toHaveCount(0);
+      await expect(panel.getByText('Todavía no se le puede quitar el rol de Discipulador, porque tiene a su cargo:')).toBeVisible();
+      await expect(panel.getByRole('link', { name: `El discipulado de E2E Inscripta${sufijo}` })).toHaveAttribute('href', `/grupos/${grupoId}`);
+      await expect(panel.getByRole('link', { name: `Una propuesta pendiente para E2E Pide${sufijo}` })).toHaveAttribute(
+        'href',
+        `/solicitudes/${solicitudId}`,
+      );
+      await expect(panel.getByText('Entrá a cada uno para reasignar el discipulado o retirar la propuesta.')).toBeVisible();
       expect((await auditar(page, ['region'])).violations).toEqual([]);
     });
   });
@@ -188,7 +218,8 @@ test.describe('historial de roles (T056)', () => {
 
 // T062 (D132): la pantalla no ofrece "Quitar" donde la API va a rechazar —
 // decide con `puedeQuitarRol` (la misma función), no con "¿lo tiene?". El caso
-// de Discipulador (3) lo cubre el test del Admin que otorga y quita, arriba.
+// de Discipulador (3) lo cubren, arriba, el test del Admin que otorga y quita
+// (sin discipulados, se ofrece) y el de T058 (con discipulados, se explica).
 test.describe('T062: el modal no ofrece quitar lo que no se puede quitar', () => {
   test('caso 1: al Admin sembrado nadie le puede quitar el rol de Admin (FR-002)', async ({ page }) => {
     await loguearseComoAdminE2E(page);

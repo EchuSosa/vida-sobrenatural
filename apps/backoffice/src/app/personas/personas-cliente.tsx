@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   type CambioDeRolListado,
+  type DiscipuladoActivo,
   type ErrorCode,
   type Pagina,
   type PersonaListado,
+  type PropuestaPendiente,
   type RolDeCargo,
   ROLES_DE_CARGO,
   apiFetch,
@@ -70,7 +72,11 @@ export function PersonasCliente({
   const router = useRouter();
   const pathname = usePathname();
   const searchParamsNav = useSearchParams();
-  const [personaParaRoles, setPersonaParaRoles] = useState<PersonaListado | null>(null);
+  // specs/004, T058: se guarda el id y la Persona se lee de la página actual —
+  // después de un `router.refresh()` el panel ve lo que la API dice AHORA
+  // (ej. un discipulado que se le asignó mientras el panel estaba abierto).
+  const [idParaRoles, setIdParaRoles] = useState<string | null>(null);
+  const personaParaRoles = pagina.items.find((p) => p.id === idParaRoles) ?? null;
   const [personaParaHistorial, setPersonaParaHistorial] = useState<PersonaListado | null>(null);
   // Cambiar la búsqueda o el orden vuelve a la página 1 (docs/15, "Listados paginados", punto 4).
   const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl({
@@ -170,7 +176,7 @@ export function PersonasCliente({
                     size="sm"
                     className="max-sm:h-11"
                     aria-label={t('cambiarRolesDe', { nombre: `${persona.nombre} ${persona.apellido}` })}
-                    onClick={() => setPersonaParaRoles(persona)}
+                    onClick={() => setIdParaRoles(persona.id)}
                   >
                     {t('cambiarRoles')}
                   </Button>
@@ -201,7 +207,7 @@ export function PersonasCliente({
           key={personaParaRoles?.id ?? 'cerrado'}
           persona={personaParaRoles}
           apiToken={apiToken}
-          onCerrar={() => setPersonaParaRoles(null)}
+          onCerrar={() => setIdParaRoles(null)}
           onCambio={() => router.refresh()}
         />
       )}
@@ -408,6 +414,10 @@ function RolesDialog({
       onCambio();
     } catch (e) {
       setError(e instanceof ApiError ? te(e.code as ErrorCode) : t('modal.errorGenerico'));
+      // specs/004, T058: si la lista decía que se podía y la API encontró un
+      // discipulado o una propuesta (se le asignó recién), se recarga el
+      // listado: el panel pasa a nombrarlos, con el enlace a cada uno.
+      if (e instanceof ApiError && e.code === 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS') onCambio();
     } finally {
       setRolEnCurso(null);
     }
@@ -456,10 +466,14 @@ function RolesDialog({
                       // D81) — el mismo mensaje con el que la API rechazaría.
                       // Debajo del estado y no en la columna de la acción: ahí
                       // aplastaba la descripción del rol.
-                      <p className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                        <span>{te(quitar.motivo)}</span>
-                      </p>
+                      quitar.motivo === 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS' ? (
+                        <BloqueoDiscipulador discipulados={quitar.discipulados} propuestas={quitar.propuestas} />
+                      ) : (
+                        <p className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                          <span>{te(quitar.motivo)}</span>
+                        </p>
+                      )
                     )}
                   </div>
                   {tiene && quitar && !quitar.puede ? null : tiene ? (
@@ -509,5 +523,51 @@ function RolesDialog({
         </SheetFooter>
       </SheetContent>
     </Sheet>
+  );
+}
+
+/**
+ * specs/004, T058 (FR-043, cierra H-127): por qué no se puede quitar
+ * `discipulador`, nombrando cada discipulado y cada propuesta, y CÓMO
+ * destrabarlo (H-107): cada uno enlaza adonde se resuelve — el discipulado a
+ * su Grupo (para reasignarlo), la propuesta a su Solicitud (o a su Grupo, si
+ * es una reasignación) para retirarla. Rutas de `config/nav.ts`.
+ */
+function BloqueoDiscipulador({
+  discipulados,
+  propuestas,
+}: {
+  discipulados: DiscipuladoActivo[];
+  propuestas: PropuestaPendiente[];
+}) {
+  const t = useTranslations('personas.modal.bloqueoDiscipulador');
+  const nombreDe = (persona: { nombre: string; apellido: string }) =>
+    `${persona.nombre} ${persona.apellido}`.trim() || t('personaSinNombre');
+  const hrefPropuesta = (p: PropuestaPendiente) =>
+    p.solicitudId ? `/solicitudes/${p.solicitudId}` : `/grupos/${p.grupoId}`;
+  return (
+    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+      <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <div className="flex flex-col gap-1">
+        <p>{t('intro')}</p>
+        <ul className="flex list-disc flex-col gap-1 pl-5">
+          {discipulados.map((d) => (
+            <li key={d.grupoId}>
+              <Link href={`/grupos/${d.grupoId}`} className="text-foreground underline underline-offset-4">
+                {t('discipulado', { nombre: nombreDe(d.persona) })}
+              </Link>
+            </li>
+          ))}
+          {propuestas.map((p) => (
+            <li key={p.propuestaId}>
+              <Link href={hrefPropuesta(p)} className="text-foreground underline underline-offset-4">
+                {t('propuesta', { nombre: nombreDe(p.persona) })}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <p>{t('comoDestrabar')}</p>
+      </div>
+    </div>
   );
 }

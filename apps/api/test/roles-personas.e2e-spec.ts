@@ -37,14 +37,32 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
   // Apellido único de esta corrida: cada búsqueda lo usa para no depender
   // de lo que haya en la base de test.
   const apellido = `Rolesinteg${sufijo}`;
-  const ids: Record<'admin' | 'sembrado' | 'adulta' | 'menor' | 'discipuladora', string> = {
+  // specs/004: las Personas de los discipulados, con otro apellido — los
+  // tests del listado cuentan exactamente las de `apellido`.
+  const apellidoDisc = `Discinteg${sufijo}`;
+  const ids: Record<
+    'admin' | 'sembrado' | 'adulta' | 'menor' | 'discipuladora' | 'proponida' | 'libre' | 'inscripta' | 'pide',
+    string
+  > = {
     admin: '',
     sembrado: '',
     adulta: '',
     menor: '',
+    // specs/004 (D137, cierra H-127): lidera un Grupo en curso.
     discipuladora: '',
+    // Solo tiene una Propuesta pendiente (FR-043).
+    proponida: '',
+    // Discipuladora sin nada a cargo: a ella sí se le puede quitar.
+    libre: '',
+    // Las Personas del discipulado y de la propuesta.
+    inscripta: '',
+    pide: '',
   };
   let tokenAdmin: string;
+  let cursoId: string;
+  let grupoId: string;
+  let solicitudPideId: string;
+  let propuestaId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -58,12 +76,12 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     });
     sedeId = sede.id;
 
-    const crear = async (clave: keyof typeof ids, nombre: string, fechaNacimiento: Date, rol: string[], adminSembrado = false) => {
+    const crear = async (clave: keyof typeof ids, nombre: string, fechaNacimiento: Date, rol: string[], adminSembrado = false, apellidoDe = apellido) => {
       const persona = await prisma.persona.create({
         data: {
           email: `integ-roles-${clave}-${sufijo}@example.com`,
           nombre,
-          apellido,
+          apellido: apellidoDe,
           genero: 'femenino',
           fechaNacimiento,
           telefono: '+5492211234567',
@@ -88,15 +106,58 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     // nacimiento, no el estado.
     await crear('menor', 'Dora', haceAnios(16), ['miembro_registrado']);
     await crear('discipuladora', 'Elsa', new Date('1988-01-01'), ['miembro_registrado', 'discipulador']);
+    await crear('proponida', 'Fany', new Date('1987-01-01'), ['miembro_registrado', 'discipulador'], false, apellidoDisc);
+    await crear('libre', 'Gina', new Date('1986-01-01'), ['miembro_registrado', 'discipulador'], false, apellidoDisc);
+    await crear('inscripta', 'Ana', new Date('1995-01-01'), ['miembro_registrado'], false, apellidoDisc);
+    await crear('pide', 'Juana', new Date('1996-01-01'), ['miembro_registrado'], false, apellidoDisc);
+
+    // specs/004 (D137): un discipulado activo = Liderazgo vigente en un Grupo
+    // en curso. Armado por Prisma: lo que se prueba acá es la guarda, no
+    // cómo se llega a tenerlo (eso es de los lotes A y B).
+    cursoId = (
+      await prisma.curso.upsert({
+        where: { categoria_tipo: { categoria: 'vida_nueva', tipo: 'individual' } },
+        update: {},
+        create: { nombre: 'Vida Nueva', categoria: 'vida_nueva', tipo: 'individual', modalidad: 'seguimiento_por_encuentros' },
+      })
+    ).id;
+    grupoId = await grupoLideradoPor(ids.discipuladora, ids.inscripta);
+    // FR-043: una Propuesta pendiente también traba la quita.
+    solicitudPideId = (await prisma.solicitudDiscipulado.create({ data: { personaId: ids.pide, estado: 'propuesta' } })).id;
+    propuestaId = (
+      await prisma.propuestaDiscipulado.create({
+        data: { tipo: 'nueva', solicitudId: solicitudPideId, discipuladorId: ids.proponida, propuestaPorId: ids.admin },
+      })
+    ).id;
 
     tokenAdmin = await token(ids.admin, ['miembro_registrado', 'admin']);
   });
 
+  /** Un Grupo en curso con `inscriptaId` adentro y `discipuladorId` liderándolo. */
+  async function grupoLideradoPor(discipuladorId: string, inscriptaId: string): Promise<string> {
+    const grupo = await prisma.grupo.create({ data: { cursoId, sedeId } });
+    const solicitud = await prisma.solicitudDiscipulado.create({
+      data: { personaId: inscriptaId, estado: 'aprobada', grupoId: grupo.id },
+    });
+    await prisma.inscripcion.create({ data: { personaId: inscriptaId, grupoId: grupo.id, solicitudId: solicitud.id } });
+    await prisma.liderazgo.create({ data: { personaId: discipuladorId, grupoId: grupo.id } });
+    return grupo.id;
+  }
+
   afterAll(async () => {
+    // specs/004: lo del discipulado de esta corrida, antes que las Personas.
+    const deLaCorrida = { apellido: { in: [apellido, apellidoDisc] } };
+    const personasDeLaCorrida = (await prisma.persona.findMany({ where: deLaCorrida, select: { id: true } })).map((p) => p.id);
+    const grupos = (await prisma.liderazgo.findMany({ where: { personaId: { in: personasDeLaCorrida } }, select: { grupoId: true } })).map((l) => l.grupoId);
+    await prisma.propuestaDiscipulado.deleteMany({ where: { discipuladorId: { in: personasDeLaCorrida } } });
+    await prisma.liderazgo.deleteMany({ where: { grupoId: { in: grupos } } });
+    await prisma.inscripcion.deleteMany({ where: { grupoId: { in: grupos } } });
+    await prisma.solicitudDiscipulado.deleteMany({ where: { personaId: { in: personasDeLaCorrida } } });
+    await prisma.grupo.deleteMany({ where: { id: { in: grupos } } });
     // Historia 6: la FK de cambios_de_rol es RESTRICT — primero el historial
     // de las Personas de esta corrida (base de test, verificada por H-130).
-    await prisma.cambioDeRol.deleteMany({ where: { persona: { apellido } } });
-    await prisma.persona.deleteMany({ where: { apellido } });
+    await prisma.cambioDeRol.deleteMany({ where: { persona: deLaCorrida } });
+    await prisma.persona.deleteMany({ where: deLaCorrida });
     await prisma.sede.delete({ where: { id: sedeId } });
     await app.close();
   });
@@ -165,13 +226,88 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
       expect((await prisma.persona.findUniqueOrThrow({ where: { id: ids.admin } })).rol).toContain('admin');
     });
 
-    it('discipulador, siempre por ahora (FR-009/H-127, fallo cerrado)', async () => {
+    // specs/004, D137/FR-043 — cierra H-127: ya no falla cerrado.
+    it('discipulador con un discipulado activo (FR-009): 409 que nombra el Grupo, sin cambiar nada', async () => {
       const respuesta = await servidor()
         .delete(`/personas/${ids.discipuladora}/roles/discipulador`)
         .set('Authorization', `Bearer ${tokenAdmin}`);
       expect(respuesta.status).toBe(409);
-      expect(respuesta.body.code).toBe('DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS');
+      expect(respuesta.body.code).toBe('DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS');
+      expect(respuesta.body.discipulados).toEqual([{ grupoId, persona: { nombre: 'Ana', apellido: apellidoDisc } }]);
+      expect(respuesta.body.propuestas).toEqual([]);
       expect((await prisma.persona.findUniqueOrThrow({ where: { id: ids.discipuladora } })).rol).toContain('discipulador');
+      expect(await prisma.cambioDeRol.count({ where: { personaId: ids.discipuladora } })).toBe(0);
+    });
+
+    it('discipulador con solo una propuesta pendiente (FR-043): 409 que nombra la propuesta y su Solicitud', async () => {
+      const respuesta = await servidor()
+        .delete(`/personas/${ids.proponida}/roles/discipulador`)
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(respuesta.status).toBe(409);
+      expect(respuesta.body.code).toBe('DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS');
+      expect(respuesta.body.discipulados).toEqual([]);
+      expect(respuesta.body.propuestas).toEqual([
+        { propuestaId, persona: { nombre: 'Juana', apellido: apellidoDisc }, solicitudId: solicitudPideId, grupoId: null },
+      ]);
+      expect((await prisma.persona.findUniqueOrThrow({ where: { id: ids.proponida } })).rol).toContain('discipulador');
+    });
+
+    it('discipulador sin discipulados ni propuestas: se quita y deja su fila de CambioDeRol', async () => {
+      const respuesta = await servidor()
+        .delete(`/personas/${ids.libre}/roles/discipulador`)
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(respuesta.status).toBe(200);
+      expect((await prisma.persona.findUniqueOrThrow({ where: { id: ids.libre } })).rol).toEqual(['miembro_registrado']);
+      const filas = await prisma.cambioDeRol.findMany({ where: { personaId: ids.libre } });
+      expect(filas).toEqual([expect.objectContaining({ rol: 'discipulador', accion: 'quitado', origen: 'backoffice', realizadoPorId: ids.admin })]);
+    });
+
+    it('un Grupo finalizado o un Liderazgo cerrado ya no cuentan (D137)', async () => {
+      const cerrada = await prisma.persona.create({
+        data: {
+          email: `integ-roles-cerrada-${sufijo}@example.com`,
+          nombre: 'Irma',
+          apellido: apellidoDisc,
+          genero: 'femenino',
+          fechaNacimiento: new Date('1985-01-01'),
+          telefono: '+5492211234567',
+          direccion: 'Calle 1 y 50',
+          sedeId,
+          estadoCivil: 'soltero_a',
+          profesion: 'otro',
+          tiempoCongregacion: 'menos_6_meses',
+          estado: 'activa',
+          activo: true,
+          consentimientoDatos: true,
+          rol: ['miembro_registrado', 'discipulador'],
+        },
+      });
+      const otraInscripta = await prisma.persona.create({
+        data: {
+          email: `integ-roles-otra-inscripta-${sufijo}@example.com`,
+          nombre: 'Julia',
+          apellido: apellidoDisc,
+          genero: 'femenino',
+          fechaNacimiento: new Date('1995-01-01'),
+          telefono: '+5492211234567',
+          direccion: 'Calle 1 y 50',
+          sedeId,
+          estadoCivil: 'soltero_a',
+          profesion: 'otro',
+          tiempoCongregacion: 'menos_6_meses',
+          estado: 'activa',
+          activo: true,
+          consentimientoDatos: true,
+          rol: ['miembro_registrado'],
+        },
+      });
+      const finalizado = await grupoLideradoPor(cerrada.id, otraInscripta.id);
+      await prisma.grupo.update({ where: { id: finalizado }, data: { estado: 'finalizado', motivoCierre: 'completado' } });
+
+      const respuesta = await servidor()
+        .delete(`/personas/${cerrada.id}/roles/discipulador`)
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(respuesta.status).toBe(200);
     });
   });
 
@@ -457,13 +593,49 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
         expect(await historial(p.id)).toHaveLength(1);
       }
     });
+
+    // specs/004, D137 (T057, cierra H-127): la quita consulta los discipulados
+    // DESPUÉS de bloquear la fila de la Persona. Si aceptar una propuesta
+    // (lote B) tiene la fila bloqueada y está abriendo un Liderazgo, la quita
+    // espera y ve ese Liderazgo: nunca queda un discipulado a cargo de alguien
+    // sin el rol. Con la consulta ANTES del bloqueo, este test da 200.
+    it('una quita de discipulador que llega mientras se abre un Liderazgo espera y lo ve (D137)', async () => {
+      for (let i = 0; i < 3; i++) {
+        const discipuladora = await personaNueva(['miembro_registrado', 'discipulador']);
+        const inscripta = await personaNueva(['miembro_registrado']);
+        let avisarBloqueada!: () => void;
+        const bloqueada = new Promise<void>((resolver) => (avisarBloqueada = resolver));
+        let grupoNuevo = '';
+
+        // Lo que hace aceptar (lote B), reducido a lo que importa acá: bloquear
+        // la fila de la Discipuladora y, con ella bloqueada, abrir el Liderazgo.
+        const aceptar = prisma.$transaction(async (tx) => {
+          await tx.$queryRaw`SELECT "id" FROM "personas" WHERE "id" = ${discipuladora.id} FOR UPDATE`;
+          avisarBloqueada();
+          await new Promise((r) => setTimeout(r, 500));
+          const grupo = await tx.grupo.create({ data: { cursoId, sedeId } });
+          const solicitud = await tx.solicitudDiscipulado.create({ data: { personaId: inscripta.id, estado: 'aprobada', grupoId: grupo.id } });
+          await tx.inscripcion.create({ data: { personaId: inscripta.id, grupoId: grupo.id, solicitudId: solicitud.id } });
+          await tx.liderazgo.create({ data: { personaId: discipuladora.id, grupoId: grupo.id } });
+          grupoNuevo = grupo.id;
+        });
+        await bloqueada;
+        const [, respuesta] = await Promise.all([aceptar, quitar(discipuladora.id, 'discipulador')]);
+
+        expect(respuesta.status).toBe(409);
+        expect(respuesta.body.code).toBe('DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS');
+        expect(respuesta.body.discipulados.map((d: { grupoId: string }) => d.grupoId)).toEqual([grupoNuevo]);
+        expect((await prisma.persona.findUniqueOrThrow({ where: { id: discipuladora.id } })).rol).toContain('discipulador');
+        expect(await historial(discipuladora.id)).toHaveLength(0);
+      }
+    });
   });
   // T062 (D132): el listado trae, por rol, si quien mira se lo puede quitar —
   // la misma `puedeQuitarRol` con la que DELETE rechaza. Los tres casos que el
   // modal ofrecía y la API siempre rechazaba.
   describe('T062: el listado dice qué roles se le pueden quitar a cada Persona, para quien mira', () => {
-    const quitarDe = async (id: string, tokenQueMira: string) => {
-      const respuesta = await servidor().get(`/personas?buscar=${apellido}&take=100`).set('Authorization', `Bearer ${tokenQueMira}`);
+    const quitarDe = async (id: string, tokenQueMira: string, buscar = apellido) => {
+      const respuesta = await servidor().get(`/personas?buscar=${buscar}&take=100`).set('Authorization', `Bearer ${tokenQueMira}`);
       expect(respuesta.status).toBe(200);
       return respuesta.body.items.find((p: { id: string }) => p.id === id).quitar;
     };
@@ -483,12 +655,24 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
       expect(rechazo.body.code).toBe('ADMIN_NO_PUEDE_AUTO_REVOCARSE');
     });
 
-    it('caso 3: discipulador no se puede quitar a nadie, por ahora (FR-009/H-127), y DELETE lo rechaza con el mismo motivo', async () => {
-      for (const id of [ids.discipuladora, ids.adulta, ids.admin]) {
-        expect((await quitarDe(id, tokenAdmin)).discipulador).toEqual({ puede: false, motivo: 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS' });
-      }
+    it('caso 3: discipulador, según sus discipulados y propuestas (D137/FR-043), y DELETE rechaza con lo mismo', async () => {
+      const deLaDiscipuladora = (await quitarDe(ids.discipuladora, tokenAdmin)).discipulador;
+      expect(deLaDiscipuladora).toEqual({
+        puede: false,
+        motivo: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS',
+        discipulados: [{ grupoId, persona: { nombre: 'Ana', apellido: apellidoDisc } }],
+        propuestas: [],
+      });
+      expect((await quitarDe(ids.proponida, tokenAdmin, apellidoDisc)).discipulador).toMatchObject({
+        puede: false,
+        propuestas: [{ propuestaId, solicitudId: solicitudPideId }],
+      });
+      // Sin nada a cargo, sí — incluso a quien no tiene el rol (no-op, la pantalla ofrece "Otorgar").
+      expect((await quitarDe(ids.adulta, tokenAdmin)).discipulador).toEqual({ puede: true });
+
       const rechazo = await servidor().delete(`/personas/${ids.discipuladora}/roles/discipulador`).set('Authorization', `Bearer ${tokenAdmin}`);
-      expect(rechazo.body.code).toBe('DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS');
+      expect(rechazo.body.code).toBe(deLaDiscipuladora.motivo);
+      expect(rechazo.body.discipulados).toEqual(deLaDiscipuladora.discipulados);
     });
 
     it('lo que sí se puede quitar dice que sí, y el listado no expone adminSembrado', async () => {

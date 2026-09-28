@@ -13,10 +13,18 @@ import { calcularEdad, nacidosAntesDeParaEdad } from '../../src/persona/calcular
 async function crearServicio() {
   const findMany = jest.fn().mockResolvedValue([]);
   const count = jest.fn().mockResolvedValue(0);
+  // specs/004, T056 (D137): discipulados activos y propuestas pendientes de la página.
+  const liderazgos = jest.fn().mockResolvedValue([]);
+  const propuestas = jest.fn().mockResolvedValue([]);
+  const prisma = {
+    persona: { findMany, count },
+    liderazgo: { findMany: liderazgos },
+    propuestaDiscipulado: { findMany: propuestas },
+  };
   const moduleRef = await Test.createTestingModule({
-    providers: [PersonaService, { provide: PrismaService, useValue: { persona: { findMany, count } } }, proveedorRolesDeEstado()],
+    providers: [PersonaService, { provide: PrismaService, useValue: prisma }, proveedorRolesDeEstado()],
   }).compile();
-  return { service: moduleRef.get(PersonaService), findMany, count };
+  return { service: moduleRef.get(PersonaService), findMany, count, liderazgos, propuestas };
 }
 
 describe('nacidosAntesDeParaEdad — la regla de calcularEdad expresada como fecha', () => {
@@ -127,5 +135,23 @@ describe('PersonaService.buscarPersonas (GET /personas/buscar, el buscador de tu
 
     expect(await service.buscarPersonas(' a ')).toEqual([]);
     expect(findMany).not.toHaveBeenCalled();
+  });
+
+  // specs/004, T056: el listado sabe si se puede quitar `discipulador` a cada
+  // fila, con UNA consulta de Liderazgos y UNA de Propuestas para toda la
+  // página — no una por fila (los nombres, si hay, se resuelven en lote).
+  it('consulta discipulados y propuestas una vez por página, no una por fila (T056)', async () => {
+    const { service, findMany, liderazgos, propuestas } = await crearServicio();
+    const pagina = Array.from({ length: 20 }, (_, i) => ({ id: `p${i}`, rol: ['discipulador'], adminSembrado: false }));
+    findMany.mockResolvedValue(pagina);
+
+    const { items } = await service.listarPersonas(0, 20, undefined, 'apellido', 'asc', false, 'admin-1');
+
+    expect(liderazgos).toHaveBeenCalledTimes(1);
+    expect(propuestas).toHaveBeenCalledTimes(1);
+    expect(liderazgos.mock.calls[0][0].where.personaId).toEqual({ in: pagina.map((p) => p.id) });
+    expect(propuestas.mock.calls[0][0].where.discipuladorId).toEqual({ in: pagina.map((p) => p.id) });
+    // Sin discipulados ni propuestas, quitar discipulador se ofrece (cierra H-127).
+    expect(items.every((p) => p.quitar.discipulador.puede)).toBe(true);
   });
 });

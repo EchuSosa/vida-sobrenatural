@@ -118,6 +118,15 @@ Admin y para Discipulador siempre). Motivos: `SESION_SIN_PERSONA`,
 spec 004 conecte la consulta de discipulados activos, cambia esa función y los dos lados cambian
 juntos.
 
+> **Actualizado por el spec 004 (T055/T056, D137, FR-043 de la 004 — cierra H-127).**
+> `DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS` ya no existe. `quitar.discipulador` es
+> `{ puede: true }` o `{ puede: false, motivo: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS',
+> discipulados: DiscipuladoActivo[], propuestas: PropuestaPendiente[] }`, calculado con los
+> discipulados activos y las propuestas pendientes de **toda la página** en lote
+> (`discipuladosActivosDeVarias` / `propuestasPendientesDeVarias`: la cantidad de consultas no
+> crece con las filas). El detalle, en `specs/004-vida-nueva-discipulado/contracts/discipulado-api.md`,
+> "Cambio al contrato del spec 005".
+
 ## `GET /personas/buscar?q=...` (EXISTENTE — buscador de tutor, H-29/D108)
 
 **Cambios de este spec** (y solo estos):
@@ -177,6 +186,17 @@ fila en `CambioDeRol` (`accion: otorgado`, FR-022).
   no como una nota que alguien tiene que acordarse de seguir: `tasks.md` DEBE incluir una tarea
   del spec 004 (o de la conexión entre ambos) que reemplace este bloqueo por la consulta real, no
   dejarlo como deuda implícita.
+
+  > **Actualizado por el spec 004 (T055, D137, FR-043 de la 004 — cierra H-127).** La consulta
+  > existe y el rechazo incondicional se fue: con la fila de la Persona bloqueada (H-142),
+  > `discipuladosActivosDe` y `propuestasPendientesDe` (`apps/api/src/discipulado/discipulados-activos.ts`)
+  > van como dato a `puedeQuitarRol`. Sin discipulados activos ni propuestas pendientes, se quita
+  > (con su fila de `CambioDeRol`); si no, **409 `DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS`** con las
+  > extensiones `discipulados` (cada uno con `grupoId`, para enlazar a `/grupos/[id]`) y
+  > `propuestas` (cada una con `solicitudId` o `grupoId`, adonde se destraba). Las operaciones que
+  > abren un Liderazgo bloquean la misma fila (D137), así que no puede quedar un discipulado a cargo
+  > de alguien sin el rol. `DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS` se eliminó del
+  > catálogo. Contrato completo: `specs/004-vida-nueva-discipulado/contracts/discipulado-api.md`.
 
 ## Guardas cuya fuente de verdad no existe todavía (criterio general, H-127)
 

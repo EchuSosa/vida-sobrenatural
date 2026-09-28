@@ -209,6 +209,13 @@ export interface DiscipuladoActivo {
 export interface PropuestaPendiente {
   propuestaId: string;
   persona: { nombre: string; apellido: string };
+  /**
+   * Adónde enlaza el panel de roles para destrabarla (FR-043, lote D): una
+   * propuesta `nueva` tiene su Solicitud; una de `reasignacion`, su Grupo.
+   * Exactamente uno de los dos no es null.
+   */
+  solicitudId: string | null;
+  grupoId: string | null;
 }
 
 /** Contadores de los pendientes del Admin (FR-048), para la tarjeta de Inicio. */

@@ -28,37 +28,7 @@ export async function discipuladosActivosDe(db: Db, personaId: string): Promise<
 
 /** Las propuestas pendientes de esta Persona como Discipulador (FR-043). */
 export async function propuestasPendientesDe(db: Db, personaId: string): Promise<PropuestaPendiente[]> {
-  const propuestas = await db.propuestaDiscipulado.findMany({
-    where: { discipuladorId: personaId, estado: 'pendiente' },
-    select: { id: true, tipo: true, solicitudId: true, grupoId: true },
-  });
-  if (propuestas.length === 0) return [];
-
-  // El nombre de la Persona: para `nueva`, la de la Solicitud; para
-  // `reasignacion`, una del Grupo. Se resuelven en lote.
-  const solicitudIds = propuestas.map((p) => p.solicitudId).filter((id): id is string => id !== null);
-  const grupoIds = propuestas.map((p) => p.grupoId).filter((id): id is string => id !== null);
-
-  const [solicitudes, gruposNombrados] = await Promise.all([
-    solicitudIds.length
-      ? db.solicitudDiscipulado.findMany({ where: { id: { in: solicitudIds } }, select: { id: true, personaId: true } })
-      : Promise.resolve([]),
-    grupoIds.length ? nombrarGruposPorInscripta(db, grupoIds) : Promise.resolve([] as DiscipuladoActivo[]),
-  ]);
-
-  const personaDeSolicitud = new Map(solicitudes.map((s) => [s.id, s.personaId]));
-  const idsPersonasSolicitud = [...new Set(solicitudes.map((s) => s.personaId))];
-  const nombres = await nombresDe(db, idsPersonasSolicitud);
-  const nombrePorGrupo = new Map(gruposNombrados.map((g) => [g.grupoId, g.persona]));
-
-  return propuestas.map((p) => {
-    if (p.tipo === 'nueva' && p.solicitudId) {
-      const pid = personaDeSolicitud.get(p.solicitudId);
-      return { propuestaId: p.id, persona: (pid && nombres.get(pid)) || { nombre: '', apellido: '' } };
-    }
-    const persona = (p.grupoId && nombrePorGrupo.get(p.grupoId)) || { nombre: '', apellido: '' };
-    return { propuestaId: p.id, persona };
-  });
+  return (await propuestasPendientesDeVarias(db, [personaId])).get(personaId) ?? [];
 }
 
 /** Versión en lote para el listado de Personas (lote D, T056) — una consulta por relación, no una por fila. */
@@ -78,13 +48,54 @@ export async function discipuladosActivosDeVarias(db: Db, personaIds: string[]):
   return mapa;
 }
 
+/**
+ * Versión en lote (lote D, T056): una consulta de propuestas para todos los
+ * ids y los nombres resueltos en lote — la cantidad de consultas no crece con
+ * las filas de la página. `propuestasPendientesDe` es este mismo camino con un
+ * solo id, para que no haya dos definiciones de "propuesta pendiente".
+ */
 export async function propuestasPendientesDeVarias(db: Db, personaIds: string[]): Promise<Map<string, PropuestaPendiente[]>> {
   const mapa = new Map<string, PropuestaPendiente[]>(personaIds.map((id) => [id, []]));
-  await Promise.all(
-    personaIds.map(async (id) => {
-      mapa.set(id, await propuestasPendientesDe(db, id));
-    }),
-  );
+  if (personaIds.length === 0) return mapa;
+  const propuestas = await db.propuestaDiscipulado.findMany({
+    where: { discipuladorId: { in: personaIds }, estado: 'pendiente' },
+    select: { id: true, discipuladorId: true, tipo: true, solicitudId: true, grupoId: true },
+    orderBy: [{ propuestaEn: 'asc' }, { id: 'asc' }],
+  });
+  if (propuestas.length === 0) return mapa;
+
+  // El nombre de la Persona: para `nueva`, la de la Solicitud; para
+  // `reasignacion`, una del Grupo. Se resuelven en lote.
+  const solicitudIds = [...new Set(propuestas.map((p) => p.solicitudId).filter((id): id is string => id !== null))];
+  const grupoIds = [...new Set(propuestas.map((p) => p.grupoId).filter((id): id is string => id !== null))];
+
+  const [solicitudes, gruposNombrados] = await Promise.all([
+    solicitudIds.length
+      ? db.solicitudDiscipulado.findMany({ where: { id: { in: solicitudIds } }, select: { id: true, personaId: true } })
+      : Promise.resolve([]),
+    grupoIds.length ? nombrarGruposPorInscripta(db, grupoIds) : Promise.resolve([] as DiscipuladoActivo[]),
+  ]);
+
+  const personaDeSolicitud = new Map(solicitudes.map((s) => [s.id, s.personaId]));
+  const nombres = await nombresDe(db, [...new Set(solicitudes.map((s) => s.personaId))]);
+  const nombrePorGrupo = new Map(gruposNombrados.map((g) => [g.grupoId, g.persona]));
+
+  for (const p of propuestas) {
+    let persona = { nombre: '', apellido: '' };
+    if (p.tipo === 'nueva' && p.solicitudId) {
+      const pid = personaDeSolicitud.get(p.solicitudId);
+      persona = (pid && nombres.get(pid)) || persona;
+    } else if (p.grupoId) {
+      persona = nombrePorGrupo.get(p.grupoId) || persona;
+    }
+    mapa.get(p.discipuladorId)?.push({
+      propuestaId: p.id,
+      persona,
+      // FR-043: adónde enlaza el panel de roles para destrabarla.
+      solicitudId: p.tipo === 'nueva' ? p.solicitudId : null,
+      grupoId: p.tipo === 'nueva' ? null : p.grupoId,
+    });
+  }
   return mapa;
 }
 
