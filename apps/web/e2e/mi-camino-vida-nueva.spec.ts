@@ -74,7 +74,30 @@ async function registrarMenorActivo(page: Page, baseURL: string, email: string) 
   await loguearseComoTest(page, email);
 }
 
-async function sinViolaciones(page: Page) {
+/**
+ * La tarjeta de Vida Nueva. Las búsquedas de texto van adentro de ella: al
+ * recargar, Next conserva una copia oculta del render anterior y un
+ * `getByText` suelto encuentra dos.
+ */
+function tarjeta(page: Page) {
+  return page.getByRole('region', { name: 'Vida Nueva' });
+}
+
+/**
+ * D95/T078: `SincronizarTema` aplica la preferencia GUARDADA de la Persona
+ * (`claro` por defecto) apenas hay sesión, y pisa lo que haya en
+ * localStorage. Para auditar el oscuro de verdad, la Persona del test guarda
+ * `oscuro` (como haría desde Perfil) y vuelve a iniciar sesión.
+ */
+async function usarTema(page: Page, baseURL: string, email: string, tema: 'claro' | 'oscuro') {
+  if (tema === 'claro') return;
+  await api(await tokenDe(baseURL, email), 'PATCH', '/personas/me/preferencias', { temaPreferido: 'oscuro' });
+  await loguearseComoTest(page, email);
+}
+
+async function sinViolaciones(page: Page, tema: 'claro' | 'oscuro') {
+  if (tema === 'oscuro') await expect(page.locator('html')).toHaveClass(/dark/);
+  else await expect(page.locator('html')).not.toHaveClass(/dark/);
   const { violations } = await auditar(page);
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
 }
@@ -82,25 +105,26 @@ async function sinViolaciones(page: Page) {
 for (const tema of ['claro', 'oscuro'] as const) {
   test.describe(`modo ${tema}`, () => {
     test.use({ colorScheme: tema === 'oscuro' ? 'dark' : 'light' });
-    test.beforeEach(async ({ page }) => {
-      // D106/H-22: next-themes no mira prefers-color-scheme; se fuerza con su clave de localStorage.
-      if (tema === 'oscuro') await page.addInitScript(() => window.localStorage.setItem('theme', 'dark'));
-    });
 
     test('un menor de 12 no ve el botón de pedir y sí el texto del tutor (FR-044)', async ({ page, baseURL }) => {
-      await registrarMenorActivo(page, baseURL!, `e2e-mi-camino-menor-${tema}-${Date.now()}@example.com`);
-      await page.goto('/mi-camino');
-
-      await expect(page.getByText('Este pedido lo hace tu mamá, tu papá o tu tutor')).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Quiero empezar Vida Nueva' })).toHaveCount(0);
-      await sinViolaciones(page);
-    });
-
-    test('pedir Vida Nueva: sin franjas da el error por campo; con una, pasa a "buscando", se edita y se retira', async ({ page }) => {
-      await registrarPersonaDeTest(page, `e2e-mi-camino-${tema}-${Date.now()}@example.com`);
+      const email = `e2e-mi-camino-menor-${tema}-${Date.now()}@example.com`;
+      await registrarMenorActivo(page, baseURL!, email);
+      await usarTema(page, baseURL!, email, tema);
       await page.goto('/mi-camino');
       await page.waitForLoadState('networkidle');
-      await sinViolaciones(page);
+
+      await expect(tarjeta(page).getByText('Este pedido lo hace tu mamá, tu papá o tu tutor')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Quiero empezar Vida Nueva' })).toHaveCount(0);
+      await sinViolaciones(page, tema);
+    });
+
+    test('pedir Vida Nueva: sin franjas da el error por campo; con una, pasa a "buscando", se edita y se retira', async ({ page, baseURL }) => {
+      const email = `e2e-mi-camino-${tema}-${Date.now()}@example.com`;
+      await registrarPersonaDeTest(page, email);
+      await usarTema(page, baseURL!, email, tema);
+      await page.goto('/mi-camino');
+      await page.waitForLoadState('networkidle');
+      await sinViolaciones(page, tema);
 
       // Sin franjas: error debajo del campo y en el resumen, con foco (H-50).
       const pedir = page.getByRole('button', { name: 'Quiero empezar Vida Nueva' });
@@ -108,18 +132,18 @@ for (const tema of ['claro', 'oscuro'] as const) {
       const resumen = page.getByRole('alert').filter({ hasText: 'Revisá esto antes de seguir:' });
       await expect(resumen).toBeFocused();
       await expect(page.locator('#campo-franjas-error')).toHaveText('Agregá al menos un día y horario con "Agregar franja".');
-      await sinViolaciones(page);
+      await sinViolaciones(page, tema);
 
       // Con una franja (martes 19 a 21, el default del editor): pasa a buscando sin recargar.
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await expect(resumen).toHaveCount(0);
       await pedir.click();
-      await expect(page.getByText('Estamos buscando a tu Discipulador')).toBeVisible();
-      await expect(page.getByText('Martes 19:00 a 21:00')).toBeVisible();
-      await sinViolaciones(page);
+      await expect(tarjeta(page).getByText('Estamos buscando a tu Discipulador')).toBeVisible();
+      await expect(tarjeta(page).getByText('Martes 19:00 a 21:00')).toBeVisible();
+      await sinViolaciones(page, tema);
 
       await page.reload();
-      await expect(page.getByText('Estamos buscando a tu Discipulador')).toBeVisible();
+      await expect(tarjeta(page).getByText('Estamos buscando a tu Discipulador')).toBeVisible();
 
       // Editar los horarios: cambia a sábado 10 a 13.
       await page.getByRole('button', { name: 'Editar horarios' }).click();
@@ -128,17 +152,17 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.getByLabel('Desde').fill('10:00');
       await page.getByLabel('Hasta').fill('13:00');
       await page.getByRole('button', { name: 'Agregar franja' }).click();
-      await sinViolaciones(page);
+      await sinViolaciones(page, tema);
       await page.getByRole('button', { name: 'Guardar horarios' }).click();
-      await expect(page.getByText('Sábado 10:00 a 13:00')).toBeVisible();
-      await expect(page.getByText('Martes 19:00 a 21:00')).toHaveCount(0);
+      await expect(tarjeta(page).getByText('Sábado 10:00 a 13:00')).toBeVisible();
+      await expect(tarjeta(page).getByText('Martes 19:00 a 21:00')).toHaveCount(0);
 
       // Retirar, con confirmación, y volver a poder pedir.
       await page.getByRole('button', { name: 'Retirar el pedido' }).click();
       await expect(page.getByRole('alertdialog')).toContainText('¿Retirar tu pedido de Vida Nueva?');
-      await sinViolaciones(page);
+      await sinViolaciones(page, tema);
       await page.getByRole('button', { name: 'Sí, retirar el pedido' }).click();
-      await expect(page.getByText('Retiraste tu pedido anterior.')).toBeVisible();
+      await expect(tarjeta(page).getByText('Retiraste tu pedido anterior.')).toBeVisible();
       await expect(page.getByRole('button', { name: 'Quiero empezar Vida Nueva' })).toBeVisible();
     });
 
@@ -148,6 +172,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
     }) => {
       const email = `e2e-mi-camino-propuesta-${tema}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
+      await usarTema(page, baseURL!, email, tema);
       const persona = await tokenDe(baseURL!, email);
       const { id: solicitudId } = await api(persona, 'POST', '/discipulado/solicitudes/me', {
         franjas: [{ diaSemana: 2, inicio: 18 * 60, fin: 20 * 60 }],
@@ -163,16 +188,18 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await api(admin, 'POST', `/discipulado/solicitudes/${solicitudId}/proponer`, { discipuladorId: propuesto.id });
 
       await page.goto('/mi-camino');
-      await expect(page.getByText('Estamos buscando a tu Discipulador')).toBeVisible();
+      await page.waitForLoadState('networkidle');
+      await expect(tarjeta(page).getByText('Estamos buscando a tu Discipulador')).toBeVisible();
       await expect(page.getByText(propuesto.apellido)).toHaveCount(0);
-      await sinViolaciones(page);
+      await sinViolaciones(page, tema);
 
       await api(admin, 'POST', `/discipulado/solicitudes/${solicitudId}/retirar-propuesta`);
       await api(admin, 'POST', `/discipulado/solicitudes/${solicitudId}/rechazar`);
       await page.reload();
-      await expect(page.getByText('Esta vez tu pedido no pudo avanzar.', { exact: false })).toBeVisible();
+      await page.waitForLoadState('networkidle');
+      await expect(tarjeta(page).getByText('Esta vez tu pedido no pudo avanzar.', { exact: false })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Quiero empezar Vida Nueva' })).toBeVisible();
-      await sinViolaciones(page);
+      await sinViolaciones(page, tema);
     });
 
     // TODO(merge): aceptar la propuesta y cargar un Encuentro son del lote B

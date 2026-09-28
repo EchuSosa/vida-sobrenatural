@@ -196,7 +196,7 @@ export function SolicitudDetalleCliente({
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <ConfirmDestructiveDialog
                 trigger={
-                  <Button type="button" variant="destructive" loading={rechazando} disabled={ocupado && !rechazando} className="h-11">
+                  <Button type="button" variant="outline" loading={rechazando} disabled={ocupado && !rechazando} className="h-11">
                     <CircleX aria-hidden />
                     {td('rechazar')}
                   </Button>

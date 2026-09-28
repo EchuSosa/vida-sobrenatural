@@ -317,7 +317,7 @@ function Buscando({
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <ConfirmDestructiveDialog
               trigger={
-                <Button type="button" variant="destructive" loading={retirando} className="h-11">
+                <Button type="button" variant="outline" loading={retirando} className="h-11">
                   <Undo2 aria-hidden />
                   {t('retirar')}
                 </Button>
