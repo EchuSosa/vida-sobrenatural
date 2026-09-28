@@ -49,6 +49,22 @@ export async function loguearseComoLiderCursoE2E(page: Page) {
 }
 
 /**
+ * specs/004 (T009): los Discipuladores de la 004. `1` femenino con agenda
+ * (martes y sábado), `2` masculino con agenda (martes), `'sin-agenda'` sin
+ * franjas ni disponibilidad (para el estado vacío de FR-047). Los siembra
+ * sembrar-e2e-admin.ts.
+ */
+export async function loguearseComoDiscipuladorE2E(page: Page, cual: 1 | 2 | 'sin-agenda' = 1) {
+  const email =
+    cual === 1
+      ? 'e2e-discipulador@example.com'
+      : cual === 2
+        ? 'e2e-discipulador-2@example.com'
+        : 'e2e-discipulador-sin-agenda@example.com';
+  await loguearseComoE2E(page, email);
+}
+
+/**
  * H-134: una sesión con `rol = []` — una cuenta que no existe como Persona
  * (el test-login, igual que Google, deja pasar cualquier email verificado y
  * `buscarPersonaPorEmail` devuelve null). Email único por llamada, así nunca
