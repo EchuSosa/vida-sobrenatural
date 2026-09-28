@@ -1,14 +1,25 @@
-import { EstadoVacio } from '@vida-sobrenatural/ui';
-import { requerirPermiso } from '../../auth';
+import { apiFetch, type MiDisponibilidad } from '@vida-sobrenatural/shared-types';
+import { requerirPermiso, tienePermisoSesion } from '../../auth';
+import { MiDisponibilidadCliente } from './mi-disponibilidad-cliente';
 
+/**
+ * specs/004, Historia 4 (T039): la agenda, el toggle, el máximo por Grupo y
+ * los períodos del propio Discipulador (contracts/disponibilidad-api.md).
+ * Server Component: el GET va acá (loading.tsx/error.tsx dan cargando y
+ * error); lo interactivo vive en MiDisponibilidadCliente, que recibe cada
+ * estado nuevo en la respuesta de su propia acción.
+ */
 export default async function MiDisponibilidadPage() {
-  // H-132: exige el mismo permiso que le asigna NAV_BACKOFFICE — sin esto,
-  // cualquier sesión entraba por URL (la regla pantalla-declara-permiso lo marca).
-  await requerirPermiso('mi_disponibilidad.ver');
+  // H-132: exige el mismo permiso que le asigna NAV_BACKOFFICE.
+  const session = await requerirPermiso('mi_disponibilidad.ver');
+  const disponibilidad = await apiFetch<MiDisponibilidad>('/disponibilidad/me', {
+    headers: { Authorization: `Bearer ${session.apiToken}` },
+  });
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Mi disponibilidad</h1>
-      <EstadoVacio mensaje="Todavía no podés gestionar tu disponibilidad acá." />
-    </div>
+    <MiDisponibilidadCliente
+      inicial={disponibilidad}
+      apiToken={session.apiToken}
+      puedeGestionar={tienePermisoSesion(session, 'mi_disponibilidad.gestionar')}
+    />
   );
 }
