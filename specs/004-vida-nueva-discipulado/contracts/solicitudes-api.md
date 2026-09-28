@@ -1,92 +1,147 @@
-# Contrato: Solicitudes de Discipulado (Historias 1, 2 y 3)
+# Contrato: Solicitudes de Discipulado — pedir, cruce, proponer (Historias 1, 2 y 3)
 
 Módulo nuevo `apps/api/src/solicitud-discipulado/`. Todos los errores siguen Problem Details con un
-`code` de `packages/shared-types/src/error-code.ts` (Principio X), y los errores de campo van en
-`errors: [{ campo, code }]` (H-50). Los permisos se declaran con `@RequierePermiso` contra
-`CATALOGO_PERMISOS` (D132). Ningún endpoint declara roles literales.
+`code` de `packages/shared-types/src/error-code.ts` (Principio X); los errores de campo van en
+`errors: [{ campo, code }]` bajo `VALIDACION` (H-50). Los permisos se declaran con
+`@RequierePermiso` contra `CATALOGO_PERMISOS` (D132). Ningún endpoint declara roles literales.
+**Actualizado el 2026-09-27**: franjas, cruce, propuesta y edición del pedido propio.
 
 ## Tipos compartidos (`packages/shared-types/src/discipulado.ts`)
 
-- `EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada'`
-- `TipoSolicitud = 'discipulado'`, el único conectado. El filtro existe y la interfaz no lo
-  muestra (FR-025).
-- `SolicitudResumen`: la forma base de la bandeja genérica —
-  `{ id, tipo, persona: { id, nombre, apellido }, estado, createdAt, revisadoPor: { id, nombre, apellido } | null, creadoPor: { id, nombre, apellido } | null }`.
-- `EstadoMiDiscipulado`: lo que ve la Persona (FR-026 a FR-028), una unión discriminada:
-  - `{ estado: 'puede_pedir' }`
-  - `{ estado: 'pendiente', solicitudId, createdAt }`
-  - `{ estado: 'rechazada', revisadaEn }` (y puede volver a pedir, FR-008)
-  - `{ estado: 'en_curso', discipulador: { nombre, apellido }, desde }`
+- `Franja = { diaSemana: 0..6, inicio: number, fin: number }` (minutos desde las 0:00) y
+  `franjasCoinciden(a, b, minimo = MINUTOS_MINIMOS_EN_COMUN)`, con `MINUTOS_MINIMOS_EN_COMUN = 60`.
+- `EstadoSolicitud = 'pendiente' | 'propuesta' | 'aprobada' | 'rechazada' | 'retirada'`.
+- `TipoSolicitud = 'discipulado'`, el único conectado (FR-025).
+- `SolicitudResumen`: la forma base de la bandeja —
+  `{ id, tipo, persona: { id, nombre, apellido }, estado, createdAt, revisadoPor | null, creadoPor | null, propuestaVigente: { discipulador: { id, nombre, apellido }, propuestaEn } | null }`.
+  `propuestaVigente` alimenta "propuesta a X, hace N días" (FR-038).
+- `SolicitudDetalle`: `SolicitudResumen & { franjas: Franja[], persona: { …, edad, genero }, historial: PropuestaHistorial[] }`.
+- `PropuestaHistorial`: `{ id, discipulador, propuestaPor, propuestaEn, estado, respondidaEn, motivoDeclinacion, retiradaPor, grupoDestinoId }` — solo el Admin.
+- `NombreRegla = 'horario' | 'genero'` (research #12; sumar una regla suma un valor acá).
+- `Cruce`: la respuesta del cruce (abajo).
+- `EstadoMiDiscipulado`: lo que ve la Persona (FR-026 a FR-028), unión discriminada:
+  - `{ estado: 'puede_pedir', ultimo?: 'rechazada' | 'retirada' | 'abandono' }`
+  - `{ estado: 'buscando', solicitudId, franjas, createdAt }` — cubre `pendiente` **y** `propuesta`
+    (FR-026): la Persona no distingue.
+  - `{ estado: 'en_curso', grupoId, discipulador: { nombre, apellido, telefono }, desde }` (FR-027)
   - `{ estado: 'finalizado', finalizadoEn }`
+  - `{ estado: 'baja', en }` (FR-042; puede pedir de nuevo)
   Nunca incluye notas ni capítulos (FR-029).
 
-## `GET /discipulado/me` — el estado propio (FR-026 a FR-028)
+## Mi camino (la Persona; sesión con `estado = activa`, sin permiso del catálogo)
 
-- **Acceso:** sesión con `estado = activa` (sin permiso del catálogo, research #9).
-- **Respuesta:** `EstadoMiDiscipulado`. Precedencia: un Grupo `en_curso` o `finalizado` gana sobre
-  una Solicitud; una `pendiente` gana sobre una `rechazada`. Una Solicitud rechazada seguida de
-  otra pendiente muestra la pendiente.
-- Incluye las Solicitudes que se crearon en su nombre (Clarificación 2026-09-27).
+### `GET /discipulado/me`
 
-## `POST /discipulado/solicitudes/me` — pedir Vida Nueva (FR-001)
+- **Respuesta:** `EstadoMiDiscipulado`. Precedencia: Inscripción `activa` → `en_curso`;
+  `completada` → `finalizado`; Solicitud `pendiente`/`propuesta` → `buscando`; si no,
+  `puede_pedir` con el último desenlace (`rechazada`, `retirada` o `abandono`) para el texto.
+- Incluye Solicitudes creadas en su nombre.
 
-- **Acceso:** sesión con `estado = activa`.
-- **Cuerpo:** vacío.
+### `POST /discipulado/solicitudes/me` — pedir (FR-001, FR-032)
+
+- **Cuerpo:** `{ franjas: Franja[] }`.
+- **Validación por campo:** `franjas` con al menos un elemento (`FRANJAS_REQUERIDAS`); cada una con
+  `diaSemana` 0..6, `inicio`/`fin` en 0..1440 y `fin > inicio` (`FRANJA_FIN_ANTERIOR_AL_INICIO`).
 - **201:** `{ id, estado: 'pendiente', createdAt }`.
-- **409 `SOLICITUD_DISCIPULADO_YA_PENDIENTE`:** ya tiene una pendiente (escenario 3 de la
-  Historia 1). La garantía la da el índice único parcial: si dos pedidos llegan juntos, el segundo
-  choca con el índice y se traduce a este mismo código, no a un 500.
-- **409 `VIDA_NUEVA_EN_CURSO_O_COMPLETADA`:** tiene una Inscripción `activa` o `completada` en
-  Vida Nueva (escenario 4 de la Historia 1).
+- **409 `SOLICITUD_DISCIPULADO_YA_PENDIENTE`:** ya tiene una `pendiente` o `propuesta`. La
+  garantía la da el índice único parcial: si dos pedidos llegan juntos, el segundo choca con el
+  índice y se traduce a este código, no a un 500.
+- **409 `VIDA_NUEVA_EN_CURSO_O_COMPLETADA`:** Inscripción `activa` o `completada` en Vida Nueva.
+  Una en `abandono` no cuenta (FR-042).
 
-## `POST /discipulado/solicitudes` — en nombre de otra Persona (FR-002)
+### `PUT /discipulado/solicitudes/me/franjas` — editar horarios (FR-039)
+
+- **Cuerpo:** `{ franjas: Franja[] }`, misma validación.
+- **Efecto (transacción):** bloquea la Solicitud abierta de la Persona; exige `pendiente` o
+  `propuesta`; reemplaza las franjas; si había una Propuesta `pendiente`, la pasa a `retirada`
+  (`retiradaPor = persona`) y la Solicitud vuelve a `pendiente`. Emite `propuesta_retirada` (ver
+  `eventos.md`) para que el Admin lo vea.
+- **200:** `EstadoMiDiscipulado`. **404 `NO_ENCONTRADO`** si no tiene Solicitud abierta.
+
+### `DELETE /discipulado/solicitudes/me` — retirar el pedido (FR-039)
+
+- **Efecto:** igual que arriba, y la Solicitud pasa a `retirada`. Puede volver a pedir.
+- **204** / **404 `NO_ENCONTRADO`.**
+
+## En nombre de otra Persona (FR-002)
+
+### `POST /discipulado/solicitudes`
 
 - **Permiso:** `solicitudes.crear_en_nombre` (`admin`, `discipulador`).
-- **Cuerpo:** `{ personaId }`. La pantalla la elige con `GET /personas/buscar`, que ya existe.
-- **201:** igual que arriba, y deja `creadoPorId` = el autor.
-- **409:** los mismos dos códigos de arriba. **404 `NO_ENCONTRADO`** si no existe o
-  `activo = false`.
+- **Cuerpo:** `{ personaId, franjas: Franja[] }`. La Persona se elige con `GET /personas/buscar`.
+- **201 / 409 / 404 `NO_ENCONTRADO`** como el pedido propio; deja `creadoPorId` = el autor.
 
-## `GET /solicitudes` — la bandeja genérica (FR-025)
+## La bandeja del Admin
 
-- **Permiso:** `solicitudes.ver` (`admin`, `pastor`, este último de solo lectura).
-- **Query:** `estado?` (por defecto `pendiente`), `tipo?` (acepta solo `discipulado`), `orden`
-  (`fecha` | `persona`), `dir`, `pagina`. Mismo patrón de listado paginado en la URL que
-  `pendientes-tutor` (H-101).
+### `GET /solicitudes` (FR-025)
+
+- **Permiso:** `solicitudes.ver` (`admin`, `pastor` solo lectura).
+- **Query:** `estado?` (por defecto `pendiente,propuesta`, los dos abiertos), `tipo?`, `orden`
+  (`fecha` | `persona` | `espera`), `dir`, `pagina`. Patrón de URL de `pendientes-tutor` (H-101).
 - **Respuesta:** `Pagina<SolicitudResumen>`.
 
-## `GET /discipulado/discipuladores-disponibles` — el listado de FR-006
+### `GET /discipulado/solicitudes/:id` (detalle + historial, FR-038)
+
+- **Permiso:** `solicitudes.ver`. El `historial` solo si tiene `solicitudes.aprobar` (el Pastor no
+  ve motivos de declinación).
+- **Respuesta:** `SolicitudDetalle`.
+
+### `GET /discipulado/solicitudes/:id/cruce` — el cruce (FR-034, FR-035, FR-045)
 
 - **Permiso:** `solicitudes.aprobar` (`admin`).
-- **Respuesta:** `{ id, nombre, apellido }[]` en orden alfabético, sin sugerencia (D25). Criterio en
-  `data-model.md` → "Listado de Discipuladores disponibles". Sin paginar: son las personas con un
-  rol de cargo en una iglesia, un número chico y acotado.
-- La lista vacía es una respuesta válida (`[]`), y la pantalla muestra el estado vacío explicado
-  (FR-007).
+- **Respuesta `Cruce`:**
 
-## `POST /discipulado/solicitudes/:id/aprobar` — aprobar y armar el Grupo (FR-003 a FR-005)
+  ```ts
+  {
+    franjas: Array<{ franja: Franja; coinciden: DiscipuladorEnCruce[] }>;   // por franja de la Persona
+    noCoinciden: Array<DiscipuladorEnCruce & { incumple: NombreRegla[] }>;  // disponibles que fallan alguna regla
+    sugeridoId: string | null;                                              // FR-035; null si nadie cumple todas
+    sinDisponibles: boolean;                                                // FR-007, caso 1
+  }
+  DiscipuladorEnCruce = {
+    id, nombre, apellido, genero,
+    carga: { discipuladosActivos: number; propuestasPendientes: number },
+    gruposConLugar: Array<{ grupoId, ocupado, maximo, coincideHorario: boolean, personas: string[] }>, // FR-045
+  }
+  ```
+
+  Un Discipulador que cumple todas aparece en **cada** franja en la que coincide (con la regla de
+  horario). `noCoinciden` lista una sola vez a cada uno con sus `incumple` en claves; la pantalla las
+  traduce. `franjas[*].coinciden` vacío en todas y `noCoinciden` no vacío = "hay disponibles pero
+  ninguno coincide" (FR-007, caso 2).
+- Sin sugerido cuando nadie cumple todas: el Admin igual puede elegir de `noCoinciden` (D25).
+- Se calcula en la API (reglas en `apps/api/src/discipulado/reglas-de-asignacion/`, research #12);
+  la pantalla no reimplementa ninguna regla ni la carga.
+
+### `POST /discipulado/solicitudes/:id/proponer` — proponer (FR-003, FR-036)
 
 - **Permiso:** `solicitudes.aprobar`.
-- **Cuerpo:** `{ discipuladorId }`.
-- **En una transacción:**
-  1. Bloquea la Solicitud (`FOR UPDATE`) y exige que esté `pendiente`.
-  2. Bloquea la fila de la Persona del Discipulador (D137) y exige que tenga el rol
-     `discipulador`, que esté disponible y que no tenga un bloqueo vigente. Así, un rol quitado o
-     una disponibilidad apagada a la vez no se cuelan.
-  3. Vuelve a exigir que la Persona no esté cursando ni haya completado Vida Nueva.
-  4. Crea el Grupo (`en_curso`, Curso Vida Nueva individual, Sede de la Persona), la Inscripción
-     `activa` y el Liderazgo vigente, y pasa la Solicitud a `aprobada` con `revisadoPorId`,
-     `revisadaEn` y `grupoId`.
-- **200:** `{ solicitudId, grupoId }`.
-- **409 `SOLICITUD_NO_PENDIENTE`:** ya resuelta (otro Admin, u otra pestaña).
-- **409 `DISCIPULADOR_NO_DISPONIBLE`:** el elegido dejó de cumplir FR-006 entre que se cargó el
-  listado y se confirmó. La pantalla recarga el listado.
-- **409 `VIDA_NUEVA_EN_CURSO_O_COMPLETADA`.**
+- **Cuerpo:** `{ discipuladorId, grupoDestinoId?: string }`.
+- **Transacción:** bloquea la Solicitud (`FOR UPDATE`) y exige `pendiente` → bloquea la fila
+  `personas` del Discipulador (D137) y exige que esté disponible (FR-006) → si `grupoDestinoId`,
+  exige que sea un Grupo `en_curso` del mismo Discipulador con lugar → crea la
+  `PropuestaDiscipulado` (`nueva`, `pendiente`) y pasa la Solicitud a `propuesta` con
+  `revisadoPorId`/`revisadaEn`. **No crea Grupo ni Liderazgo.** Emite `propuesta_nueva`.
+- **200:** `{ propuestaId }`.
+- **409 `SOLICITUD_NO_PENDIENTE`** (otro Admin llegó antes, u otra pestaña) ·
+  **409 `DISCIPULADOR_NO_DISPONIBLE`** (dejó de cumplir FR-006; la pantalla recarga el cruce) ·
+  **409 `GRUPO_SIN_LUGAR`** · **409 `VIDA_NUEVA_EN_CURSO_O_COMPLETADA`.**
+- Elegir a uno de `noCoinciden` **no** es un error: D25.
 
-## `POST /discipulado/solicitudes/:id/rechazar` (FR-008)
+### `POST /discipulado/solicitudes/:id/retirar-propuesta` (FR-036)
 
 - **Permiso:** `solicitudes.aprobar`.
-- **Cuerpo:** vacío. El spec no pide motivo de rechazo de la Solicitud.
-- **En una transacción:** bloquea, exige `pendiente` y pasa a `rechazada` con `revisadoPorId` y
-  `revisadaEn`. No crea nada.
+- **Transacción:** bloquea la Solicitud, exige `propuesta`; Propuesta → `retirada`
+  (`retiradaPor = admin`); Solicitud → `pendiente`. Emite `propuesta_retirada`.
+- **200** / **409 `SOLICITUD_NO_PROPUESTA`.**
+
+### `POST /discipulado/solicitudes/:id/rechazar` (FR-008)
+
+- **Permiso:** `solicitudes.aprobar`. **Cuerpo:** vacío.
+- **Transacción:** bloquea, exige `pendiente`, pasa a `rechazada` con `revisadoPorId`/`revisadaEn`.
+  No crea nada. Emite `solicitud_rechazada`.
 - **200** / **409 `SOLICITUD_NO_PENDIENTE`.**
+
+**Qué ya no existe:** `POST …/aprobar` y `GET /discipulado/discipuladores-disponibles` del contrato
+anterior. Aprobar pasó a ser aceptar (contrato de discipulado), y el listado plano pasó a ser el
+cruce.
