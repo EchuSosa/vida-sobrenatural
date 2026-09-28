@@ -171,6 +171,32 @@ Dependencias reales entre lotes: el e2e del flujo crítico (pedir → aprobar �
 finalizar) cruza A, B y C, así que va **al final**, cuando los cuatro están mergeados. Los datos de
 prueba de B se siembran por API o fixture, sin depender de la pantalla de A.
 
+## Decisiones de esta corrida (2026-09-27)
+
+**Confirmadas por Echu:** reasignación por el Admin (FR-030), rechazo de una finalización con
+motivo opcional (FR-019a), Personas sin acceso sin vista propia (FR-026) y discipulados activos
+calculados en el momento (D137).
+
+**Tomadas en el plan sin preguntar**, por ser de bajo impacto o por salir de algo ya decidido:
+- Alinear la spec con D134: las notas las ve solo el Discipulador (`2fb0f46`).
+- Reutilizar `DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS`, que el 005 dejó reservado.
+- Capítulos como texto corto, no como números (research #5).
+- Crear una Solicitud en nombre de otra Persona sin exigir que no tenga acceso, porque hoy el
+  sistema no tiene cómo saberlo (research #8).
+- Tres Assumptions del spec: bloqueos superpuestos, quién propone la finalización, y que la
+  Persona no retira su Solicitud.
+
+**Pendientes de Echu** (no bloquean el lote 0; cada una cambia a lo sumo una tarea):
+1. **¿Un menor de edad puede pedir Vida Nueva?** El Discipulador vería sus datos de contacto
+   (research #11). Hoy el plan no lo restringe.
+2. **`disponibleDiscipulado` arranca en `false`:** a quien recibe el rol hay que avisarle que se
+   marque disponible (research #7). ¿O preferís `true`?
+3. **Un Discipulador reasignado ve las notas del anterior** (`data-model.md` → Encuentro). Se
+   eligió así para que el discipulado no pierda su historia. ¿Te parece bien?
+4. **No se pueden borrar períodos de no disponibilidad ni corregir un Encuentro mal cargado.**
+   Ningún requisito lo pide (Principio IV). ¿Lo sumamos al spec?
+5. **`Status: Draft` en `spec.md`:** las cinco specs lo tienen igual, cerradas o no. Lo dejé así.
+
 ## Complexity Tracking
 
 *Sin violaciones de la Constitución que requieran justificación — tabla omitida.*
