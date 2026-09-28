@@ -34,6 +34,7 @@ esto en vez de dejarlo como un hueco propio.
 ### Session 2026-09-27
 
 - Q: Si un Discipulador ya no puede seguir con un discipulado en curso, ¿el Admin puede pasárselo a otro Discipulador? → A: Sí. El Admin cambia el Discipulador de un Grupo en curso eligiendo del mismo listado de disponibles (FR-006). Los Encuentros ya registrados quedan en el Grupo, el cambio queda registrado y el Discipulador anterior deja de ver ese discipulado y sus datos de contacto. Es lo que destraba FR-009 del 005: para sacarle el rol a alguien con discipulados activos, primero se le reasignan.
+- Alineación con D134 (no es una pregunta nueva): la clarificación del 2026-09-23 decía que las notas de los Encuentros eran "para el Discipulador y el Admin". D134 (`docs/05-decisiones.md`, posterior) lo enmendó: las notas las ve **solo** el Discipulador, y el Admin y el Pastor ven el seguimiento sin su texto. FR-010, FR-029, la Historia 5 (escenarios 2 y 6) y la entidad Encuentro quedan alineados con D134.
 - Q: Si el Discipulador propone terminar un discipulado y el Admin no está de acuerdo, ¿qué puede hacer el Admin? → A: Rechazar la propuesta, con un motivo opcional. El discipulado vuelve a "en curso", el Discipulador ve que se rechazó (y el motivo, si hay) y puede volver a proponerla más adelante.
 - Q: Una Persona que el Admin dio de alta sin acceso a la app (D97), ¿no ve nada de su discipulado, y si más adelante entra con Google ve su estado como cualquiera? → A: Sí a las dos. Mientras no tenga acceso no ve nada: el seguimiento lo hacen el Admin y el Discipulador. Si después entra, ve su estado como cualquier Persona (FR-026 a FR-028), incluida la Solicitud que crearon en su nombre. No hay una vista aparte.
 
@@ -70,7 +71,7 @@ Una Persona que pidió empezar Vida Nueva quiere saber qué pasó con ese pedido
 2. **Given** una Solicitud aprobada (con Grupo ya creado), **When** la Persona consulta su estado, **Then** ve que su discipulado está en curso y quién es su Discipulador asignado.
 3. **Given** una Solicitud rechazada, **When** la Persona consulta su estado, **Then** ve que fue rechazada, sin depender de que se le haya avisado por otro medio.
 4. **Given** un discipulado cuya finalización fue confirmada, **When** la Persona consulta su estado, **Then** ve que el proceso terminó.
-5. **Given** un discipulado en curso con Encuentros ya registrados, **When** la Persona consulta su propia vista, **Then** NO ve las notas que el Discipulador cargó en cada Encuentro — son apuntes de seguimiento pastoral para el Discipulador y el Admin, no un informe para la persona discipulada.
+5. **Given** un discipulado en curso con Encuentros ya registrados, **When** la Persona consulta su propia vista, **Then** NO ve las notas que el Discipulador cargó en cada Encuentro — son apuntes de seguimiento pastoral solo para el Discipulador (D134), no un informe para la persona discipulada.
 
 ---
 
@@ -115,16 +116,17 @@ Un Discipulador quiere poder avisar cuándo está en condiciones de tomar un dis
 
 ### User Story 5 - Registrar el avance de los encuentros (Priority: P2)
 
-Un Discipulador que se reúne periódicamente con su discípulo quiere dejar un registro de cada encuentro (cuándo fue, qué capítulos del libro vieron, alguna nota si hace falta), para tener un historial del progreso y que el Admin también pueda hacer seguimiento si lo necesita.
+Un Discipulador que se reúne periódicamente con su discípulo quiere dejar un registro de cada encuentro (cuándo fue, qué capítulos del libro vieron, alguna nota si hace falta), para tener un historial del progreso — y que el Admin pueda hacer seguimiento del avance, sin leer las notas (D134).
 
 **Why this priority**: Es el corazón operativo del discipulado ya en marcha — sin esto, un discipulado asignado no deja ningún rastro de que efectivamente está pasando. Depende de que exista la Historia 3 (tiene que haber un Grupo con Persona y Discipulador ya asignados).
 
-**Independent Test**: Puede probarse por completo haciendo que un Discipulador con un discipulado asignado registre un encuentro con fecha y capítulos vistos, y verificando que ese registro queda visible tanto para él como para el Admin.
+**Independent Test**: Puede probarse por completo haciendo que un Discipulador con un discipulado asignado registre un encuentro con fecha y capítulos vistos, y verificando que él lo ve con sus notas y que el Admin ve el seguimiento (fecha y capítulos) sin las notas (D134).
 
 **Acceptance Scenarios**:
 
 1. **Given** un Discipulador con un discipulado asignado, **When** registra un encuentro, **Then** puede cargar la fecha, los capítulos del libro vistos, y notas opcionales.
-2. **Given** varios encuentros ya registrados para un discipulado, **When** el Discipulador o el Admin los consultan, **Then** ven el historial completo en orden, como registro del progreso.
+2. **Given** varios encuentros ya registrados para un discipulado, **When** el Discipulador los consulta, **Then** ve el historial completo en orden, con sus notas, como registro del progreso.
+6. **Given** un discipulado con Encuentros registrados, **When** el Admin o el Pastor lo consultan desde la vista administrativa de discipulados, **Then** ven quién discipula a quién, desde cuándo, cuántos Encuentros hubo, cuándo y qué capítulos se vieron — **sin el texto de las notas**, que queda solo para el Discipulador (D134).
 3. **Given** un discipulado asignado a un Discipulador, **When** ese Discipulador consulta los datos de contacto de la Persona (teléfono, dirección) para coordinar el próximo encuentro, **Then** el sistema se los muestra.
 4. **Given** un Discipulador con sesión iniciada, **When** intenta ver encuentros o datos de contacto de un discipulado que no es suyo, **Then** el sistema se lo impide.
 5. **Given** que Vida Nueva no libera contenido digital por cronograma, **When** se registra o consulta un encuentro, **Then** el sistema no ofrece ni exige nada relacionado con liberación programada de contenido — solo el registro histórico de la reunión.
@@ -183,7 +185,7 @@ Un Discipulador que considera que ya recorrió con su discípulo todo el conteni
 - **FR-007**: El sistema DEBE indicarle al Admin, de forma explícita, si el listado de FR-006 no tiene ningún Discipulador disponible, en vez de mostrar una lista vacía sin explicación.
 - **FR-008**: Cuando el Admin rechaza una Solicitud de Discipulado, el sistema DEBE dejarla registrada como rechazada, sin crear ningún Grupo ni Inscripción, y NO DEBE impedirle a esa Persona volver a crear una Solicitud más adelante.
 - **FR-009**: El sistema DEBE permitir que un Discipulador con al menos un discipulado asignado registre, para cada encuentro con su discípulo, la fecha, los capítulos del libro físico vistos, y notas opcionales.
-- **FR-010**: El sistema DEBE mostrar, tanto al Discipulador como al Admin, el historial completo de encuentros registrados de un discipulado.
+- **FR-010**: El sistema DEBE mostrarle al Discipulador el historial completo de Encuentros de sus propios discipulados, con sus notas. Al Admin y al Pastor, en la vista administrativa de discipulados, les DEBE mostrar el seguimiento — quién discipula a quién, desde cuándo, cuántos Encuentros hubo, cuándo y qué capítulos se vieron — y NO DEBE mostrarles el texto de las notas (D134).
 - **FR-011**: El sistema DEBE mostrarle a un Discipulador los datos de contacto (teléfono, dirección) únicamente de las Personas de sus propios discipulados asignados, y NO DEBE mostrarle los de discipulados asignados a otros Discipuladores.
 - **FR-012**: El sistema NO DEBE ofrecer liberación de contenido digital por cronograma para Vida Nueva — el registro de encuentros (FR-009) es el único mecanismo de seguimiento de avance.
 - **FR-013**: El sistema DEBE registrar una Asistencia (presente/ausente) de la Persona por cada Encuentro, también en la variante individual — no alcanza con la existencia del Encuentro para inferir presencia, porque de lo contrario una falta (el Discipulador se presentó y el discípulo no) no tendría forma de quedar registrada, e `Inscripción.dada_de_baja` por exceso de faltas (docs/04-dominio-entidades.md) quedaría sin insumo.
@@ -205,7 +207,7 @@ Un Discipulador que considera que ya recorrió con su discípulo todo el conteni
 - **FR-026**: El sistema DEBE mostrarle a la Persona el estado de su propia Solicitud de Discipulado (pendiente de revisión / aprobada / rechazada) (H-126), también cuando la Solicitud la creó otra persona en su nombre (FR-002) — la vista es la misma para todas las Personas con acceso a la app; una Persona sin acceso (D97) no tiene vista propia.
 - **FR-027**: Una vez aprobada la Solicitud, el sistema DEBE mostrarle a la Persona que su discipulado está en curso y quién es el Discipulador que le fue asignado.
 - **FR-028**: Cuando se confirma la finalización de un discipulado, el sistema DEBE mostrarle a la Persona que ese proceso terminó.
-- **FR-029**: El sistema NO DEBE mostrarle a la Persona las notas que su Discipulador cargó en cada Encuentro — son un registro de seguimiento pastoral para el Discipulador y el Admin, no un informe para la persona discipulada. Mostrarle otro dato del avance (ej. los capítulos vistos) queda fuera de este spec, como una decisión aparte y explícita todavía no tomada.
+- **FR-029**: El sistema NO DEBE mostrarle a la Persona las notas que su Discipulador cargó en cada Encuentro — son un registro de seguimiento pastoral solo para el Discipulador (D134), no un informe para la persona discipulada. Mostrarle otro dato del avance (ej. los capítulos vistos) queda fuera de este spec, como una decisión aparte y explícita todavía no tomada.
 - **FR-030**: El sistema DEBE permitir que un Admin reasigne el Discipulador de un discipulado en curso, eligiendo al nuevo del listado de FR-006. Al reasignar: los Encuentros y Asistencias ya registrados quedan en el Grupo; queda registrado quién era el Discipulador anterior, quién el nuevo, quién hizo el cambio y cuándo; y el Discipulador anterior deja de tener acceso a ese discipulado y a los datos de contacto de la Persona (FR-011). La Persona ve a su nuevo Discipulador (FR-027).
 
 ### Key Entities *(include if feature involves data)*
@@ -215,7 +217,7 @@ Un Discipulador que considera que ya recorrió con su discípulo todo el conteni
 - **Grupo**: la instancia concreta de un discipulado — nace al aprobarse una Solicitud. Tiene un estado, y puede tener una finalización propuesta, que el Admin confirma o rechaza (FR-019a: al rechazarse vuelve a "en curso" y se puede volver a proponer). Un Grupo admite una o más Inscripciones (D44, FR-014): en la variante individual de este spec, cada Grupo tiene exactamente una, pero el vínculo Grupo–Inscripción NO se modela como uno a uno — es lo que permite que la futura variante grupal (fuera de alcance acá) se sume como otro `Curso.tipo` sin una migración de datos.
 - **Inscripción**: vincula a la Persona con su Grupo de discipulado. Tiene un estado (activa / completada, entre otros posibles) — pasa a completada cuando se confirma la finalización del Grupo.
 - **Liderazgo**: vincula al Discipulador con el Grupo que le fue asignado. Una reasignación (FR-030) cierra el Liderazgo vigente y abre uno nuevo, sin borrar el anterior: así queda registrado quién lideró el Grupo y hasta cuándo.
-- **Encuentro**: el registro de una reunión entre el Discipulador y su discípulo — fecha, capítulos vistos, notas opcionales. Es el mecanismo central de seguimiento de avance en Vida Nueva.
+- **Encuentro**: el registro de una reunión entre el Discipulador y su discípulo — fecha, capítulos vistos, notas opcionales (las notas las ve solo el Discipulador, D134). Es el mecanismo central de seguimiento de avance en Vida Nueva.
 - **Asistencia**: registro de presente/ausente de una Persona en un Encuentro puntual — se registra siempre, también en la variante individual (FR-013), como presente por defecto (FR-013a). Es el insumo que permite dar de baja una Inscripción por exceso de faltas.
 - **Disponibilidad del Discipulador**: combina un toggle manual (si el Discipulador está dispuesto a tomar un discipulado nuevo) con períodos de no disponibilidad por rango de fechas — determina quién aparece en el listado que ve el Admin al asignar (FR-006).
 
