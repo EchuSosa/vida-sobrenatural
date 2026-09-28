@@ -58,6 +58,22 @@ const TITULOS: Record<ErrorCode, string> = {
   SESION_SIN_PERSONA: 'La sesión no tiene una Persona asociada',
   DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS: 'Tiene discipulados activos a cargo',
   DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS: 'No se puede verificar discipulados activos',
+  // specs/004-vida-nueva-discipulado.
+  SOLICITUD_DISCIPULADO_YA_PENDIENTE: 'Ya tenés un pedido de Vida Nueva en curso',
+  VIDA_NUEVA_EN_CURSO_O_COMPLETADA: 'Ya estás cursando o completaste Vida Nueva',
+  EDAD_INSUFICIENTE_PARA_PEDIR_SOLO: 'Este pedido lo hace tu mamá, papá o tutor',
+  SOLICITUD_NO_PENDIENTE: 'La Solicitud ya no está pendiente',
+  SOLICITUD_NO_PROPUESTA: 'La Solicitud no tiene una propuesta en curso',
+  DISCIPULADOR_NO_DISPONIBLE: 'El Discipulador ya no está disponible',
+  GRUPO_SIN_LUGAR: 'El Grupo no tiene lugar',
+  PROPUESTA_NO_VIGENTE: 'La propuesta ya no está vigente',
+  DISCIPULADO_NO_EN_CURSO: 'El discipulado no está en curso',
+  FINALIZACION_NO_PROPUESTA: 'No hay una finalización propuesta',
+  FINALIZACION_YA_PROPUESTA: 'La finalización ya está propuesta',
+  BAJA_NO_PROPUESTA: 'No hay una baja propuesta',
+  BAJA_YA_PROPUESTA: 'La baja ya está propuesta',
+  REASIGNACION_AL_MISMO_DISCIPULADOR: 'Es el Discipulador actual',
+  REASIGNACION_YA_PROPUESTA: 'La reasignación ya está propuesta',
   ERROR_INTERNO: 'Error interno',
 };
 
