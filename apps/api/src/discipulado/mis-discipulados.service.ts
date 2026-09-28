@@ -17,6 +17,16 @@ type Db = PrismaService | Prisma.TransactionClient;
 const MAYORIA_DE_EDAD_CONTACTO_TUTOR = 18;
 
 /**
+ * `MiDiscipulado` con el `personaId` de cada Persona: las asistencias de un
+ * Encuentro vienen por `personaId` y la pantalla necesita cruzarlas con la
+ * Inscripción. TODO(merge): sumar `personaId` a `MiDiscipulado.personas` en
+ * `packages/shared-types/src/discipulado.ts` (archivo del lote 0) y borrar esto.
+ */
+export type MiDiscipuladoConIds = Omit<MiDiscipulado, 'personas'> & {
+  personas: Array<MiDiscipulado['personas'][number] & { personaId: string }>;
+};
+
+/**
  * specs/004, Historia 5 (D134, FR-011): el escritorio del Discipulador. Solo
  * lo que lidera HOY (Liderazgo vigente): con el contacto de cada Persona y,
  * en el detalle, los Encuentros con notas — incluidas las de un Discipulador
@@ -27,7 +37,7 @@ export class MisDiscipuladosService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Los Grupos que lidera, en curso primero. */
-  async misDiscipulados(discipuladorId: string): Promise<MiDiscipulado[]> {
+  async misDiscipulados(discipuladorId: string): Promise<MiDiscipuladoConIds[]> {
     const liderazgos = await this.prisma.liderazgo.findMany({
       where: { personaId: discipuladorId, hasta: null },
       select: { grupoId: true, desde: true },
@@ -38,7 +48,7 @@ export class MisDiscipuladosService {
   }
 
   /** GET /discipulado/mis-discipulados/:grupoId — 404 si no tiene el Liderazgo vigente (Principio V). */
-  async miDiscipulado(discipuladorId: string, grupoId: string): Promise<MiDiscipulado & { encuentros: EncuentroDelDiscipulador[] }> {
+  async miDiscipulado(discipuladorId: string, grupoId: string): Promise<MiDiscipuladoConIds & { encuentros: EncuentroDelDiscipulador[] }> {
     const liderazgo = await exigirLiderazgoVigente(this.prisma, discipuladorId, grupoId);
     const [discipulado] = await armarMisDiscipulados(this.prisma, discipuladorId, [{ grupoId, desde: liderazgo.desde }]);
     const encuentros = await this.prisma.encuentro.findMany({
@@ -83,7 +93,7 @@ async function armarMisDiscipulados(
   db: Db,
   discipuladorId: string,
   liderazgos: Array<{ grupoId: string; desde: Date }>,
-): Promise<MiDiscipulado[]> {
+): Promise<MiDiscipuladoConIds[]> {
   if (liderazgos.length === 0) return [];
   const grupoIds = liderazgos.map((l) => l.grupoId);
   const [grupos, inscripciones, discipulador] = await Promise.all([
@@ -137,7 +147,7 @@ async function armarMisDiscipulados(
   const grupoPorId = new Map(grupos.map((g) => [g.id, g]));
   const maximo = discipulador?.maxPersonasPorGrupo ?? 1;
 
-  return liderazgos.flatMap((l): MiDiscipulado[] => {
+  return liderazgos.flatMap((l): MiDiscipuladoConIds[] => {
     const g = grupoPorId.get(l.grupoId);
     if (!g) return [];
     const delGrupo = inscripciones.filter((i) => i.grupoId === g.id);
@@ -151,6 +161,7 @@ async function armarMisDiscipulados(
           return [
             {
               inscripcionId: i.id,
+              personaId: p.id,
               nombre: p.nombre,
               apellido: p.apellido,
               edad,

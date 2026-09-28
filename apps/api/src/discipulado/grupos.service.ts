@@ -22,7 +22,20 @@ export interface FiltrosGrupos {
   take: number;
 }
 
-export type DetalleDiscipuladoAdmin = DiscipuladoResumen & {
+/**
+ * Cada Persona con su Inscripción y la baja pedida (fecha y motivo): el Admin
+ * confirma o rechaza la baja por Inscripción y el motivo es para él (FR-042).
+ * TODO(merge): sumar estos campos a `DiscipuladoResumen.personas` en
+ * `packages/shared-types/src/discipulado.ts` (archivo del lote 0) y borrar esto.
+ */
+export type PersonaDeResumen = DiscipuladoResumen['personas'][number] & {
+  inscripcionId: string;
+  bajaPropuestaEn: string | null;
+  bajaPropuestaMotivo: string | null;
+};
+export type ResumenConInscripciones = Omit<DiscipuladoResumen, 'personas'> & { personas: PersonaDeResumen[] };
+
+export type DetalleDiscipuladoAdmin = ResumenConInscripciones & {
   encuentros: EncuentroAdministrativo[];
   liderazgos: Array<{ discipulador: PersonaBreve; desde: string; hasta: string | null }>;
   franjasDelGrupo: Franja[];
@@ -38,7 +51,7 @@ export type DetalleDiscipuladoAdmin = DiscipuladoResumen & {
 export class GruposService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listar(filtros: FiltrosGrupos): Promise<Pagina<DiscipuladoResumen>> {
+  async listar(filtros: FiltrosGrupos): Promise<Pagina<ResumenConInscripciones>> {
     const where = await this.whereDe(filtros);
     const [grupos, total] = await Promise.all([
       this.prisma.grupo.findMany({
@@ -113,7 +126,7 @@ export class GruposService {
   }
 
   /** Arma los `DiscipuladoResumen` de estos Grupos en pocas consultas (no una por fila, H-42), en el mismo orden. */
-  private async resumenes(grupoIds: string[]): Promise<DiscipuladoResumen[]> {
+  private async resumenes(grupoIds: string[]): Promise<ResumenConInscripciones[]> {
     if (grupoIds.length === 0) return [];
     const [grupos, inscripciones, liderazgos, ultimos, reasignaciones] = await Promise.all([
       this.prisma.grupo.findMany({
@@ -122,7 +135,7 @@ export class GruposService {
       }),
       this.prisma.inscripcion.findMany({
         where: { grupoId: { in: grupoIds } },
-        select: { grupoId: true, personaId: true, estado: true, bajaPropuestaEn: true },
+        select: { id: true, grupoId: true, personaId: true, estado: true, bajaPropuestaEn: true, bajaPropuestaMotivo: true },
         orderBy: { createdAt: 'asc' },
       }),
       this.prisma.liderazgo.findMany({ where: { grupoId: { in: grupoIds }, hasta: null }, select: { grupoId: true, personaId: true, desde: true } }),
@@ -156,7 +169,7 @@ export class GruposService {
     const ultimoPorGrupo = new Map(ultimos.map((u) => [u.grupoId, u]));
     const reasignacionPorGrupo = new Map(reasignaciones.map((r) => [r.grupoId, r]));
 
-    return grupoIds.flatMap((id): DiscipuladoResumen[] => {
+    return grupoIds.flatMap((id): ResumenConInscripciones[] => {
       const g = grupoPorId.get(id);
       if (!g) return [];
       const delGrupo = inscripciones.filter((i) => i.grupoId === id);
@@ -170,6 +183,9 @@ export class GruposService {
             ...breve(i.personaId),
             estadoInscripcion: i.estado,
             bajaPropuesta: i.estado === 'activa' && i.bajaPropuestaEn !== null,
+            inscripcionId: i.id,
+            bajaPropuestaEn: i.estado === 'activa' ? (i.bajaPropuestaEn?.toISOString() ?? null) : null,
+            bajaPropuestaMotivo: i.estado === 'activa' ? i.bajaPropuestaMotivo : null,
           })),
           discipulador: lider ? breve(lider.personaId) : { id: '', nombre: '', apellido: '' },
           desde: g.createdAt.toISOString(),
