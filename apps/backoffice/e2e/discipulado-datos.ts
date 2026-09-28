@@ -135,3 +135,21 @@ export async function fijarMaximoPorGrupo(email: string, maximo: number): Promis
 export async function sinScrollHorizontal(page: import('@playwright/test').Page): Promise<boolean> {
   return page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
 }
+
+/** Un Encuentro ya registrado, con una Asistencia presente por Inscripción activa. */
+export async function crearEncuentro(grupoId: string, datos: { fecha: string; capitulos: string; notas?: string }): Promise<string> {
+  return conBase(async (c) => {
+    const { rows: lider } = await c.query<{ personaId: string }>('SELECT "personaId" FROM liderazgos WHERE "grupoId" = $1 AND hasta IS NULL', [grupoId]);
+    const { rows } = await c.query<{ id: string }>(
+      `INSERT INTO encuentros (id, "grupoId", fecha, capitulos, notas, "registradoPorId", "updatedAt")
+       VALUES (gen_random_uuid(), $1, $2::date, $3, $4, $5, now()) RETURNING id`,
+      [grupoId, datos.fecha, datos.capitulos, datos.notas ?? null, lider[0].personaId],
+    );
+    await c.query(
+      `INSERT INTO asistencias (id, "encuentroId", "inscripcionId", presente)
+       SELECT gen_random_uuid(), $1, id, true FROM inscripciones WHERE "grupoId" = $2 AND estado = 'activa'`,
+      [rows[0].id, grupoId],
+    );
+    return rows[0].id;
+  });
+}
