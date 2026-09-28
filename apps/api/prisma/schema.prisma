@@ -203,6 +203,14 @@ model Persona {
   // Persona (CambioDeRol, abajo). Prisma exige el lado inverso de la relación.
   cambiosDeRol CambioDeRol[]
 
+  // specs/004-vida-nueva-discipulado (Historia 4). `disponibleDiscipulado`
+  // arranca APAGADO (FR-015, Echo 2026-09-28): el Discipulador carga su agenda
+  // (FranjaAgenda) y lo prende él; la agenda + el toggle son la condición para
+  // aparecer en el cruce (FR-006). `maxPersonasPorGrupo`: hasta cuántas Personas
+  // acepta por Grupo (FR-045), 1..MAX_PERSONAS_POR_GRUPO_VIDA_NUEVA (CHECK).
+  disponibleDiscipulado Boolean @default(false)
+  maxPersonasPorGrupo   Int     @default(1)
+
   // H-42 (revisión manual, revisión de código): PostgreSQL no indexa las
   // claves foráneas por sí solo — `sedeId` lo necesita como FK.
   // `estado` es el filtro de `findPendientesTutor` (y de cualquier consulta
@@ -372,4 +380,278 @@ model CambioDeRol {
   // H-42: el filtro frecuente es "el historial de esta Persona".
   @@index([personaId])
   @@map("cambios_de_rol")
+}
+
+// --- Vida Nueva / Discipulado (specs/004-vida-nueva-discipulado) ---
+// Nombres alineados con docs/04-dominio-entidades.md (Principio II). Las
+// referencias a Persona y los "actores" (creadoPor, revisadoPor, propuestaPor,
+// registradoPor, cerradoPor) son referencias lógicas —String sin @relation—,
+// como Persona.altaPor y CambioDeRol.realizadoPorId: el nombre se resuelve con
+// una segunda consulta. Los CHECK y los índices únicos parciales van en SQL a
+// mano en la migración (patrón H-140), no se pueden expresar en el schema.
+
+enum CategoriaCurso {
+  vida_nueva
+}
+
+enum TipoCurso {
+  individual
+  grupal
+}
+
+enum ModalidadCurso {
+  seguimiento_por_encuentros
+}
+
+enum EstadoSolicitud {
+  pendiente
+  propuesta
+  aprobada
+  rechazada
+  retirada
+}
+
+enum TipoPropuesta {
+  nueva
+  reasignacion
+}
+
+enum EstadoPropuesta {
+  pendiente
+  aceptada
+  declinada
+  retirada
+}
+
+enum RetiradaPor {
+  admin
+  persona
+}
+
+enum EstadoGrupo {
+  en_curso
+  finalizado
+}
+
+enum MotivoCierreGrupo {
+  completado
+  abandonado
+}
+
+enum EstadoInscripcion {
+  activa
+  completada
+  dada_de_baja
+  abandono
+}
+
+model Curso {
+  id        String         @id @default(uuid())
+  nombre    String
+  categoria CategoriaCurso
+  tipo      TipoCurso
+  modalidad ModalidadCurso
+  activo    Boolean        @default(true)
+
+  grupos    Grupo[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // La API busca el Curso por (categoria, tipo), nunca por un id fijo.
+  @@unique([categoria, tipo])
+  @@map("cursos")
+}
+
+// FR-031: la agenda semanal del Discipulador. `inicio`/`fin` en minutos desde
+// las 0:00 (0..1440), `fin > inicio` (CHECK). Borrado lógico (FR-040).
+model FranjaAgenda {
+  id         String    @id @default(uuid())
+  personaId  String
+  diaSemana  Int
+  inicio     Int
+  fin        Int
+  eliminadaEn DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([personaId, eliminadaEn])
+  @@map("franjas_agenda")
+}
+
+// FR-032: las franjas de una Solicitud (los horarios de la Persona). Al editar
+// (FR-039) se reemplazan todas. Al menos una por Solicitud lo exige el servicio.
+model FranjaSolicitud {
+  id          String              @id @default(uuid())
+  solicitudId String
+  solicitud   SolicitudDiscipulado @relation(fields: [solicitudId], references: [id])
+  diaSemana   Int
+  inicio      Int
+  fin         Int
+
+  @@index([solicitudId])
+  @@map("franjas_solicitud")
+}
+
+model SolicitudDiscipulado {
+  id            String          @id @default(uuid())
+  personaId     String
+  estado        EstadoSolicitud @default(pendiente)
+  // null = la pidió la propia Persona; si no, el Admin/Discipulador (FR-002, D97).
+  creadoPorId   String?
+  revisadoPorId String?
+  revisadaEn    DateTime?
+  // Solo en `aprobada`. No único: varias Solicitudes pueden ir al mismo Grupo (FR-045).
+  grupoId       String?
+
+  franjas   FranjaSolicitud[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Un solo pedido abierto por Persona (pendiente|propuesta): índice único
+  // parcial en SQL a mano (FR-001).
+  @@index([personaId])
+  @@index([estado, createdAt])
+  @@index([grupoId])
+  @@map("solicitudes_discipulado")
+}
+
+// FR-036 a FR-038: el Admin propone, el Discipulador acepta o declina. Entidad
+// propia porque FR-038 pide historial (a quién, cuándo, cómo terminó).
+model PropuestaDiscipulado {
+  id             String          @id @default(uuid())
+  tipo           TipoPropuesta
+  // `nueva` tiene solicitudId; `reasignacion` tiene grupoId (CHECK en SQL).
+  solicitudId    String?
+  grupoId        String?
+  discipuladorId String
+  // Solo en `nueva`: sumar la Persona a este Grupo en curso en vez de abrir uno (FR-045).
+  grupoDestinoId String?
+  propuestaPorId String
+  propuestaEn    DateTime        @default(now())
+  estado         EstadoPropuesta @default(pendiente)
+  respondidaEn   DateTime?
+  motivoDeclinacion String?
+  retiradaPor    RetiradaPor?
+
+  // Una `pendiente` por Solicitud y una por Grupo: índices únicos parciales en SQL.
+  @@index([solicitudId])
+  @@index([grupoId])
+  @@index([discipuladorId, estado])
+  @@map("propuestas_discipulado")
+}
+
+model Grupo {
+  id       String @id @default(uuid())
+  cursoId  String
+  curso    Curso  @relation(fields: [cursoId], references: [id])
+  // Referencia lógica a Sede (no navegamos Sede→Grupos en este spec).
+  sedeId   String
+  estado   EstadoGrupo       @default(en_curso)
+  // Solo en `finalizado`: (estado = finalizado) = (motivoCierre no es null), CHECK en SQL.
+  motivoCierre MotivoCierreGrupo?
+
+  propuestaFinalizacionEn      DateTime?
+  propuestaFinalizacionPorId   String?
+  finalizacionRechazadaEn      DateTime?
+  finalizacionRechazadaMotivo  String?
+  cerradoEn                    DateTime?
+  cerradoPorId                 String?
+
+  inscripciones Inscripcion[]
+  liderazgos    Liderazgo[]
+  encuentros    Encuentro[]
+  createdAt     DateTime @default(now())
+
+  @@index([cursoId])
+  @@index([sedeId])
+  @@index([estado])
+  @@map("grupos")
+}
+
+model Inscripcion {
+  id          String            @id @default(uuid())
+  personaId   String
+  grupoId     String
+  grupo       Grupo             @relation(fields: [grupoId], references: [id])
+  // De qué pedido nació: sus franjas son el horario de esta Persona (research #14).
+  solicitudId String            @unique
+  estado      EstadoInscripcion @default(activa)
+
+  bajaPropuestaEn     DateTime?
+  bajaPropuestaPorId  String?
+  bajaPropuestaMotivo String?
+  bajaRechazadaEn     DateTime?
+  bajaRechazadaMotivo String?
+  cerradaEn           DateTime?
+
+  asistencias Asistencia[]
+  createdAt   DateTime @default(now())
+
+  @@unique([personaId, grupoId])
+  @@index([personaId])
+  @@index([grupoId])
+  @@map("inscripciones")
+}
+
+model Liderazgo {
+  id          String    @id @default(uuid())
+  personaId   String
+  grupoId     String
+  grupo       Grupo     @relation(fields: [grupoId], references: [id])
+  desde       DateTime  @default(now())
+  // null = vigente. Lo cierra una reasignación aceptada (FR-030).
+  hasta       DateTime?
+  // La Propuesta que lo abrió (FR-037): queda quién propuso y quién aceptó.
+  propuestaId String?
+  cerradoPorId String?
+
+  // discipulados activos de una Persona (D137) y "mis discipulados".
+  @@index([personaId, hasta])
+  @@index([grupoId, hasta])
+  @@map("liderazgos")
+}
+
+model Encuentro {
+  id             String    @id @default(uuid())
+  grupoId        String
+  grupo          Grupo     @relation(fields: [grupoId], references: [id])
+  fecha          DateTime  @db.Date
+  capitulos      String
+  // Solo las ve el Discipulador vigente (D134, FR-029).
+  notas          String?
+  registradoPorId String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  asistencias Asistencia[]
+
+  @@index([grupoId, fecha])
+  @@map("encuentros")
+}
+
+model Asistencia {
+  id            String      @id @default(uuid())
+  encuentroId   String
+  encuentro     Encuentro   @relation(fields: [encuentroId], references: [id])
+  inscripcionId String
+  inscripcion   Inscripcion @relation(fields: [inscripcionId], references: [id])
+  // FR-013; true por defecto (FR-013a).
+  presente      Boolean
+
+  @@unique([encuentroId, inscripcionId])
+  @@index([inscripcionId])
+  @@map("asistencias")
+}
+
+// FR-016: período de no disponibilidad por rango de fechas civiles. `hasta >=
+// desde` (CHECK). Borrado lógico (FR-040).
+model BloqueoDisponibilidad {
+  id         String    @id @default(uuid())
+  personaId  String
+  desde      DateTime  @db.Date
+  hasta      DateTime  @db.Date
+  eliminadoEn DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([personaId, hasta])
+  @@map("bloqueos_disponibilidad")
 }
