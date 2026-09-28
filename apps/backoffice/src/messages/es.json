@@ -148,5 +148,31 @@
   },
   "comun": {
     "cerrarPanel": "Cerrar el panel"
+  },
+  "solicitudes": {},
+  "grupos": {},
+  "misDiscipulados": {},
+  "miDisponibilidad": {},
+  "inicio": {
+    "pendientes": {}
+  },
+  "franjas": {
+    "dias": [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado"
+    ],
+    "dia": "Día",
+    "desde": "Desde",
+    "hasta": "Hasta",
+    "agregar": "Agregar franja",
+    "quitar": "Quitar",
+    "sinFranjas": "Todavía no cargaste horarios.",
+    "errorRango": "La hora de fin tiene que ser posterior a la de inicio.",
+    "separador": " a "
   }
 }

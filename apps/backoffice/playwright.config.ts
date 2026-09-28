@@ -135,5 +135,14 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PUERTO_APP}`,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // specs/004 (T012b, FR-046): las pantallas del Discipulador (aceptar una
+  // propuesta, cargar la agenda) se usan desde el teléfono, así que sus specs
+  // —los que llevan `@celular` en el título— corren también en un viewport de
+  // celular, además del de escritorio. El proyecto `celular` corre SOLO esos
+  // (grep), para no duplicar el tiempo de toda la suite; el de escritorio los
+  // corre igual (el `@celular` es "también en celular", no "solo").
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'celular', grep: /@celular/, use: { ...devices['Pixel 7'] } },
+  ],
 });
