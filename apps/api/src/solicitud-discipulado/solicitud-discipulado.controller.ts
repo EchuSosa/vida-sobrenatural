@@ -71,7 +71,7 @@ export class SolicitudDiscipuladoController {
 
   @Get('solicitudes')
   @RequierePermiso('solicitudes.ver')
-  @ApiOkResponse({ description: 'specs/004, FR-025: la bandeja genérica, paginada. `estado` (lista separada por comas, por defecto pendiente,propuesta), `tipo` (hoy solo discipulado), `orden` (fecha|persona|espera), `dir`, `skip`, `take`.' })
+  @ApiOkResponse({ description: 'specs/004, FR-025: la bandeja genérica, paginada. `estado` (lista separada por comas, por defecto pendiente,propuesta), `tipo` (hoy solo discipulado), `orden` (fecha|persona|espera), `dir`, `skip`, `take`, `buscar` (nombre o apellido de la Persona).' })
   listar(
     @Query('estado') estadoParam?: string,
     @Query('tipo') tipo?: string,
@@ -79,6 +79,7 @@ export class SolicitudDiscipuladoController {
     @Query('dir') dirParam?: string,
     @Query('skip') skipParam?: string,
     @Query('take') takeParam?: string,
+    @Query('buscar') buscar?: string,
   ) {
     const skip = Math.max(0, Number(skipParam) || 0);
     const take = Math.min(100, Math.max(1, Number(takeParam) || SOLICITUDES_TAKE_DEFAULT));
@@ -87,7 +88,7 @@ export class SolicitudDiscipuladoController {
     const pedidos = (estadoParam ?? '').split(',').filter((e): e is EstadoSolicitud => ESTADOS.includes(e as EstadoSolicitud));
     const orden: OrdenBandeja = ordenParam === 'persona' || ordenParam === 'espera' ? ordenParam : 'fecha';
     const dir: 'asc' | 'desc' = dirParam === 'desc' ? 'desc' : 'asc';
-    return this.service.listar(pedidos.length > 0 ? pedidos : ESTADOS_ABIERTOS, orden, dir, skip, take);
+    return this.service.listar(pedidos.length > 0 ? pedidos : ESTADOS_ABIERTOS, orden, dir, skip, take, buscar);
   }
 
   @Get('discipulado/solicitudes/:id')

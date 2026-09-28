@@ -182,6 +182,10 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
     expect(deBeto).toMatchObject({ estado: 'pendiente', tipo: 'discipulado', creadoPor: { id: ids.disc } });
     expect(bandeja.body.items.every((s: { estado: string }) => ['pendiente', 'propuesta'].includes(s.estado))).toBe(true);
 
+    // `buscar` filtra por nombre en la base, con el total de lo filtrado.
+    const buscada = await request(app.getHttpServer()).get(`/solicitudes?buscar=beto%20Integraci`).set('Authorization', `Bearer ${admin}`);
+    expect(buscada.body).toMatchObject({ total: 1, items: [{ persona: { id: ids.beto } }] });
+
     const pastor = await request(app.getHttpServer())
       .get(`/discipulado/solicitudes/${deBeto.id}`)
       .set('Authorization', `Bearer ${await tokenDe('pastor', ['miembro_registrado', 'pastor'])}`);

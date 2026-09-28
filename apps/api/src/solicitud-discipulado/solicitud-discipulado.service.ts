@@ -186,7 +186,7 @@ export class SolicitudDiscipuladoService {
    * Persona (referencia lógica), así que el orden por persona y por espera
    * se resuelve en SQL con un JOIN; los datos de cada fila, en lote.
    * `espera` = desde cuándo espera algo: la propuesta vigente o, si no hay,
-   * el pedido.
+   * el pedido. `buscar` filtra por nombre y apellido de la Persona, en la base.
    */
   async listar(
     estados: EstadoSolicitud[],
@@ -194,8 +194,13 @@ export class SolicitudDiscipuladoService {
     dir: 'asc' | 'desc',
     skip: number,
     take: number,
+    buscar?: string,
   ): Promise<Pagina<SolicitudResumen>> {
-    const filtro = Prisma.sql`s."estado"::text IN (${Prisma.join(estados)})`;
+    const termino = buscar?.trim();
+    const porNombre = termino
+      ? Prisma.sql`AND (p."nombre" ILIKE ${`%${termino}%`} OR p."apellido" ILIKE ${`%${termino}%`} OR (p."nombre" || ' ' || p."apellido") ILIKE ${`%${termino}%`})`
+      : Prisma.empty;
+    const filtro = Prisma.sql`s."estado"::text IN (${Prisma.join(estados)}) ${porNombre}`;
     const direccion = dir === 'desc' ? Prisma.sql`DESC` : Prisma.sql`ASC`;
     const criterio =
       orden === 'persona'
@@ -213,7 +218,9 @@ export class SolicitudDiscipuladoService {
         ORDER BY ${criterio}, s."id" ASC
         OFFSET ${skip} LIMIT ${take}`,
       this.prisma.$queryRaw<{ total: bigint }[]>`
-        SELECT COUNT(*)::bigint AS "total" FROM "solicitudes_discipulado" s WHERE ${filtro}`,
+        SELECT COUNT(*)::bigint AS "total" FROM "solicitudes_discipulado" s
+        JOIN "personas" p ON p."id" = s."personaId"
+        WHERE ${filtro}`,
     ]);
     const ids = filas.map((f) => f.id);
     const porId = new Map((await this.resumenes(ids)).map((r) => [r.id, r]));
