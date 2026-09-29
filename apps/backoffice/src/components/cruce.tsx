@@ -67,7 +67,8 @@ function TarjetaDiscipulador({
             </span>
           )}
         </span>
-        <Button type="button" size="sm" disabled={disabled} onClick={() => onElegir(d.id)}>
+        {/* Echu (merge de la 004): en una lista, el botón de cada ítem es outline. */}
+        <Button type="button" variant="outline" size="sm" disabled={disabled} onClick={() => onElegir(d.id)}>
           {etiquetas.elegir}
         </Button>
       </div>

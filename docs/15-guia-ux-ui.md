@@ -29,6 +29,8 @@ No se inventa un sistema propio: se toman convenciones probadas.
 | Terciario | Solo texto (link) | Volver, ver más, acciones menores |
 | Destructivo | Relleno rojo + ícono | Dar de baja, rechazar, cancelar inscripción, desactivar |
 
+**En una lista, el botón de cada ítem es de contorno** (Echu, merge de la 004): repetido en cada fila, el relleno deja de marcar cuál es la acción principal. El relleno queda para la acción principal de la pantalla.
+
 **Textos:**
 - Siempre un verbo concreto que describa el resultado: "Inscribirme", "Enviar solicitud", "Aprobar", "Rechazar postulación". Nunca "Aceptar", "OK" o "Sí" solos.
 - **Evitar "Cancelar" como botón de cierre**, porque existe la acción de negocio "Cancelar inscripción". En diálogos: "Sí, cancelar inscripción" / "No, mantenerla". Para cerrar sin hacer nada: "Volver" o "Cerrar".

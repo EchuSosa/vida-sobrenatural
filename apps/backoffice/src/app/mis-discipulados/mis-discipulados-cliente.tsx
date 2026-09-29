@@ -194,10 +194,12 @@ function TarjetaPropuesta({ propuesta, apiToken, puedeGestionar }: { propuesta: 
 
         {puedeGestionar && (
           // docs/15, Celular: apiladas a todo el ancho, la principal arriba; en escritorio, a la derecha.
+          // Echu (merge de la 004): en una lista, el botón de cada ítem es outline; el lleno queda
+          // para la acción principal de la pantalla.
           <div className="flex flex-col gap-2 pt-1 sm:flex-row-reverse sm:justify-start">
             <ConfirmDestructiveDialog
               trigger={
-                <Button size="xl" className="w-full sm:w-auto" loading={aceptando} loadingText={t('propuestas.aceptando')}>
+                <Button size="xl" variant="outline" className="w-full sm:w-auto" loading={aceptando} loadingText={t('propuestas.aceptando')}>
                   {t('propuestas.aceptar', { nombre: propuesta.persona.nombre })}
                 </Button>
               }
