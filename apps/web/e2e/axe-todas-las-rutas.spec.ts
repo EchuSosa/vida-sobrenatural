@@ -1,4 +1,4 @@
-import { test, expect, auditar, registrarPersonaDeTest } from './helpers';
+import { test, expect, auditar, registrarPersonaDeTest, usarTemaOscuro, esperarTema } from './helpers';
 import { RUTAS_PUBLICAS } from '../src/app/sitemap';
 import { NAV_APP } from '../src/config/nav-app';
 
@@ -12,6 +12,9 @@ import { NAV_APP } from '../src/config/nav-app';
  * no alcanza para forzar oscuro (next-themes usa el `defaultTheme` fijo
  * cuando no hay nada guardado, sin mirar el sistema). Se fuerza escribiendo
  * la misma clave de localStorage que lee next-themes antes de cada navegación.
+ * Con sesión eso no alcanza: `SincronizarTema` pisa localStorage con la
+ * preferencia guardada de la Persona, así que ahí se guarda `oscuro` y se
+ * verifica la clase `dark` antes de auditar (merge de la 004).
  *
  * H-149: UN test por ruta, no uno que las recorra todas. Recorriéndolas en
  * un solo `test()`, las públicas vivían al borde del timeout de 30 s en CI
@@ -35,6 +38,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
         test(`${ruta} sin violaciones de axe`, async ({ page }) => {
           await page.goto(ruta);
           await page.waitForLoadState('networkidle');
+          await esperarTema(page, tema);
           const { violations } = await auditar(page);
           expect(violations, `${ruta}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
         });
@@ -46,8 +50,10 @@ for (const tema of ['claro', 'oscuro'] as const) {
         test(`${item.href} sin violaciones de axe`, async ({ page }) => {
           const email = `e2e-axe-${tema}${item.href.replace(/\//g, '-')}-${Date.now()}@example.com`;
           await registrarPersonaDeTest(page, email);
+          if (tema === 'oscuro') await usarTemaOscuro(page, email);
           await page.goto(item.href);
           await page.waitForLoadState('networkidle');
+          await esperarTema(page, tema);
           const { violations } = await auditar(page);
           expect(violations, `${item.href}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
         });

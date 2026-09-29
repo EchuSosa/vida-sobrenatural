@@ -1,4 +1,4 @@
-import { test, expect, loguearseComoTest, registrarPersonaDeTest, auditar } from './helpers';
+import { test, expect, loguearseComoTest, registrarPersonaDeTest, auditar, usarTemaOscuro, esperarTema } from './helpers';
 
 /**
  * H-50 (revisión manual ronda 4): errores de validación por campo — mensaje
@@ -27,8 +27,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 400/);
       const email = `e2e-h50-perfil-${colorScheme}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
+      if (colorScheme === 'dark') await usarTemaOscuro(page, email);
       await page.goto('/perfil');
       await page.waitForLoadState('networkidle');
+      await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
       const telefono = page.getByLabel('Número de teléfono');
       await telefono.fill('123');
@@ -62,8 +64,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
     }) => {
       const email = `e2e-h72-perfil-${colorScheme}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
+      if (colorScheme === 'dark') await usarTemaOscuro(page, email);
       await page.goto('/perfil');
       await page.waitForLoadState('networkidle');
+      await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
       const telefono = page.getByLabel('Número de teléfono');
       const errorTelefono = page.locator('#campo-telefono-error');

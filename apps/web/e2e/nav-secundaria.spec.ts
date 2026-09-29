@@ -1,4 +1,4 @@
-import { test, expect, registrarPersonaDeTest, auditar } from './helpers';
+import { test, expect, registrarPersonaDeTest, auditar, usarTemaOscuro, esperarTema } from './helpers';
 
 /**
  * H-37/H-38 (revisión manual ronda 3, docs/14-navegacion.md secciones 1 y 2):
@@ -17,9 +17,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       test('el panel "Más" de la app lleva a una sección pública, que ofrece volver', async ({ page }) => {
         const email = `e2e-nav-mas-celular-${colorScheme}-${Date.now()}@example.com`;
         await registrarPersonaDeTest(page, email);
+        if (colorScheme === 'dark') await usarTemaOscuro(page, email);
 
         await page.goto('/inicio');
         await page.waitForLoadState('networkidle');
+        await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
         // H-87: la barra superior de la app en celular mostraba "Vida
         // Sobrenatural" en texto pelado, sin marca — ahora el isotipo.
@@ -46,9 +48,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       test('el panel hamburguesa público incluye Perfil, tema y cerrar sesión con sesión activa', async ({ page }) => {
         const email = `e2e-menu-usuario-celular-${colorScheme}-${Date.now()}@example.com`;
         await registrarPersonaDeTest(page, email);
+        if (colorScheme === 'dark') await usarTemaOscuro(page, email);
 
         await page.goto('/nosotros');
         await page.waitForLoadState('networkidle');
+        await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
         await page.getByRole('button', { name: 'Abrir menú' }).click();
         const panel = page.getByRole('dialog');
@@ -67,9 +71,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       test('el menú "Más" de la app agrupa las secciones públicas', async ({ page }) => {
         const email = `e2e-nav-mas-escritorio-${colorScheme}-${Date.now()}@example.com`;
         await registrarPersonaDeTest(page, email);
+        if (colorScheme === 'dark') await usarTemaOscuro(page, email);
 
         await page.goto('/inicio');
         await page.waitForLoadState('networkidle');
+        await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
         await page.getByRole('button', { name: 'Más' }).click();
         const menu = page.getByRole('menu');
@@ -99,9 +105,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       test('el menú de usuario del header público ofrece Perfil, tema y cerrar sesión', async ({ page }) => {
         const email = `e2e-menu-usuario-escritorio-${colorScheme}-${Date.now()}@example.com`;
         await registrarPersonaDeTest(page, email);
+        if (colorScheme === 'dark') await usarTemaOscuro(page, email);
 
         await page.goto('/nosotros');
         await page.waitForLoadState('networkidle');
+        await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
         // El trigger muestra session.user.name — 'Visitante de Test' para el proveedor test-login.
         await page.getByRole('button', { name: 'Visitante de Test' }).click();
@@ -134,9 +142,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       }) => {
         const email = `e2e-perfil-app-escritorio-${colorScheme}-${Date.now()}@example.com`;
         await registrarPersonaDeTest(page, email);
+        if (colorScheme === 'dark') await usarTemaOscuro(page, email);
 
         await page.goto('/inicio');
         await page.waitForLoadState('networkidle');
+        await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
         const barra = page.getByRole('navigation', { name: 'Principal' });
         await barra.getByRole('button', { name: 'Perfil' }).click();

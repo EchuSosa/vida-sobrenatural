@@ -1,5 +1,5 @@
 import { request as playwrightRequest, type Page } from '@playwright/test';
-import { test, expect, auditar, loguearseComoTest, registrarPersonaDeTest } from './helpers';
+import { test, expect, auditar, loguearseComoTest, registrarPersonaDeTest, usarTemaOscuro, esperarTema } from './helpers';
 
 /**
  * specs/004, Historias 1 y 2 (T021, T035): Vida Nueva en Mi camino, de punta
@@ -83,21 +83,9 @@ function tarjeta(page: Page) {
   return page.getByRole('region', { name: 'Vida Nueva' });
 }
 
-/**
- * D95/T078: `SincronizarTema` aplica la preferencia GUARDADA de la Persona
- * (`claro` por defecto) apenas hay sesión, y pisa lo que haya en
- * localStorage. Para auditar el oscuro de verdad, la Persona del test guarda
- * `oscuro` (como haría desde Perfil) y vuelve a iniciar sesión.
- */
-async function usarTema(page: Page, baseURL: string, email: string, tema: 'claro' | 'oscuro') {
-  if (tema === 'claro') return;
-  await api(await tokenDe(baseURL, email), 'PATCH', '/personas/me/preferencias', { temaPreferido: 'oscuro' });
-  await loguearseComoTest(page, email);
-}
-
+/** Con el tema verificado en `<html>` antes de auditar (ver `usarTemaOscuro` en helpers.ts). */
 async function sinViolaciones(page: Page, tema: 'claro' | 'oscuro') {
-  if (tema === 'oscuro') await expect(page.locator('html')).toHaveClass(/dark/);
-  else await expect(page.locator('html')).not.toHaveClass(/dark/);
+  await esperarTema(page, tema);
   const { violations } = await auditar(page);
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
 }
@@ -109,7 +97,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
     test('un menor de 12 no ve el botón de pedir y sí el texto del tutor (FR-044)', async ({ page, baseURL }) => {
       const email = `e2e-mi-camino-menor-${tema}-${Date.now()}@example.com`;
       await registrarMenorActivo(page, baseURL!, email);
-      await usarTema(page, baseURL!, email, tema);
+      if (tema === 'oscuro') await usarTemaOscuro(page, email);
       await page.goto('/mi-camino');
       await page.waitForLoadState('networkidle');
 
@@ -118,10 +106,10 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page, tema);
     });
 
-    test('pedir Vida Nueva: sin franjas da el error por campo; con una, pasa a "buscando", se edita y se retira', async ({ page, baseURL }) => {
+    test('pedir Vida Nueva: sin franjas da el error por campo; con una, pasa a "buscando", se edita y se retira', async ({ page }) => {
       const email = `e2e-mi-camino-${tema}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
-      await usarTema(page, baseURL!, email, tema);
+      if (tema === 'oscuro') await usarTemaOscuro(page, email);
       await page.goto('/mi-camino');
       await page.waitForLoadState('networkidle');
       await sinViolaciones(page, tema);
@@ -172,7 +160,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
     }) => {
       const email = `e2e-mi-camino-propuesta-${tema}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
-      await usarTema(page, baseURL!, email, tema);
+      if (tema === 'oscuro') await usarTemaOscuro(page, email);
       const persona = await tokenDe(baseURL!, email);
       const { id: solicitudId } = await api(persona, 'POST', '/discipulado/solicitudes/me', {
         franjas: [{ diaSemana: 2, inicio: 18 * 60, fin: 20 * 60 }],
@@ -205,7 +193,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
     test('aceptada: ve a su Discipulador con su teléfono y no ve las notas de los Encuentros (T035)', async ({ page, baseURL }) => {
       const email = `e2e-mi-camino-aceptada-${tema}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
-      await usarTema(page, baseURL!, email, tema);
+      if (tema === 'oscuro') await usarTemaOscuro(page, email);
       const persona = await tokenDe(baseURL!, email);
       const { id: solicitudId } = await api(persona, 'POST', '/discipulado/solicitudes/me', {
         franjas: [{ diaSemana: 2, inicio: 18 * 60, fin: 20 * 60 }],

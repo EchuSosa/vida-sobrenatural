@@ -145,3 +145,32 @@ export async function registrarPersonaDeTest(page: Page, email: string) {
   await page.getByRole('button', { name: 'Registrarme' }).click();
   await expect(page).toHaveURL(/\/registro\/listo/);
 }
+
+/**
+ * Merge de la 004 (hallazgo del lote A): con sesión, `SincronizarTema` (D95,
+ * T078) aplica la preferencia GUARDADA de la Persona — `claro` por defecto —
+ * y pisa lo que haya en localStorage o en `prefers-color-scheme`. Un spec que
+ * "corre en oscuro" con una Persona registrada auditaba, en realidad, el
+ * claro dos veces. Esto guarda `oscuro` (como haría desde Perfil), vuelve a
+ * iniciar sesión para que la sesión lo traiga. Las páginas públicas no tienen
+ * `SincronizarTema` (quedan estáticas, Historia 7) y leen localStorage: por
+ * eso también se escribe ahí. Llamarlo después de registrar a la Persona;
+ * `esperarTema` antes de auditar.
+ */
+export async function usarTemaOscuro(page: Page, email: string) {
+  await page.addInitScript(() => window.localStorage.setItem('theme', 'dark'));
+  const { apiToken } = await (await page.request.get('/api/auth/session')).json();
+  const api = process.env.API_BASE_URL ?? 'http://localhost:3334';
+  const respuesta = await page.request.patch(`${api}/personas/me/preferencias`, {
+    headers: { Authorization: `Bearer ${apiToken}` },
+    data: { temaPreferido: 'oscuro' },
+  });
+  expect(respuesta.ok(), await respuesta.text()).toBe(true);
+  await loguearseComoTest(page, email);
+}
+
+/** La clase `dark` de `<html>` es la que manda: sin ella, axe mide el claro. */
+export async function esperarTema(page: Page, tema: 'claro' | 'oscuro') {
+  if (tema === 'oscuro') await expect(page.locator('html')).toHaveClass(/dark/);
+  else await expect(page.locator('html')).not.toHaveClass(/dark/);
+}
