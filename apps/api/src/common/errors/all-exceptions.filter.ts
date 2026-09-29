@@ -20,6 +20,7 @@ interface ErrorNormalizado {
   code: ErrorCode;
   detail: string;
   errors?: AppExceptionErrorField[];
+  extensiones?: Record<string, unknown>;
 }
 
 const PRISMA_NOT_FOUND = 'P2025';
@@ -57,7 +58,6 @@ const TITULOS: Record<ErrorCode, string> = {
   ADMIN_NO_PUEDE_AUTO_REVOCARSE: 'Un Admin no puede quitarse su propio rol',
   SESION_SIN_PERSONA: 'La sesión no tiene una Persona asociada',
   DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS: 'Tiene discipulados activos a cargo',
-  DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS: 'No se puede verificar discipulados activos',
   // specs/004-vida-nueva-discipulado.
   SOLICITUD_DISCIPULADO_YA_PENDIENTE: 'Ya tenés un pedido de Vida Nueva en curso',
   VIDA_NUEVA_EN_CURSO_O_COMPLETADA: 'Ya estás cursando o completaste Vida Nueva',
@@ -92,7 +92,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<RequestConId>();
     const requestId = request.id ?? 'sin-id';
 
-    const { status, code, detail, errors } = this.normalizar(exception);
+    const { status, code, detail, errors, extensiones } = this.normalizar(exception);
 
     if (status >= 500) {
       if (request.log) {
@@ -104,6 +104,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     response.status(status).json({
+      // Primero las extensiones: los miembros estándar de abajo las pisan si
+      // alguna se llamara igual (RFC 9457 §3.2).
+      ...extensiones,
       type: `https://vidasobrenatural.app/errores/${code.toLowerCase().replace(/_/g, '-')}`,
       title: TITULOS[code],
       status,
@@ -121,6 +124,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: exception.code,
         detail: exception.message,
         errors: exception.errors,
+        extensiones: exception.extensiones,
       };
     }
 

@@ -17,6 +17,10 @@ import {
 import { calcularEdad, nacidosAntesDeParaEdad } from './calcular-edad.js';
 import { RolesDeEstadoService } from './roles-de-estado.service.js';
 import { AppException } from '../common/errors/app-exception.js';
+import {
+  discipuladosActivosDeVarias,
+  propuestasPendientesDeVarias,
+} from '../discipulado/discipulados-activos.js';
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import type { ActivarPersonaDto } from './dto/activar-persona.dto.js';
 import type { ActualizarPerfilDto } from './dto/actualizar-perfil.dto.js';
@@ -417,19 +421,33 @@ export class PersonaService {
       }),
       this.prisma.persona.count({ where }),
     ]);
+    // specs/004, T056 (D137): los discipulados activos y las propuestas
+    // pendientes de TODA la página, en lote — la cantidad de consultas no
+    // crece con las filas. Los mismos datos que consulta quitarRol, para que
+    // la pantalla y la API respondan igual.
+    const ids = items.map((p) => p.id);
+    const [discipuladosPorPersona, propuestasPorPersona] = await Promise.all([
+      discipuladosActivosDeVarias(this.prisma, ids),
+      propuestasPendientesDeVarias(this.prisma, ids),
+    ]);
     // T062 (D132): por cada rol de cargo, si quien mira se lo puede quitar y,
     // si no, por qué — la misma función con la que quitarRol rechaza. La
     // pantalla no ofrece lo que la API va a rechazar.
     return {
-      items: items.map(({ adminSembrado, ...persona }) => ({
-        ...persona,
-        quitar: Object.fromEntries(
-          ROLES_DE_CARGO.map((rol) => [
-            rol,
-            puedeQuitarRol(rol, { id: persona.id, adminSembrado }, autorId),
-          ]),
-        ) as Record<RolDeCargo, ResultadoQuitarRol>,
-      })),
+      items: items.map(({ adminSembrado, ...persona }) => {
+        const datos = {
+          id: persona.id,
+          adminSembrado,
+          discipuladosActivos: discipuladosPorPersona.get(persona.id) ?? [],
+          propuestasPendientes: propuestasPorPersona.get(persona.id) ?? [],
+        };
+        return {
+          ...persona,
+          quitar: Object.fromEntries(
+            ROLES_DE_CARGO.map((rol) => [rol, puedeQuitarRol(rol, datos, autorId)]),
+          ) as Record<RolDeCargo, ResultadoQuitarRol>,
+        };
+      }),
       total,
     };
   }

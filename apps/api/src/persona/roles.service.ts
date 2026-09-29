@@ -10,6 +10,10 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { calcularEdad } from './calcular-edad.js';
 import { CambioDeRolService } from '../cambio-de-rol/cambio-de-rol.service.js';
+import {
+  discipuladosActivosDe,
+  propuestasPendientesDe,
+} from '../discipulado/discipulados-activos.js';
 
 /** T062: el estado HTTP y el detalle de cada motivo de `puedeQuitarRol`. */
 const RECHAZOS_DE_QUITAR: Record<
@@ -21,10 +25,10 @@ const RECHAZOS_DE_QUITAR: Record<
     detalle:
       'La sesión no tiene una Persona asociada: el sistema no puede registrar quién hace el cambio, así que no lo hace.',
   },
-  DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS: {
+  DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS: {
     estado: 409,
     detalle:
-      'Todavía no se puede quitar el rol de Discipulador: el sistema aún no puede verificar si esta Persona tiene discipulados a cargo.',
+      'Esta Persona tiene discipulados a cargo o propuestas pendientes: reasignalos antes de quitarle el rol de Discipulador.',
   },
   NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO: {
     estado: 409,
@@ -126,16 +130,40 @@ export class RolesService {
     return this.prisma.$transaction(async (tx) => {
       const persona = await this.bloquearOFallar(tx, personaId);
 
+      // specs/004, D137 (cierra H-127): los discipulados activos y las
+      // propuestas pendientes, consultados DESPUÉS de bloquear la fila. Aceptar
+      // una propuesta o reasignar (lote B) bloquean esta misma fila y exigen
+      // que siga teniendo el rol: si una de esas corre a la vez, una espera a
+      // la otra, y esta ve el Liderazgo que la otra dejó. Solo para
+      // `discipulador` — los otros roles no dependen de esto.
+      const [discipuladosActivos, propuestasPendientes] =
+        rol === 'discipulador'
+          ? await Promise.all([
+              discipuladosActivosDe(tx, personaId),
+              propuestasPendientesDe(tx, personaId),
+            ])
+          : [[], []];
+
       // T062 (D132): la MISMA función con la que la pantalla decide si ofrece
       // "Quitar" — no tres guardas escritas acá y otras tres allá. Evaluada con
       // la fila bloqueada (H-142): FR-002 vale aunque db:recrear-admin la marque
-      // a la vez. Incluye FR-009/H-127 (discipulador: fallo cerrado hasta el
-      // spec 004, que cambia la regla en ese único lugar), FR-002 y FR-010 —
-      // ver el orden y el porqué en `puedeQuitarRol` (shared-types).
-      const evaluacion = puedeQuitarRol(rol, persona, realizadoPorId);
+      // a la vez. Incluye FR-009/FR-043 (discipulador con discipulados o
+      // propuestas), FR-002 y FR-010 — ver el orden y el porqué en
+      // `puedeQuitarRol` (shared-types).
+      const evaluacion = puedeQuitarRol(
+        rol,
+        { ...persona, discipuladosActivos, propuestasPendientes },
+        realizadoPorId,
+      );
       if (!evaluacion.puede) {
         const { estado, detalle } = RECHAZOS_DE_QUITAR[evaluacion.motivo];
-        throw new AppException(evaluacion.motivo, estado, detalle);
+        // FR-043: el 409 nombra cuáles, para que la pantalla enlace a cada uno
+        // (contracts/discipulado-api.md, "Cambio al contrato del spec 005").
+        const extensiones =
+          evaluacion.motivo === 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'
+            ? { discipulados: evaluacion.discipulados, propuestas: evaluacion.propuestas }
+            : undefined;
+        throw new AppException(evaluacion.motivo, estado, detalle, undefined, extensiones);
       }
 
       const cambiada = await tx.$queryRaw<RolesDePersona[]>`

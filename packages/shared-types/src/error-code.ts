@@ -63,13 +63,11 @@ export type ErrorCode =
   // no puede identificar quién hace el cambio (ni registrarlo, FR-022, ni
   // aplicar FR-010), así que no lo hace. No es SIN_PERMISO.
   | 'SESION_SIN_PERSONA'
-  // specs/005-roles-permisos-acceso, FR-009: quitar el rol discipulador a
-  // una Persona con discipulados activos a cargo.
+  // specs/005-roles-permisos-acceso, FR-009 (y FR-043 de la 004): quitar el
+  // rol discipulador a una Persona con discipulados activos o propuestas
+  // pendientes. Reemplaza al fallo cerrado de H-127
+  // (DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS, eliminado en la 004).
   | 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'
-  // specs/005-roles-permisos-acceso, FR-009/H-127: fallo cerrado mientras la
-  // consulta real contra el spec 004 no existe — quitar discipulador se
-  // rechaza siempre, no porque se haya verificado que tiene discipulados.
-  | 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS'
   // specs/004-vida-nueva-discipulado — Solicitud de Discipulado, propuesta y
   // aceptación (contracts/). Los códigos de CAMPO (FRANJAS_REQUERIDAS,
   // FRANJA_FIN_ANTERIOR_AL_INICIO, DIA_SEMANA_INVALIDO, FECHA_FUTURA,

@@ -1,4 +1,5 @@
 import type { ErrorCode } from './error-code.js';
+import type { DiscipuladoActivo, PropuestaPendiente } from './discipulado.js';
 
 /**
  * Catálogo único de permisos (D132) — tanto `apps/api` (`PermisosGuard`)
@@ -121,12 +122,39 @@ export function tienePermiso(roles: readonly string[], permiso: Permiso): boolea
 export type MotivoNoQuitable = Extract<
   ErrorCode,
   | 'SESION_SIN_PERSONA'
-  | 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS'
+  | 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'
   | 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO'
   | 'ADMIN_NO_PUEDE_AUTO_REVOCARSE'
 >;
 
-export type ResultadoQuitarRol = { puede: true } | { puede: false; motivo: MotivoNoQuitable };
+/**
+ * specs/004, FR-043: el rechazo por discipulados NOMBRA cuáles — el Admin
+ * necesita saber qué reasignar, y la pantalla enlaza cada uno a su Grupo (o a
+ * su Solicitud, si es una propuesta). Los otros motivos no traen datos.
+ */
+export type ResultadoQuitarRol =
+  | { puede: true }
+  | { puede: false; motivo: Exclude<MotivoNoQuitable, 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'> }
+  | {
+      puede: false;
+      motivo: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS';
+      discipulados: DiscipuladoActivo[];
+      propuestas: PropuestaPendiente[];
+    };
+
+/** Lo que `puedeQuitarRol` necesita saber de la Persona destino. */
+export interface PersonaParaQuitarRol {
+  id: string;
+  adminSembrado: boolean;
+  /**
+   * specs/004, D137: calculados en el momento (`discipuladosActivosDe` /
+   * `propuestasPendientesDe` en la API), con la fila de la Persona bloqueada
+   * cuando se va a escribir. Obligatorios a propósito: quien llama no puede
+   * olvidarse de consultarlos y dejar pasar la quita sin mirar.
+   */
+  discipuladosActivos: readonly DiscipuladoActivo[];
+  propuestasPendientes: readonly PropuestaPendiente[];
+}
 
 /**
  * specs/005, T062 (D132): "¿se le puede quitar ESTE rol a ESTA Persona, pedido
@@ -140,10 +168,11 @@ export type ResultadoQuitarRol = { puede: true } | { puede: false; motivo: Motiv
  * El orden importa y es el de la API:
  * 1. Sin autor identificable, nada (H-140 — `autorId` null es "no sé quién es",
  *    nunca "no es él").
- * 2. `discipulador`: SIEMPRE no, por ahora (FR-009/H-127, fallo cerrado) — la
- *    consulta de discipulados activos es del spec 004. Cuando exista, entra
- *    ACÁ (como dato de `persona`) y la API y la pantalla cambian juntas; nadie
- *    tiene que acordarse de sacar un condicional de la pantalla.
+ * 2. `discipulador` con discipulados activos o propuestas pendientes
+ *    (FR-009 del 005, FR-043 de la 004, D137) — nombrándolos. Cierra H-127:
+ *    hasta la 004 esta rama decía SIEMPRE que no (fallo cerrado) porque la
+ *    consulta no existía; ahora llega como dato de `persona`, y la API y la
+ *    pantalla cambiaron juntas.
  * 3. `admin` del Admin sembrado (FR-002).
  * 4. `admin` de uno mismo (FR-010).
  * No mira si la Persona TIENE el rol: quitar uno que no tiene es un no-op
@@ -151,11 +180,18 @@ export type ResultadoQuitarRol = { puede: true } | { puede: false; motivo: Motiv
  */
 export function puedeQuitarRol(
   rol: RolDeCargo,
-  persona: { id: string; adminSembrado: boolean },
+  persona: PersonaParaQuitarRol,
   autorId: string | null,
 ): ResultadoQuitarRol {
   if (autorId === null) return { puede: false, motivo: 'SESION_SIN_PERSONA' };
-  if (rol === 'discipulador') return { puede: false, motivo: 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS' };
+  if (rol === 'discipulador' && (persona.discipuladosActivos.length > 0 || persona.propuestasPendientes.length > 0)) {
+    return {
+      puede: false,
+      motivo: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS',
+      discipulados: [...persona.discipuladosActivos],
+      propuestas: [...persona.propuestasPendientes],
+    };
+  }
   if (rol === 'admin' && persona.adminSembrado) return { puede: false, motivo: 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO' };
   if (rol === 'admin' && persona.id === autorId) return { puede: false, motivo: 'ADMIN_NO_PUEDE_AUTO_REVOCARSE' };
   return { puede: true };

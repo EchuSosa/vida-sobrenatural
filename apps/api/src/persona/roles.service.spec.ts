@@ -12,7 +12,16 @@ function haceAnios(anios: number): Date {
   return fecha;
 }
 
-async function crearServicio(persona: Record<string, unknown> | null) {
+/**
+ * specs/004, D137: lo que devuelven las consultas de discipulados activos y
+ * propuestas pendientes (`discipulados-activos.ts`) — por defecto, nada.
+ */
+interface Discipulados {
+  liderazgos?: { personaId: string; grupoId: string }[];
+  propuestas?: { id: string; discipuladorId: string; tipo: 'nueva' | 'reasignacion'; solicitudId: string | null; grupoId: string | null }[];
+}
+
+async function crearServicio(persona: Record<string, unknown> | null, discipulados: Discipulados = {}) {
   // H-142: RolesService lee con `SELECT … FOR UPDATE` y escribe con un UPDATE
   // condicionado (`array_append`/`array_remove`), todo con $queryRaw dentro de
   // la transacción. El mock simula esa semántica: el SELECT devuelve la
@@ -46,12 +55,44 @@ async function crearServicio(persona: Record<string, unknown> | null) {
   // Historia 6 (T050): cada cambio real se registra en CambioDeRol dentro de
   // la misma transacción — el mock ejecuta la función con el mismo cliente.
   const registrar = jest.fn().mockResolvedValue(undefined);
-  const prisma: Record<string, unknown> = { $queryRaw };
+  const liderazgos = discipulados.liderazgos ?? [];
+  const propuestas = discipulados.propuestas ?? [];
+  const consultasDeDiscipulados = jest.fn();
+  const prisma: Record<string, unknown> = {
+    $queryRaw,
+    liderazgo: {
+      findMany: jest.fn(() => {
+        consultasDeDiscipulados();
+        return Promise.resolve(liderazgos);
+      }),
+    },
+    propuestaDiscipulado: {
+      findMany: jest.fn(() => {
+        consultasDeDiscipulados();
+        return Promise.resolve(propuestas);
+      }),
+    },
+    inscripcion: {
+      findMany: jest.fn(() =>
+        Promise.resolve(liderazgos.map((l) => ({ grupoId: l.grupoId, personaId: `inscripta-${l.grupoId}` }))),
+      ),
+    },
+    solicitudDiscipulado: {
+      findMany: jest.fn(() =>
+        Promise.resolve(propuestas.filter((p) => p.solicitudId).map((p) => ({ id: p.solicitudId, personaId: `pide-${p.solicitudId}` }))),
+      ),
+    },
+    persona: {
+      findMany: jest.fn(({ where }: { where: { id: { in: string[] } } }) =>
+        Promise.resolve(where.id.in.map((id) => ({ id, nombre: 'Nombre', apellido: id }))),
+      ),
+    },
+  };
   prisma.$transaction = (fn: (tx: unknown) => unknown) => fn(prisma);
   const moduleRef = await Test.createTestingModule({
     providers: [RolesService, { provide: PrismaService, useValue: prisma }, { provide: CambioDeRolService, useValue: { registrar } }],
   }).compile();
-  return { service: moduleRef.get(RolesService), findUnique, update, registrar };
+  return { service: moduleRef.get(RolesService), findUnique, update, registrar, consultasDeDiscipulados };
 }
 
 async function codigoDeError(promesa: Promise<unknown>): Promise<string | undefined> {
@@ -153,20 +194,65 @@ describe('RolesService (specs/005, Historia 2)', () => {
       await expect(service.quitarRol('admin-2', 'admin', 'admin-1')).resolves.toEqual({ id: 'admin-2', rol: ['miembro_registrado'] });
     });
 
-    // H-127: fallo cerrado. Se prueba que rechaza SIN consultar nada — ni
-    // siquiera si la Persona existe o si tiene el rol: no hay ninguna
-    // condición que lo deje pasar mientras el spec 004 no exista.
-    // T062: la regla vive en `puedeQuitarRol` (shared-types), la misma que usa
-    // la pantalla, y se evalúa sobre la Persona leída con la fila bloqueada.
-    // Antes este test exigía además "sin consultar la base": eso cambió a
-    // propósito — la garantía (se rechaza SIEMPRE, nunca escribe) no.
-    it('rechaza SIEMPRE quitar discipulador, sin escribir (FR-009/H-127, fallo cerrado)', async () => {
-      const { service, update } = await crearServicio({ id: 'p1', rol: ['discipulador'], fechaNacimiento: ADULTA, adminSembrado: false });
+    // specs/004, D137 (cierra H-127): ya no falla cerrado — la regla sigue en
+    // `puedeQuitarRol` (shared-types, T062) y ahora recibe como dato los
+    // discipulados activos y las propuestas pendientes, consultados con la
+    // fila de la Persona ya bloqueada.
+    it('sin discipulados ni propuestas, quita discipulador y registra el cambio (D137)', async () => {
+      const { service, update, registrar, consultasDeDiscipulados } = await crearServicio({
+        id: 'p1',
+        rol: ['discipulador', 'miembro_registrado'],
+        fechaNacimiento: ADULTA,
+        adminSembrado: false,
+      });
 
-      expect(await codigoDeError(service.quitarRol('p1', 'discipulador', 'admin-1'))).toBe('DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS');
-      // Antes que FR-010: quitarse discipulador a uno mismo también se rechaza por FR-009.
-      expect(await codigoDeError(service.quitarRol('p1', 'discipulador', 'p1'))).toBe('DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS');
+      await expect(service.quitarRol('p1', 'discipulador', 'admin-1')).resolves.toEqual({ id: 'p1', rol: ['miembro_registrado'] });
+      expect(consultasDeDiscipulados).toHaveBeenCalled();
+      expect(update).toHaveBeenCalled();
+      expect(registrar).toHaveBeenCalledWith(
+        { personaId: 'p1', rol: 'discipulador', accion: 'quitado', actor: { origen: 'backoffice', realizadoPorId: 'admin-1' } },
+        expect.anything(),
+      );
+    });
+
+    it('con un discipulado activo, rechaza nombrándolo, sin escribir (FR-009/FR-043)', async () => {
+      const { service, update, registrar } = await crearServicio(
+        { id: 'p1', rol: ['discipulador'], fechaNacimiento: ADULTA, adminSembrado: false },
+        { liderazgos: [{ personaId: 'p1', grupoId: 'g1' }] },
+      );
+
+      const error = (await service.quitarRol('p1', 'discipulador', 'admin-1').catch((e: unknown) => e)) as AppException;
+      expect(error).toBeInstanceOf(AppException);
+      expect(error.code).toBe('DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS');
+      expect(error.getStatus()).toBe(409);
+      expect(error.extensiones).toEqual({
+        discipulados: [{ grupoId: 'g1', persona: { nombre: 'Nombre', apellido: 'inscripta-g1' } }],
+        propuestas: [],
+      });
       expect(update).not.toHaveBeenCalled();
+      expect(registrar).not.toHaveBeenCalled();
+    });
+
+    it('con solo una propuesta pendiente, también rechaza, con el enlace a su Solicitud (FR-043)', async () => {
+      const { service, update } = await crearServicio(
+        { id: 'p1', rol: ['discipulador'], fechaNacimiento: ADULTA, adminSembrado: false },
+        { propuestas: [{ id: 'prop-1', discipuladorId: 'p1', tipo: 'nueva', solicitudId: 's1', grupoId: null }] },
+      );
+
+      const error = (await service.quitarRol('p1', 'discipulador', 'admin-1').catch((e: unknown) => e)) as AppException;
+      expect(error.code).toBe('DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS');
+      expect(error.extensiones).toEqual({
+        discipulados: [],
+        propuestas: [{ propuestaId: 'prop-1', persona: { nombre: 'Nombre', apellido: 'pide-s1' }, solicitudId: 's1', grupoId: null }],
+      });
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    it('los otros roles no consultan discipulados', async () => {
+      const { service, consultasDeDiscipulados } = await crearServicio({ id: 'p1', rol: ['pastor'], fechaNacimiento: ADULTA, adminSembrado: false });
+
+      await service.quitarRol('p1', 'pastor', 'admin-1');
+      expect(consultasDeDiscipulados).not.toHaveBeenCalled();
     });
 
     it('una Persona que no existe responde NO_ENCONTRADO, también para discipulador (no hay rol que proteger)', async () => {
