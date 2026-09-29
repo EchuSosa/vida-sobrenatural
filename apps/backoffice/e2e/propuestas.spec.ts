@@ -1,5 +1,5 @@
 import { test, expect, auditar, loguearseComoDiscipuladorE2E } from './helpers';
-import { crearPersona, crearPropuesta, estadoDeSolicitud, sinScrollHorizontal, sinSesion } from './discipulado-datos';
+import { crearPersona, crearPropuesta, estadoDeSolicitud, sinScrollHorizontal, sinSesion } from './helpers';
 
 /**
  * specs/004, T037f (FR-037, FR-046, FR-047): el Discipulador responde sus
@@ -12,12 +12,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('ve la propuesta primero y sin teléfono; declina con motivo y la Solicitud vuelve a pendiente', async ({ page }) => {
       const sufijo = `${colorScheme}-${Date.now()}`;
-      const personaId = await crearPersona(`e2e-b-prop-dec-${sufijo}@example.com`, {
+      const persona = await crearPersona(`e2e-b-prop-dec-${sufijo}@example.com`, {
         nombre: 'Rocío',
         apellido: `Declina ${sufijo}`,
         telefono: '+54 9 221 777 1234',
       });
-      const { solicitudId } = await crearPropuesta(personaId);
+      const { solicitudId } = await crearPropuesta(persona);
 
       await sinSesion(page);
 
@@ -45,12 +45,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('acepta una propuesta y aparece en sus discipulados con el teléfono', async ({ page }) => {
       const sufijo = `${colorScheme}-${Date.now()}`;
-      const personaId = await crearPersona(`e2e-b-prop-acep-${sufijo}@example.com`, {
+      const persona = await crearPersona(`e2e-b-prop-acep-${sufijo}@example.com`, {
         nombre: 'Martina',
         apellido: `Acepta ${sufijo}`,
         telefono: '+54 9 221 888 4321',
       });
-      await crearPropuesta(personaId);
+      await crearPropuesta(persona);
 
       await sinSesion(page);
 

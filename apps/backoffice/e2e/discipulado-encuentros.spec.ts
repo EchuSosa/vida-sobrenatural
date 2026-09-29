@@ -1,5 +1,5 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E, loguearseComoPastorE2E } from './helpers';
-import { crearEncuentro, crearGrupo, crearPersona, sinScrollHorizontal, sinSesion } from './discipulado-datos';
+import { crearEncuentro, crearGrupo, crearPersona, sinScrollHorizontal, sinSesion } from './helpers';
 
 /**
  * specs/004, T048 (FR-009, FR-011, FR-013a, FR-029, FR-041, D134): el
@@ -62,7 +62,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const sufijo = `${colorScheme}-${Date.now()}`;
       const persona = await crearPersona(`e2e-b-enc-adm-${sufijo}@example.com`, { nombre: 'Tomás', apellido: `Admin ${sufijo}`, genero: 'masculino' });
       const { grupoId } = await crearGrupo([persona], 'e2e-discipulador-2@example.com');
-      await crearEncuentro(grupoId, { fecha: '2026-09-02', capitulos: '4 y 5', notas: `Secreto ${sufijo}` });
+      await crearEncuentro(grupoId, { fecha: '2026-09-02', capitulos: '4 y 5', notas: `Secreto ${sufijo}` }, 'e2e-discipulador-2@example.com');
 
       await sinSesion(page);
 

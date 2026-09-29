@@ -6,8 +6,8 @@ import {
   crearPersonaActiva,
   auditar,
   verificarQueElFocoCiclaEnElPanel,
+  armarDiscipuladoYPropuesta,
 } from './helpers';
-import { armarDiscipuladoYPropuesta } from './discipulado-en-la-base.cjs';
 
 /**
  * specs/005-roles-permisos-acceso, Historia 2 (T028/T029): ascender a una
@@ -80,7 +80,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
     // propuesta pendiente, el panel no ofrece quitar Discipulador: nombra a
     // cada uno, dice cómo destrabarlo y enlaza adonde se hace — el discipulado
     // a su Grupo, la propuesta a su Solicitud. Las páginas de destino son de
-    // otros lotes: acá se verifica el href (brief del lote D).
+    // otros lotes: acá se verifica el href. El discipulado y la propuesta se
+  // arman por la API (proponer y aceptar reales).
     test('con un discipulado y una propuesta, el panel los nombra y enlaza a cada uno (T058)', async ({ page }) => {
       const sufijo = `${tema}-${Date.now()}`;
       const apellido = `ConDiscipulado${sufijo}`;

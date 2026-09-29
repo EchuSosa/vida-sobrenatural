@@ -1,5 +1,5 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E } from './helpers';
-import { crearGrupo, crearPersona, estadoDeGrupo, sinSesion } from './discipulado-datos';
+import { crearGrupo, crearPersona, estadoDeGrupo, sinSesion } from './helpers';
 
 /**
  * specs/004, T053 (FR-019 a FR-021, FR-030; Historia 3, escenario 11):

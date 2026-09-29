@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, crearPersonaActiva, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
+import { test, expect, auditar, crearPersonaActiva, dejarSinDisponibles, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
 
 /**
  * specs/004, Historia 3 (T030): la bandeja y el detalle de una Solicitud con
@@ -173,10 +173,21 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await sinViolaciones(page);
     });
 
-    // TODO(merge): apagar la disponibilidad de los tres fixtures por API es
-    // PUT /disponibilidad/me, del lote C. Con eso mergeado, este caso
-    // verifica el estado vacío del caso 1 de FR-007 ("hoy no hay ningún
-    // Discipulador disponible") y vuelve a prenderlos al terminar.
-    test.fixme('con ningún Discipulador disponible, el cruce muestra el caso 1 de FR-007', async () => {});
+    test('con ningún Discipulador disponible, el cruce muestra el caso 1 de FR-007', async ({ page }) => {
+      const sufijo = `${colorScheme}sd${Date.now()}`;
+      await loguearseComoAdminE2E(page);
+      const solicitud = await solicitudPendiente(page, sufijo);
+      // Cada Discipulador apaga la suya (PUT /disponibilidad/me, FR-015); al
+      // terminar se prenden de nuevo para los specs que siguen.
+      const volverAPrender = await dejarSinDisponibles(solicitud.id);
+      try {
+        await page.goto(`/solicitudes/${solicitud.id}`);
+        await expect(page.getByText('Hoy no hay ningún Discipulador disponible', { exact: false })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Elegir' })).toHaveCount(0);
+        await sinViolaciones(page);
+      } finally {
+        await volverAPrender();
+      }
+    });
   });
 }

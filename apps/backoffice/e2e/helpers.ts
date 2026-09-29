@@ -341,3 +341,271 @@ export async function crearPersonaActiva(email: string, apellido: string) {
     await ctx.dispose();
   }
 }
+
+// ─── specs/004: datos del discipulado armados por la API (T009) ────────────
+//
+// Reemplazan a discipulado-datos.ts (lote B) y discipulado-en-la-base.cjs
+// (lote D), que escribían directo en la base porque los endpoints de proponer
+// y aceptar estaban en otro lote. Por la API, los datos pasan por las mismas
+// reglas que en la app (FR-006, FR-045, el orden de bloqueo): un e2e no puede
+// armar un estado que la app no permitiría.
+
+export const MARTES_19_A_21 = { diaSemana: 2, inicio: 19 * 60, fin: 21 * 60 };
+export const EMAIL_DISCIPULADOR_1 = 'e2e-discipulador@example.com';
+export const EMAIL_DISCIPULADOR_2 = 'e2e-discipulador-2@example.com';
+export const EMAIL_ADMIN = 'e2e-admin@example.com';
+
+type Franja = { diaSemana: number; inicio: number; fin: number };
+
+/**
+ * El token de API de una Persona, por el test-login de `apps/web` (el mismo
+ * camino que `crearPersonaActiva`). Una sesión nueva cada vez: el token se
+ * resuelve al entrar, así que una Persona recién registrada o con un rol
+ * recién otorgado necesita entrar de nuevo para que su token lo traiga.
+ */
+async function sesionDe(email: string): Promise<{ apiToken: string; personaId: string | null }> {
+  const ctx = await playwrightRequest.newContext({ baseURL: WEB_BASE_URL });
+  try {
+    const { csrfToken } = await (await ctx.get('/api/auth/csrf')).json();
+    await ctx.post('/api/auth/callback/test-login', { form: { email, csrfToken } });
+    const session = await (await ctx.get('/api/auth/session')).json();
+    return { apiToken: session.apiToken, personaId: session.user?.personaId ?? null };
+  } finally {
+    await ctx.dispose();
+  }
+}
+
+/** Una llamada a la API como `email`. Falla ruidoso si la API no responde 2xx. */
+async function apiComo<T>(email: string, metodo: 'GET' | 'POST' | 'PUT' | 'DELETE', ruta: string, datos?: unknown): Promise<T> {
+  const { apiToken } = await sesionDe(email);
+  const ctx = await playwrightRequest.newContext();
+  try {
+    const respuesta = await ctx.fetch(`${API_BASE_URL}${ruta}`, {
+      method: metodo,
+      headers: { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'application/json' },
+      data: datos,
+    });
+    if (!respuesta.ok()) {
+      throw new Error(`${metodo} ${ruta} como ${email} respondió ${respuesta.status()}: ${await respuesta.text()}`);
+    }
+    const texto = await respuesta.text();
+    return (texto ? JSON.parse(texto) : undefined) as T;
+  } finally {
+    await ctx.dispose();
+  }
+}
+
+async function idDe(email: string): Promise<string> {
+  const { personaId } = await sesionDe(email);
+  if (!personaId) throw new Error(`helpers: ${email} no es una Persona registrada`);
+  return personaId;
+}
+
+export interface OpcionesPersona {
+  nombre: string;
+  apellido: string;
+  genero?: 'femenino' | 'masculino';
+  telefono?: string;
+  direccion?: string;
+}
+
+export interface PersonaDeTest {
+  id: string;
+  email: string;
+}
+
+/** Una Persona adulta activa, registrada por el flujo real (`POST /personas`), con email `e2e-…` (la borra limpiar-e2e). */
+export async function crearPersona(email: string, o: OpcionesPersona): Promise<PersonaDeTest> {
+  const ctx = await playwrightRequest.newContext();
+  const sedes = await (await ctx.get(`${API_BASE_URL}/sedes`)).json();
+  await ctx.dispose();
+  await apiComo(email, 'POST', '/personas', {
+    nombre: o.nombre,
+    apellido: o.apellido,
+    genero: o.genero ?? 'femenino',
+    fechaNacimiento: '1990-05-20',
+    telefono: o.telefono ?? '+54 9 221 555 0101',
+    direccion: o.direccion ?? 'Calle 7 número 1234',
+    sedeId: sedes[0].id,
+    estadoCivil: 'soltero_a',
+    profesion: 'estudiante',
+    tiempoCongregacion: 'menos_6_meses',
+    consentimientoDatos: true,
+  });
+  return { id: await idDe(email), email };
+}
+
+/**
+ * Que el Discipulador aparezca en el cruce (FR-006): disponibilidad prendida,
+ * al menos una franja (la del martes) y ningún período de no disponibilidad.
+ * Idempotente: no toca lo que ya está bien.
+ */
+export async function asegurarDisponible(emailDiscipulador: string): Promise<void> {
+  const actual = await apiComo<{ disponible: boolean; franjas: unknown[]; bloqueos: Array<{ id: string }> }>(emailDiscipulador, 'GET', '/disponibilidad/me');
+  if (actual.franjas.length === 0) await apiComo(emailDiscipulador, 'POST', '/disponibilidad/me/franjas', MARTES_19_A_21);
+  for (const b of actual.bloqueos) await apiComo(emailDiscipulador, 'DELETE', `/disponibilidad/me/bloqueos/${b.id}`);
+  if (!actual.disponible) await apiComo(emailDiscipulador, 'PUT', '/disponibilidad/me', { disponible: true });
+}
+
+/** Cuántas Personas acepta por Grupo el Discipulador (FR-045), por la pantalla de su disponibilidad. */
+export async function fijarMaximoPorGrupo(emailDiscipulador: string, maximo: number): Promise<void> {
+  await apiComo(emailDiscipulador, 'PUT', '/disponibilidad/me', { maxPersonasPorGrupo: maximo });
+}
+
+/** La Persona pide Vida Nueva sola, desde Mi camino (FR-001). Devuelve el id de la Solicitud. */
+export async function pedirVidaNuevaComo(email: string, franjas: Franja[] = [MARTES_19_A_21]): Promise<string> {
+  const { id } = await apiComo<{ id: string }>(email, 'POST', '/discipulado/solicitudes/me', { franjas });
+  return id;
+}
+
+/** El Admin propone la Solicitud a un Discipulador (FR-036); opcionalmente, para sumarla a un Grupo en curso (FR-045). */
+export async function proponer(solicitudId: string, emailDiscipulador: string, grupoDestinoId?: string): Promise<string> {
+  await asegurarDisponible(emailDiscipulador);
+  const discipuladorId = await idDe(emailDiscipulador);
+  const { propuestaId } = await apiComo<{ propuestaId: string }>(EMAIL_ADMIN, 'POST', `/discipulado/solicitudes/${solicitudId}/proponer`, {
+    discipuladorId,
+    ...(grupoDestinoId ? { grupoDestinoId } : {}),
+  });
+  return propuestaId;
+}
+
+/** Proponer y que el Discipulador acepte (FR-037): recién ahí existen Grupo, Inscripción y Liderazgo. */
+export async function proponerYAceptar(
+  solicitudId: string,
+  emailDiscipulador: string = EMAIL_DISCIPULADOR_1,
+  grupoDestinoId?: string,
+): Promise<{ propuestaId: string; grupoId: string }> {
+  const propuestaId = await proponer(solicitudId, emailDiscipulador, grupoDestinoId);
+  const { grupoId } = await apiComo<{ grupoId: string }>(emailDiscipulador, 'POST', `/discipulado/propuestas/${propuestaId}/aceptar`);
+  return { propuestaId, grupoId };
+}
+
+/** Lo que deja proponer: Solicitud `propuesta` + Propuesta `nueva` pendiente. */
+export async function crearPropuesta(persona: PersonaDeTest, emailDiscipulador: string = EMAIL_DISCIPULADOR_1) {
+  const solicitudId = await pedirVidaNuevaComo(persona.email);
+  const propuestaId = await proponer(solicitudId, emailDiscipulador);
+  return { solicitudId, propuestaId };
+}
+
+/**
+ * Un Grupo en curso de este Discipulador con estas Personas: la primera abre el
+ * Grupo y las demás se suman a él (FR-045 — el Discipulador tiene que aceptar
+ * esa cantidad, ver `fijarMaximoPorGrupo`). Las Inscripciones, en el orden de
+ * `personas`.
+ */
+export async function crearGrupo(personas: PersonaDeTest[], emailDiscipulador: string = EMAIL_DISCIPULADOR_1) {
+  let grupoId: string | undefined;
+  for (const persona of personas) {
+    const solicitudId = await pedirVidaNuevaComo(persona.email);
+    ({ grupoId } = await proponerYAceptar(solicitudId, emailDiscipulador, grupoId));
+  }
+  const detalle = await detalleDeGrupo(grupoId!);
+  const inscripciones = personas.map((p) => detalle.personas.find((x) => x.id === p.id)!.inscripcionId);
+  return { grupoId: grupoId!, inscripciones };
+}
+
+/** Un Encuentro registrado por el Discipulador que lidera el Grupo, con todos presentes (FR-013a). */
+export async function crearEncuentro(
+  grupoId: string,
+  datos: { fecha: string; capitulos: string; notas?: string },
+  emailDiscipulador: string = EMAIL_DISCIPULADOR_1,
+): Promise<string> {
+  const { id } = await apiComo<{ id: string }>(emailDiscipulador, 'POST', `/discipulado/mis-discipulados/${grupoId}/encuentros`, datos);
+  return id;
+}
+
+interface DetalleGrupoTest {
+  estado: string;
+  motivoCierre: string | null;
+  personas: Array<{ id: string; inscripcionId: string; estadoInscripcion: string }>;
+}
+
+async function detalleDeGrupo(grupoId: string): Promise<DetalleGrupoTest> {
+  return apiComo<DetalleGrupoTest>(EMAIL_ADMIN, 'GET', `/grupos/discipulados/${grupoId}`);
+}
+
+export async function estadoDeSolicitud(solicitudId: string): Promise<string> {
+  return (await apiComo<{ estado: string }>(EMAIL_ADMIN, 'GET', `/discipulado/solicitudes/${solicitudId}`)).estado;
+}
+
+export async function estadoDeGrupo(grupoId: string): Promise<{ estado: string; motivoCierre: string | null }> {
+  const { estado, motivoCierre } = await detalleDeGrupo(grupoId);
+  return { estado, motivoCierre };
+}
+
+export async function estadoDeInscripcion(grupoId: string, inscripcionId: string): Promise<string> {
+  return (await detalleDeGrupo(grupoId)).personas.find((p) => p.inscripcionId === inscripcionId)!.estadoInscripcion;
+}
+
+/**
+ * T058 (FR-043, lote D): una Persona con un discipulado activo (Grupo con
+ * `inscripta`) y una propuesta pendiente (la Solicitud de `pide`). Le otorga el
+ * rol `discipulador` por el panel de roles (API del 005) y la deja disponible.
+ */
+export async function armarDiscipuladoYPropuesta(emails: { discipuladora: string; inscripta: string; pide: string }) {
+  const discipuladoraId = await idDe(emails.discipuladora);
+  await apiComo(EMAIL_ADMIN, 'POST', `/personas/${discipuladoraId}/roles`, { rol: 'discipulador' });
+  const { grupoId } = await proponerYAceptar(await pedirVidaNuevaComo(emails.inscripta), emails.discipuladora);
+  const solicitudId = await pedirVidaNuevaComo(emails.pide);
+  await proponer(solicitudId, emails.discipuladora);
+  return { grupoId, solicitudId };
+}
+
+/** Sin scroll horizontal (docs/15, H-62): el documento no es más ancho que la ventana. */
+export async function sinScrollHorizontal(page: Page): Promise<boolean> {
+  return page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+}
+
+/**
+ * Cambiar de Persona a mitad de un test: sin borrar las cookies, el
+ * test-login a veces deja la sesión anterior (se vio en la suite completa).
+ */
+export async function sinSesion(page: Page): Promise<void> {
+  await page.context().clearCookies();
+}
+
+/**
+ * T030 (FR-007, caso 1): deja el cruce de una Solicitud sin ningún
+ * Discipulador disponible, apagando la disponibilidad de cada uno con su
+ * propia sesión (solo el Discipulador cambia la suya, FR-015). Devuelve la
+ * función que los vuelve a prender: llamala al terminar, así los specs que
+ * siguen encuentran la base como estaba.
+ */
+export async function dejarSinDisponibles(solicitudId: string): Promise<() => Promise<void>> {
+  const cruce = await apiComo<{ franjas: Array<{ coinciden: Array<{ id: string }> }>; noCoinciden: Array<{ id: string }> }>(
+    EMAIL_ADMIN,
+    'GET',
+    `/discipulado/solicitudes/${solicitudId}/cruce`,
+  );
+  const ids = new Set([...cruce.franjas.flatMap((f) => f.coinciden.map((d) => d.id)), ...cruce.noCoinciden.map((d) => d.id)]);
+  const emails: string[] = [];
+  for (let skip = 0; ids.size > emails.length; skip += 100) {
+    const pagina = await apiComo<{ items: Array<{ id: string; email: string }> }>(EMAIL_ADMIN, 'GET', `/personas?skip=${skip}&take=100`);
+    if (pagina.items.length === 0) break;
+    for (const p of pagina.items) if (ids.has(p.id)) emails.push(p.email);
+  }
+  for (const email of emails) await apiComo(email, 'PUT', '/disponibilidad/me', { disponible: false });
+  return async () => {
+    for (const email of emails) await apiComo(email, 'PUT', '/disponibilidad/me', { disponible: true });
+  };
+}
+
+/** El id de una Persona registrada, por su sesión. */
+export async function idDePersona(email: string): Promise<string> {
+  return idDe(email);
+}
+
+/** Los ids de todos los Discipuladores disponibles del cruce de una Solicitud (coincidan o no, D25). */
+export async function idsEnElCruce(solicitudId: string): Promise<string[]> {
+  const cruce = await apiComo<{ franjas: Array<{ coinciden: Array<{ id: string }> }>; noCoinciden: Array<{ id: string }> }>(
+    EMAIL_ADMIN,
+    'GET',
+    `/discipulado/solicitudes/${solicitudId}/cruce`,
+  );
+  return [...new Set([...cruce.franjas.flatMap((f) => f.coinciden.map((d) => d.id)), ...cruce.noCoinciden.map((d) => d.id)])];
+}
+
+/** Lo que ve la Persona en Mi camino (`GET /discipulado/me`, FR-026 a FR-028). */
+export async function estadoMiCamino(email: string): Promise<{ estado: string }> {
+  return apiComo<{ estado: string }>(email, 'GET', '/discipulado/me');
+}

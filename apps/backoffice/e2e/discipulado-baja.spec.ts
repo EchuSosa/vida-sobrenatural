@@ -1,5 +1,15 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E } from './helpers';
-import { crearGrupo, crearPersona, estadoDeGrupo, estadoDeInscripcion, EMAIL_DISCIPULADOR_1, fijarMaximoPorGrupo, sinSesion } from './discipulado-datos';
+import {
+  crearGrupo,
+  crearPersona,
+  estadoDeGrupo,
+  estadoDeInscripcion,
+  estadoMiCamino,
+  EMAIL_DISCIPULADOR_1,
+  fijarMaximoPorGrupo,
+  pedirVidaNuevaComo,
+  sinSesion,
+} from './helpers';
 
 /**
  * specs/004, T054d (FR-042) y T054g (FR-048): en un Grupo de dos, el
@@ -53,10 +63,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('button', { name: 'Sí, dar de baja' }).click();
       await expect(page.getByText('Valeria quedó dada de baja de este discipulado.')).toBeVisible();
 
-      expect(await estadoDeInscripcion(inscripciones[1])).toBe('abandono');
-      expect(await estadoDeInscripcion(inscripciones[0])).toBe('activa');
+      expect(await estadoDeInscripcion(grupoId, inscripciones[1])).toBe('abandono');
+      expect(await estadoDeInscripcion(grupoId, inscripciones[0])).toBe('activa');
       expect(await estadoDeGrupo(grupoId)).toEqual({ estado: 'en_curso', motivoCierre: null });
-      // TODO(merge): con el lote A, la Persona dada de baja ve `baja` en Mi camino y puede volver a pedir (apps/web).
+      // FR-042: la Persona dada de baja ve la baja en Mi camino y puede volver a pedir.
+      expect(await estadoMiCamino(seVa.email)).toMatchObject({ estado: 'baja' });
+      expect(await pedirVidaNuevaComo(seVa.email)).toEqual(expect.any(String));
+      expect(await estadoMiCamino(seVa.email)).toMatchObject({ estado: 'buscando' });
     });
   });
 }

@@ -202,10 +202,38 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page, tema);
     });
 
-    // TODO(merge): aceptar la propuesta y cargar un Encuentro son del lote B
-    // (POST /discipulado/propuestas/:id/aceptar, POST …/encuentros). Con esos
-    // endpoints mergeados, este caso se completa: ve el nombre y el teléfono
-    // de su Discipulador y NO el texto de una nota (FR-027, FR-029).
-    test.fixme('aceptada: ve a su Discipulador con su teléfono y no ve las notas de los Encuentros (T035)', async () => {});
+    test('aceptada: ve a su Discipulador con su teléfono y no ve las notas de los Encuentros (T035)', async ({ page, baseURL }) => {
+      const email = `e2e-mi-camino-aceptada-${tema}-${Date.now()}@example.com`;
+      await registrarPersonaDeTest(page, email);
+      await usarTema(page, baseURL!, email, tema);
+      const persona = await tokenDe(baseURL!, email);
+      const { id: solicitudId } = await api(persona, 'POST', '/discipulado/solicitudes/me', {
+        franjas: [{ diaSemana: 2, inicio: 18 * 60, fin: 20 * 60 }],
+      });
+
+      // El equipo: el Admin la propone a e2e-discipulador@ (fixture con agenda
+      // del martes), ella acepta y carga un Encuentro con una nota.
+      const admin = await tokenDe(baseURL!, 'e2e-admin@example.com');
+      const cruce = await api(admin, 'GET', `/discipulado/solicitudes/${solicitudId}/cruce`);
+      const discipuladora = [...cruce.franjas.flatMap((f: { coinciden: unknown[] }) => f.coinciden), ...cruce.noCoinciden].find(
+        (d: { apellido: string }) => d.apellido === 'Discipuladora',
+      ) as { id: string; nombre: string; apellido: string };
+      const { propuestaId } = await api(admin, 'POST', `/discipulado/solicitudes/${solicitudId}/proponer`, { discipuladorId: discipuladora.id });
+      const disc = await tokenDe(baseURL!, 'e2e-discipulador@example.com');
+      const { grupoId } = await api(disc, 'POST', `/discipulado/propuestas/${propuestaId}/aceptar`);
+      const nota = `Nota pastoral ${tema} ${Date.now()}`;
+      const ayer = new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10);
+      await api(disc, 'POST', `/discipulado/mis-discipulados/${grupoId}/encuentros`, { fecha: ayer, capitulos: '1 y 2', notas: nota });
+
+      await page.goto('/mi-camino');
+      await page.waitForLoadState('networkidle');
+      await expect(tarjeta(page).getByText('Estás haciendo Vida Nueva')).toBeVisible();
+      await expect(tarjeta(page).getByText(`Tu Discipulador es ${discipuladora.nombre} ${discipuladora.apellido}.`)).toBeVisible();
+      await expect(tarjeta(page).getByText(/Llamar o escribir al \+54/)).toBeVisible();
+      // FR-029: ni la nota ni los capítulos.
+      await expect(page.getByText(nota)).toHaveCount(0);
+      await expect(page.getByText('1 y 2')).toHaveCount(0);
+      await sinViolaciones(page, tema);
+    });
   });
 }

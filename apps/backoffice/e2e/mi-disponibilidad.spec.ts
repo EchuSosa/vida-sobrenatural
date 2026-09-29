@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { hoyEnArgentina, type MiDisponibilidad } from '@vida-sobrenatural/shared-types';
-import { test, expect, auditar, loguearseComoDiscipuladorE2E } from './helpers';
+import { test, expect, auditar, crearPersona, idDePersona, idsEnElCruce, loguearseComoDiscipuladorE2E, pedirVidaNuevaComo } from './helpers';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
@@ -42,12 +42,9 @@ async function agregarFranja(page: Page, dia: string, desde: string, hasta: stri
  * Discipulador maneja su disponibilidad desde el teléfono (`@celular`: corre
  * también en el proyecto `celular`), en los dos temas, con axe.
  *
- * TODO(merge): falta el paso "como Admin, aparece en el cruce de una
- * Solicitud con esa franja (por API)" — `GET /discipulado/solicitudes/:id/cruce`
- * es del lote A y no existe en esta rama. El reflejo en el cruce ya lo
- * prueba la integración (disponibilidad.integration-spec.ts, contra
- * `CruceService.disponibles`); después del merge, sumar acá la llamada al
- * endpoint después de prender el toggle y de borrar la franja.
+ * Y del lado del Admin (FR-006): con la disponibilidad prendida aparece en el
+ * cruce de una Solicitud real (`GET /discipulado/solicitudes/:id/cruce`); al
+ * quitar su única franja, deja de aparecer.
  */
 /**
  * T041 (docs/15, "Celular"): con horarios y un período cargados —el estado más
@@ -120,6 +117,12 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(estado).toContainText('Hoy el Admin te ve como disponible');
       await sinViolaciones(page);
 
+      // Lo que dice la frase es lo que ve el Admin: aparece en el cruce (FR-006).
+      const pide = await crearPersona(`e2e-c-cruce-${tema}-${Date.now()}@example.com`, { nombre: 'Carla', apellido: `Cruce ${tema}` });
+      const solicitudId = await pedirVidaNuevaComo(pide.email);
+      const yo = await idDePersona('e2e-discipulador-sin-agenda@example.com');
+      expect(await idsEnElCruce(solicitudId)).toContain(yo);
+
       // Borrar la franja, con confirmación: vuelve a "sin agenda", el toggle sigue prendido.
       await page.getByRole('button', { name: 'Quitar' }).click();
       const confirmar = page.getByRole('alertdialog');
@@ -128,6 +131,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await confirmar.getByRole('button', { name: 'Sí, quitar el horario' }).click();
       await expect(estado).toContainText('Todavía no cargaste horarios');
       await expect(page.getByTestId('estado-toggle')).toContainText('Prendida');
+      expect(await idsEnElCruce(solicitudId)).not.toContain(yo);
 
       // Fin anterior al inicio: error debajo del campo y en el resumen, con foco.
       await agregarFranja(page, 'Jueves', '21:00', '19:00');
