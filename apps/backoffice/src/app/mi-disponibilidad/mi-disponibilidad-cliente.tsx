@@ -433,7 +433,7 @@ export function MiDisponibilidadCliente({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('agenda.volver')}</AlertDialogCancel>
-            {/* Sin variant="destructive": en oscuro, sobre el pie del diálogo, da 3.48:1 (axe). Mismo botón que ConfirmDestructiveDialog. */}
+            {/* Mismo botón que ConfirmDestructiveDialog. */}
             <AlertDialogAction
               onClick={() => {
                 const franja = franjaABorrar;

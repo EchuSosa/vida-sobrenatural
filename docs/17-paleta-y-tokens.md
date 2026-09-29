@@ -157,6 +157,20 @@ blanco cae de 5.8:1 a 3.9:1, por debajo de AA. Se cambia de tono.
 .dark { --primary-hover: oklch(0.760 0.100 45); }  /* 8.1:1 con el texto oscuro */
 ```
 
+El botón destructivo sigue el mismo criterio (merge de la 004): es **sólido**
+(`bg-destructive` + `text-destructive-foreground`), no un tinte translúcido. El tinte
+(`bg-destructive/20` con el rojo como texto) daba 3.5:1 en oscuro sobre el pie de un
+`AlertDialog` y su hover por opacidad bajaba a 3.0:1.
+
+```css
+:root { --destructive-hover: oklch(0.440 0.180 18); }  /* 8.5:1 con blanco */
+.dark { --destructive-hover: oklch(0.720 0.170 18); }  /* 6.7:1 con el texto oscuro */
+```
+
+El **resumen de errores** (`ResumenErrores`) lleva el texto en `--foreground` sobre el tinte
+`destructive/10`, con el borde en `--destructive`: el rojo como texto sobre su propio tinte, dentro
+de un `Sheet` (fondo `--popover`) en oscuro, daba 4.2:1.
+
 ## Contrastes medidos
 
 Mínimos de D81: 4.5:1 para texto, 3:1 para elementos de interfaz y foco.
@@ -168,6 +182,9 @@ Mínimos de D81: 4.5:1 para texto, 3:1 para elementos de interfaz y foco.
 | Texto sobre card | 15.9 | 14.3 |
 | Texto del botón primario sobre primario | 5.8 | 6.5 |
 | Texto del botón destructivo sobre destructivo | 6.5 | 5.3 |
+| Texto del botón destructivo sobre su hover | 8.5 | 6.7 |
+| Botón destructivo contra el pie de un `AlertDialog` | 6.1 | 4.6 |
+| Texto del resumen de errores sobre su tinte, dentro de un `Sheet` | 13.4 | 12.6 |
 | Texto del botón de éxito sobre éxito | 5.8 | 6.9 |
 | Primario como texto (enlaces) | 5.5 | 6.5 |
 | Éxito como texto | 5.5 | 6.9 |
