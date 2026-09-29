@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import type {
   DetalleDiscipuladoAdmin,
   DiscipuladoResumen,
-  EncuentroAdministrativo,
   Franja,
   Pagina,
   PersonaBreve,
