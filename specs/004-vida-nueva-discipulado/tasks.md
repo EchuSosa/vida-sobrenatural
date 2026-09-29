@@ -208,7 +208,7 @@ cambian de texto); las nuevas llevan sufijo (`T024a`) o números nuevos al final
 ## Phase 11: Pendientes del Admin (FR-048) — lote B
 
 - [x] T054f Implementar `apps/api/src/discipulado/pendientes-admin.service.ts` y `GET /discipulado/pendientes-admin` (`solicitudes.aprobar` o `grupos.gestionar`): `propuestasDeclinadas` (Solicitudes `pendiente` cuya última Propuesta es `declinada`), `propuestasSinRespuesta` (Propuestas `pendiente` con `propuestaEn` hace más de `DIAS_PROPUESTA_SIN_RESPUESTA`), `finalizacionesPropuestas`, `bajasPropuestas`, cada una `{ cantidad, enlace }` a la bandeja o a `/grupos?pendiente=…`. Unit test en `apps/api/test/unit/pendientes-admin.spec.ts`.
-- [x] T054g Extender `apps/backoffice/src/app/page.tsx` (Inicio) con la tarjeta **Pendientes** para quien tiene `solicitudes.aprobar` o `grupos.gestionar` (`tienePermiso`, D132): cuatro filas con cantidad, texto e ícono (D81), cada una enlazando a su listado filtrado; en cero, el estado vacío "No tenés nada pendiente". Textos en `inicio.pendientes`. Verificar contra el checklist de `docs/15-guia-ux-ui.md`.
+- [x] T054g Extender `apps/backoffice/src/app/page.tsx` (Inicio) con la tarjeta **Pendientes** para quien tiene `solicitudes.aprobar` o `grupos.gestionar` (`tienePermiso`, D132): hasta cuatro filas con cantidad, texto e ícono (D81) — solo las que tienen algo (Echu, merge de la 004) —, cada una enlazando a su listado filtrado; si no hay ninguna, el estado vacío "No tenés nada pendiente". Textos en `inicio.pendientes`. Verificar contra el checklist de `docs/15-guia-ux-ui.md`.
 
 ---
 
