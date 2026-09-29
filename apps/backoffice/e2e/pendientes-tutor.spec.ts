@@ -202,7 +202,12 @@ test('ordenar por Nombre se refleja en la URL, sobrevive a un F5, y se puede vol
     .getByRole('alertdialog', { name: /¿Cerrar el caso de/ })
     .getByRole('button', { name: 'Sí, cerrar el caso' })
     .click();
-  await expect(page.getByText('Caso cerrado.')).toBeVisible();
+  // Si el segundo cierre llega antes de que se vaya el primer toast (sonner lo
+  // deja unos segundos), hay DOS "Caso cerrado." a la vez: se mira el último,
+  // y que la fila se haya ido de verdad (era el flaky "toast duplicado").
+  await expect(page.getByText('Caso cerrado.').last()).toBeVisible();
+  await expect(filaZeta).toHaveCount(0);
+  await expect(filaAlfa).toHaveCount(0);
 });
 
 // Cierre de H-101 (D-paginado, antes de la spec 004): reemplaza a "cargar
