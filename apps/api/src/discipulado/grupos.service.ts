@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type {
+  DetalleDiscipuladoAdmin,
   DiscipuladoResumen,
   EncuentroAdministrativo,
   Franja,
@@ -23,25 +24,6 @@ export interface FiltrosGrupos {
 }
 
 /**
- * Cada Persona con su Inscripción y la baja pedida (fecha y motivo): el Admin
- * confirma o rechaza la baja por Inscripción y el motivo es para él (FR-042).
- * TODO(merge): sumar estos campos a `DiscipuladoResumen.personas` en
- * `packages/shared-types/src/discipulado.ts` (archivo del lote 0) y borrar esto.
- */
-export type PersonaDeResumen = DiscipuladoResumen['personas'][number] & {
-  inscripcionId: string;
-  bajaPropuestaEn: string | null;
-  bajaPropuestaMotivo: string | null;
-};
-export type ResumenConInscripciones = Omit<DiscipuladoResumen, 'personas'> & { personas: PersonaDeResumen[] };
-
-export type DetalleDiscipuladoAdmin = ResumenConInscripciones & {
-  encuentros: EncuentroAdministrativo[];
-  liderazgos: Array<{ discipulador: PersonaBreve; desde: string; hasta: string | null }>;
-  franjasDelGrupo: Franja[];
-};
-
-/**
  * specs/004, T044 (D134): la vista administrativa de los discipulados, para
  * Admin y Pastor. **Ningún `select` de este archivo incluye `notas`**: las
  * notas de un Encuentro son del Discipulador vigente (FR-029, test de
@@ -51,7 +33,7 @@ export type DetalleDiscipuladoAdmin = ResumenConInscripciones & {
 export class GruposService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listar(filtros: FiltrosGrupos): Promise<Pagina<ResumenConInscripciones>> {
+  async listar(filtros: FiltrosGrupos): Promise<Pagina<DiscipuladoResumen>> {
     const where = await this.whereDe(filtros);
     const [grupos, total] = await Promise.all([
       this.prisma.grupo.findMany({
@@ -126,7 +108,7 @@ export class GruposService {
   }
 
   /** Arma los `DiscipuladoResumen` de estos Grupos en pocas consultas (no una por fila, H-42), en el mismo orden. */
-  private async resumenes(grupoIds: string[]): Promise<ResumenConInscripciones[]> {
+  private async resumenes(grupoIds: string[]): Promise<DiscipuladoResumen[]> {
     if (grupoIds.length === 0) return [];
     const [grupos, inscripciones, liderazgos, ultimos, reasignaciones] = await Promise.all([
       this.prisma.grupo.findMany({
@@ -169,7 +151,7 @@ export class GruposService {
     const ultimoPorGrupo = new Map(ultimos.map((u) => [u.grupoId, u]));
     const reasignacionPorGrupo = new Map(reasignaciones.map((r) => [r.grupoId, r]));
 
-    return grupoIds.flatMap((id): ResumenConInscripciones[] => {
+    return grupoIds.flatMap((id): DiscipuladoResumen[] => {
       const g = grupoPorId.get(id);
       if (!g) return [];
       const delGrupo = inscripciones.filter((i) => i.grupoId === id);

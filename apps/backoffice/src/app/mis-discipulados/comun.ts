@@ -1,15 +1,9 @@
 import {
   ApiError,
   erroresPorCampo,
-  type DiscipuladoResumen,
-  type EncuentroAdministrativo,
-  type EncuentroDelDiscipulador,
   type Franja,
-  type PersonaBreve,
   formatearFechaLarga,
   hoyEnArgentina,
-  type MiDiscipulado,
-  type PropuestaParaMi,
 } from '@vida-sobrenatural/shared-types';
 import { minutosAHHMM } from '@vida-sobrenatural/ui';
 
@@ -19,38 +13,7 @@ import { minutosAHHMM } from '@vida-sobrenatural/ui';
  * importan tanto los Server Components como las islas de cliente.
  */
 
-/**
- * `MiDiscipulado` con el `personaId` de cada Persona, que la API ya manda:
- * las asistencias de un Encuentro vienen por `personaId`.
- * TODO(merge): sumar `personaId` a `MiDiscipulado.personas` en shared-types.
- */
-export type MiDiscipuladoConIds = Omit<MiDiscipulado, 'personas'> & {
-  personas: Array<MiDiscipulado['personas'][number] & { personaId: string }>;
-};
-
-/** Lo que devuelve `GET /discipulado/mis-discipulados` (contracts/discipulado-api.md). */
-export interface MisDiscipuladosRespuesta {
-  propuestas: PropuestaParaMi[];
-  discipulados: MiDiscipuladoConIds[];
-  tieneAgenda: boolean;
-}
-
-/** `GET /discipulado/mis-discipulados/:grupoId`. */
-export type DetalleMiDiscipulado = MiDiscipuladoConIds & { encuentros: EncuentroDelDiscipulador[] };
-
-/**
- * La vista del Admin (`GET /grupos/discipulados/:grupoId`), con la Inscripción
- * y la baja pedida de cada Persona, que la API ya manda.
- * TODO(merge): sumar esos campos a `DiscipuladoResumen.personas` en shared-types.
- */
-export type DetalleDiscipuladoAdmin = Omit<DiscipuladoResumen, 'personas'> & {
-  personas: Array<
-    DiscipuladoResumen['personas'][number] & { inscripcionId: string; bajaPropuestaEn: string | null; bajaPropuestaMotivo: string | null }
-  >;
-  encuentros: EncuentroAdministrativo[];
-  liderazgos: Array<{ discipulador: PersonaBreve; desde: string; hasta: string | null }>;
-  franjasDelGrupo: Franja[];
-};
+export type { DetalleDiscipuladoAdmin, DetalleMiDiscipulado, MisDiscipuladosRespuesta } from '@vida-sobrenatural/shared-types';
 
 /**
  * Una fecha para leer: si es un instante (`2026-09-28T21:30:00Z`), el día

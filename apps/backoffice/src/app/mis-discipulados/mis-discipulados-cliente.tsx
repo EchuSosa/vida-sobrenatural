@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { AlertTriangle, CalendarClock, CheckCircle2, CircleCheckBig, Clock, Phone, UsersRound } from 'lucide-react';
-import { apiFetch, ApiError, type PropuestaParaMi } from '@vida-sobrenatural/shared-types';
+import { apiFetch, ApiError, type MiDiscipulado, type PropuestaParaMi } from '@vida-sobrenatural/shared-types';
 import { Button, ButtonLink, ConfirmDestructiveDialog, EstadoVacio, useEnvio } from '@vida-sobrenatural/ui';
-import { fechaParaLeer, mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type MiDiscipuladoConIds, type MisDiscipuladosRespuesta } from './comun';
+import { fechaParaLeer, mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type MisDiscipuladosRespuesta } from './comun';
 import { PanelMotivo } from './panel-motivo';
 
 /**
@@ -231,7 +231,7 @@ function TarjetaPropuesta({ propuesta, apiToken, puedeGestionar }: { propuesta: 
   );
 }
 
-function TarjetaDiscipulado({ discipulado }: { discipulado: MiDiscipuladoConIds }) {
+function TarjetaDiscipulado({ discipulado }: { discipulado: MiDiscipulado }) {
   const t = useTranslations('misDiscipulados');
   const locale = useLocale();
   const nombres = nombresDe(discipulado.personas);

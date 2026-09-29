@@ -158,7 +158,20 @@ export type EncuentroDelDiscipulador = EncuentroAdministrativo & { notas: string
 /** Fila de la vista administrativa de discipulados (D134): sin notas. */
 export interface DiscipuladoResumen {
   grupoId: string;
-  personas: Array<{ id: string; nombre: string; apellido: string; estadoInscripcion: EstadoInscripcion; bajaPropuesta: boolean }>;
+  /**
+   * Cada Persona con su Inscripción y la baja pedida (fecha y motivo): el Admin
+   * confirma o rechaza la baja por Inscripción, y el motivo es para él (FR-042).
+   */
+  personas: Array<{
+    id: string;
+    inscripcionId: string;
+    nombre: string;
+    apellido: string;
+    estadoInscripcion: EstadoInscripcion;
+    bajaPropuesta: boolean;
+    bajaPropuestaEn: string | null;
+    bajaPropuestaMotivo: string | null;
+  }>;
   discipulador: PersonaBreve;
   desde: string;
   estado: EstadoGrupo;
@@ -174,6 +187,8 @@ export interface DiscipuladoResumen {
 export interface MiDiscipulado {
   grupoId: string;
   personas: Array<{
+    /** Las asistencias de un Encuentro vienen por `personaId`; la pantalla las cruza con la Inscripción. */
+    personaId: string;
     inscripcionId: string;
     nombre: string;
     apellido: string;
@@ -188,6 +203,24 @@ export interface MiDiscipulado {
   propuestaFinalizacionEn: string | null;
   finalizacionRechazada: { en: string; motivo: string | null } | null;
 }
+
+/** `GET /discipulado/mis-discipulados`: primero las propuestas por responder (FR-037, FR-047). */
+export interface MisDiscipuladosRespuesta {
+  propuestas: PropuestaParaMi[];
+  discipulados: MiDiscipulado[];
+  tieneAgenda: boolean;
+}
+
+/** `GET /discipulado/mis-discipulados/:grupoId`: con las notas de cada Encuentro (D134). */
+export type DetalleMiDiscipulado = MiDiscipulado & { encuentros: EncuentroDelDiscipulador[] };
+
+/** `GET /grupos/discipulados/:grupoId`, la vista del Admin y el Pastor: sin notas (D134). */
+export type DetalleDiscipuladoAdmin = DiscipuladoResumen & {
+  encuentros: EncuentroAdministrativo[];
+  liderazgos: Array<{ discipulador: PersonaBreve; desde: string; hasta: string | null }>;
+  /** El horario derivado del Grupo (research #14). */
+  franjasDelGrupo: Franja[];
+};
 
 /** Una propuesta pendiente como la ve el Discipulador antes de aceptar (FR-037): sin contacto. */
 export interface PropuestaParaMi {
