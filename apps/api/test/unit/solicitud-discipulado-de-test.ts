@@ -182,6 +182,9 @@ function prismaEnMemoria(base: Base) {
     inscripcion: {
       count: async ({ where }: { where: { personaId: string; estado: { in: string[] } } }) =>
         base.inscripciones.filter((i) => i.personaId === where.personaId && where.estado.in.includes(i.estado)).length,
+      // `cursaOCompletoVidaNueva` (discipulado/consultas.ts, la única tras el merge) usa findFirst.
+      findFirst: async ({ where }: { where: { personaId: string; estado: { in: string[] } } }) =>
+        base.inscripciones.find((i) => i.personaId === where.personaId && where.estado.in.includes(i.estado)) ?? null,
       findMany: async ({ where }: { where: { personaId: string } }) =>
         base.inscripciones
           .filter((i) => i.personaId === where.personaId)

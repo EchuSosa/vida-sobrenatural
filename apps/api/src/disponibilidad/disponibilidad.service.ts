@@ -6,11 +6,7 @@ import { aparicionEnElCruce, bloqueosVisibles, validarBloqueo, validarFranja, va
 import type { CrearFranjaDto } from './dto/crear-franja.dto.js';
 import type { CrearBloqueoDto } from './dto/crear-bloqueo.dto.js';
 import type { ActualizarDisponibilidadDto } from './dto/actualizar-disponibilidad.dto.js';
-
-/** `@db.Date` llega como medianoche UTC: la fecha civil es la parte de fecha del ISO. */
-function comoFechaCivil(fecha: Date): string {
-  return fecha.toISOString().slice(0, 10);
-}
+import { comoFechaCivil } from '../discipulado/consultas.js';
 
 function desdeFechaCivil(fecha: string): Date {
   return new Date(`${fecha}T00:00:00.000Z`);

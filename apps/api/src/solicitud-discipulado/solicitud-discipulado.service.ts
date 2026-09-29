@@ -17,7 +17,7 @@ import { AppException } from '../common/errors/app-exception.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
 import { CruceService } from '../discipulado/cruce.service.js';
 import { EventosDiscipuladoService } from '../discipulado/eventos.js';
-import { cursaOCompletoVidaNueva } from './cursa-o-completo.js';
+import { cursaOCompletoVidaNueva } from '../discipulado/consultas.js';
 import { erroresDeFranjas, estadoMiDiscipulado, puedePedirSola } from './reglas-solicitud.js';
 
 type Tx = Prisma.TransactionClient;
@@ -301,6 +301,9 @@ export class SolicitudDiscipuladoService {
         const solicitud = await bloquearSolicitud(tx, id);
         if (solicitud.estado !== 'pendiente') throw solicitudNoPendiente();
 
+        // Orden de bloqueo del discipulado: Solicitud → Grupo → Propuesta → Persona
+        // (propuestas.service.ts). Acá: Solicitud (arriba) → Persona. El Grupo
+        // destino no se bloquea: aceptar lo vuelve a contar con su fila bloqueada.
         const filas = await tx.$queryRaw<{ id: string }[]>`
           SELECT "id" FROM "personas" WHERE "id" = ${discipuladorId} FOR UPDATE`;
         const franjas = await tx.franjaSolicitud.findMany({ where: { solicitudId: id }, select: FRANJA_SELECT });
@@ -444,6 +447,12 @@ async function exigirSinSolicitudAbierta(tx: Tx, personaId: string) {
   if (abierta) throw yaTieneSolicitudAbierta();
 }
 
+/**
+ * Orden de bloqueo del discipulado: Solicitud → Grupo → Propuesta → Persona
+ * (propuestas.service.ts). Toda transición de Solicitudes bloquea la Solicitud
+ * PRIMERO; la Propuesta se toca después (el UPDATE de `retirarPropuestaPendiente`
+ * toma su fila) y la Persona al final (proponer).
+ */
 async function bloquearSolicitud(tx: Tx, id: string): Promise<SolicitudBloqueada> {
   const filas = await tx.$queryRaw<SolicitudBloqueada[]>`
     SELECT "id", "personaId", "estado"::text AS "estado" FROM "solicitudes_discipulado" WHERE "id" = ${id} FOR UPDATE`;
@@ -451,7 +460,7 @@ async function bloquearSolicitud(tx: Tx, id: string): Promise<SolicitudBloqueada
   return filas[0];
 }
 
-/** La Solicitud abierta (`pendiente` o `propuesta`) de la Persona, bloqueada. 404 si no tiene. */
+/** La Solicitud abierta (`pendiente` o `propuesta`) de la Persona, bloqueada. 404 si no tiene. Mismo orden que `bloquearSolicitud`: primero la Solicitud. */
 async function bloquearAbiertaDe(tx: Tx, personaId: string): Promise<SolicitudBloqueada> {
   const filas = await tx.$queryRaw<SolicitudBloqueada[]>`
     SELECT "id", "personaId", "estado"::text AS "estado" FROM "solicitudes_discipulado"

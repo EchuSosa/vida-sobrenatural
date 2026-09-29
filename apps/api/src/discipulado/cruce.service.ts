@@ -4,6 +4,7 @@ import { franjasCoinciden, hoyEnArgentina, bloqueoVigente } from '@vida-sobrenat
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { armarCruce, type CandidatoCruce } from './cruce-puro.js';
+import { comoFechaCivil } from './consultas.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -154,10 +155,6 @@ export class CruceService {
   }
 }
 
-/** Fecha civil `YYYY-MM-DD` de un `@db.Date` (llega como Date a medianoche UTC). */
-function comoFechaCivil(fecha: Date): string {
-  return fecha.toISOString().slice(0, 10);
-}
 
 async function nombresDe(db: Db, ids: string[]): Promise<Map<string, { nombre: string; apellido: string }>> {
   if (ids.length === 0) return new Map();

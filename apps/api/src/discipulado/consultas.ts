@@ -15,8 +15,8 @@ type Db = PrismaService | Prisma.TransactionClient;
  * Nueva si tiene una Inscripción `activa` o `completada` en un Grupo de Vida
  * Nueva. `abandono` y `dada_de_baja` NO cuentan: puede volver a pedir.
  *
- * TODO(merge): el lote A la necesita para crear una Solicitud (T016). Tiene
- * que usar esta, no escribir otra.
+ * Única definición (Principio XI): la usan pedir y proponer (Solicitudes) y
+ * aceptar (propuestas), que la re-exige con la fila bloqueada.
  */
 export async function cursaOCompletoVidaNueva(db: Db, personaId: string): Promise<boolean> {
   const inscripcion = await db.inscripcion.findFirst({
@@ -69,7 +69,8 @@ export async function franjasDeSolicitudes(db: Db, solicitudIds: string[]): Prom
  * viva y ningún período de no disponibilidad vigente hoy (en Argentina). Es el
  * mismo criterio que `CruceService.disponibles` aplica en lote.
  *
- * TODO(merge): el lote A lo necesita al proponer (T024). Tiene que usar esta.
+ * Proponer (Solicitudes) no la llama: usa `CruceService.disponibles`, que
+ * aplica el mismo criterio en lote y además devuelve los Grupos con lugar.
  */
 export async function estaDisponible(
   db: Db,
@@ -85,7 +86,11 @@ export async function estaDisponible(
   return !bloqueos.some((b) => bloqueoVigente({ desde: comoFechaCivil(b.desde), hasta: comoFechaCivil(b.hasta) }, hoy));
 }
 
-/** Fecha civil `YYYY-MM-DD` de un `@db.Date` (llega como Date a medianoche UTC). */
+/**
+ * Fecha civil `YYYY-MM-DD` de un `@db.Date` (llega como Date a medianoche UTC).
+ * Única (Principio XI): la usan el cruce, la disponibilidad, Grupos y Mis
+ * discipulados. No confundir con el día civil de un INSTANTE (shared-types).
+ */
 export function comoFechaCivil(fecha: Date): string {
   return fecha.toISOString().slice(0, 10);
 }
