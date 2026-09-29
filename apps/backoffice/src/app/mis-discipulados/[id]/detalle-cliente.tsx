@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { CircleCheckBig, Clock, Info, MapPin, Pencil, Phone, UserRoundX } from 'lucide-react';
-import { apiFetch, type EncuentroDelDiscipulador } from '@vida-sobrenatural/shared-types';
+import { apiFetch, type EncuentroDelDiscipulador, formatearDiaEnArgentina } from '@vida-sobrenatural/shared-types';
 import { Button, ConfirmDestructiveDialog, EstadoVacio, MigaDePan, useEnvio } from '@vida-sobrenatural/ui';
-import { fechaParaLeer, mensajeDeError, mensajesDeCampo, nombresDe, type DetalleMiDiscipulado } from '../comun';
+import { mensajeDeError, mensajesDeCampo, nombresDe, type DetalleMiDiscipulado } from '../comun';
 import { PanelMotivo } from '../panel-motivo';
 import { FormularioEncuentro } from './formulario-encuentro';
 
@@ -48,7 +48,7 @@ export function DetalleMiDiscipuladoCliente({
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
           <span className="inline-flex items-center gap-1.5">
             {enCurso ? <Clock className="size-4" aria-hidden="true" /> : <CircleCheckBig className="size-4" aria-hidden="true" />}
-            {enCurso ? t('detalle.enCurso', { fecha: fechaParaLeer(detalle.desde, locale) }) : t('detalle.finalizado')}
+            {enCurso ? t('detalle.enCurso', { fecha: formatearDiaEnArgentina(detalle.desde, locale) }) : t('detalle.finalizado')}
           </span>
           {enCurso && <span className="text-muted-foreground">{t('detalle.lugar', detalle.lugar)}</span>}
         </p>
@@ -82,7 +82,7 @@ export function DetalleMiDiscipuladoCliente({
           <ul className="flex flex-col gap-3">
             {detalle.encuentros.map((e) => {
               const faltaron = e.asistencias.filter((a) => !a.presente).map((a) => nombrePorPersona.get(a.personaId) ?? '');
-              const fecha = fechaParaLeer(e.fecha, locale);
+              const fecha = formatearDiaEnArgentina(e.fecha, locale);
               return (
                 <li key={e.id} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 text-card-foreground">
                   <div className="flex items-start justify-between gap-3">
@@ -207,7 +207,7 @@ function TarjetaPersona({ persona, grupoId, apiToken, gestiona }: { persona: Per
       {persona.bajaPropuesta ? (
         <p className="flex items-start gap-2 text-sm">
           <Clock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          {t('detalle.baja.propuesta', { fecha: fechaParaLeer(persona.bajaPropuesta.en, locale) })}
+          {t('detalle.baja.propuesta', { fecha: formatearDiaEnArgentina(persona.bajaPropuesta.en, locale) })}
         </p>
       ) : (
         <>
@@ -215,7 +215,7 @@ function TarjetaPersona({ persona, grupoId, apiToken, gestiona }: { persona: Per
             <p className="flex items-start gap-2 text-sm">
               <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
               <span>
-                {t('detalle.baja.rechazada', { fecha: fechaParaLeer(persona.bajaRechazada.en, locale) })}
+                {t('detalle.baja.rechazada', { fecha: formatearDiaEnArgentina(persona.bajaRechazada.en, locale) })}
                 {persona.bajaRechazada.motivo && ` ${t('detalle.baja.rechazadaMotivo', { motivo: persona.bajaRechazada.motivo })}`}
               </span>
             </p>
@@ -278,7 +278,7 @@ function SeccionFinalizacion({ detalle, apiToken, gestiona }: { detalle: Detalle
       {detalle.propuestaFinalizacionEn ? (
         <p className="flex items-start gap-2 text-sm">
           <Clock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          {t('detalle.finalizacion.enviada', { fecha: fechaParaLeer(detalle.propuestaFinalizacionEn, locale) })}
+          {t('detalle.finalizacion.enviada', { fecha: formatearDiaEnArgentina(detalle.propuestaFinalizacionEn, locale) })}
         </p>
       ) : (
         <>
@@ -286,7 +286,7 @@ function SeccionFinalizacion({ detalle, apiToken, gestiona }: { detalle: Detalle
             <p className="flex items-start gap-2 text-sm">
               <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
               <span>
-                {t('detalle.finalizacion.rechazada', { fecha: fechaParaLeer(detalle.finalizacionRechazada.en, locale) })}
+                {t('detalle.finalizacion.rechazada', { fecha: formatearDiaEnArgentina(detalle.finalizacionRechazada.en, locale) })}
                 {detalle.finalizacionRechazada.motivo && ` ${t('detalle.finalizacion.rechazadaMotivo', { motivo: detalle.finalizacionRechazada.motivo })}`}
               </span>
             </p>

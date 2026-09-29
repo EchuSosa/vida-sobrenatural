@@ -6,6 +6,7 @@
  * backoffice (la pantalla).
  */
 import type { Franja } from './discipulado.js';
+import { diaCivilEnArgentina } from './formato.js';
 
 export type { Franja };
 export { MAX_PERSONAS_POR_GRUPO_VIDA_NUEVA, MINUTOS_MINIMOS_EN_COMUN } from './discipulado.js';
@@ -44,12 +45,7 @@ export interface MiDisponibilidad {
  * de día si el proceso corre en otro huso (mismo criterio que `formato.ts`).
  */
 export function hoyEnArgentina(ahora: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Argentina/Buenos_Aires',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(ahora);
+  return diaCivilEnArgentina(ahora);
 }
 
 /**

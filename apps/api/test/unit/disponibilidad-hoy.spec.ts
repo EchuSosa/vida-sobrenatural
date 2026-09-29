@@ -1,4 +1,4 @@
-import { hoyEnArgentina, bloqueoVigente } from '@vida-sobrenatural/shared-types';
+import { hoyEnArgentina, bloqueoVigente, diaCivilEnArgentina, formatearDiaEnArgentina } from '@vida-sobrenatural/shared-types';
 
 /**
  * specs/004, T004 (research #7): la fecha civil de hoy en Argentina y la
@@ -42,5 +42,22 @@ describe('bloqueoVigente', () => {
 
   it('el día posterior al fin no está vigente', () => {
     expect(bloqueoVigente(b, '2026-03-21')).toBe(false);
+  });
+});
+
+describe('diaCivilEnArgentina y formatearDiaEnArgentina (fechas de instantes, Fase 2 del merge)', () => {
+  it('un instante de las 22:30 de Argentina es de ese día, no del siguiente (el bug de leerlo en UTC)', () => {
+    // 2026-09-28T01:30Z = 27/09 22:30 en Buenos Aires.
+    expect(diaCivilEnArgentina('2026-09-28T01:30:00Z')).toBe('2026-09-27');
+    expect(formatearDiaEnArgentina('2026-09-28T01:30:00Z', 'es')).toBe('27 de septiembre de 2026');
+  });
+
+  it('una fecha civil se muestra tal cual, sin correr el día', () => {
+    expect(formatearDiaEnArgentina('2026-09-28', 'es')).toBe('28 de septiembre de 2026');
+  });
+
+  it('hoyEnArgentina es la misma función aplicada a "ahora"', () => {
+    const ahora = new Date('2026-03-10T02:30:00Z');
+    expect(hoyEnArgentina(ahora)).toBe(diaCivilEnArgentina(ahora));
   });
 });

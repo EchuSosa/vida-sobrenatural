@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { AlertTriangle, CalendarClock, CheckCircle2, CircleCheckBig, Clock, Phone, UsersRound } from 'lucide-react';
-import { apiFetch, ApiError, type MiDiscipulado, type PropuestaParaMi } from '@vida-sobrenatural/shared-types';
+import { apiFetch, ApiError, type MiDiscipulado, type PropuestaParaMi, formatearDiaEnArgentina } from '@vida-sobrenatural/shared-types';
 import { Button, ButtonLink, ConfirmDestructiveDialog, EstadoVacio, useEnvio } from '@vida-sobrenatural/ui';
-import { fechaParaLeer, mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type MisDiscipuladosRespuesta } from './comun';
+import { mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type MisDiscipuladosRespuesta } from './comun';
 import { PanelMotivo } from './panel-motivo';
 import { PedirEnNombreDe } from '../../components/pedir-en-nombre-de';
 
@@ -189,7 +189,7 @@ function TarjetaPropuesta({ propuesta, apiToken, puedeGestionar }: { propuesta: 
           )}
         </p>
 
-        <p className="text-xs text-muted-foreground">{t('propuestas.propuestaEn', { fecha: fechaParaLeer(propuesta.propuestaEn, locale) })}</p>
+        <p className="text-xs text-muted-foreground">{t('propuestas.propuestaEn', { fecha: formatearDiaEnArgentina(propuesta.propuestaEn, locale) })}</p>
 
         {puedeGestionar && (
           // docs/15, Celular: apiladas a todo el ancho, la principal arriba; en escritorio, a la derecha.
@@ -253,7 +253,7 @@ function TarjetaDiscipulado({ discipulado }: { discipulado: MiDiscipulado }) {
             {enCurso ? <Clock className="size-4" aria-hidden="true" /> : <CircleCheckBig className="size-4" aria-hidden="true" />}
             {enCurso ? t('discipulados.enCurso') : t('discipulados.finalizado')}
           </span>
-          <span className="text-muted-foreground">{t('discipulados.desde', { fecha: fechaParaLeer(discipulado.desde, locale) })}</span>
+          <span className="text-muted-foreground">{t('discipulados.desde', { fecha: formatearDiaEnArgentina(discipulado.desde, locale) })}</span>
           {enCurso && <span className="text-muted-foreground">{t('discipulados.lugar', discipulado.lugar)}</span>}
         </p>
         {enCurso && discipulado.propuestaFinalizacionEn && (

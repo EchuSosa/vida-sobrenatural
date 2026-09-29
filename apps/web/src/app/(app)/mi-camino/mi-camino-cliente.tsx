@@ -11,7 +11,7 @@ import {
   ApiError,
   apiFetch,
   erroresPorCampo,
-  formatearFechaLarga,
+  formatearDiaEnArgentina,
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
@@ -36,7 +36,8 @@ export function MiCaminoCliente({ estadoInicial }: { estadoInicial: EstadoMiDisc
   const [estado, setEstado] = useState(estadoInicial);
   const t = useTranslations('miCamino.vidaNueva');
   const locale = useLocale();
-  const fecha = (iso: string) => formatearFechaLarga(iso, locale);
+  // Instantes (pedido, inicio, fin, baja): el día en Argentina, no en UTC.
+  const fecha = (iso: string) => formatearDiaEnArgentina(iso, locale);
 
   return (
     <section aria-labelledby="vida-nueva-titulo" className="flex flex-col gap-4 rounded-lg border border-border p-5">

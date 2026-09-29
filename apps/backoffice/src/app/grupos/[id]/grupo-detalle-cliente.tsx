@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ArrowRightLeft, CircleCheckBig, Clock, Info, Lock, UserRoundX } from 'lucide-react';
-import { apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
+import { apiFetch, ApiError, formatearDiaEnArgentina } from '@vida-sobrenatural/shared-types';
 import { Button, ConfirmDestructiveDialog, EstadoVacio, MigaDePan, useEnvio } from '@vida-sobrenatural/ui';
-import { fechaParaLeer, mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type DetalleDiscipuladoAdmin } from '../../mis-discipulados/comun';
+import { mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type DetalleDiscipuladoAdmin } from '../../mis-discipulados/comun';
 import { PanelMotivo, type TextosPanelMotivo } from '../../mis-discipulados/panel-motivo';
 import { PanelReasignar } from './reasignar';
 
@@ -127,7 +127,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
             {t(`estado.${detalle.motivoCierre ?? 'en_curso'}`)}
           </span>
           <span>{t('detalle.discipulador', { nombre: actual })}</span>
-          <span className="text-muted-foreground">{t('detalle.desde', { fecha: fechaParaLeer(detalle.desde, locale) })}</span>
+          <span className="text-muted-foreground">{t('detalle.desde', { fecha: formatearDiaEnArgentina(detalle.desde, locale) })}</span>
           {enCurso && <span className="text-muted-foreground">{t('detalle.lugar', detalle.lugar)}</span>}
         </p>
       </header>
@@ -143,7 +143,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
             <div className="flex flex-col gap-3">
               <p className="flex items-start gap-2 text-sm">
                 <CircleCheckBig className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                {t('finalizacion.propuesta', { nombre: actual, fecha: fechaParaLeer(detalle.propuestaFinalizacionEn, locale) })}
+                {t('finalizacion.propuesta', { nombre: actual, fecha: formatearDiaEnArgentina(detalle.propuestaFinalizacionEn, locale) })}
               </p>
               <div className="flex flex-col gap-2 sm:flex-row-reverse sm:justify-start">
                 <ConfirmDestructiveDialog
@@ -170,7 +170,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
               <div className="flex flex-col gap-1 text-sm">
                 <p className="flex items-start gap-2 font-medium">
                   <UserRoundX className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                  {p.nombre} {p.apellido}: {t('baja.propuesta', { fecha: fechaParaLeer(p.bajaPropuestaEn!, locale) })}
+                  {p.nombre} {p.apellido}: {t('baja.propuesta', { fecha: formatearDiaEnArgentina(p.bajaPropuestaEn!, locale) })}
                 </p>
                 {p.bajaPropuestaMotivo && <p className="text-muted-foreground">{t('baja.motivo', { motivo: p.bajaPropuestaMotivo })}</p>}
               </div>
@@ -202,7 +202,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
                   <ArrowRightLeft className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                   {t('reasignacion.propuesta', {
                     nombre: `${detalle.reasignacionPropuesta.discipulador.nombre} ${detalle.reasignacionPropuesta.discipulador.apellido}`,
-                    fecha: fechaParaLeer(detalle.reasignacionPropuesta.propuestaEn, locale),
+                    fecha: formatearDiaEnArgentina(detalle.reasignacionPropuesta.propuestaEn, locale),
                     actual,
                   })}
                 </p>
@@ -292,7 +292,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
               const faltaron = e.asistencias.filter((a) => !a.presente).map((a) => nombrePorPersona.get(a.personaId) ?? '');
               return (
                 <li key={e.id} className="flex flex-col gap-1 rounded-lg border border-border p-3 text-sm">
-                  <p className="font-medium">{fechaParaLeer(e.fecha, locale)}</p>
+                  <p className="font-medium">{formatearDiaEnArgentina(e.fecha, locale)}</p>
                   <p>{t('detalle.capitulos', { capitulos: e.capitulos })}</p>
                   <p className="text-muted-foreground">
                     {faltaron.length === 0 ? t('detalle.vinieronTodos') : t('detalle.faltaron', { nombres: faltaron.join(', ') })}
@@ -318,8 +318,8 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
                 </span>{' '}
                 —{' '}
                 {l.hasta
-                  ? t('detalle.periodo', { desde: fechaParaLeer(l.desde, locale), hasta: fechaParaLeer(l.hasta, locale) })
-                  : t('detalle.vigente', { desde: fechaParaLeer(l.desde, locale) })}
+                  ? t('detalle.periodo', { desde: formatearDiaEnArgentina(l.desde, locale), hasta: formatearDiaEnArgentina(l.hasta, locale) })
+                  : t('detalle.vigente', { desde: formatearDiaEnArgentina(l.desde, locale) })}
               </span>
             </li>
           ))}

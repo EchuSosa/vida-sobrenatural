@@ -61,6 +61,34 @@ export function formatearFechaLarga(fecha: string | Date, locale: string): strin
   }).format(comoFecha(fecha));
 }
 
+/**
+ * El día civil (`YYYY-MM-DD`) de un INSTANTE en Argentina. Un instante como
+ * `2026-09-28T01:30:00Z` es el 27 a las 22:30 en Buenos Aires: leerlo en UTC
+ * (como hace `formatearFechaLarga`, que es para fechas civiles) mostraría el
+ * día siguiente para todo lo que pasa después de las 21 h. Única
+ * implementación (Principio XI): `hoyEnArgentina` (disponibilidad.ts) es esto
+ * mismo aplicado a "ahora".
+ */
+export function diaCivilEnArgentina(instante: string | Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(comoFecha(instante));
+}
+
+/**
+ * "28 de septiembre de 2026" para leer en pantalla, venga lo que venga: una
+ * fecha civil (`2026-09-28`, un Encuentro o un período) tal cual, o un
+ * instante (un pedido, una propuesta, una baja) como el día en que pasó en
+ * Argentina. Es la que usan las pantallas de la 004.
+ */
+export function formatearDiaEnArgentina(valor: string | Date, locale: string): string {
+  const civil = typeof valor === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(valor) ? valor : diaCivilEnArgentina(valor);
+  return formatearFechaLarga(civil, locale);
+}
+
 /** "10 de marzo de 2012, 14:30" */
 export function formatearFechaHora(fecha: string | Date, locale: string): string {
   return new Intl.DateTimeFormat(conRegion(locale), {

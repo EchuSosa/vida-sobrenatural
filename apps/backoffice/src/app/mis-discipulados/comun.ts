@@ -2,8 +2,6 @@ import {
   ApiError,
   erroresPorCampo,
   type Franja,
-  formatearFechaLarga,
-  hoyEnArgentina,
 } from '@vida-sobrenatural/shared-types';
 import { minutosAHHMM } from '@vida-sobrenatural/ui';
 
@@ -14,16 +12,6 @@ import { minutosAHHMM } from '@vida-sobrenatural/ui';
  */
 
 export type { DetalleDiscipuladoAdmin, DetalleMiDiscipulado, MisDiscipuladosRespuesta } from '@vida-sobrenatural/shared-types';
-
-/**
- * Una fecha para leer: si es un instante (`2026-09-28T21:30:00Z`), el día
- * civil en Argentina (a las 21:30 del 28 en Buenos Aires ya es 29 en UTC);
- * si ya es una fecha civil (`2026-09-28`, un Encuentro), tal cual.
- */
-export function fechaParaLeer(valor: string, locale: string): string {
-  const civil = valor.length === 10 ? valor : hoyEnArgentina(new Date(valor));
-  return formatearFechaLarga(civil, locale);
-}
 
 type Traductor = ((clave: string) => string) & { has: (clave: string) => boolean };
 

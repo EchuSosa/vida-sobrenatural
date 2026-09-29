@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRightLeft, CircleCheckBig, Clock, UserRoundX } from 'lucide-react';
-import type { DiscipuladoResumen, Pagina } from '@vida-sobrenatural/shared-types';
+import { formatearDiaEnArgentina, type DiscipuladoResumen, type Pagina } from '@vida-sobrenatural/shared-types';
 import { Button, Paginacion, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
-import { fechaParaLeer, nombresDe } from '../mis-discipulados/comun';
+import { nombresDe } from '../mis-discipulados/comun';
 import { FILTROS_PENDIENTE, type FiltroPendiente } from './constantes';
 
 /**
@@ -62,7 +62,7 @@ export function GruposCliente({
       encabezado: t('tabla.desde'),
       ordenable: true,
       className: 'hidden md:table-cell',
-      celda: (d) => fechaParaLeer(d.desde, locale),
+      celda: (d) => formatearDiaEnArgentina(d.desde, locale),
     },
     {
       id: 'lugar',
