@@ -190,6 +190,12 @@ export class RolesService {
    * H-142: lee la Persona BLOQUEANDO su fila hasta el fin de la transacción —
    * un cambio de rol concurrente sobre la misma Persona espera acá, y lee el
    * estado que dejó el anterior, no un snapshot previo.
+   *
+   * Orden de bloqueo del discipulado (propuestas.service.ts): Solicitud → Grupo
+   * → Propuesta → Persona. Otorgar y quitar un rol bloquean SOLO la Persona, el
+   * último eslabón, así que no pueden esperarse en cruz con proponer/aceptar/
+   * reasignar (D137). Las consultas de discipulados y propuestas de quitarRol
+   * son lecturas, sin lock.
    */
   private async bloquearOFallar(
     tx: Prisma.TransactionClient,
