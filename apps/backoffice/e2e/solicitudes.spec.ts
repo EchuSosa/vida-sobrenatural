@@ -154,7 +154,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await sinViolaciones(page);
 
       await page.goto(`/solicitudes/${solicitud.id}`);
-      await expect(page.getByText('Martes 18:00 a 20:00')).toBeVisible();
+      // En #contenido: mientras la página llega por streaming, React deja una copia oculta afuera
+      // (la corrida de cierre de la 004 falló por modo estricto con esa copia).
+      await expect(page.locator('#contenido').getByText('Martes 18:00 a 20:00')).toBeVisible();
       await expect(page.getByRole('button', { name: 'Rechazar la Solicitud' })).toHaveCount(0);
       await expect(page.getByRole('button', { name: 'Elegir' })).toHaveCount(0);
       await expect(page.getByText('Historial de propuestas')).toHaveCount(0);
