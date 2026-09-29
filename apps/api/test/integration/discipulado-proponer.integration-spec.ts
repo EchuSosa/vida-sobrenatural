@@ -8,14 +8,9 @@ import { Escenario, levantarApp, MARTES_19_A_21, tokenDe } from './discipulado-f
 
 /**
  * specs/004, T029 (FR-006, FR-034, FR-036, D137): proponer contra la base
- * real. Es del lote B pero necesita el `proponer` del lote A (T024), que en
- * esta rama todavía no existe.
- *
- * TODO(merge): con T024 mergeado, sacar el `.skip` de los tres casos que
- * pegan a `POST /discipulado/solicitudes/:id/proponer` (contracts/solicitudes-api.md)
- * y crear la Solicitud `pendiente` con `POST /discipulado/solicitudes/me`
- * si el setup por Prisma deja de alcanzar. Lo que no depende de A (el índice
- * único parcial y el cruce) ya corre.
+ * real, por `POST /discipulado/solicitudes/:id/proponer` (lote A, T024). La
+ * Solicitud `pendiente` se arma por Prisma igual que la deja
+ * `POST /discipulado/solicitudes/me`: acá se prueba proponer, no pedir.
  */
 describe('Proponer un Discipulador (integración)', () => {
   let app: INestApplication<Server>;
@@ -77,8 +72,7 @@ describe('Proponer un Discipulador (integración)', () => {
       .set('Authorization', `Bearer ${await tokenDe(admin, ['miembro_registrado', 'admin'])}`)
       .send({ discipuladorId });
 
-  // TODO(merge): los tres necesitan `proponer` del lote A (T024).
-  it.skip('proponer deja la Solicitud `propuesta` con su Propuesta `pendiente` y NINGÚN Grupo', async () => {
+  it('proponer deja la Solicitud `propuesta` con su Propuesta `pendiente` y NINGÚN Grupo', async () => {
     const disc = await esc.discipulador('disc-p1');
     const solicitudId = await solicitudPendiente('bea');
     const res = await proponer(solicitudId, disc);
@@ -91,7 +85,7 @@ describe('Proponer un Discipulador (integración)', () => {
     expect(await prisma.liderazgo.count({ where: { personaId: disc } })).toBe(0);
   });
 
-  it.skip('dos propuestas simultáneas de la misma Solicitud dejan una sola (la otra recibe 409)', async () => {
+  it('dos propuestas simultáneas de la misma Solicitud dejan una sola (la otra recibe 409)', async () => {
     const [d1, d2] = [await esc.discipulador('disc-p2'), await esc.discipulador('disc-p3')];
     const solicitudId = await solicitudPendiente('cami');
     const respuestas = await Promise.all([proponer(solicitudId, d1), proponer(solicitudId, d2)]);
@@ -99,7 +93,7 @@ describe('Proponer un Discipulador (integración)', () => {
     expect(await prisma.propuestaDiscipulado.count({ where: { solicitudId, estado: 'pendiente' } })).toBe(1);
   });
 
-  it.skip('carrera de D137: quitarRol(discipulador) y proponer en paralelo nunca dejan una Propuesta pendiente de alguien sin el rol', async () => {
+  it('carrera de D137: quitarRol(discipulador) y proponer en paralelo nunca dejan una Propuesta pendiente de alguien sin el rol', async () => {
     const disc = await esc.discipulador('disc-p4');
     const solicitudId = await solicitudPendiente('dora');
     await Promise.allSettled([app.get(RolesService).quitarRol(disc, 'discipulador', admin), proponer(solicitudId, disc)]);

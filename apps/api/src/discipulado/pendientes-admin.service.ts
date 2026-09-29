@@ -7,7 +7,8 @@ const MS_POR_DIA = 24 * 60 * 60 * 1000;
 /**
  * A dónde lleva cada fila de la tarjeta. Las de Solicitudes apuntan a la
  * bandeja del lote A con su filtro de estado.
- * TODO(merge): confirmar con la bandeja de `/solicitudes` (lote A) que acepta `?estado=`.
+ * La bandeja acepta `?estado=pendiente` y `?estado=propuesta` (FILTROS_ESTADO en
+ * apps/backoffice/src/app/solicitudes/constantes.ts).
  */
 export const ENLACES_PENDIENTES = {
   propuestasDeclinadas: '/solicitudes?estado=pendiente',

@@ -10,26 +10,29 @@ import { apiFetch, ApiError, type MiDiscipulado, type PropuestaParaMi } from '@v
 import { Button, ButtonLink, ConfirmDestructiveDialog, EstadoVacio, useEnvio } from '@vida-sobrenatural/ui';
 import { fechaParaLeer, mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type MisDiscipuladosRespuesta } from './comun';
 import { PanelMotivo } from './panel-motivo';
+import { PedirEnNombreDe } from '../../components/pedir-en-nombre-de';
 
 /**
  * specs/004, T037e y T046 (FR-037, FR-046, FR-047): la lista del
  * Discipulador. Primero lo que hay que responder (las propuestas), como
  * tarjetas — es celular, no tabla —; después sus discipulados. Sin agenda,
  * arriba de todo el aviso de FR-047 con el enlace a Mi disponibilidad.
- *
- * TODO(merge): "Pedir Vida Nueva en nombre de…" (FR-002, T046) va arriba de
- * la lista con `components/pedir-en-nombre-de.tsx` del lote A.
+ * Arriba de la lista, "Pedir Vida Nueva en nombre de…" (FR-002, T046), con el
+ * mismo componente que la bandeja de Solicitudes.
  */
 export function MisDiscipuladosCliente({
   datos,
   apiToken,
   puedeGestionar,
+  puedeCrearEnNombre,
 }: {
   datos: MisDiscipuladosRespuesta;
   apiToken: string;
   puedeGestionar: boolean;
+  puedeCrearEnNombre: boolean;
 }) {
   const t = useTranslations('misDiscipulados');
+  const router = useRouter();
   const { propuestas, discipulados, tieneAgenda } = datos;
 
   return (
@@ -37,6 +40,7 @@ export function MisDiscipuladosCliente({
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
         <p className="text-muted-foreground">{t('descripcion')}</p>
+        {puedeCrearEnNombre && <PedirEnNombreDe apiToken={apiToken} onCreado={() => router.refresh()} />}
       </header>
 
       {!tieneAgenda && (

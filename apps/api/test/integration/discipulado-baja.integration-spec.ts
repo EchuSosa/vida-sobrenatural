@@ -4,7 +4,7 @@ import type { Server } from 'node:http';
 import type { PrismaService } from '../../src/prisma/prisma.service.js';
 import { discipuladosActivosDe } from '../../src/discipulado/discipulados-activos.js';
 import { cursaOCompletoVidaNueva } from '../../src/discipulado/consultas.js';
-import { Escenario, levantarApp, tokenDe } from './discipulado-fixtures.js';
+import { Escenario, levantarApp, MARTES_19_A_21, tokenDe } from './discipulado-fixtures.js';
 
 /** specs/004, T054b (FR-042, research #15) y los pendientes del Admin (T054f, FR-048), contra la base real. */
 describe('Baja de una Persona (integración)', () => {
@@ -95,8 +95,19 @@ describe('Baja de una Persona (integración)', () => {
     expect(res.status).toBe(403);
   });
 
-  // TODO(merge): con el lote A, "la Persona dada de baja puede volver a pedir"
-  // se prueba por HTTP (`POST /discipulado/solicitudes/me` → 201). Hoy se
-  // prueba la regla que ese endpoint usa (`cursaOCompletoVidaNueva`), arriba.
-  it.todo('la Persona dada de baja vuelve a pedir por POST /discipulado/solicitudes/me → 201 (lote A)');
+  it('la Persona dada de baja vuelve a pedir por POST /discipulado/solicitudes/me → 201 (FR-042)', async () => {
+    const disc = await esc.discipulador('disc-vuelve');
+    const carla = await esc.persona('carla');
+    const { grupoId, inscripciones } = await esc.grupo(disc, [carla], admin);
+    const tokenDisc = await tokenDe(disc, ['miembro_registrado', 'discipulador']);
+    await http().post(`/discipulado/mis-discipulados/${grupoId}/inscripciones/${inscripciones[0]}/baja/proponer`).set('Authorization', `Bearer ${tokenDisc}`).send({});
+    await http().post(`/grupos/discipulados/${grupoId}/inscripciones/${inscripciones[0]}/baja/confirmar`).set('Authorization', `Bearer ${tokenAdmin}`);
+
+    const res = await http()
+      .post('/discipulado/solicitudes/me')
+      .set('Authorization', `Bearer ${await tokenDe(carla, ['miembro_registrado'])}`)
+      .send({ franjas: [MARTES_19_A_21] });
+    expect(res.status).toBe(201);
+    expect(res.body.estado).toBe('pendiente');
+  });
 });

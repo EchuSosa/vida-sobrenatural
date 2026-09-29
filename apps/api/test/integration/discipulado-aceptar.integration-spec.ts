@@ -7,8 +7,8 @@ import { Escenario, levantarApp, tokenDe } from './discipulado-fixtures.js';
 
 /**
  * specs/004, T037d (FR-036/FR-037, D137): aceptar contra la base real. La
- * Propuesta se arma por Prisma en el setup (lo que deja el `proponer` del
- * lote A) — TODO(merge): cuando exista, T029 cubre el camino por servicio.
+ * Propuesta se arma por Prisma en el setup (lo mismo que deja `proponer`,
+ * cuyo camino por HTTP cubre T029); el retiro de la carrera es el real.
  */
 describe('Propuestas: aceptar y declinar (integración)', () => {
   let app: INestApplication<Server>;
@@ -112,17 +112,13 @@ describe('Propuestas: aceptar y declinar (integración)', () => {
   it('aceptar y retirar en paralelo dejan UNA sola de las dos (la Propuesta queda aceptada o retirada, nunca las dos)', async () => {
     const persona = await esc.persona('flor');
     const { solicitudId, propuestaId } = await esc.propuestaNueva(persona, disc, admin);
-    // TODO(merge): el retiro es del lote A (T024). Mientras tanto se simula
-    // con la misma forma que tendrá: bloquear la Solicitud y la Propuesta y
-    // pasarla a `retirada` solo si sigue pendiente.
-    const retirar = prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT "id" FROM "solicitudes_discipulado" WHERE "id" = ${solicitudId} FOR UPDATE`;
-      const [p] = await tx.$queryRaw<Array<{ estado: string }>>`SELECT "estado"::text AS "estado" FROM "propuestas_discipulado" WHERE "id" = ${propuestaId} FOR UPDATE`;
-      if (p.estado !== 'pendiente') return 'no';
-      await tx.propuestaDiscipulado.update({ where: { id: propuestaId }, data: { estado: 'retirada', retiradaPor: 'admin' } });
-      await tx.solicitudDiscipulado.update({ where: { id: solicitudId }, data: { estado: 'pendiente' } });
-      return 'si';
-    });
+    // El retiro real del Admin (lote A): bloquea la Solicitud primero, como
+    // aceptar, así que las dos se serializan (orden de bloqueo del discipulado).
+    const tokenAdmin = await tokenDe(admin, ['miembro_registrado', 'admin']);
+    const retirar = http()
+      .post(`/discipulado/solicitudes/${solicitudId}/retirar-propuesta`)
+      .set('Authorization', `Bearer ${tokenAdmin}`)
+      .then((r) => (r.status === 200 ? 'si' : 'no'));
     const aceptar = http().post(`/discipulado/propuestas/${propuestaId}/aceptar`).set('Authorization', `Bearer ${tokenDisc}`);
     const [retiro, aceptacion] = await Promise.all([retirar, aceptar]);
 
@@ -141,8 +137,8 @@ describe('Propuestas: aceptar y declinar (integración)', () => {
   });
 
   it('carrera de D137: quitarRol y aceptar en paralelo nunca dejan un Liderazgo vigente de alguien sin el rol', async () => {
-    // Hasta el lote D (T055), quitar `discipulador` falla cerrado siempre; el
-    // invariante se verifica igual y pasa a tener dientes cuando D lo abra.
+    // Con el lote D (T055), quitar `discipulador` consulta de verdad: si
+    // gana quitarRol, aceptar no puede dejar un Liderazgo de alguien sin el rol.
     const nueva = await esc.discipulador('gaby');
     const persona = await esc.persona('hugo');
     const { propuestaId } = await esc.propuestaNueva(persona, nueva, admin);

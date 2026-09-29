@@ -20,6 +20,7 @@ export default async function MisDiscipuladosPage() {
       datos={datos}
       apiToken={session.apiToken}
       puedeGestionar={tienePermisoSesion(session, 'mis_discipulados.gestionar')}
+      puedeCrearEnNombre={tienePermisoSesion(session, 'solicitudes.crear_en_nombre')}
     />
   );
 }
