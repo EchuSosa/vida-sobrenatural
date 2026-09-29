@@ -27,6 +27,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
   const t = useTranslations('grupos');
   const tf = useTranslations('franjas');
   const tc = useTranslations('comun');
+  const te = useTranslations('errors');
   const locale = useLocale();
   const router = useRouter();
   const [rechazo, setRechazo] = useState<Rechazo>(null);
@@ -50,7 +51,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
 
   /** Ante un 409 de estado (otro Admin lo resolvió, el Grupo cerró), se dice y se recarga. */
   function fallo(e: unknown) {
-    toast.error(mensajeDeError(e, t));
+    toast.error(mensajeDeError(e, te, t));
     if (e instanceof ApiError && e.code !== 'ERROR_INTERNO') router.refresh();
   }
 
@@ -91,7 +92,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
       else await post(`/inscripciones/${rechazo.persona.inscripcionId}/baja/rechazar`, motivo ? { motivo } : {});
       toast(rechazo.tipo === 'finalizacion' ? t('finalizacion.exitoRechazada') : t('baja.exitoRechazada'));
     } catch (e) {
-      const campos = mensajesDeCampo(e, t);
+      const campos = mensajesDeCampo(e, te, t);
       if (campos) return campos;
       fallo(e);
     }
@@ -110,7 +111,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
     volver: t('volver'),
     cerrarPanel: tc('cerrarPanel'),
     resumen: t('campos.resumen'),
-    demasiadoLargo: t('campos.MOTIVO_DEMASIADO_LARGO'),
+    demasiadoLargo: te('campos.MOTIVO_DEMASIADO_LARGO'),
   });
 
   const hayQueDecidir = Boolean(detalle.propuestaFinalizacionEn) || bajasPedidas.length > 0 || detalle.reasignacionPropuesta !== null;

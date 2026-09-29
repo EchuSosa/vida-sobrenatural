@@ -28,7 +28,37 @@
     "ADMIN_NO_PUEDE_AUTO_REVOCARSE": "No podés quitarte tu propio rol de Admin. Si hace falta, pedíselo a otro Admin.",
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS": "Esta Persona tiene discipulados a cargo o propuestas pendientes. Reasignalos antes de quitarle el rol de Discipulador.",
-    "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
+    "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos.",
+    "SOLICITUD_DISCIPULADO_YA_PENDIENTE": "Esta Persona ya tiene un pedido de Vida Nueva abierto. Buscalo en Solicitudes.",
+    "VIDA_NUEVA_EN_CURSO_O_COMPLETADA": "Esta Persona ya está haciendo Vida Nueva o ya lo terminó.",
+    "EDAD_INSUFICIENTE_PARA_PEDIR_SOLO": "Una Persona menor de 12 años no pide sola: el pedido lo carga el equipo en su nombre.",
+    "SOLICITUD_NO_PENDIENTE": "Esta Solicitud ya cambió: alguien la resolvió o ya tiene una propuesta. Actualizamos la pantalla.",
+    "SOLICITUD_NO_PROPUESTA": "Esta propuesta ya no está esperando respuesta. Actualizamos la pantalla.",
+    "DISCIPULADOR_NO_DISPONIBLE": "Ese Discipulador ya no está disponible. Actualizamos la lista para que elijas de nuevo.",
+    "GRUPO_SIN_LUGAR": "Ese Grupo ya no tiene lugar para sumar a esta Persona.",
+    "PROPUESTA_NO_VIGENTE": "Esa propuesta ya no está vigente: ya se respondió o se retiró. Actualizamos la pantalla.",
+    "DISCIPULADO_NO_EN_CURSO": "Este discipulado ya terminó, así que no se puede cambiar.",
+    "FINALIZACION_NO_PROPUESTA": "Ya no hay un pedido de terminar este discipulado: puede que alguien del equipo lo haya resuelto. Actualizamos la pantalla.",
+    "FINALIZACION_YA_PROPUESTA": "Ya se pidió darlo por terminado: falta que el Admin lo confirme.",
+    "BAJA_NO_PROPUESTA": "Ya no hay un pedido de baja: puede que alguien del equipo lo haya resuelto. Actualizamos la pantalla.",
+    "BAJA_YA_PROPUESTA": "Ya se pidió la baja de esta Persona: falta que el Admin la confirme.",
+    "REASIGNACION_AL_MISMO_DISCIPULADOR": "Esa persona ya es quien acompaña este discipulado: elegí a otra.",
+    "REASIGNACION_YA_PROPUESTA": "Ya hay un cambio de Discipulador propuesto. Retiralo antes de proponer otro.",
+    "campos": {
+      "FRANJAS_REQUERIDAS": "Cargá al menos un horario.",
+      "FRANJAS_INVALIDO": "Revisá los horarios: cada uno necesita un día, una hora de inicio y una de fin.",
+      "FRANJA_FIN_ANTERIOR_AL_INICIO": "La hora de fin tiene que ser posterior a la de inicio, por ejemplo de 19:00 a 21:00.",
+      "DIA_SEMANA_INVALIDO": "Elegí un día de la semana de la lista.",
+      "BLOQUEO_FIN_ANTERIOR_AL_INICIO": "La fecha de fin tiene que ser igual o posterior a la de inicio.",
+      "BLOQUEO_YA_VENCIDO": "Ese período ya terminó: elegí una fecha de fin de hoy en adelante.",
+      "MAXIMO_POR_GRUPO_FUERA_DE_RANGO": "Elegí un número de 1 a 6.",
+      "FECHA_REQUERIDA": "Elegí la fecha del encuentro.",
+      "FECHA_FUTURA": "La fecha no puede ser posterior a hoy: elegí el día en que se juntaron.",
+      "CAPITULOS_REQUERIDO": "Escribí qué capítulos vieron, por ejemplo \"1 y 2\" (hasta 200 caracteres).",
+      "NOTAS_DEMASIADO_LARGAS": "Las notas pueden tener hasta 2000 caracteres: acortalas un poco.",
+      "MOTIVO_DEMASIADO_LARGO": "El motivo puede tener hasta 500 caracteres: acortalo un poco.",
+      "INSCRIPCION_DE_OTRO_GRUPO": "La lista de personas cambió: recargá la página y volvé a marcar la asistencia."
+    }
   },
   "nav": {
     "saltarAlContenido": "Saltar al contenido",
@@ -213,9 +243,6 @@
       "creado": "Cargamos el pedido de Vida Nueva de {nombre}.",
       "resumenErrores": "Revisá esto antes de seguir:",
       "errores": {
-        "SOLICITUD_DISCIPULADO_YA_PENDIENTE": "{nombre} ya tiene un pedido de Vida Nueva abierto. Buscalo en Solicitudes.",
-        "VIDA_NUEVA_EN_CURSO_O_COMPLETADA": "{nombre} ya está haciendo Vida Nueva o ya lo terminó.",
-        "NO_ENCONTRADO": "No encontramos a {nombre} como Persona activa.",
         "generico": "No pudimos cargar el pedido. Probá de nuevo en unos segundos."
       }
     },
@@ -267,11 +294,6 @@
       "motivo": "Motivo: {motivo}",
       "sinMotivo": "No dejó motivo.",
       "errores": {
-        "DISCIPULADOR_NO_DISPONIBLE": "{nombre} ya no está disponible. Actualizamos la lista para que elijas de nuevo.",
-        "GRUPO_SIN_LUGAR": "Ese Grupo ya no tiene lugar. Actualizamos la lista para que elijas de nuevo.",
-        "SOLICITUD_NO_PENDIENTE": "Esta Solicitud ya cambió: alguien la resolvió o ya tiene una propuesta. Actualizamos la pantalla.",
-        "SOLICITUD_NO_PROPUESTA": "Esta propuesta ya no está esperando respuesta. Actualizamos la pantalla.",
-        "VIDA_NUEVA_EN_CURSO_O_COMPLETADA": "Esta Persona ya está haciendo Vida Nueva o ya lo terminó.",
         "generico": "No pudimos guardar el cambio. Probá de nuevo en unos segundos."
       },
       "noEncontradaTitulo": "No encontramos esta Solicitud",
@@ -442,18 +464,10 @@
       "reintentar": "Reintentar"
     },
     "errores": {
-      "PROPUESTA_NO_VIGENTE": "Esa propuesta ya no está vigente: ya se respondió o ya se retiró. Actualizamos la pantalla.",
-      "DISCIPULADO_NO_EN_CURSO": "Este discipulado ya terminó, así que no se puede cambiar.",
-      "FINALIZACION_NO_PROPUESTA": "Ya no hay un pedido de terminar: puede que otra persona del equipo lo haya resuelto. Actualizamos la pantalla.",
-      "BAJA_NO_PROPUESTA": "Ya no hay un pedido de baja: puede que otra persona del equipo lo haya resuelto. Actualizamos la pantalla.",
-      "REASIGNACION_AL_MISMO_DISCIPULADOR": "Esa persona ya es quien acompaña este discipulado: elegí a otra.",
-      "REASIGNACION_YA_PROPUESTA": "Ya hay un cambio de Discipulador propuesto. Retiralo antes de proponer otro.",
-      "DISCIPULADOR_NO_DISPONIBLE": "Ese Discipulador ya no está disponible. Actualizamos la lista: elegí a otra persona.",
       "generico": "No pudimos completar la acción. Probá de nuevo en un momento."
     },
     "campos": {
-      "resumen": "Revisá estos campos:",
-      "MOTIVO_DEMASIADO_LARGO": "El motivo puede tener hasta 500 caracteres: acortalo un poco."
+      "resumen": "Revisá estos campos:"
     }
   },
   "misDiscipulados": {
@@ -591,24 +605,10 @@
       "reintentar": "Reintentar"
     },
     "errores": {
-      "PROPUESTA_NO_VIGENTE": "Esta propuesta ya no está vigente: el Admin la retiró o ya se respondió. Actualizamos la lista.",
-      "GRUPO_SIN_LUGAR": "Tu Grupo ya no tiene lugar para sumar a esta persona. Avisale al Admin para que lo reorganice.",
-      "VIDA_NUEVA_EN_CURSO_O_COMPLETADA": "Esta persona ya está cursando o terminó Vida Nueva.",
-      "DISCIPULADO_NO_EN_CURSO": "Este discipulado ya terminó, así que no se puede cambiar.",
-      "FINALIZACION_YA_PROPUESTA": "Ya pediste darlo por terminado: falta que el Admin lo confirme.",
-      "BAJA_YA_PROPUESTA": "Ya pediste la baja de esta persona: falta que el Admin la confirme.",
-      "NO_ENCONTRADO": "No encontramos lo que buscabas: puede que ya no esté a tu cargo.",
-      "SIN_PERMISO": "Ya no tenés el rol de Discipulador. Si creés que es un error, hablá con el Admin.",
       "generico": "No pudimos completar la acción. Probá de nuevo en un momento."
     },
     "campos": {
-      "resumen": "Revisá estos campos:",
-      "FECHA_FUTURA": "La fecha no puede ser posterior a hoy: elegí el día en que se juntaron.",
-      "FECHA_REQUERIDA": "Elegí la fecha del encuentro.",
-      "CAPITULOS_REQUERIDO": "Escribí qué capítulos vieron, por ejemplo \"1 y 2\" (hasta 200 caracteres).",
-      "NOTAS_DEMASIADO_LARGAS": "Las notas pueden tener hasta 2000 caracteres: acortalas un poco.",
-      "INSCRIPCION_DE_OTRO_GRUPO": "La lista de personas cambió: recargá la página y volvé a marcar la asistencia.",
-      "MOTIVO_DEMASIADO_LARGO": "El motivo puede tener hasta 500 caracteres: acortalo un poco."
+      "resumen": "Revisá estos campos:"
     }
   },
   "miDisponibilidad": {
@@ -677,11 +677,6 @@
       "resumen": "Revisá estos campos:",
       "desdeRequerido": "Elegí la fecha en que empieza el período.",
       "hastaRequerido": "Elegí la fecha en que termina el período.",
-      "FRANJA_FIN_ANTERIOR_AL_INICIO": "La hora de fin tiene que ser posterior a la de inicio, por ejemplo de 19:00 a 21:00.",
-      "DIA_SEMANA_INVALIDO": "Elegí un día de la semana de la lista.",
-      "BLOQUEO_FIN_ANTERIOR_AL_INICIO": "La fecha de fin tiene que ser igual o posterior a la de inicio.",
-      "BLOQUEO_YA_VENCIDO": "Ese período ya terminó: elegí una fecha de fin de hoy en adelante.",
-      "MAXIMO_POR_GRUPO_FUERA_DE_RANGO": "Elegí un número de 1 a 6.",
       "generico": "Revisá este dato e intentá de nuevo."
     },
     "error": {

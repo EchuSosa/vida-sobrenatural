@@ -140,6 +140,7 @@ export function DetalleMiDiscipuladoCliente({
 function TarjetaPersona({ persona, grupoId, apiToken, gestiona }: { persona: PersonaDetalle; grupoId: string; apiToken: string; gestiona: boolean }) {
   const t = useTranslations('misDiscipulados');
   const tc = useTranslations('comun');
+  const te = useTranslations('errors');
   const locale = useLocale();
   const router = useRouter();
   const [pidiendoBaja, setPidiendoBaja] = useState(false);
@@ -155,9 +156,9 @@ function TarjetaPersona({ persona, grupoId, apiToken, gestiona }: { persona: Per
       });
       toast(t('detalle.baja.exito', { nombre: persona.nombre }));
     } catch (e) {
-      const campos = mensajesDeCampo(e, t);
+      const campos = mensajesDeCampo(e, te, t);
       if (campos) return campos;
-      toast.error(mensajeDeError(e, t));
+      toast.error(mensajeDeError(e, te, t));
     }
     setPidiendoBaja(false);
     router.refresh();
@@ -245,7 +246,7 @@ function TarjetaPersona({ persona, grupoId, apiToken, gestiona }: { persona: Per
           volver: t('detalle.volver'),
           cerrarPanel: tc('cerrarPanel'),
           resumen: t('campos.resumen'),
-          demasiadoLargo: t('campos.MOTIVO_DEMASIADO_LARGO'),
+          demasiadoLargo: te('campos.MOTIVO_DEMASIADO_LARGO'),
         }}
       />
     </li>
@@ -254,6 +255,7 @@ function TarjetaPersona({ persona, grupoId, apiToken, gestiona }: { persona: Per
 
 function SeccionFinalizacion({ detalle, apiToken, gestiona }: { detalle: DetalleMiDiscipulado; apiToken: string; gestiona: boolean }) {
   const t = useTranslations('misDiscipulados');
+  const te = useTranslations('errors');
   const locale = useLocale();
   const router = useRouter();
 
@@ -265,7 +267,7 @@ function SeccionFinalizacion({ detalle, apiToken, gestiona }: { detalle: Detalle
       });
       toast(t('detalle.finalizacion.exito'));
     } catch (e) {
-      toast.error(mensajeDeError(e, t));
+      toast.error(mensajeDeError(e, te, t));
     }
     router.refresh();
   });

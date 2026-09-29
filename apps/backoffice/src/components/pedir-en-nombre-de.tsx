@@ -104,6 +104,7 @@ function Contenido({
   onCreado: (solicitudId: string) => void;
 }) {
   const t = useTranslations('solicitudes.pedirEnNombre');
+  const te = useTranslations('errors');
   const etiquetas = useEtiquetasFranjas();
   const [persona, setPersona] = useState<PersonaElegible | null>(personaFija ?? null);
   const [busqueda, setBusqueda] = useState('');
@@ -152,7 +153,7 @@ function Contenido({
         return;
       }
       const code = error instanceof ApiError ? error.code : null;
-      setErrorGeneral(code && t.has(`errores.${code}`) ? t(`errores.${code}`, { nombre }) : t('errores.generico'));
+      setErrorGeneral(code && te.has(code) ? te(code) : t('errores.generico'));
     }
   });
 

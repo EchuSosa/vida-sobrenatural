@@ -16,21 +16,21 @@ export type { DetalleDiscipuladoAdmin, DetalleMiDiscipulado, MisDiscipuladosResp
 type Traductor = ((clave: string) => string) & { has: (clave: string) => boolean };
 
 /**
- * El mensaje de un error de la API en el namespace de la pantalla
- * (`errores.<CODE>`), o el genérico. Los códigos de estas pantallas se
- * explican en contexto ("el Admin la retiró"), no con el texto general.
+ * El mensaje de un error de la API: el texto de su código en `errors` (una
+ * sola fuente para todas las pantallas), o el genérico de la pantalla
+ * (`errores.generico` de su namespace) si el código no tiene uno.
  */
-export function mensajeDeError(e: unknown, t: Traductor): string {
-  if (e instanceof ApiError && t.has(`errores.${e.code}`)) return t(`errores.${e.code}`);
+export function mensajeDeError(e: unknown, te: Traductor, t: Traductor): string {
+  if (e instanceof ApiError && te.has(e.code)) return te(e.code);
   return t('errores.generico');
 }
 
-/** Los errores de campo de la API (H-50), traducidos con `campos.<CODE>` del namespace. */
-export function mensajesDeCampo(e: unknown, t: Traductor): Record<string, string> | null {
+/** Los errores de campo de la API (H-50), traducidos con `errors.campos.<CODE>`. */
+export function mensajesDeCampo(e: unknown, te: Traductor, t: Traductor): Record<string, string> | null {
   const campos = erroresPorCampo(e);
   if (!campos) return null;
   return Object.fromEntries(
-    campos.map(({ campo, code }) => [campo, t.has(`campos.${code}`) ? t(`campos.${code}`) : t('errores.generico')]),
+    campos.map(({ campo, code }) => [campo, te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errores.generico')]),
   );
 }
 

@@ -50,6 +50,7 @@ export function PanelReasignar({
   const t = useTranslations('grupos');
   const tf = useTranslations('franjas');
   const tc = useTranslations('comun');
+  const te = useTranslations('errors');
   const [cruce, setCruce] = useState<Cruce | null>(null);
   const [errorCruce, setErrorCruce] = useState(false);
   const [elegido, setElegido] = useState<DiscipuladorEnCruce | null>(null);
@@ -89,7 +90,7 @@ export function PanelReasignar({
       setElegido(null);
       onPropuesta();
     } catch (e) {
-      toast.error(mensajeDeError(e, t));
+      toast.error(mensajeDeError(e, te, t));
       setElegido(null);
       if (e instanceof ApiError && e.code === 'DISCIPULADOR_NO_DISPONIBLE') recargar();
       if (e instanceof ApiError && (e.code === 'REASIGNACION_YA_PROPUESTA' || e.code === 'DISCIPULADO_NO_EN_CURSO')) onPropuesta();

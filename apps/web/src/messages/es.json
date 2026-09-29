@@ -10,7 +10,28 @@
     "PERSONA_NO_PENDIENTE_TUTOR": "Este caso ya no está pendiente de un tutor.",
     "VERIFICACION_LOGIN_FALLIDA": "No pudimos verificar tu cuenta. Probá de nuevo en un momento.",
     "EMAIL_NO_VERIFICADO": "No pudimos confirmar que tu email esté verificado con tu proveedor de inicio de sesión.",
-    "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
+    "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos.",
+    "SOLICITUD_DISCIPULADO_YA_PENDIENTE": "Ya tenés un pedido de Vida Nueva en curso. Podés cambiar tus horarios o retirarlo.",
+    "VIDA_NUEVA_EN_CURSO_O_COMPLETADA": "Ya estás haciendo Vida Nueva o ya lo terminaste.",
+    "EDAD_INSUFICIENTE_PARA_PEDIR_SOLO": "Este pedido lo hace tu mamá, tu papá o tu tutor hablando con el equipo.",
+    "SOLICITUD_NO_PENDIENTE": "Esta Solicitud ya cambió: alguien la resolvió o ya tiene una propuesta. Actualizamos la pantalla.",
+    "SOLICITUD_NO_PROPUESTA": "Esta propuesta ya no está esperando respuesta. Actualizamos la pantalla.",
+    "DISCIPULADOR_NO_DISPONIBLE": "Ese Discipulador ya no está disponible. Actualizamos la lista para que elijas de nuevo.",
+    "GRUPO_SIN_LUGAR": "Ese Grupo ya no tiene lugar para sumar a esta Persona.",
+    "PROPUESTA_NO_VIGENTE": "Esa propuesta ya no está vigente: ya se respondió o se retiró. Actualizamos la pantalla.",
+    "DISCIPULADO_NO_EN_CURSO": "Este discipulado ya terminó, así que no se puede cambiar.",
+    "FINALIZACION_NO_PROPUESTA": "Ya no hay un pedido de terminar este discipulado: puede que alguien del equipo lo haya resuelto. Actualizamos la pantalla.",
+    "FINALIZACION_YA_PROPUESTA": "Ya se pidió darlo por terminado: falta que el Admin lo confirme.",
+    "BAJA_NO_PROPUESTA": "Ya no hay un pedido de baja: puede que alguien del equipo lo haya resuelto. Actualizamos la pantalla.",
+    "BAJA_YA_PROPUESTA": "Ya se pidió la baja de esta Persona: falta que el Admin la confirme.",
+    "REASIGNACION_AL_MISMO_DISCIPULADOR": "Esa persona ya es quien acompaña este discipulado: elegí a otra.",
+    "REASIGNACION_YA_PROPUESTA": "Ya hay un cambio de Discipulador propuesto. Retiralo antes de proponer otro.",
+    "campos": {
+      "FRANJAS_REQUERIDAS": "Cargá al menos un horario.",
+      "FRANJAS_INVALIDO": "Revisá los horarios: cada uno necesita un día, una hora de inicio y una de fin.",
+      "FRANJA_FIN_ANTERIOR_AL_INICIO": "La hora de fin tiene que ser posterior a la de inicio, por ejemplo de 19:00 a 21:00.",
+      "DIA_SEMANA_INVALIDO": "Elegí un día de la semana de la lista."
+    }
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -331,10 +352,6 @@
       "finalizadoTexto": "Lo terminaste el {fecha}. El próximo paso lo vas a ver acá apenas esté disponible; mientras tanto, podés hablar con el equipo de tu sede."
     },
     "errores": {
-      "SOLICITUD_DISCIPULADO_YA_PENDIENTE": "Ya tenés un pedido de Vida Nueva en curso. Podés cambiar tus horarios o retirarlo.",
-      "VIDA_NUEVA_EN_CURSO_O_COMPLETADA": "Ya estás haciendo Vida Nueva o ya lo terminaste.",
-      "EDAD_INSUFICIENTE_PARA_PEDIR_SOLO": "Este pedido lo hace tu mamá, tu papá o tu tutor hablando con el equipo.",
-      "NO_ENCONTRADO": "Ya no tenés un pedido abierto.",
       "generico": "No pudimos guardar tu pedido. Probá de nuevo en unos segundos."
     },
     "errorCargaTitulo": "No pudimos mostrar tu camino",

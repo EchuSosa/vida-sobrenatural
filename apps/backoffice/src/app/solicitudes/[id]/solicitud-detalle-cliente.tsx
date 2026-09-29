@@ -71,6 +71,7 @@ export function SolicitudDetalleCliente({
 }) {
   const t = useTranslations('solicitudes');
   const td = useTranslations('solicitudes.detalle');
+  const te = useTranslations('errors');
   const tf = useTranslations('franjas');
   const locale = useLocale();
   const router = useRouter();
@@ -89,9 +90,9 @@ export function SolicitudDetalleCliente({
   }
 
   /** Un 409 dice qué cambió; la pantalla se actualiza para que el Admin decida con lo de ahora. */
-  function avisarError(error: unknown, nombre = '') {
+  function avisarError(error: unknown) {
     const code = error instanceof ApiError ? error.code : null;
-    toast.error(code && td.has(`errores.${code}`) ? td(`errores.${code}`, { nombre }) : td('errores.generico'));
+    toast.error(code && te.has(code) ? te(code) : td('errores.generico'));
     if (error instanceof ApiError && error.code !== 'ERROR_INTERNO') {
       setEleccion(null);
       router.refresh();
@@ -106,7 +107,7 @@ export function SolicitudDetalleCliente({
       setEleccion(null);
       router.refresh();
     } catch (error) {
-      avisarError(error, nombreElegido);
+      avisarError(error);
     }
   });
 

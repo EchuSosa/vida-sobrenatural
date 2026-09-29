@@ -72,7 +72,7 @@ export function MiDisponibilidadCliente({
     agregar: tf('agregar'),
     quitar: tf('quitar'),
     sinFranjas: t('agenda.vacio'),
-    errorRango: t('errores.FRANJA_FIN_ANTERIOR_AL_INICIO'),
+    errorRango: te('campos.FRANJA_FIN_ANTERIOR_AL_INICIO'),
     separador: tf('separador'),
   };
 
@@ -81,7 +81,7 @@ export function MiDisponibilidadCliente({
 
   /** Un code de campo de la API a su texto; si no tiene uno propio, el genérico (nunca solo "inválido"). */
   function mensajeDeCodigo(code: string): string {
-    return t.has(`errores.${code}`) ? t(`errores.${code}`) : t('errores.generico');
+    return te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errores.generico');
   }
 
   /** Los errores que no son de un campo (sin permiso, red, etc.) van a un toast; la pantalla no cambia. */
@@ -182,8 +182,8 @@ export function MiDisponibilidadCliente({
     const errores: Record<string, string> = {};
     if (!valores.desde) errores.desde = t('errores.desdeRequerido');
     if (!valores.hasta) errores.hasta = t('errores.hastaRequerido');
-    else if (valores.desde && valores.hasta < valores.desde) errores.hasta = t('errores.BLOQUEO_FIN_ANTERIOR_AL_INICIO');
-    else if (valores.hasta < hoyEnArgentina()) errores.hasta = t('errores.BLOQUEO_YA_VENCIDO');
+    else if (valores.desde && valores.hasta < valores.desde) errores.hasta = te('campos.BLOQUEO_FIN_ANTERIOR_AL_INICIO');
+    else if (valores.hasta < hoyEnArgentina()) errores.hasta = te('campos.BLOQUEO_YA_VENCIDO');
     return errores;
   }
 

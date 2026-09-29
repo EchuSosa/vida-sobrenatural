@@ -92,6 +92,7 @@ function TarjetaPropuesta({ propuesta, apiToken, puedeGestionar }: { propuesta: 
   const t = useTranslations('misDiscipulados');
   const tf = useTranslations('franjas');
   const tc = useTranslations('comun');
+  const te = useTranslations('errors');
   const locale = useLocale();
   const router = useRouter();
   const [declinando, setDeclinando] = useState(false);
@@ -107,7 +108,7 @@ function TarjetaPropuesta({ propuesta, apiToken, puedeGestionar }: { propuesta: 
       });
       toast(t('propuestas.exitoAceptada', { nombre }));
     } catch (e) {
-      toast.error(mensajeDeError(e, t));
+      toast.error(mensajeDeError(e, te, t));
     }
     // En los dos casos: la lista cambió (aceptada, o ya no vigente).
     router.refresh();
@@ -122,9 +123,9 @@ function TarjetaPropuesta({ propuesta, apiToken, puedeGestionar }: { propuesta: 
       });
       toast(t('propuestas.exitoDeclinada'));
     } catch (e) {
-      const campos = mensajesDeCampo(e, t);
+      const campos = mensajesDeCampo(e, te, t);
       if (campos) return campos;
-      toast.error(mensajeDeError(e, t));
+      toast.error(mensajeDeError(e, te, t));
       if (!(e instanceof ApiError) || e.code !== 'PROPUESTA_NO_VIGENTE') return null;
     }
     setDeclinando(false);
@@ -228,7 +229,7 @@ function TarjetaPropuesta({ propuesta, apiToken, puedeGestionar }: { propuesta: 
           volver: t('propuestas.volver'),
           cerrarPanel: tc('cerrarPanel'),
           resumen: t('campos.resumen'),
-          demasiadoLargo: t('campos.MOTIVO_DEMASIADO_LARGO'),
+          demasiadoLargo: te('campos.MOTIVO_DEMASIADO_LARGO'),
         }}
       />
     </li>

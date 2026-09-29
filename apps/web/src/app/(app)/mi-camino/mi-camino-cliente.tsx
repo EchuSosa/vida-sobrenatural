@@ -159,6 +159,7 @@ function FormularioFranjas({
   secundaria?: ReactNode;
 }) {
   const t = useTranslations('miCamino');
+  const te = useTranslations('errors');
   const etiquetas = useEtiquetasFranjas();
   const [franjas, setFranjas] = useState<Franja[]>(inicial);
   const validacion = useValidacionCampos();
@@ -176,7 +177,7 @@ function FormularioFranjas({
         return;
       }
       const code = error instanceof ApiError ? error.code : null;
-      toast.error(code && t.has(`errores.${code}`) ? t(`errores.${code}`) : t('errores.generico'));
+      toast.error(code && te.has(code) ? te(code) : t('errores.generico'));
     }
   });
 

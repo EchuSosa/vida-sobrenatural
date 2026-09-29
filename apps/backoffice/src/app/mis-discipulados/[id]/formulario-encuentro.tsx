@@ -60,6 +60,7 @@ export function FormularioEncuentro({
 }) {
   const t = useTranslations('misDiscipulados');
   const tc = useTranslations('comun');
+  const te = useTranslations('errors');
   const hoy = hoyEnArgentina();
   const [fecha, setFecha] = useState(encuentro?.fecha ?? hoy);
   const [capitulos, setCapitulos] = useState(encuentro?.capitulos ?? '');
@@ -72,16 +73,16 @@ export function FormularioEncuentro({
   const reglas = {
     fecha: {
       esValido: (v: string) => v !== '' && v <= hoy,
-      mensaje: fecha === '' ? t('campos.FECHA_REQUERIDA') : t('campos.FECHA_FUTURA'),
+      mensaje: fecha === '' ? te('campos.FECHA_REQUERIDA') : te('campos.FECHA_FUTURA'),
     } satisfies ValidacionCampo<string>,
-    capitulos: { esValido: (v: string) => v.trim() !== '' && v.trim().length <= CAPITULOS_MAX, mensaje: t('campos.CAPITULOS_REQUERIDO') } satisfies ValidacionCampo<string>,
-    notas: { esValido: (v: string) => v.trim().length <= NOTAS_ENCUENTRO_MAX, mensaje: t('campos.NOTAS_DEMASIADO_LARGAS') } satisfies ValidacionCampo<string>,
+    capitulos: { esValido: (v: string) => v.trim() !== '' && v.trim().length <= CAPITULOS_MAX, mensaje: te('campos.CAPITULOS_REQUERIDO') } satisfies ValidacionCampo<string>,
+    notas: { esValido: (v: string) => v.trim().length <= NOTAS_ENCUENTRO_MAX, mensaje: te('campos.NOTAS_DEMASIADO_LARGAS') } satisfies ValidacionCampo<string>,
   };
 
   const { enviando, ejecutar: guardar } = useEnvio(async () => {
     const errores: Record<string, string> = {};
-    if (fecha === '') errores.fecha = t('campos.FECHA_REQUERIDA');
-    else if (fecha > hoy) errores.fecha = t('campos.FECHA_FUTURA');
+    if (fecha === '') errores.fecha = te('campos.FECHA_REQUERIDA');
+    else if (fecha > hoy) errores.fecha = te('campos.FECHA_FUTURA');
     if (!reglas.capitulos.esValido(capitulos)) errores.capitulos = reglas.capitulos.mensaje;
     if (!reglas.notas.esValido(notas)) errores.notas = reglas.notas.mensaje;
     if (Object.keys(errores).length > 0) {
@@ -107,9 +108,9 @@ export function FormularioEncuentro({
       toast(encuentro ? t('detalle.formulario.exitoEditado') : t('detalle.formulario.exitoNuevo'));
       onGuardado();
     } catch (e) {
-      const campos = mensajesDeCampo(e, t);
+      const campos = mensajesDeCampo(e, te, t);
       if (campos) validacion.reemplazar(campos);
-      else toast.error(mensajeDeError(e, t));
+      else toast.error(mensajeDeError(e, te, t));
     }
   });
 
