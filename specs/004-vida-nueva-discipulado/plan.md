@@ -104,7 +104,7 @@ specs/004-vida-nueva-discipulado/
 ├── plan.md              # este archivo
 ├── research.md          # Fase 0 — 19 decisiones
 ├── data-model.md        # Fase 1
-├── quickstart.md        # Fase 1 — 17 escenarios de validación
+├── quickstart.md        # Fase 1 — 18 escenarios de validación
 ├── contracts/
 │   ├── solicitudes-api.md    # pedir, editar/retirar, bandeja, cruce, proponer
 │   ├── discipulado-api.md    # propuestas, Encuentros, finalización, baja, reasignación
