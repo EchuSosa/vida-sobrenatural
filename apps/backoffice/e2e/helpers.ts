@@ -609,3 +609,25 @@ export async function idsEnElCruce(solicitudId: string): Promise<string[]> {
 export async function estadoMiCamino(email: string): Promise<{ estado: string }> {
   return apiComo<{ estado: string }>(email, 'GET', '/discipulado/me');
 }
+
+/** Entrar como cualquier Persona por su email (test-login), no solo las sembradas. */
+export async function loguearseComo(page: Page, email: string) {
+  await loguearseComoE2E(page, email);
+}
+
+/**
+ * specs/004, T061: un Discipulador nuevo, sin agenda y con la disponibilidad
+ * apagada — para un flujo que la carga desde la pantalla sin tocar a los
+ * sembrados (otros specs dependen de su agenda). El Admin le da el rol por la
+ * API, como desde Personas (specs/005).
+ */
+export async function crearDiscipulador(email: string, o: OpcionesPersona): Promise<PersonaDeTest> {
+  const persona = await crearPersona(email, o);
+  await apiComo(EMAIL_ADMIN, 'POST', `/personas/${persona.id}/roles`, { rol: 'discipulador' });
+  return persona;
+}
+
+/** Que el Discipulador deje de aparecer en el cruce de los demás specs (toggle apagado). */
+export async function apagarDisponibilidad(emailDiscipulador: string): Promise<void> {
+  await apiComo(emailDiscipulador, 'PUT', '/disponibilidad/me', { disponible: false });
+}
