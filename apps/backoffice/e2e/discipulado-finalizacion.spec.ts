@@ -1,11 +1,12 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E } from './helpers';
-import { crearGrupo, crearPersona, estadoDeGrupo, sinSesion } from './helpers';
+import { crearEncuentro, crearGrupo, crearPersona, estadoDeGrupo, sinSesion } from './helpers';
 
 /**
  * specs/004, T053 (FR-019 a FR-021, FR-030; Historia 3, escenario 11):
  * proponer la finalización, rechazarla con motivo, volver a proponer y
  * confirmar; y reasignar desde /grupos/[id] — propone, el anterior sigue
- * hasta que el nuevo acepta, y después ya no lo ve. Claro y oscuro con axe.
+ * hasta que el nuevo acepta, el nuevo ve los Encuentros anteriores, y el
+ * anterior ya no lo ve. Claro y oscuro con axe.
  */
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`Finalización y reasignación — modo ${colorScheme}`, () => {
@@ -67,6 +68,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // Masculino, para que el Discipulador 2 (masculino, martes) coincida en las dos reglas.
       const persona = await crearPersona(`e2e-b-reasig-${sufijo}@example.com`, { nombre: 'Julián', apellido: `Reasigna ${sufijo}`, genero: 'masculino' });
       const { grupoId } = await crearGrupo([persona]);
+      // Un Encuentro del Discipulador 1, para ver que el 2 lo hereda (FR-030).
+      const capitulosAnteriores = `Capítulos del anterior ${sufijo}`;
+      await crearEncuentro(grupoId, { fecha: '2026-09-01', capitulos: capitulosAnteriores });
 
       await sinSesion(page);
 
@@ -102,6 +106,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await propuesta.getByRole('button', { name: 'Aceptar a Julián' }).click();
         await pagina2.getByRole('button', { name: 'Sí, acepto' }).click();
         await expect(pagina2.getByText(/Aceptaste/)).toBeVisible();
+        // El 2 ve los Encuentros que registró el 1.
+        await pagina2.goto(`/mis-discipulados/${grupoId}`);
+        await expect(pagina2.getByText(capitulosAnteriores)).toBeVisible();
       } finally {
         await contexto2.close();
       }
