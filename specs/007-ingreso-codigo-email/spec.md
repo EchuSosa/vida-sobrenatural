@@ -8,6 +8,16 @@
 
 **Input**: User description: "Ingreso con código por email, sin contraseñas, para web app y backoffice. Quien no tiene cuenta de Google (Hotmail, Yahoo, mail del trabajo) no puede entrar hoy; Echu adelantó este ítem de Fase 2 (`docs/08-roadmap-producto.md`, `docs/10-stack-tecnico.md`, D97) al MVP, antes de la 006. Decidido: la persona escribe su email, recibe un código de 6 dígitos por mail, lo escribe en la app y entra. Sin contraseñas en ninguna parte; el Admin no reparte credenciales. Recibir el código es la verificación de que el email existe y es suyo. Convive con Google: quien tiene Google sigue entrando con Google; mismo email → misma Persona. Sirve para Personas dadas de alta por el Admin con email de otro proveedor (D97): entran solas con el código. Quien no tiene ningún email sigue como hoy (el Admin actúa en su nombre, D97). Vale para web app y backoffice. A resolver: vida del código, intentos por código, límite de envíos contra spam, duración de la sesión (cuidando 001/002 y D88 fail-closed), email no registrado (arranca el registro de 4 pasos igual que con Google, sin revelar si un email existe), menores (D35: mismo reconocimiento de cuenta pre-cargada), texto del mail en voseo con el código grande, cuánto dura y 'si no fuiste vos, ignorá este mail', sin datos personales. Infraestructura: no existe EmailService; la 007 lo construye según `docs/10-stack-tecnico.md` §Email (D96)."
 
+## Clarifications
+
+### Session 2026-09-30
+
+- Q: ¿Qué límites usa el código de ingreso (vida, intentos, envíos)? → A: El código dura **15 minutos** (margen para un mail que tarda o una persona que va más lenta), 5 intentos por código, 5 envíos por hora por email y **30 por hora por origen**. El límite por origen queda alto a propósito: un domingo, toda la gente que se registra desde el wifi del templo comparte la misma dirección de red, y un límite de 5 dejaría afuera a la sexta persona.
+- Q: ¿Cuánto dura la sesión antes de volver a pedir código o entrar con Google? → A: En la **web app, 30 días** y en el **backoffice, 7 días**; en los dos casos el plazo se renueva mientras la Persona use la app. Vale igual para Google y para código. Hoy las dos apps usaban el valor por defecto del proveedor de autenticación (30 días) sin que estuviera decidido por escrito; el backoffice se acorta porque muestra datos de contacto de otras Personas, incluidos menores, y puede quedar abierto en una computadora compartida.
+- Q: En el backoffice, si alguien pide código con un email sin Persona o sin rol de cargo, ¿se le manda igual el mail? → A: **Sí**, el mismo mail que a cualquier otro email; recién al escribir el código ve que no tiene acceso al backoffice, igual que hoy con Google. Ni la pantalla ni el mail distinguen un email del equipo de uno cualquiera, y el mecanismo es el mismo en las dos apps.
+- Q: ¿Qué texto lleva el mail del código? → A: Asunto **"Tu código para entrar: NNNNNN"** (el código en el asunto, para que la notificación del celular lo muestre sin abrir el mail). Cuerpo: "¡Hola! / Este es tu código para entrar a Vida Sobrenatural: / **NNNNNN** (grande) / Escribilo en la pantalla donde lo pediste. Vale por 15 minutos y sirve una sola vez. / Si no fuiste vos, ignorá este mail: nadie puede entrar sin este código. / Iglesia Vida Sobrenatural". El mismo texto en la versión de texto plano.
+- Q: ¿Cómo se ordenan las dos formas de entrar en la pantalla de ingreso? → A: Arriba **"Entrar con Google"** como botón con contorno, después una línea "o", y abajo el campo de email con **"Enviarme el código"** como única acción principal (D94). Mismo orden en la web app y en el backoffice.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Entrar a la app con un código enviado al email (Priority: P1)
@@ -59,7 +69,7 @@ Una Persona que se registró con Google puede seguir entrando con Google, y tamb
 1. **Given** una Persona registrada con Google, **When** entra con código usando el mismo email, **Then** queda con la sesión iniciada como esa misma Persona.
 2. **Given** una Persona registrada con código, **When** entra con Google con el mismo email (verificado por Google), **Then** queda con la sesión iniciada como esa misma Persona.
 3. **Given** un email escrito con mayúsculas o espacios distintos al que está guardado, **When** se pide el código, **Then** el sistema lo trata como el mismo email.
-4. **Given** la pantalla de ingreso, **When** alguien la abre, **Then** ve las dos formas de entrar (Google y código por email), con la de código igual de visible que la de Google.
+4. **Given** la pantalla de ingreso, **When** alguien la abre, **Then** ve arriba "Entrar con Google" (botón con contorno), una línea "o", y el campo de email con "Enviarme el código" como acción principal.
 
 ---
 
@@ -128,23 +138,23 @@ La Persona recibe un mail que se entiende de un vistazo, en el tono de la iglesi
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE ofrecer, en la pantalla de ingreso de la web app y del backoffice, la opción de entrar escribiendo un email y un código recibido por mail, además del ingreso con Google.
+- **FR-001**: El sistema DEBE ofrecer, en la pantalla de ingreso de la web app y del backoffice, la opción de entrar escribiendo un email y un código recibido por mail, además del ingreso con Google. El orden es: "Entrar con Google" arriba como botón con contorno, una línea "o", y el campo de email con "Enviarme el código" como única acción principal de la pantalla (D94).
 - **FR-002**: El sistema NO DEBE pedir, guardar ni mostrar ninguna contraseña, en ninguna de las dos apps ni en el mail.
 - **FR-003**: Al pedir un código, el sistema DEBE generar un código numérico de 6 dígitos, al azar e impredecible, y enviarlo al email escrito.
-- **FR-004**: El código DEBE vencer a los **10 minutos** de enviado, y servir **una sola vez**.
+- **FR-004**: El código DEBE vencer a los **15 minutos** de enviado, y servir **una sola vez**.
 - **FR-005**: Pedir un código nuevo para el mismo email DEBE invalidar cualquier código anterior todavía vigente para ese email.
 - **FR-006**: El sistema DEBE aceptar como máximo **5 intentos** de verificación por código; al quinto intento fallido, ese código deja de servir y la Persona tiene que pedir uno nuevo.
 - **FR-007**: Verificar correctamente el código DEBE contar como verificación del email (equivalente al `email_verified` de Google en FR-017 de la spec 001).
 - **FR-008**: La respuesta en pantalla al pedir un código DEBE ser idéntica para un email registrado y uno no registrado — mismo texto, mismo paso siguiente, sin diferencias observables que revelen si el email pertenece a una Persona.
-- **FR-009**: El sistema DEBE limitar los pedidos de código a **5 por hora por email** y **5 por hora por origen** (dirección de red) para evitar que se use para enviar spam. Pasado el límite, DEBE mostrar un mensaje que diga cuándo se puede volver a intentar.
+- **FR-009**: El sistema DEBE limitar los pedidos de código a **5 por hora por email** y **30 por hora por origen** (dirección de red) para evitar que se use para enviar spam. El límite por origen es más alto a propósito: mucha gente comparte la misma dirección de red en el wifi del templo. Pasado el límite, DEBE mostrar un mensaje que diga cuándo se puede volver a intentar.
 - **FR-010**: Los emails DEBEN compararse sin distinguir mayúsculas y minúsculas e ignorando espacios al principio y al final, tanto al pedir el código como al reconocer a la Persona.
 - **FR-011**: Un código correcto para un email que pertenece a una Persona DEBE iniciar la sesión como esa Persona, sea cual fuere la forma en que se registró (Google, código o alta del Admin). NUNCA DEBE existir más de una Persona con el mismo email.
 - **FR-012**: En la web app, un código correcto para un email que no pertenece a ninguna Persona DEBE llevar al mismo registro de 4 pasos que hoy arranca con Google, con el email ya verificado y no editable.
-- **FR-013**: En el backoffice, un código correcto para un email sin Persona o sin rol de cargo DEBE llevar al mismo resultado que hoy tiene esa situación con Google, sin arrancar ningún registro.
+- **FR-013**: En el backoffice, el sistema DEBE enviar el código a cualquier email pedido (tenga o no Persona o rol de cargo), con el mismo mail que a los demás. Un código correcto para un email sin Persona o sin rol de cargo DEBE llevar al mismo resultado que hoy tiene esa situación con Google, sin arrancar ningún registro.
 - **FR-014**: Las reglas de estado que hoy se aplican al entrar con Google DEBEN aplicarse igual al entrar con código: `pendiente_tutor` va a la pantalla de espera (FR-008 de la 001), el menor pre-cargado y activado entra sin repetir la validación de edad (D35), y la Persona desactivada recibe el mismo trato que hoy.
 - **FR-015**: Si la API no responde al verificar el código o al reconocer a la Persona, el ingreso DEBE bloquearse y mostrar la pantalla de error de verificación existente (D88, fail-closed).
-- **FR-016**: La sesión iniciada con código DEBE durar lo mismo que la iniciada con Google, y cerrarse con la misma acción "Cerrar sesión" (FR-044 de la spec 002).
-- **FR-017**: El mail del código DEBE estar en español rioplatense con voseo, en el tono de `docs/15-guia-ux-ui.md`, mostrar el código grande, decir cuánto dura, incluir "si no fuiste vos, ignorá este mail", y tener una versión en texto plano con la misma información.
+- **FR-016**: La sesión DEBE durar **30 días en la web app** y **7 días en el backoffice**, y ese plazo DEBE renovarse mientras la Persona use la app. La duración es la misma se entre con Google o con código, y la sesión se cierra con la misma acción "Cerrar sesión" (FR-044 de la spec 002). Pasado el plazo sin uso, la Persona vuelve a la pantalla de ingreso.
+- **FR-017**: El mail del código DEBE usar el texto acordado en Clarifications (asunto con el código incluido), estar en español rioplatense con voseo, en el tono de `docs/15-guia-ux-ui.md`, mostrar el código grande, decir cuánto dura, incluir "si no fuiste vos, ignorá este mail", y tener una versión en texto plano con la misma información.
 - **FR-018**: El mail del código NO DEBE incluir ningún dato personal ni ninguna pista de si el email está registrado.
 - **FR-019**: Los errores de la pantalla de código (código incorrecto, vencido, sin intentos, límite de envíos, envío fallido) DEBEN mostrarse junto al campo con la pieza compartida de errores de validación, diciendo cómo seguir (H-50), y el botón de enviar DEBE bloquearse mientras se procesa (H-57).
 - **FR-020**: El sistema NO DEBE guardar el código en forma legible, ni escribirlo en logs, ni enviar el email o el código a la observabilidad de errores (D101).
@@ -170,8 +180,6 @@ La Persona recibe un mail que se entiende de un vistazo, en el tono de la iglesi
 ## Assumptions
 
 - El registro de 4 pasos, la pantalla de `pendiente_tutor`, la pantalla de error de verificación (D88) y la acción de cerrar sesión ya existen (specs 001 y 002) y se reutilizan tal cual; esta spec no los rediseña.
-- Los valores de vida del código (10 minutos), intentos por código (5) y límite de envíos (5 por hora por email y por origen) son las propuestas del brief, a confirmar en `/speckit-clarify`.
-- La duración de la sesión es la misma para Google y para código (FR-016); el valor concreto se confirma en `/speckit-clarify`.
 - El Admin no necesita ninguna pantalla nueva para esta spec: una Persona cargada con email ya puede entrar sola. El reenvío de un código a pedido del Admin no está en alcance.
 - Una persona sin email sigue sin acceso propio (D97); esta spec no agrega ningún otro medio (SMS, WhatsApp).
 - El proveedor real de envío de emails en producción se define en el plan (queda pendiente en `docs/10-stack-tecnico.md`); en desarrollo y en los tests los mails se capturan localmente.

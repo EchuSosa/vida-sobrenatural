@@ -31,5 +31,5 @@
 
 ## Notes
 
-- Los valores numéricos (vida del código, intentos, límite de envíos, duración de la sesión) están escritos con las propuestas del brief y se confirman en `/speckit-clarify`.
+- Los valores numéricos (vida del código, intentos, límite de envíos, duración de la sesión) quedaron confirmados en el clarify del 2026-09-30.
 - FR-021 nombra el servicio de email intercambiable y la captura local porque es una restricción ya decidida en D96, no una elección de implementación de esta spec.
