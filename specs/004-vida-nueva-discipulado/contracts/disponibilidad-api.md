@@ -36,8 +36,10 @@ Discipulador después de cargar su agenda), borrar períodos, máximo por Grupo.
 - **Cuerpo:** `{ diaSemana, inicio, fin }` (minutos; la pantalla convierte desde/hacia `HH:mm`
   en 24 h).
 - **Validación por campo:** `diaSemana` 0..6 (`DIA_SEMANA_INVALIDO`); `inicio` 0..1439 y `fin`
-  1..1440; `fin > inicio` (`FRANJA_FIN_ANTERIOR_AL_INICIO`, en el campo `fin`, FR-017).
-- **201:** `MiDisponibilidad`. Superposiciones permitidas.
+  1..1440; `fin > inicio` (`FRANJA_FIN_ANTERIOR_AL_INICIO`, en el campo `fin`, FR-017); al menos
+  60 minutos (`FRANJA_MUY_CORTA`, en `fin`); ni igual ni superpuesta a otra franja del mismo día de
+  su agenda (`FRANJA_REPETIDA`, `FRANJA_SUPERPUESTA`, en `inicio`) — FR-017a.
+- **201:** `MiDisponibilidad`.
 
 ### `DELETE /disponibilidad/me/franjas/:id`
 

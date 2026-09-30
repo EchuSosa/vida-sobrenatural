@@ -42,7 +42,9 @@ Módulo nuevo `apps/api/src/solicitud-discipulado/`. Todos los errores siguen Pr
 
 - **Cuerpo:** `{ franjas: Franja[] }`.
 - **Validación por campo:** `franjas` con al menos un elemento (`FRANJAS_REQUERIDAS`); cada una con
-  `diaSemana` 0..6, `inicio`/`fin` en 0..1440 y `fin > inicio` (`FRANJA_FIN_ANTERIOR_AL_INICIO`).
+  `diaSemana` 0..6, `inicio`/`fin` en 0..1440 y `fin > inicio` (`FRANJA_FIN_ANTERIOR_AL_INICIO`);
+  al menos 60 minutos (`FRANJA_MUY_CORTA`) y ninguna igual ni superpuesta a otra del mismo día de
+  la misma lista (`FRANJA_REPETIDA`, `FRANJA_SUPERPUESTA`) — FR-017a. Todos en el campo `franjas`.
 - **201:** `{ id, estado: 'pendiente', createdAt }`.
 - **409 `SOLICITUD_DISCIPULADO_YA_PENDIENTE`:** ya tiene una `pendiente` o `propuesta`. La
   garantía la da el índice único parcial: si dos pedidos llegan juntos, el segundo choca con el

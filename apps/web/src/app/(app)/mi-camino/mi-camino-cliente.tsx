@@ -118,6 +118,7 @@ function UltimoDesenlace({ ultimo }: { ultimo: 'rechazada' | 'retirada' | 'aband
 
 function useEtiquetasFranjas(): EtiquetasEditorFranjas {
   const t = useTranslations('franjas');
+  const te = useTranslations('errors');
   return {
     dias: t.raw('dias') as EtiquetasEditorFranjas['dias'],
     dia: t('dia'),
@@ -129,6 +130,9 @@ function useEtiquetasFranjas(): EtiquetasEditorFranjas {
     quitar: t('quitar'),
     sinFranjas: t('sinFranjas'),
     errorRango: t('errorRango'),
+    errorMuyCorta: te('campos.FRANJA_MUY_CORTA'),
+    errorRepetida: te('campos.FRANJA_REPETIDA'),
+    errorSuperpuesta: te('campos.FRANJA_SUPERPUESTA'),
     separador: t('separador'),
   };
 }

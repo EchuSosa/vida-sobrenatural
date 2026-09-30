@@ -1,6 +1,7 @@
 import {
   MAX_PERSONAS_POR_GRUPO_VIDA_NUEVA,
   bloqueoVigente,
+  problemaDeFranjaNueva,
   type BloqueoDisponibilidad,
   type Franja,
   type PorQueNoAparece,
@@ -28,6 +29,17 @@ export function validarFranja(franja: Franja): AppExceptionErrorField[] {
     errores.push({ campo: 'fin', code: 'FRANJA_FIN_ANTERIOR_AL_INICIO' });
   }
   return errores;
+}
+
+/**
+ * FR-017a (H-R7/H-R8): una franja ya válida en sí (arriba) contra la agenda
+ * cargada: al menos 60 minutos (en `fin`), y ni repetida ni superpuesta con
+ * otra del mismo día (en `inicio`: es la hora que hay que mover).
+ */
+export function validarFranjaContraAgenda(franja: Franja, cargadas: readonly Franja[]): AppExceptionErrorField[] {
+  const problema = problemaDeFranjaNueva(franja, cargadas);
+  if (!problema) return [];
+  return [{ campo: problema === 'FRANJA_MUY_CORTA' ? 'fin' : 'inicio', code: problema }];
 }
 
 /**

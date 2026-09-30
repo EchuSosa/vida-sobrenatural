@@ -148,6 +148,20 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await expect(page.getByText('Jueves 21:00 a 22:00')).toBeVisible();
       await expect(resumen).toHaveCount(0);
+
+      // FR-017a (H-R7/H-R8): ni repetida, ni superpuesta, ni de menos de una hora.
+      await agregarFranja(page, 'Jueves', '21:00', '22:00');
+      await expect(page.locator('#campo-franja-error')).toContainText('Ese horario ya está en la lista');
+      await expect(page.locator('#campo-franja-desde')).toHaveAttribute('aria-invalid', 'true');
+      await agregarFranja(page, 'Jueves', '21:30', '22:30');
+      await expect(page.locator('#campo-franja-error')).toContainText('se pisa con otro del mismo día');
+      await agregarFranja(page, 'Viernes', '22:30', '22:45');
+      await expect(page.locator('#campo-franja-error')).toContainText('tiene que durar al menos 1 hora');
+      await expect(page.locator('#campo-franja-hasta')).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.getByRole('listitem').filter({ hasText: 'Jueves 21:00 a 22:00' })).toHaveCount(1);
+      await agregarFranja(page, 'Viernes', '22:00', '23:00');
+      await expect(page.getByText('Viernes 22:00 a 23:00')).toBeVisible();
+      await expect(resumen).toHaveCount(0);
       await expect(estado).toContainText('Hoy el Admin te ve como disponible');
 
       // Apagar el toggle: deja de aparecer.

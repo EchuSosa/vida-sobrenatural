@@ -126,6 +126,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
       // Con una franja (martes 19 a 21, el default del editor): pasa a buscando sin recargar.
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await expect(resumen).toHaveCount(0);
+      // FR-017a (H-R7): la misma franja otra vez no se suma; el editor dice cómo seguir.
+      await page.getByRole('button', { name: 'Agregar franja' }).click();
+      await expect(page.getByText('Ese horario ya está en la lista. Elegí otro día u otras horas.')).toBeVisible();
       await pedir.click();
       await expect(tarjeta(page).getByText('Estamos buscando a tu Discipulador')).toBeVisible();
       await expect(tarjeta(page).getByText('Martes 19:00 a 21:00')).toBeVisible();

@@ -77,6 +77,9 @@ export function MiDisponibilidadCliente({
     quitar: tf('quitar'),
     sinFranjas: t('agenda.vacio'),
     errorRango: te('campos.FRANJA_FIN_ANTERIOR_AL_INICIO'),
+    errorMuyCorta: te('campos.FRANJA_MUY_CORTA'),
+    errorRepetida: te('campos.FRANJA_REPETIDA'),
+    errorSuperpuesta: te('campos.FRANJA_SUPERPUESTA'),
     separador: tf('separador'),
   };
 
@@ -276,7 +279,7 @@ export function MiDisponibilidadCliente({
           etiquetas={etiquetasFranjas}
           disabled={bloqueado || quitandoFranja}
           enviando={agregandoFranja}
-          onErrorChange={(error) => (error ? validacionFranja.reemplazar({ 'franja-hasta': error }) : validacionFranja.reset())}
+          onErrorChange={(error, campo) => (error ? validacionFranja.reemplazar({ [`franja-${campo}`]: error }) : validacionFranja.reset())}
         />
       </section>
 
