@@ -248,7 +248,7 @@ Lo que bloqueaba o era un bug en la revisión manual del 2026-09-29. H-R3, H-R4 
 - [x] T069a Checklist de pantalla de T068/T069 (layout privado y menú público), con el checklist de `docs/15-guia-ux-ui.md` (acción principal, orden de botones, cuatro estados, H-57, feedback, qué pasa después, tono, celular/teclado/lector, contraste en los dos temas).
 - [x] T070 **H-R12** Editar un período de no disponibilidad (FR-040 y contrato actualizados).
 - [x] T070a Checklist de pantalla de T070 en Mi disponibilidad, con el checklist de `docs/15-guia-ux-ui.md` (acción principal, orden de botones, cuatro estados, H-57, feedback, qué pasa después, tono, celular/teclado/lector, contraste en los dos temas).
-- [ ] T071 **H-R11/H-R9** Etiquetas de estado de los períodos que dicen qué pasa; hora en 24 h (resuelta por `CampoHora`, T065).
+- [x] T071 **H-R11/H-R9** Etiquetas de estado de los períodos que dicen qué pasa; hora en 24 h (resuelta por `CampoHora`, T065).
 - [ ] T072 **H-R13** `/dev/entrar` en las dos apps, solo con `ALLOW_TEST_LOGIN=true` y fuera de producción; `COMO-ARRANCAR.md` al día.
 
 ## Dependencies & Execution Order
