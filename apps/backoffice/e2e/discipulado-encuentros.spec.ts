@@ -1,5 +1,6 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E, loguearseComoPastorE2E } from './helpers';
 import { crearEncuentro, crearGrupo, crearPersona, sinScrollHorizontal, sinSesion } from './helpers';
+import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * specs/004, T048 (FR-009, FR-011, FR-013a, FR-029, FR-041, D134): el
@@ -11,7 +12,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`Encuentros — modo ${colorScheme}`, () => {
     test.use({ colorScheme });
 
-    test('@celular el Discipulador registra un Encuentro con nota y lo edita', async ({ page }) => {
+    test('@celular @webkit el Discipulador registra un Encuentro con nota y lo edita', async ({ page }) => {
       const sufijo = `${colorScheme}-${Date.now()}`;
       const persona = await crearPersona(`e2e-b-enc-${sufijo}@example.com`, { nombre: 'Lucía', apellido: `Encuentro ${sufijo}` });
       const { grupoId } = await crearGrupo([persona]);
@@ -35,7 +36,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(panel.locator('#campo-capitulos-error')).toContainText('Escribí qué capítulos vieron');
       expect((await auditar(page)).violations).toEqual([]);
 
-      await panel.getByLabel('Fecha').fill('2026-09-01');
+      await completarFecha(campo(panel, 'Fecha'), '2026-09-01');
       await panel.getByLabel('Capítulos').fill('1 y 2');
       await panel.getByLabel('Notas (opcional)').fill(`Nota privada ${sufijo}`);
       await panel.getByRole('checkbox', { name: 'Faltó Lucía' }).check();

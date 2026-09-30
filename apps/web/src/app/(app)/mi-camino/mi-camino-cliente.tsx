@@ -123,6 +123,8 @@ function useEtiquetasFranjas(): EtiquetasEditorFranjas {
     dia: t('dia'),
     desde: t('desde'),
     hasta: t('hasta'),
+    hora: t('hora'),
+    minutos: t('minutos'),
     agregar: t('agregar'),
     quitar: t('quitar'),
     sinFranjas: t('sinFranjas'),

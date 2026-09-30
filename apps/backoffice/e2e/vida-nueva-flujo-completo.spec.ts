@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { test, expect, auditar, loguearseComo, loguearseComoAdminE2E } from './helpers';
 import { apagarDisponibilidad, crearDiscipulador, crearPersona, estadoDeGrupo, estadoMiCamino, pedirVidaNuevaComo, sinScrollHorizontal, sinSesion } from './helpers';
+import { campo, completarFecha, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
 
 const WEB_BASE_URL = process.env.PLAYWRIGHT_WEB_BASE_URL ?? 'http://localhost:3001';
 
@@ -46,9 +47,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await page.goto('/mi-disponibilidad');
         const estado = page.getByTestId('estado-disponibilidad');
         await expect(estado).toContainText('hasta que no cargues tus horarios no aparecés para nuevos discipulados');
-        await page.getByLabel('Día', { exact: true }).selectOption({ label: 'Miércoles' });
-        await page.getByLabel('Desde', { exact: true }).first().fill('20:00');
-        await page.getByLabel('Hasta', { exact: true }).first().fill('22:00');
+        await page.getByLabel('Día', { exact: true }).first().selectOption({ label: 'Miércoles' });
+        await elegirHora(campo(page, 'Desde').first(), '20:00');
+        await elegirHora(campo(page, 'Hasta').first(), '22:00');
         await page.getByRole('button', { name: 'Agregar franja' }).click();
         await expect(page.getByText('Miércoles 20:00 a 22:00')).toBeVisible();
         await page.getByRole('button', { name: 'Prender mi disponibilidad' }).click();
@@ -89,7 +90,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         const grupoId = page.url().split('/mis-discipulados/')[1];
         await page.getByRole('button', { name: 'Registrar encuentro' }).click();
         const panel = page.getByRole('dialog', { name: 'Registrar encuentro' });
-        await panel.getByLabel('Fecha').fill('2026-09-01');
+        await completarFecha(campo(panel, 'Fecha'), '2026-09-01');
         await panel.getByLabel('Capítulos').fill('1 al 12');
         await panel.getByRole('button', { name: 'Guardar encuentro' }).click();
         await expect(page.getByText('Encuentro registrado.')).toBeVisible();

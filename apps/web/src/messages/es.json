@@ -246,6 +246,7 @@
       "editar": "Editar"
     },
     "errorCampo": "Revisá este dato.",
+    "errorFechaNacimiento": "Completá el día, el mes y el año en que naciste. El año va con 4 números, por ejemplo 1965.",
     "elegirOpcion": "Elegí una opción",
     "soloNumeros": "Solo números",
     "opciones": {
@@ -372,10 +373,31 @@
     "dia": "Día",
     "desde": "Desde",
     "hasta": "Hasta",
+    "hora": "Hora",
+    "minutos": "Minutos",
     "agregar": "Agregar franja",
     "quitar": "Quitar",
     "sinFranjas": "Todavía no cargaste horarios.",
     "errorRango": "La hora de fin tiene que ser posterior a la de inicio.",
     "separador": " a "
+  },
+  "campoFecha": {
+    "dia": "Día",
+    "mes": "Mes",
+    "anio": "Año",
+    "meses": [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre"
+    ]
   }
 }

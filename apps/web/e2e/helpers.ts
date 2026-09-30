@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from '../../../scripts/e2e-fallas-en-consola';
+import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * Helpers compartidos por los e2e de registro/sesión — extraídos acá para
@@ -50,6 +51,11 @@ export function crearAxeBuilder(page: Page, reglasDeshabilitadas: string[] = [])
     rules[regla] = { enabled: false };
   }
   const builder = new AxeBuilder({ page }).options({ rules });
+  // H-R10: en WebKit, Base UI les pone `role="button"` a las guardas de foco
+  // invisibles de sus diálogos (utils/FocusGuard.js: así VoiceOver no se
+  // escapa del foco atrapado) y axe las marca como botón sin nombre. Son de la
+  // librería, invisibles y a propósito: se excluyen, el resto se audita igual.
+  builder.exclude('[data-base-ui-focus-guard]');
   for (const { iframe } of EMBEDS_DE_TERCEROS) {
     // [iframe, '*']: excluye cada elemento del documento de ADENTRO del
     // iframe, no el elemento <iframe> — ése es nuestro (su `title`, regla
@@ -126,7 +132,7 @@ export async function registrarPersonaDeTest(page: Page, email: string) {
   await page.getByLabel('Apellido').fill('García');
   await page.getByLabel('Nombre').fill('Ana');
   await page.getByLabel('Género').selectOption('femenino');
-  await page.getByLabel('Fecha de nacimiento').fill('1990-05-20');
+  await completarFecha(campo(page, 'Fecha de nacimiento'), '1990-05-20');
   await page.getByRole('button', { name: 'Siguiente' }).click();
 
   await page.getByLabel('Código de país').selectOption('+54');

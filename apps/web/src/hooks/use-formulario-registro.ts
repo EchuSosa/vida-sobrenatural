@@ -136,7 +136,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     apellido: requerido,
     nombre: requerido,
     genero: requerido,
-    fechaNacimiento: requerido,
+    fechaNacimiento: { ...requerido, mensaje: t('errorFechaNacimiento') },
     telefono: {
       esValido: (v: { codigoPais: string; numero: string }) => TELEFONO_REGEX.test(`${v.codigoPais} ${v.numero}`),
       mensaje: mensajeDeCampo('TELEFONO_INVALIDO', t('campos.numeroTelefono')),

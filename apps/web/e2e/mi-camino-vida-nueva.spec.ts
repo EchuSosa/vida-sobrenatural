@@ -1,5 +1,6 @@
 import { request as playwrightRequest, type Page } from '@playwright/test';
 import { test, expect, auditar, loguearseComoTest, registrarPersonaDeTest, usarTemaOscuro, esperarTema } from './helpers';
+import { campo, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * specs/004, Historias 1 y 2 (T021, T035): Vida Nueva en Mi camino, de punta
@@ -106,7 +107,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page, tema);
     });
 
-    test('pedir Vida Nueva: sin franjas da el error por campo; con una, pasa a "buscando", se edita y se retira', async ({ page }) => {
+    test('pedir Vida Nueva: sin franjas da el error por campo; con una, pasa a "buscando", se edita y se retira @webkit', async ({ page }) => {
       const email = `e2e-mi-camino-${tema}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
       if (tema === 'oscuro') await usarTemaOscuro(page, email);
@@ -136,9 +137,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
       // Editar los horarios: cambia a sábado 10 a 13.
       await page.getByRole('button', { name: 'Editar horarios' }).click();
       await page.getByRole('button', { name: 'Quitar' }).click();
-      await page.getByLabel('Día').selectOption({ label: 'Sábado' });
-      await page.getByLabel('Desde').fill('10:00');
-      await page.getByLabel('Hasta').fill('13:00');
+      await page.getByLabel('Día', { exact: true }).selectOption({ label: 'Sábado' });
+      await elegirHora(campo(page, 'Desde'), '10:00');
+      await elegirHora(campo(page, 'Hasta'), '13:00');
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await sinViolaciones(page, tema);
       await page.getByRole('button', { name: 'Guardar horarios' }).click();

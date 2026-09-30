@@ -28,12 +28,14 @@ import {
   AlertDialogTitle,
   Button,
   ConfirmDestructiveDialog,
+  CampoFecha,
   EditorDeFranjas,
   MensajeErrorCampo,
   ResumenErrores,
   minutosAHHMM,
   useEnvio,
   useValidacionCampos,
+  type EtiquetasCampoFecha,
   type EtiquetasEditorFranjas,
 } from '@vida-sobrenatural/ui';
 
@@ -69,12 +71,17 @@ export function MiDisponibilidadCliente({
     dia: tf('dia'),
     desde: tf('desde'),
     hasta: tf('hasta'),
+    hora: tf('hora'),
+    minutos: tf('minutos'),
     agregar: tf('agregar'),
     quitar: tf('quitar'),
     sinFranjas: t('agenda.vacio'),
     errorRango: te('campos.FRANJA_FIN_ANTERIOR_AL_INICIO'),
     separador: tf('separador'),
   };
+
+  const tcf = useTranslations('campoFecha');
+  const etiquetasFecha: EtiquetasCampoFecha = { dia: tcf('dia'), mes: tcf('mes'), anio: tcf('anio'), meses: tcf.raw('meses') as EtiquetasCampoFecha['meses'] };
 
   const fecha = (civil: string) => formatearFechaLarga(civil, locale);
   const textoFranja = (f: Franja) => `${etiquetasFranjas.dias[f.diaSemana]} ${minutosAHHMM(f.inicio)}${etiquetasFranjas.separador}${minutosAHHMM(f.fin)}`;
@@ -386,36 +393,37 @@ export function MiDisponibilidadCliente({
 
         <h3 className="text-lg font-medium">{t('bloqueos.nuevo')}</h3>
         {validacionBloqueo.foco > 0 && <ResumenErrores errores={validacionBloqueo.resumen} titulo={t('errores.resumen')} foco={validacionBloqueo.foco} />}
-        <form noValidate onSubmit={(e) => void agregarBloqueo(e)} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
+        <form noValidate onSubmit={(e) => void agregarBloqueo(e)} className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
           {(['desde', 'hasta'] as const).map((campo) => {
             const error = validacionBloqueo.mensajes[campo];
             const valor = campo === 'desde' ? desde : hasta;
             return (
-              <div key={campo} className="flex flex-col gap-1 text-sm font-medium">
-                <label htmlFor={`campo-${campo}`}>{t(`bloqueos.${campo}`)}</label>
-                <input
+              <div key={campo} className="flex flex-col gap-1">
+                <CampoFecha
                   id={`campo-${campo}`}
-                  type="date"
+                  etiqueta={t(`bloqueos.${campo}`)}
                   value={valor}
                   disabled={bloqueado}
-                  aria-invalid={error ? true : undefined}
-                  aria-describedby={error ? `error-${campo}` : undefined}
-                  onChange={(e) => {
-                    if (campo === 'desde') setDesde(e.target.value);
-                    else setHasta(e.target.value);
+                  error={Boolean(error)}
+                  idError={`error-${campo}`}
+                  etiquetas={etiquetasFecha}
+                  onChange={(v) => {
+                    if (campo === 'desde') setDesde(v);
+                    else setHasta(v);
                     validacionBloqueo.limpiar(campo);
                   }}
-                  onBlur={(e) => revalidarBloqueo(campo, { desde, hasta, [campo]: e.target.value })}
-                  className={CLASE_CAMPO}
+                  onBlur={() => revalidarBloqueo(campo, { desde, hasta })}
                 />
                 <MensajeErrorCampo id={`error-${campo}`} mensaje={error} />
               </div>
             );
           })}
+          </div>
           <Button
             type="submit"
             variant="outline"
-            className="h-11 w-full sm:mt-6 sm:w-auto"
+            className="h-11 w-full sm:w-auto sm:self-start"
             disabled={bloqueado}
             loading={agregandoBloqueo}
             loadingText={t('bloqueos.agregando')}

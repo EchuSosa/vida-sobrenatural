@@ -12,6 +12,8 @@ export { CampoTelefono, OPCIONES_CODIGO_PAIS } from './components/campo-telefono
 export { CampoAutocompletado, type CampoAutocompletadoProps } from './components/campo-autocompletado';
 export { MarkdownSeguro, type MarkdownSeguroProps } from './components/markdown-seguro';
 export { EditorMarkdown, type EditorMarkdownProps, type EtiquetasEditorMarkdown } from './components/editor-markdown';
+export { CampoFecha, componerFecha, partirFecha, type CampoFechaProps, type EtiquetasCampoFecha } from './components/campo-fecha';
+export { CampoHora, type CampoHoraProps, type EtiquetasCampoHora } from './components/campo-hora';
 export { EditorDeFranjas, minutosAHHMM, type EditorDeFranjasProps, type EtiquetasEditorFranjas } from './components/editor-de-franjas';
 export { ResumenErrores, MensajeErrorCampo, type ErrorResumen } from './components/form-errors';
 export {

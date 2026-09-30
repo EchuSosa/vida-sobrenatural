@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import type { Franja } from '@vida-sobrenatural/shared-types';
 import { Button } from './ui/button';
+import { CampoHora } from './campo-hora';
 
 /**
  * specs/004-vida-nueva-discipulado (T012a, Echo 2026-09-28): editor de franjas
  * horarias — selector de día de la semana + hora de inicio + hora de fin (24 h),
  * con la lista de franjas cargadas y "quitar" por franja. Sin grilla: anda con
- * teclado y en celular (`<input type="time">`, objetivos de 44px). Lo usan Mi
+ * teclado y en celular (objetivos de 44px). La hora es `CampoHora` (H-R10/H-R9:
+ * dos listas, 24 h, igual en Safari), no `<input type="time">`. Lo usan Mi
  * camino (apps/web), Mi disponibilidad y "pedir en nombre de" (apps/backoffice),
  * así que vive en packages/ui (Principio XI). Todo texto llega por prop, incluidos
  * los días (H-151/D84): el componente no sabe español.
@@ -19,6 +21,9 @@ export interface EtiquetasEditorFranjas {
   dia: string;
   desde: string;
   hasta: string;
+  /** Nombres accesibles de las dos listas de cada hora (CampoHora). */
+  hora: string;
+  minutos: string;
   agregar: string;
   quitar: string;
   sinFranjas: string;
@@ -74,6 +79,7 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
   const idDesde = `${idBase}-desde`;
   const idHasta = `${idBase}-hasta`;
   const idError = `${idBase}-error`;
+  const etiquetasHora = { hora: etiquetas.hora, minutos: etiquetas.minutos };
 
   function agregar() {
     const inicio = aMinutos(desde);
@@ -132,30 +138,24 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
             ))}
           </select>
         </div>
-        <div className="flex flex-col gap-1 text-sm font-medium">
-          <label htmlFor={idDesde}>{etiquetas.desde}</label>
-          <input
-            id={idDesde}
-            type="time"
-            value={desde}
-            disabled={disabled}
-            onChange={(e) => setDesde(e.target.value)}
-            className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30"
-          />
-        </div>
-        <div className="flex flex-col gap-1 text-sm font-medium">
-          <label htmlFor={idHasta}>{etiquetas.hasta}</label>
-          <input
-            id={idHasta}
-            type="time"
-            value={hasta}
-            disabled={disabled}
-            onChange={(e) => setHasta(e.target.value)}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? idError : undefined}
-            className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30"
-          />
-        </div>
+        <CampoHora
+          id={idDesde}
+          etiqueta={etiquetas.desde}
+          value={desde}
+          onChange={setDesde}
+          etiquetas={etiquetasHora}
+          disabled={disabled}
+        />
+        <CampoHora
+          id={idHasta}
+          etiqueta={etiquetas.hasta}
+          value={hasta}
+          onChange={setHasta}
+          etiquetas={etiquetasHora}
+          disabled={disabled}
+          error={Boolean(error)}
+          idError={idError}
+        />
         <Button type="button" variant="outline" disabled={disabled} loading={enviando} onClick={agregar} className="h-11">
           {etiquetas.agregar}
         </Button>

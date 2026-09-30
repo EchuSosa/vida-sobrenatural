@@ -12,6 +12,7 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
+  CampoFecha,
   Input,
   MensajeErrorCampo,
   ResumenErrores,
@@ -23,6 +24,7 @@ import {
   SheetTitle,
   useEnvio,
   useValidacionCampos,
+  type EtiquetasCampoFecha,
   type ValidacionCampo,
 } from '@vida-sobrenatural/ui';
 import { mensajeDeError, mensajesDeCampo } from '../comun';
@@ -61,6 +63,7 @@ export function FormularioEncuentro({
   const t = useTranslations('misDiscipulados');
   const tc = useTranslations('comun');
   const te = useTranslations('errors');
+  const tcf = useTranslations('campoFecha');
   const hoy = hoyEnArgentina();
   const [fecha, setFecha] = useState(encuentro?.fecha ?? hoy);
   const [capitulos, setCapitulos] = useState(encuentro?.capitulos ?? '');
@@ -132,22 +135,18 @@ export function FormularioEncuentro({
           <ResumenErrores errores={validacion.resumen} foco={validacion.foco} titulo={t('campos.resumen')} />
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="campo-fecha" className="text-sm font-medium">
-              {t('detalle.formulario.fecha')}
-            </label>
-            <Input
+            <CampoFecha
               id="campo-fecha"
-              type="date"
-              max={hoy}
+              etiqueta={t('detalle.formulario.fecha')}
               value={fecha}
-              className="h-11"
-              onChange={(e) => {
-                setFecha(e.target.value);
+              etiquetas={{ dia: tcf('dia'), mes: tcf('mes'), anio: tcf('anio'), meses: tcf.raw('meses') as EtiquetasCampoFecha['meses'] }}
+              onChange={(v) => {
+                setFecha(v);
                 validacion.limpiar('fecha');
               }}
               onBlur={() => validacion.revalidar('fecha', fecha, reglas.fecha)}
-              aria-invalid={Boolean(validacion.mensajes.fecha)}
-              aria-describedby={validacion.mensajes.fecha ? 'campo-fecha-error' : undefined}
+              error={Boolean(validacion.mensajes.fecha)}
+              idError="campo-fecha-error"
             />
             <MensajeErrorCampo id="campo-fecha-error" mensaje={validacion.mensajes.fecha} />
           </div>

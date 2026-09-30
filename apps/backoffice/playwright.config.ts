@@ -140,6 +140,12 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PUERTO_APP}`,
     trace: 'on-first-retry',
   },
+  // H-R10 (revisión manual de la 004): en iPhone todos los navegadores son
+  // WebKit, y los campos de fecha y hora nativos no andaban en Safari sin que
+  // ningún e2e lo viera (corrían solo en Chromium). Los specs con `@webkit` en
+  // el título corren también en WebKit — los flujos de fechas, horas y
+  // franjas —, sin duplicar toda la suite (como `@celular`).
+  //
   // specs/004 (T012b, FR-046): las pantallas del Discipulador (aceptar una
   // propuesta, cargar la agenda) se usan desde el teléfono, así que sus specs
   // —los que llevan `@celular` en el título— corren también en un viewport de
@@ -149,5 +155,6 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'celular', grep: /@celular/, use: { ...devices['Pixel 7'] } },
+    { name: 'webkit', grep: /@webkit/, use: { ...devices['Desktop Safari'] } },
   ],
 });

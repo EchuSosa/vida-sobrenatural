@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { hoyEnArgentina, type MiDisponibilidad } from '@vida-sobrenatural/shared-types';
 import { test, expect, auditar, crearPersona, idDePersona, idsEnElCruce, loguearseComoDiscipuladorE2E, pedirVidaNuevaComo } from './helpers';
+import { campo, completarFecha, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
@@ -31,9 +32,9 @@ async function sinViolaciones(page: Page) {
 }
 
 async function agregarFranja(page: Page, dia: string, desde: string, hasta: string) {
-  await page.getByLabel('Día', { exact: true }).selectOption({ label: dia });
-  await page.getByLabel('Desde', { exact: true }).first().fill(desde);
-  await page.getByLabel('Hasta', { exact: true }).first().fill(hasta);
+  await page.getByLabel('Día', { exact: true }).first().selectOption({ label: dia });
+  await elegirHora(campo(page, 'Desde').first(), desde);
+  await elegirHora(campo(page, 'Hasta').first(), hasta);
   await page.getByRole('button', { name: 'Agregar franja' }).click();
 }
 
@@ -97,7 +98,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await reiniciarDisponibilidad(page);
     });
 
-    test('agenda, toggle, períodos y máximo, con la frase de arriba siempre al día @celular', async ({ page }) => {
+    test('agenda, toggle, períodos y máximo, con la frase de arriba siempre al día @celular @webkit', async ({ page }) => {
       const estado = page.getByTestId('estado-disponibilidad');
       await page.goto('/mi-disponibilidad');
 
@@ -143,7 +144,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page);
 
       // Corregido, se agrega y el resumen se va.
-      await page.getByLabel('Hasta', { exact: true }).first().fill('22:00');
+      await elegirHora(campo(page, 'Hasta').first(), '22:00');
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await expect(page.getByText('Jueves 21:00 a 22:00')).toBeVisible();
       await expect(resumen).toHaveCount(0);
@@ -157,8 +158,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
 
       // Un período que cubre hoy: no aparece; borrarlo lo devuelve.
       const hoy = hoyEnArgentina();
-      await page.getByLabel('Desde', { exact: true }).last().fill(hoy);
-      await page.getByLabel('Hasta', { exact: true }).last().fill(sumarDias(hoy, 3));
+      await completarFecha(campo(page, 'Desde').last(), hoy);
+      await completarFecha(campo(page, 'Hasta').last(), sumarDias(hoy, 3));
       await page.getByRole('button', { name: 'Agregar período' }).click();
       await expect(estado).toContainText('Hoy no aparecés, por tu período del');
       await expect(page.getByText('Vigente hoy')).toBeVisible();
@@ -169,12 +170,11 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(page.getByText('No tenés períodos cargados.')).toBeVisible();
 
       // Un período que ya terminó: error por campo, sin llegar a guardarse.
-      await page.getByLabel('Desde', { exact: true }).last().fill(sumarDias(hoy, -5));
-      const hastaPeriodo = page.getByLabel('Hasta', { exact: true }).last();
-      await hastaPeriodo.fill(sumarDias(hoy, -1));
-      // Al salir del campo ya avisa debajo (validación al salir, H-72), sin resumen todavía. (Tab
-      // no sirve: en un campo de fecha recorre día, mes y año antes de salir.)
-      await hastaPeriodo.blur();
+      await completarFecha(campo(page, 'Desde').last(), sumarDias(hoy, -5));
+      const hastaPeriodo = campo(page, 'Hasta').last();
+      await completarFecha(hastaPeriodo, sumarDias(hoy, -1));
+      // Al salir del campo ya avisa debajo (validación al salir, H-72), sin resumen todavía.
+      await hastaPeriodo.getByLabel('Año', { exact: true }).blur();
       await expect(page.locator('#error-hasta')).toContainText('Ese período ya terminó');
       await expect(page.getByRole('alert').filter({ hasText: 'Revisá estos campos:' })).toHaveCount(0);
       await page.getByRole('button', { name: 'Agregar período' }).click();

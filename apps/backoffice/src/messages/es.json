@@ -52,7 +52,7 @@
       "BLOQUEO_FIN_ANTERIOR_AL_INICIO": "La fecha de fin tiene que ser igual o posterior a la de inicio.",
       "BLOQUEO_YA_VENCIDO": "Ese período ya terminó: elegí una fecha de fin de hoy en adelante.",
       "MAXIMO_POR_GRUPO_FUERA_DE_RANGO": "Elegí un número de 1 a 6.",
-      "FECHA_REQUERIDA": "Elegí la fecha del encuentro.",
+      "FECHA_REQUERIDA": "Completá el día, el mes y el año del encuentro.",
       "FECHA_FUTURA": "La fecha no puede ser posterior a hoy: elegí el día en que se juntaron.",
       "CAPITULOS_REQUERIDO": "Escribí qué capítulos vieron, por ejemplo \"1 y 2\" (hasta 200 caracteres).",
       "NOTAS_DEMASIADO_LARGAS": "Las notas pueden tener hasta 2000 caracteres: acortalas un poco.",
@@ -675,8 +675,8 @@
     },
     "errores": {
       "resumen": "Revisá estos campos:",
-      "desdeRequerido": "Elegí la fecha en que empieza el período.",
-      "hastaRequerido": "Elegí la fecha en que termina el período.",
+      "desdeRequerido": "Completá el día, el mes y el año en que empieza el período.",
+      "hastaRequerido": "Completá el día, el mes y el año en que termina el período.",
       "generico": "Revisá este dato e intentá de nuevo."
     },
     "error": {
@@ -710,10 +710,31 @@
     "dia": "Día",
     "desde": "Desde",
     "hasta": "Hasta",
+    "hora": "Hora",
+    "minutos": "Minutos",
     "agregar": "Agregar franja",
     "quitar": "Quitar",
     "sinFranjas": "Todavía no cargaste horarios.",
     "errorRango": "La hora de fin tiene que ser posterior a la de inicio.",
     "separador": " a "
+  },
+  "campoFecha": {
+    "dia": "Día",
+    "mes": "Mes",
+    "anio": "Año",
+    "meses": [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre"
+    ]
   }
 }
