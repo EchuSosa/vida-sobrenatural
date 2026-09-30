@@ -13,7 +13,7 @@ import { MenuUsuarioPublico, ItemsUsuarioCelular } from './menu-usuario-publico'
 /**
  * H-19 (actualización 2026-09-18): con sesión de una Persona ya activa, la
  * acción "Ingresar" deja de tener sentido — se reemplaza por un acceso
- * directo a la app. "Dar" no depende de la sesión, se mantiene siempre.
+ * directo a la app; con sesión sin registro, por "Completar registro" (H-R2). "Dar" no depende de la sesión, se mantiene siempre.
  * Exportado: H-64 (revisión manual ronda 5, D115) — nav-app-mas.tsx (el
  * panel "Más" de la app, con sesión SIEMPRE activa) usaba NAV_PUBLICA_ACCIONES
  * crudo, sin este filtro. Con sesión, cualquier enlace a `/registro` termina
@@ -26,11 +26,13 @@ export function useAccionesPublicas() {
   const t = useTranslations('nav');
   const yaEsMiembro = session?.user.estado === 'activa';
 
-  return NAV_PUBLICA_ACCIONES.map((item) =>
-    item.href === '/registro' && yaEsMiembro
-      ? { href: '/inicio', labelKey: 'irALaApp' as const, destacado: true }
-      : item,
-  ).map((item) => ({ ...item, label: t(item.labelKey) }));
+  return NAV_PUBLICA_ACCIONES.map((item) => {
+    if (item.href !== '/registro' || !session) return item;
+    if (yaEsMiembro) return { href: '/inicio', labelKey: 'irALaApp', destacado: true };
+    // FR-042 de la 002 (H-R2): con sesión y sin registro, "Ingresar" junto al
+    // nombre confundía — ya entró; lo que le falta es completar el registro.
+    return { href: '/registro', labelKey: 'completarRegistro', destacado: true };
+  }).map((item) => ({ ...item, label: t(item.labelKey) }));
 }
 
 function EnlaceMenu({
