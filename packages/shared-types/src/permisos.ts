@@ -77,7 +77,8 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   // D64: el Pastor ve esta lista (GET /personas/pendientes-tutor, T070) —
   // la única compuesta enteramente por menores, con sus datos de contacto y
   // el teléfono del tutor. Restringirla es enmendar D64, no este valor.
-  'pendientes_tutor.ver': ['admin', 'discipulador', 'pastor'],
+  // D139 (H-R6): el Discipulador ya no la ve ni la gestiona.
+  'pendientes_tutor.ver': ['admin', 'pastor'],
   'solicitudes.ver': ['admin', 'pastor'],
   'grupos.ver': ['admin', 'pastor'],
   'eventos.ver': ['admin', 'pastor'],
@@ -96,7 +97,8 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'libros.gestionar': ['admin'],
   // D129: el Pastor carga y edita la Palabra Profética igual que el Admin.
   'palabra_profetica.editar': ['admin', 'pastor'],
-  'pendientes_tutor.gestionar': ['admin', 'discipulador'],
+  // D139 (H-R6): activar un menor y cerrar un caso son del Admin.
+  'pendientes_tutor.gestionar': ['admin'],
   'sedes.gestionar': ['admin'],
   // specs/004-vida-nueva-discipulado.
   'solicitudes.aprobar': ['admin'],

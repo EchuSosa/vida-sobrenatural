@@ -240,7 +240,7 @@ Lo que bloqueaba o era un bug en la revisión manual del 2026-09-29. H-R3, H-R4 
 
 - [x] T065 **H-R10** Campos de fecha y hora propios en `packages/ui` (`CampoFecha`: Día/Mes/Año; `CampoHora`: Hora/Minutos, 24 h) en lugar de `type="date"`/`type="time"`, que en Safari no le entregaban el valor a la página. En registro, Mi disponibilidad (períodos), Encuentro y el editor de franjas. Proyecto `webkit` en los Playwright de las dos apps (specs con `@webkit`).
 - [x] T065a Checklist de pantalla de T065 en registro (paso 1), Mi disponibilidad, formulario de Encuentro, Mi camino y "pedir en nombre de", con el checklist de `docs/15-guia-ux-ui.md` (acción principal, orden de botones, cuatro estados, H-57, feedback, qué pasa después, tono, celular/teclado/lector, contraste en los dos temas).
-- [ ] T066 **H-R6** Sacar `discipulador` de `pendientes_tutor.ver` y `.gestionar` (D139), con tests de API y e2e.
+- [x] T066 **H-R6** Sacar `discipulador` de `pendientes_tutor.ver` y `.gestionar` (D139), con tests de API y e2e.
 - [ ] T067 **H-R7/H-R8** Rechazar franjas repetidas, superpuestas o de menos de `MINUTOS_MINIMOS_EN_COMUN` (API y editor), con error por campo.
 - [ ] T067a Checklist de pantalla de T067 en Mi disponibilidad, Mi camino y "pedir en nombre de", con el checklist de `docs/15-guia-ux-ui.md` (acción principal, orden de botones, cuatro estados, H-57, feedback, qué pasa después, tono, celular/teclado/lector, contraste en los dos temas).
 - [ ] T068 **H-R1** Con sesión sin Persona `activa`, la app privada de `apps/web` redirige a `/registro`; FR nueva y e2e.
