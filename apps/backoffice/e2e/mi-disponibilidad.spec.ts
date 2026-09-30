@@ -178,6 +178,21 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(estado).toContainText('Hoy no aparecés, por tu período del');
       await expect(page.getByText('Vigente hoy')).toBeVisible();
       await sinViolaciones(page);
+
+      // FR-040 (H-R12): editar el período. Con el fin antes del inicio, error por campo en el panel;
+      // corrido a la semana que viene, deja de estar vigente y vuelve a aparecer.
+      await page.getByRole('button', { name: /^Editar: Del / }).click();
+      const panelEditar = page.getByRole('dialog', { name: 'Editar el período' });
+      await completarFecha(campo(panelEditar, 'Desde'), sumarDias(hoy, 7));
+      await completarFecha(campo(panelEditar, 'Hasta'), sumarDias(hoy, 6));
+      await panelEditar.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(panelEditar.locator('#campo-editar-hasta-error')).toBeVisible();
+      await sinViolaciones(page);
+      await completarFecha(campo(panelEditar, 'Hasta'), sumarDias(hoy, 9));
+      await panelEditar.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(panelEditar).toHaveCount(0);
+      await expect(page.getByText('Período actualizado.')).toBeVisible();
+      await expect(estado).toContainText('Hoy el Admin te ve como disponible');
       await page.getByRole('button', { name: /^Borrar: Del / }).click();
       await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, borrar el período' }).click();
       await expect(estado).toContainText('Hoy el Admin te ve como disponible');

@@ -65,6 +65,13 @@ export class DisponibilidadController {
     return this.disponibilidadService.agregarBloqueo(this.personaDeSesion(request), dto);
   }
 
+  @Put('bloqueos/:id')
+  @RequierePermiso('mi_disponibilidad.gestionar')
+  @ApiOkResponse({ description: 'FR-040 (H-R12): cambia desde/hasta de un período propio, con las validaciones de crear; 404 si es ajeno o ya estaba borrado.' })
+  editarBloqueo(@Req() request: AuthenticatedRequest, @Param('id') id: string, @Body() dto: CrearBloqueoDto) {
+    return this.disponibilidadService.editarBloqueo(this.personaDeSesion(request), id, dto);
+  }
+
   @Delete('bloqueos/:id')
   @RequierePermiso('mi_disponibilidad.gestionar')
   @ApiOkResponse({ description: 'FR-040: borrado lógico de un período propio; 404 si es ajeno o ya estaba borrado.' })
