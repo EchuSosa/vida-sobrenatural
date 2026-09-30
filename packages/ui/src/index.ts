@@ -15,6 +15,7 @@ export { EditorMarkdown, type EditorMarkdownProps, type EtiquetasEditorMarkdown 
 export { CampoFecha, componerFecha, partirFecha, type CampoFechaProps, type EtiquetasCampoFecha } from './components/campo-fecha';
 export { CampoHora, type CampoHoraProps, type EtiquetasCampoHora } from './components/campo-hora';
 export { EditorDeFranjas, minutosAHHMM, type EditorDeFranjasProps, type EtiquetasEditorFranjas } from './components/editor-de-franjas';
+export { EntrarDePrueba, EMAILS_DE_PRUEBA, type EtiquetasEntrarDePrueba } from './components/entrar-de-prueba';
 export { ResumenErrores, MensajeErrorCampo, type ErrorResumen } from './components/form-errors';
 export {
   ConfirmDestructiveDialog,
