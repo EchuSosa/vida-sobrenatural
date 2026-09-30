@@ -9,8 +9,8 @@
 **Camino feliz (mayor de 18):**
 
 1. La persona entra a la app y toca "Registrarme" (o intenta ver contenido que requiere login y se le ofrece registrarse).
-2. Elige método de acceso vía SSO (Google u otro proveedor).
-3. Autoriza el acceso — el sistema recibe email, nombre básico y (si es Google) la foto de perfil desde el proveedor SSO. Si la verificación contra la API falla por un error inesperado, el login se bloquea con un mensaje para reintentar (fail-closed, D88).
+2. Elige método de acceso: vía SSO (Google) o con **código por email** (D141): escribe su email, recibe un código de 6 dígitos y lo escribe en la app, lo que verifica el email.
+3. Autoriza el acceso (o escribe el código) — el sistema recibe email, nombre básico y (si es Google) la foto de perfil desde el proveedor SSO. Si la verificación contra la API falla por un error inesperado, el login se bloquea con un mensaje para reintentar (fail-closed, D88).
 4. El sistema pide completar datos obligatorios: **apellido, nombre, género, fecha de nacimiento, teléfono, dirección, Sede, estado civil, profesión, tiempo congregándose** (hoy solo existe la Sede La Plata, pero el campo ya queda preparado para más sedes a futuro). El formulario se divide en pasos cortos con indicador de progreso (D94).
 5. El sistema calcula la edad a partir de la fecha de nacimiento. Es **mayor de 18** → se crea la cuenta con `estado = activa` y rol "Miembro registrado".
 6. La persona llega a una pantalla de bienvenida/perfil. Accede al contenido público + su propio perfil.
@@ -174,7 +174,7 @@
 
 1. El Admin o Discipulador contacta al tutor (fuera de la app, ej. WhatsApp o en persona) y obtiene su autorización, junto con el **email que el menor va a usar para loguearse** (el mismo que usará en el SSO), nombre y teléfono del tutor.
 2. En el back office, el Admin o Discipulador completa/crea el perfil de la Persona menor con: datos personales, `tutor_nombre`, `tutor_telefono`, y **cambia el estado a `activa`** (si venía de `pendiente_tutor`) o lo crea directamente en `activa` (si es alta desde cero).
-3. La próxima vez que el menor inicia sesión vía SSO usando el email ya cargado, el sistema **reconoce el email contra un registro existente en estado `activa`** y lo deja ingresar directamente — sin volver a pasar por la validación de edad del Flujo 2 (esa validación ya la hizo una persona humana, con la autorización del tutor). Solo se vincula si el proveedor confirma que el email está verificado.
+3. La próxima vez que el menor inicia sesión vía SSO o con código por email (D141) usando el email ya cargado, el sistema **reconoce el email contra un registro existente en estado `activa`** y lo deja ingresar directamente — sin volver a pasar por la validación de edad del Flujo 2 (esa validación ya la hizo una persona humana, con la autorización del tutor). Solo se vincula si el proveedor confirma que el email está verificado (el código por email ya lo verifica).
 4. A partir de ahí, el menor tiene acceso igual que cualquier Miembro registrado, y el Admin/Discipulador le asigna los roles que correspondan (ej. Vida Nueva) de la misma forma que a un adulto.
 
 ---
@@ -240,7 +240,7 @@ Detalle técnico del envío en `16-sistemas-transversales.md` (D96, D100).
 **Actor:** Persona.
 
 1. La Persona accede a "Mi perfil" y puede editar sus propios datos de contacto (teléfono, dirección) y otros campos no críticos (estado civil, profesión), y su preferencia de tema (Claro / Oscuro / Sistema, D95). La foto de perfil no es editable en el MVP (D87).
-2. Campos que **no puede editar libremente** ella misma: `fecha_nacimiento` (afecta validaciones ya realizadas, como la de mayoría de edad) y `email` (es la identidad de login vía SSO). Cambios a estos dos campos requieren contactar al Admin.
+2. Campos que **no puede editar libremente** ella misma: `fecha_nacimiento` (afecta validaciones ya realizadas, como la de mayoría de edad) y `email` (es la identidad de login, vía SSO o código). Cambios a estos dos campos requieren contactar al Admin.
 3. La Persona también puede gestionar sus **Relaciones Familiares** (vincular a su cónyuge, hijos, etc., si ya están registrados en el sistema).
 
 ---
@@ -257,11 +257,11 @@ Detalle técnico del envío en `16-sistemas-transversales.md` (D96, D100).
 2. En el backoffice, crea la Persona con los mismos datos obligatorios del registro (Flujo 2). El **email es opcional**. Se crea con `estado = activa` y `origen_alta = admin`.
 3. Según el email cargado:
    - **Email de una cuenta Google o Facebook:** la Persona puede ingresar a la app vía SSO; el sistema reconoce el email contra el registro existente (mismo mecanismo que el Flujo 7, solo con email verificado por el proveedor). Recibe un email importante avisándole que su cuenta está lista, con instrucciones simples.
-   - **Otro email (sin cuenta Google/Facebook):** la Persona no puede ingresar a la app en el MVP (el ingreso con código por email queda para Fase 2), pero **sí recibe por email los avisos importantes** (D96).
+   - **Otro email (sin cuenta Google/Facebook):** la Persona ingresa sola con un **código por email** (D141, spec 007): escribe su email, recibe un código de 6 dígitos y entra a su Persona, sin pasar por el registro. También recibe por email los avisos importantes (D96).
    - **Sin email:** la Persona queda registrada **sin acceso a la app** y sin avisos automáticos; el Admin/Discipulador le comunica las novedades por WhatsApp o en persona, como hoy.
 4. El Admin (o el Discipulador, en lo que le corresponde) puede **actuar en nombre de la Persona**: crear su Solicitud de Discipulado, de Bautismo o de inscripción a Vida de Servicio, inscribirla a Eventos y registrar Pagos. Cada acción queda registrada como hecha por el Admin/Discipulador.
 5. Su avance (Encuentros, Asistencia, Inscripciones, Completitudes) se registra igual que el de cualquier otra Persona, y cuenta para prerrequisitos y métricas.
-6. Si más adelante la Persona obtiene una cuenta de Google/Facebook, el Admin actualiza el email y la Persona puede empezar a ingresar a la app sin perder su historial.
+6. Si más adelante la Persona tiene un email (de cualquier proveedor), el Admin lo carga y la Persona puede empezar a ingresar a la app con código por email, o con Google si es una cuenta de Google, sin perder su historial (D141).
 
 ---
 *Sesión de origen: Sesión 4 (cerrada), ampliada fuera de sesión con Notificaciones push, cancelación/lista de espera, edición de perfil, datos estructurados de registro (D90), login fail-closed (D88), alta de adultos por el Admin y canal de email (ver `08-roadmap-producto.md` y `05-decisiones.md`).*

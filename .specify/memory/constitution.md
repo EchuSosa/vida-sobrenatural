@@ -1,5 +1,24 @@
 <!--
 Sync Impact Report
+- Version change: 1.2.0 → 1.3.0 (MINOR, per ADR D141 in docs/05-decisiones.md)
+- Rationale for bump: Principio V expands the ways a person can access the system (SSO or a
+  one-time code sent by email) without making anything existing incompatible. The core of the
+  principle — the system never manages its own passwords — is unchanged, so this is a material
+  expansion (MINOR), not a redefinition (MAJOR).
+- Why D141 exists: Echu moved "Ingreso con código por email" from Fase 2 to the MVP
+  (specs/007-ingreso-codigo-email). Principio V said access was "vía SSO" only, including the
+  later access of Personas added by an Admin (D97); spec 007 could not pass the Constitution
+  Check without this amendment.
+- Modified principles:
+  - V. Seguridad: access via SSO or email one-time code; the code counts as verified email; new
+    bullet on how codes are stored and limited; D97 bullet updated.
+  - I–IV, VI–XI: unchanged.
+- Added sections: none. Removed sections: none.
+- Deferred items / TODOs: none.
+- Templates requiring follow-up: none — plan-template.md resolves the Constitution Check against
+  this file at plan time; spec-template.md and tasks-template.md have no principle-specific text.
+
+Previous Sync Impact Report (1.1.0 → 1.2.0), kept verbatim per D114's own request:
 - Version change: 1.1.0 → 1.2.0 (MINOR, per ADR D114 in docs/05-decisiones.md)
 - Rationale for bump: one new principle added (XI), Restricciones Técnicas expanded, Governance
   expanded with a concrete "definición de terminado" — no existing principle was redefined or
@@ -79,8 +98,9 @@ tiene spec, no debería tener implementación.
 
 ### V. Seguridad
 
-El registro de usuarios es vía SSO (Google/Facebook, mediante NextAuth.js); el sistema no
-gestiona contraseñas propias. El acceso a contenido por curso se habilita manualmente (por un
+El registro y el acceso de usuarios son vía SSO (Google/Facebook, mediante NextAuth.js) o con un
+código de un solo uso enviado al email de la persona (D141); el sistema no gestiona contraseñas
+propias. El acceso a contenido por curso se habilita manualmente (por un
 Admin o Discipulador), nunca automáticamente solo por rol.
 
 Además:
@@ -91,14 +111,18 @@ Además:
 - El login es **fail-closed**: si no se puede verificar la Persona contra la API (caída,
   timeout, error), el login se bloquea por completo en vez de dejar pasar sin rol (D88).
 - Una cuenta SSO solo se vincula a una Persona existente si el proveedor confirma que el email
-  está verificado.
+  está verificado. Escribir correctamente un código recibido por email cuenta como email
+  verificado.
+- Los códigos de ingreso por email se guardan solo como huella (nunca en claro, nunca en logs),
+  vencen, sirven una sola vez, y tienen límite de intentos por código y de envíos por email y
+  por origen (D141, `specs/007-ingreso-codigo-email/`).
 - Los archivos privados (comprobantes de pago, contenido de curso) nunca se sirven desde
   carpetas públicas: se exponen vía un endpoint de la API que valida permisos en cada request.
 - Ninguna notificación push ni asunto de email incluye datos sensibles (ver
   `docs/16-sistemas-transversales.md`).
 - El alta de Personas adultas por un Admin/Discipulador desde el backoffice (D97) es la **única
   excepción** al registro vía SSO; incluso en ese caso, el sistema nunca gestiona contraseñas
-  propias — el acceso posterior, si existe, sigue siendo vía SSO.
+  propias — el acceso posterior, si existe, es vía SSO o con código por email (D141).
 
 **Rationale**: Reduce la superficie de riesgo de manejar credenciales propias y mantiene control
 humano sobre quién accede a qué contenido, en línea con las decisiones ya registradas en
@@ -241,4 +265,4 @@ Toda spec, plan de implementación o PR debe poder verificarse contra los once p
 anteriores antes de mergear. Cuando un principio y una spec entren en conflicto, gana la
 Constitución hasta que se apruebe una ADR que la enmiende.
 
-**Version**: 1.2.0 | **Ratified**: 2026-09-15 | **Last Amended**: 2026-09-20
+**Version**: 1.3.0 | **Ratified**: 2026-09-15 | **Last Amended**: 2026-09-30
