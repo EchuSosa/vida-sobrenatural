@@ -243,7 +243,7 @@ Lo que bloqueaba o era un bug en la revisión manual del 2026-09-29. H-R3, H-R4 
 - [x] T066 **H-R6** Sacar `discipulador` de `pendientes_tutor.ver` y `.gestionar` (D139), con tests de API y e2e.
 - [x] T067 **H-R7/H-R8** Rechazar franjas repetidas, superpuestas o de menos de `MINUTOS_MINIMOS_EN_COMUN` (API y editor), con error por campo.
 - [x] T067a Checklist de pantalla de T067 en Mi disponibilidad, Mi camino y "pedir en nombre de", con el checklist de `docs/15-guia-ux-ui.md` (acción principal, orden de botones, cuatro estados, H-57, feedback, qué pasa después, tono, celular/teclado/lector, contraste en los dos temas).
-- [ ] T068 **H-R1** Con sesión sin Persona `activa`, la app privada de `apps/web` redirige a `/registro`; FR nueva y e2e.
+- [x] T068 **H-R1** Con sesión sin Persona `activa`, la app privada de `apps/web` redirige a `/registro`; FR nueva y e2e.
 - [ ] T069 **H-R2** Menú público con sesión sin registro: "Completar registro" en lugar de "Ingresar".
 - [ ] T069a Checklist de pantalla de T068/T069 (layout privado y menú público), con el checklist de `docs/15-guia-ux-ui.md` (acción principal, orden de botones, cuatro estados, H-57, feedback, qué pasa después, tono, celular/teclado/lector, contraste en los dos temas).
 - [ ] T070 **H-R12** Editar un período de no disponibilidad (FR-040 y contrato actualizados).

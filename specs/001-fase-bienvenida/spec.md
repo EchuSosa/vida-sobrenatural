@@ -189,6 +189,7 @@ Una Persona con sesión iniciada quiere poder corregir o actualizar sus propios 
 - **FR-027** *(actualización 2026-09-20, revisión manual H-30, D90)*: El campo `contactoTelefono` de una Sede DEBE usar el mismo input estructurado de código de país + número que ya usa el registro de Personas, en vez de texto libre.
 - **FR-028** *(nueva, actualización 2026-09-20 — Flujo 11, `docs/07-flujos-casos-de-uso.md`)*: El sistema DEBE permitir que una Persona con sesión iniciada edite sus propios `telefono`, `direccion`, `estadoCivil` y `profesion` (con `profesionDetalle` cuando corresponda) desde su Perfil, usando los mismos controles y opciones predefinidas que el formulario de registro (incluido el input estructurado de teléfono, D90).
 - **FR-029** *(nueva, actualización 2026-09-20 — Flujo 11)*: El sistema NO DEBE permitir que una Persona edite su propia `fechaNacimiento` ni su `email` desde Perfil; esos cambios requieren contactar a un Admin.
+- **FR-030** *(nueva, 2026-09-29, revisión manual de la 004, H-R1)*: La app privada (`apps/web`: Inicio, Mi camino, Eventos, Avisos, Perfil) DEBE exigir una sesión con Persona en estado `activa`. Sin sesión, o con sesión sin Persona (registro sin completar), DEBE llevar a `/registro`; con una Persona `pendiente_tutor`, a `/pendiente-tutor` (la pantalla de espera de FR-008). Ninguna pantalla privada se muestra, ni vacía, a quien no terminó el registro.
 
 ### Key Entities *(include if feature involves data)*
 
