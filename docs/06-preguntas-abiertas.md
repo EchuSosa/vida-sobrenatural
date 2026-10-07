@@ -2,10 +2,6 @@
 
 Temas identificados pero no resueltos todavía — a definir en próximas sesiones o a validar con la iglesia (recordar: la decisión tomada es validar recién cuando haya un prototipo mostrable, no antes).
 
-- ¿La verificación del Pago de un Evento **bloquea** la confirmación de la Inscripción (no se confirma hasta que el Admin verifique el comprobante), o son dos pasos **independientes** (la Inscripción puede estar confirmada mientras el pago sigue pendiente de verificación)? Ver Flujo 8, paso 7.
-
-- **Parejas o matrimonios que quieren hacer Vida Nueva juntos** (spec 004, decisión de Echu 2026-09-27): el sistema los trata como dos Solicitudes sin trato especial; si coinciden en horario, pueden terminar en el mismo Grupo (FR-045). Pregunta para el Admin: ¿alcanza con eso, o hace falta que el Admin pueda marcar que van juntos para que el cruce los proponga al mismo Discipulador? Se decide con un caso real, no antes.
-
 ## Contenido y demo (antes de presentar)
 
 - Falta el **texto real de "En qué creemos"** (declaración de fe/valores) — no se encontró en el material investigado hasta ahora. Hay que pedirlo directamente (a un pastor, o revisar "Nosotros" → "Sistema de Trabajo" del sitio anterior con más detalle). No se inventa (D98). Ver `12-contenido-bienvenida.md`.
@@ -17,7 +13,7 @@ Temas identificados pero no resueltos todavía — a definir en próximas sesion
 
 - **Proveedor de email transaccional** (D96). La captura en local ya está decidida (Mailpit en Docker Compose, D105): falta el proveedor real para producción.
 - **Dominio** (D85): candidato `vidasobrenatural.org.ar`. Al definirlo: verificar requisitos de NIC Argentina para `.org.ar`, averiguar quién administra `vidasobrenatural.com`, planificar redirecciones y configurar SPF/DKIM para el email.
-- **Convenciones del repositorio — lo que queda**: estrategia de ramas, formato de mensajes de commit y entornos (local / staging / producción). Ya resueltos: linting (ESLint con reglas propias en `eslint-rules/`, oxlint en `apps/api`), migraciones de Prisma, y `CLAUDE.md`, que apunta a esta documentación y a la regla de revisar la última numeración antes de agregar decisiones (D103). **Las dos primeras dejaron de ser teóricas**: el repo ya tiene remoto en GitHub y una workflow de CI que corre en `push` a `main` y en cada pull request, así que "estrategia de ramas" ahora decide si CI corre sobre trabajo terminado o a medio hacer.
+- **Convenciones del repositorio — lo que queda**: formato de mensajes de commit y entornos (local / staging / producción). Ya resueltos: estrategia de ramas (rama por spec, PR a `main` con CI en verde, D152), linting (ESLint con reglas propias en `eslint-rules/`, oxlint en `apps/api`), migraciones de Prisma, y `CLAUDE.md`, que apunta a esta documentación y a la regla de revisar la última numeración antes de agregar decisiones (D103).
 
 ## Antes de producción — Operación
 

@@ -36,8 +36,10 @@ Discipulador después de cargar su agenda), borrar períodos, máximo por Grupo.
 - **Cuerpo:** `{ diaSemana, inicio, fin }` (minutos; la pantalla convierte desde/hacia `HH:mm`
   en 24 h).
 - **Validación por campo:** `diaSemana` 0..6 (`DIA_SEMANA_INVALIDO`); `inicio` 0..1439 y `fin`
-  1..1440; `fin > inicio` (`FRANJA_FIN_ANTERIOR_AL_INICIO`, en el campo `fin`, FR-017).
-- **201:** `MiDisponibilidad`. Superposiciones permitidas.
+  1..1440; `fin > inicio` (`FRANJA_FIN_ANTERIOR_AL_INICIO`, en el campo `fin`, FR-017); al menos
+  60 minutos (`FRANJA_MUY_CORTA`, en `fin`); ni igual ni superpuesta a otra franja del mismo día de
+  su agenda (`FRANJA_REPETIDA`, `FRANJA_SUPERPUESTA`, en `inicio`) — FR-017a.
+- **201:** `MiDisponibilidad`.
 
 ### `DELETE /disponibilidad/me/franjas/:id`
 
@@ -68,6 +70,15 @@ Discipulador después de cargar su agenda), borrar períodos, máximo por Grupo.
   `hasta`); `hasta >= hoy` (`BLOQUEO_YA_VENCIDO`: un período que ya terminó no tiene efecto y
   aceptarlo confunde). El CHECK de la base es la red de seguridad, no el mensaje.
 - **201:** `MiDisponibilidad`. Superposiciones permitidas.
+
+### `PUT /disponibilidad/me/bloqueos/:id` (H-R12)
+
+- **Permiso:** `mi_disponibilidad.gestionar` + bloqueo propio.
+- **Cuerpo:** `{ desde, hasta }` (fechas civiles `YYYY-MM-DD`), las mismas validaciones por campo
+  que `POST /disponibilidad/me/bloqueos`.
+- **Efecto:** cambia las dos fechas. Si queda vigente, deja de aparecer en el cruce en el acto; si
+  deja de serlo, vuelve.
+- **200:** `MiDisponibilidad` · **400 `VALIDACION`** · **404 `NO_ENCONTRADO`** (ajeno o borrado).
 
 ### `DELETE /disponibilidad/me/bloqueos/:id`
 

@@ -1,5 +1,6 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E, loguearseComoPastorE2E } from './helpers';
 import { crearEncuentro, crearGrupo, crearPersona, sinScrollHorizontal, sinSesion } from './helpers';
+import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * specs/004, T048 (FR-009, FR-011, FR-013a, FR-029, FR-041, D134): el
@@ -11,7 +12,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`Encuentros — modo ${colorScheme}`, () => {
     test.use({ colorScheme });
 
-    test('@celular el Discipulador registra un Encuentro con nota y lo edita', async ({ page }) => {
+    test('@celular @webkit el Discipulador registra un Encuentro con nota y lo edita', async ({ page }) => {
       const sufijo = `${colorScheme}-${Date.now()}`;
       const persona = await crearPersona(`e2e-b-enc-${sufijo}@example.com`, { nombre: 'Lucía', apellido: `Encuentro ${sufijo}` });
       const { grupoId } = await crearGrupo([persona]);
@@ -21,7 +22,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto(`/mis-discipulados/${grupoId}`);
       await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Lucía Encuentro ${sufijo}`) })).toBeVisible();
-      await expect(page.getByText('Todavía no registraste ningún encuentro.', { exact: false })).toBeVisible();
+      // #contenido: mientras la página llega por streaming, React deja una copia oculta fuera (2cc64e9).
+      await expect(page.locator('#contenido').getByText('Todavía no registraste ningún encuentro.', { exact: false })).toBeVisible();
       expect(await sinScrollHorizontal(page)).toBe(true);
       expect((await auditar(page)).violations).toEqual([]);
 
@@ -35,7 +37,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(panel.locator('#campo-capitulos-error')).toContainText('Escribí qué capítulos vieron');
       expect((await auditar(page)).violations).toEqual([]);
 
-      await panel.getByLabel('Fecha').fill('2026-09-01');
+      await completarFecha(campo(panel, 'Fecha'), '2026-09-01');
       await panel.getByLabel('Capítulos').fill('1 y 2');
       await panel.getByLabel('Notas (opcional)').fill(`Nota privada ${sufijo}`);
       await panel.getByRole('checkbox', { name: 'Faltó Lucía' }).check();
@@ -55,6 +57,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Cambios guardados.')).toBeVisible();
       const editado = page.getByRole('listitem').filter({ hasText: 'Capítulos: 1 a 3' });
       await expect(editado).toContainText('Vinieron todos');
+      // El toast anterior queda apilado detrás del nuevo mientras se desvanece; en WebKit axe lo
+      // medía a mitad de camino (3.7:1). Se audita cuando ya se fue.
+      // Con el puntero encima (quedó donde estaba "Guardar cambios"), sonner pausa el tiempo del toast.
+      await page.mouse.move(0, 0);
+      await expect(page.getByText('Encuentro registrado.')).toHaveCount(0, { timeout: 10_000 });
       expect((await auditar(page)).violations).toEqual([]);
     });
 

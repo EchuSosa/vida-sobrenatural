@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { hoyEnArgentina, type MiDisponibilidad } from '@vida-sobrenatural/shared-types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException, type AppExceptionErrorField } from '../common/errors/app-exception.js';
-import { aparicionEnElCruce, bloqueosVisibles, validarBloqueo, validarFranja, validarMaximoPorGrupo } from './disponibilidad-puro.js';
+import { aparicionEnElCruce, bloqueosVisibles, validarBloqueo, validarFranja, validarFranjaContraAgenda, validarMaximoPorGrupo } from './disponibilidad-puro.js';
 import type { CrearFranjaDto } from './dto/crear-franja.dto.js';
 import type { CrearBloqueoDto } from './dto/crear-bloqueo.dto.js';
 import type { ActualizarDisponibilidadDto } from './dto/actualizar-disponibilidad.dto.js';
@@ -63,9 +63,14 @@ export class DisponibilidadService {
     };
   }
 
-  /** FR-031. Superposiciones permitidas. No prende el toggle (FR-015). */
+  /** FR-031. Sin franjas cortas, repetidas ni superpuestas (FR-017a). No prende el toggle (FR-015). */
   async agregarFranja(personaId: string, dto: CrearFranjaDto): Promise<MiDisponibilidad> {
     rechazarSiHayErrores(validarFranja(dto));
+    const cargadas = await this.prisma.franjaAgenda.findMany({
+      where: { personaId, eliminadaEn: null },
+      select: { diaSemana: true, inicio: true, fin: true },
+    });
+    rechazarSiHayErrores(validarFranjaContraAgenda(dto, cargadas));
     await this.prisma.franjaAgenda.create({
       data: { personaId, diaSemana: dto.diaSemana, inicio: dto.inicio, fin: dto.fin },
       select: { id: true },
@@ -104,6 +109,21 @@ export class DisponibilidadService {
       data: { personaId, desde: desdeFechaCivil(dto.desde), hasta: desdeFechaCivil(dto.hasta) },
       select: { id: true },
     });
+    return this.obtener(personaId);
+  }
+
+  /**
+   * FR-040 (H-R12): cambiar las fechas de un período propio, con las mismas
+   * reglas que al crearlo (un período que ya terminó no se guarda). Si queda
+   * vigente, deja de aparecer en el cruce en el acto; si deja de serlo, vuelve.
+   */
+  async editarBloqueo(personaId: string, bloqueoId: string, dto: CrearBloqueoDto): Promise<MiDisponibilidad> {
+    rechazarSiHayErrores(validarBloqueo(dto, hoyEnArgentina()));
+    const { count } = await this.prisma.bloqueoDisponibilidad.updateMany({
+      where: { id: bloqueoId, personaId, eliminadoEn: null },
+      data: { desde: desdeFechaCivil(dto.desde), hasta: desdeFechaCivil(dto.hasta) },
+    });
+    if (count === 0) throw new AppException('NO_ENCONTRADO', 404, 'Ese período no existe o ya estaba borrado.');
     return this.obtener(personaId);
   }
 

@@ -22,6 +22,13 @@ describe('SolicitudDiscipuladoService — pedir Vida Nueva (T015)', () => {
       expect(erroresDeFranjas([MARTES_19_A_21, { diaSemana: 6, inicio: 0, fin: 1440 }])).toEqual([]);
     });
 
+    it('ninguna de menos de 60 minutos, repetida o superpuesta con otra de la lista (FR-017a)', () => {
+      expect(erroresDeFranjas([{ diaSemana: 2, inicio: 1350, fin: 1351 }])).toEqual([{ campo: 'franjas', code: 'FRANJA_MUY_CORTA' }]);
+      expect(erroresDeFranjas([MARTES_19_A_21, { ...MARTES_19_A_21 }])).toEqual([{ campo: 'franjas', code: 'FRANJA_REPETIDA' }]);
+      expect(erroresDeFranjas([MARTES_19_A_21, { diaSemana: 2, inicio: 1200, fin: 1320 }])).toEqual([{ campo: 'franjas', code: 'FRANJA_SUPERPUESTA' }]);
+      expect(erroresDeFranjas([MARTES_19_A_21, { diaSemana: 2, inicio: 1260, fin: 1320 }])).toEqual([]);
+    });
+
     it('con una franja crea la Solicitud pendiente con esa franja', async () => {
       const { service, base } = await crearServicio({ personas: [{ id: 'ana' }] });
 

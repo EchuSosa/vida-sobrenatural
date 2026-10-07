@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { hoyEnArgentina, type MiDisponibilidad } from '@vida-sobrenatural/shared-types';
 import { test, expect, auditar, crearPersona, idDePersona, idsEnElCruce, loguearseComoDiscipuladorE2E, pedirVidaNuevaComo } from './helpers';
+import { campo, completarFecha, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
@@ -31,9 +32,9 @@ async function sinViolaciones(page: Page) {
 }
 
 async function agregarFranja(page: Page, dia: string, desde: string, hasta: string) {
-  await page.getByLabel('Día', { exact: true }).selectOption({ label: dia });
-  await page.getByLabel('Desde', { exact: true }).first().fill(desde);
-  await page.getByLabel('Hasta', { exact: true }).first().fill(hasta);
+  await page.getByLabel('Día', { exact: true }).first().selectOption({ label: dia });
+  await elegirHora(campo(page, 'Desde').first(), desde);
+  await elegirHora(campo(page, 'Hasta').first(), hasta);
   await page.getByRole('button', { name: 'Agregar franja' }).click();
 }
 
@@ -70,7 +71,7 @@ test.describe('a 320 px, con datos cargados', () => {
 
   test('sin scroll horizontal y con objetivos táctiles de 44 px @celular', async ({ page }) => {
     await page.goto('/mi-disponibilidad');
-    await expect(page.getByText('Vigente hoy')).toBeVisible();
+    await expect(page.getByText(/^Vigente: hasta el .* no aparecés para nuevos discipulados\.$/)).toBeVisible();
     const sinDesborde = await page.evaluate(() => document.scrollingElement!.scrollWidth <= window.innerWidth);
     expect(sinDesborde, 'hay scroll horizontal a 320 px').toBe(true);
 
@@ -97,7 +98,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await reiniciarDisponibilidad(page);
     });
 
-    test('agenda, toggle, períodos y máximo, con la frase de arriba siempre al día @celular', async ({ page }) => {
+    test('agenda, toggle, períodos y máximo, con la frase de arriba siempre al día @celular @webkit', async ({ page }) => {
       const estado = page.getByTestId('estado-disponibilidad');
       await page.goto('/mi-disponibilidad');
 
@@ -143,9 +144,23 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page);
 
       // Corregido, se agrega y el resumen se va.
-      await page.getByLabel('Hasta', { exact: true }).first().fill('22:00');
+      await elegirHora(campo(page, 'Hasta').first(), '22:00');
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await expect(page.getByText('Jueves 21:00 a 22:00')).toBeVisible();
+      await expect(resumen).toHaveCount(0);
+
+      // FR-017a (H-R7/H-R8): ni repetida, ni superpuesta, ni de menos de una hora.
+      await agregarFranja(page, 'Jueves', '21:00', '22:00');
+      await expect(page.locator('#campo-franja-error')).toContainText('Ese horario ya está en la lista');
+      await expect(page.locator('#campo-franja-desde')).toHaveAttribute('aria-invalid', 'true');
+      await agregarFranja(page, 'Jueves', '21:30', '22:30');
+      await expect(page.locator('#campo-franja-error')).toContainText('se pisa con otro del mismo día');
+      await agregarFranja(page, 'Viernes', '22:30', '22:45');
+      await expect(page.locator('#campo-franja-error')).toContainText('tiene que durar al menos 1 hora');
+      await expect(page.locator('#campo-franja-hasta')).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.getByRole('listitem').filter({ hasText: 'Jueves 21:00 a 22:00' })).toHaveCount(1);
+      await agregarFranja(page, 'Viernes', '22:00', '23:00');
+      await expect(page.getByText('Viernes 22:00 a 23:00')).toBeVisible();
       await expect(resumen).toHaveCount(0);
       await expect(estado).toContainText('Hoy el Admin te ve como disponible');
 
@@ -157,24 +172,40 @@ for (const tema of ['claro', 'oscuro'] as const) {
 
       // Un período que cubre hoy: no aparece; borrarlo lo devuelve.
       const hoy = hoyEnArgentina();
-      await page.getByLabel('Desde', { exact: true }).last().fill(hoy);
-      await page.getByLabel('Hasta', { exact: true }).last().fill(sumarDias(hoy, 3));
+      await completarFecha(campo(page, 'Desde').last(), hoy);
+      await completarFecha(campo(page, 'Hasta').last(), sumarDias(hoy, 3));
       await page.getByRole('button', { name: 'Agregar período' }).click();
       await expect(estado).toContainText('Hoy no aparecés, por tu período del');
-      await expect(page.getByText('Vigente hoy')).toBeVisible();
+      await expect(page.getByText(/^Vigente: hasta el .* no aparecés para nuevos discipulados\.$/)).toBeVisible();
       await sinViolaciones(page);
+
+      // FR-040 (H-R12): editar el período. Con el fin antes del inicio, error por campo en el panel;
+      // corrido a la semana que viene, deja de estar vigente y vuelve a aparecer.
+      await page.getByRole('button', { name: /^Editar: Del / }).click();
+      const panelEditar = page.getByRole('dialog', { name: 'Editar el período' });
+      await completarFecha(campo(panelEditar, 'Desde'), sumarDias(hoy, 7));
+      await completarFecha(campo(panelEditar, 'Hasta'), sumarDias(hoy, 6));
+      await panelEditar.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(panelEditar.locator('#campo-editar-hasta-error')).toBeVisible();
+      await sinViolaciones(page);
+      await completarFecha(campo(panelEditar, 'Hasta'), sumarDias(hoy, 9));
+      await panelEditar.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(panelEditar).toHaveCount(0);
+      await expect(page.getByText('Período actualizado.')).toBeVisible();
+      await expect(estado).toContainText('Hoy el Admin te ve como disponible');
+      // H-R11: la etiqueta dice qué pasa, no solo "Próximo".
+      await expect(page.getByText(/^Empieza el .*: hasta entonces seguís apareciendo para nuevos discipulados\.$/)).toBeVisible();
       await page.getByRole('button', { name: /^Borrar: Del / }).click();
       await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, borrar el período' }).click();
       await expect(estado).toContainText('Hoy el Admin te ve como disponible');
       await expect(page.getByText('No tenés períodos cargados.')).toBeVisible();
 
       // Un período que ya terminó: error por campo, sin llegar a guardarse.
-      await page.getByLabel('Desde', { exact: true }).last().fill(sumarDias(hoy, -5));
-      const hastaPeriodo = page.getByLabel('Hasta', { exact: true }).last();
-      await hastaPeriodo.fill(sumarDias(hoy, -1));
-      // Al salir del campo ya avisa debajo (validación al salir, H-72), sin resumen todavía. (Tab
-      // no sirve: en un campo de fecha recorre día, mes y año antes de salir.)
-      await hastaPeriodo.blur();
+      await completarFecha(campo(page, 'Desde').last(), sumarDias(hoy, -5));
+      const hastaPeriodo = campo(page, 'Hasta').last();
+      await completarFecha(hastaPeriodo, sumarDias(hoy, -1));
+      // Al salir del campo ya avisa debajo (validación al salir, H-72), sin resumen todavía.
+      await hastaPeriodo.getByLabel('Año', { exact: true }).blur();
       await expect(page.locator('#error-hasta')).toContainText('Ese período ya terminó');
       await expect(page.getByRole('alert').filter({ hasText: 'Revisá estos campos:' })).toHaveCount(0);
       await page.getByRole('button', { name: 'Agregar período' }).click();

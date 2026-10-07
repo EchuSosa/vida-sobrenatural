@@ -81,15 +81,21 @@ export function PedirEnNombreDe({ apiToken, persona: personaFija, onCreado }: Pe
 
 function useEtiquetasFranjas(): EtiquetasEditorFranjas {
   const t = useTranslations('franjas');
+  const te = useTranslations('errors');
   return {
     dias: t.raw('dias') as EtiquetasEditorFranjas['dias'],
     dia: t('dia'),
     desde: t('desde'),
     hasta: t('hasta'),
+    hora: t('hora'),
+    minutos: t('minutos'),
     agregar: t('agregar'),
     quitar: t('quitar'),
     sinFranjas: t('sinFranjas'),
     errorRango: t('errorRango'),
+    errorMuyCorta: te('campos.FRANJA_MUY_CORTA'),
+    errorRepetida: te('campos.FRANJA_REPETIDA'),
+    errorSuperpuesta: te('campos.FRANJA_SUPERPUESTA'),
     separador: t('separador'),
   };
 }

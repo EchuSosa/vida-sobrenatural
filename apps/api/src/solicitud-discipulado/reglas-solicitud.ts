@@ -1,5 +1,5 @@
 import type { EstadoMiDiscipulado, Franja } from '@vida-sobrenatural/shared-types';
-import { EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO } from '@vida-sobrenatural/shared-types';
+import { EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO, problemaDeFranjaNueva } from '@vida-sobrenatural/shared-types';
 import type { AppExceptionErrorField } from '../common/errors/app-exception.js';
 
 /**
@@ -10,14 +10,17 @@ import type { AppExceptionErrorField } from '../common/errors/app-exception.js';
 
 /**
  * FR-032: al menos una franja, y cada una con `diaSemana` 0..6, `inicio`/`fin`
- * en 0..1440 y `fin > inicio` (FR-017). Los códigos van bajo `VALIDACION`, en
- * el campo `franjas` (H-50): la pantalla los muestra debajo del editor.
+ * en 0..1440 y `fin > inicio` (FR-017); y ninguna de menos de 60 minutos,
+ * repetida o superpuesta con otra de la misma lista (FR-017a, H-R7/H-R8). Los
+ * códigos van bajo `VALIDACION`, en el campo `franjas` (H-50): la pantalla los
+ * muestra debajo del editor.
  */
 export function erroresDeFranjas(franjas: unknown): AppExceptionErrorField[] {
   if (!Array.isArray(franjas) || franjas.length === 0) {
     return [{ campo: 'franjas', code: 'FRANJAS_REQUERIDAS' }];
   }
   const codigos = new Set<string>();
+  const validas: Franja[] = [];
   for (const f of franjas as Partial<Franja>[]) {
     if (!esEntero(f?.diaSemana) || f.diaSemana < 0 || f.diaSemana > 6) {
       codigos.add('DIA_SEMANA_INVALIDO');
@@ -27,7 +30,14 @@ export function erroresDeFranjas(franjas: unknown): AppExceptionErrorField[] {
       codigos.add('FRANJAS_INVALIDO');
       continue;
     }
-    if (f.fin <= f.inicio) codigos.add('FRANJA_FIN_ANTERIOR_AL_INICIO');
+    if (f.fin <= f.inicio) {
+      codigos.add('FRANJA_FIN_ANTERIOR_AL_INICIO');
+      continue;
+    }
+    const franja = { diaSemana: f.diaSemana, inicio: f.inicio, fin: f.fin };
+    const problema = problemaDeFranjaNueva(franja, validas);
+    if (problema) codigos.add(problema);
+    validas.push(franja);
   }
   return [...codigos].map((code) => ({ campo: 'franjas', code }));
 }

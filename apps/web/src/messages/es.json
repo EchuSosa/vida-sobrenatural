@@ -30,6 +30,9 @@
       "FRANJAS_REQUERIDAS": "Cargá al menos un horario.",
       "FRANJAS_INVALIDO": "Revisá los horarios: cada uno necesita un día, una hora de inicio y una de fin.",
       "FRANJA_FIN_ANTERIOR_AL_INICIO": "La hora de fin tiene que ser posterior a la de inicio, por ejemplo de 19:00 a 21:00.",
+      "FRANJA_MUY_CORTA": "Cada horario tiene que durar al menos 1 hora, así puede coincidir con el de otra persona. Por ejemplo, de 19:00 a 20:00.",
+      "FRANJA_REPETIDA": "Ese horario ya está en la lista. Elegí otro día u otras horas.",
+      "FRANJA_SUPERPUESTA": "Ese horario se pisa con otro del mismo día que ya está en la lista. Cambiá las horas, o quitá el otro y cargá uno solo que cubra los dos.",
       "DIA_SEMANA_INVALIDO": "Elegí un día de la semana de la lista."
     }
   },
@@ -41,6 +44,7 @@
     "dar": "Dar",
     "ingresar": "Ingresar",
     "irALaApp": "Ir a la app",
+    "completarRegistro": "Completar registro",
     "inicio": "Inicio",
     "miCamino": "Mi camino",
     "avisos": "Avisos",
@@ -246,6 +250,7 @@
       "editar": "Editar"
     },
     "errorCampo": "Revisá este dato.",
+    "errorFechaNacimiento": "Completá el día, el mes y el año en que naciste. El año va con 4 números, por ejemplo 1965.",
     "elegirOpcion": "Elegí una opción",
     "soloNumeros": "Solo números",
     "opciones": {
@@ -372,10 +377,39 @@
     "dia": "Día",
     "desde": "Desde",
     "hasta": "Hasta",
+    "hora": "Hora",
+    "minutos": "Minutos",
     "agregar": "Agregar franja",
     "quitar": "Quitar",
     "sinFranjas": "Todavía no cargaste horarios.",
     "errorRango": "La hora de fin tiene que ser posterior a la de inicio.",
     "separador": " a "
+  },
+  "campoFecha": {
+    "dia": "Día",
+    "mes": "Mes",
+    "anio": "Año",
+    "meses": [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre"
+    ]
+  },
+  "devEntrar": {
+    "titulo": "Entrar para probar",
+    "descripcion": "Solo en desarrollo: entrás como la persona de ese email, sin pasar por Google. Si esa persona no está registrada, empezás su registro.",
+    "email": "Email",
+    "entrar": "Entrar",
+    "entrando": "Entrando…",
+    "rapidos": "Cuentas de la revisión manual"
   }
 }

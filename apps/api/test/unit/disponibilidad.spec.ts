@@ -5,6 +5,7 @@ import {
   bloqueosVisibles,
   validarBloqueo,
   validarFranja,
+  validarFranjaContraAgenda,
   validarMaximoPorGrupo,
 } from '../../src/disponibilidad/disponibilidad-puro.js';
 import { DisponibilidadService } from '../../src/disponibilidad/disponibilidad.service.js';
@@ -53,6 +54,30 @@ describe('validarFranja', () => {
       { campo: 'diaSemana', code: 'DIA_SEMANA_INVALIDO' },
       { campo: 'fin', code: 'FRANJA_FIN_ANTERIOR_AL_INICIO' },
     ]);
+  });
+});
+
+describe('validarFranjaContraAgenda (FR-017a, H-R7/H-R8)', () => {
+  const martes19a21 = { diaSemana: 2, inicio: 1140, fin: 1260 };
+
+  it('de menos de 60 minutos → FRANJA_MUY_CORTA en fin; 60 exactos se aceptan', () => {
+    expect(validarFranjaContraAgenda({ diaSemana: 2, inicio: 1350, fin: 1351 }, [])).toEqual([{ campo: 'fin', code: 'FRANJA_MUY_CORTA' }]);
+    expect(validarFranjaContraAgenda({ diaSemana: 2, inicio: 1350, fin: 1409 }, [])).toEqual([{ campo: 'fin', code: 'FRANJA_MUY_CORTA' }]);
+    expect(validarFranjaContraAgenda({ diaSemana: 2, inicio: 1350, fin: 1410 }, [])).toEqual([]);
+  });
+
+  it('igual a una ya cargada → FRANJA_REPETIDA en inicio', () => {
+    expect(validarFranjaContraAgenda({ ...martes19a21 }, [martes19a21])).toEqual([{ campo: 'inicio', code: 'FRANJA_REPETIDA' }]);
+  });
+
+  it('que pisa a otra del mismo día → FRANJA_SUPERPUESTA en inicio', () => {
+    expect(validarFranjaContraAgenda({ diaSemana: 2, inicio: 1200, fin: 1320 }, [martes19a21])).toEqual([{ campo: 'inicio', code: 'FRANJA_SUPERPUESTA' }]);
+    expect(validarFranjaContraAgenda({ diaSemana: 2, inicio: 1080, fin: 1320 }, [martes19a21])).toEqual([{ campo: 'inicio', code: 'FRANJA_SUPERPUESTA' }]);
+  });
+
+  it('pegada a otra (termina cuando la otra empieza) u otro día → se acepta', () => {
+    expect(validarFranjaContraAgenda({ diaSemana: 2, inicio: 1260, fin: 1320 }, [martes19a21])).toEqual([]);
+    expect(validarFranjaContraAgenda({ diaSemana: 3, inicio: 1140, fin: 1260 }, [martes19a21])).toEqual([]);
   });
 });
 
@@ -192,11 +217,13 @@ describe('DisponibilidadService', () => {
     expect(resultado).toMatchObject({ apareceEnElCruce: false, porQueNo: 'sin_agenda' });
   });
 
-  it('una franja superpuesta con otra se acepta', async () => {
+  it('una franja superpuesta con otra se rechaza y no se guarda (FR-017a)', async () => {
     const mock = prismaMock({ disponible: true, franjas: [{ id: 'f1', diaSemana: 2, inicio: 1140, fin: 1260 }] });
     const service = await crear(mock);
-    const resultado = await service.agregarFranja('p1', { diaSemana: 2, inicio: 1200, fin: 1300 });
-    expect(resultado.franjas).toHaveLength(2);
+    const error = await service.agregarFranja('p1', { diaSemana: 2, inicio: 1200, fin: 1300 }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(AppException);
+    expect((error as AppException).errors).toEqual([{ campo: 'inicio', code: 'FRANJA_SUPERPUESTA' }]);
+    expect(mock.franjaAgenda.create).not.toHaveBeenCalled();
   });
 
   it('franja con fin <= inicio → VALIDACION con el campo fin, sin escribir', async () => {
@@ -246,5 +273,33 @@ describe('DisponibilidadService', () => {
     const hoy = hoyEnArgentina();
     await service.agregarBloqueo('p1', { desde: hoy, hasta: hoy });
     expect(mock.bloqueoDisponibilidad.create).toHaveBeenCalled();
+  });
+
+  it('editar un período propio cambia desde y hasta (FR-040, H-R12)', async () => {
+    const mock = prismaMock({ disponible: true, franjas: [] });
+    mock.bloqueoDisponibilidad.updateMany.mockResolvedValue({ count: 1 });
+    const service = await crear(mock);
+    const hoy = hoyEnArgentina();
+    await service.editarBloqueo('p1', 'b1', { desde: hoy, hasta: hoy });
+    expect(mock.bloqueoDisponibilidad.updateMany).toHaveBeenCalledWith({
+      where: { id: 'b1', personaId: 'p1', eliminadoEn: null },
+      data: { desde: expect.any(Date), hasta: expect.any(Date) },
+    });
+  });
+
+  it('editar con fechas que no sirven → el mismo error que al crear, sin escribir', async () => {
+    const mock = prismaMock({ disponible: true, franjas: [] });
+    const service = await crear(mock);
+    const error = await service.editarBloqueo('p1', 'b1', { desde: '2000-01-01', hasta: '2000-01-02' }).catch((e: unknown) => e);
+    expect((error as AppException).errors).toEqual([{ campo: 'hasta', code: 'BLOQUEO_YA_VENCIDO' }]);
+    expect(mock.bloqueoDisponibilidad.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('editar un período ajeno o borrado → NO_ENCONTRADO', async () => {
+    const mock = prismaMock({ disponible: true, franjas: [] });
+    const service = await crear(mock);
+    const hoy = hoyEnArgentina();
+    const error = await service.editarBloqueo('p1', 'ajeno', { desde: hoy, hasta: hoy }).catch((e: unknown) => e);
+    expect((error as AppException).code).toBe('NO_ENCONTRADO');
   });
 });

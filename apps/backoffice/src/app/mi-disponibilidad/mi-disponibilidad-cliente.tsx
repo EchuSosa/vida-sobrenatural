@@ -3,7 +3,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CalendarClock, CalendarDays, CircleCheck, Info, Trash2 } from 'lucide-react';
+import { CalendarClock, CalendarDays, CircleCheck, Info, Pencil, Trash2 } from 'lucide-react';
 import {
   apiFetch,
   ApiError,
@@ -28,14 +28,24 @@ import {
   AlertDialogTitle,
   Button,
   ConfirmDestructiveDialog,
+  CampoFecha,
   EditorDeFranjas,
   MensajeErrorCampo,
   ResumenErrores,
   minutosAHHMM,
   useEnvio,
   useValidacionCampos,
+  type EtiquetasCampoFecha,
   type EtiquetasEditorFranjas,
 } from '@vida-sobrenatural/ui';
+import { EditarPeriodo } from './editar-periodo';
+
+/** El día civil (`YYYY-MM-DD`) siguiente a otro. */
+function diaSiguiente(civil: string): string {
+  const d = new Date(`${civil}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
 
 /** Del `campo` que devuelve la API al id del control en pantalla (`campo-…`, lo que enlaza ResumenErrores). */
 const CAMPO_FRANJA_EN_PANTALLA: Record<string, string> = { diaSemana: 'franja-dia', inicio: 'franja-desde', fin: 'franja-hasta' };
@@ -69,12 +79,24 @@ export function MiDisponibilidadCliente({
     dia: tf('dia'),
     desde: tf('desde'),
     hasta: tf('hasta'),
+    hora: tf('hora'),
+    minutos: tf('minutos'),
     agregar: tf('agregar'),
     quitar: tf('quitar'),
     sinFranjas: t('agenda.vacio'),
     errorRango: te('campos.FRANJA_FIN_ANTERIOR_AL_INICIO'),
+    errorMuyCorta: te('campos.FRANJA_MUY_CORTA'),
+    errorRepetida: te('campos.FRANJA_REPETIDA'),
+    errorSuperpuesta: te('campos.FRANJA_SUPERPUESTA'),
     separador: tf('separador'),
   };
+
+  const tcf = useTranslations('campoFecha');
+  const etiquetasFecha: EtiquetasCampoFecha = { dia: tcf('dia'), mes: tcf('mes'), anio: tcf('anio'), meses: tcf.raw('meses') as EtiquetasCampoFecha['meses'] };
+
+  // H-R11: la etiqueta de cada período dice qué pasa ("Empieza mañana: hasta
+  // entonces seguís apareciendo…"), no solo "Próximo".
+  const maniana = diaSiguiente(hoyEnArgentina());
 
   const fecha = (civil: string) => formatearFechaLarga(civil, locale);
   const textoFranja = (f: Franja) => `${etiquetasFranjas.dias[f.diaSemana]} ${minutosAHHMM(f.inicio)}${etiquetasFranjas.separador}${minutosAHHMM(f.fin)}`;
@@ -212,6 +234,24 @@ export function MiDisponibilidadCliente({
     }
   });
 
+  // FR-040 (H-R12): editar un período ya cargado, en un panel aparte.
+  const [bloqueoAEditar, setBloqueoAEditar] = useState<BloqueoDisponibilidad | null>(null);
+
+  async function guardarBloqueoEditado(valores: { desde: string; hasta: string }): Promise<Record<string, string> | null> {
+    if (!bloqueoAEditar) return null;
+    try {
+      setDatos(await llamar(`/disponibilidad/me/bloqueos/${bloqueoAEditar.id}`, 'PUT', valores));
+      setBloqueoAEditar(null);
+      toast(t('bloqueos.editado'));
+      return null;
+    } catch (e) {
+      const campos = erroresPorCampo(e);
+      if (campos) return Object.fromEntries(campos.map(({ campo, code }) => [campo, mensajeDeCodigo(code)]));
+      avisarError(e);
+      return null;
+    }
+  }
+
   async function borrarBloqueo(bloqueo: BloqueoDisponibilidad) {
     if (borrandoBloqueoRef.current.has(bloqueo.id)) return;
     borrandoBloqueoRef.current.add(bloqueo.id);
@@ -269,7 +309,7 @@ export function MiDisponibilidadCliente({
           etiquetas={etiquetasFranjas}
           disabled={bloqueado || quitandoFranja}
           enviando={agregandoFranja}
-          onErrorChange={(error) => (error ? validacionFranja.reemplazar({ 'franja-hasta': error }) : validacionFranja.reset())}
+          onErrorChange={(error, campo) => (error ? validacionFranja.reemplazar({ [`franja-${campo}`]: error }) : validacionFranja.reset())}
         />
       </section>
 
@@ -355,9 +395,21 @@ export function MiDisponibilidadCliente({
                     <span>{t('bloqueos.rango', rango)}</span>
                     <span className="flex items-center gap-1.5 font-medium">
                       {b.vigente ? <CalendarClock className="size-4" aria-hidden="true" /> : <CalendarDays className="size-4" aria-hidden="true" />}
-                      {b.vigente ? t('bloqueos.vigente') : t('bloqueos.proximo')}
+                      {b.vigente ? t('bloqueos.vigente', rango) : b.desde === maniana ? t('bloqueos.empiezaManiana') : t('bloqueos.proximo', rango)}
                     </span>
                   </div>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 w-full sm:w-auto"
+                    disabled={bloqueado || borrandoBloqueoId === b.id}
+                    aria-label={`${t('bloqueos.editar')}: ${t('bloqueos.rango', rango)}`}
+                    onClick={() => setBloqueoAEditar(b)}
+                  >
+                    <Pencil aria-hidden="true" />
+                    {t('bloqueos.editar')}
+                  </Button>
                   <ConfirmDestructiveDialog
                     trigger={
                       <Button
@@ -378,6 +430,7 @@ export function MiDisponibilidadCliente({
                     textoCancelar={t('bloqueos.volver')}
                     onConfirmar={() => void borrarBloqueo(b)}
                   />
+                  </div>
                 </li>
               );
             })}
@@ -386,36 +439,37 @@ export function MiDisponibilidadCliente({
 
         <h3 className="text-lg font-medium">{t('bloqueos.nuevo')}</h3>
         {validacionBloqueo.foco > 0 && <ResumenErrores errores={validacionBloqueo.resumen} titulo={t('errores.resumen')} foco={validacionBloqueo.foco} />}
-        <form noValidate onSubmit={(e) => void agregarBloqueo(e)} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
+        <form noValidate onSubmit={(e) => void agregarBloqueo(e)} className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
           {(['desde', 'hasta'] as const).map((campo) => {
             const error = validacionBloqueo.mensajes[campo];
             const valor = campo === 'desde' ? desde : hasta;
             return (
-              <div key={campo} className="flex flex-col gap-1 text-sm font-medium">
-                <label htmlFor={`campo-${campo}`}>{t(`bloqueos.${campo}`)}</label>
-                <input
+              <div key={campo} className="flex flex-col gap-1">
+                <CampoFecha
                   id={`campo-${campo}`}
-                  type="date"
+                  etiqueta={t(`bloqueos.${campo}`)}
                   value={valor}
                   disabled={bloqueado}
-                  aria-invalid={error ? true : undefined}
-                  aria-describedby={error ? `error-${campo}` : undefined}
-                  onChange={(e) => {
-                    if (campo === 'desde') setDesde(e.target.value);
-                    else setHasta(e.target.value);
+                  error={Boolean(error)}
+                  idError={`error-${campo}`}
+                  etiquetas={etiquetasFecha}
+                  onChange={(v) => {
+                    if (campo === 'desde') setDesde(v);
+                    else setHasta(v);
                     validacionBloqueo.limpiar(campo);
                   }}
-                  onBlur={(e) => revalidarBloqueo(campo, { desde, hasta, [campo]: e.target.value })}
-                  className={CLASE_CAMPO}
+                  onBlur={() => revalidarBloqueo(campo, { desde, hasta })}
                 />
                 <MensajeErrorCampo id={`error-${campo}`} mensaje={error} />
               </div>
             );
           })}
+          </div>
           <Button
             type="submit"
             variant="outline"
-            className="h-11 w-full sm:mt-6 sm:w-auto"
+            className="h-11 w-full sm:w-auto sm:self-start"
             disabled={bloqueado}
             loading={agregandoBloqueo}
             loadingText={t('bloqueos.agregando')}
@@ -424,6 +478,17 @@ export function MiDisponibilidadCliente({
           </Button>
         </form>
       </section>
+
+      {bloqueoAEditar && (
+        <EditarPeriodo
+          key={bloqueoAEditar.id}
+          bloqueo={bloqueoAEditar}
+          onCerrar={() => setBloqueoAEditar(null)}
+          validar={erroresDeBloqueo}
+          guardar={guardarBloqueoEditado}
+          etiquetasFecha={etiquetasFecha}
+        />
+      )}
 
       <AlertDialog open={franjaABorrar !== null} onOpenChange={(abierto) => !abierto && setFranjaABorrar(null)}>
         <AlertDialogContent>

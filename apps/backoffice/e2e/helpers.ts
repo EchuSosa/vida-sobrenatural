@@ -104,7 +104,11 @@ export function crearAxeBuilder(page: Page, reglasDeshabilitadas: string[] = [])
   for (const regla of reglasDeshabilitadas) {
     rules[regla] = { enabled: false };
   }
-  return new AxeBuilder({ page }).options({ rules });
+  // H-R10: en WebKit, Base UI les pone `role="button"` a las guardas de foco
+  // invisibles de sus diálogos (utils/FocusGuard.js: así VoiceOver no se
+  // escapa del foco atrapado) y axe las marca como botón sin nombre. Son de la
+  // librería, invisibles y a propósito: se excluyen, el resto se audita igual.
+  return new AxeBuilder({ page }).options({ rules }).exclude('[data-base-ui-focus-guard]');
 }
 
 /**

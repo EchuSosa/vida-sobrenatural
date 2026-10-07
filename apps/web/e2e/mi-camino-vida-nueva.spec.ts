@@ -1,5 +1,6 @@
 import { request as playwrightRequest, type Page } from '@playwright/test';
 import { test, expect, auditar, loguearseComoTest, registrarPersonaDeTest, usarTemaOscuro, esperarTema } from './helpers';
+import { campo, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * specs/004, Historias 1 y 2 (T021, T035): Vida Nueva en Mi camino, de punta
@@ -106,7 +107,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page, tema);
     });
 
-    test('pedir Vida Nueva: sin franjas da el error por campo; con una, pasa a "buscando", se edita y se retira', async ({ page }) => {
+    test('pedir Vida Nueva: sin franjas da el error por campo; con una, pasa a "buscando", se edita y se retira @webkit', async ({ page }) => {
       const email = `e2e-mi-camino-${tema}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
       if (tema === 'oscuro') await usarTemaOscuro(page, email);
@@ -125,6 +126,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
       // Con una franja (martes 19 a 21, el default del editor): pasa a buscando sin recargar.
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await expect(resumen).toHaveCount(0);
+      // FR-017a (H-R7): la misma franja otra vez no se suma; el editor dice cómo seguir.
+      await page.getByRole('button', { name: 'Agregar franja' }).click();
+      await expect(page.getByText('Ese horario ya está en la lista. Elegí otro día u otras horas.')).toBeVisible();
       await pedir.click();
       await expect(tarjeta(page).getByText('Estamos buscando a tu Discipulador')).toBeVisible();
       await expect(tarjeta(page).getByText('Martes 19:00 a 21:00')).toBeVisible();
@@ -136,9 +140,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
       // Editar los horarios: cambia a sábado 10 a 13.
       await page.getByRole('button', { name: 'Editar horarios' }).click();
       await page.getByRole('button', { name: 'Quitar' }).click();
-      await page.getByLabel('Día').selectOption({ label: 'Sábado' });
-      await page.getByLabel('Desde').fill('10:00');
-      await page.getByLabel('Hasta').fill('13:00');
+      await page.getByLabel('Día', { exact: true }).selectOption({ label: 'Sábado' });
+      await elegirHora(campo(page, 'Desde'), '10:00');
+      await elegirHora(campo(page, 'Hasta'), '13:00');
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await sinViolaciones(page, tema);
       await page.getByRole('button', { name: 'Guardar horarios' }).click();

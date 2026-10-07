@@ -109,5 +109,13 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PUERTO_APP}`,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // H-R10 (revisión manual de la 004): en iPhone todos los navegadores son
+  // WebKit, y los campos de fecha y hora nativos no andaban en Safari sin que
+  // ningún e2e lo viera (corrían solo en Chromium). Los specs con `@webkit` en
+  // el título corren también en WebKit — los flujos de fechas, horas y
+  // franjas —, sin duplicar toda la suite (como `@celular`).
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'webkit', grep: /@webkit/, use: { ...devices['Desktop Safari'] } },
+  ],
 });

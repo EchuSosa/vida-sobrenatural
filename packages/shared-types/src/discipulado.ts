@@ -44,6 +44,25 @@ export function franjasCoinciden(a: Franja, b: Franja, minimo: number = MINUTOS_
   return enComun >= minimo;
 }
 
+/** Por qué no se puede sumar una franja a las ya cargadas (H-R7/H-R8). Son códigos de campo de `VALIDACION`. */
+export type ProblemaDeFranja = 'FRANJA_MUY_CORTA' | 'FRANJA_REPETIDA' | 'FRANJA_SUPERPUESTA';
+
+/**
+ * H-R7/H-R8 (revisión manual de la 004): una franja nueva tiene que durar al
+ * menos `MINUTOS_MINIMOS_EN_COMUN` — una más corta nunca coincide con nadie
+ * en el cruce (`franjasCoinciden`), así que no sirve — y no puede repetir ni
+ * pisar otra del mismo día. Supone `fin > inicio` (eso se valida antes, con
+ * su propio código). Única implementación (Principio XI): la usan la API
+ * (agenda del Discipulador y franjas de la Solicitud) y el editor de franjas.
+ */
+export function problemaDeFranjaNueva(nueva: Franja, cargadas: readonly Franja[]): ProblemaDeFranja | null {
+  if (nueva.fin - nueva.inicio < MINUTOS_MINIMOS_EN_COMUN) return 'FRANJA_MUY_CORTA';
+  const mismoDia = cargadas.filter((f) => f.diaSemana === nueva.diaSemana);
+  if (mismoDia.some((f) => f.inicio === nueva.inicio && f.fin === nueva.fin)) return 'FRANJA_REPETIDA';
+  if (mismoDia.some((f) => f.inicio < nueva.fin && nueva.inicio < f.fin)) return 'FRANJA_SUPERPUESTA';
+  return null;
+}
+
 export type EstadoSolicitud = 'pendiente' | 'propuesta' | 'aprobada' | 'rechazada' | 'retirada';
 
 /** Hoy solo Discipulado está conectado; el filtro por tipo existe y la interfaz no lo muestra (FR-025). */

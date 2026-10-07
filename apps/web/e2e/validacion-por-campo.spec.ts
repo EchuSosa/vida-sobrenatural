@@ -1,4 +1,5 @@
 import { test, expect, loguearseComoTest, registrarPersonaDeTest, auditar, usarTemaOscuro, esperarTema } from './helpers';
+import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * H-50 (revisión manual ronda 4): errores de validación por campo — mensaje
@@ -105,7 +106,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Apellido').fill('García');
       await page.getByLabel('Nombre').fill('Ana');
       await page.getByLabel('Género').selectOption('femenino');
-      await page.getByLabel('Fecha de nacimiento').fill('1990-05-20');
+      await completarFecha(campo(page, 'Fecha de nacimiento'), '1990-05-20');
       await page.getByRole('button', { name: 'Siguiente' }).click();
 
       await page.getByLabel('Código de país').selectOption('+54');
@@ -162,7 +163,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Apellido').fill('García');
       await page.getByLabel('Nombre').fill('Ana');
       await page.getByLabel('Género').selectOption('femenino');
-      await page.getByLabel('Fecha de nacimiento').fill('1990-05-20');
+      await completarFecha(campo(page, 'Fecha de nacimiento'), '1990-05-20');
       await page.getByRole('button', { name: 'Siguiente' }).click();
 
       await page.getByLabel('Código de país').selectOption('+54');
