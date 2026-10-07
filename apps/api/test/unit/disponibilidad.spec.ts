@@ -274,4 +274,32 @@ describe('DisponibilidadService', () => {
     await service.agregarBloqueo('p1', { desde: hoy, hasta: hoy });
     expect(mock.bloqueoDisponibilidad.create).toHaveBeenCalled();
   });
+
+  it('editar un período propio cambia desde y hasta (FR-040, H-R12)', async () => {
+    const mock = prismaMock({ disponible: true, franjas: [] });
+    mock.bloqueoDisponibilidad.updateMany.mockResolvedValue({ count: 1 });
+    const service = await crear(mock);
+    const hoy = hoyEnArgentina();
+    await service.editarBloqueo('p1', 'b1', { desde: hoy, hasta: hoy });
+    expect(mock.bloqueoDisponibilidad.updateMany).toHaveBeenCalledWith({
+      where: { id: 'b1', personaId: 'p1', eliminadoEn: null },
+      data: { desde: expect.any(Date), hasta: expect.any(Date) },
+    });
+  });
+
+  it('editar con fechas que no sirven → el mismo error que al crear, sin escribir', async () => {
+    const mock = prismaMock({ disponible: true, franjas: [] });
+    const service = await crear(mock);
+    const error = await service.editarBloqueo('p1', 'b1', { desde: '2000-01-01', hasta: '2000-01-02' }).catch((e: unknown) => e);
+    expect((error as AppException).errors).toEqual([{ campo: 'hasta', code: 'BLOQUEO_YA_VENCIDO' }]);
+    expect(mock.bloqueoDisponibilidad.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('editar un período ajeno o borrado → NO_ENCONTRADO', async () => {
+    const mock = prismaMock({ disponible: true, franjas: [] });
+    const service = await crear(mock);
+    const hoy = hoyEnArgentina();
+    const error = await service.editarBloqueo('p1', 'ajeno', { desde: hoy, hasta: hoy }).catch((e: unknown) => e);
+    expect((error as AppException).code).toBe('NO_ENCONTRADO');
+  });
 });

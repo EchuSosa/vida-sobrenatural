@@ -661,8 +661,16 @@
       "ayuda": "Vacaciones, viajes o cualquier momento en que no puedas empezar un discipulado nuevo. Mientras dure, no aparecés; los discipulados que ya tenés siguen igual.",
       "vacio": "No tenés períodos cargados.",
       "rango": "Del {desde} al {hasta}",
-      "vigente": "Vigente hoy",
-      "proximo": "Próximo",
+      "vigente": "Vigente: hasta el {hasta} no aparecés para nuevos discipulados.",
+      "empiezaManiana": "Empieza mañana: hasta entonces seguís apareciendo para nuevos discipulados.",
+      "proximo": "Empieza el {desde}: hasta entonces seguís apareciendo para nuevos discipulados.",
+      "editar": "Editar",
+      "editarTitulo": "Editar el período",
+      "editarDescripcion": "Cambiá las fechas. Si el período queda vigente hoy, dejás de aparecer para nuevos discipulados en el acto; si ya no, volvés a aparecer.",
+      "guardar": "Guardar cambios",
+      "guardando": "Guardando…",
+      "cancelar": "Cancelar",
+      "editado": "Período actualizado.",
       "borrar": "Borrar",
       "confirmarTitulo": "¿Borrar el período del {desde} al {hasta}?",
       "confirmarDescripcion": "Si estaba vigente, volvés a aparecer para nuevos discipulados en el acto.",
@@ -739,5 +747,13 @@
       "Noviembre",
       "Diciembre"
     ]
+  },
+  "devEntrar": {
+    "titulo": "Entrar para probar",
+    "descripcion": "Solo en desarrollo: entrás como la persona de ese email, sin pasar por Google.",
+    "email": "Email",
+    "entrar": "Entrar",
+    "entrando": "Entrando…",
+    "rapidos": "Cuentas de la revisión manual"
   }
 }

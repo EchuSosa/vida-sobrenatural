@@ -71,6 +71,15 @@ Discipulador después de cargar su agenda), borrar períodos, máximo por Grupo.
   aceptarlo confunde). El CHECK de la base es la red de seguridad, no el mensaje.
 - **201:** `MiDisponibilidad`. Superposiciones permitidas.
 
+### `PUT /disponibilidad/me/bloqueos/:id` (H-R12)
+
+- **Permiso:** `mi_disponibilidad.gestionar` + bloqueo propio.
+- **Cuerpo:** `{ desde, hasta }` (fechas civiles `YYYY-MM-DD`), las mismas validaciones por campo
+  que `POST /disponibilidad/me/bloqueos`.
+- **Efecto:** cambia las dos fechas. Si queda vigente, deja de aparecer en el cruce en el acto; si
+  deja de serlo, vuelve.
+- **200:** `MiDisponibilidad` · **400 `VALIDACION`** · **404 `NO_ENCONTRADO`** (ajeno o borrado).
+
 ### `DELETE /disponibilidad/me/bloqueos/:id`
 
 - **Permiso:** `mi_disponibilidad.gestionar` + bloqueo propio.

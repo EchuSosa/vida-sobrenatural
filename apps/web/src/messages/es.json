@@ -403,5 +403,13 @@
       "Noviembre",
       "Diciembre"
     ]
+  },
+  "devEntrar": {
+    "titulo": "Entrar para probar",
+    "descripcion": "Solo en desarrollo: entrás como la persona de ese email, sin pasar por Google. Si esa persona no está registrada, empezás su registro.",
+    "email": "Email",
+    "entrar": "Entrar",
+    "entrando": "Entrando…",
+    "rapidos": "Cuentas de la revisión manual"
   }
 }

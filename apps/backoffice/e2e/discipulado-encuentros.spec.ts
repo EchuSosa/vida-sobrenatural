@@ -22,7 +22,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await loguearseComoDiscipuladorE2E(page, 1);
       await page.goto(`/mis-discipulados/${grupoId}`);
       await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Lucía Encuentro ${sufijo}`) })).toBeVisible();
-      await expect(page.getByText('Todavía no registraste ningún encuentro.', { exact: false })).toBeVisible();
+      // #contenido: mientras la página llega por streaming, React deja una copia oculta fuera (2cc64e9).
+      await expect(page.locator('#contenido').getByText('Todavía no registraste ningún encuentro.', { exact: false })).toBeVisible();
       expect(await sinScrollHorizontal(page)).toBe(true);
       expect((await auditar(page)).violations).toEqual([]);
 
@@ -56,6 +57,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Cambios guardados.')).toBeVisible();
       const editado = page.getByRole('listitem').filter({ hasText: 'Capítulos: 1 a 3' });
       await expect(editado).toContainText('Vinieron todos');
+      // El toast anterior queda apilado detrás del nuevo mientras se desvanece; en WebKit axe lo
+      // medía a mitad de camino (3.7:1). Se audita cuando ya se fue.
+      // Con el puntero encima (quedó donde estaba "Guardar cambios"), sonner pausa el tiempo del toast.
+      await page.mouse.move(0, 0);
+      await expect(page.getByText('Encuentro registrado.')).toHaveCount(0, { timeout: 10_000 });
       expect((await auditar(page)).violations).toEqual([]);
     });
 

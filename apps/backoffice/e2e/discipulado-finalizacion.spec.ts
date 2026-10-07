@@ -108,7 +108,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(pagina2.getByText(/Aceptaste/)).toBeVisible();
         // El 2 ve los Encuentros que registró el 1.
         await pagina2.goto(`/mis-discipulados/${grupoId}`);
-        await expect(pagina2.getByText(capitulosAnteriores)).toBeVisible();
+        // #contenido: la copia oculta del streaming queda afuera (2cc64e9).
+        await expect(pagina2.locator('#contenido').getByText(capitulosAnteriores)).toBeVisible();
       } finally {
         await contexto2.close();
       }

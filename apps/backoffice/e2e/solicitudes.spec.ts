@@ -99,7 +99,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const solicitud = await solicitudPendiente(page, sufijo, [LUNES_8_A_9]);
 
       await page.goto(`/solicitudes/${solicitud.id}`);
-      await expect(page.getByText('Hay Discipuladores disponibles, pero ninguno coincide con sus horarios y las reglas.', { exact: false })).toBeVisible();
+      // #contenido: la copia oculta del streaming queda afuera (2cc64e9).
+      await expect(page.locator('#contenido').getByText('Hay Discipuladores disponibles, pero ninguno coincide con sus horarios y las reglas.', { exact: false })).toBeVisible();
       await expect(page.getByText('No coincide el horario').first()).toBeVisible();
       await sinViolaciones(page);
 

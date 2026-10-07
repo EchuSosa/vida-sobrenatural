@@ -71,7 +71,7 @@ test.describe('a 320 px, con datos cargados', () => {
 
   test('sin scroll horizontal y con objetivos táctiles de 44 px @celular', async ({ page }) => {
     await page.goto('/mi-disponibilidad');
-    await expect(page.getByText('Vigente hoy')).toBeVisible();
+    await expect(page.getByText(/^Vigente: hasta el .* no aparecés para nuevos discipulados\.$/)).toBeVisible();
     const sinDesborde = await page.evaluate(() => document.scrollingElement!.scrollWidth <= window.innerWidth);
     expect(sinDesborde, 'hay scroll horizontal a 320 px').toBe(true);
 
@@ -176,8 +176,25 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await completarFecha(campo(page, 'Hasta').last(), sumarDias(hoy, 3));
       await page.getByRole('button', { name: 'Agregar período' }).click();
       await expect(estado).toContainText('Hoy no aparecés, por tu período del');
-      await expect(page.getByText('Vigente hoy')).toBeVisible();
+      await expect(page.getByText(/^Vigente: hasta el .* no aparecés para nuevos discipulados\.$/)).toBeVisible();
       await sinViolaciones(page);
+
+      // FR-040 (H-R12): editar el período. Con el fin antes del inicio, error por campo en el panel;
+      // corrido a la semana que viene, deja de estar vigente y vuelve a aparecer.
+      await page.getByRole('button', { name: /^Editar: Del / }).click();
+      const panelEditar = page.getByRole('dialog', { name: 'Editar el período' });
+      await completarFecha(campo(panelEditar, 'Desde'), sumarDias(hoy, 7));
+      await completarFecha(campo(panelEditar, 'Hasta'), sumarDias(hoy, 6));
+      await panelEditar.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(panelEditar.locator('#campo-editar-hasta-error')).toBeVisible();
+      await sinViolaciones(page);
+      await completarFecha(campo(panelEditar, 'Hasta'), sumarDias(hoy, 9));
+      await panelEditar.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(panelEditar).toHaveCount(0);
+      await expect(page.getByText('Período actualizado.')).toBeVisible();
+      await expect(estado).toContainText('Hoy el Admin te ve como disponible');
+      // H-R11: la etiqueta dice qué pasa, no solo "Próximo".
+      await expect(page.getByText(/^Empieza el .*: hasta entonces seguís apareciendo para nuevos discipulados\.$/)).toBeVisible();
       await page.getByRole('button', { name: /^Borrar: Del / }).click();
       await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, borrar el período' }).click();
       await expect(estado).toContainText('Hoy el Admin te ve como disponible');
