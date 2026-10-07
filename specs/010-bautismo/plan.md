@@ -51,7 +51,7 @@ paginan en la API igual (`docs/15`).
 - Diálogos de retirar y "No puedo ese día": neutros, no rojos (D151).
 - Todo color de tokens (D118); nada solo por color (D81); textos por `next-intl` (D84).
 
-**Scale/Scope**: 7 historias, 34 FR, 4 pantallas nuevas o modificadas (card de Mi camino, bandeja,
+**Scale/Scope**: 7 historias, 36 requisitos (FR-001 a FR-034, más FR-020a y FR-020b), 4 pantallas nuevas o modificadas (card de Mi camino, bandeja,
 detalle de Solicitud de Bautismo, sección Bautismo del Evento) + el panel de Persona.
 
 ## Constitution Check

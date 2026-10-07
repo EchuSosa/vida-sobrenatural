@@ -42,7 +42,9 @@ incluye `motivoRechazo`. Incluye Solicitudes creadas en su nombre.
 
 ### `POST /bautismo/solicitudes/me/retirar` (FR-020)
 
-- Exige `pendiente` o `aprobada`. Si tenía inscripción: la cancela y pone la FK en `null`. → `retirada`.
+- Exige `pendiente`, o `aprobada` sin Evento o con un Evento **futuro**; con un Evento ya pasado →
+  409 `SOLICITUD_BAUTISMO_YA_CAMBIO` (lo resuelve el Admin al confirmar, FR-027). Si tenía
+  inscripción: la cancela y pone la FK en `null`. → `retirada`.
 - 200: `EstadoCardBautismo` (`puede_pedir { ultimo: 'retirada' }` o `no_habilitada`). Sin aviso.
 
 ### `POST /bautismo/solicitudes/me/no-puedo` (FR-020a)

@@ -331,7 +331,9 @@ a "esperando fecha".
 
 - **FR-006**: Las Solicitudes de Bautismo MUST aparecer en la bandeja unificada de Solicitudes del
   backoffice con la forma base común (Persona, tipo, estado, fecha, revisada por, creada por) y el
-  filtro por tipo MUST mostrarse ahora que hay más de un tipo conectado (D31, `docs/14`).
+  filtro por tipo MUST mostrarse ahora que hay más de un tipo conectado (D31, `docs/14`). La bandeja
+  MUST ofrecer además el filtro "Esperando fecha" (Bautismo aceptadas sin Evento); el filtro por
+  defecto ("abiertas") muestra solo lo que espera una decisión.
 - **FR-007**: El detalle de una Solicitud de Bautismo MUST mostrar lo de la forma base, el texto
   opcional de la Persona, su situación respecto de la regla de FR-002 (Vida Nueva en curso desde /
   completada / habilitada por quién y cuándo / ninguna, si la creó el Admin) y, si está aceptada, el
@@ -376,8 +378,10 @@ a "esperando fecha".
   Evento, en texto, y enlace a su página), `fecha_pasada_sin_confirmar` ("estamos confirmando tu
   bautismo"), y `bautizada` (con la fecha si se conoce).
 - **FR-020**: La Persona MUST poder
-  **retirar** su Solicitud mientras esté pendiente o aceptada (con o sin fecha), con un diálogo de
-  confirmación neutro (D151); si estaba asignada, sale del Evento en la misma operación.
+  **retirar** su Solicitud mientras esté pendiente o aceptada (sin fecha o con un Evento futuro),
+  con un diálogo de confirmación neutro (D151); si estaba asignada, sale del Evento en la misma
+  operación. Con un Evento ya pasado y sin confirmar no se puede retirar: el bautismo pudo haber
+  ocurrido y lo resuelve el Admin al confirmar (FR-027).
 - **FR-020a**: La Persona MUST poder decir **"No puedo ese día"** sobre su Evento asignado futuro;
   la Solicitud vuelve a "esperando fecha" y sigue aceptada.
 - **FR-020b**: La card MUST dejar el lugar para la acción "Ya me bauticé" de D144 cuando el estado
@@ -458,8 +462,9 @@ a "esperando fecha".
 - **SC-004**: En cualquier momento, la Persona ve en Mi camino en qué está su pedido y qué pasa
   después, sin preguntarle a nadie: cada uno de los 8 estados de FR-019 tiene texto e ícono propios
   verificados por un test.
-- **SC-005**: Ninguna Persona queda con dos Solicitudes abiertas, ni asignada a un Evento cancelado
-  o pasado sin confirmar indefinidamente (estos últimos aparecen en pendientes del Admin).
+- **SC-005**: Ninguna Persona queda con dos Solicitudes abiertas ni asignada a un Evento cancelado;
+  y todo Evento de bautismo pasado con asignados sin confirmar aparece en los pendientes del Admin
+  desde el momento en que pasa su fecha.
 - **SC-006**: Ningún aviso de esta spec contiene, fuera de la app, la palabra "bautismo" ni el
   estado del pedido.
 - **SC-007**: Las pantallas de esta spec pasan axe sin violaciones en modo claro y oscuro, y la
