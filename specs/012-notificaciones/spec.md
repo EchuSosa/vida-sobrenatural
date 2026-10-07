@@ -332,9 +332,10 @@ transición lo emite.
   Evento, todas las Personas), la prioridad (`normal` / `importante`), la entidad relacionada y el
   destino en la web app, la clave de idempotencia, y las claves de texto (título, detalle, asunto
   y cuerpo del mail si es importante).
-- **FR-013**: Los eventos MUST llevar solo ids en sus datos: ningún nombre, teléfono, email ni
-  motivo viaja en el evento ni se guarda en la Notificación automática; el texto se arma al mostrarlo
-  o al mandar el mail, en el idioma del destinatario (D84, Principio X).
+- **FR-013**: Los eventos MUST llevar en sus datos solo ids y datos no personales de la entidad que
+  el texto necesita (el nombre de un Evento, el número de semana): ningún nombre de Persona,
+  teléfono, email ni motivo viaja en el evento ni se guarda en la Notificación automática; el texto se
+  arma al mostrarlo o al mandar el mail, en el idioma del destinatario (D84, Principio X).
 - **FR-014**: Un evento emitido con una clave de idempotencia que ya existe MUST NOT crear una
   segunda Notificación.
 - **FR-015**: Los eventos cuyo destinatario es "el Admin" MUST NOT generar avisos en esta tanda: lo
