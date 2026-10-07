@@ -293,7 +293,7 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
 - **`?mes=` inválido en cumpleaños**: cae al mes actual con redirect.
 - **Métricas con Personas sin Sede activa**: cuentan en su Sede aunque esté inactiva; las dadas de baja no cuentan.
 - **Curso inactivo y una propuesta de Discipulado aceptada después**: la aceptación (004) rechaza crear el Grupo con
-  `CURSO_INACTIVO`; el Admin lo ve en la bandeja como abierta otra vez.
+  `CURSO_INACTIVO`; la propuesta queda sin aceptar y la Solicitud sigue abierta en la bandeja.
 - **El Admin abre su propio perfil**: se ve igual que cualquiera; las restricciones sobre sí mismo (no auto-revocarse
   `admin`) ya las aplica el panel de roles (005).
 
