@@ -44,7 +44,7 @@ Forma base de las Solicitudes (D31, docs/04) + campos propios.
 | `id` | uuid | |
 | `personaId` | String | Referencia lógica a Persona (como `SolicitudDiscipulado`). |
 | `ministerioId` | FK → Ministerio | Obligatorio. |
-| `celulaId` | FK → Célula? | Opcional; si está, pertenece a `ministerioId` (servicio + CHECK por trigger no: lo garantiza el servicio y un test de integración). |
+| `celulaId` | FK → Célula? | Opcional; si está, pertenece a `ministerioId`. Lo garantiza el servicio (sin trigger: la Célula no cambia de Ministerio nunca) y lo cubre un test de integración. |
 | `estado` | `EstadoPostulacion` | `pendiente` (default) / `aprobada` / `rechazada` / `inactiva` / `retirada`. |
 | `motivacion` | String? | ≤ 500 (`POSTULACION_TEXTO_MAX`). |
 | `disponibilidad` | String? | ≤ 500. |

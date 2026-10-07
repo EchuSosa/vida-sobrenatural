@@ -16,6 +16,10 @@ Mismo patrón que `sede.controller.ts` (D117, D119, H-129).
 
 Revisar Postulaciones reusa `solicitudes.ver` / `solicitudes.aprobar` (bandeja unificada).
 
+**Orden de rutas**: las rutas estáticas (`/ministerios/publicos`, `/ministerios/me`, `/ministerios/papelera`)
+se declaran antes de `/ministerios/:id` en los controllers, y `:id` se valida como uuid (`ParseUUIDPipe`),
+para que ninguna caiga en la otra.
+
 ## Públicos (sin sesión)
 
 ### `GET /ministerios/publicos`
