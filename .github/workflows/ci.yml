@@ -193,8 +193,8 @@ jobs:
 
       # Solo Chromium: los dos playwright.config.ts declaran un único
       # project ({ name: 'chromium', use: devices['Desktop Chrome'] }).
-      - name: Instalar Chromium de Playwright
-        run: pnpm --filter web exec playwright install --with-deps chromium
+      - name: Instalar Chromium y WebKit de Playwright
+        run: pnpm --filter web exec playwright install --with-deps chromium webkit
 
       - name: E2E de apps/web
         run: pnpm --filter web run test:e2e
