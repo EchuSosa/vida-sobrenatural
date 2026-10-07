@@ -240,6 +240,8 @@ Un Visitante que entra a Primeros pasos › Ministerios ve los Ministerios activ
 - **FR-035**: Cada transición DEBE emitir un evento tipado, después de confirmada la operación, con destinatario e ids (sin datos personales): Postulación creada (→ Admin), aprobada (→ Persona, importante), rechazada (→ Persona, importante), retirada (→ Admin), inactivada por cambio (→ Persona: incluida en el de aprobada), dada de baja (→ Persona, importante). El envío lo conecta la spec 012 (D149: Avisos + email).
 - **FR-036**: El sistema DEBE exponer una única forma de resolver "los miembros activos de un Ministerio" para que la spec 012 la use como alcance `ministerio` de las notificaciones manuales (D48).
 
+- **FR-041**: Mientras no haya envío de notificaciones, la tarjeta de pendientes del Inicio del backoffice DEBE mostrar cuántas Postulaciones pendientes hay, con enlace a la bandeja filtrada por ese tipo.
+
 **Transversales**
 
 - **FR-037**: Toda pantalla nueva o modificada DEBE tener sus cuatro estados (cargando, vacío, error, éxito) con `loading.tsx` / `error.tsx` (Principio VIII), textos de `next-intl` en rioplatense, colores solo de tokens, y en `apps/web` los tamaños de D150 (16 px, botones de 44 px).
