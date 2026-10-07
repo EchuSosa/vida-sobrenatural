@@ -422,7 +422,7 @@ pública no ofrece "Anotarme" ni muestra nombres, y que la API rechaza una auto-
 - **FR-011**: Al crear un Evento el sistema DEBE generarle un `slug` único derivado del nombre (sin
   tildes, en minúsculas, con sufijo numérico si ya existe) que **no cambia** al editar el nombre.
 - **FR-012**: El flyer DEBE subirse desde el backoffice con las reglas de archivo público de
-  `docs/13` (JPG/PNG/WebP, tamaño máximo, redimensionado y recompresión sin recorte, nombre generado
+  `docs/13` (JPG/PNG/WebP hasta 5 MB, redimensionado y recompresión sin recorte, nombre generado
   por el sistema) y su texto alternativo DEBE ser obligatorio cuando hay flyer. El Admin DEBE poder
   reemplazarlo o quitarlo.
 - **FR-013**: El detalle de un Evento con inscripción DEBE mostrar el QR que lleva a su página
@@ -494,7 +494,8 @@ pública no ofrece "Anotarme" ni muestra nombres, y que la API rechaza una auto-
 
 - **FR-030**: Con su Inscripción `confirmada` en un Evento con costo, la Persona DEBE poder registrar
   un Pago con monto (por defecto, el costo), medio de pago (`transferencia`, `efectivo`, `otro`),
-  fecha en que pagó y el comprobante (obligatorio cuando lo carga la Persona). El Pago queda
+  fecha en que pagó y el comprobante (obligatorio cuando lo carga la Persona), también después del
+  inicio del Evento (para cerrar las cuentas). El Pago queda
   `pendiente_verificacion` y la Inscripción sigue `confirmada` (D148). No puede haber dos Pagos
   `pendiente_verificacion` en la misma Inscripción.
 - **FR-031**: El comprobante DEBE aceptar JPG, PNG, WebP o PDF hasta 5 MB, validado por contenido y
@@ -556,7 +557,8 @@ pública no ofrece "Anotarme" ni muestra nombres, y que la API rechaza una auto-
   esos datos y las consultas de destinatarios.
 - **FR-051**: La API DEBE autorizar por registro (Principio V): una Persona solo ve, cancela o paga
   sus propias Inscripciones; toda acción sobre Eventos, inscriptos de otros y Pagos ajenos exige el
-  permiso correspondiente del catálogo (`CATALOGO_PERMISOS`, D132).
+  permiso correspondiente del catálogo (`CATALOGO_PERMISOS`, D132). Los endpoints públicos de
+  Eventos y los de subida de archivos (flyer, comprobante) DEBEN tener límite de pedidos (`docs/13`).
 
 ### Key Entities *(include if feature involves data)*
 
