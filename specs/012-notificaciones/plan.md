@@ -92,7 +92,7 @@ specs/012-notificaciones/
 ├── data-model.md
 ├── quickstart.md
 ├── contracts/
-│   ├── catalogo-eventos.md     # CATALOGO_AVISOS: 004, 005, 008–011
+│   ├── catalogo-eventos.md     # CATALOGO_AVISOS: 001, 004, 008–011
 │   ├── emision.md              # NotificacionesService.emitir(tx, evento)
 │   ├── avisos-api.md           # /avisos (web)
 │   ├── notificaciones-api.md   # /notificaciones (backoffice)
@@ -159,7 +159,7 @@ donde la navegación ya las puso (`docs/14`).
 |---|---|---|---|
 | **007** Ingreso con código | `EmailService`, `SmtpEmailService`, `EmailServiceFalso`, Mailpit, `COLORES_EMAIL`, `mensajes/es.json`, helper de Mailpit en e2e | rama `007-ingreso-codigo-email`, sin mergear | Lote C (mail) espera; lotes 0, A, B y D (sin mail) avanzan |
 | **004** Vida Nueva | Eventos, Grupo, Inscripción, `hoyEnArgentina` | en `main` | — |
-| **005** Roles | `CATALOGO_PERMISOS`, `PATCH /personas/:id/activar` | en `main` | — |
+| **001** / **005** Bienvenida, Roles | `PATCH /personas/:id/activar` (001), `CATALOGO_PERMISOS` (005) | en `main` | — |
 | **006** Discipulador en la web app | Ruta `/mis-discipulados` en la web (destino de `discipulado.propuesta_nueva`) | en paralelo | Destino provisorio `/mi-camino`; cambiar una línea del catálogo al mergear la 006 |
 | **008** Vida de Servicio | Solicitud/Inscripción VS, Cronograma, Contenido | en paralelo | Sus eventos quedan en el catálogo sin llamador (lote F) |
 | **009** Ministerios | Ministerio, Postulación, "miembro vigente" | en paralelo | Alcance "A un ministerio" deshabilitado con explicación |

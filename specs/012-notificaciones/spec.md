@@ -271,7 +271,7 @@ transición lo emite.
 - **Volumen**: un aviso a todas las personas (cientos) se reparte dentro de la misma acción sin
   dejar al Admin esperando más de unos segundos; los mails salen después, en tanda.
 - **Tope diario del proveedor de mail**: los mails que el proveedor rechaza por límite se
-  reintentan con espera creciente (hasta ~1 día); los que no salen quedan "no se pudo enviar" y el
+  reintentan con espera creciente (cinco intentos en unas 7 horas, FR-022); los que no salen quedan "no se pudo enviar" y el
   Admin los ve en Notificaciones.
 - **Evento emitido dentro de una transacción que se deshace**: no queda aviso ni mail.
 - **El mismo hecho emitido dos veces** (doble clic, reintento, proceso programado que corre de
@@ -402,7 +402,7 @@ transición lo emite.
 
 **Recordatorios programados**
 
-- **FR-035**: Un proceso programado MUST correr una vez por día (a la mañana, hora de Argentina) y
+- **FR-035**: Un proceso programado MUST correr una vez por día (a las 8:00, hora de Argentina) y
   emitir `evento_proximo` para cada Evento que ocurre al día siguiente, a quienes tienen una
   Inscripción a Evento `confirmada`.
 - **FR-036**: El mismo proceso MUST emitir `recordatorio_inscripcion` para cada Evento con

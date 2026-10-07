@@ -27,6 +27,7 @@ Guía de verificación de punta a punta. Cómo levantar todo: `specs/revision-ma
 | 9 | Pastora (US4) | Backoffice como Pastora → Notificaciones | Ve historial y detalle; no ve "Enviar un aviso" |
 | 10 | Recordatorios (US5, requiere 011) | Evento mañana con inscriptos; `pnpm --filter api run tareas:correr recordatorios` dos veces | Un solo aviso "Mañana es …" por confirmado |
 | 11 | Modo oscuro y 360 px | Repetir 1–4 con tema oscuro y viewport de 360 px | Contraste correcto, letra de 16 px, sin scroll horizontal |
+| 12 | Error de carga (US1-7) | Con la sesión abierta, detener la API (puerto 3333) y entrar a `/avisos` | Mensaje en lenguaje simple con "Reintentar" y código de referencia; la pestaña Avisos sin número |
 
 ## Suites
 

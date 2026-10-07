@@ -18,7 +18,7 @@ type Destinatario =
   | { tipo: 'todas_sin_inscripcion'; eventoId: string }; // activas sin inscripción vigente al Evento
 
 interface EntradaCatalogo<N extends NombreEventoAviso> {
-  spec: '004' | '005' | '008' | '009' | '010' | '011' | 'flujo-12';
+  spec: '001' | '004' | '008' | '009' | '010' | '011' | 'flujo-12';
   destinatario: Destinatario['tipo'];      // el único permitido para este evento
   disparador: Disparador | null;          // null ⇔ destinatario 'admin'
   prioridad: 'normal' | 'importante';
@@ -66,7 +66,7 @@ la spec dueña define otra, actualiza `destino` en su PR.
 
 Asunto del mail de los dos importantes: "Hay novedades sobre tu pedido".
 
-### Personas — activación de cuenta (005 construido; Flujo 12 sin spec asignada)
+### Personas — activación de cuenta (001 construida; Flujo 12 sin spec asignada)
 
 | Nombre | Destinatario | Prioridad | Disparador | Entidad | Destino | Datos | Título |
 |---|---|---|---|---|---|---|---|
