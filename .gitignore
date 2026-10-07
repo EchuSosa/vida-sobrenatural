@@ -49,3 +49,4 @@ BRIEF-ESTADO.md
 # Worktrees de los lotes A–D de la 004 (scripts/lote-worktree.sh) — cada uno es
 # un checkout aparte con sus propias bases y puertos; no se versionan.
 .worktrees/
+.claude/settings.local.json
