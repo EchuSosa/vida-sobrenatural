@@ -19,7 +19,12 @@ La bandeja de la 004 suma el tipo `historial`. Cada fila:
 }
 ```
 
-- Query `tipo=discipulado|historial` (opcional; sin él, los dos). El resto de los parámetros
+- Query `tipo=discipulado|historial` (opcional; sin él, los dos; hoy un `tipo` distinto de
+  `discipulado` devuelve vacío y eso cambia). Mapeo por tipo: **estado** — el filtro por defecto
+  "abiertas" es `pendiente,propuesta` para Discipulado y `pendiente` para historial; "resueltas" es
+  `aprobada,rechazada,retirada` y `confirmada,rechazada,retirada`; **orden** `espera` (más vieja
+  primero) y `fecha` usan `createdAt` en los dos; **buscar** filtra por nombre/apellido de la
+  Persona en los dos. El resto de los parámetros
   (estado, orden, página) igual que en la 004. Las filas de Discipulado suman `"tipo":
   "discipulado"` y `"detalle": {}` (cambio compatible: la bandeja actual es el único consumidor).
 - Permiso: `solicitudes.ver` (`admin`, `pastor`).
@@ -49,7 +54,7 @@ Permiso `historial.resolver` (`admin`). Transacción: bloquea la Persona; exige 
 (`DECLARACION_NO_PENDIENTE`); si la etapa ya está completa por el sistema o con Completitud
 vigente → **409** `ETAPA_YA_COMPLETADA`. Pasa a `confirmada` (`revisadoPorId`, `revisadaEn`) y
 crea `CompletitudManual { origen: declaracion, declaracionId, registradaPorId }`. Emite
-`declaracion_historial_confirmada`. **200** con el detalle actualizado.
+`declaracion_historial_confirmada`. No toca `Persona.rol` (FR-019). **200** con el detalle actualizado.
 
 ## POST /historial/declaraciones/:id/rechazar — FR-013
 
@@ -70,7 +75,8 @@ Transacción: bloquea la Persona; vigente de esa etapa o completa por sistema �
 `ETAPA_YA_COMPLETADA`; Vida Nueva con Inscripción activa o pedido abierto → **409**
 `ETAPA_EN_CURSO`. Crea la Completitud `origen: admin`; si había declaración `pendiente` de esa
 etapa, la pasa a `confirmada` y la vincula (en ese caso `origen: declaracion`). Emite
-`completitud_manual_registrada`. **201**.
+`completitud_manual_registrada` y, si había declaración, también
+`declaracion_historial_confirmada`. **201**.
 
 Persona inexistente → 404. Vale para Personas sin acceso a la app y para menores (lo registra el
 Admin, coherente con FR-044 de la 004).
@@ -83,7 +89,7 @@ historia). **200**.
 
 ## Tests
 
-Integración: confirmar crea exactamente una Completitud; doble confirmación concurrente → una
+Integración (`*.integration-spec.ts`): confirmar crea exactamente una Completitud y no cambia `Persona.rol`; confirmar una ya retirada → `DECLARACION_NO_PENDIENTE`; registrar VN con VN completada por Grupo → `ETAPA_YA_COMPLETADA`; anular la Completitud de VN vuelve a ofrecer el pedido en `GET /camino/me`; doble confirmación concurrente → una
 gana, la otra `DECLARACION_NO_PENDIENTE`; rechazar con motivo y que la Persona lo vea en
 `GET /camino/me`; registrar directo con declaración pendiente la confirma; anular y volver a
 registrar; Pastor → 403 en confirmar, rechazar, registrar y anular, 200 en los GET; Discipulador

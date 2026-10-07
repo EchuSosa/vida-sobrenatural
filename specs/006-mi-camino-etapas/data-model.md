@@ -142,7 +142,10 @@ model Persona {
   // admite varios NULL en un índice único). Se guarda normalizado (trim + minúsculas).
   email    String? @unique
   …
-  @@index([telefono])         // aviso de duplicado (research #7)
+  // research #7: solo dígitos, sin el 9 de celular de AR. Lo escribe la API con
+  // normalizarTelefono en cada alta/registro/cambio de teléfono; nunca la pantalla.
+  telefonoNormalizado String
+  @@index([telefonoNormalizado]) // aviso de duplicado (research #7)
   @@index([fechaNacimiento])  // aviso de duplicado (research #7)
 }
 ```
@@ -152,8 +155,10 @@ Campos existentes que el alta usa (sin cambios de esquema): `origenAlta = admin`
 `consentimientoDatosOrigen = presencial`, `estado = activa`, `rol` con `miembro_registrado`
 escrito por `RolesDeEstadoService.otorgarRolDeEstado` (FR-019 del 005).
 
-Migración: `ALTER TABLE "personas" ALTER COLUMN "email" DROP NOT NULL;` — sin migración de datos
-(todas las filas existentes tienen email).
+Migración: `ALTER TABLE "personas" ALTER COLUMN "email" DROP NOT NULL;` (sin migración de datos:
+todas las filas existentes tienen email) y `telefonoNormalizado`: se agrega nullable, se completa
+para las filas existentes con el mismo algoritmo de `normalizarTelefono` (con un test que compare
+la versión SQL contra la de TS sobre los teléfonos del seed) y se pasa a `NOT NULL`.
 
 ## Tipos compartidos (`packages/shared-types/src/camino.ts`)
 
@@ -193,9 +198,9 @@ export type EstadoEtapa =
   | { etapa: EtapaCamino; estado: 'completada'; como: ComoSeCompleto }
   | { etapa: EtapaCamino; estado: 'en_revision'; declaracionId: string; desde: string };
 // `declaracion.no_confirmada` acompaña a proximamente/bloqueada/disponible: la card muestra el
-// estado de fondo y, arriba, el mensaje amable del rechazo más reciente (si es posterior a la
-// última vez que cambió algo). `en_revision` reemplaza al estado de fondo (FR-008: mientras está
-// pendiente, no se ofrece el pedido).
+// estado de fondo y, arriba, el mensaje amable — SOLO si la última declaración de esa etapa está
+// `rechazada` (si después la retiró, la volvió a declarar o se confirmó, no). `en_revision`
+// reemplaza al estado de fondo (FR-008: mientras está pendiente, no se ofrece el pedido).
 
 /** Vida Nueva lleva, además, su estado de la 004 para el enlace de la card (FR-005). */
 export interface CaminoDeLaPersona {
@@ -208,7 +213,8 @@ export interface HechosCamino {
   edad: number;
   vidaNueva: EstadoMiDiscipulado;
   completas: Completas;
-  declaracionesRecientes: Partial<Record<EtapaCamino, { id: string; estado: 'pendiente' | 'rechazada'; fecha: string; motivo: string | null }>>;
+  /** La declaración MÁS RECIENTE de cada etapa, en cualquier estado. */
+  ultimaDeclaracion: Partial<Record<EtapaCamino, { id: string; estado: EstadoDeclaracion; fecha: string; motivo: string | null }>>;
 }
 
 export function estadoDeEtapa(etapa: EtapaCamino, hechos: HechosCamino): EstadoEtapa;
@@ -228,8 +234,8 @@ Reglas de `estadoDeEtapa` (en este orden; cada rama con su test unitario):
 4. Etapa fuera de `ETAPAS_CONSTRUIDAS` → `proximamente`.
 5. `reglaDeEtapa` falsa → `bloqueada` con el requisito.
 6. Si no → `disponible`.
-   En 4–6, `puedeDeclarar` = `puedeDeclarar(etapa, hechos)` y `declaracion` = la rechazada más
-   reciente si la hay.
+   En 4–6, `puedeDeclarar` = `puedeDeclarar(etapa, hechos)` y `declaracion` = `no_confirmada`
+   solo si `ultimaDeclaracion[etapa].estado === 'rechazada'`.
 
 `puedeDeclarar`: edad ≥ `EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO` (12, FR-044 de la 004), etapa no
 completa, sin declaración pendiente, y para Vida Nueva `vidaNueva.estado ∈ {puede_pedir, baja}`.
@@ -270,9 +276,9 @@ export function sonPosiblesDuplicados(a: DatosPersonales, b: DatosPersonales): C
 | 'completitud_manual.gestionar'   // ['admin'] — FR-014, FR-015
 ```
 
-Sin cambios de roles en los existentes (FR-028). `tienePermisoSesion(session, permiso)` pasa de
-`apps/backoffice/src/auth.ts` a `shared-types` como `tienePermisoRoles(roles, permiso)` (ya existe
-como `tienePermiso`): las dos apps la llaman con `session.user.rol`.
+Sin cambios de roles en los existentes (FR-028). La regla sigue siendo `tienePermiso(roles, permiso)` de `shared-types` (ya existe); el backoffice
+conserva su `tienePermisoSesion` (envoltorio de una línea), y la web app suma `requerirPermiso`
+que la llama con `session.user.rol`.
 
 ## Códigos de error nuevos (`error-code.ts`)
 
@@ -286,10 +292,12 @@ como `tienePermiso`): las dos apps la llaman con `session.user.rol`.
 | `HISTORIAL_VIDA_NUEVA_EN_REVISION` | 409 | FR-017: pedir VN con declaración pendiente |
 | `VIDA_NUEVA_COMPLETADA_POR_HISTORIAL` | 409 | FR-017: pedir VN con Completitud vigente |
 | `POSIBLE_DUPLICADO` | 409 | FR-035, con `coincidencias` |
-| `ALTA_MENOR_DE_EDAD` | 400 | FR-033: código **de campo** (`fechaNacimiento`) dentro de `VALIDACION`, como `FRANJAS_REQUERIDAS` en la 004 |
 | `EMAIL_YA_CARGADO` | 409 | FR-037: "Agregar email" a una Persona que ya tiene |
 
-Códigos de campo nuevos (dentro de `VALIDACION`): `COMENTARIO_DEMASIADO_LARGO`, `MOTIVO_DEMASIADO_LARGO`, `NOTA_DEMASIADO_LARGA`.
+Nueve `ErrorCode` nuevos (los de la tabla). Códigos **de campo** nuevos, dentro de `VALIDACION` y
+que **no** van en `error-code.ts` (su propio comentario lo dice): `ALTA_MENOR_DE_EDAD`
+(`fechaNacimiento`), `COMENTARIO_DEMASIADO_LARGO`, `NOTA_DEMASIADO_LARGA`; se reutiliza
+`MOTIVO_DEMASIADO_LARGO` (004). Sus traducciones van en los `es.json`.
 
 Reutilizados: `EMAIL_DUPLICADO` (FR-034, en el campo `email`), `VALIDACION` (errores de campo),
 `NO_ENCONTRADO`, `SIN_PERMISO`, `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO` (declarar con menos de 12).
@@ -300,6 +308,6 @@ Reutilizados: `EMAIL_DUPLICADO` (FR-034, en el campo `email`), `VALIDACION` (err
   caracteres con tildes), "Rechazada" (Vida de Servicio rechazada con motivo), "Confirmada" (Vida
   Nueva por historial), "Anulada" (Completitud de Bautismo anulada y otra vigente).
 - Tres Personas sin email (una con pedido de Vida Nueva creado por la Discipuladora 1).
-- Par duplicado por teléfono (`+54 9 221 555-0101` y `+54 221 5550101`) y par de homónimos con la
+- Par duplicado por teléfono (`+54 9 221 555 0101` y `+54 221 5550101`, los dos válidos para `TELEFONO_REGEX`) y par de homónimos con la
   misma fecha y tildes distintas ("José Pérez" / "Jose Perez").
 - Nombres largos y apellidos compuestos en todos los casos anteriores.

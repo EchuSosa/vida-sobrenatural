@@ -51,12 +51,14 @@ error, reglas puras); `packages/ui` (`Button`, `useEnvio`, `useValidacionCampos`
 **Storage**: PostgreSQL vía Prisma. Dos modelos nuevos (`DeclaracionHistorial`,
 `CompletitudManual`), tres enums nuevos (`EtapaCamino`, `EstadoDeclaracion`,
 `OrigenCompletitud`), `Persona.email` opcional, y en SQL dentro de la migración los índices únicos
-parciales (una declaración `pendiente` y una Completitud vigente por Persona y etapa) y los
-índices de `Persona.telefono` y `Persona.fechaNacimiento` para el aviso de duplicado (patrón
+parciales (una declaración `pendiente` y una Completitud vigente por Persona y etapa) y la
+columna `Persona.telefonoNormalizado` (con índice) y el índice de `Persona.fechaNacimiento` para el
+aviso de duplicado (patrón
 H-140). Ver `data-model.md`.
 
-**Testing**: Jest unit e integración (`apps/api`), Jest en `packages/shared-types` para las
-reglas puras, y Playwright con `axe` en los dos temas en `apps/web` y `apps/backoffice`. La web
+**Testing**: Jest unit e integración (`apps/api`) — las reglas puras de `packages/shared-types`
+se testean desde `apps/api/test/unit/`, como ya hace el repo (ni `shared-types` ni `apps/web` tienen
+runner de unit) —, y Playwright con `axe` en los dos temas en `apps/web` y `apps/backoffice`. La web
 app suma un proyecto **`celular`** de Playwright (hoy solo lo tiene el backoffice), porque las
 pantallas del Discipulador se usan en el teléfono (FR-027, SC-005).
 
@@ -67,14 +69,14 @@ pantallas del Discipulador se usan en el teléfono (FR-027, SC-005).
 
 **Performance Goals**: sin meta propia. `GET /camino/me` es una consulta por fuente (Solicitud
 abierta, Inscripción de Vida Nueva, declaraciones, Completitudes) para una sola Persona, en
-paralelo; la búsqueda de duplicados usa índices sobre `telefono` y sobre `fechaNacimiento`, y
-compara nombre y apellido normalizados en la API entre las pocas Personas con esa misma fecha —
+paralelo; la búsqueda de duplicados usa `telefonoNormalizado` (igualdad, indexado) y el índice de
+`fechaNacimiento`, y compara nombre y apellido normalizados en la API entre las pocas Personas con esa misma fecha —
 sin extensión `unaccent` (research #7).
 
 **Constraints**:
 - La regla de habilitación de cada etapa vive en **una función pura** (`reglaDeEtapa`, en
-  `shared-types`) y la consulta "¿completó?" en **un servicio** (`CaminoService.completoEtapa`, en
-  la API). Ni las pantallas ni otros servicios las reimplementan (Principio XI).
+  `shared-types`) y la consulta "¿completó?" en **una función** de la API (`completoEtapa`, en
+  `camino/consultas.ts`, que `CaminoService` y el pedido de Vida Nueva usan). Ni las pantallas ni otros servicios las reimplementan (Principio XI).
 - Pedir Vida Nueva, declararla y registrar su Completitud quedan **serializados** bloqueando la
   fila de la Persona (`FOR UPDATE`, patrón D137/H-142), para que no coexistan un pedido y una
   declaración por una carrera.
@@ -86,7 +88,9 @@ sin extensión `unaccent` (research #7).
   decide el servicio (Principio V).
 - Ninguna declaración ni Completitud escribe roles (FR-019).
 
-**Scale/Scope**: 2 modelos nuevos, 4 permisos nuevos, ~11 endpoints nuevos, 3 que cambian; en
+**Scale/Scope**: 2 modelos nuevos, 4 permisos nuevos, ~11 endpoints nuevos, 5 que cambian
+(`POST /discipulado/solicitudes/me`, `POST /discipulado/solicitudes`, `GET /solicitudes`, `GET /personas`,
+`GET /personas/buscar`); en
 `apps/web`, 1 pantalla rehecha (Mi camino), 1 nueva (`/mi-camino/vida-nueva`), 3 movidas
 (`/mis-discipulados`, `/mis-discipulados/[id]`, `/mi-disponibilidad`) y 1 que suma un aviso
 (Inicio); en `apps/backoffice`, 1 detalle nuevo (`/solicitudes/historial/[id]`), 1 alta nueva
@@ -108,7 +112,7 @@ rutas que pasan a redirigir.
 | VII. Accesibilidad | ¿WCAG y axe en los dos temas? | A CUBRIR en `tasks.md` — checklist de `docs/15` por pantalla (D114), axe claro/oscuro, proyecto `celular` nuevo en `apps/web`, estados con texto + ícono (D81). |
 | VIII. Experiencia consistente | ¿Cuatro estados, una acción principal, `useEnvio`? | A CUBRIR en `tasks.md`, por pantalla. Confirmaciones reversibles neutras (D151), tamaños de D150. |
 | IX. Idiomas | ¿Textos por next-intl, claves estables? | A CUBRIR — etapas y estados como claves (`EtapaCamino`, `EstadoEtapa`); los subtítulos de Primeros pasos se **reusan** por clave (una sola fuente de texto). |
-| X. Errores | ¿Un código por regla nueva? | PASA en diseño — diez códigos nuevos listados en `data-model.md` y `contracts/` (`DECLARACION_YA_PENDIENTE`, `ETAPA_YA_COMPLETADA`, `ETAPA_EN_CURSO`, `DECLARACION_NO_PENDIENTE`, `COMPLETITUD_NO_VIGENTE`, `HISTORIAL_VIDA_NUEVA_EN_REVISION`, `VIDA_NUEVA_COMPLETADA_POR_HISTORIAL`, `POSIBLE_DUPLICADO`, `ALTA_MENOR_DE_EDAD`, `EMAIL_YA_CARGADO`). Se reutilizan los que significan lo mismo (`EMAIL_DUPLICADO`, `VALIDACION`, `NO_ENCONTRADO`, `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO`). |
+| X. Errores | ¿Un código por regla nueva? | PASA en diseño — nueve códigos nuevos listados en `data-model.md` y `contracts/` (`DECLARACION_YA_PENDIENTE`, `ETAPA_YA_COMPLETADA`, `ETAPA_EN_CURSO`, `DECLARACION_NO_PENDIENTE`, `COMPLETITUD_NO_VIGENTE`, `HISTORIAL_VIDA_NUEVA_EN_REVISION`, `VIDA_NUEVA_COMPLETADA_POR_HISTORIAL`, `POSIBLE_DUPLICADO`, `EMAIL_YA_CARGADO`), más códigos de campo bajo `VALIDACION` (que no van en `error-code.ts`). Se reutilizan los que significan lo mismo (`EMAIL_DUPLICADO`, `VALIDACION`, `NO_ENCONTRADO`, `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO`, `MOTIVO_DEMASIADO_LARGO`). |
 | XI. Una sola fuente de verdad | ¿Nada duplicado? | PASA en diseño — reglas de etapa en `shared-types`; "¿completó?" en `CaminoService`; validaciones del registro extraídas para registro y alta; `PedirEnNombreDe` en `packages/ui` (lo usan Admin y Discipulador); `tienePermisoSesion` deja de ser del backoffice; los subtítulos de las etapas, una clave por etapa usada por Primeros pasos y Mi camino. Las pantallas del Discipulador se **mueven**, no se copian. |
 
 Sin violaciones. **Re-chequeo después del diseño:** sin cambios.
@@ -144,7 +148,7 @@ packages/shared-types/src/
 │                             #   normalizarTelefono(), normalizarNombre() (los usa la API)
 ├── registro.ts               # NUEVO: validaciones del registro extraídas (registro + alta)
 ├── permisos.ts               # 4 permisos nuevos; tienePermisoSesion pasa acá (genérico)
-├── error-code.ts             # 10 códigos nuevos
+├── error-code.ts             # 9 códigos nuevos (los de campo no van acá)
 ├── eventos-historial.ts      # NUEVO: eventos de FR-018
 └── index.ts
 
@@ -159,7 +163,10 @@ apps/api/
 └── src/
     ├── camino/               # NUEVO módulo
     │   ├── camino.module.ts
-    │   ├── camino.service.ts        # completoEtapa(), estadoDeEtapas(); la ÚNICA fuente de FR-016
+    │   ├── consultas.ts             # completoEtapa(tx,…), bloquearPersona(tx,…): funciones de tx
+    │   │                            #   puras, sin DI (las importan camino y solicitud-discipulado sin
+    │   │                            #   ciclo de módulos); completoEtapa absorbe cursaOCompletoVidaNueva
+    │   ├── camino.service.ts        # estadoDeEtapas(); la ÚNICA fuente de FR-016 vía consultas.ts
     │   ├── camino.controller.ts     # GET /camino/me, POST/DELETE /camino/me/declaraciones
     │   ├── historial-admin.service.ts / .controller.ts  # resolver, registrar, anular
     │   └── eventos.ts
@@ -181,7 +188,7 @@ apps/backoffice/src/
 ├── app/solicitudes/                 # bandeja con tipo "Historial previo"; historial/[id]/ NUEVO
 ├── app/personas/                    # "Dar de alta", "Registrar una etapa hecha", "Agregar email",
 │   └── nueva/                       #   "Sin acceso a la app"; NUEVO formulario de alta
-├── app/mis-discipulados/, mi-disponibilidad/, mis-grupos/   # pasan a redirect (page.tsx de 5 líneas)
+├── app/mis-discipulados/, mi-disponibilidad/, mis-grupos/   # se BORRAN; next.config.ts `redirects()`
 ├── app/page.tsx + not-found.tsx     # pantalla terminal "Lo tuyo está en la app"
 └── config/nav.ts                    # sin los tres ítems; entradas de las rutas nuevas
 ```
@@ -200,7 +207,7 @@ tamaños de D150). Lo que usan las dos apps baja a `packages/ui`.
 | **001** Fase de Bienvenida | El formulario y las validaciones del registro (Flujo 2), `CampoTelefono`, el normalizado de teléfono (D90). | En `main`. |
 | **007** Ingreso con código por email | "Si después se le agrega un email, entra con el código" (D145). Esta spec **no** depende de 007 para nada propio; 007 **sí** tiene que convivir con `Persona.email` opcional (ver nota abajo). | En paralelo (`origin/007-ingreso-codigo-email`). |
 | **012** Notificaciones | Envía los eventos de FR-018. | Futura. |
-| Specs de **Vida de Servicio**, **Ministerio** y **Bautismo** | **Consumen** lo de esta spec: `CaminoService.completoEtapa`, `reglaDeEtapa`, y sacan su etapa de `ETAPAS_CONSTRUIDAS`/`proximamente`. Bautismo construye la habilitación por el Admin (D147). Vida de Servicio construye Mis grupos en la web app (D142). | Futuras. |
+| Specs de **Vida de Servicio**, **Ministerio** y **Bautismo** | **Consumen** lo de esta spec: `completoEtapa` (`apps/api/src/camino/consultas.ts`), `reglaDeEtapa`, y sacan su etapa de `ETAPAS_CONSTRUIDAS`/`proximamente`. Bautismo construye la habilitación por el Admin (D147). Vida de Servicio construye Mis grupos en la web app (D142). | Futuras. |
 
 **Nota de coordinación con 007:** si 007 se mergea antes, su búsqueda de Persona por email ya no
 puede asumir `email` no nulo en los tipos (`string | null`); si se mergea después, al rebasear
@@ -208,15 +215,15 @@ tiene que tomar el `schema.prisma` con `email String?`. Ninguna de las dos specs
 significado de la otra: 007 busca por un email concreto, que nunca coincide con un `NULL`.
 
 **Nota de coordinación con D150:** si otra spec implementa antes el `Button` de 44 px y la letra
-de 16 px como default de `apps/web`, la tarea T005 de esta spec se reduce a usarlo; si no, la hace
+de 16 px como default de `apps/web`, la tarea T021 de esta spec se reduce a usarlo; si no, la hace
 esta spec (y actualiza `docs/15`).
 
 ## Paralelización (para `/speckit-tasks`)
 
 - **Lote 0 — base (secuencial, una sola sesión):** `packages/shared-types` (`camino.ts`,
   `registro.ts`, `persona.ts`, permisos, códigos, eventos, `tienePermisoSesion` genérico);
-  `schema.prisma` + migración + SQL; el módulo `camino` registrado con `CaminoService.completoEtapa`
-  (lo usan A y D); `PedirEnNombreDe` a `packages/ui`; `CardEtapa` en `packages/ui`; el proyecto
+  `schema.prisma` + migración + SQL; el módulo `camino` registrado y `camino/consultas.ts` con `completoEtapa` y
+  `bloquearPersona` (lo usan A, B y D); `PedirEnNombreDe` a `packages/ui`; `CardEtapa` en `packages/ui`; el proyecto
   `celular` de Playwright en `apps/web`; `requerirPermiso` en `apps/web/src/auth.ts`; D150 si
   falta; las entradas de `nav.ts`/`nav-app.ts`; los namespaces de los dos `es.json`; fixtures y
   seed base.
@@ -235,8 +242,8 @@ esta spec (y actualiza `docs/15`).
 
 Dependencias reales entre lotes: B y D tocan los dos `apps/backoffice/src/app/personas/` — B suma
 una acción en la fila y D otra; se coordinan en `personas-cliente.tsx` (o B va después de D). A
-y B comparten `camino.service.ts`, que el lote 0 deja con `completoEtapa`; A le agrega
-`estadoDeEtapas` y B no lo toca. C no comparte archivos con A, B ni D salvo `es.json` (namespaces
+y B comparten `camino/consultas.ts`, que deja el lote 0; A agrega `estadoDeEtapas` a
+`camino.service.ts` y B escribe `historial-admin.*`. C no comparte archivos con A, B ni D salvo `es.json` (namespaces
 separados que deja el lote 0). El e2e "declarar → confirmar → Mi camino actualizado" cruza A y B:
 va al final.
 
@@ -264,7 +271,7 @@ decisiones se le agregan al mergear, con el número que siga:
    declaración) tendrían que fingir una declaración. Con la forma común (`personaId`, `estado`,
    `creadoPorId`, `revisadoPorId`, fecha) la declaración entra a la bandeja unificada sin un caso
    especial, que es para lo que D31 mantuvo esa forma.
-3. **Una única consulta "¿completó esta etapa?" en la API (`CaminoService.completoEtapa`), que
+3. **Una única consulta "¿completó esta etapa?" en la API (`completoEtapa` (`apps/api/src/camino/consultas.ts`)), que
    cada spec de etapa extiende con su fuente "por el sistema", y una única regla de habilitación
    por etapa en `shared-types` (`reglaDeEtapa`).** **Por qué:** `docs/04` dice que el prerrequisito
    se chequea "por ambos caminos" — si cada spec (Vida de Servicio, Ministerio, Bautismo) escribe
@@ -284,7 +291,10 @@ decisiones se le agregan al mergear, con el número que siga:
    `mi-disponibilidad` y el cascarón de `mis-grupos` salen del backoffice; sus rutas redirigen a la
    web app, y quien no tiene ningún ítem aterriza en una pantalla terminal "Lo tuyo está en la
    app" (nunca un error ni un bucle, H-134). La URL de la web app la recibe el backoffice por
-   variable de entorno (`NEXT_PUBLIC_WEB_APP_URL`). **Por qué:** D142 dice que Discipuladores y
+   variable de entorno (`NEXT_PUBLIC_WEB_APP_URL`). Las redirecciones van en `redirects()` de
+   `next.config.ts` (las páginas se borran: la regla de lint `pantalla-declara-permiso` exige que
+   toda `page.tsx` tenga ítem de menú y permiso), y la pantalla terminal decide su texto por
+   permiso del catálogo, nunca por rol literal (regla `sin-rol-de-sesion-en-pantallas`, D132). **Por qué:** D142 dice que Discipuladores y
    Líderes usan la web app "para todo lo suyo"; dejar Mis grupos como cascarón vacío en el
    backoffice contradiría eso y haría que el Líder de curso aterrice en una pantalla sin nada. Las
    redirecciones existen porque esas URLs ya están en favoritos y en mensajes de WhatsApp de la
@@ -312,11 +322,21 @@ la web app (#12).
   §3, quitar las filas **Discipulador** y **Líder de curso** del menú del backoffice, y en Admin
   "Personas (incluye alta de adultos, D97)" queda igual; anotar la pantalla terminal.
 - `docs/15-guia-ux-ui.md`: el glosario ("Ya lo hice", "Registrado por la iglesia", "Historial
-  previo"), y la sección Celular con D150 (si la implementa esta spec, T005).
+  previo"), y la sección Celular con D150 (si la implementa esta spec, T021); en la sección "Miga de pan", que el selector de Mi camino es subnavegación de una sección, no un segundo sistema de ubicación.
 - `docs/02-alcance-mvp.md`: "Alta de Personas adultas por el Admin" (sin "o un Discipulador").
+- `docs/07-flujos-casos-de-uso.md`, también: Flujo 7/Flujo 2 donde dice "Admin o un Discipulador" dan el
+  alta; Flujo 3 paso 1, que el Discipulador también puede crear la Solicitud en nombre de alguien
+  sin app (D143).
+- `docs/14-navegacion.md` §2: Mi camino muestra **las cuatro etapas siempre** (con su estado), no
+  "solo lo que aplica".
 - `docs/12-contenido-bienvenida.md`: el texto provisorio de Bautismo, marcado D98, si Echu no da
   otro (pregunta 3).
 - `docs/05-decisiones.md`: las cinco decisiones de arriba, numeradas.
+
+**Sobre el Principio I ("docs antes o junto con el código"):** el pedido de esta corrida prohíbe
+editar `docs/` en paralelo, así que estos cambios quedan listados acá. La tarea T000 los aplica
+**antes del lote 0**, en el mismo PR de implementación, después de que Echu apruebe el spec y
+responda las Preguntas — no después del código.
 
 ## Complexity Tracking
 

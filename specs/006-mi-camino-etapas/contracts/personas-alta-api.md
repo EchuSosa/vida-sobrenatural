@@ -21,13 +21,12 @@ Cuerpo `DatosAltaPersona` (`data-model.md`):
 Orden de validación:
 
 1. Campos: `erroresDeDatosPersonales` (shared, los mismos del registro) + `email` con formato si
-   viene + `consentimiento === true` (`CONSENTIMIENTO_REQUERIDO`, ya existe). Todo junto →
-   **400** `VALIDACION` con `errors: [{campo, code}]` (H-50).
-2. Edad < 18 → **400** `VALIDACION` con `{campo: "fechaNacimiento", code: "ALTA_MENOR_DE_EDAD"}`
-   (FR-033).
-3. Email (normalizado) ya usado → **409** `EMAIL_DUPLICADO` con `errors: [{campo: "email", code:
+   viene + `consentimiento === true` (`CONSENTIMIENTO_REQUERIDO`, ya existe) + edad < 18 →
+   `{campo: "fechaNacimiento", code: "ALTA_MENOR_DE_EDAD"}` (FR-033). Todo junto → **400**
+   `VALIDACION` con `errors: [{campo, code}]` (H-50).
+2. Email (normalizado) ya usado → **409** `EMAIL_DUPLICADO` con `errors: [{campo: "email", code:
    "EMAIL_DUPLICADO"}]` (FR-034). El índice único lo garantiza ante carreras.
-4. Si `confirmarPosibleDuplicado !== true`: busca coincidencias (research #7). Si hay → **409**
+3. Si `confirmarPosibleDuplicado !== true`: busca coincidencias (research #7). Si hay → **409**
    `POSIBLE_DUPLICADO`:
 
 ```json
@@ -40,7 +39,7 @@ Orden de validación:
 }
 ```
 
-5. Crea la Persona (`estado: activa`, `origenAlta: admin`, `altaPor: <sesión>`,
+4. Crea la Persona (`estado: activa`, `telefonoNormalizado`, `origenAlta: admin`, `altaPor: <sesión>`,
    `consentimientoDatos: true`, `consentimientoDatosFecha: now`, `consentimientoDatosOrigen:
    presencial`) y, en la misma transacción, `RolesDeEstadoService.otorgarRolDeEstado(id,
    'miembro_registrado')`.
@@ -66,7 +65,7 @@ Flujo 9, fuera de alcance). Formato → `VALIDACION`; usado → `EMAIL_DUPLICADO
 
 Unit: `normalizarTelefono` (tres formas del mismo número, otro país), `normalizarNombre` (tildes,
 mayúsculas, espacios), `sonPosiblesDuplicados` (teléfono, nombre+apellido+fecha, homónimo con otra
-fecha = no). Integración: alta sin email; alta con email; email duplicado; menor de edad; aviso
+fecha = no). Integración (`*.integration-spec.ts`): alta sin email; alta con email; email duplicado; menor de edad; aviso
 por teléfono escrito distinto; aviso contra Persona inactiva; reintento con confirmación crea;
 doble envío concurrente con el mismo email → uno solo; `miembro_registrado` presente; Discipulador
 y Pastor → 403; agregar email a quien no tiene; a quien tiene → `EMAIL_YA_CARGADO`.

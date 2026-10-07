@@ -9,7 +9,7 @@ Fase 0 del plan. Cada decisión: qué se eligió, por qué, y qué se descartó.
   `EstadoMiDiscipulado` que ya calcula `estadoPropio` de la 004; para todas: la declaración más
   reciente y la Completitud vigente; edad) y los pasa a `estadoDeEtapa(etapa, hechos)`, una
   función pura de `packages/shared-types/src/camino.ts`. La habilitación usa `reglaDeEtapa(etapa,
-  completas)`, también pura. No se guarda ningún "estado de etapa".
+  completas, enCurso)`, también pura. No se guarda ningún "estado de etapa".
 - **Rationale**: D137 ya fijó el criterio (no guardar lo que se puede calcular de una fuente que
   existe). Las funciones puras se testean sin Prisma (Principio VI) y la web app las puede usar
   para textos sin otra llamada.
@@ -50,12 +50,21 @@ Declaración:  pendiente ──confirmar(Admin)──▶ confirmada  (+ crea Com
                  └──retirar(Persona)──▶ retirada
 Completitud:  vigente ──anular(Admin)──▶ anulada (anuladaEn, anuladaPorId)
 Registro directo (Admin): crea Completitud origen=admin; si hay declaración pendiente de esa
-etapa, la confirma en la misma transacción.
+etapa, la confirma en la misma transacción y la Completitud queda origen=declaracion vinculada a
+ella (el CHECK de data-model lo exige). Eventos: completitud_manual_registrada siempre; además
+declaracion_historial_confirmada si había declaración.
 ```
 
 ## 5. Concurrencia entre pedido de Vida Nueva, declaración y Completitud
 
-- **Decision**: las cinco operaciones que pueden chocar (pedir Vida Nueva propio o en nombre,
+- **Decision**: `bloquearPersona(tx, id)` y `completoEtapa(tx, id, etapa)` viven en
+  `apps/api/src/camino/consultas.ts` como funciones de transacción sin inyección de dependencias,
+  para que `solicitud-discipulado` y `camino` las importen sin un ciclo de módulos Nest
+  (`estadoDeEtapas` usa `estadoPropio` de `solicitud-discipulado`, y el pedido usa
+  `completoEtapa`). `completoEtapa` **reemplaza** a `cursaOCompletoVidaNueva`
+  (`apps/api/src/discipulado/consultas.ts`) para la parte "completó", y esta pasa a llamarla —
+  una sola consulta, Principio XI.
+- Las cinco operaciones que pueden chocar (pedir Vida Nueva propio o en nombre,
   declarar, confirmar, registrar directo) empiezan bloqueando la fila de la Persona
   (`SELECT … FROM personas WHERE id = $1 FOR UPDATE`) y recién después leen el estado. Los índices
   únicos parciales (una `pendiente` por Persona y etapa; una Completitud vigente por Persona y
@@ -83,12 +92,13 @@ etapa, la confirma en la misma transacción.
 
 - **Decision**:
   - **Teléfono**: `normalizarTelefono` en `shared-types` — solo dígitos; si el código de país es
-    `54`, se quita el `9` de celular que sigue al 54, y un `15` después del código de área no se
-    intenta interpretar (el input estructurado de D90 ya no lo permite). Se compara contra
-    `normalizarTelefono(persona.telefono)`. Para no recorrer la tabla, la API filtra por los
-    **últimos 8 dígitos** con un índice (columna calculada no; `telefono` ya se guarda en el
-    formato del input estructurado, y se agrega `@@index([telefono])`; la comparación fina se hace
-    en memoria entre los candidatos).
+    `54`, se quita el `9` de celular que sigue al 54 (el 0 y el 15 no llegan: el input
+    estructurado de D90 los separa). Como `telefono` se guarda con espacios (`TELEFONO_REGEX`), se
+    agrega la columna **`Persona.telefonoNormalizado`**, escrita por la API con `normalizarTelefono`
+    en cada creación o cambio de teléfono (registro, alta, edición de perfil), con índice y
+    comparación por igualdad. La migración la completa para las filas existentes con el mismo
+    algoritmo (script de datos en TS dentro de la migración, o `regexp_replace` equivalente con un
+    test que compare los dos).
   - **Nombre + apellido + fecha**: se buscan las Personas con la misma `fechaNacimiento`
     (`@@index([fechaNacimiento])`, pocas filas por fecha) y se comparan `normalizarNombre(nombre)`
     y `normalizarNombre(apellido)` en la API: minúsculas, sin tildes (`NFD` + quitar marcas),
@@ -157,10 +167,10 @@ etapa, la confirma en la misma transacción.
 ## 12. D150 en la web app
 
 - **Decision**: si al implementar `main` no tiene todavía el default de 44 px / 16 px en `apps/web`,
-  la tarea T005 lo hace: el `Button` de `packages/ui` gana un tamaño `app` (h-11, `text-base`) y
-  `apps/web` lo usa como default vía un wrapper o la variante por defecto según cómo lo haya
-  dejado `packages/ui` (el backoffice no cambia); las etiquetas y ayudas de formularios de la web
-  pasan a `text-base`. Se actualiza `docs/15` §Celular. Si ya existe, T005 se cierra sin cambios.
+  la tarea T021 lo hace: se reutiliza el tamaño `xl` (h-11) que ya tiene el `Button` de
+  `packages/ui` (sumándole `text-base`), y `apps/web` lo usa como default (el backoffice no
+  cambia); las etiquetas y ayudas de formularios de la web
+  pasan a `text-base`. Se actualiza `docs/15` §Celular. Si ya existe, T021 se cierra sin cambios.
 - **Rationale**: D150 lo pide "en la tarea que lo implemente"; esta spec mueve tres pantallas al
   celular y no puede esperar a otra.
 
@@ -175,13 +185,17 @@ etapa, la confirma en la misma transacción.
 
 ## 14. Backoffice: redirecciones y pantalla terminal
 
-- **Decision**: `apps/backoffice/src/app/mis-discipulados/page.tsx`, `[id]/page.tsx`,
-  `mi-disponibilidad/page.tsx` y `mis-grupos/page.tsx` pasan a hacer `redirect()` a
-  `${NEXT_PUBLIC_WEB_APP_URL}/mis-discipulados[/id]`, `/mi-disponibilidad` y `/mi-camino`. Se
-  sacan sus entradas de `NAV_BACKOFFICE` (y del recorrido de axe). La pantalla terminal de
+- **Decision**: se **borran** `apps/backoffice/src/app/{mis-discipulados,mi-disponibilidad,mis-grupos}/`
+  y las redirecciones a `${NEXT_PUBLIC_WEB_APP_URL}/mis-discipulados[/:id]`, `/mi-disponibilidad` y
+  `/mi-camino` van en `redirects()` de `apps/backoffice/next.config.ts` (antes de cualquier
+  layout, sin sesión: la web app pide la suya). Una `page.tsx` que solo redirige rompería la
+  regla de lint `pantalla-declara-permiso` (toda página necesita ítem en `NAV_BACKOFFICE` y
+  `requerirPermiso`). Se sacan sus entradas de `NAV_BACKOFFICE` (y del recorrido de axe). La pantalla terminal de
   `itemDeAterrizaje === null` (H-134, ya existe para una cuenta sin rol) cambia su texto según el
-  caso: si la sesión tiene `discipulador` o `lider_curso`, "Tus discipulados y tu disponibilidad
-  están en la app" + "Ir a la app"; si no tiene ningún rol, el texto actual. Variable nueva en
-  `.env.example` y en `specs/revision-manual/COMO-ARRANCAR.md` (`http://localhost:3001` en local,
+  caso, **por permiso del catálogo** (nunca rol literal, regla `sin-rol-de-sesion-en-pantallas`):
+  con `mis_discipulados.ver`, "Tus discipulados y tu disponibilidad están en la app"; con
+  `mis_grupos.ver` (sin el anterior), "Lo tuyo está en la app"; en ambos, "Ir a la app"; sin
+  ninguno, el texto actual. Variable nueva en `apps/backoffice/.env.local.example`, en el `env` del
+  `webServer` de `apps/backoffice/playwright.config.ts` y en `specs/revision-manual/COMO-ARRANCAR.md` (`http://localhost:3001` en local,
   D104).
 - **Rationale**: ver Decisión nueva 5. Un `redirect` server-side evita pintar la pantalla vieja.

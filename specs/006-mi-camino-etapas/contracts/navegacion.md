@@ -58,7 +58,8 @@ función muestra 404/terminal: distinto destino, misma regla).
 Server component: si la sesión tiene `mis_discipulados.ver`, pide `GET
 /discipulado/mis-discipulados` (endpoint existente, sin cambios) y cuenta propuestas pendientes +
 finalizaciones/bajas rechazadas no vueltas a proponer (la misma función `pendientesDelDiscipulador`
-que usa Mis discipulados, en `apps/web`). Si es > 0, una tarjeta con ícono + texto ("Tenés
+que usa Mis discipulados; pura, en `packages/shared-types/src/discipulado.ts`, testeada desde
+`apps/api/test/unit/`). Si es > 0, una tarjeta con ícono + texto ("Tenés
 {n, plural, one {# cosa} other {# cosas}} para revisar en tus discipulados") que enlaza a
 `/mis-discipulados`. Si la llamada falla, el aviso no se muestra y el Inicio sigue (no rompe la
 pantalla por algo secundario).
@@ -71,7 +72,7 @@ pantalla por algo secundario).
 - **Entran** (con `enMenu: false`, para el recorrido de axe): `/personas/nueva`
   (`personas.alta`), `/solicitudes/historial/[id]` (`solicitudes.ver`).
 
-### Redirecciones (research #14)
+### Redirecciones (research #14) — `redirects()` en `apps/backoffice/next.config.ts`; las cuatro páginas se borran
 
 | Ruta vieja | Destino |
 |---|---|
@@ -80,14 +81,16 @@ pantalla por algo secundario).
 | `/mi-disponibilidad` | `${NEXT_PUBLIC_WEB_APP_URL}/mi-disponibilidad` |
 | `/mis-grupos` | `${NEXT_PUBLIC_WEB_APP_URL}/mi-camino` |
 
-Sin exigir sesión antes de redirigir (la web app pide la suya).
+Sin exigir sesión antes de redirigir (corren antes del layout; la web app pide la suya).
 
 ### Pantalla terminal (FR-025)
 
-Cuando `itemDeAterrizaje(roles) === null`: si `roles` incluye `discipulador` o `lider_curso` →
-título "Lo tuyo está en la app", texto "Tus discipulados y tu disponibilidad ahora se manejan
-desde la app, también en el celular.", botón principal "Ir a la app"
-(`NEXT_PUBLIC_WEB_APP_URL/mi-camino`). Si no → el texto actual de H-134. Nunca `redirect` (bucle).
+Cuando `itemDeAterrizaje(roles) === null`, por **permiso** (nunca rol literal, D132): con
+`mis_discipulados.ver` → título "Lo tuyo está en la app", texto "Tus discipulados y tu
+disponibilidad ahora se manejan desde la app, también en el celular."; con `mis_grupos.ver` (sin
+el anterior) → "Lo tuyo está en la app" con un texto genérico; en los dos, botón principal "Ir a la
+app" (`NEXT_PUBLIC_WEB_APP_URL/mi-camino`). Sin ninguno → el texto actual de H-134. Nunca
+`redirect` (bucle).
 
 ### Personas (`/personas`)
 

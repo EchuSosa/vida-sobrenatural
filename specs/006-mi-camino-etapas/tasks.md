@@ -36,11 +36,15 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 
 ---
 
+## Phase 0: Gate (antes de todo)
+
+- [ ] T000 Echu aprueba el spec (PR) y responde las "Preguntas para Echu"; se aplican sus respuestas a spec/plan/tasks y, en el mismo PR de implementación y **antes** del lote 0, los "Cambios a docs al mergear" de `plan.md` con las cinco decisiones numeradas en `docs/05` (mirando el último número usado, D89/D103) — Principio I
+
 ## Phase 1: Setup (lote 0)
 
-- [ ] T001 Agregar `NEXT_PUBLIC_WEB_APP_URL` a `apps/backoffice/.env.example`, a la validación de entorno del backoffice y a `specs/revision-manual/COMO-ARRANCAR.md` (`http://localhost:3001`, D104) — research #14, FR-025
+- [ ] T001 Agregar `NEXT_PUBLIC_WEB_APP_URL` a `apps/backoffice/.env.local.example`, al `env` del `webServer` de `apps/backoffice/playwright.config.ts` (y del CI) y a `specs/revision-manual/COMO-ARRANCAR.md` (`http://localhost:3001`, D104) — research #14, FR-025
 - [ ] T002 [P] Agregar el proyecto `celular` (`grep: /@celular/`, `devices['Pixel 7']`) a `apps/web/playwright.config.ts`, y un helper `sinScrollHorizontal(page, ancho = 375)` en `apps/web/e2e/helpers.ts` — research #13, FR-027, SC-005
-- [ ] T003 [P] Crear los namespaces vacíos `etapas`, `miCamino.etapas`, `miCamino.selector`, `misDiscipulados`, `miDisponibilidad`, `inicio.pendientesDiscipulador` en `apps/web/src/messages/es.json`, y `personasAlta`, `historialPrevio`, `etapasPersona`, `loTuyoEnLaApp` en `apps/backoffice/src/messages/es.json` (cada lote los llena sin pisarse) — FR-040
+- [ ] T003 [P] Crear los namespaces vacíos `etapas` (`etapas.<etapa>.descripcion`, la única fuente de las descripciones), `miCamino.estados`, `miCamino.selector`, `misDiscipulados`, `miDisponibilidad`, `inicio.pendientesDiscipulador` en `apps/web/src/messages/es.json`, y `personasAlta`, `historialPrevio`, `etapasPersona`, `loTuyoEnLaApp` en `apps/backoffice/src/messages/es.json` (cada lote los llena sin pisarse) — FR-040
 
 ---
 
@@ -49,40 +53,40 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 **Shared types y reglas puras**
 
 - [ ] T004 Crear `packages/shared-types/src/camino.ts` con `EtapaCamino`, `ETAPAS_CAMINO`, `ETAPAS_CONSTRUIDAS`, `Completas`, `Requisito`, `requisitoDeEtapa`, `reglaDeEtapa`, `EstadoEtapa`, `HechosCamino`, `CaminoDeLaPersona`, `estadoDeEtapa` y `puedeDeclarar` según `data-model.md`, y exportarlo en `index.ts` — FR-002, FR-003, FR-004, FR-008, FR-016
-- [ ] T005 Test unitario `packages/shared-types/src/camino.spec.ts`: cada rama de `estadoDeEtapa` (orden de data-model, incluido `buscando` ≠ "en curso" para Bautismo), `reglaDeEtapa` para las cuatro etapas (VN siempre; Bautismo con VN `en_curso` o completa por sistema/historial; VS con VN completa; Ministerio con VS completa), `puedeDeclarar` (edad < 12, completa, pendiente, VN con pedido o Grupo, VN `baja` sí), y que `ETAPAS_CONSTRUIDAS` solo tenga `vida_nueva` — SC-002, FR-003, FR-008
-- [ ] T006 [P] Crear `packages/shared-types/src/registro.ts` con `DatosPersonales` y `erroresDeDatosPersonales` (extraídos de `apps/api/src/persona/dto/registro-persona.dto.ts` y `apps/web/src/hooks/use-formulario-registro.ts`, sin cambiar comportamiento) y su test unitario — FR-031, research #9
-- [ ] T007 [P] En `packages/shared-types/src/persona.ts`: `email: string | null` en los tipos de Persona que puede devolver la API, `sinAccesoALaApp`, `DatosAltaPersona`, `CoincidenciaDuplicado`, `normalizarTelefono`, `normalizarNombre`, `sonPosiblesDuplicados`; test unitario con las tres formas del mismo teléfono, otro país, tildes/mayúsculas/espacios y homónimo con otra fecha — FR-030, FR-035, research #7, SC-007
+- [ ] T005 Test unitario `apps/api/test/unit/camino.spec.ts` (ni `shared-types` ni `apps/web` tienen runner de unit; el repo testea `shared-types` desde acá): cada rama de `estadoDeEtapa` (orden de data-model, incluido `buscando` ≠ "en curso" para Bautismo), `reglaDeEtapa` para las cuatro etapas (VN siempre; Bautismo con VN `en_curso` o completa por sistema/historial; VS con VN completa; Ministerio con VS completa), `puedeDeclarar` (edad < 12, completa, pendiente, VN con pedido o Grupo, VN `baja` sí), y que `ETAPAS_CONSTRUIDAS` solo tenga `vida_nueva` — SC-002, FR-003, FR-008
+- [ ] T006 [P] Crear `packages/shared-types/src/registro.ts` con `DatosPersonales` y `erroresDeDatosPersonales` (extraídos de `apps/api/src/persona/dto/registro-persona.dto.ts`, `actualizar-perfil.dto.ts`, `apps/web/src/hooks/use-formulario-registro.ts` y `apps/web/src/components/perfil-formulario.tsx`, sin cambiar comportamiento; `TELEFONO_REGEX` ya está en shared-types y se reusa) y su test unitario en `apps/api/test/unit/registro-compartido.spec.ts` — FR-031, research #9
+- [ ] T007 [P] En `packages/shared-types/src/persona.ts`: `email: string | null` en los tipos de Persona que puede devolver la API, `sinAccesoALaApp`, `DatosAltaPersona`, `CoincidenciaDuplicado`, `normalizarTelefono`, `normalizarNombre`, `sonPosiblesDuplicados`; test unitario en `apps/api/test/unit/duplicados.spec.ts` con las tres formas del mismo teléfono, otro país, tildes/mayúsculas/espacios y homónimo con otra fecha — FR-030, FR-035, research #7, SC-007
 - [ ] T008 [P] En `packages/shared-types/src/permisos.ts`: permisos `personas.alta`, `personas.editar_email`, `historial.resolver`, `completitud_manual.gestionar` (solo `admin`); actualizar el test del catálogo para afirmar la matriz de FR-028 (incluido que `discipulador` NO tiene `personas.alta` y sí `solicitudes.crear_en_nombre`, `personas.buscar`, `mis_discipulados.*`, `mi_disponibilidad.*`) — FR-028, FR-029
-- [ ] T009 [P] En `packages/shared-types/src/error-code.ts`: los diez códigos de `data-model.md` y los de campo (`ALTA_MENOR_DE_EDAD`, `COMENTARIO_DEMASIADO_LARGO`, `MOTIVO_DEMASIADO_LARGO`, `NOTA_DEMASIADO_LARGA`) con su traducción en los dos `es.json` (mensaje que dice cómo corregir) — FR-041
+- [ ] T009 [P] En `packages/shared-types/src/error-code.ts`: los nueve códigos de `data-model.md`; los de campo (`ALTA_MENOR_DE_EDAD`, `COMENTARIO_DEMASIADO_LARGO`, `NOTA_DEMASIADO_LARGA`, y `MOTIVO_DEMASIADO_LARGO` reusado) **no** van ahí; todos con su traducción en los dos `es.json` (mensaje que dice cómo corregir) — FR-041
 - [ ] T010 [P] Crear `packages/shared-types/src/eventos-historial.ts` con los cuatro eventos de `contracts/eventos.md` — FR-018
 
 **Base de datos**
 
-- [ ] T011 En `apps/api/prisma/schema.prisma`: enums `EtapaCamino`, `EstadoDeclaracion`, `OrigenCompletitud`; modelos `DeclaracionHistorial` y `CompletitudManual`; `Persona.email String? @unique`; `@@index([telefono])` y `@@index([fechaNacimiento])` en Persona — FR-030, Key Entities, data-model
-- [ ] T012 Migración `apps/api/prisma/migrations/<fecha>_camino_historial_email_opcional/` generada por Prisma + el SQL a mano de `data-model.md` (índices únicos parciales, CHECK) — FR-010, FR-015
-- [ ] T013 Test de integración `apps/api/test/integration/camino-esquema.e2e-spec.ts`: el índice parcial rechaza dos `pendiente` de la misma etapa y dos Completitudes vigentes; los CHECK rechazan estados incoherentes; dos Personas con `email = NULL` conviven — FR-010, FR-015, FR-030
+- [ ] T011 En `apps/api/prisma/schema.prisma`: enums `EtapaCamino`, `EstadoDeclaracion`, `OrigenCompletitud`; modelos `DeclaracionHistorial` y `CompletitudManual`; `Persona.email String? @unique`; `Persona.telefonoNormalizado` con `@@index`, y `@@index([fechaNacimiento])` — FR-030, Key Entities, data-model
+- [ ] T012 Migración `apps/api/prisma/migrations/<fecha>_camino_historial_email_opcional/` generada por Prisma + el SQL a mano de `data-model.md` (índices únicos parciales, CHECK, backfill de `telefonoNormalizado`); registro (`PersonaService.create`) y edición de perfil escriben `telefonoNormalizado` con `normalizarTelefono` — FR-010, FR-015
+- [ ] T013 Test de integración `apps/api/test/integration/camino-esquema.integration-spec.ts`: el índice parcial rechaza dos `pendiente` de la misma etapa y dos Completitudes vigentes; los CHECK rechazan estados incoherentes; dos Personas con `email = NULL` conviven; el backfill SQL de `telefonoNormalizado` coincide con `normalizarTelefono` en todos los teléfonos del seed — FR-010, FR-015, FR-030
 - [ ] T014 Corregir en el mismo commit que T011 todo lo que deja de compilar por `email` opcional (tipos de `apps/api`, selects, fixtures de tests) — FR-038 (la auditoría de pantallas es T072)
 
 **Módulo `camino` y servicios compartidos**
 
-- [ ] T015 Crear `apps/api/src/camino/camino.module.ts` (registrado en `app.module.ts`) y `camino.service.ts` con `completoEtapa(tx, personaId, etapa): Promise<ComoSeCompleto | null>` (VN por sistema: Inscripción `completada` en un Curso de categoría `vida_nueva`; todas: Completitud vigente) y `bloquearPersona(tx, personaId)`; exportar el servicio para `solicitud-discipulado` y `persona` — FR-016, research #5, Decisión nueva 3
-- [ ] T016 Test de integración de `completoEtapa`: sin nada; VN por Grupo finalizado; VN por Completitud; Completitud anulada no cuenta; Bautismo/VS/Ministerio solo por Completitud — FR-016, SC-004
-- [ ] T017 [P] Crear `apps/api/src/camino/eventos.ts` (`emitirEventoHistorial`, mismo mecanismo no-op que `discipulado/eventos.ts`) — FR-018
+- [ ] T015 Crear `apps/api/src/camino/camino.module.ts` (registrado en `app.module.ts`) y `apps/api/src/camino/consultas.ts` con `completoEtapa(tx, personaId, etapa): Promise<ComoSeCompleto | null>` (VN por sistema: Inscripción `completada` en un Curso de categoría `vida_nueva`; todas: Completitud vigente) y `bloquearPersona(tx, personaId)`, como funciones de transacción sin DI (sin ciclo de módulos con `solicitud-discipulado`, research #5); `cursaOCompletoVidaNueva` de `apps/api/src/discipulado/consultas.ts` pasa a usar `completoEtapa` para la parte "completó" (una sola consulta, Principio XI) — FR-016, research #5, Decisión nueva 3
+- [ ] T016 Test de integración `apps/api/test/integration/completo-etapa.integration-spec.ts` de `completoEtapa`: sin nada; VN por Grupo finalizado; VN por Completitud; Completitud anulada no cuenta; Bautismo/VS/Ministerio solo por Completitud — FR-016, SC-004
+- [ ] T017 [P] Crear `apps/api/src/camino/eventos.ts` (`emitirEventoHistorial`, mismo mecanismo no-op que `discipulado/eventos.ts`) y `apps/api/test/unit/eventos-historial.spec.ts` modelado en `eventos-discipulado.spec.ts` (cada evento con su destinatario y datos, sin datos personales) — FR-018
 
 **Piezas de interfaz compartidas**
 
 - [ ] T018 Mover (`git mv`) `apps/backoffice/src/components/pedir-en-nombre-de.tsx` a `packages/ui/src/components/pedir-en-nombre-de.tsx`, sin dependencias de Next ni de `apiFetch`: recibe `buscar(q)`, `enviar(personaId, franjas)` y las etiquetas por props; textos de "no la encontramos" que remiten al equipo, sin alta (FR-029); exportar en `packages/ui/src/index.ts`; adaptar el uso del Admin en `apps/backoffice/src/app/solicitudes/solicitudes-cliente.tsx` sin cambio de comportamiento — FR-026, FR-029, research #11
 - [ ] T019 [P] Crear `packages/ui/src/components/card-etapa.tsx`: título, descripción (con `first-letter:uppercase`), estado con ícono + texto, zona de acciones, y `render` del enlace por prop (sin Next); sin rol de enlace cuando no hay destino — FR-001, FR-002, FR-004, research #3
-- [ ] T020 [P] Mover `tienePermisoSesion` de `apps/backoffice/src/auth.ts` a una función compartida (`tienePermiso(session.user.rol, permiso)` de `shared-types`) y crear `requerirPermiso(permiso)` en `apps/web/src/auth.ts` (sin permiso → `redirect('/mi-camino')`) — FR-024, contracts/navegacion.md
+- [ ] T020 [P] Crear `requerirPermiso(permiso)` en `apps/web/src/auth.ts` sobre `tienePermiso(session.user.rol, permiso)` de `shared-types` (sin permiso → `redirect('/mi-camino')`); el backoffice conserva su `tienePermisoSesion` — FR-024, contracts/navegacion.md
 - [ ] T021 D150 en `apps/web` (research #12): si `main` todavía no lo tiene, tamaño por defecto de 44 px y `text-base` para el `Button` que usa la web app y para etiquetas/ayudas de formularios; actualizar `docs/15-guia-ux-ui.md` §Celular; si ya existe, cerrar la tarea anotando el commit que lo trajo — FR-027
-- [ ] T022 [P] `apps/web/src/config/nav-app.ts`: `rutasRelacionadas` en Mi camino y `SUBNAV_MI_CAMINO` con permiso; `nav-app-bar.tsx` marca `aria-current` por prefijo; test unitario de "qué pestaña es actual" para `/mi-camino/vida-nueva`, `/mis-discipulados/x` y `/mi-disponibilidad` — FR-023
-- [ ] T023 [P] `apps/backoffice/src/config/nav.ts`: sacar `/mis-discipulados`, `/mis-discipulados/[id]`, `/mi-disponibilidad`, `/mis-grupos`; agregar `/personas/nueva` (`personas.alta`) y `/solicitudes/historial/[id]` (`solicitudes.ver`) con `enMenu: false`; actualizar el test de `itemsParaRoles`/`itemDeAterrizaje` (Discipulador solo → `null`) — FR-025, contracts/navegacion.md
+- [ ] T022 [P] `apps/web/src/config/nav-app.ts`: `rutasRelacionadas` en Mi camino y `SUBNAV_MI_CAMINO` con permiso; `nav-app-bar.tsx` marca `aria-current` por prefijo (la función `esItemActual(item, pathname)` pura, en `shared-types`, con test en `apps/api/test/unit/nav-app-actual.spec.ts` para `/mi-camino/vida-nueva`, `/mis-discipulados/x`, `/mi-disponibilidad` y `/mis-eventos`) — FR-023
+- [ ] T023 [P] `apps/backoffice/src/config/nav.ts`: sacar `/mis-discipulados`, `/mis-discipulados/[id]`, `/mi-disponibilidad`, `/mis-grupos`; agregar `/personas/nueva` (`personas.alta`) y `/solicitudes/historial/[id]` (`solicitudes.ver`) con `enMenu: false`; borrar `apps/backoffice/src/app/{mis-discipulados,mi-disponibilidad,mis-grupos}/` del menú (las páginas se borran en T061; la regla `pantalla-declara-permiso` debe seguir pasando en este commit — si no, este cambio de `nav.ts` va junto con T061). `itemDeAterrizaje` para Discipulador solo → `null` lo cubre T053 — FR-025, contracts/navegacion.md
 
 **Seed**
 
 - [ ] T024 Fixtures de test y `apps/api/prisma/seed-demo.ts` con los casos de `data-model.md` §Seed demo (declaraciones en cada estado, Completitudes vigentes y anuladas, Personas sin email, pares duplicados, datos hostiles) — FR-043
 
-**Checkpoint**: shared-types, esquema, `CaminoService.completoEtapa`, piezas de `packages/ui`, navegación y seed listos. Los lotes A–D pueden arrancar.
+**Checkpoint**: shared-types, esquema, `completoEtapa` (`apps/api/src/camino/consultas.ts`), piezas de `packages/ui`, navegación y seed listos. Los lotes A–D pueden arrancar.
 
 ---
 
@@ -94,15 +98,15 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 
 ### Tests
 
-- [ ] T025 [P] [US1] Test de integración `apps/api/test/integration/camino-me.e2e-spec.ts` para `GET /camino/me`: siempre cuatro etapas en orden; Persona sin nada, con pedido (`buscando`), con Grupo en curso, finalizada, `baja`, menor de 12; `vidaNueva` igual a `GET /discipulado/me`; sin sesión 401 — FR-001, FR-005, FR-007, SC-002
-- [ ] T026 [P] [US1] E2E `apps/web/e2e/mi-camino-etapas.spec.ts` (`@celular` y escritorio, axe claro/oscuro): cuatro cards en orden; VN disponible → `/mi-camino/vida-nueva`; tres "Próximamente" sin enlace ni foco de acción; subtítulos iguales a los de `/primeros-pasos`; estados con texto visible (no solo color); menor de 12 sin botón — Historia 1 escenarios 1–6, SC-001 (apoyo), SC-008
+- [ ] T025 [P] [US1] Test de integración `apps/api/test/integration/camino-me.integration-spec.ts` para `GET /camino/me`: siempre cuatro etapas en orden; Persona sin nada, con pedido (`buscando`), con Grupo en curso, finalizada, `baja`, menor de 12; `vidaNueva` igual a `GET /discipulado/me`; sin sesión 401; última declaración `rechazada` → `no_confirmada`, rechazada y después retirada → sin mensaje — FR-001, FR-005, FR-007, SC-002
+- [ ] T026 [P] [US1] E2E `apps/web/e2e/mi-camino-etapas.spec.ts` (`@celular` y escritorio, axe claro/oscuro): cuatro cards en orden; VN disponible → `/mi-camino/vida-nueva`; tres "Próximamente" cuya card no es enlace y cuya única acción es "Ya lo hice"; subtítulos iguales a los de `/primeros-pasos`; estados con texto visible (no solo color); menor de 12 sin botón; API caída (ruta interceptada) → `error.tsx` con reintentar que funciona — Historia 1 escenarios 1–6, SC-001 (apoyo), SC-008
 - [ ] T027 [P] [US1] Actualizar `apps/web/e2e/mi-camino-vida-nueva.spec.ts` (004) a la ruta `/mi-camino/vida-nueva`, sin cambiar lo que afirma — FR-005
 
 ### Implementation
 
 - [ ] T028 [US1] `CaminoService.estadoDeEtapas(personaId)`: junta `HechosCamino` (reusa `estadoPropio` de `solicitud-discipulado` para `vidaNueva`, declaraciones recientes y Completitudes, en paralelo) y aplica `estadoDeEtapa`; `GET /camino/me` en `apps/api/src/camino/camino.controller.ts` — FR-007, contracts/camino-api.md
 - [ ] T029 [US1] Mover el contenido de `apps/web/src/app/(app)/mi-camino/{page.tsx,mi-camino-cliente.tsx}` a `apps/web/src/app/(app)/mi-camino/vida-nueva/` (`page.tsx`, `vida-nueva-cliente.tsx`, `loading.tsx`, `error.tsx`, miga "Mi camino › Vida Nueva"), sin cambio de comportamiento — FR-005
-- [ ] T030 [US1] Mover los textos `primerosPasos.paso2Descripcion`…`paso4Descripcion` a `etapas.<etapa>.descripcion` en `apps/web/src/messages/es.json` y hacer que `apps/web/src/app/(publica)/primeros-pasos/page.tsx` los lea de ahí; sumar `etapas.bautismo.descripcion` provisorio (marcado D98) — FR-001, research #3
+- [ ] T030 [US1] Mover los textos `primerosPasos.paso2Descripcion`…`paso4Descripcion` a `etapas.<etapa>.descripcion` (único namespace de descripciones) en `apps/web/src/messages/es.json` y hacer que `apps/web/src/app/(publica)/primeros-pasos/page.tsx` los lea de ahí; sumar `etapas.bautismo.descripcion` provisorio (marcado D98) — FR-001, research #3
 - [ ] T031 [US1] Rehacer `apps/web/src/app/(app)/mi-camino/page.tsx`: pide `GET /camino/me`, pinta una `CardEtapa` por etapa con el texto de su estado (para VN, el de la 004 según `vidaNueva`) y "¿Y ahora qué?"; `loading.tsx` con cuatro esqueletos; `error.tsx` con reintentar — FR-001, FR-002, FR-004, FR-005, FR-006
 - [ ] T032 [US1] Checklist `docs/15` para `/mi-camino` (rehecha): una acción principal por card, estados de carga/error/éxito, se entiende qué sigue en cada estado, tono, celular 375 px con teclado y lector de pantalla, contraste claro/oscuro — D114
 - [ ] T033 [US1] Checklist `docs/15` para `/mi-camino/vida-nueva` (nueva ruta del contenido de la 004) — D114
@@ -120,28 +124,31 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 
 ### Tests
 
-- [ ] T035 [P] [US2] Integración `apps/api/test/integration/declaraciones.e2e-spec.ts` (lote A): declarar (201); segunda pendiente de la misma etapa → `DECLARACION_YA_PENDIENTE`; con VN `buscando`/en curso → `ETAPA_EN_CURSO`; con Completitud → `ETAPA_YA_COMPLETADA`; menor de 12 → `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO`; comentario de 501 → `VALIDACION`; retirar propia (204), ajena (404), no pendiente (409); se emite el evento — FR-008 a FR-011, FR-018, Historia 2 escenarios 1, 4, 5
-- [ ] T036 [P] [US2] Integración `apps/api/test/integration/historial-admin.e2e-spec.ts` (lote B): confirmar crea exactamente una Completitud `origen: declaracion`; doble confirmación concurrente → una gana; rechazar con motivo y verlo en `GET /camino/me`; confirmar con la etapa ya completa por sistema → `ETAPA_YA_COMPLETADA`; registro directo (con y sin declaración pendiente); registro con VN en curso → `ETAPA_EN_CURSO`; anular y volver a registrar; anular dos veces → `COMPLETITUD_NO_VIGENTE`; Pastor 403 en escrituras y 200 en lecturas; Discipulador 403 — FR-013 a FR-015, Historia 2 escenarios 2, 3, 7, 8, 9
-- [ ] T037 [P] [US2] Integración `apps/api/test/integration/pedido-vs-historial.e2e-spec.ts` (lote B): pedir VN (propio y en nombre) con declaración pendiente → `HISTORIAL_VIDA_NUEVA_EN_REVISION`; con Completitud → `VIDA_NUEVA_COMPLETADA_POR_HISTORIAL`; carrera pedir ∥ declarar → exactamente uno gana; después de confirmar, `completoEtapa` = `historial` — FR-017, Historia 2 escenario 6, SC-004
-- [ ] T038 [P] [US2] Integración de la bandeja: `GET /solicitudes` devuelve los dos tipos con la forma base, filtra por `tipo`, pagina sobre la unión, y las filas de Discipulado no cambian salvo `tipo`/`detalle` — FR-012
-- [ ] T039 [US2] E2E `apps/web/e2e/historial-previo.spec.ts` + `apps/backoffice/e2e/historial-previo.spec.ts` (va al final, cruza A y B; axe claro/oscuro; web en `@celular`): declarar Bautismo con comentario → "en revisión" → Admin confirma → "Registrado por la iglesia"; declarar VS → Admin no confirma con motivo → mensaje amable con el motivo y "Ya lo hice" otra vez; diálogos neutros (no rojos) — Historia 2 escenarios 1–3, SC-003, FR-009, FR-011
+- [ ] T035 [P] [US2] Integración `apps/api/test/integration/declaraciones.integration-spec.ts` (lote A): declarar (201); segunda pendiente de la misma etapa → `DECLARACION_YA_PENDIENTE`; con VN `buscando`/en curso → `ETAPA_EN_CURSO`; con Completitud → `ETAPA_YA_COMPLETADA`; menor de 12 → `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO`; comentario de 501 → `VALIDACION`; retirar propia (204), ajena (404), no pendiente (409); `declaracion_historial_creada` se emite una sola vez y después del commit (no si la transacción falla) — FR-008 a FR-011, FR-018, Historia 2 escenarios 1, 4, 5
+- [ ] T036 [P] [US2] Integración `apps/api/test/integration/historial-admin.integration-spec.ts` (lote B): confirmar crea exactamente una Completitud `origen: declaracion`, no cambia `Persona.rol` (FR-019) y emite `declaracion_historial_confirmada` una vez; rechazar emite `declaracion_historial_rechazada`; registro directo emite `completitud_manual_registrada` (y `…_confirmada` si había declaración); confirmar una ya retirada → `DECLARACION_NO_PENDIENTE`; registrar VN con VN completada por Grupo → `ETAPA_YA_COMPLETADA`; anular la de VN vuelve a ofrecer el pedido en `GET /camino/me`; doble confirmación concurrente → una gana; rechazar con motivo y verlo en `GET /camino/me`; confirmar con la etapa ya completa por sistema → `ETAPA_YA_COMPLETADA`; registro directo (con y sin declaración pendiente); registro con VN en curso → `ETAPA_EN_CURSO`; anular y volver a registrar; anular dos veces → `COMPLETITUD_NO_VIGENTE`; Pastor 403 en escrituras y 200 en lecturas; Discipulador 403 — FR-013 a FR-015, Historia 2 escenarios 2, 3, 7, 8, 9
+- [ ] T037 [P] [US2] Integración `apps/api/test/integration/pedido-vs-historial.integration-spec.ts` (lote B): pedir VN (propio y en nombre) con declaración pendiente → `HISTORIAL_VIDA_NUEVA_EN_REVISION`; con Completitud → `VIDA_NUEVA_COMPLETADA_POR_HISTORIAL`; carrera pedir ∥ declarar → exactamente uno gana; después de confirmar, `completoEtapa` = `historial` — FR-017, Historia 2 escenario 6, SC-004
+- [ ] T038 [P] [US2] Integración de la bandeja (`apps/api/test/integration/bandeja-tipos.integration-spec.ts`): `GET /solicitudes` devuelve los dos tipos con la forma base, filtra por `tipo`, aplica el mapeo de estado/orden/buscar por tipo de `contracts/historial-admin-api.md`, pagina sobre la unión, y las filas de Discipulado no cambian salvo `tipo`/`detalle`; `GET /discipulado/pendientes-admin` cuenta las declaraciones pendientes — FR-012
+- [ ] T039 [US2] E2E `apps/web/e2e/historial-previo.spec.ts` + `apps/backoffice/e2e/historial-previo.spec.ts` (va al final, cruza A y B; axe claro/oscuro; web en `@celular`): declarar Bautismo con comentario → "en revisión" → Admin confirma → "Registrado por la iglesia"; declarar VS → Admin no confirma con motivo → mensaje amable con el motivo y "Ya lo hice" otra vez; diálogos neutros (no rojos); la tarjeta de pendientes del Inicio del backoffice muestra "Historial previo por revisar" — Historia 2 escenarios 1–3, SC-003, FR-009, FR-011, FR-012
+- [ ] T039a [US2] Extender `apps/backoffice/e2e/pastor-solo-lectura.spec.ts`: el Pastor ve `/solicitudes/historial/[id]` y el panel "Etapas" de Personas sin "Confirmar", "No confirmar", "Registrar" ni "Anular" — Historia 2 escenario 9
 
 ### Implementation — lote A (Persona)
 
 - [ ] T040 [US2] `POST /camino/me/declaraciones` y `DELETE /camino/me/declaraciones/:id` en `camino.controller.ts`/`camino.service.ts` (bloqueo de Persona, `puedeDeclarar`, traducción de la violación del índice a `DECLARACION_YA_PENDIENTE`, evento) — FR-008 a FR-011, contracts/camino-api.md
-- [ ] T041 [US2] En `apps/web/src/app/(app)/mi-camino/`: "Ya lo hice" en cada card con `puedeDeclarar` (diálogo neutro con comentario opcional ≤ 500 y contador), estado "La iglesia lo está revisando" con "Retirar" (confirmación neutra), "Registrado por la iglesia", y el mensaje de no confirmada con motivo y enlace al WhatsApp de Secretaría; actualiza la card sin recargar — FR-002, FR-008, FR-009, FR-011, FR-040, D151
+- [ ] T041 [US2] En `apps/web/src/app/(app)/mi-camino/`: "Ya lo hice" en cada card con `puedeDeclarar` (diálogo neutro con comentario opcional ≤ 500 y contador), estado "La iglesia lo está revisando" con "Retirar" (confirmación neutra), "Registrado por la iglesia", y el mensaje de no confirmada con motivo y el contacto de la Sede de la Persona (`Sede.contactoTelefono`, como Visitanos; si no hay, "acercate a la Sede"); actualiza la card sin recargar — FR-002, FR-008, FR-009, FR-011, FR-040, D151
 - [ ] T042 [US2] Checklist `docs/15` para el diálogo "Ya lo hice" y los estados de historial en `/mi-camino` (foco al abrir y al cerrar, Escape, lector de pantalla, envío protegido) — D114
 
 ### Implementation — lote B (Admin)
 
-- [ ] T043 [US2] `apps/api/src/camino/historial-admin.service.ts` + `.controller.ts`: `GET /historial/declaraciones/:id`, `POST …/confirmar`, `POST …/rechazar`, `GET /personas/:id/camino`, `POST /personas/:id/completitudes`, `POST /personas/:id/completitudes/:id/anular` — FR-013, FR-014, FR-015, contracts/historial-admin-api.md
-- [ ] T044 [US2] En `apps/api/src/solicitud-discipulado/solicitud-discipulado.service.ts`: `crear()` bloquea la fila de la Persona al principio y rechaza por historial antes de las reglas existentes; `GET /solicitudes` une los dos tipos (research #6) — FR-012, FR-017
+- [ ] T043 [US2] `apps/api/src/camino/historial-admin.service.ts` + `.controller.ts`: `GET /historial/declaraciones/:id`, `POST …/confirmar`, `POST …/rechazar`, `GET /personas/:id/camino`, `POST /personas/:id/completitudes`, `POST /personas/:id/completitudes/:id/anular`, cada transición con su `emitirEventoHistorial` después del commit — FR-013, FR-014, FR-015, FR-018, contracts/historial-admin-api.md
+- [ ] T044 [US2] En `apps/api/src/solicitud-discipulado/solicitud-discipulado.service.ts`: `crear()` llama a `bloquearPersona` al principio y rechaza por historial (con `completoEtapa` y la declaración pendiente) antes de las reglas existentes; `GET /solicitudes` une los dos tipos con el mapeo de `contracts/historial-admin-api.md` (research #6) — FR-012, FR-017
 - [ ] T045 [US2] `apps/backoffice/src/app/solicitudes/`: filtro por tipo visible; columna/insignia de etapa en las filas de historial; cada fila enlaza a su detalle — FR-012
+- [ ] T045a [US2] Pendientes del Admin: `apps/api/src/discipulado/pendientes-admin.service.ts` suma la cantidad de declaraciones pendientes y `apps/backoffice/src/app/` (tarjeta de pendientes del Inicio) muestra "Historial previo por revisar" con enlace a la bandeja filtrada — FR-012
 - [ ] T046 [US2] `apps/backoffice/src/app/solicitudes/historial/[id]/` (`page.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`): datos, comentario, contexto, "Confirmar" (principal) y "No confirmar" con motivo opcional que avisa que la Persona lo lee; Pastor sin acciones; recarga si la API responde `DECLARACION_NO_PENDIENTE` — FR-013, D151
-- [ ] T047 [US2] `apps/backoffice/src/app/personas/`: acción "Etapas" por fila → panel lateral con el estado de las cuatro etapas (`GET /personas/:id/camino`), "Registrar una etapa hecha" (etapa + nota opcional) y "Anular" (confirmación: es reversible registrando de nuevo, estilo neutro); solo lectura para el Pastor — FR-014, FR-015
+- [ ] T047 [US2] `apps/backoffice/src/app/personas/acciones-etapas.tsx` (y su uso en `personas-cliente.tsx`): acción "Etapas" por fila → panel lateral con el estado de las cuatro etapas (`GET /personas/:id/camino`), "Registrar una etapa hecha" (etapa + nota opcional) y "Anular" (confirmación: es reversible registrando de nuevo, estilo neutro); solo lectura para el Pastor — FR-014, FR-015
 - [ ] T048 [US2] Checklist `docs/15` para `/solicitudes` (modificada) — D114
 - [ ] T049 [US2] Checklist `docs/15` para `/solicitudes/historial/[id]` (nueva) — D114
 - [ ] T050 [US2] Checklist `docs/15` para el panel "Etapas" de `/personas` — D114
+- [ ] T050a [US2] Checklist `docs/15` para `/` (Inicio del backoffice, tarjeta de pendientes con historial) — D114
 
 **Checkpoint**: el historial previo funciona de punta a punta; `completoEtapa` queda listo para las specs de cada etapa.
 
@@ -155,20 +162,20 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 
 ### Tests
 
-- [ ] T051 [P] [US3] Mover a `apps/web/e2e/` los e2e del lado del Discipulador (`mi-disponibilidad.spec.ts`, la parte del Discipulador de `discipulado-encuentros.spec.ts`, `propuestas.spec.ts`, `discipulado-baja.spec.ts`, `discipulado-finalizacion.spec.ts`), apuntando a las rutas de la web app y con `@celular`; lo del Admin queda en el backoffice — FR-020, SC-005
+- [ ] T051 [P] [US3] Mover a `apps/web/e2e/` los e2e del lado del Discipulador (`mi-disponibilidad.spec.ts`, la parte del Discipulador de `discipulado-encuentros.spec.ts`, `propuestas.spec.ts`, `discipulado-baja.spec.ts`, `discipulado-finalizacion.spec.ts`), apuntando a las rutas de la web app y con `@celular`; lo del Admin queda en el backoffice. Partir `apps/backoffice/e2e/vida-nueva-flujo-completo.spec.ts` en un flujo que cruza las dos apps (Admin en 3002, Discipuladora en 3001) — vive en `apps/web/e2e/` con la URL del backoffice por variable; ajustar `pendientes-tutor.spec.ts` (la referencia a Mis discipulados) y sacar `/mi-disponibilidad` de `RUTAS_SIN_CHEQUEO_PROPIO_ANTES` en `sesion-requerida.spec.ts` — FR-020, SC-005
 - [ ] T052 [P] [US3] E2E `apps/web/e2e/discipulador-web.spec.ts` (`@celular`, axe claro/oscuro): selector visible para la Discipuladora e invisible para otra Persona; pestaña Mi camino actual en las tres rutas; aviso de pendientes en Inicio con el número correcto y ausente sin pendientes; `/mis-discipulados` sin rol → Mi camino; ciclo aceptar → Encuentro con ausencia → proponer finalizar → franja → período sin scroll horizontal a 375 px y con objetivos ≥ 44 px — Historia 3 escenarios 1–6, FR-021 a FR-024, FR-027, SC-005
-- [ ] T053 [P] [US3] E2E `apps/backoffice/e2e/lo-tuyo-en-la-app.spec.ts`: Discipuladora sin otros roles → pantalla terminal con "Ir a la app"; las cuatro rutas viejas redirigen a la web app (con el id); Líder de curso solo → misma pantalla; Admin y Pastor no ven los ítems; actualizar `aterrizaje.spec.ts`, `axe-todas-las-rutas.spec.ts`, `dev-entrar.spec.ts` y `helpers.ts` — Historia 3 escenarios 7–8, FR-025, SC-006
-- [ ] T054 [P] [US3] Test unitario de `pendientesDelDiscipulador(respuestaMisDiscipulados)` en `apps/web`: propuestas pendientes + finalizaciones/bajas rechazadas no vueltas a proponer — FR-021, FR-022
+- [ ] T053 [P] [US3] E2E `apps/backoffice/e2e/lo-tuyo-en-la-app.spec.ts`: Discipuladora sin otros roles → pantalla terminal con "Ir a la app"; las cuatro rutas viejas redirigen a la web app (con el id); Líder de curso solo → misma pantalla; Admin y Pastor no ven los ítems; actualizar `aterrizaje.spec.ts`, `axe-todas-las-rutas.spec.ts`, `dev-entrar.spec.ts`, `pastor-solo-lectura.spec.ts`, `sesion-requerida.spec.ts` y `helpers.ts` — Historia 3 escenarios 7–8, FR-025, SC-006
+- [ ] T054 [P] [US3] Test unitario `apps/api/test/unit/pendientes-discipulador.spec.ts` de `pendientesDelDiscipulador(respuestaMisDiscipulados)` (pura, en `packages/shared-types/src/discipulado.ts`): propuestas pendientes + finalizaciones/bajas rechazadas no vueltas a proponer — FR-021, FR-022
 
 ### Implementation
 
 - [ ] T055 [US3] `git mv apps/backoffice/src/app/mis-discipulados apps/web/src/app/(app)/mis-discipulados` (con `[id]/`, `panel-motivo.tsx`, `formulario-encuentro.tsx`, `comun.ts`, `loading.tsx`, `error.tsx`, `not-found.tsx`) y adaptar a la web app: `requerirPermiso('mis_discipulados.ver')`, `auth()`/`apiToken` de la web, mensajes movidos al `es.json` de la web, migas de `contracts/navegacion.md`, sin menú lateral — FR-020, FR-024, research #11
 - [ ] T056 [US3] `git mv apps/backoffice/src/app/mi-disponibilidad apps/web/src/app/(app)/mi-disponibilidad` (con `editar-periodo.tsx`) y adaptar igual (`mi_disponibilidad.ver`) — FR-020, FR-024
-- [ ] T057 [US3] En Mis discipulados: sección "Pendientes" primero (propuestas + rechazos de finalización/baja con su motivo), después discipulados; enlace a Mi disponibilidad; `pendientesDelDiscipulador` en `apps/web/src/app/(app)/mis-discipulados/pendientes.ts` — FR-021
+- [ ] T057 [US3] En Mis discipulados: sección "Pendientes" primero (propuestas + rechazos de finalización/baja con su motivo), después discipulados; enlace a Mi disponibilidad; `pendientesDelDiscipulador` en `packages/shared-types/src/discipulado.ts` — FR-021
 - [ ] T058 [US3] `apps/web/src/app/(app)/mi-camino/selector-mi-camino.tsx` (desde `SUBNAV_MI_CAMINO`, visible con ≥ 2 ítems, `<nav>` con `aria-label`, enlaces reales, activo sin depender del color) en `/mi-camino`, `/mis-discipulados` y `/mi-disponibilidad` — FR-023, Decisión nueva 4
-- [ ] T059 [US3] `apps/web/src/app/(app)/inicio/page.tsx`: aviso de pendientes para quien tiene `mis_discipulados.ver` (plural por ICU; si la API falla, no se muestra) — FR-022
+- [ ] T059 [US3] `apps/web/src/app/(app)/inicio/page.tsx`: pasar sus textos fijos ("Hola,", "Este es tu Inicio…") a `next-intl` (D84), agregar `loading.tsx` y `error.tsx`, y el aviso de pendientes para quien tiene `mis_discipulados.ver` (plural por ICU; si la llamada de pendientes falla, el aviso no se muestra y el Inicio sigue) — FR-022, Principio VIII
 - [ ] T060 [US3] Ajustar las pantallas movidas a D150/D151: tamaños, confirmaciones neutras para declinar, retirar y borrar franja/período; zona del pulgar — FR-027
-- [ ] T061 [US3] Backoffice: `mis-discipulados/page.tsx`, `mis-discipulados/[id]/page.tsx`, `mi-disponibilidad/page.tsx` y `mis-grupos/page.tsx` pasan a `redirect()` a la web app; la pantalla terminal de `itemDeAterrizaje === null` (`app/page.tsx` y `not-found.tsx`) muestra "Lo tuyo está en la app" cuando la sesión tiene `discipulador` o `lider_curso`; borrar los mensajes del backoffice que quedaron sin uso — FR-025, research #14
+- [ ] T061 [US3] Backoffice: borrar `apps/backoffice/src/app/{mis-discipulados,mi-disponibilidad,mis-grupos}/` (lo que no se movió en T055/T056) y agregar las cuatro redirecciones a `redirects()` de `apps/backoffice/next.config.ts`; la pantalla terminal de `itemDeAterrizaje === null` (`app/page.tsx`, `not-found.tsx` o `boton-aterrizaje.tsx`) elige su texto **por permiso** (`tienePermisoSesion(s, 'mis_discipulados.ver')` / `'mis_grupos.ver'`), nunca por rol literal (reglas `sin-rol-de-sesion-en-pantallas` y `pantalla-declara-permiso` en verde); borrar los mensajes del backoffice que quedaron sin uso — FR-025, research #14
 - [ ] T062 [US3] Checklist `docs/15` para `/mis-discipulados` en la web app — D114
 - [ ] T063 [US3] Checklist `docs/15` para `/mis-discipulados/[id]` en la web app — D114
 - [ ] T064 [US3] Checklist `docs/15` para `/mi-disponibilidad` en la web app — D114
@@ -186,7 +193,7 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 **Independent Test**: el pedido en nombre aparece en la bandeja con el Discipulador como creador; el alta le da 403 (spec, Historia 4).
 
 - [ ] T067 [P] [US4] E2E en `apps/web/e2e/discipulador-web.spec.ts` (`@celular`, axe): pedir en nombre de una Persona sin email con dos franjas → "Listo, el equipo lo revisa"; Persona con pedido abierto o declaración pendiente → mensaje debajo del buscador; búsqueda sin resultados → texto que remite al equipo, sin botón de alta — Historia 4 escenarios 1–3
-- [ ] T068 [P] [US4] Integración en `apps/api/test/integration/personas-alta.e2e-spec.ts`: `POST /personas/alta` con token de Discipulador → 403 — Historia 4 escenario 4, FR-029
+- [ ] T068 [P] [US4] Integración en `apps/api/test/integration/personas-alta.integration-spec.ts`: `POST /personas/alta` con token de Discipulador → 403 — Historia 4 escenario 4, FR-029
 - [ ] T069 [US4] En `apps/web/src/app/(app)/mis-discipulados/`: "Pedir Vida Nueva en nombre de…" con `PedirEnNombreDe` de `packages/ui` (búsqueda `GET /personas/buscar`, envío `POST /discipulado/solicitudes`, solo con `solicitudes.crear_en_nombre`); mostrar los códigos de FR-017 y de la 004 debajo del buscador — FR-020, FR-026, FR-028, D143
 - [ ] T070 [US4] Revisar textos de `apps/web` y `apps/backoffice` que sugieran que el Discipulador da de alta (ayudas, estados vacíos) y remitir al Admin — FR-029
 - [ ] T071 [US4] Checklist `docs/15` para "Pedir Vida Nueva en nombre de…" en la web app (panel dentro de `/mis-discipulados`) — D114
@@ -202,17 +209,17 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 ### Tests
 
 - [ ] T072 [P] [US5] Auditoría de `email` (FR-038): `grep -rn "\.email" apps/ packages/` sin `!` ni `.toLowerCase()` sobre un posible `null`; `PersonasCliente`, panel de roles, `PedirEnNombreDe`, auditoría de cambios de rol y vista administrativa de discipulados con una Persona sin email del seed — test de componente o e2e por cada pantalla que lo muestre — FR-038
-- [ ] T073 [P] [US5] Integración `apps/api/test/integration/personas-alta.e2e-spec.ts`: alta sin email (activa, `origenAlta: admin`, `altaPor`, consentimiento presencial, `miembro_registrado`); con email (normalizado); email duplicado → `EMAIL_DUPLICADO` en el campo; menor → `ALTA_MENOR_DE_EDAD` en el campo; datos faltantes → todos los errores de campo juntos; aviso por teléfono escrito de tres formas; aviso por nombre+apellido+fecha con tildes; homónimo con otra fecha no avisa; aviso contra Persona inactiva; reintento con `confirmarPosibleDuplicado` crea; doble envío concurrente con el mismo email → una sola; Pastor 403; `PATCH /personas/:id/email` a quien no tiene (200), a quien tiene (`EMAIL_YA_CARGADO`), duplicado; login por `GET /personas/by-email` sigue igual — FR-030 a FR-037, Historia 5 escenarios 1, 3–9, SC-007
+- [ ] T073 [P] [US5] Integración `apps/api/test/integration/personas-alta.integration-spec.ts`: alta sin email (activa, `origenAlta: admin`, `altaPor`, consentimiento presencial, `miembro_registrado`); con email (normalizado); email duplicado → `EMAIL_DUPLICADO` en el campo; menor → `ALTA_MENOR_DE_EDAD` en el campo; datos faltantes → todos los errores de campo juntos (incluido `ALTA_MENOR_DE_EDAD` si corresponde); aviso por teléfono escrito de tres formas; aviso por nombre+apellido+fecha con tildes; homónimo con otra fecha no avisa; aviso contra Persona inactiva; reintento con `confirmarPosibleDuplicado` crea; doble envío concurrente con el mismo email → una sola; Pastor 403; `PATCH /personas/:id/email` a quien no tiene (200), a quien tiene (`EMAIL_YA_CARGADO`), duplicado; login por `GET /personas/by-email` sigue igual — FR-030 a FR-037, Historia 5 escenarios 1, 3–9, SC-007
 - [ ] T074 [P] [US5] E2E `apps/backoffice/e2e/personas-alta.spec.ts` (axe claro/oscuro, escritorio y `@celular`): envío vacío → errores por campo, resumen con enlaces y foco; alta sin email → éxito con "qué sigue" e insignia "Sin acceso a la app"; aviso de duplicado con enlace a la existente y "Es otra persona, crear igual" sin recargar datos; doble toque → una sola Persona; "Agregar email"; Pastor sin botones — Historia 5 escenarios 1–9, FR-039, SC-007
 
 ### Implementation
 
-- [ ] T075 [US5] `apps/api/src/persona/dto/alta-persona.dto.ts` (usa `erroresDeDatosPersonales` + email opcional + consentimiento) y que `registro-persona.dto.ts` use la misma función compartida — FR-031, research #9
-- [ ] T076 [US5] `PersonaService.alta(dto, autorId)`: validación, menor, email, búsqueda de duplicados (candidatos por sufijo de teléfono y por `fechaNacimiento`, comparación con `sonPosiblesDuplicados`), creación con `RolesDeEstadoService` en la misma transacción; `POST /personas/alta` con `@RequierePermiso('personas.alta')`; 409 con `coincidencias` — FR-032 a FR-035, contracts/personas-alta-api.md
+- [ ] T075 [US5] `apps/api/src/persona/dto/alta-persona.dto.ts` (usa `erroresDeDatosPersonales` + email opcional + consentimiento) y que `registro-persona.dto.ts` y `actualizar-perfil.dto.ts` usen la misma función compartida — FR-031, research #9
+- [ ] T076 [US5] `PersonaService.alta(dto, autorId)`: validación, menor, email, búsqueda de duplicados (igualdad de `telefonoNormalizado` y candidatos por `fechaNacimiento`, comparación con `sonPosiblesDuplicados`), creación (con `telefonoNormalizado`) con `RolesDeEstadoService` en la misma transacción; `POST /personas/alta` con `@RequierePermiso('personas.alta')`; 409 con `coincidencias` — FR-032 a FR-035, contracts/personas-alta-api.md
 - [ ] T077 [US5] `PATCH /personas/:id/email` (`personas.editar_email`) y `sinAccesoALaApp` en `GET /personas` y `GET /personas/buscar` — FR-037, FR-038
 - [ ] T078 [US5] Bajar a `packages/ui` los campos del registro que el alta necesita y hoy viven en `apps/web` (selector de profesión con detalle, estado civil, tiempo congregándose, si son componentes propios) — FR-031, Principio XI
 - [ ] T079 [US5] `apps/backoffice/src/app/personas/nueva/` (`page.tsx` con `requerirPermiso('personas.alta')`, `loading.tsx`, `error.tsx`): una página con secciones (datos personales, contacto, iglesia, email opcional con ayuda "Si no tiene, dejalo vacío: no va a poder entrar a la app", consentimiento), `useEnvio`, errores por campo, panel de posible duplicado y mensaje de éxito con qué sigue — FR-031, FR-035, FR-036, FR-039
-- [ ] T080 [US5] `apps/backoffice/src/app/personas/`: botón principal "Dar de alta una persona" (con `personas.alta`), insignia "Sin acceso a la app", acción "Agregar email" (con `personas.editar_email`) — FR-031, FR-037
+- [ ] T080 [US5] `apps/backoffice/src/app/personas/` (`acciones-email.tsx` + `personas-cliente.tsx`): botón principal "Dar de alta una persona" (con `personas.alta`), insignia "Sin acceso a la app", acción "Agregar email" (con `personas.editar_email`) — FR-031, FR-037
 - [ ] T081 [US5] Checklist `docs/15` para `/personas/nueva` — D114
 - [ ] T082 [US5] Checklist `docs/15` para `/personas` (botón de alta, insignia, "Agregar email") — D114
 
@@ -224,15 +231,16 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 - [ ] T084 [P] Correr el recorrido de axe de todas las rutas en las dos apps (claro y oscuro) y el chequeo de contraste incluido `hover` de los componentes nuevos (`CardEtapa`, selector, insignia) contra `docs/17` — SC-008, H-56
 - [ ] T085 Ejecutar `quickstart.md` completo a mano y anotar lo que falle como test + arreglo — SC-001, SC-003
 - [ ] T086 Las tres suites en verde: `pnpm --filter api run test`, `pnpm --filter api run test:e2e`, `pnpm --filter web exec playwright test`, `pnpm --filter backoffice exec playwright test` — SC-008
-- [ ] T087 Al mergear: aplicar "Cambios a docs al mergear" de `plan.md` y numerar las cinco decisiones nuevas en `docs/05-decisiones.md` (mirando el último número usado, D89/D103) — Principio I
+- [ ] T087 Verificar que los cambios a `docs/` que hizo T000 siguen coincidiendo con lo implementado; si algo cambió durante la implementación, actualizar `docs/` en el mismo commit que el código (Principio I)
 
 ---
 
 ## Dependencies & Execution Order
 
+- **T000** (gate): aprobación de Echu y docs, antes de todo.
 - **Setup (T001–T003)** y **Foundational (T004–T024)**: lote 0, una sola sesión, primero. Bloquean todo.
 - **US1 (lote A)**: depende del lote 0.
-- **US2**: la parte de la Persona (T035, T040–T042) va en el lote A después de US1 (comparte `mi-camino/`); la del Admin (T036–T038, T043–T050) en el lote B, en paralelo con A. **T039** (e2e de punta a punta) va al final, cuando A y B están.
+- **US2**: la parte de la Persona (T035, T040–T042) va en el lote A después de US1 (comparte `mi-camino/`); la del Admin (T036–T038, T043–T050) en el lote B, en paralelo con A. **T039** y **T039a** (e2e) van al final, cuando A y B están.
 - **US3 y US4 (lote C)**: dependen del lote 0 (T018 `PedirEnNombreDe`, T020 `requerirPermiso`, T022 navegación, T002 proyecto `celular`). No comparten archivos con A, B ni D salvo `es.json` (namespaces separados).
 - **US5 (lote D)**: depende del lote 0 (T006, T007, T011). Comparte `apps/backoffice/src/app/personas/personas-cliente.tsx` con T047 (lote B): **B va después de D en ese archivo**, o se coordinan agregando cada uno su acción en un componente propio (`acciones-etapas.tsx`, `acciones-email.tsx`).
 - **Polish**: al final.
@@ -243,10 +251,10 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 |---|---|---|
 | **0 — base** | T001–T024 | `packages/shared-types/src/{camino,registro,persona,permisos,error-code,eventos-historial}.ts`, `schema.prisma` + migración, `apps/api/src/camino/{camino.module,camino.service,eventos}.ts`, `packages/ui/src/components/{pedir-en-nombre-de,card-etapa}.tsx`, `apps/web/src/auth.ts`, `nav-app.ts`, `nav.ts`, `playwright.config.ts` (web), `seed-demo.ts`, `.env.example` |
 | **A — Mi camino e historial (Persona)** | T025–T035, T040–T042 | `apps/api/src/camino/camino.controller.ts` (+ `estadoDeEtapas`), `apps/web/src/app/(app)/mi-camino/**`, `(publica)/primeros-pasos/page.tsx`, e2e de Mi camino |
-| **B — historial (Admin)** | T036–T038, T043–T050 | `apps/api/src/camino/historial-admin.*`, `solicitud-discipulado.service.ts`, `apps/backoffice/src/app/solicitudes/**`, `personas/acciones-etapas.tsx` |
-| **C — Discipulador en la web** | T051–T067, T069–T071 | `apps/web/src/app/(app)/{mis-discipulados,mi-disponibilidad,inicio}/**`, `selector-mi-camino.tsx`, `apps/backoffice/src/app/{mis-discipulados,mi-disponibilidad,mis-grupos,page,not-found}.tsx`, e2e del Discipulador |
+| **B — historial (Admin)** | T036–T038, T043–T050a (incl. T045a) | `apps/api/src/camino/historial-admin.*`, `solicitud-discipulado.service.ts`, `apps/backoffice/src/app/solicitudes/**`, `pendientes-admin.service.ts`, tarjeta de pendientes del Inicio, `personas/acciones-etapas.tsx` |
+| **C — Discipulador en la web** | T051–T067, T069–T071 | `apps/web/src/app/(app)/{mis-discipulados,mi-disponibilidad,inicio}/**`, `selector-mi-camino.tsx`, borrado de `apps/backoffice/src/app/{mis-discipulados,mi-disponibilidad,mis-grupos}/`, `apps/backoffice/next.config.ts`, pantalla terminal, e2e del Discipulador y los del backoffice que los nombran |
 | **D — alta y email opcional** | T068, T072–T082 | `apps/api/src/persona/**` (alta, email), `apps/backoffice/src/app/personas/{nueva/**,acciones-email.tsx,personas-cliente.tsx}`, componentes de campo en `packages/ui` |
-| **Cierre** | T039, T083–T087 | e2e de punta a punta del historial, revisión, suites, docs |
+| **Cierre** | T039, T039a, T083–T087 | e2e de punta a punta del historial, revisión, suites, docs |
 
 ## Cobertura (criterio → test)
 
@@ -254,17 +262,19 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 |---|---|
 | Historia 1, escenarios 1–6 / FR-001–FR-007 | T005 (unit), T025 (integración), T026–T027 (e2e) |
 | Historia 2, escenarios 1, 4, 5 / FR-008–FR-011 | T005, T035, T039 |
-| Historia 2, escenarios 2, 3, 7, 8, 9 / FR-012–FR-015 | T036, T038, T039 |
+| Historia 2, escenarios 2, 3, 7, 8 / FR-012–FR-015 | T036, T038, T039 |
+| Historia 2, escenario 9 (Pastor) | T036 (API), T039a (pantalla) |
 | Historia 2, escenario 6 / FR-017 | T037 |
 | FR-016 | T016, T037 |
-| FR-018 | T035, T036 (evento emitido una vez) |
+| FR-018 | T017 (unit), T035, T036 (cada evento una vez, después del commit) |
 | FR-019 | T036 (después de confirmar, `Persona.rol` no cambia) |
-| Historia 3, escenarios 1–6 / FR-020–FR-024, FR-027 | T051, T052, T054, T022 |
+| Historia 3, escenarios 1–6 / FR-020–FR-024, FR-027 | T051, T052, T054, T022 (unit de `esItemActual`) |
 | Historia 3, escenarios 7–8 / FR-025 | T053, T023 |
 | FR-026 | T018 (bandeja del Admin sigue pasando en `solicitudes.spec.ts`), T067 |
 | Historia 4 / FR-028, FR-029 | T008, T067, T068 |
 | Historia 5 / FR-030–FR-037, FR-039 | T007, T013, T073, T074 |
 | FR-038 | T072, T073 (login sin cambios) |
+| FR-006 (estados de Mi camino) | T026 (error + reintentar) |
 | FR-040–FR-042 | T009, T083, checklists por pantalla, T084 |
 | FR-043 | T024 (el seed corre en `db:reset-demo` del CI) |
 | SC-001, SC-003 | T085 (revisión manual), T039 (cantidad de toques) |
@@ -277,7 +287,8 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 
 ## Implementation Strategy
 
-1. **Lote 0** completo y en verde (unit de shared-types, integración del esquema).
+0. **T000**: aprobación del spec por Echu, respuestas a las Preguntas y docs actualizados.
+1. **Lote 0** completo y en verde (unit de shared-types desde `apps/api/test/unit/`, integración del esquema).
 2. **MVP = US1** (lote A): Mi camino por etapas ya mejora la pantalla para todos.
 3. En paralelo: **B** (historial del Admin), **C** (Discipulador a la web), **D** (alta). A sigue con la parte de la Persona de US2.
 4. **Cierre**: T039, revisión manual (`quickstart.md`), tres suites, docs al mergear.

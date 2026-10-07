@@ -33,7 +33,7 @@ escritorio; los del backoffice, en escritorio. En cada uno: modo claro y oscuro.
 4. Backoffice como Admin → Solicitudes → filtro "Historial previo" → abrir la declaración → ver el
    contexto → "Confirmar". En la web, la card dice "Completada · Registrado por la iglesia".
 5. Otra declaración → "No confirmar" con motivo → en la web, mensaje amable con el motivo y el
-   WhatsApp de Secretaría, y "Ya lo hice" otra vez disponible.
+   contacto de la Sede, y "Ya lo hice" otra vez disponible.
 6. Backoffice → Personas → una Persona sin acceso a la app → "Etapas" → registrar Bautismo con nota
    → aparece completada; "Anular" → deja de estarlo; registrar de nuevo → funciona.
 7. Como Pastor: ver la bandeja y el detalle sin botones; `POST …/confirmar` → 403.
@@ -50,7 +50,7 @@ escritorio; los del backoffice, en escritorio. En cada uno: modo claro y oscuro.
    una válida, un período, prender el toggle, cambiar el máximo por Grupo.
 5. Sin scroll horizontal en 375 px; botones de 44 px; letra de 16 px en etiquetas.
 6. Backoffice con la misma sesión → pantalla "Lo tuyo está en la app" con "Ir a la app". Abrir
-   `http://localhost:3002/mi-disponibilidad` → redirige a `http://localhost:3001/mi-disponibilidad`.
+   `http://localhost:3002/mi-disponibilidad` → redirige a `http://localhost:3001/mi-disponibilidad`; también `/mis-grupos` → `/mi-camino`.
 7. Web app como una Persona sin rol de Discipulador → no hay selector; `/mis-discipulados` →
    vuelve a Mi camino.
 8. Admin en el backoffice: el menú no tiene "Mis discipulados", "Mi disponibilidad" ni "Mis

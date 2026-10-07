@@ -30,7 +30,7 @@ Estado de las cuatro etapas de la Persona de la sesión.
   fuente, en paralelo) y aplica `estadoDeEtapa` de `shared-types`. Nunca devuelve notas de
   Encuentros ni datos de otra Persona.
 
-**Tests**: unit de `estadoDeEtapa` por rama (data-model); integración: Persona sin nada, con
+**Tests**: unit de `estadoDeEtapa` por rama (data-model, en `apps/api/test/unit/`); integración: Persona sin nada, con
 pedido, con Grupo en curso, finalizada, con declaración pendiente, rechazada, confirmada, con
 Completitud anulada; una Persona no ve las declaraciones de otra.
 
@@ -44,7 +44,7 @@ Completitud anulada; una Persona no ve las declaraciones de otra.
   `comentario`, code `COMENTARIO_DEMASIADO_LARGO`).
 - En una transacción: bloquea la fila de la Persona (`FOR UPDATE`), junta `HechosCamino` y aplica
   `puedeDeclarar`. Rechazos, en este orden:
-  - edad < 12 → **403** `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO`
+  - edad < 12 → **409** `EDAD_INSUFICIENTE_PARA_PEDIR_SOLO` (mismo estado HTTP que la 004)
   - etapa completa (sistema o Completitud vigente) → **409** `ETAPA_YA_COMPLETADA`
   - ya hay una `pendiente` de esa etapa → **409** `DECLARACION_YA_PENDIENTE` (el índice parcial lo
     garantiza ante carreras; su violación se traduce a este código)
@@ -69,7 +69,8 @@ reglas que ya tenían, consultan:
 - declaración `pendiente` de `vida_nueva` → **409** `HISTORIAL_VIDA_NUEVA_EN_REVISION`
 - Completitud vigente de `vida_nueva` → **409** `VIDA_NUEVA_COMPLETADA_POR_HISTORIAL`
 
-Hoy `crear()` bloquea la Solicitud abierta (`bloquearAbiertaDe`); se agrega el bloqueo de la fila
-de la Persona al principio de la transacción (mismo patrón que proponer, D137), para serializar
+Hoy `crear()` usa `exigirSinSolicitudAbierta` más el índice único parcial (`bloquearAbiertaDe` lo
+usan editar y retirar); se agrega `bloquearPersona` (de `camino/consultas.ts`) al principio de la
+transacción (mismo patrón que proponer, D137), para serializar
 pedido y declaración (research #5). Test de integración de la carrera: pedir y declarar a la vez →
 exactamente uno gana.
