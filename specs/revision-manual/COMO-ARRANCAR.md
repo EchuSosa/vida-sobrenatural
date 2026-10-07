@@ -84,6 +84,14 @@ La suite de integración de la API necesita su propia base (`vidasobrenatural_te
 hay que crearla a mano (H-59): `pnpm --filter api run test:e2e` la crea y le corre las
 migraciones sola si no existe, antes de la primera corrida.
 
+## Trabajar en varios `git worktree` a la vez (lotes A–D de la 004)
+
+`scripts/lote-worktree.sh <a|b|c|d>` arma un worktree en `.worktrees/lote-<letra>/` con sus
+propias bases (`vidasobrenatural_<letra>`, `_test_<letra>`, `_e2e_<letra>`) y un
+`E2E_PUERTO_OFFSET` (10/20/30/40) en su `.env.e2e`, para que las cuatro sesiones corran
+integración y e2e sin pisarse en puertos ni en base. En el repo principal el offset es 0 y nada
+cambia.
+
 ## Si tocás `packages/shared-types`
 
 Desde H-33 ese paquete se compila a `dist/` y los tres `dev` lo construyen antes de arrancar
@@ -150,7 +158,7 @@ pnpm --filter api run db:seed-demo   # opcional — si vas a mirar pantallas con
 
 ## Probar con distintos roles y personas
 
-### Tu cuenta de Google con otro rol (única forma en el backoffice)
+### Darle un rol a una Persona
 
 El rol vive en la columna `rol` de `personas` (un arreglo de textos). Los valores que entienden el
 backoffice y la API: `admin`, `discipulador`, `lider_curso`, `pastor` (y `miembro_registrado`).
@@ -170,34 +178,27 @@ docker compose exec -T postgres psql -U vidasobrenatural -d vidasobrenatural -c 
 > **Después de cada cambio hay que cerrar sesión y volver a entrar**: el rol se lee al iniciar
 > sesión y queda guardado en la sesión.
 
-### Entrar como otra Persona en la app del usuario (sin gastar cuentas de Google)
+### Entrar como otra Persona sin gastar cuentas de Google: `/dev/entrar` (H-R13)
 
-`apps/web` tiene un login de prueba, el mismo que usan los e2e. Agregar a `apps/web/.env.local` y
-reiniciar esa app:
+Las dos apps tienen un login de prueba con pantalla, el mismo proveedor que usan los e2e. Hace
+falta `ALLOW_TEST_LOGIN=true` en `apps/web/.env.local` **y** en `apps/backoffice/.env.local`
+(reiniciar cada app después de agregarlo). Solo existe fuera de producción: sin la variable, o en
+producción, `/dev/entrar` es un 404.
 
-```
-ALLOW_TEST_LOGIN=true
-```
+- **App:** http://localhost:3001/dev/entrar — escribís un email (o tocás uno de los botones
+  rápidos) y entrás como esa persona. Después va a `/registro`: si ya está registrada, eso la manda
+  sola a Primeros pasos; si no, arranca su registro.
+- **Backoffice:** http://localhost:3002/dev/entrar — sin sesión, el backoffice muestra su pantalla
+  de ingreso en cualquier dirección, y debajo del botón de Google aparece el mismo formulario. Con
+  una sesión abierta, `/dev/entrar` sirve para cambiar de persona sin cerrar sesión.
 
-No tiene pantalla propia. Con `http://localhost:3001` abierto, en la consola del navegador:
+Botones rápidos (las cuentas de la revisión manual de la 004): `demo-vn-persona@example.com`,
+`demo-vn-persona-2@example.com`, `demo-vn-disc-1@example.com`, `demo-vn-disc-2@example.com`,
+`demo-vn-menor@example.com`. No están sembradas: la primera vez que entrás con una, la registrás
+en la app (y le das el rol con el comando de arriba si hace falta). También sirve cualquier email
+del seed (`demo-activa@example.com`, …) o uno nuevo.
 
-```js
-const { csrfToken } = await (await fetch('/api/auth/csrf')).json();
-await fetch('/api/auth/callback/test-login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  body: new URLSearchParams({ email: 'demo-activa@example.com', csrfToken }),
-});
-location.href = '/inicio';
-```
-
-Cambiando el email se entra como cualquier Persona del seed (`demo-activa@example.com`,
-`demo-pendiente-tutor@example.com`, `demo-inactiva@example.com`) o como un email nuevo, para probar
-el registro sin usar la cuenta real. Para simular el caso de email no verificado (FR-017), agregar
-`emailVerified: 'false'` al cuerpo.
-
-Límites: solo funciona fuera de producción y con la variable activada, y **el backoffice no lo
-tiene** — ahí siempre se entra con Google, con el rol que tenga la Persona en la base.
+El rol se lee al entrar: si le cambiaste el rol en la base, volvé a entrar por `/dev/entrar`.
 
 ## Al terminar
 

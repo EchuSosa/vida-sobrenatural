@@ -47,6 +47,10 @@ const TOKEN_ENV = 'DESTINO_DE_TEST_TOKEN';
 const MARCA = '.destino-de-test';
 const PREFIJO = 'vs-test-';
 const NOMBRE_BASE_TEST = 'vidasobrenatural_test';
+// Para varios `git worktree` en paralelo (lotes A–D de la 004): cada uno usa
+// `vidasobrenatural_test_<a-d>`. La guarda acepta el nombre base o el mismo con
+// ese sufijo, nunca la de desarrollo (`vidasobrenatural`).
+const RE_BASE_TEST = /^vidasobrenatural_test(_[a-d])?$/;
 
 function abortar(mensaje) {
   throw new Error(`[destino-de-test] ${mensaje} Se aborta sin escribir ni borrar nada (H-130).`);
@@ -128,9 +132,9 @@ function verificarBaseDeTest(databaseUrl, origen = 'el entorno') {
   } catch {
     abortar('DATABASE_URL no es una URL válida.');
   }
-  if (nombreBase !== NOMBRE_BASE_TEST) {
+  if (!RE_BASE_TEST.test(nombreBase)) {
     abortar(
-      `DATABASE_URL apunta a "${nombreBase}", no a "${NOMBRE_BASE_TEST}" (vino de ${origen}). ` +
+      `DATABASE_URL apunta a "${nombreBase}", no a "${NOMBRE_BASE_TEST}" (ni a "${NOMBRE_BASE_TEST}_<a-d>", vino de ${origen}). ` +
         'Si está exportada en tu terminal, dotenv NO la reemplaza con la de apps/api/.env.test: sacala (unset DATABASE_URL).',
     );
   }

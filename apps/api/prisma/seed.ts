@@ -380,12 +380,33 @@ async function crearLibrosDemo() {
   }
 }
 
+/**
+ * specs/004-vida-nueva-discipulado (T009): el Curso "Vida Nueva" individual,
+ * dato de referencia que la API busca por (categoria, tipo) — nunca por id
+ * fijo. Idempotente. Vida Nueva Grupal (tipo `grupal`, D44) y Vida de Servicio
+ * suman su registro cuando existan.
+ */
+async function crearCursoVidaNueva() {
+  const curso = await prisma.curso.upsert({
+    where: { categoria_tipo: { categoria: 'vida_nueva', tipo: 'individual' } },
+    update: {},
+    create: {
+      nombre: 'Vida Nueva',
+      categoria: 'vida_nueva',
+      tipo: 'individual',
+      modalidad: 'seguimiento_por_encuentros',
+    },
+  });
+  console.log(`Curso Vida Nueva (individual) listo (${curso.id}).`);
+}
+
 async function main() {
   const sede = await crearSedeDemo();
   await crearPersonasDemo(sede.id);
   await promoverAdminDemo(sede.id);
   await crearPalabraProfeticaDemo();
   await crearLibrosDemo();
+  await crearCursoVidaNueva();
 }
 
 main()

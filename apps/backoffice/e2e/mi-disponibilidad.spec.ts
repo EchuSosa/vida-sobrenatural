@@ -1,0 +1,224 @@
+import type { Page } from '@playwright/test';
+import { hoyEnArgentina, type MiDisponibilidad } from '@vida-sobrenatural/shared-types';
+import { test, expect, auditar, crearPersona, idDePersona, idsEnElCruce, loguearseComoDiscipuladorE2E, pedirVidaNuevaComo } from './helpers';
+import { campo, completarFecha, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
+
+function sumarDias(fecha: string, dias: number): string {
+  const d = new Date(`${fecha}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Deja al Discipulador "sin agenda" como lo siembra sembrar-e2e-admin.ts: sin
+ * franjas, sin períodos, toggle apagado y máximo 1 — antes (el test corre en
+ * dos temas y en dos proyectos, siempre sobre la misma Persona) y después
+ * (otros specs la usan para el vacío de FR-047). Por la API, con su sesión.
+ */
+async function reiniciarDisponibilidad(page: Page) {
+  const { apiToken } = await (await page.request.get('/api/auth/session')).json();
+  const headers = { Authorization: `Bearer ${apiToken}` };
+  const actual: MiDisponibilidad = await (await page.request.get(`${API_BASE_URL}/disponibilidad/me`, { headers })).json();
+  for (const f of actual.franjas) await page.request.delete(`${API_BASE_URL}/disponibilidad/me/franjas/${f.id}`, { headers });
+  for (const b of actual.bloqueos) await page.request.delete(`${API_BASE_URL}/disponibilidad/me/bloqueos/${b.id}`, { headers });
+  await page.request.put(`${API_BASE_URL}/disponibilidad/me`, { headers, data: { disponible: false, maxPersonasPorGrupo: 1 } });
+}
+
+async function sinViolaciones(page: Page) {
+  const { violations } = await auditar(page);
+  expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+}
+
+async function agregarFranja(page: Page, dia: string, desde: string, hasta: string) {
+  await page.getByLabel('Día', { exact: true }).first().selectOption({ label: dia });
+  await elegirHora(campo(page, 'Desde').first(), desde);
+  await elegirHora(campo(page, 'Hasta').first(), hasta);
+  await page.getByRole('button', { name: 'Agregar franja' }).click();
+}
+
+/**
+ * specs/004, T040 (Historia 4, FR-015/FR-016/FR-017/FR-031/FR-045/FR-047): el
+ * Discipulador maneja su disponibilidad desde el teléfono (`@celular`: corre
+ * también en el proyecto `celular`), en los dos temas, con axe.
+ *
+ * Y del lado del Admin (FR-006): con la disponibilidad prendida aparece en el
+ * cruce de una Solicitud real (`GET /discipulado/solicitudes/:id/cruce`); al
+ * quitar su única franja, deja de aparecer.
+ */
+/**
+ * T041 (docs/15, "Celular"): con horarios y un período cargados —el estado más
+ * ancho de la pantalla—, a 320 px no hay scroll horizontal y cada control
+ * táctil mide al menos 44×44 px (D81).
+ */
+test.describe('a 320 px, con datos cargados', () => {
+  test.use({ viewport: { width: 320, height: 640 } });
+
+  test.beforeEach(async ({ page }) => {
+    await loguearseComoDiscipuladorE2E(page, 'sin-agenda');
+    await reiniciarDisponibilidad(page);
+    const { apiToken } = await (await page.request.get('/api/auth/session')).json();
+    const headers = { Authorization: `Bearer ${apiToken}` };
+    const hoy = hoyEnArgentina();
+    await page.request.post(`${API_BASE_URL}/disponibilidad/me/franjas`, { headers, data: { diaSemana: 3, inicio: 19 * 60, fin: 21 * 60 } });
+    await page.request.post(`${API_BASE_URL}/disponibilidad/me/bloqueos`, { headers, data: { desde: hoy, hasta: sumarDias(hoy, 30) } });
+  });
+
+  test.afterEach(async ({ page }) => {
+    await reiniciarDisponibilidad(page);
+  });
+
+  test('sin scroll horizontal y con objetivos táctiles de 44 px @celular', async ({ page }) => {
+    await page.goto('/mi-disponibilidad');
+    await expect(page.getByText(/^Vigente: hasta el .* no aparecés para nuevos discipulados\.$/)).toBeVisible();
+    const sinDesborde = await page.evaluate(() => document.scrollingElement!.scrollWidth <= window.innerWidth);
+    expect(sinDesborde, 'hay scroll horizontal a 320 px').toBe(true);
+
+    const chicos = await page.locator('#contenido').evaluate((contenido) =>
+      [...contenido.querySelectorAll<HTMLElement>('button, select, input')]
+        .filter((el) => el.getClientRects().length > 0)
+        .map((el) => ({ el: `${el.tagName.toLowerCase()} "${(el.getAttribute('aria-label') || el.textContent || el.id).trim().slice(0, 30)}"`, ...el.getBoundingClientRect().toJSON() }))
+        .filter((r) => r.height < 44 || r.width < 44)
+        .map((r) => `${r.el}: ${Math.round(r.width)}×${Math.round(r.height)}`),
+    );
+    expect(chicos).toEqual([]);
+  });
+});
+
+for (const tema of ['claro', 'oscuro'] as const) {
+  test.describe(`modo ${tema}`, () => {
+    test.beforeEach(async ({ page }) => {
+      if (tema === 'oscuro') await page.addInitScript(() => window.localStorage.setItem('theme', 'dark'));
+      await loguearseComoDiscipuladorE2E(page, 'sin-agenda');
+      await reiniciarDisponibilidad(page);
+    });
+
+    test.afterEach(async ({ page }) => {
+      await reiniciarDisponibilidad(page);
+    });
+
+    test('agenda, toggle, períodos y máximo, con la frase de arriba siempre al día @celular @webkit', async ({ page }) => {
+      const estado = page.getByTestId('estado-disponibilidad');
+      await page.goto('/mi-disponibilidad');
+
+      // FR-047: sin agenda, el vacío dice por qué no aparece.
+      await expect(page.getByRole('heading', { name: 'Mi disponibilidad', level: 1 })).toBeVisible();
+      await expect(estado).toContainText('hasta que no cargues tus horarios no aparecés para nuevos discipulados');
+      await expect(page.getByTestId('estado-toggle')).toContainText('Apagada');
+      await sinViolaciones(page);
+
+      // Cargar una franja no prende el toggle (FR-015).
+      await agregarFranja(page, 'Martes', '19:00', '21:00');
+      await expect(page.getByText('Martes 19:00 a 21:00')).toBeVisible();
+      await expect(estado).toContainText('Ya tenés horarios: prendé tu disponibilidad para aparecer.');
+      await expect(page.getByTestId('estado-toggle')).toContainText('Apagada');
+
+      await page.getByRole('button', { name: 'Prender mi disponibilidad' }).click();
+      await expect(estado).toContainText('Hoy el Admin te ve como disponible');
+      await sinViolaciones(page);
+
+      // Lo que dice la frase es lo que ve el Admin: aparece en el cruce (FR-006).
+      const pide = await crearPersona(`e2e-c-cruce-${tema}-${Date.now()}@example.com`, { nombre: 'Carla', apellido: `Cruce ${tema}` });
+      const solicitudId = await pedirVidaNuevaComo(pide.email);
+      const yo = await idDePersona('e2e-discipulador-sin-agenda@example.com');
+      expect(await idsEnElCruce(solicitudId)).toContain(yo);
+
+      // Borrar la franja, con confirmación: vuelve a "sin agenda", el toggle sigue prendido.
+      await page.getByRole('button', { name: 'Quitar' }).click();
+      const confirmar = page.getByRole('alertdialog');
+      await expect(confirmar).toContainText('¿Quitar el horario del Martes 19:00 a 21:00?');
+      await sinViolaciones(page);
+      await confirmar.getByRole('button', { name: 'Sí, quitar el horario' }).click();
+      await expect(estado).toContainText('Todavía no cargaste horarios');
+      await expect(page.getByTestId('estado-toggle')).toContainText('Prendida');
+      expect(await idsEnElCruce(solicitudId)).not.toContain(yo);
+
+      // Fin anterior al inicio: error debajo del campo y en el resumen, con foco.
+      await agregarFranja(page, 'Jueves', '21:00', '19:00');
+      const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos:' });
+      await expect(resumen).toBeFocused();
+      await expect(resumen).toContainText('La hora de fin tiene que ser posterior a la de inicio');
+      await expect(page.locator('#campo-franja-error')).toContainText('La hora de fin tiene que ser posterior a la de inicio');
+      await expect(page.locator('#campo-franja-hasta')).toHaveAttribute('aria-invalid', 'true');
+      await sinViolaciones(page);
+
+      // Corregido, se agrega y el resumen se va.
+      await elegirHora(campo(page, 'Hasta').first(), '22:00');
+      await page.getByRole('button', { name: 'Agregar franja' }).click();
+      await expect(page.getByText('Jueves 21:00 a 22:00')).toBeVisible();
+      await expect(resumen).toHaveCount(0);
+
+      // FR-017a (H-R7/H-R8): ni repetida, ni superpuesta, ni de menos de una hora.
+      await agregarFranja(page, 'Jueves', '21:00', '22:00');
+      await expect(page.locator('#campo-franja-error')).toContainText('Ese horario ya está en la lista');
+      await expect(page.locator('#campo-franja-desde')).toHaveAttribute('aria-invalid', 'true');
+      await agregarFranja(page, 'Jueves', '21:30', '22:30');
+      await expect(page.locator('#campo-franja-error')).toContainText('se pisa con otro del mismo día');
+      await agregarFranja(page, 'Viernes', '22:30', '22:45');
+      await expect(page.locator('#campo-franja-error')).toContainText('tiene que durar al menos 1 hora');
+      await expect(page.locator('#campo-franja-hasta')).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.getByRole('listitem').filter({ hasText: 'Jueves 21:00 a 22:00' })).toHaveCount(1);
+      await agregarFranja(page, 'Viernes', '22:00', '23:00');
+      await expect(page.getByText('Viernes 22:00 a 23:00')).toBeVisible();
+      await expect(resumen).toHaveCount(0);
+      await expect(estado).toContainText('Hoy el Admin te ve como disponible');
+
+      // Apagar el toggle: deja de aparecer.
+      await page.getByRole('button', { name: 'Apagar mi disponibilidad' }).click();
+      await expect(estado).toContainText('prendé tu disponibilidad para aparecer');
+      await page.getByRole('button', { name: 'Prender mi disponibilidad' }).click();
+      await expect(estado).toContainText('Hoy el Admin te ve como disponible');
+
+      // Un período que cubre hoy: no aparece; borrarlo lo devuelve.
+      const hoy = hoyEnArgentina();
+      await completarFecha(campo(page, 'Desde').last(), hoy);
+      await completarFecha(campo(page, 'Hasta').last(), sumarDias(hoy, 3));
+      await page.getByRole('button', { name: 'Agregar período' }).click();
+      await expect(estado).toContainText('Hoy no aparecés, por tu período del');
+      await expect(page.getByText(/^Vigente: hasta el .* no aparecés para nuevos discipulados\.$/)).toBeVisible();
+      await sinViolaciones(page);
+
+      // FR-040 (H-R12): editar el período. Con el fin antes del inicio, error por campo en el panel;
+      // corrido a la semana que viene, deja de estar vigente y vuelve a aparecer.
+      await page.getByRole('button', { name: /^Editar: Del / }).click();
+      const panelEditar = page.getByRole('dialog', { name: 'Editar el período' });
+      await completarFecha(campo(panelEditar, 'Desde'), sumarDias(hoy, 7));
+      await completarFecha(campo(panelEditar, 'Hasta'), sumarDias(hoy, 6));
+      await panelEditar.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(panelEditar.locator('#campo-editar-hasta-error')).toBeVisible();
+      await sinViolaciones(page);
+      await completarFecha(campo(panelEditar, 'Hasta'), sumarDias(hoy, 9));
+      await panelEditar.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(panelEditar).toHaveCount(0);
+      await expect(page.getByText('Período actualizado.')).toBeVisible();
+      await expect(estado).toContainText('Hoy el Admin te ve como disponible');
+      // H-R11: la etiqueta dice qué pasa, no solo "Próximo".
+      await expect(page.getByText(/^Empieza el .*: hasta entonces seguís apareciendo para nuevos discipulados\.$/)).toBeVisible();
+      await page.getByRole('button', { name: /^Borrar: Del / }).click();
+      await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, borrar el período' }).click();
+      await expect(estado).toContainText('Hoy el Admin te ve como disponible');
+      await expect(page.getByText('No tenés períodos cargados.')).toBeVisible();
+
+      // Un período que ya terminó: error por campo, sin llegar a guardarse.
+      await completarFecha(campo(page, 'Desde').last(), sumarDias(hoy, -5));
+      const hastaPeriodo = campo(page, 'Hasta').last();
+      await completarFecha(hastaPeriodo, sumarDias(hoy, -1));
+      // Al salir del campo ya avisa debajo (validación al salir, H-72), sin resumen todavía.
+      await hastaPeriodo.getByLabel('Año', { exact: true }).blur();
+      await expect(page.locator('#error-hasta')).toContainText('Ese período ya terminó');
+      await expect(page.getByRole('alert').filter({ hasText: 'Revisá estos campos:' })).toHaveCount(0);
+      await page.getByRole('button', { name: 'Agregar período' }).click();
+      await expect(page.getByRole('alert').filter({ hasText: 'Ese período ya terminó' })).toBeFocused();
+      await expect(page.locator('#error-hasta')).toContainText('Ese período ya terminó');
+
+      // Máximo por Grupo: sube a 3 y queda guardado.
+      await page.getByLabel('Personas por grupo', { exact: true }).selectOption('3');
+      await page.getByRole('button', { name: 'Guardar', exact: true }).click();
+      await expect(page.getByText('Listo: hasta 3 personas por grupo.')).toBeVisible();
+      await page.reload();
+      await expect(page.getByLabel('Personas por grupo', { exact: true })).toHaveValue('3');
+      await sinViolaciones(page);
+    });
+  });
+}

@@ -19,6 +19,10 @@ export interface ErrorResumen {
  * enviar; con la revalidación al escribir/salir de un campo (H-72) ese
  * contenido cambia todo el tiempo, y enfocar el resumen en esos casos le
  * robaría el foco al campo que la persona está usando en ese momento.
+ *
+ * Texto en `foreground`, no en `destructive` (merge de la 004, docs/17): el
+ * rojo como texto sobre su propio tinte, dentro de un Sheet en oscuro, daba
+ * 4.2:1. El color queda en el borde y el fondo; el título dice qué pasa.
  */
 export function ResumenErrores({
   errores,
@@ -46,7 +50,7 @@ export function ResumenErrores({
       ref={ref}
       tabIndex={-1}
       role="alert"
-      className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive outline-none"
+      className="rounded-md border border-destructive bg-destructive/10 p-4 text-sm text-foreground outline-none"
     >
       <p className="font-medium">{titulo}</p>
       <ul className="mt-2 list-disc space-y-1 pl-5">

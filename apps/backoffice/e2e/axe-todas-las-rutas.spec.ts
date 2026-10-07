@@ -8,6 +8,10 @@ import {
   loguearseComoPastorE2E,
   loguearseComoOtroRolE2E,
   loguearseComoLiderCursoE2E,
+  loguearseComoDiscipuladorE2E,
+  crearGrupo,
+  crearPersona,
+  pedirVidaNuevaComo,
 } from './helpers';
 import { NAV_BACKOFFICE, type ItemNavBackoffice } from '../src/config/nav';
 
@@ -63,11 +67,43 @@ async function abrirRuta(page: Page, item: ItemNavBackoffice) {
  * sección" y el smoke terminaría auditando el 404 en su lugar, en silencio
  * (por eso cada ruta se visita con la Persona que tiene su permiso, arriba).
  * Las rutas dinámicas (`/sedes/[id]`) se visitan con el `[id]` literal y SÍ
- * son un 404 de su segmento — se auditan así, a propósito.
+ * son un 404 de su segmento — se auditan así, a propósito. Salvo las tres de
+ * la 004, que van con ids reales (T062, `CON_ID_REAL` abajo) y sí exigen la
+ * pantalla, no el 404.
  */
 async function esperarPaginaReal(page: Page, href: string) {
   if (href.includes('[')) return;
   await expect(page.getByRole('heading', { name: 'No encontramos esta sección' }), `${href}: la sesión del smoke recibió 404`).toHaveCount(0);
+}
+
+/**
+ * specs/004, T062: las tres rutas `[id]` de la 004 se auditan con ids REALES
+ * (una Solicitud pendiente y un Grupo en curso, armados por la API una vez por
+ * corrida), no con el `[id]` literal: su pantalla tiene contenido propio que el
+ * 404 no muestra. `/mis-discipulados/[id]` se abre con el Discipulador que
+ * lidera ese Grupo (el 1 sembrado), no con la sesión genérica del rol.
+ */
+const CON_ID_REAL: Record<string, { ruta: (ids: IdsReales) => string; loguearse?: (page: Page) => Promise<void> }> = {
+  '/solicitudes/[id]': { ruta: (ids) => `/solicitudes/${ids.solicitudId}` },
+  '/grupos/[id]': { ruta: (ids) => `/grupos/${ids.grupoId}` },
+  '/mis-discipulados/[id]': { ruta: (ids) => `/mis-discipulados/${ids.grupoId}`, loguearse: (page) => loguearseComoDiscipuladorE2E(page, 1) },
+};
+interface IdsReales {
+  solicitudId: string;
+  grupoId: string;
+}
+let idsReales: IdsReales | undefined;
+
+async function asegurarIdsReales(): Promise<IdsReales> {
+  if (!idsReales) {
+    const sufijo = Date.now();
+    const pide = await crearPersona(`e2e-axe-solicitud-${sufijo}@example.com`, { nombre: 'Axe', apellido: `Solicitud ${sufijo}` });
+    const cursa = await crearPersona(`e2e-axe-grupo-${sufijo}@example.com`, { nombre: 'Axe', apellido: `Grupo ${sufijo}` });
+    const solicitudId = await pedirVidaNuevaComo(pide.email);
+    const { grupoId } = await crearGrupo([cursa]);
+    idsReales = { solicitudId, grupoId };
+  }
+  return idsReales;
 }
 
 for (const tema of ['claro', 'oscuro'] as const) {
@@ -80,8 +116,15 @@ for (const tema of ['claro', 'oscuro'] as const) {
 
     for (const item of NAV_BACKOFFICE) {
       test(`${item.href} sin violaciones de axe`, async ({ page }) => {
-        await sesionPara(item).loguearse(page);
-        await abrirRuta(page, item);
+        const conId = CON_ID_REAL[item.href];
+        if (conId) {
+          const href = conId.ruta(await asegurarIdsReales());
+          await (conId.loguearse ?? sesionPara(item).loguearse)(page);
+          await abrirRuta(page, { ...item, href });
+        } else {
+          await sesionPara(item).loguearse(page);
+          await abrirRuta(page, item);
+        }
         const { violations } = await auditar(page);
         expect(violations, `${item.href}: ${JSON.stringify(violations, null, 2)}`).toEqual([]);
       });

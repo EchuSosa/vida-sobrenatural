@@ -1,4 +1,4 @@
-import { test, expect, registrarPersonaDeTest, auditar } from './helpers';
+import { test, expect, registrarPersonaDeTest, auditar, usarTemaOscuro, esperarTema } from './helpers';
 
 /**
  * H-11 (specs/002-base-transversal, revisión manual 2026-09-18): cerrar
@@ -15,9 +15,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
     }) => {
       const email = `e2e-cerrar-sesion-${colorScheme}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
+      if (colorScheme === 'dark') await usarTemaOscuro(page, email);
 
       await page.goto('/perfil');
       await page.waitForLoadState('networkidle');
+      await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
       let resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);

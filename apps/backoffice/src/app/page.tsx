@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { EstadoVacio } from '@vida-sobrenatural/ui';
-import { aterrizajeDeSesion, requerirPermiso, requerirSesion } from '../auth';
+import { aterrizajeDeSesion, requerirPermiso, requerirSesion, tienePermisoSesion } from '../auth';
+import { TarjetaPendientes } from './tarjeta-pendientes';
 
 /**
  * H-116 (revisión manual): el chequeo de sesión (y la pantalla de
@@ -36,11 +37,18 @@ export default async function InicioBackofficePage() {
     redirect(aterrizaje.href);
   }
 
-  await requerirPermiso('inicio.ver');
+  const sesion = await requerirPermiso('inicio.ver');
+  // specs/004, T054g (FR-048): la tarjeta de Pendientes es de quien decide
+  // sobre Solicitudes o Grupos — por permiso del catálogo (D132), nunca por rol.
+  const vePendientes = tienePermisoSesion(sesion, 'solicitudes.aprobar') || tienePermisoSesion(sesion, 'grupos.gestionar');
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">Inicio</h1>
-      <EstadoVacio mensaje="Todavía no hay métricas ni pendientes para mostrar acá." />
+      {vePendientes ? (
+        <TarjetaPendientes apiToken={sesion.apiToken} />
+      ) : (
+        <EstadoVacio mensaje="Todavía no hay métricas ni pendientes para mostrar acá." />
+      )}
     </div>
   );
 }

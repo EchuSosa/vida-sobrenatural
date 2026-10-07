@@ -35,6 +35,25 @@ describe('AllExceptionsFilter', () => {
     );
   });
 
+  // specs/004, FR-043: los miembros de extensión (RFC 9457 §3.2) van al nivel
+  // raíz — ej. los discipulados que traban quitar el rol — y no pisan los estándar.
+  it('agrega las extensiones de un AppException al nivel raíz, sin pisar los miembros estándar', () => {
+    const { host, json } = mockHost();
+    const discipulados = [{ grupoId: 'g1', persona: { nombre: 'Ana', apellido: 'Pérez' } }];
+    filter.catch(
+      new AppException('DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS', 409, 'Tiene discipulados.', undefined, {
+        discipulados,
+        propuestas: [],
+        code: 'PISADO',
+      }),
+      host,
+    );
+
+    expect(json).toHaveBeenCalledWith(
+      expect.objectContaining({ code: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS', status: 409, discipulados, propuestas: [] }),
+    );
+  });
+
   it('normaliza un error de validación (BadRequestException) a code VALIDACION', () => {
     const { host, json, status } = mockHost();
     filter.catch(new BadRequestException('inválido'), host);

@@ -41,6 +41,15 @@ export type EstadoPersona = 'activa' | 'pendiente_tutor';
  */
 export const EDAD_MINIMA_ROL_DE_CARGO = 18;
 
+/**
+ * specs/004-vida-nueva-discipulado (FR-044): una Persona de 12 años o más
+ * puede pedir Vida Nueva sola; menor de 12, lo pide el Admin o un Discipulador
+ * en su nombre (FR-002). Constante propia — **no** reutiliza `EDAD_MINIMA` ni
+ * `EDAD_MINIMA_ROL_DE_CARGO` (H-128): son reglas independientes que deben
+ * poder moverse por separado. Se evalúa con `calcularEdad(fechaNacimiento)`.
+ */
+export const EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO = 12;
+
 /** Base Transversal (specs/002-base-transversal) — solo "es" en el MVP (D84). */
 export type Idioma = 'es';
 

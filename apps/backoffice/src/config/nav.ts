@@ -52,7 +52,9 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
     permiso: 'pendientes_tutor.ver',
   },
   { href: '/solicitudes', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver' },
+  { href: '/solicitudes/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   { href: '/grupos', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver' },
+  { href: '/grupos/[id]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
   { href: '/eventos', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver' },
   { href: '/notificaciones', labelKey: 'notificaciones', icon: Bell, permiso: 'notificaciones.ver' },
   { href: '/sedes', labelKey: 'sedes', icon: Building2, permiso: 'sedes.ver' },
@@ -87,6 +89,7 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
     icon: UsersRound,
     permiso: 'mis_discipulados.ver',
   },
+  { href: '/mis-discipulados/[id]', labelKey: 'misDiscipulados', icon: UsersRound, permiso: 'mis_discipulados.ver', enMenu: false },
   {
     href: '/mi-disponibilidad',
     labelKey: 'miDisponibilidad',

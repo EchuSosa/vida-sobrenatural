@@ -63,13 +63,32 @@ export type ErrorCode =
   // no puede identificar quién hace el cambio (ni registrarlo, FR-022, ni
   // aplicar FR-010), así que no lo hace. No es SIN_PERMISO.
   | 'SESION_SIN_PERSONA'
-  // specs/005-roles-permisos-acceso, FR-009: quitar el rol discipulador a
-  // una Persona con discipulados activos a cargo.
+  // specs/005-roles-permisos-acceso, FR-009 (y FR-043 de la 004): quitar el
+  // rol discipulador a una Persona con discipulados activos o propuestas
+  // pendientes. Reemplaza al fallo cerrado de H-127
+  // (DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS, eliminado en la 004).
   | 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'
-  // specs/005-roles-permisos-acceso, FR-009/H-127: fallo cerrado mientras la
-  // consulta real contra el spec 004 no existe — quitar discipulador se
-  // rechaza siempre, no porque se haya verificado que tiene discipulados.
-  | 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS'
+  // specs/004-vida-nueva-discipulado — Solicitud de Discipulado, propuesta y
+  // aceptación (contracts/). Los códigos de CAMPO (FRANJAS_REQUERIDAS,
+  // FRANJA_FIN_ANTERIOR_AL_INICIO, DIA_SEMANA_INVALIDO, FECHA_FUTURA,
+  // CAPITULOS_REQUERIDO, BLOQUEO_FIN_ANTERIOR_AL_INICIO, BLOQUEO_YA_VENCIDO,
+  // MOTIVO_DEMASIADO_LARGO, MAXIMO_POR_GRUPO_FUERA_DE_RANGO) NO van acá: caen
+  // en 'VALIDACION' con su code de campo, como HORARIOS_INVALIDO (Principio X/IX).
+  | 'SOLICITUD_DISCIPULADO_YA_PENDIENTE'
+  | 'VIDA_NUEVA_EN_CURSO_O_COMPLETADA'
+  | 'EDAD_INSUFICIENTE_PARA_PEDIR_SOLO'
+  | 'SOLICITUD_NO_PENDIENTE'
+  | 'SOLICITUD_NO_PROPUESTA'
+  | 'DISCIPULADOR_NO_DISPONIBLE'
+  | 'GRUPO_SIN_LUGAR'
+  | 'PROPUESTA_NO_VIGENTE'
+  | 'DISCIPULADO_NO_EN_CURSO'
+  | 'FINALIZACION_NO_PROPUESTA'
+  | 'FINALIZACION_YA_PROPUESTA'
+  | 'BAJA_NO_PROPUESTA'
+  | 'BAJA_YA_PROPUESTA'
+  | 'REASIGNACION_AL_MISMO_DISCIPULADOR'
+  | 'REASIGNACION_YA_PROPUESTA'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */

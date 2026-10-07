@@ -2,6 +2,7 @@ import {
   test,
   expect,
   loguearseComoAdminE2E,
+  loguearseComoDiscipuladorE2E,
   crearMenorPendienteTutor,
   crearPersonaActiva,
   auditar,
@@ -202,7 +203,12 @@ test('ordenar por Nombre se refleja en la URL, sobrevive a un F5, y se puede vol
     .getByRole('alertdialog', { name: /¿Cerrar el caso de/ })
     .getByRole('button', { name: 'Sí, cerrar el caso' })
     .click();
-  await expect(page.getByText('Caso cerrado.')).toBeVisible();
+  // Si el segundo cierre llega antes de que se vaya el primer toast (sonner lo
+  // deja unos segundos), hay DOS "Caso cerrado." a la vez: se mira el último,
+  // y que la fila se haya ido de verdad (era el flaky "toast duplicado").
+  await expect(page.getByText('Caso cerrado.').last()).toBeVisible();
+  await expect(filaZeta).toHaveCount(0);
+  await expect(filaAlfa).toHaveCount(0);
 });
 
 // Cierre de H-101 (D-paginado, antes de la spec 004): reemplaza a "cargar
@@ -309,4 +315,21 @@ test('el panel de Activar atrapa el foco y lo hace ciclar en orden (T029)', asyn
   await expect(panel.getByRole('button', { name: 'Activar' })).toBeEnabled();
 
   await verificarQueElFocoCiclaEnElPanel(page, panel);
+});
+
+/**
+ * D139 (H-R6, revisión manual de la 004): activar un menor y cerrar su caso son
+ * del Admin. El Discipulador no ve el ítem en el menú y, si entra por URL, la
+ * sección no existe para él (la misma pantalla que cualquier ruta sin permiso).
+ */
+test('el Discipulador no ve Pendientes de tutor ni entra por URL (D139)', async ({ page, permitirErrorDeConsola }) => {
+  permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 404/);
+  await loguearseComoDiscipuladorE2E(page);
+  await page.goto('/mis-discipulados');
+  const menu = page.getByRole('navigation', { name: 'Principal' });
+  await expect(menu.getByRole('link', { name: 'Mis discipulados' })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Pendientes tutor' })).toHaveCount(0);
+
+  await page.goto('/pendientes-tutor');
+  await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toBeVisible();
 });

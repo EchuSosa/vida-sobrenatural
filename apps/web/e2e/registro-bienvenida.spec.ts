@@ -1,4 +1,5 @@
 import { test, expect, loguearseComoTest, auditar } from './helpers';
+import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * Único flujo E2E exigido por la Constitución (Principio VI): el registro
@@ -16,7 +17,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`modo ${colorScheme}`, () => {
     test.use({ colorScheme });
 
-    test('un Visitante mayor de edad se registra vía SSO, en un formulario de 4 pasos, y queda como Miembro registrado', async ({
+    test('un Visitante mayor de edad se registra vía SSO, en un formulario de 4 pasos, y queda como Miembro registrado @webkit', async ({
       page,
     }) => {
       const email = `e2e-${colorScheme}-${Date.now()}@example.com`;
@@ -33,7 +34,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Apellido').fill('García');
       await page.getByLabel('Nombre').fill('Ana');
       await page.getByLabel('Género').selectOption('femenino');
-      await page.getByLabel('Fecha de nacimiento').fill('1990-05-20');
+      await completarFecha(campo(page, 'Fecha de nacimiento'), '1990-05-20');
       await page.getByRole('button', { name: 'Siguiente' }).click();
 
       // Paso 2 — Contacto.

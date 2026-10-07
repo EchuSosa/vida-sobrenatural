@@ -44,7 +44,9 @@ export function NavAppTopBarCelular() {
     // vive "Más", la única salida de la app hacia las páginas públicas
     // (H-37). `fixed`, como la barra inferior (nav-app-bar.tsx) — el
     // `<main>` compensa con `pt-14` (app/(app)/layout.tsx).
-    <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
+    // `<header>` y no `<div>` (T061, merge de la 004): el logo quedaba fuera
+    // de todo landmark y axe lo marcaba (regla `region`) en celular.
+    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
       {/* H-87: acá no había marca, solo el nombre en texto — isotipo, no
           logotipo (7.5:1 produce scroll horizontal a 320px, H-62). */}
       <Link href="/inicio">
@@ -77,6 +79,6 @@ export function NavAppTopBarCelular() {
           </nav>
         </SheetContent>
       </Sheet>
-    </div>
+    </header>
   );
 }

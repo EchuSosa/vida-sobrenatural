@@ -7,8 +7,12 @@ import { puedeQuitarRol } from '@vida-sobrenatural/shared-types';
  * va a fallar). Los tres casos que el modal ofrecía y la API rechazaba.
  */
 describe('puedeQuitarRol', () => {
-  const comun = { id: 'p1', adminSembrado: false };
-  const sembrada = { id: 's1', adminSembrado: true };
+  // specs/004 (D137): sin discipulados activos ni propuestas pendientes.
+  const libre = { discipuladosActivos: [], propuestasPendientes: [] };
+  const comun = { id: 'p1', adminSembrado: false, ...libre };
+  const sembrada = { id: 's1', adminSembrado: true, ...libre };
+  const discipulado = { grupoId: 'g1', persona: { nombre: 'Ana', apellido: 'Pérez' } };
+  const propuesta = { propuestaId: 'prop-1', persona: { nombre: 'Juan', apellido: 'Gómez' }, solicitudId: 's-1', grupoId: null };
 
   it('caso 1 — el admin del Admin sembrado, pedido por cualquiera (FR-002)', () => {
     expect(puedeQuitarRol('admin', sembrada, 'otro-admin')).toEqual({ puede: false, motivo: 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO' });
@@ -23,15 +27,47 @@ describe('puedeQuitarRol', () => {
     expect(puedeQuitarRol('admin', comun, 'otro-admin')).toEqual({ puede: true });
   });
 
-  it('caso 3 — discipulador, para cualquiera, siempre, por ahora (FR-009/H-127, fallo cerrado hasta el spec 004)', () => {
-    for (const persona of [comun, sembrada]) {
-      for (const autor of ['otro-admin', persona.id]) {
-        expect(puedeQuitarRol('discipulador', persona, autor)).toEqual({
-          puede: false,
-          motivo: 'DISCIPULADOR_SIN_VERIFICACION_DE_DISCIPULADOS_ACTIVOS',
-        });
+  // specs/004, D137/FR-043 — cierra H-127: hasta la 004 este caso decía
+  // SIEMPRE que no (fallo cerrado, porque la consulta no existía).
+  describe('caso 3 — discipulador (FR-009 del 005, FR-043 de la 004)', () => {
+    it('sin discipulados ni propuestas: se puede, también para la sembrada y para uno mismo', () => {
+      for (const persona of [comun, sembrada]) {
+        for (const autor of ['otro-admin', persona.id]) {
+          expect(puedeQuitarRol('discipulador', persona, autor)).toEqual({ puede: true });
+        }
       }
-    }
+    });
+
+    it('con un discipulado activo: no, y lo nombra', () => {
+      expect(puedeQuitarRol('discipulador', { ...comun, discipuladosActivos: [discipulado] }, 'otro-admin')).toEqual({
+        puede: false,
+        motivo: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS',
+        discipulados: [discipulado],
+        propuestas: [],
+      });
+    });
+
+    it('con solo una propuesta pendiente: tampoco, y la nombra', () => {
+      expect(puedeQuitarRol('discipulador', { ...comun, propuestasPendientes: [propuesta] }, 'otro-admin')).toEqual({
+        puede: false,
+        motivo: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS',
+        discipulados: [],
+        propuestas: [propuesta],
+      });
+    });
+
+    it('los discipulados no traban los otros roles', () => {
+      const conDiscipulado = { ...comun, discipuladosActivos: [discipulado], propuestasPendientes: [propuesta] };
+      expect(puedeQuitarRol('pastor', conDiscipulado, 'otro-admin')).toEqual({ puede: true });
+      expect(puedeQuitarRol('admin', conDiscipulado, 'otro-admin')).toEqual({ puede: true });
+    });
+  });
+
+  it('el orden es el de la API: sin autor antes que discipulados; discipulados antes que FR-010', () => {
+    const conDiscipulado = { ...comun, discipuladosActivos: [discipulado] };
+    expect(puedeQuitarRol('discipulador', conDiscipulado, null)).toEqual({ puede: false, motivo: 'SESION_SIN_PERSONA' });
+    // Quitarse discipulador a uno mismo: FR-010 es solo de `admin`, así que lo traba FR-009.
+    expect(puedeQuitarRol('discipulador', conDiscipulado, 'p1')).toMatchObject({ motivo: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS' });
   });
 
   it('sin autor identificable, nada — antes que cualquier otra regla (H-140)', () => {

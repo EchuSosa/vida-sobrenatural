@@ -21,9 +21,14 @@ import { leerEnvE2e } from '../../scripts/e2e-base-datos.cjs';
  */
 const envE2e = leerEnvE2e();
 
-const PUERTO_APP = 3012;
-const PUERTO_API = 3335;
-const PUERTO_WEB_AUXILIAR = 3013;
+// Offset de puertos por worktree (lotes A–D de la 004): con varios `git
+// worktree` corriendo e2e a la vez, cada uno suma su offset (10, 20, 30, 40)
+// desde su `.env.e2e` para no chocar en puertos. Con el default 0 nada cambia.
+const OFFSET_PUERTO = Number(envE2e.E2E_PUERTO_OFFSET) || 0;
+
+const PUERTO_APP = 3012 + OFFSET_PUERTO;
+const PUERTO_API = 3335 + OFFSET_PUERTO;
+const PUERTO_WEB_AUXILIAR = 3013 + OFFSET_PUERTO;
 
 // H-78: helpers.ts lee estas dos de process.env — sin esto, seguiría
 // apuntando por defecto a localhost:3001/localhost:3333 (desarrollo).
@@ -135,5 +140,21 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PUERTO_APP}`,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // H-R10 (revisión manual de la 004): en iPhone todos los navegadores son
+  // WebKit, y los campos de fecha y hora nativos no andaban en Safari sin que
+  // ningún e2e lo viera (corrían solo en Chromium). Los specs con `@webkit` en
+  // el título corren también en WebKit — los flujos de fechas, horas y
+  // franjas —, sin duplicar toda la suite (como `@celular`).
+  //
+  // specs/004 (T012b, FR-046): las pantallas del Discipulador (aceptar una
+  // propuesta, cargar la agenda) se usan desde el teléfono, así que sus specs
+  // —los que llevan `@celular` en el título— corren también en un viewport de
+  // celular, además del de escritorio. El proyecto `celular` corre SOLO esos
+  // (grep), para no duplicar el tiempo de toda la suite; el de escritorio los
+  // corre igual (el `@celular` es "también en celular", no "solo").
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'celular', grep: /@celular/, use: { ...devices['Pixel 7'] } },
+    { name: 'webkit', grep: /@webkit/, use: { ...devices['Desktop Safari'] } },
+  ],
 });

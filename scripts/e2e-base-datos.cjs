@@ -25,6 +25,11 @@ const { Client } = require('pg');
 const RAIZ_API = path.join(__dirname, '..', 'apps', 'api');
 const RUTA_ENV_E2E = path.join(RAIZ_API, '.env.e2e');
 const NOMBRE_BASE_E2E = 'vidasobrenatural_e2e';
+// Para trabajar con varios `git worktree` en paralelo (lotes A–D de la 004),
+// cada uno usa una base propia con sufijo — `vidasobrenatural_e2e_a`, `_b`… La
+// guarda de H-78 acepta el nombre base o el mismo con un sufijo `_<a-d>`, nunca
+// la base de desarrollo (`vidasobrenatural`) ni la de integración (`_test`).
+const RE_BASE_E2E = /^vidasobrenatural_e2e(_[a-d])?$/;
 
 /**
  * Parser mínimo a propósito (sin depender de `dotenv`, que solo está
@@ -66,9 +71,9 @@ function leerEnvE2e() {
 function verificarBaseE2e(databaseUrl) {
   const url = new URL(databaseUrl);
   const nombreBase = url.pathname.replace(/^\//, '');
-  if (nombreBase !== NOMBRE_BASE_E2E) {
+  if (!RE_BASE_E2E.test(nombreBase)) {
     throw new Error(
-      `[e2e-base-datos] DATABASE_URL apunta a "${nombreBase}", no a "${NOMBRE_BASE_E2E}". ` +
+      `[e2e-base-datos] DATABASE_URL apunta a "${nombreBase}", no a "${NOMBRE_BASE_E2E}" (ni a "${NOMBRE_BASE_E2E}_<a-d>"). ` +
         'Los e2e de Playwright NUNCA corren contra otra base (H-78: ya rompió la de desarrollo tres veces). ' +
         'Revisá apps/api/.env.e2e — se aborta la corrida.',
     );

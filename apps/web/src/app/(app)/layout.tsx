@@ -13,6 +13,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!session) {
     redirect('/registro');
   }
+  // FR-030 de la 001 (H-R1, revisión manual de la 004): con sesión no alcanza —
+  // quien entró con Google y no completó el registro no tiene Persona, y veía
+  // toda la app privada. Un menor pendiente_tutor va a su pantalla de espera.
+  if (session.user.estado === 'pendiente_tutor') {
+    redirect('/pendiente-tutor');
+  }
+  if (!session.user.personaId || session.user.estado !== 'activa') {
+    redirect('/registro');
+  }
 
   // H-25/H-28 (revisión manual, actualización 2026-09-20): este contenedor
   // tenía `md:flex-row`, pero NavAppBar ya es responsive por sí solo (barra

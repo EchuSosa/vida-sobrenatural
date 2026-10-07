@@ -1,4 +1,5 @@
-import { test, expect, loguearseComoTest, registrarPersonaDeTest, auditar } from './helpers';
+import { test, expect, loguearseComoTest, registrarPersonaDeTest, auditar, usarTemaOscuro, esperarTema } from './helpers';
+import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * H-50 (revisión manual ronda 4): errores de validación por campo — mensaje
@@ -27,8 +28,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 400/);
       const email = `e2e-h50-perfil-${colorScheme}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
+      if (colorScheme === 'dark') await usarTemaOscuro(page, email);
       await page.goto('/perfil');
       await page.waitForLoadState('networkidle');
+      await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
       const telefono = page.getByLabel('Número de teléfono');
       await telefono.fill('123');
@@ -62,8 +65,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
     }) => {
       const email = `e2e-h72-perfil-${colorScheme}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
+      if (colorScheme === 'dark') await usarTemaOscuro(page, email);
       await page.goto('/perfil');
       await page.waitForLoadState('networkidle');
+      await esperarTema(page, colorScheme === 'dark' ? 'oscuro' : 'claro');
 
       const telefono = page.getByLabel('Número de teléfono');
       const errorTelefono = page.locator('#campo-telefono-error');
@@ -101,7 +106,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Apellido').fill('García');
       await page.getByLabel('Nombre').fill('Ana');
       await page.getByLabel('Género').selectOption('femenino');
-      await page.getByLabel('Fecha de nacimiento').fill('1990-05-20');
+      await completarFecha(campo(page, 'Fecha de nacimiento'), '1990-05-20');
       await page.getByRole('button', { name: 'Siguiente' }).click();
 
       await page.getByLabel('Código de país').selectOption('+54');
@@ -158,7 +163,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Apellido').fill('García');
       await page.getByLabel('Nombre').fill('Ana');
       await page.getByLabel('Género').selectOption('femenino');
-      await page.getByLabel('Fecha de nacimiento').fill('1990-05-20');
+      await completarFecha(campo(page, 'Fecha de nacimiento'), '1990-05-20');
       await page.getByRole('button', { name: 'Siguiente' }).click();
 
       await page.getByLabel('Código de país').selectOption('+54');

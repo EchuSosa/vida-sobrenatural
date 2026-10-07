@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { AvisoPorQuery } from './aviso-por-query';
+import { testLoginHabilitado } from '@vida-sobrenatural/shared-types/auth-server';
 import { BotonIngresarGoogle } from './boton-ingresar-google';
+import { EntrarDePruebaCliente } from '../app/dev/entrar/entrar-de-prueba-cliente';
 
 /**
  * H-116 (revisión manual): la única pantalla de "necesitás iniciar sesión"
@@ -21,6 +23,9 @@ export function PantallaSinSesion() {
       <h1 className="text-2xl font-semibold">Backoffice — Vida Sobrenatural</h1>
       <p className="text-muted-foreground">Necesitás iniciar sesión para continuar.</p>
       <BotonIngresarGoogle>Ingresar con Google</BotonIngresarGoogle>
+      {/* H-R13: sin sesión, el layout muestra esta pantalla en cualquier URL — también en
+          /dev/entrar —, así que el login de prueba se ofrece acá (solo con testLoginHabilitado()). */}
+      {testLoginHabilitado() && <EntrarDePruebaCliente />}
     </div>
   );
 }

@@ -10,7 +10,31 @@
     "PERSONA_NO_PENDIENTE_TUTOR": "Este caso ya no está pendiente de un tutor.",
     "VERIFICACION_LOGIN_FALLIDA": "No pudimos verificar tu cuenta. Probá de nuevo en un momento.",
     "EMAIL_NO_VERIFICADO": "No pudimos confirmar que tu email esté verificado con tu proveedor de inicio de sesión.",
-    "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos."
+    "ERROR_INTERNO": "Ocurrió un error inesperado. Podés reintentar en unos segundos.",
+    "SOLICITUD_DISCIPULADO_YA_PENDIENTE": "Ya tenés un pedido de Vida Nueva en curso. Podés cambiar tus horarios o retirarlo.",
+    "VIDA_NUEVA_EN_CURSO_O_COMPLETADA": "Ya estás haciendo Vida Nueva o ya lo terminaste.",
+    "EDAD_INSUFICIENTE_PARA_PEDIR_SOLO": "Este pedido lo hace tu mamá, tu papá o tu tutor hablando con el equipo.",
+    "SOLICITUD_NO_PENDIENTE": "Esta Solicitud ya cambió: alguien la resolvió o ya tiene una propuesta. Actualizamos la pantalla.",
+    "SOLICITUD_NO_PROPUESTA": "Esta propuesta ya no está esperando respuesta. Actualizamos la pantalla.",
+    "DISCIPULADOR_NO_DISPONIBLE": "Ese Discipulador ya no está disponible. Actualizamos la lista para que elijas de nuevo.",
+    "GRUPO_SIN_LUGAR": "Ese Grupo ya no tiene lugar para sumar a esta Persona.",
+    "PROPUESTA_NO_VIGENTE": "Esa propuesta ya no está vigente: ya se respondió o se retiró. Actualizamos la pantalla.",
+    "DISCIPULADO_NO_EN_CURSO": "Este discipulado ya terminó, así que no se puede cambiar.",
+    "FINALIZACION_NO_PROPUESTA": "Ya no hay un pedido de terminar este discipulado: puede que alguien del equipo lo haya resuelto. Actualizamos la pantalla.",
+    "FINALIZACION_YA_PROPUESTA": "Ya se pidió darlo por terminado: falta que el Admin lo confirme.",
+    "BAJA_NO_PROPUESTA": "Ya no hay un pedido de baja: puede que alguien del equipo lo haya resuelto. Actualizamos la pantalla.",
+    "BAJA_YA_PROPUESTA": "Ya se pidió la baja de esta Persona: falta que el Admin la confirme.",
+    "REASIGNACION_AL_MISMO_DISCIPULADOR": "Esa persona ya es quien acompaña este discipulado: elegí a otra.",
+    "REASIGNACION_YA_PROPUESTA": "Ya hay un cambio de Discipulador propuesto. Retiralo antes de proponer otro.",
+    "campos": {
+      "FRANJAS_REQUERIDAS": "Cargá al menos un horario.",
+      "FRANJAS_INVALIDO": "Revisá los horarios: cada uno necesita un día, una hora de inicio y una de fin.",
+      "FRANJA_FIN_ANTERIOR_AL_INICIO": "La hora de fin tiene que ser posterior a la de inicio, por ejemplo de 19:00 a 21:00.",
+      "FRANJA_MUY_CORTA": "Cada horario tiene que durar al menos 1 hora, así puede coincidir con el de otra persona. Por ejemplo, de 19:00 a 20:00.",
+      "FRANJA_REPETIDA": "Ese horario ya está en la lista. Elegí otro día u otras horas.",
+      "FRANJA_SUPERPUESTA": "Ese horario se pisa con otro del mismo día que ya está en la lista. Cambiá las horas, o quitá el otro y cargá uno solo que cubra los dos.",
+      "DIA_SEMANA_INVALIDO": "Elegí un día de la semana de la lista."
+    }
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -20,6 +44,7 @@
     "dar": "Dar",
     "ingresar": "Ingresar",
     "irALaApp": "Ir a la app",
+    "completarRegistro": "Completar registro",
     "inicio": "Inicio",
     "miCamino": "Mi camino",
     "avisos": "Avisos",
@@ -225,6 +250,7 @@
       "editar": "Editar"
     },
     "errorCampo": "Revisá este dato.",
+    "errorFechaNacimiento": "Completá el día, el mes y el año en que naciste. El año va con 4 números, por ejemplo 1965.",
     "elegirOpcion": "Elegí una opción",
     "soloNumeros": "Solo números",
     "opciones": {
@@ -289,5 +315,101 @@
   },
   "comun": {
     "cerrarPanel": "Cerrar el panel"
+  },
+  "miCamino": {
+    "titulo": "Mi camino",
+    "proximosPasos": "Vida de Servicio, Ministerio y Bautismo van a aparecer acá apenas estén disponibles.",
+    "vidaNueva": {
+      "titulo": "Vida Nueva",
+      "introduccion": "Vida Nueva es el primer paso después de la Bienvenida: te juntás con una persona del equipo, un Discipulador, para recorrer juntos el libro Vida Nueva.",
+      "franjasTitulo": "¿Qué días y horarios podés?",
+      "franjasAyuda": "Cargá al menos un horario. Con eso buscamos a alguien que pueda en esos momentos.",
+      "franjasRequeridas": "Agregá al menos un día y horario con \"Agregar franja\".",
+      "pedir": "Quiero empezar Vida Nueva",
+      "pedidoEnviado": "Recibimos tu pedido de Vida Nueva.",
+      "buscandoTitulo": "Estamos buscando a tu Discipulador",
+      "buscandoTexto": "Recibimos tu pedido el {fecha}. El equipo está buscando a alguien que pueda en tus horarios.",
+      "buscandoYAhora": "Cuando lo encontremos, vas a ver acá quién es y su teléfono. Mientras tanto, podés cambiar tus horarios o retirar el pedido.",
+      "tusHorarios": "Tus horarios",
+      "editarHorarios": "Editar horarios",
+      "guardarHorarios": "Guardar horarios",
+      "volver": "Volver",
+      "horariosGuardados": "Guardamos tus horarios.",
+      "retirar": "Retirar el pedido",
+      "retirarTitulo": "¿Retirar tu pedido de Vida Nueva?",
+      "retirarDescripcion": "El equipo deja de buscarte un Discipulador. Podés volver a pedirlo cuando quieras.",
+      "retirarConfirmar": "Sí, retirar el pedido",
+      "retirarMantener": "No, mantenerlo",
+      "pedidoRetirado": "Retiraste tu pedido.",
+      "ultimoRechazada": "Esta vez tu pedido no pudo avanzar. Si querés saber por qué, hablá con el equipo de tu sede. Podés volver a pedirlo cuando quieras.",
+      "ultimoRetirada": "Retiraste tu pedido anterior. Podés volver a pedirlo cuando quieras.",
+      "ultimoAbandono": "Tu discipulado anterior se dio de baja. Podés volver a pedir Vida Nueva cuando quieras.",
+      "bajaTitulo": "Tu discipulado se dio de baja",
+      "bajaTexto": "Se dio de baja el {fecha}. Si querés retomar, podés volver a pedir Vida Nueva cuando quieras.",
+      "tutorTitulo": "Este pedido lo hace tu mamá, tu papá o tu tutor",
+      "tutorTexto": "Para empezar Vida Nueva, pediles que hablen con el equipo de tu sede. Ellos cargan el pedido por vos, y después vas a ver acá cómo sigue.",
+      "enCursoTitulo": "Estás haciendo Vida Nueva",
+      "enCursoDiscipulador": "Tu Discipulador es {nombre}.",
+      "enCursoTelefono": "Llamar o escribir al {telefono}",
+      "enCursoDesde": "Empezaste el {fecha}.",
+      "enCursoYAhora": "Tu Discipulador se va a comunicar con vos para combinar los encuentros. Si preferís, podés escribirle vos.",
+      "finalizadoTitulo": "¡Terminaste Vida Nueva!",
+      "finalizadoTexto": "Lo terminaste el {fecha}. El próximo paso lo vas a ver acá apenas esté disponible; mientras tanto, podés hablar con el equipo de tu sede."
+    },
+    "errores": {
+      "generico": "No pudimos guardar tu pedido. Probá de nuevo en unos segundos."
+    },
+    "errorCargaTitulo": "No pudimos mostrar tu camino",
+    "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
+    "reintentar": "Reintentar",
+    "resumenErrores": "Revisá esto antes de seguir:"
+  },
+  "franjas": {
+    "dias": [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado"
+    ],
+    "dia": "Día",
+    "desde": "Desde",
+    "hasta": "Hasta",
+    "hora": "Hora",
+    "minutos": "Minutos",
+    "agregar": "Agregar franja",
+    "quitar": "Quitar",
+    "sinFranjas": "Todavía no cargaste horarios.",
+    "errorRango": "La hora de fin tiene que ser posterior a la de inicio.",
+    "separador": " a "
+  },
+  "campoFecha": {
+    "dia": "Día",
+    "mes": "Mes",
+    "anio": "Año",
+    "meses": [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre"
+    ]
+  },
+  "devEntrar": {
+    "titulo": "Entrar para probar",
+    "descripcion": "Solo en desarrollo: entrás como la persona de ese email, sin pasar por Google. Si esa persona no está registrada, empezás su registro.",
+    "email": "Email",
+    "entrar": "Entrar",
+    "entrando": "Entrando…",
+    "rapidos": "Cuentas de la revisión manual"
   }
 }
