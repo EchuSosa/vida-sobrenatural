@@ -32,6 +32,11 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 0 — Compartido (secuencial, bloquea todos los demás)
 
+- [ ] T000 [L0] **Compuerta**: no arrancar `/speckit-implement` sin las respuestas de Echu a las cinco "Preguntas para
+  Echu" de la spec (Principio I). Si alguna respuesta difiere de la recomendación aplicada, actualizar spec, plan y
+  tasks antes de seguir (ej. si la Pregunta 1 dice que "Contanos" va en otra spec, se saca el Lote 5). — cubre:
+  Principio I
+
 - [ ] T001 [L0] Verificar `main` actualizado, que `.specify/feature.json` apunta a `specs/013-backoffice-admin`, y qué
   specs de 006–011 ya están mergeadas: anotar en el PR de implementación qué ramas de la vista y qué secciones del
   perfil se conectan en esta corrida (plan.md → Dependencias). Mirar el último número de `docs/05` antes de numerar
@@ -63,8 +68,9 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   cubre: FR-022–FR-024, FR-041, FR-043, FR-052, FR-056
 - [ ] T009 [L0] `permisos.ts`: `comentarios.ver` [admin, pastor], `comentarios.gestionar` [admin], `cursos.gestionar`
   [admin], `cursos.papelera.ver` [admin], `personas.editar` [admin]. `error-code.ts`: `CURSO_INACTIVO`,
-  `CURSO_TIENE_GRUPOS`, `CURSO_NO_RECONOCIDO`, `CURSO_YA_EXISTE`, `CONTACTO_REQUERIDO` (y `DEMASIADOS_PEDIDOS` si la
-  007 no lo trajo todavía — una sola definición). Extender el test existente del catálogo de permisos para que el
+  `CURSO_TIENE_GRUPOS`, `CURSO_NO_RECONOCIDO`, `CURSO_YA_EXISTE` (y `DEMASIADOS_PEDIDOS` si la 007 no lo trajo
+  todavía — una sola definición). Los códigos de campo nuevos (`TEXTO_INVALIDO`, `CONTACTO_INVALIDO`) no van al
+  catálogo. Extender el test existente del catálogo de permisos para que el
   Pastor no tenga ningún `.gestionar`/`.editar` nuevo. — cubre: FR-061, SC-008
 - [ ] T010 [L0] Prisma (`data-model.md`): `ComentarioApp` + `TipoComentario` + `AppOrigen` (o el de la 007),
   `Curso.descripcion/eliminadoEn/eliminadoPor`; migración con los CHECK de §1. Migración aparte `--create-only` con el
@@ -83,8 +89,8 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 - [ ] T013 [P] [L0] `packages/ui`: `FormularioComentario` (research #11) — tipo (radio con texto), texto con contador,
   "Pueden contactarme" que, sin sesión, despliega email/teléfono (`CampoTelefono`), errores por campo con
   `ResumenErrores`, `useEnvio`; recibe `enviar(datos)`, `conSesion`, `paginaOrigen`; estado de confirmación con "qué
-  pasa después". `resumirNavegador(userAgent)` en el mismo paquete. Sin conectar a ninguna app todavía. — cubre:
-  FR-041, FR-042, FR-045
+  pasa después"; le pasa `navigator.userAgent` a `resumirNavegador` y toma `ultimoRequestId()` (T017). Va en
+  `packages/ui/src/components/`. Sin conectar a ninguna app todavía. — cubre: FR-041, FR-042, FR-045
 - [ ] T014 [L0] `apps/backoffice/src/config/nav.ts`: rutas nuevas (`/personas/[id]`, `/personas/[id]/editar`,
   `/cumpleanos`, `/comentarios`, `/comentarios/[id]`, `/cursos`, `/cursos/[id]`, `/cursos/papelera`) con su permiso y
   `enMenu: false`; `/sedes` pasa a `enMenu: false`; `aria-current` en Catálogos para `/sedes*` y `/cursos*` (research
@@ -94,6 +100,16 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 - [ ] T015 [L0] Mensajes: namespaces vacíos con las claves base en `apps/backoffice/src/messages/es.json` (`bandeja`,
   `perfil`, `inicio`, `metricas`, `cumpleanos`, `comentarios`, `cursos`, `catalogos`) y `apps/web/src/messages/es.json`
   (`comentarios`), incluidos tipos y estados de Discipulado para la bandeja. — cubre: FR-064
+
+- [ ] T016 [L0] `PersonaBreve` suma `fotoUrl: string | null` (`discipulado.ts`); sumar `fotoUrl` a
+  `PERSONA_LISTADO_SELECT` y a los `select` que arman `PersonaBreve` en la API (resúmenes de Solicitudes, Grupos);
+  `PersonaListado` también. Actualizar en el mismo commit los tests que comparan objetos exactos. — cubre: FR-018,
+  FR-011
+- [ ] T017 [L0] `packages/shared-types`: `resumirNavegador(userAgent)` en `comentario.ts` y `ultimoRequestId()` en
+  `api-client.ts` (`apiFetch` recuerda en memoria el `requestId` del último Problem Details). Unit
+  `apps/api/test/unit/resumir-navegador.spec.ts` (Chrome Android, Safari iOS, Firefox escritorio, cadena vacía, user
+  agent desconocido → "Otro") y `ultimo-request-id.spec.ts` (se actualiza con cada error, no con respuestas OK). —
+  cubre: FR-042
 
 **Checkpoint L0**: `pnpm --filter api run test` y `test:e2e` verdes, `packages/shared-types` reconstruido (H-33).
 
@@ -105,7 +121,10 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `BandejaService.listar(filtros)` sobre la vista con `$queryRaw` (ids + tipo, orden con desempate por `id`), hidrata
   por tipo preservando el orden; `conteoAbiertas()`. `BandejaController`: `GET /solicitudes` (se muda desde
   `solicitud-discipulado.controller.ts`, misma ruta) y `GET /solicitudes/conteo-abiertas`, con la compatibilidad de
-  `estado=` de la 004 (`contracts/bandeja-api.md`). DTO con validación de `tipo`/`estado`/`take`. — cubre: FR-001–FR-005,
+  `estado=` de la 004 (`contracts/bandeja-api.md`). DTO con validación de `tipo`/`estado`/`take`. **Borrar las copias
+  que reemplaza** (Principio XI): el `ESTADOS_ABIERTOS` local del controller de la 004, `OrdenBandeja` de la API y de
+  `apps/backoffice/src/app/solicitudes/constantes.ts` (pasan a importar el de `bandeja.ts`), `estadosDelFiltro`, y
+  `SolicitudResumen` (queda como alias de `SolicitudBandeja` o se reemplaza en sus usos). — cubre: FR-001–FR-005,
   FR-008
 - [ ] T021 [L1] `SolicitudDiscipuladoService`: implementar `FuenteSolicitudes` (`resumenes(ids)` = el `resumenes`
   actual, con `extra.propuestaVigente`) y registrarla; borrar su `listar` (lo reemplaza la bandeja) actualizando sus
@@ -123,13 +142,15 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   por, Revisada por; filtro Abiertas/Resueltas/Todas, filtro de tipo solo con >1 tipo, filtro de estados solo con un
   tipo elegido, búsqueda y orden con `ControlesTabla` + `useControlesTablaUrl`; fila → `RUTA_DETALLE_SOLICITUD[tipo]`;
   vuelta a página 1 al cambiar filtros. Columnas que colapsan según `docs/15` (identificación y estado nunca se ocultan).
-  Estado vacío por filtro ("No hay nada esperando una respuesta" en Abiertas). — cubre: FR-002, FR-004–FR-006, H1.3,
-  H1.4
+  Estado vacío por filtro ("No hay nada esperando una respuesta" en Abiertas). Días de espera con el `diasDesde`
+  existente. — cubre: FR-002, FR-004–FR-006, H1.3, H1.4
 - [ ] T025 [L1] E2E `apps/backoffice/e2e/bandeja.spec.ts`: H1.1, H1.3 (sin filtro de tipo con un solo tipo), H1.4 (fila
-  → detalle de Discipulado; nombre → perfil), H1.5, H1.6 (Pastor sin acciones), `?pagina=99` → redirect a la última,
+  → detalle de Discipulado; nombre → perfil), H1.5, H1.6 (Pastor sin acciones), "hace N días" visible en cada fila (FR-002), `?pagina=99` → redirect a la última,
   cambio de filtro → `pagina=1`; axe claro y oscuro; 320 px sin scroll. — cubre: H1.1, H1.3–H1.6, FR-062, SC-007
 - [ ] T026 [L1] Adaptar `solicitudes.spec.ts` (004) a los textos nuevos de la bandeja sin perder sus casos. — cubre:
   FR-008
+- [ ] T027a [L1] [CHECKLIST] Pantalla **Solicitud de Discipulado (detalle)** modificada (nombre enlazado al perfil):
+  checklist de `docs/15` sobre lo tocado. — cubre: FR-062
 - [ ] T027 [L1] [CHECKLIST] Pantalla **Solicitudes (bandeja)**: aplicar y tildar el checklist de `docs/15` (una acción
   principal — no tiene: decirlo; estados de carga/vacío/error/éxito; feedback; tono; teclado y lector de pantalla;
   contraste claro/oscuro incl. `hover`). — cubre: FR-062
@@ -165,10 +186,12 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 - [ ] T035 [L2] E2E `apps/backoffice/e2e/perfil-persona.spec.ts`: desde el listado al perfil (avatar en la fila, FR-018); H2.1 (foto con alt; sin
   foto, iniciales), el Admin abre el panel de roles y el historial desde el perfil (FR-012) y ve "Pedir Vida Nueva en
   su nombre" con el nombre de la Persona visible (FR-016), H2.2, H2.3, H2.4, H2.6 (Pastor: contacto visible, sin botones de gestión), H2.8 (id inexistente → "No
-  encontramos esta Persona" con enlace), H2.9 `@celular` (360 px sin scroll, tamaño de letra de etiquetas y botones
+  encontramos esta Persona" con enlace), Persona con `activo = false` muestra "Dada de baja" (FR-017), H2.9 `@celular` (360 px sin scroll, tamaño de letra de etiquetas y botones
   ≥ 16 px y alto ≥ 44 px medidos con `getComputedStyle`/`boundingBox`); axe claro y oscuro. — cubre: H2.1–H2.4, H2.6,
   H2.8, H2.9, FR-063, SC-003, SC-007
 - [ ] T036 [L2] [CHECKLIST] Pantalla **Perfil de Persona**: checklist de `docs/15` + D150. — cubre: FR-062, FR-063
+- [ ] T037a [L2] [CHECKLIST] Pantallas **Grupos (listado)**, **Grupo (detalle)** y **Pendientes de tutor**, modificadas
+  por T034 (nombres enlazados al perfil): checklist de `docs/15` sobre lo tocado, una por una. — cubre: FR-062
 - [ ] T037 [L2] [CHECKLIST] Pantalla **Personas (listado)** modificada: checklist de `docs/15` (avatar en celular, foco
   y lector de pantalla del enlace). — cubre: FR-062
 
@@ -188,11 +211,12 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `/solicitudes?tipo=X`, la `TarjetaPendientes` existente y la cantidad de Pendientes de tutor. Métricas: número grande
   de Personas activas; tabla de rangos y de Sedes con cantidad y porcentaje en texto + `BarraProporcion`; ayuda "Es el
   tiempo que cada Persona declaró al registrarse" (A6). Los bloques de cumpleaños y comentarios se conectan en los
-  lotes 4 y 5 (si no están, el bloque no se muestra). Migrar a next-intl el h1 y los textos fijos. Pastor igual, sin
+  lotes 4 y 5 (si no están, el bloque no se muestra). El cálculo de porcentajes con total 0 devuelve 0 sin dividir. Migrar a next-intl el h1 y los textos fijos. Pastor igual, sin
   acciones. `@celular`. — cubre: FR-020–FR-024, FR-064, H3.5, H3.6
 - [ ] T043 [L3] E2E `apps/backoffice/e2e/inicio.spec.ts`: H3.2 (cinco rangos con número y % visibles como texto), H3.4
-  (estado vacío sin "NaN"/"0 %" — con base sin activas en un test aislado vía fixture), H3.5 (conteos enlazan a la
-  bandeja filtrada; sin abiertas, mensaje), H3.6 (interceptar `GET /inicio/metricas` con 500: el bloque muestra error y
+  (con `page.route` sobre `GET /inicio/metricas` devolviendo `personasActivas: 0` y todo en 0: estado vacío, sin
+  "NaN"), H3.5 (con `page.route` sobre `GET /solicitudes/conteo-abiertas` devolviendo `{discipulado: 5, bautismo: 2}`:
+  "5 de Discipulado · 2 de Bautismo", cada uno enlaza a `/solicitudes?tipo=…`; con todo en 0, el mensaje), H3.6 (interceptar `GET /inicio/metricas` con 500: el bloque muestra error y
   "Reintentar", los otros se ven), `@celular` 360 px; axe claro y oscuro. — cubre: H3.2, H3.4–H3.6, FR-020, FR-063
 - [ ] T044 [L3] [CHECKLIST] Pantalla **Inicio**: checklist de `docs/15` + D150 (cuatro estados **por bloque**). —
   cubre: FR-062, FR-063
@@ -224,8 +248,9 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 - [ ] T060 [L5] API `apps/api/src/comentario/`: `POST /comentarios` público con sesión opcional (guard que acepta token
   si viene), lee `X-Origen-Cliente` y guarda solo la huella (helper de la 007), valida DTO (`contracts/comentarios-api.md`,
-  `CONTACTO_REQUERIDO` bajo `VALIDACION`), descarta datos de contacto si hay sesión, límite por ventana de una hora
-  (5 por huella sin sesión, 20 por Persona con sesión) → `429 DEMASIADOS_PEDIDOS` con `reintentarEn`; después de
+  códigos de campo según `validation-exception-factory`), descarta datos de contacto si hay sesión, límite por ventana de una hora
+  (5 por huella sin sesión, 20 por Persona con sesión) → `429 DEMASIADOS_PEDIDOS` con `reintentarEn`; la regla cruzada de
+  contacto con `AppException('VALIDACION')` y `{campo: 'contacto', code: 'CONTACTO_INVALIDO'}`; después de
   confirmar, email con `EmailService` a `EMAIL_COMENTARIOS_DESTINO` (asunto sin datos sensibles), falla capturada a
   Sentry sin texto ni contacto. Documentar la variable en `.env.example` y en `docs/11` vía "Cambios a docs". — cubre:
   FR-040–FR-044, A8, A9
@@ -234,29 +259,34 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   FR-047
 - [ ] T062 [P] [L5] Unit `comentario-limites.spec.ts`: cálculo de `reintentarEn` (el más viejo de la ventana sale en N
   segundos), umbral exacto 5/6 y 20/21, sin sesión vs. con sesión; validación de contacto (acepta sin email ni teléfono
-  → `CONTACTO_REQUERIDO`; con sesión ignora el contacto enviado). — cubre: FR-041, FR-043, H5.3, H5.5
+  → `CONTACTO_INVALIDO` en el campo `contacto`; con sesión ignora el contacto enviado). — cubre: FR-041, FR-043, H5.3, H5.5
 - [ ] T063 [L5] Integración `comentarios.integration-spec.ts` (con `EmailServiceFalso` de la 007): H5.1 (sin sesión,
   guarda página, navegador, requestId, huella y **no** la IP), H5.2 (con sesión, `personaId` y sin contacto propio),
-  H5.3, H5.4 (vacío y 2001 caracteres → `errors[campo=texto]`), H5.5 (sexto en la hora → 429), H5.6 (email enviado con
+  H5.3, H5.4 (vacío y 2001 caracteres → `errors[campo=texto, code=TEXTO_INVALIDO]`), H5.5 (sexto en la hora → 429), H5.6 (email enviado con
   asunto sin texto; `EmailService` que falla → igual 201 y guardado), H5.7 (marcar y deshacer, idempotente, registra
   quién), H5.8 (Pastor: listado 200, marcar 403). — cubre: H5.1–H5.8, SC-006
-- [ ] T064 [L5] Web: página `/contanos` (pública, `noindex`, `loading`/`error`) con `FormularioComentario`; el servidor de
-  Next manda `X-Origen-Cliente` como en la 007; enlace "Contanos qué te parece" en el pie de página y en Perfil
+- [ ] T064 [L5] Web: página `/contanos` (pública, `noindex`, `loading`/`error`) con `FormularioComentario`; el envío pasa
+  por un route handler/server action de `apps/web` que lee la sesión con `auth()` (si hay, adjunta el token de API como
+  el resto de la app, D135, y `conSesion` oculta los campos de contacto) y manda `X-Origen-Cliente` como en la 007; enlace "Contanos qué te parece" en el pie de página y en Perfil
   (`docs/14`). Mandar `paginaOrigen` desde el enlace (`?desde=`) sin query string. `@celular`. — cubre: FR-040, FR-042,
   FR-045, FR-063
 - [ ] T065 [L5] Backoffice: "Contanos qué te parece" en el menú de usuario (abre `Sheet` con `FormularioComentario`);
   `app/comentarios/` listado (filtro Sin revisar/Revisados/Todos y tipo, paginado de a 20, extracto, quién o "Sin
   sesión", "Acepta contacto" con ícono) y `app/comentarios/[id]` (texto completo como texto plano, datos técnicos,
   contacto si lo aceptó, "Marcar como revisado"/"Deshacer" con toast); `BloqueComentarios` del Inicio (cantidad sin
-  revisar + 5 más recientes, vacío "No hay comentarios nuevos"). Miga de pan Inicio › Comentarios. — cubre: FR-040,
+  revisar + 5 más recientes, vacío "No hay comentarios nuevos"). Miga de pan Comentarios › <fecha> en el detalle (la
+  miga arranca en la sección, nunca en Inicio — `docs/15`). El ítem del menú de usuario se suma como prop opcional de
+  `MenuUsuario` (`packages/ui`), sin cambiar el menú de la web. — cubre: FR-040,
   FR-046–FR-048
 - [ ] T066 [L5] E2E `apps/web/e2e/contanos.spec.ts`: H5.1 (sin sesión, desde el pie: confirmación con qué pasa después),
-  H5.3, H5.4 (resumen arriba con enlace y foco, texto no se borra), H5.5 (mensaje con minutos en palabras), `@celular`;
-  axe claro y oscuro. — cubre: H5.1, H5.3–H5.5, FR-045, FR-063
+  H5.3, H5.4 (resumen arriba con enlace y foco, texto no se borra), H5.5 (mensaje con minutos en palabras), H5.2 en la web (con sesión: sin campos de contacto, queda asociado a
+  la Persona), `@celular`; axe claro y oscuro. — cubre: H5.1–H5.5, FR-045, FR-063
 - [ ] T067 [L5] E2E `apps/backoffice/e2e/comentarios.spec.ts`: el comentario enviado en la web aparece en "Sin revisar"
   y en el bloque del Inicio (SC-006); H5.7; un texto con `<b>hola</b>` se ve literal (FR-048); H5.8 (Pastor sin botón);
   enviar desde el menú de usuario del backoffice queda con `app = backoffice` y la Persona; axe claro y oscuro. — cubre:
   H5.2, H5.7, H5.8, FR-048, SC-006
+- [ ] T068a [L5] [CHECKLIST] **Pie de página** y **Perfil** de la web, modificados con el enlace nuevo: checklist de
+  `docs/15` sobre lo tocado (enlace real, foco, contraste, 44 px). — cubre: FR-062, FR-063
 - [ ] T068 [L5] [CHECKLIST] Pantalla **/contanos (web)** y el `Sheet` del menú de usuario: checklist de `docs/15` + D150.
   — cubre: FR-062, FR-063
 - [ ] T069 [L5] [CHECKLIST] Pantallas **Comentarios (listado)** y **Comentario (detalle)**: checklist de `docs/15`. —
@@ -269,15 +299,19 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 - [ ] T070 [L6] API `apps/api/src/curso/` (`contracts/cursos-api.md`): listado con `gruposEnCurso`/`tieneGrupos`, detalle,
   `disponibles-para-alta`, alta acotada a `CURSOS_RECONOCIDOS` (restaurar si está en la papelera), `PATCH` sin
   categoría/tipo/modalidad, `DELETE` lógico con `CURSO_TIENE_GRUPOS`, papelera y restaurar. `CursoService.exigirActivo(
-  cursoId, tx)` → `CURSO_INACTIVO`. `GET /catalogos/resumen`. — cubre: FR-050–FR-056
-- [ ] T071 [L6] Llamar `exigirActivo` en la aceptación de propuesta de la 004 (donde se crea el Grupo, dentro de la
-  misma transacción) y en la reasignación si crea Grupo; mostrar el código traducido donde el Discipulador acepta. —
-  cubre: FR-054
+  cursoId, tx)` → `CURSO_INACTIVO` si `activo = false` o `eliminadoEn` no es nulo. `GET /catalogos/resumen`. — cubre: FR-050–FR-056
+- [ ] T071 [L6] Llamar `exigirActivo` en la aceptación de propuesta de la 004 (`propuestas.service.ts`, rama sin
+  `grupoDestinoId` que crea el Grupo, dentro de la misma transacción); la rama "sumar a este Grupo" no se bloquea.
+  Traducir `CURSO_INACTIVO` en la pantalla donde el Discipulador acepta (backoffice hoy; web app si la 006 ya la movió).
+  — cubre: FR-054
+- [ ] T071a [L6] [CHECKLIST] Pantalla del Discipulador **donde acepta una propuesta**, modificada por T071 (mensaje de
+  error nuevo): checklist de `docs/15` sobre lo tocado. — cubre: FR-062
 - [ ] T072 [P] [L6] Unit `curso-alta.spec.ts`: combinación reconocida libre → ok; existente → `CURSO_YA_EXISTE`;
   eliminada → restaurar; no reconocida → `CURSO_NO_RECONOCIDO`. — cubre: FR-056
 - [ ] T073 [L6] Integración `cursos.integration-spec.ts`: H6.2 (listado con Grupos en curso), H6.3 (inactivar con Grupos
   en curso: los Grupos siguen; aceptar una propuesta nueva → `CURSO_INACTIVO`, la propuesta queda sin aceptar y la Solicitud sigue abierta), H6.4
-  (eliminar con un Grupo finalizado → 409), H6.5 (papelera y restaurar), `PATCH` con `categoria` → 400, H6.6 (Pastor:
+  (eliminar con un Grupo finalizado → 409), H6.5 (papelera y restaurar), Curso eliminado → `exigirActivo` rechaza,
+  sumar a un Grupo en curso de un Curso inactivo sigue funcionando, `PATCH` con `categoria` → 400, H6.6 (Pastor:
   GET 200, escritura 403), `catalogos/resumen`. — cubre: H6.2–H6.6, FR-052, FR-054
 - [ ] T074 [L6] Backoffice `app/catalogos/`: tarjetas por catálogo con activos/total y enlace (Sedes, Cursos; las demás
   cuando existan), textos a next-intl. `app/cursos/` (listado con filtro activos/todos, columnas de FR-051, alta en modal
@@ -298,9 +332,11 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 7 — Edición de datos de una Persona (Historia 7, P3) — requiere la 006 en `main`
 
-- [ ] T080 [L7] API `PATCH /personas/:id` (`personas.editar`): DTO parcial del alta de la 006; regla de D133 con la
-  misma función que usa `RolesService` (no una copia); email único (`EMAIL_DUPLICADO`); email vacío solo si la columna ya
-  es opcional (D145). — cubre: FR-057, FR-058
+- [ ] T080 [L7] Primero, extraer la regla de D133 que hoy está en línea en `RolesService.otorgarRol` a
+  `esMenorDeEdad(fechaNacimiento, hoy)` (`packages/shared-types/src/persona.ts`) con su unit test, y que `otorgarRol`
+  la use (sin cambio de comportamiento: sus tests siguen verdes). Después, API `PATCH /personas/:id` (`personas.editar`):
+  DTO parcial del alta de la 006; D133 con esa función; email normalizado como exige la 007 y único
+  (`EMAIL_DUPLICADO`); email vacío solo si la 006 ya lo hizo opcional (D145). — cubre: FR-057, FR-058
 - [ ] T081 [L7] Integración `persona-editar.integration-spec.ts`: H7.2 (fecha que vuelve menor a un Discipulador → 409
   con el código existente), H7.3 (email de otra Persona → 409), edición válida devuelve `PerfilPersona` actualizado,
   H7.5 (Pastor 403). — cubre: H7.2, H7.3, H7.5
@@ -349,8 +385,8 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 | H1.3, H1.4, H1.6 | T025 |
 | H2.1, H2.6, H2.9, FR-012, FR-016, FR-018 | T035 |
 | H2.2–H2.5, H2.7, H2.8 | T032 (+ T035 para H2.2–H2.4, H2.8 en pantalla) |
-| H3.1–H3.4 | T041 (+ T043 H3.2, H3.4) |
-| H3.5, H3.6 | T043 |
+| H3.1–H3.4 | T041 (+ T043 H3.2, H3.4 con respuesta simulada) |
+| H3.5, H3.6 | T043 (H3.5 con dos tipos simulados) |
 | H4.1–H4.6 | T007, T051, T053 |
 | H5.1–H5.8 | T062, T063, T066, T067 |
 | H6.1–H6.6 | T073, T075 (H6.2 en T073) |
@@ -358,10 +394,12 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 | FR-003 / FR-007 (regla y extensión) | T003, T011 |
 | FR-008 (004 sin regresión) | T023, T026 |
 | FR-014 (inversas) | T005 |
+| FR-018 (foto en listado) | T016, T035 |
+| FR-042 (requestId, navegador) | T017, T063 |
 | FR-015 (sin notas) | T032 |
 | FR-054 (Curso inactivo) | T073 |
 | FR-061 / SC-008 (permisos, Pastor) | T009, T091 |
-| FR-062 / SC-007 (checklist, axe, 320 px) | T027, T036, T037, T044, T054, T068, T069, T076, T077, T084, T092 |
+| FR-062 / SC-007 (checklist, axe, 320 px) | T027, T027a, T036, T037a, T068a, T071a, T037, T044, T054, T068, T069, T076, T077, T084, T092 |
 | FR-063 (D150) | T035, T043, T053, T066 |
 | FR-065 (seed) | T090 |
 | SC-004 | T093 |

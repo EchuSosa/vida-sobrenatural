@@ -18,17 +18,20 @@ Permiso: `personas.ver`. `mes` por defecto el actual (`hoyEnArgentina`). Respues
 
 ```ts
 interface Cumpleanero {
-  persona: PersonaBreve; dia: number;      // día en que se festeja ESE año (29/2 → 28 en no bisiesto)
-  cumple: number; esHoy: boolean; telefono: string;
+  persona: PersonaBreve;
+  fecha: string;   // 'YYYY-MM-DD' del festejo en el año de referencia (29/2 → 28/2 si no es bisiesto)
+  dia: number; cumple: number; yaPaso: boolean; esHoy: boolean; telefono: string;
 }
 ```
 
+Año de referencia: el año en curso (fecha civil argentina), también para meses ya pasados (`yaPaso` → "cumplió N").
 Orden: `dia`, `apellido`, `nombre`. `400 VALIDACION` si `mes` no es 1..12 (la pantalla redirige antes).
 
 ## `GET /inicio/cumpleanos-semana`
 
-Permiso: `inicio.ver`. Respuesta `Cumpleanero[]` de hoy a hoy + 7 (incluye `fecha: 'YYYY-MM-DD'`), ordenados por
-fecha. Sin paginar: acotado por 8 días (si superara 50, devuelve 50 y `hayMas: true` — el bloque enlaza al mes).
+Permiso: `inicio.ver`. Respuesta `{ items: Cumpleanero[]; hayMas: boolean }` de hoy a hoy + 7 (año de referencia: el
+del festejo, puede ser el siguiente si cruza el 31/12), ordenados por `fecha`. Sin paginar: acotado por 8 días; si
+superara 50, devuelve 50 y `hayMas: true` — el bloque enlaza al mes.
 
 ## Pendientes
 

@@ -124,10 +124,13 @@ se escribe a mano con `--create-only`).
   anio)`, `CUMPLEANOS_DIAS_SEMANA = 7`, `CUMPLEANOS_PAGINA = 50`.
 - `comentario.ts`: `TipoComentario`, `ComentarioNuevo`, `ComentarioResumen`, `ComentarioDetalle`,
   `COMENTARIO_TEXTO_MAX = 2000`, `COMENTARIOS_POR_HORA_SIN_SESION = 5`, `COMENTARIOS_POR_HORA_CON_SESION = 20`,
-  `resumirNavegador(userAgent)` (si no depende del DOM; si sí, va a `packages/ui`).
+  `resumirNavegador(userAgent)` (función pura, research #10).
 - `curso.ts`: `CursoListado`, `CursoDetalle`, `CURSOS_RECONOCIDOS`, `CURSO_DESCRIPCION_MAX = 500`.
-- `error-code.ts`: `CURSO_INACTIVO`, `CURSO_TIENE_GRUPOS`, `CURSO_NO_RECONOCIDO`, `CURSO_YA_EXISTE`,
-  `CONTACTO_REQUERIDO`; `DEMASIADOS_PEDIDOS` lo trae la 007.
+- `error-code.ts`: `CURSO_INACTIVO`, `CURSO_TIENE_GRUPOS`, `CURSO_NO_RECONOCIDO`, `CURSO_YA_EXISTE`;
+  `DEMASIADOS_PEDIDOS` lo trae la 007. Los códigos de campo (`TEXTO_INVALIDO`, `CONTACTO_INVALIDO`) no van al
+  catálogo (convención de `validation-exception-factory`).
+- `discipulado.ts`: `PersonaBreve` suma `fotoUrl: string | null` (D87) — lo usan la bandeja, el perfil y el listado.
+- `persona.ts`: `esMenorDeEdad(fechaNacimiento, hoy)` extraída de `RolesService.otorgarRol` (research #14).
 - `permisos.ts`: `comentarios.ver` [admin, pastor], `comentarios.gestionar` [admin], `cursos.gestionar` [admin],
   `cursos.papelera.ver` [admin], `personas.editar` [admin]; `cursos.ver` no hace falta (usa `catalogos.ver`).
 

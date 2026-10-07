@@ -19,9 +19,11 @@ interface ComentarioNuevo {
 }
 ```
 
-Respuestas: `201 { id }`. Errores: `400 VALIDACION` con `errors: [{campo, code}]` — `texto` (`REQUERIDO`,
-`DEMASIADO_LARGO`), `contacto` (`CONTACTO_REQUERIDO` si `aceptaContacto` sin sesión y sin email ni teléfono),
-`contactoEmail`/`contactoTelefono` (formato); `429 DEMASIADOS_PEDIDOS` con `reintentarEn` (segundos).
+Respuestas: `201 { id }`. Errores: `400 VALIDACION` con `errors: [{campo, code}]`. Los códigos de campo siguen la
+convención de `validation-exception-factory` (`<CAMPO>_INVALIDO`, fuera del catálogo `ErrorCode`): `TEXTO_INVALIDO`
+(vacío o > 2000), formato de `contactoEmail`/`contactoTelefono`; y la regla cruzada de contacto (`aceptaContacto` sin
+sesión y sin email ni teléfono) se lanza a mano con `AppException('VALIDACION', 400, …)` y
+`errors: [{ campo: 'contacto', code: 'CONTACTO_INVALIDO' }]`, misma convención; `429 DEMASIADOS_PEDIDOS` con `reintentarEn` (segundos).
 
 Efecto posterior a la transacción: email a `EMAIL_COMENTARIOS_DESTINO` con asunto "Nuevo comentario en la app
 (problema|sugerencia)" — sin texto ni datos de contacto en el asunto; el cuerpo lleva el texto y un enlace al detalle

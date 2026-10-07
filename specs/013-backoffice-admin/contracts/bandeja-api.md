@@ -12,15 +12,16 @@ Query:
 |---|---|---|
 | `filtro` | `abiertas` \| `resueltas` \| `todas` | `abiertas` |
 | `tipo` | un `TipoSolicitud` conectado | (todos) |
-| `estado` | lista separada por comas de estados **del tipo elegido**; ignorado sin `tipo`; si viene, reemplaza a `filtro` | — |
+| `estado` | lista separada por comas de estados **del tipo elegido**; si viene, reemplaza a `filtro`. Sin `tipo`, se interpreta como `tipo=discipulado` (compatibilidad con la 004, ver abajo) | — |
 | `persona` | id de Persona | — |
 | `buscar` | texto (nombre, apellido o "nombre apellido") | — |
 | `orden` | `espera` \| `fecha` \| `persona` | `espera` |
 | `dir` | `asc` \| `desc` | `asc` |
 | `skip`, `take` | enteros; `take` ≤ 100 | 0, 20 |
 
-Compatibilidad 004: `estado=pendiente,propuesta` sin `tipo` sigue aceptándose mientras `discipulado` sea el único tipo
-conectado (se interpreta como `tipo=discipulado`); la pantalla nueva siempre manda `filtro`.
+Compatibilidad 004: `estado=…` sin `tipo` se interpreta **siempre** como `tipo=discipulado`, también cuando haya más
+tipos conectados, para que los tests y enlaces de la 004 no cambien de significado. La pantalla nueva siempre manda
+`filtro` (y `tipo` cuando filtra por estados). Se puede retirar cuando ningún test ni enlace lo use.
 
 Respuesta `200`: `Pagina<SolicitudBandeja>`
 
@@ -28,7 +29,7 @@ Respuesta `200`: `Pagina<SolicitudBandeja>`
 interface SolicitudBandeja {
   tipo: TipoSolicitud;
   id: string;
-  persona: PersonaBreve;          // id, nombre, apellido, fotoUrl
+  persona: PersonaBreve;          // id, nombre, apellido, fotoUrl (se suma fotoUrl a PersonaBreve, T016)
   estado: string;                 // clave del estado de ese tipo, se traduce en el cliente
   abierta: boolean;
   createdAt: string;

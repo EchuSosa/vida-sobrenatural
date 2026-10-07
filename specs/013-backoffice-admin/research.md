@@ -62,12 +62,13 @@ para filtrar y paginar, y en TypeScript para la pantalla (filtro por estado del 
 
 **Decisión**: `esperaDesde` es, por tipo, desde cuándo espera **al Admin**: Discipulado `COALESCE(propuesta vigente,
 createdAt)` (lo que ya usa el orden "espera" de 004); los demás `createdAt`. El orden por defecto es `esperaDesde ASC`
-con `abierta`. "Días de espera" se calcula en el cliente con `hoyEnArgentina`.
+con `abierta`. "Días de espera" se calcula en el cliente con el `diasDesde` que ya usa la bandeja de la 004 (no una
+segunda implementación).
 
 ## 5. Perfil de Persona: un endpoint compuesto con secciones
 
 **Decisión**: `GET /personas/:id/perfil` devuelve datos + roles + Relaciones Familiares + tutor; el historial va en
-endpoints aparte para que cada sección cargue y falle sola: `GET /bandeja?persona=:id&estado=todas&take=20`
+endpoints aparte para que cada sección cargue y falle sola: `GET /solicitudes?persona=:id&filtro=todas&take=20`
 (Solicitudes), `GET /personas/:id/grupos` (Inscripciones y Liderazgos, 20 más recientes de cada uno). Las secciones
 de 006/009/011 (Completitudes, Ministerio, Eventos) las suma cada spec con su endpoint y su componente en
 `apps/backoffice/src/app/personas/[id]/secciones/`, registrado en una lista (`SECCIONES_PERFIL`) — mismo criterio
@@ -135,10 +136,11 @@ mayor, y el volumen no lo justifica).
 
 ## 10. Navegador resumido y `requestId`
 
-**Decisión**: el cliente manda `navegador` como "familia + versión mayor + sistema" (ej. "Chrome 141 · Android")
-calculado en el cliente a partir de `navigator.userAgent` con una función de `packages/ui` — nunca el user agent
-completo. El último `requestId` lo guarda `apiFetch` (`packages/shared-types/src/api-client.ts`) en memoria al
-recibir un error Problem Details; el formulario lo lee de ahí.
+**Decisión**: el cliente manda `navegador` como "familia + versión mayor + sistema" (ej. "Chrome 141 · Android"),
+calculado con `resumirNavegador(userAgent)` — función pura en `packages/shared-types/src/comentario.ts`, con unit test;
+el formulario de `packages/ui` le pasa `navigator.userAgent` — nunca el user agent completo. Hoy `apiFetch`
+(`packages/shared-types/src/api-client.ts`) **no** guarda el `requestId`: se le suma `ultimoRequestId()`, que recuerda en
+memoria el `requestId` del último Problem Details recibido; el formulario lo lee de ahí.
 
 **Rationale**: `docs/16` pide "datos técnicos mínimos"; el user agent completo es casi una huella del dispositivo.
 
@@ -152,9 +154,10 @@ por props cómo enviar (cada app arma su llamada con `apiFetch`) y si hay sesió
 
 **Decisión**: `CURSOS_RECONOCIDOS` en `packages/shared-types/src/curso.ts`: lista de `{ categoria, tipo, modalidad }`
 válidas (hoy las dos de Vida Nueva; la 008 suma Vida de Servicio). El alta elige una de las que no tienen registro.
-El chequeo `CURSO_INACTIVO` vive en un solo lugar de la API (`CursoService.exigirActivo(cursoId, tx)`), llamado por
-la aceptación de propuesta de la 004 (`discipulado/propuestas…aceptar`, donde hoy se crea el Grupo) y por la creación
-de Grupos de la 008.
+El chequeo `CURSO_INACTIVO` vive en un solo lugar de la API (`CursoService.exigirActivo(cursoId, tx)`, que rechaza `activo = false` **y**
+`eliminadoEn` no nulo), llamado por la aceptación de propuesta de la 004 (`propuestas.service.ts`, rama que crea el
+Grupo: hoy busca el Curso con `findUnique` por `categoria_tipo` sin mirar `activo`) y por la creación de Grupos de la
+008. La rama "sumar a este Grupo" (`grupoDestinoId`) no crea Grupo y no se bloquea: el Grupo en curso sigue.
 
 **Rationale**: D44 y `docs/04`: la combinación categoría/tipo tiene comportamiento propio; dejar que el Admin la
 invente crea Cursos que ningún flujo usa (Principio IV).
@@ -168,6 +171,8 @@ por pantalla). URLs sin cambio (enlaces existentes y e2e siguen valiendo). El í
 
 ## 14. Edición de Persona
 
-**Decisión**: `PATCH /personas/:id` (`personas.editar`) con el DTO de alta de la 006 en modo parcial; la regla de
-D133 se verifica con la misma función que usa `RolesService` (005) para no duplicarla. Si la 006 no está mergeada, la
+**Decisión**: `PATCH /personas/:id` (`personas.editar`) con el DTO de alta de la 006 en modo parcial; el email se
+normaliza como exige la 007 para toda escritura. La regla de D133 hoy está escrita en línea dentro de
+`RolesService.otorgarRol` (005): primero se **extrae** a una función (`esMenorDeEdad(fechaNacimiento, hoy)` en
+`shared-types`, junto a `EDAD_MINIMA_ROL_DE_CARGO`) que usan los dos, para no duplicarla. Si la 006 no está mergeada, la
 Historia 7 espera (lote 7).

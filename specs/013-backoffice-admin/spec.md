@@ -38,8 +38,8 @@ Relevado en `apps/backoffice` y `apps/api` el 2026-10-07 (rama `main`, `22a04e2`
 |---|---|
 | 004 (construida) | Solicitud de Discipulado, Grupo, Inscripción, Liderazgo; su detalle y resolución en `/solicitudes/[id]`. |
 | 005 (construida) | Catálogo de permisos (D132), panel de roles y su historial (`CambioDeRol`). |
-| 006 | Traslado del Discipulador/Líder a la web app (D142), **alta de adultos por el Admin** (Flujo 12, D143, D145), **Completitud Manual** y la confirmación de "Ya lo hice" (D144). |
-| 007 | `EmailService`, la huella de origen (`X-Origen-Cliente`) y el código `DEMASIADOS_PEDIDOS` para límites de envíos. `Persona.email` opcional (D145). |
+| 006 | Traslado del Discipulador/Líder a la web app (D142), **alta de adultos por el Admin** (Flujo 12, D143, D145), **Completitud Manual** y la confirmación de "Ya lo hice" (D144); `Persona.email` opcional (D145). |
+| 007 | `EmailService`, la huella de origen (`X-Origen-Cliente`) y el código `DEMASIADOS_PEDIDOS` para límites de envíos; la regla de normalizar el email en toda escritura. |
 | 008 | Vida de Servicio: la solicitud de inscripción y su gestión; nuevos valores de `CategoriaCurso`/`ModalidadCurso` y `prerequisito_categoria` de Curso. |
 | 009 | Ministerios, Células y Postulaciones (y el CRUD de Ministerio y Célula). |
 | 010 | Solicitud de Bautismo y su gestión (D147). |
@@ -151,8 +151,9 @@ bloquea ninguna gestión (todo se puede hacer desde las otras pantallas), por es
    que no es la única forma de leer el dato (D81).
 3. **Given** dos Sedes, una inactiva, **Then** la distribución por Sede las muestra a las dos, la inactiva marcada
    como tal en texto.
-4. **Given** 0 Personas activas (instalación nueva), **Then** cada bloque muestra su estado vacío, nunca "0 %" de
-   una división por cero.
+4. **Given** que la API devuelve 0 Personas activas (instalación recién hecha, antes de que el Admin sembrado tenga
+   Sede activa, o una respuesta simulada en el test), **Then** cada bloque de métricas muestra su estado vacío, nunca
+   "NaN" ni un porcentaje de una división por cero; un rango o una Sede con 0 muestra "0" y "0 %".
 5. **Given** 5 abiertas de Discipulado y 2 de Bautismo, **Then** el bloque de pendientes dice "5 de Discipulado ·
    2 de Bautismo" y cada uno lleva a la bandeja filtrada; **Given** ninguna abierta, **Then** "No hay nada esperando
    una respuesta".
@@ -178,8 +179,9 @@ la lista y el bloque del Inicio muestran exactamente las que corresponden.
 2. **Given** las 23:30 del 6 de octubre en Argentina (02:30 del 7 en UTC), **Then** "hoy" es el 6 (fecha civil
    argentina, la misma `hoyEnArgentina` de la 004).
 3. **Given** una Persona nacida un 29 de febrero, **When** el año no es bisiesto, **Then** aparece el 28 de febrero.
-4. **Given** el mes elegido es otro (`?mes=12`), **Then** muestra diciembre; "cumple N" se calcula para el año de
-   ese cumpleaños próximo.
+4. **Given** el mes elegido es otro (`?mes=12` o `?mes=1` mirado en octubre), **Then** muestra ese mes **del año en
+   curso**: "cumple N" (o "cumplió N" si el día ya pasó) se calcula para el año en curso, y el 29/2 cae el 28 si el
+   año en curso no es bisiesto.
 5. **Given** una Persona `pendiente_tutor` o dada de baja (`activo = false`), **Then** no aparece.
 6. **Given** el bloque del Inicio con 0 cumpleaños en 7 días, **Then** dice "Nadie cumple años esta semana" y
    enlaza al listado del mes.
@@ -330,7 +332,7 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
   un tipo conectado), por los estados del tipo (solo con un tipo elegido), por Persona (`?persona=<id>`, para el
   enlace del perfil) y buscar por nombre o apellido.
 - **FR-005**: La bandeja MUST ordenar por espera (por defecto, la más vieja primero), fecha o Persona, y paginar de a
-  20; paginado, búsqueda, orden y filtros MUST resolverse en la API y reflejarse en la URL (`docs/15`, listados).
+  20 (cambia a propósito el orden por defecto de la 004, que era por fecha); paginado, búsqueda, orden y filtros MUST resolverse en la API y reflejarse en la URL (`docs/15`, listados).
 - **FR-006**: Cada fila MUST llevar al detalle de su tipo (la pantalla de su spec) y el nombre al perfil de la
   Persona. La bandeja MUST NOT ofrecer acciones de resolver propias.
 - **FR-007**: Sumar un tipo nuevo a la bandeja MUST requerir solo: declarar el tipo y su regla de abierto (FR-003)
@@ -360,7 +362,8 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
 - **FR-015**: El perfil MUST NOT mostrar el texto de las notas de Encuentros a ningún rol (D134).
 - **FR-016**: El perfil MUST ofrecer, a quien tenga el permiso, las acciones en nombre de la Persona que ya existan
   (hoy: pedir Vida Nueva en su nombre, 004) y un lugar donde las specs dependientes sumen las suyas (Completitud
-  Manual, inscribir a Evento, registrar Pago), mostrando en todo momento el nombre de la Persona (`docs/15`, D97).
+  Manual, inscribir a Evento, registrar Pago) con una lista registrable de acciones igual que la de secciones,
+  mostrando en todo momento el nombre de la Persona (`docs/15`, D97).
 - **FR-017**: La API MUST exponer el perfil solo a quien tenga `personas.ver`, con `select` explícito, y responder
   404 (`NO_ENCONTRADO`) para un id inexistente. Una Persona con `activo = false` se muestra con la marca "Dada de baja".
 - **FR-018**: El listado de Personas MUST mostrar la foto o iniciales de cada una (D87, Flujo 9) y enlazar al perfil.
@@ -400,8 +403,8 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
   si acepta ser contactado; sin sesión y con contacto aceptado, MUST pedir un email o un teléfono (al menos uno).
 - **FR-042**: Al guardar, el sistema MUST registrar automáticamente la página de origen, el navegador (resumido,
   sin identificadores), el último `requestId` conocido por el cliente, la Persona si tenía sesión, y la fecha.
-- **FR-043**: El envío MUST funcionar sin sesión y MUST limitarse por origen: 5 por hora sin sesión, 20 por hora con
-  sesión; pasado el límite, `429 DEMASIADOS_PEDIDOS` con el tiempo de espera, en palabras para la persona.
+- **FR-043**: El envío MUST funcionar sin sesión y MUST limitarse: 5 por hora por origen sin sesión, 20 por hora por
+  Persona con sesión; pasado el límite, `429 DEMASIADOS_PEDIDOS` con el tiempo de espera, en palabras para la persona.
 - **FR-044**: Al guardar un comentario el sistema MUST enviar un email a la dirección configurada para la
   desarrolladora, con asunto sin datos sensibles; una falla del envío MUST NOT impedir guardar el comentario.
 - **FR-045**: Tras enviar, la persona MUST ver una confirmación en pantalla con qué pasa después (matriz de `docs/16`:
@@ -424,8 +427,9 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
   (cada combinación tiene comportamiento propio en Vida Nueva y Vida de Servicio).
 - **FR-053**: Inactivar un Curso MUST pedir confirmación reforzada (escribir el nombre) si tiene Grupos en curso, y
   simple si no (D38); reactivar MUST ser posible siempre.
-- **FR-054**: Un Curso inactivo MUST NOT admitir Grupos nuevos: la API rechaza crearlos con el código nuevo `CURSO_INACTIVO`; los
-  Grupos existentes siguen sin cambios.
+- **FR-054**: Un Curso inactivo o eliminado MUST NOT admitir Grupos nuevos: la API rechaza crearlos con el código nuevo
+  `CURSO_INACTIVO`; los Grupos existentes siguen sin cambios, y sumar una Persona a un Grupo en curso de ese Curso
+  ("sumar a este Grupo", FR-045 de la 004) sigue permitido.
 - **FR-055**: Eliminar un Curso MUST ser posible solo si no tiene ningún Grupo (D119), MUST llevarlo a la papelera de
   Cursos y MUST poder restaurarse; con Grupos, el botón queda deshabilitado con su explicación y la oferta de
   inactivar.
@@ -438,7 +442,8 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
   estado, origen del alta y consentimiento, con las mismas validaciones del registro y del alta (Flujo 2, Flujo 12).
 - **FR-058**: Cambiar la fecha de nacimiento MUST rechazarse si deja menor de edad a una Persona con un rol de cargo
   (D133, `PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO`); cambiar el email MUST rechazarse si lo usa otra Persona
-  (`EMAIL_DUPLICADO`, existente), y dejarlo vacío MUST permitirse solo si 007/D145 ya lo hicieron opcional.
+  (`EMAIL_DUPLICADO`, existente) y MUST normalizarse igual que en toda escritura de email (007); dejarlo vacío MUST
+  permitirse solo si la 006 (D145) ya lo hizo opcional.
 
 **Transversales**
 

@@ -64,7 +64,7 @@ nuevas o modificadas en el backoffice, 1 en la web.
 | VII. Accesibilidad | Estados en texto + ícono; métricas con números en texto (barras `aria-hidden`); foto con alt; axe claro/oscuro; 320 px sin scroll. | PASA |
 | VIII. Experiencia | Cuatro estados por pantalla **y por bloque** del Inicio; checklist de `docs/15` por pantalla (tareas propias); D150 en las pantallas de celular; D151 en las confirmaciones (inactivar Curso es reversible → neutra; la reforzada sigue D38). | PASA |
 | IX. Idiomas | Claves de next-intl; estados y tipos como claves estables; la API devuelve códigos. Inicio y Catálogos migran sus textos fijos. | PASA |
-| X. Errores | Códigos nuevos en `error-code.ts` (`CURSO_INACTIVO`, `CURSO_TIENE_GRUPOS`, `CURSO_NO_RECONOCIDO`, `CURSO_YA_EXISTE`, `CONTACTO_REQUERIDO`); `DEMASIADOS_PEDIDOS` de la 007. | PASA |
+| X. Errores | Códigos nuevos en `error-code.ts` (`CURSO_INACTIVO`, `CURSO_TIENE_GRUPOS`, `CURSO_NO_RECONOCIDO`, `CURSO_YA_EXISTE`); códigos de campo según `validation-exception-factory` (`TEXTO_INVALIDO`, `CONTACTO_INVALIDO`); `DEMASIADOS_PEDIDOS` de la 007. | PASA |
 | XI. Una sola fuente | Regla de "abierta" en `shared-types` atada a la vista por un test; inversas de Relación Familiar movidas a `shared-types`; formulario de comentario en `packages/ui`; `hoyEnArgentina` reusada; formulario de Persona reusado de la 006. | PASA |
 
 Restricciones técnicas: puertos fijos (D104); `noindex` en el backoffice (ya); la página `/contanos` de la web es
@@ -105,10 +105,11 @@ packages/shared-types/src/
 ├── permisos.ts              # + 5 permisos
 └── error-code.ts            # + 5 códigos
 
-packages/ui/src/
+packages/ui/src/components/
 ├── avatar-persona.tsx       # NUEVO: foto con alt o iniciales (D87, D118)
 ├── barra-proporcion.tsx     # NUEVO: barra horizontal aria-hidden sobre token
-└── formulario-comentario.tsx# NUEVO: "Contanos qué te parece" (web + backoffice)
+├── formulario-comentario.tsx# NUEVO: "Contanos qué te parece" (web + backoffice)
+└── menu-usuario.tsx         # + ítem opcional "Contanos qué te parece" (lo usa el backoffice; la web no cambia)
 
 apps/api/
 ├── prisma/schema.prisma     # ComentarioApp, Curso (+3), comentario del índice de expresión
@@ -134,7 +135,6 @@ apps/backoffice/src/
 ├── app/comentarios/         # NUEVO: listado y [id]
 ├── app/catalogos/           # índice real
 ├── app/cursos/              # NUEVO: listado, [id], papelera
-├── components/menu-usuario  # + "Contanos qué te parece"
 └── messages/es.json         # bandeja, perfil, inicio, cumpleanos, comentarios, cursos, catalogos
 
 apps/web/src/
@@ -153,8 +153,8 @@ de `sede/` y `libro/` (controller + service + dto). `GET /solicitudes` se muda d
 |---|---|---|
 | 004 (en `main`) | Solicitud de Discipulado, Grupos, `hoyEnArgentina`, `pedir-en-nombre-de`, aceptación de propuesta (donde se agrega `exigirActivo`). | — |
 | 005 (en `main`) | `CATALOGO_PERMISOS`, panel de roles y su historial, regla D133. | — |
-| 006 | Formulario de alta de adultos (Historia 7), Completitud Manual y "Ya lo hice" (sección del perfil), traslado del Discipulador a la web app (las pantallas `mis-*` del backoffice desaparecen del menú). | Lote 7 espera; la sección de Completitudes no se construye; el resto avanza. |
-| 007 | `EmailService`, huella de origen y `X-Origen-Cliente`, `DEMASIADOS_PEDIDOS`; `Persona.email` opcional (D145). | Lote 5 (comentarios) espera. FR-058 trata el email como obligatorio. |
+| 006 | Formulario de alta de adultos (Historia 7) y `Persona.email` opcional (D145), Completitud Manual y "Ya lo hice" (sección del perfil), traslado del Discipulador a la web app (las pantallas `mis-*` del backoffice desaparecen del menú). | Lote 7 espera; la sección de Completitudes no se construye; el resto avanza. |
+| 007 | `EmailService`, huella de origen y `X-Origen-Cliente`, `DEMASIADOS_PEDIDOS`, normalización del email en toda escritura. | Lote 5 (comentarios) espera. |
 | 008 | Rama `vida_de_servicio` de la vista + su `FuenteSolicitudes`; valores nuevos de Curso y creación de Grupos (que debe llamar `exigirActivo`). | La bandeja funciona sin ese tipo. |
 | 009 | Ramas `postulacion`; CRUD de Ministerio y Célula (tarjetas de Catálogos); sección "Ministerio" del perfil. | Catálogos muestra solo Sedes y Cursos. |
 | 010 | Rama `bautismo`. | Sin ese tipo. |
@@ -227,6 +227,11 @@ resuelven conservando las dos partes.
   `/contanos`.
 - `docs/15-guia-ux-ui.md`: glosario — "Abiertas/Resueltas" para la bandeja; patrón de "bloques independientes" del
   Inicio.
+- `docs/14-navegacion.md` §3 y `docs/07` Flujo 9: el Inicio muestra los cumpleaños **de la semana** con enlace al
+  listado **del mes** (antes decía "cumpleaños del mes" en el Inicio); el orden por defecto de la bandeja pasa a "más
+  tiempo esperando".
+- `docs/02-alcance-mvp.md`: la confirmación reforzada al desactivar aplica con datos relacionados **activos** (D38), no
+  con cualquier dato relacionado.
 
 ## Complexity Tracking
 
