@@ -29,7 +29,7 @@ Lectura con `grupos.ver` / `solicitudes.ver` (`admin`, `pastor`); escritura con 
 |---|---|---|
 | `GET /solicitudes` | suma `tipo=discipulado\|vida_servicio` (sin = las dos) | `Pagina<SolicitudResumen>` con `tipo` en cada fila (research #7). Contrato de la 004 sin otros cambios |
 | `GET /vida-de-servicio/solicitudes/:id` | | `SolicitudVidaServicioDetalle`: Persona (nombre, edad, contacto), `prerrequisito: { via: 'inscripcion', grupoId, cursoTipo } \| { via: 'completitud_manual', fecha }`, edición pedida, `creadoPor`, estado, revisión, y las ediciones en curso para elegir |
-| `POST /vida-de-servicio/solicitudes/:id/aprobar` | `{ grupoId }` | FR-016. `409 SOLICITUD_NO_PENDIENTE`, `422 VIDA_SERVICIO_PRERREQUISITO_NO_CUMPLIDO`, `409 VIDA_SERVICIO_EN_CURSO_O_COMPLETADA`, campo `grupoId`: `EDICION_NO_DISPONIBLE` (en curso, de Vida de Servicio; la inscripción cerrada **no** impide). Bloquea la Solicitud y la Persona. Emite `solicitud_aprobada` |
+| `POST /vida-de-servicio/solicitudes/:id/aprobar` | `{ grupoId }` | FR-016. `409 SOLICITUD_NO_PENDIENTE`, `422 VIDA_SERVICIO_PRERREQUISITO_NO_CUMPLIDO`, `409 VIDA_SERVICIO_EN_CURSO_O_COMPLETADA`, campo `grupoId`: `EDICION_NO_DISPONIBLE` o `EDICION_YA_CURSADA` (ya tuvo una Inscripción en ese Grupo) (en curso, de Vida de Servicio; la inscripción cerrada **no** impide). Bloquea la Solicitud y la Persona. Emite `solicitud_aprobada` |
 | `POST /vida-de-servicio/solicitudes/:id/rechazar` | `{ motivo? }` | `409 SOLICITUD_NO_PENDIENTE`. Emite `solicitud_rechazada` |
 | `POST /vida-de-servicio/solicitudes` | `{ personaId, grupoId \| null }` | En nombre de (FR-013), mismas reglas que `…/me` salvo la edad. `creadoPorId` = el Admin |
 

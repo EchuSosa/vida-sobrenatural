@@ -359,6 +359,8 @@ y Líderes, sin ningún botón de gestión.
 - **Una Persona menor de edad**: puede hacer Vida de Servicio si cumple el prerrequisito; aplica la
   misma regla de edad para pedir sola que en Vida Nueva (12 años, FR-044 de la 004): menor de 12, el
   pedido lo carga el Admin en su nombre.
+- **Volver a la misma edición después de una baja**: no se puede (una Persona, una Inscripción por
+  Grupo); al aprobar, el Admin elige otra edición. El sistema lo dice con un error claro (FR-016).
 - **Persona con dos Inscripciones**: una Persona dada de baja en una edición y anotada en otra tiene
   dos Inscripciones; Mi camino muestra la vigente (`activa` o, si no hay, la última) y el historial.
 - **Grupo que queda sin Inscripciones activas** porque todas se dieron de baja: no se cierra solo (a
@@ -441,7 +443,8 @@ y Líderes, sin ningún botón de gestión.
 - **FR-015**: El detalle de una Solicitud de inscripción DEBE mostrar cómo cumple la Persona el
   prerrequisito (qué Inscripción o qué Completitud Manual) y la edición pedida.
 - **FR-016**: Aprobar DEBE exigir un Grupo de Vida de Servicio en curso (preelegido el pedido si sigue
-  en curso), revalidar el prerrequisito y la ausencia de otra Inscripción activa, crear la Inscripción
+  en curso), revalidar el prerrequisito y la ausencia de otra Inscripción activa, rechazar un Grupo donde la
+  Persona ya tuvo una Inscripción (por ejemplo, se dio de baja), crear la Inscripción
   `activa` y pasar la Solicitud a aprobada, todo en una transacción.
 - **FR-017**: Rechazar DEBE dejar la Solicitud rechazada (motivo opcional que solo ve el Admin) sin
   crear Inscripción; la Persona ve un mensaje amable y puede volver a pedir.
