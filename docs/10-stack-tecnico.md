@@ -75,17 +75,19 @@ Los frontends necesitan saber dónde está la API — en el `.env.local` de cada
 ## Autenticación
 
 - **SSO**: NextAuth.js (Auth.js) — maneja login con Google/Facebook, sesiones, y es gratuito.
+- **Código por email** (D141, spec 007): la persona pide un código de 6 dígitos y lo escribe en la app. Los códigos los genera, guarda (como huella) y verifica `apps/api`; cada app lo conecta a NextAuth con un proveedor `Credentials` propio. No se usa el proveedor Email de NextAuth: manda un enlace mágico, no un código, y exige un adaptador de base de datos que el proyecto no usa (sesiones JWT). Detalle en `specs/007-ingreso-codigo-email/research.md`.
+- **Duración de la sesión**: 30 días en la web app y 7 en el backoffice, renovables con el uso, igual para Google y código (spec 007, FR-016).
 - Se guarda la foto de perfil de Google (`picture`) como `foto_url` (D87).
 - Si la verificación contra `apps/api` en el callback `signIn` falla, el login se bloquea (fail-closed, D88).
 - Solo se vincula una cuenta por email si el proveedor garantiza el email verificado (relevante para D35 y D97).
-- Personas dadas de alta por el Admin sin cuenta Google/Facebook no tienen login en el MVP (D97). El ingreso con código por email (proveedor Email de NextAuth) queda para Fase 2.
+- Personas dadas de alta por el Admin con email de cualquier proveedor entran con código por email (D141, enmienda D97). Solo quien no tiene email queda sin acceso propio.
 - **Pendiente**: cómo valida la API NestJS la sesión de NextAuth (ver `06-preguntas-abiertas.md`).
 
 ## Email (D96)
 
 - `EmailService` detrás de una interfaz simple (mismo criterio que `StorageService`), para cambiar de proveedor sin tocar la lógica.
-- Proveedor transaccional con plan gratuito — a elegir en `/speckit.plan`.
-- Plantillas con componentes (ej. React Email), con versión en texto plano.
+- Envío por **SMTP**, con un único adaptador: el proveedor de producción se pospone junto con el hosting y el dominio; candidato preferido **Resend** (D140).
+- Plantillas con versión HTML y texto plano, textos en un catálogo de mensajes (D84). La spec 007 las arma con funciones de TypeScript, sin React Email (ver su `research.md`).
 - **Local**: captura de emails con Mailpit (en Docker Compose), sin envíos reales.
 - Producción: remitente del dominio de la iglesia con SPF/DKIM (cuando exista el dominio, D85).
 
@@ -139,9 +141,9 @@ Los frontends necesitan saber dónde está la API — en el `.env.local` de cada
 ## Pendiente para la Sesión 6 formal
 
 - Confirmar/ajustar este stack si surge algo nuevo.
-- Sumar Mailpit al `docker-compose.yml` de desarrollo local.
+- Sumar Mailpit al `docker-compose.yml` de desarrollo local (lo hace la spec 007).
 - Validación de sesión NextAuth ↔ NestJS.
-- Elección del proveedor de email transaccional.
+- Elección del proveedor de email transaccional: pospuesta con hosting y dominio, candidato preferido Resend (D140).
 - Decisión de hosting y dominio reales (cuando corresponda).
 
 ---

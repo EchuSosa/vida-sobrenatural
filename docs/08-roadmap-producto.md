@@ -8,6 +8,7 @@
 - Información pública (Inicio, Nosotros, Primeros pasos, Ministerios, Palabra Profética, Ediciones VS, Eventos, Visitanos, Dar), con el contenido institucional real del sitio de la iglesia (D109) y textos provisorios marcados donde falta el real (D98, `12-contenido-bienvenida.md`).
 - **Seguinos con YouTube**: últimos videos del canal de la iglesia (D93, adelantado desde Fase 2).
 - Registro de usuario (SSO, validación de edad, alta manual de menores) y **alta de adultos por el Admin**, con acciones en su nombre (D97).
+- **Ingreso con código por email** (sin contraseña ni cuenta de Google), en la web app y el backoffice: la persona escribe su email, recibe un código de 6 dígitos y entra. Adelantado desde Fase 2 antes de la spec 006 (D141, `specs/007-ingreso-codigo-email/`). Las Personas dadas de alta por el Admin con email de cualquier proveedor entran solas.
 - **Mi camino** como sección que agrupa los procesos de cada Persona (D92):
   - Discipulado / Vida Nueva (individual y grupal).
   - Vida de Servicio (inscripción, contenido semanal, asistencia, bajas).
@@ -28,7 +29,6 @@
 - Reportes / analíticas (ej. cuánta gente completa cada curso, tasa de abandono vs. baja administrativa).
 
 **Acceso, perfil y notificaciones:**
-- **Ingreso con código por email** (sin contraseña ni cuenta de Google/Facebook), para personas con otro proveedor de email. NextAuth lo soporta y el servicio de email ya existe desde el MVP (D96), así que el costo es bajo. Permitiría que las Personas dadas de alta por el Admin con email de otro proveedor (D97) usen la app.
 - Subir una foto de perfil propia (en el MVP solo se usa la de Google, D87).
 - Preferencias de canal por Persona (ej. desactivar push de ciertos tipos, o recibir por email también los avisos normales).
 

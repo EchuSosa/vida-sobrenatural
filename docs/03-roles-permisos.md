@@ -13,7 +13,7 @@
 
 La distinción importa: tratar un rol de cargo como derivado produce bloqueos reales. Si `discipulador` se dedujera de tener un Grupo activo, quien termina su único discipulado dejaría de serlo y perdería la pantalla donde avisa que está libre para otro — justo el caso que D51 describe como normal (ver H-125 en `specs/revision-manual/`).
 
-**Personas sin acceso a la app** (D97): una Persona dada de alta por el Admin/Discipulador sin cuenta Google/Facebook tiene los mismos roles que cualquier otra (Miembro registrado, En curso, Apto para Ministerio, etc.) — solo que no inicia sesión. El Admin (o el Discipulador, en lo que le corresponde) actúa en su nombre, y recibe por email los avisos importantes si tiene email cargado.
+**Personas sin acceso a la app** (D97): una Persona dada de alta por el Admin/Discipulador sin email (con cualquier email entra con código, D141) tiene los mismos roles que cualquier otra (Miembro registrado, En curso, Apto para Ministerio, etc.) — solo que no inicia sesión. El Admin (o el Discipulador, en lo que le corresponde) actúa en su nombre, y recibe por email los avisos importantes si tiene email cargado.
 
 | Rol | Descripción | Visibilidad / permisos | Necesita login |
 |---|---|---|---|

@@ -37,8 +37,8 @@ Los emails importantes son transaccionales: no se pueden desactivar en el MVP. L
 ### Email
 
 - `EmailService` detrás de una interfaz simple (igual que `StorageService`), para poder cambiar de proveedor sin tocar la lógica.
-- Proveedor transaccional con plan gratuito (a elegir en `/speckit.plan`).
-- Plantillas con componentes (ej. React Email), en español, con el logo, texto claro y un único botón que lleva a la app. Versión de texto plano incluida.
+- Proveedor transaccional con plan gratuito, conectado por SMTP; la elección se pospone con el hosting y el dominio, candidato preferido Resend (D140).
+- Plantillas en español, con el logo, texto claro y un único botón que lleva a la app. Versión de texto plano incluida.
 - Remitente del dominio de la iglesia cuando exista (D85), con SPF/DKIM configurados para no caer en spam.
 - En desarrollo local, los emails se capturan con Mailpit (no se envían de verdad).
 

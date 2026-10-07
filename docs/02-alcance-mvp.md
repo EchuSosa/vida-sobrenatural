@@ -22,7 +22,7 @@
 
 **Registro, alta y perfil:**
 - Registro con SSO, validación de edad y género, alta manual de menores (Flujo 2 y 7). El formulario de registro se divide en pasos cortos con indicador de progreso (D94). Teléfono con selector de país y profesión por categoría (D90).
-- **Alta de Personas adultas por el Admin o un Discipulador** (Flujo 12, D97), con email opcional. Quien no tiene cuenta Google/Facebook queda sin acceso a la app, y el Admin puede crear solicitudes e inscripciones en su nombre.
+- **Alta de Personas adultas por el Admin o un Discipulador** (Flujo 12, D97), con email opcional. Con email de cualquier proveedor entra sola con código por email (D141); quien no tiene email queda sin acceso a la app, y el Admin puede crear solicitudes e inscripciones en su nombre.
 - Edición de perfil propio (datos de contacto, no fecha de nacimiento ni email) y gestión de Relaciones Familiares (Flujo 11).
 - Preferencia de tema: Claro / Oscuro / Sistema (D95).
 
@@ -94,7 +94,7 @@ Cada solicitud muestra, además de su estado, qué pasa después (ver `15-guia-u
 - Escuelita y Grupos de Extensión quedan en Fase 2 (ver `08-roadmap-producto.md`).
 - Portugués e inglés quedan en Fase 2 (D84) — el MVP solo deja la base preparada.
 - Feed de Instagram y visualización de progreso en "Mi camino" quedan en Fase 2.
-- Ingreso con código por email (sin Google/Facebook), preferencias de canal de notificación y subida de foto de perfil propia quedan en Fase 2.
+- Preferencias de canal de notificación y subida de foto de perfil propia quedan en Fase 2. (El ingreso con código por email se adelantó al MVP, D141.)
 
 ## Identidad visual
 
