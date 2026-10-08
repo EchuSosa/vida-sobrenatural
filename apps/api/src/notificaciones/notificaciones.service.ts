@@ -77,13 +77,27 @@ export class NotificacionesService {
     if (destinatarios.length === 0) return { hayEmails: false };
 
     // 6. Una sentencia por canal: `app` para todos; `email` solo si es importante y tiene email (FR-017, D200).
+    return this.crearEntregas(tx, notificacionId, destinatarios, entrada.prioridad === 'importante');
+  }
+
+  /**
+   * Las Entregas de una Notificación, una sentencia por canal (la usan `emitir`
+   * y los avisos manuales del backoffice, Principio XI): `app` para todos,
+   * `email` `pendiente` solo si es importante y para quienes tienen email.
+   */
+  async crearEntregas(
+    tx: Prisma.TransactionClient,
+    notificacionId: string,
+    destinatarios: { id: string; tieneEmail: boolean }[],
+    importante: boolean,
+  ): Promise<{ hayEmails: boolean }> {
+    const ahora = new Date();
     await tx.entregaNotificacion.createMany({
-      data: destinatarios.map((d) => ({ notificacionId, personaId: d.id, canal: 'app' as const, estado: 'enviada' as const, enviadaEn: new Date() })),
+      data: destinatarios.map((d) => ({ notificacionId, personaId: d.id, canal: 'app' as const, estado: 'enviada' as const, enviadaEn: ahora })),
       skipDuplicates: true,
     });
-    const conEmail = entrada.prioridad === 'importante' ? destinatarios.filter((d) => d.tieneEmail) : [];
+    const conEmail = importante ? destinatarios.filter((d) => d.tieneEmail) : [];
     if (conEmail.length > 0) {
-      const ahora = new Date();
       await tx.entregaNotificacion.createMany({
         data: conEmail.map((d) => ({ notificacionId, personaId: d.id, canal: 'email' as const, estado: 'pendiente' as const, proximoIntentoEn: ahora })),
         skipDuplicates: true,
