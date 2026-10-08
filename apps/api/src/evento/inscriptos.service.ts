@@ -181,6 +181,14 @@ export class InscriptosService {
     });
   }
 
+  /** GET /inscripciones-evento/:id — para que la bandeja lleve al Evento de la Inscripción. */
+  async una(id: string): Promise<InscripcionEventoResumen & { eventoId: string }> {
+    const fila = await this.prisma.inscripcionEvento.findFirst({ where: { id, evento: { eliminadoEn: null } }, select: RESUMEN_SELECT });
+    if (!fila) throw new AppException('NO_ENCONTRADO', 404, 'Inscripción no encontrada.');
+    const [resumen] = await this.aResumenes(this.prisma, [fila]);
+    return { ...resumen, eventoId: fila.eventoId };
+  }
+
   /** POST /inscripciones-evento/:id/promocion-vista — FR-025: "Ya le avisé". */
   async marcarPromocionVista(id: string): Promise<InscripcionEventoResumen> {
     const insc = await this.prisma.inscripcionEvento.findUnique({ where: { id }, select: { id: true } });

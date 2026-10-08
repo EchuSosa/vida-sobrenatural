@@ -45,6 +45,13 @@ export class InscriptosController {
     return this.servicio.aprobarLote(id, ids, personaDeSesion(request));
   }
 
+  @Get('inscripciones-evento/:id')
+  @RequierePermiso('eventos.ver')
+  @ApiOkResponse({ description: 'Una Inscripción con su `eventoId` (la bandeja lleva al detalle del Evento).' })
+  una(@Param('id') id: string) {
+    return this.servicio.una(id);
+  }
+
   @Post('inscripciones-evento/:id/aprobar')
   @HttpCode(200)
   @RequierePermiso('inscripciones_evento.gestionar')
