@@ -3,6 +3,7 @@ import {
   cronogramaPropuesto,
   cronogramaValido,
   cumplePrerrequisito,
+  errorEdicionPedida,
   estadoSemanaLider,
   estadoSemanaPersona,
   liberada,
@@ -136,6 +137,14 @@ describe('Vida de Servicio — reglas puras (spec 008, T003)', () => {
     expect(materialCargado({ titulo: 'Semana 1', texto: 'Hola', archivos: 0, enlaces: 0 })).toBe(true);
     expect(materialCargado({ titulo: 'Semana 1', texto: null, archivos: 1, enlaces: 0 })).toBe(true);
     expect(materialCargado({ titulo: 'Semana 1', archivos: 0, enlaces: 1 })).toBe(true);
+  });
+
+  it('errorEdicionPedida (FR-010, FR-011): con edición, abierta; sin edición, solo si no hay ninguna', () => {
+    expect(errorEdicionPedida(['g1', 'g2'], 'g1')).toBeNull();
+    expect(errorEdicionPedida(['g1'], 'g9')).toEqual({ campo: 'grupoId', code: 'EDICION_NO_DISPONIBLE' });
+    expect(errorEdicionPedida([], 'g1')).toEqual({ campo: 'grupoId', code: 'EDICION_NO_DISPONIBLE' });
+    expect(errorEdicionPedida([], null)).toBeNull();
+    expect(errorEdicionPedida(['g1'], null)).toEqual({ campo: 'grupoId', code: 'EDICION_REQUERIDA' });
   });
 
   it('alertaFaltas (FR-029, D164): desde 2', () => {

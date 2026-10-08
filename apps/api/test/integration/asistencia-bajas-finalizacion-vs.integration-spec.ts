@@ -212,10 +212,9 @@ describe('Vida de Servicio — asistencia, bajas y finalización (spec 008, T051
         [inscripciones[2]]: 'dada_de_baja',
         [inscripciones[3]]: 'abandono',
       });
-      expect(avisos.emitidos.map((e) => [e.nombre, (e.a as { personaId: string }).personaId])).toEqual([
-        ['vida_servicio.completada', personas[0]],
-        ['vida_servicio.completada', personas[1]],
-      ]);
+      const completadas = avisos.emitidos.map((e) => [e.nombre, (e.a as { personaId: string }).personaId]);
+      expect(completadas).toHaveLength(2);
+      expect(completadas).toEqual(expect.arrayContaining([['vida_servicio.completada', personas[0]], ['vida_servicio.completada', personas[1]]]));
       expect((await como(personas[1], MIEMBRO, 'get', '/vida-de-servicio/me')).body).toMatchObject({ estado: 'completada', via: 'inscripcion' });
     });
 

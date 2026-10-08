@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import {
   EDAD_MINIMA_PEDIR_VIDA_DE_SERVICIO_SOLO,
+  errorEdicionPedida,
   sinAccesoALaApp,
   type SolicitudVidaServicioDetalle,
   type VidaDeServicioDePersona,
@@ -210,12 +211,8 @@ async function exigirQuePuedePedir(tx: Prisma.TransactionClient, personaId: stri
  * estuvo); sin edición ("para la próxima"), solo si no hay ninguna abierta.
  */
 async function exigirEdicionParaPedir(tx: Prisma.TransactionClient, personaId: string, grupoId: string | null): Promise<void> {
-  const abiertas = await edicionesAbiertas(tx, personaId);
-  if (grupoId === null) {
-    if (abiertas.length > 0) throw errorDeValidacion([{ campo: 'grupoId', code: 'EDICION_REQUERIDA' }]);
-    return;
-  }
-  if (!abiertas.some((e) => e.grupoId === grupoId)) throw errorDeValidacion([{ campo: 'grupoId', code: 'EDICION_NO_DISPONIBLE' }]);
+  const error = errorEdicionPedida((await edicionesAbiertas(tx, personaId)).map((e) => e.grupoId), grupoId);
+  if (error) throw errorDeValidacion([error]);
 }
 
 async function bloquearSolicitudPendiente(tx: Prisma.TransactionClient, id: string): Promise<{ personaId: string }> {

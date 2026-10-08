@@ -84,6 +84,16 @@ export function liberada(item: { fechaLiberacion: string }, contenido: unknown, 
   return contenido !== null && contenido !== undefined && item.fechaLiberacion <= hoy;
 }
 
+/**
+ * FR-010/FR-011: la edición de un pedido. Con edición, tiene que estar entre
+ * las abiertas para esa Persona; sin edición ("para la próxima"), solo si no
+ * hay ninguna abierta. `null` = válido.
+ */
+export function errorEdicionPedida(abiertas: readonly string[], grupoId: string | null): ErrorDeCampo | null {
+  if (grupoId === null) return abiertas.length > 0 ? { campo: 'grupoId', code: 'EDICION_REQUERIDA' } : null;
+  return abiertas.includes(grupoId) ? null : { campo: 'grupoId', code: 'EDICION_NO_DISPONIBLE' };
+}
+
 /** FR-020: hay material = título y al menos un texto, archivo o enlace. */
 export function materialCargado(contenido: { titulo: string; texto?: string | null; archivos: number; enlaces: number }): boolean {
   return contenido.titulo.trim() !== '' && ((contenido.texto?.trim() ?? '') !== '' || contenido.archivos > 0 || contenido.enlaces > 0);

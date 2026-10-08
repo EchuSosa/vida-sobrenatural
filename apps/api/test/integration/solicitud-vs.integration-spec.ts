@@ -101,14 +101,19 @@ describe('Vida de Servicio — pedir la inscripción (spec 008, T012/T026)', () 
     await prisma.grupo.updateMany({ where: { id: { in: [abierta, cerrada] } }, data: { estado: 'finalizado', motivoCierre: 'completado' } });
   });
 
-  it('sin ninguna edición abierta acepta "para la próxima edición" (escenario 4)', async () => {
-    // Las ediciones de otros archivos pueden estar abiertas: esta Persona no ve ninguna si ya las cursó todas.
+  it('"para la próxima edición" (escenario 4): con ediciones abiertas pide elegir; sin ninguna, queda pendiente sin edición', async () => {
+    // Los demás archivos de integración abren ediciones en paralelo, así que acá no se puede asegurar
+    // que no haya ninguna sin tocar las suyas: la regla en sí la cubre el unit test de
+    // `errorEdicionPedida`; esto prueba el cableado de las dos ramas según lo que haya en ese momento.
     const id = await vs.apta('proxima');
-    const abiertas = await prisma.grupo.findMany({ where: { curso: { categoria: 'vida_de_servicio' }, estado: 'en_curso', inscripcionAbierta: true }, select: { id: true } });
-    for (const g of abiertas) await vs.inscribir(id, g.id, 'dada_de_baja');
+    const abiertasAntes = await prisma.grupo.count({ where: { curso: { categoria: 'vida_de_servicio' }, estado: 'en_curso', inscripcionAbierta: true } });
     const res = await como(id, MIEMBRO, 'post', '/vida-de-servicio/solicitudes/me', { grupoId: null });
-    expect(res.status).toBe(201);
-    expect(await estado(id)).toMatchObject({ estado: 'pendiente', edicion: null });
+    if (res.status === 201) {
+      expect(await estado(id)).toMatchObject({ estado: 'pendiente', edicion: null });
+    } else {
+      expect(abiertasAntes + (await prisma.grupo.count({ where: { curso: { categoria: 'vida_de_servicio' }, estado: 'en_curso', inscripcionAbierta: true } }))).toBeGreaterThan(0);
+      expect(res.body.errors).toEqual([{ campo: 'grupoId', code: 'EDICION_REQUERIDA' }]);
+    }
   });
 
   it('doble pedido → 409, también en paralelo (escenario 5, D60); retirar y volver a pedir (escenario 6)', async () => {
