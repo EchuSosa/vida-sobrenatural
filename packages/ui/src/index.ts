@@ -151,6 +151,7 @@ export {
 // --- spec 008 (EstadoSemana) ---
 
 // --- spec 009 (AvisoEstado) ---
+export { AvisoEstado, type AvisoEstadoProps } from './components/aviso-estado';
 
 // --- spec 010 ---
 
