@@ -17,6 +17,7 @@ export const EMAILS_E2E_009 = {
   miembro: 'e2e-ministerio-miembro@example.com',
   postulante: 'e2e-ministerio-postulante@example.com',
   postulanteCambio: 'e2e-ministerio-cambio@example.com',
+  catalogo: 'e2e-ministerio-catalogo@example.com',
 } as const;
 
 const APTA = ['miembro_registrado', 'apto_ministerio'];
@@ -187,6 +188,7 @@ export async function sembrarE2e009({
   await persona(EMAILS_E2E_009.noApta, 'NoApta', ['miembro_registrado']);
   await persona(EMAILS_E2E_009.postulante, 'Postulante', APTA);
   await persona(EMAILS_E2E_009.postulanteCambio, 'Cambio', APTA);
+  await persona(EMAILS_E2E_009.catalogo, 'Catalogo', APTA);
   const miembro = await persona(EMAILS_E2E_009.miembro, 'Miembro', [
     ...APTA,
     'miembro_ministerio',
