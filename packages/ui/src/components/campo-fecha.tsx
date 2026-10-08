@@ -70,7 +70,7 @@ export function componerFecha({ dia, mes, anio }: Partes): string {
   return `${anio}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
-const CLASE = 'h-11 rounded-md border border-input bg-transparent px-2 text-base font-normal aria-invalid:border-destructive disabled:opacity-50 sm:text-sm dark:bg-input/30';
+const CLASE = 'h-11 rounded-md border border-input bg-transparent px-2 text-base font-normal aria-invalid:border-destructive disabled:opacity-50 sm:text-sm tactil:sm:text-base dark:bg-input/30';
 
 export function CampoFecha({ id, etiqueta, value, onChange, onBlur, etiquetas, error, idError, disabled, required, autoCompletarNacimiento, className }: CampoFechaProps) {
   const [partes, setPartes] = useState<Partes>(() => partirFecha(value));
@@ -106,10 +106,10 @@ export function CampoFecha({ id, etiqueta, value, onChange, onBlur, etiquetas, e
         if (onBlur && !grupo.current?.contains(e.relatedTarget as Node | null)) onBlur();
       }}
     >
-      <legend className="mb-1 text-sm font-medium">{etiqueta}</legend>
+      <legend className="mb-1 text-sm font-medium tactil:text-base">{etiqueta}</legend>
       <div className="flex gap-2">
         <div className="flex flex-col gap-1">
-          <label htmlFor={id} className="text-xs text-muted-foreground">
+          <label htmlFor={id} className="text-xs text-muted-foreground tactil:text-sm">
             {etiquetas.dia}
           </label>
           <input
@@ -126,7 +126,7 @@ export function CampoFecha({ id, etiqueta, value, onChange, onBlur, etiquetas, e
           />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <label htmlFor={`${id}-mes`} className="text-xs text-muted-foreground">
+          <label htmlFor={`${id}-mes`} className="text-xs text-muted-foreground tactil:text-sm">
             {etiquetas.mes}
           </label>
           <select
@@ -148,7 +148,7 @@ export function CampoFecha({ id, etiqueta, value, onChange, onBlur, etiquetas, e
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${id}-anio`} className="text-xs text-muted-foreground">
+          <label htmlFor={`${id}-anio`} className="text-xs text-muted-foreground tactil:text-sm">
             {etiquetas.anio}
           </label>
           <input

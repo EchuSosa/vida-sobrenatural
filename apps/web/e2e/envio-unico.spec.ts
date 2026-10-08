@@ -32,6 +32,7 @@ test('tres clics seguidos en Guardar cambios de Perfil disparan una sola petici�
     el.click();
   });
 
-  await expect(page.getByText('Guardamos tus cambios.')).toBeVisible();
+  // ajustes-ux #54: el éxito queda en pantalla (role=status), además del toast.
+  await expect(page.getByRole('status').filter({ hasText: 'Guardamos tus cambios.' })).toBeVisible();
   expect(peticiones).toBe(1);
 });

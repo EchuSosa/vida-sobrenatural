@@ -54,15 +54,22 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.waitForLoadState('networkidle');
       await sinViolaciones(page, tema);
 
-      // Sin franjas: error debajo del campo y en el resumen, con foco (H-50).
+      // Sin franjas y con un horario que no sirve en los selectores (fin antes
+      // del inicio): error debajo del campo y en el resumen, con foco (H-50).
+      // Con uno que sirve, se toma aunque no se haya tocado "Agregar franja"
+      // (ajustes-ux #40, ver ajustes-ux.spec.ts).
       const pedir = page.getByRole('button', { name: 'Quiero empezar Vida Nueva' });
+      await elegirHora(campo(page, 'Hasta'), '18:00');
       await pedir.click();
       const resumen = page.getByRole('alert').filter({ hasText: 'Revisá esto antes de seguir:' });
       await expect(resumen).toBeFocused();
-      await expect(page.locator('#campo-franjas-error')).toHaveText('Agregá al menos un día y horario con "Agregar franja".');
+      await expect(page.locator('#campo-franjas-error')).toHaveText(
+        'Elegí un día y un horario en el que la hora de fin sea después de la de inicio, y tocá "Agregar franja".',
+      );
       await sinViolaciones(page, tema);
 
       // Con una franja (martes 19 a 21, el default del editor): pasa a buscando sin recargar.
+      await elegirHora(campo(page, 'Hasta'), '21:00');
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await expect(resumen).toHaveCount(0);
       // FR-017a (H-R7): la misma franja otra vez no se suma; el editor dice cómo seguir.
@@ -160,7 +167,10 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.waitForLoadState('networkidle');
       await expect(tarjeta(page).getByText('Estás haciendo Vida Nueva')).toBeVisible();
       await expect(tarjeta(page).getByText(`Tu Discipulador es ${discipuladora.nombre} ${discipuladora.apellido}.`)).toBeVisible();
-      await expect(tarjeta(page).getByText(/Llamar o escribir al \+54/)).toBeVisible();
+      await expect(tarjeta(page).getByText(/Su teléfono es \+54/)).toBeVisible();
+      // ajustes-ux #46: escribirle o llamarlo, con botones de verdad.
+      await expect(page.getByRole('link', { name: 'Escribirle por WhatsApp' })).toHaveAttribute('href', /^https:\/\/wa\.me\/54\d+$/);
+      await expect(page.getByRole('link', { name: 'Llamar' })).toHaveAttribute('href', /^tel:\+54\d+$/);
       // FR-029: ni la nota ni los capítulos.
       await expect(page.getByText(nota)).toHaveCount(0);
       await expect(page.getByText('1 y 2')).toHaveCount(0);

@@ -85,7 +85,7 @@ export function CampoAutocompletado({
         aria-describedby={ariaDescribedby}
         placeholder={placeholder}
         className={cn(
-          'rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none aria-invalid:border-destructive dark:bg-input/30',
+          'rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none tactil:min-h-11 tactil:text-base aria-invalid:border-destructive dark:bg-input/30',
           className,
         )}
       />

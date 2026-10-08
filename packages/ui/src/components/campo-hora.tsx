@@ -34,7 +34,7 @@ export interface CampoHoraProps {
 const HORAS = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0'));
 const MINUTOS = ['00', '15', '30', '45'];
 
-const CLASE = 'h-11 rounded-md border border-input bg-transparent px-2 text-base font-normal aria-invalid:border-destructive disabled:opacity-50 sm:text-sm dark:bg-input/30';
+const CLASE = 'h-11 rounded-md border border-input bg-transparent px-2 text-base font-normal aria-invalid:border-destructive disabled:opacity-50 sm:text-sm tactil:sm:text-base dark:bg-input/30';
 
 export function CampoHora({ id, etiqueta, value, onChange, etiquetas, error, idError, disabled }: CampoHoraProps) {
   const [hora = '00', minutos = '00'] = /^\d{2}:\d{2}$/.test(value) ? value.split(':') : [];
@@ -46,7 +46,7 @@ export function CampoHora({ id, etiqueta, value, onChange, etiquetas, error, idE
 
   return (
     <fieldset className="flex flex-col gap-1">
-      <legend className="mb-1 text-sm font-medium">{etiqueta}</legend>
+      <legend className="mb-1 text-sm font-medium tactil:text-base">{etiqueta}</legend>
       <div className="flex items-center gap-1">
         <select
           id={id}

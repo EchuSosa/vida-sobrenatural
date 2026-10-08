@@ -93,9 +93,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       }
       await expect(page.getByRole('link', { name: 'Ingresar' })).toHaveCount(0);
       await expect(page.getByRole('link', { name: 'Ir a la app' })).toBeVisible();
-      // H-05: /registro/listo conserva el menú y el pie de página, y ofrece
-      // volver al Inicio.
-      await expect(page.getByRole('link', { name: 'Ir a Inicio' })).toBeVisible();
+      // H-05: /registro/listo conserva el menú y el pie de página.
+      // ajustes-ux #36: la acción principal lleva a Mi camino, no a la web pública.
+      await expect(page.getByRole('link', { name: 'Ir a mi camino' })).toHaveAttribute('href', '/mi-camino');
 
       resultados = await auditar(page);
       expect(resultados.violations).toEqual([]);

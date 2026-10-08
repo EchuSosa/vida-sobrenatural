@@ -3,7 +3,7 @@
 import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 import { type Sede, formatearFechaCorta } from '@vida-sobrenatural/shared-types';
-import { MensajeErrorCampo } from '@vida-sobrenatural/ui';
+import { Button, MensajeErrorCampo } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../../../hooks/use-opciones-registro';
 import type { UseFormularioRegistroResult } from '../../../hooks/use-formulario-registro';
 import type { DatosFormulario } from './tipos';
@@ -51,7 +51,9 @@ export function Paso4Resumen({ form }: { form: UseFormularioRegistroResult }) {
               toda la app. El servidor (CONSENTIMIENTO_REQUERIDO) sigue
               siendo la fuente de verdad, como el resto de las reglas de
               negocio que tampoco son expresables con HTML nativo. */}
-          <label htmlFor="campo-consentimientoDatos" className="flex items-start gap-2 text-sm text-foreground">
+          {/* ajustes-ux #35: casilla de 24 px (la nativa medía 13) y toda la
+              etiqueta como área de toque. */}
+          <label htmlFor="campo-consentimientoDatos" className="flex min-h-11 cursor-pointer items-start gap-3 py-2 text-base text-foreground">
             <input
               id="campo-consentimientoDatos"
               type="checkbox"
@@ -59,7 +61,7 @@ export function Paso4Resumen({ form }: { form: UseFormularioRegistroResult }) {
               onChange={(e) => actualizar('consentimientoDatos', e.target.checked)}
               aria-invalid={Boolean(validacion.mensajes.consentimientoDatos)}
               aria-describedby={validacion.mensajes.consentimientoDatos ? 'campo-consentimientoDatos-error' : undefined}
-              className="mt-1"
+              className="size-6 shrink-0 accent-primary"
             />
             {t('campos.consentimiento')}
           </label>
@@ -134,16 +136,15 @@ function ResumenDatos({
       {grupos.map((grupo) => (
         <section key={grupo.paso} className="flex flex-col gap-2 rounded-lg border border-border p-4">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-medium text-foreground">{grupo.titulo}</h3>
-            <button
-              type="button"
-              onClick={() => onEditar(grupo.paso)}
-              className="shrink-0 text-sm font-medium text-primary underline-offset-2 hover:underline"
-            >
+            <h3 className="text-base font-medium text-foreground">{grupo.titulo}</h3>
+            {/* ajustes-ux #34: botón de contorno de 44 px (D150) en vez de un
+                enlace de texto de 20 px; el nombre accesible dice qué edita. */}
+            <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => onEditar(grupo.paso)}>
               {t('botones.editar')}
-            </button>
+              <span className="sr-only"> {grupo.titulo}</span>
+            </Button>
           </div>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-base [overflow-wrap:anywhere]">
             {grupo.filas.map((fila) => (
               <Fragment key={fila.label}>
                 <dt className="font-medium text-muted-foreground">{fila.label}</dt>

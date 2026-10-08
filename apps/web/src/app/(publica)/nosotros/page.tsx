@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { PlaceholderImagen } from '@vida-sobrenatural/ui';
 import imgQuienesSomos from '@/assets/images/cards/card-comunidad-risas.webp';
@@ -15,7 +16,7 @@ export const metadata = {
 
 // docs/claude_20-fotos-web-publica.md, sección "Nosotros": tamaño acorde al
 // grid de dos columnas (sm+) / una columna (celular).
-const SIZES_TARJETA = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw';
+const SIZES_TARJETA = '(max-width: 639px) 112px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw';
 
 /**
  * D122/H-77: Nosotros pasa de una página larga a una entrada corta ("Somos
@@ -103,10 +104,13 @@ export default function NosotrosPage() {
           <li key={tarjeta.href}>
             <Link
               href={tarjeta.href}
-              className="flex h-full flex-col gap-3 rounded-lg border border-border p-4 transition-colors hover:bg-secondary"
+              // ajustes-ux #9: en celular, fila compacta (miniatura a la
+              // izquierda, título y descripción a la derecha) — seis tarjetas
+              // con foto grande hacían 2 900 px de alto; desde sm, tarjetas.
+              className="flex h-full flex-row items-center gap-4 rounded-lg border border-border p-3 transition-colors hover:bg-secondary sm:flex-col sm:items-stretch sm:gap-3 sm:p-4"
             >
               {tarjeta.imagen && tarjeta.alt ? (
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md">
+                <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-md sm:w-full">
                   {/* H-79: `priority` en la primera tarjeta, el LCP real de
                       esta página — ver el comentario de arriba. `index === 0`
                       y no un flag fijo por tarjeta: si el orden cambia,
@@ -121,10 +125,18 @@ export default function NosotrosPage() {
                   />
                 </div>
               ) : (
-                <PlaceholderImagen aspecto="tarjeta" etiqueta={t('tarjetaImagenAlt', { titulo: tarjeta.titulo })} />
+                <div className="w-28 shrink-0 sm:w-full">
+                  <PlaceholderImagen aspecto="tarjeta" etiqueta={t('tarjetaImagenAlt', { titulo: tarjeta.titulo })} />
+                </div>
               )}
-              <span className="font-medium">{tarjeta.titulo}</span>
-              <span className="text-sm text-muted-foreground">{tarjeta.descripcion}</span>
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                {/* ajustes-ux #10: el chevrón dice que la tarjeta se toca, sin depender del hover. */}
+                <span className="flex items-center justify-between gap-2 font-medium">
+                  {tarjeta.titulo}
+                  <ChevronRight aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+                </span>
+                <span className="text-base text-muted-foreground">{tarjeta.descripcion}</span>
+              </span>
             </Link>
           </li>
         ))}

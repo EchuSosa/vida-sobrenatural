@@ -26,18 +26,14 @@ export default function DarPage() {
       <div className="flex flex-col gap-3">
         <CampoCopiable etiqueta={t('alias')} valor="IglesiaVS" />
         <CampoCopiable etiqueta={t('cbu')} valor="0720099120000002972718" />
+        {/* ajustes-ux #19: CUIT y número de cuenta también se copian; la
+            entidad es informativa (no se pega en ningún lado). */}
         <div className="rounded-lg border border-border p-3">
-          <p className="text-sm text-muted-foreground">{t('entidad')}</p>
+          <p className="text-base text-muted-foreground">{t('entidad')}</p>
           <p className="font-medium">ISAIAS 61 ASOCIACIÓN CIVIL</p>
         </div>
-        <div className="rounded-lg border border-border p-3">
-          <p className="text-sm text-muted-foreground">{t('cuit')}</p>
-          <p className="font-medium">30-71798938-0</p>
-        </div>
-        <div className="rounded-lg border border-border p-3">
-          <p className="text-sm text-muted-foreground">{t('cuenta')}</p>
-          <p className="font-medium">Cuenta en Pesos 099-029727/1, Banco Santander</p>
-        </div>
+        <CampoCopiable etiqueta={t('cuit')} valor="30-71798938-0" />
+        <CampoCopiable etiqueta={t('cuenta')} valor="099-029727/1" detalle={t('cuentaDetalle')} />
       </div>
     </div>
   );
