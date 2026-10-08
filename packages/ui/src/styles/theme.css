@@ -11,6 +11,13 @@
  * comunicar un estado solo con color.
  */
 
+/*
+ * D150: `tactil:` = "dentro de un elemento con `data-tactil`". apps/web marca
+ * su <body> con ese atributo, y `Button`/`Input` de este paquete suben a
+ * 44 px de alto y 16 px de letra solo ahí: el backoffice queda igual.
+ */
+@custom-variant tactil (&:where([data-tactil] *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

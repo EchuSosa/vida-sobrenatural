@@ -39,7 +39,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      {/* D150: `data-tactil` sube Button e Input de packages/ui a 44 px y
+          16 px (variante `tactil:` de theme.css) — solo en esta app. */}
+      <body data-tactil="" className="min-h-full flex flex-col">
         {/*
           Primer elemento enfocable de toda página — FR-010. Envuelto en un
           <nav> propio (en vez de flotar directo en <body>) para que axe

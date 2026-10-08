@@ -24,21 +24,25 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
+        // D150: `tactil:` aplica solo dentro de `[data-tactil]` (el <body>
+        // de apps/web): 44 px de alto y 16 px de letra en todos los tamaños,
+        // sin tocar el backoffice. `min-h` y no `h`, para que un botón con
+        // texto largo pueda crecer en vez de desbordar.
         default:
-          "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+          "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 tactil:min-h-11 tactil:gap-2 tactil:px-4 tactil:text-base",
         xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+        sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 tactil:min-h-11 tactil:px-3 tactil:text-base tactil:[&_svg:not([class*='size-'])]:size-4",
+        lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 tactil:min-h-11 tactil:px-4 tactil:text-base",
         // H-56: mismo tamaño que los CTA de pantalla completa (páginas de
         // error/vacío, el registro) escritos a mano antes de pasar a
         // buttonVariants — ninguno de los tamaños de arriba llegaba a h-11.
-        xl: "h-11 gap-1.5 px-5",
-        icon: "size-8",
+        xl: "h-11 gap-1.5 px-5 tactil:min-h-11 tactil:text-base",
+        icon: "size-8 tactil:min-h-11 tactil:min-w-11",
         "icon-xs":
           "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
         "icon-sm":
-          "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
-        "icon-lg": "size-9",
+          "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg tactil:min-h-11 tactil:min-w-11",
+        "icon-lg": "size-9 tactil:min-h-11 tactil:min-w-11",
       },
     },
     defaultVariants: {

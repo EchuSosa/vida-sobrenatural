@@ -107,11 +107,11 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
   return (
     <div className="flex flex-col gap-3">
       {value.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{etiquetas.sinFranjas}</p>
+        <p className="text-sm text-muted-foreground tactil:text-base">{etiquetas.sinFranjas}</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {value.map((f, i) => (
-            <li key={`${f.diaSemana}-${f.inicio}-${f.fin}-${i}`} className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2 text-sm">
+            <li key={`${f.diaSemana}-${f.inicio}-${f.fin}-${i}`} className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2 text-sm tactil:text-base">
               <span>
                 {etiquetas.dias[f.diaSemana]} {minutosAHHMM(f.inicio)}
                 {etiquetas.separador}
@@ -134,14 +134,14 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
       )}
 
       <div className="flex flex-wrap items-end gap-2">
-        <div className="flex flex-col gap-1 text-sm font-medium">
+        <div className="flex flex-col gap-1 text-sm font-medium tactil:text-base">
           <label htmlFor={idDia}>{etiquetas.dia}</label>
           <select
             id={idDia}
             value={dia}
             disabled={disabled}
             onChange={(e) => setDia(Number(e.target.value))}
-            className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30"
+            className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal tactil:text-base dark:bg-input/30"
           >
             {etiquetas.dias.map((nombre, i) => (
               <option key={i} value={i}>
@@ -175,7 +175,7 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
         </Button>
       </div>
       {error && (
-        <p id={idError} className="text-sm text-destructive">
+        <p id={idError} className="text-sm text-destructive tactil:text-base">
           {error}
         </p>
       )}

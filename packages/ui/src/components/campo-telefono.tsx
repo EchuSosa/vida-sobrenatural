@@ -79,7 +79,7 @@ export function CampoTelefono({
   const idError = id ? `${id}-error` : undefined;
   const mostrarNombrePais = usePantallaDesdeSm();
   return (
-    <div className="flex flex-col gap-1 text-sm font-medium">
+    <div className="flex flex-col gap-1 text-sm font-medium tactil:text-base">
       {labelTelefono}
       <div className="flex gap-2">
         <select
@@ -88,7 +88,7 @@ export function CampoTelefono({
           value={codigoPais}
           onChange={(e) => onChangeCodigo(e.target.value)}
           aria-label={labelCodigo}
-          className="h-10 w-24 shrink-0 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30 sm:w-40"
+          className="h-10 tactil:h-11 w-24 shrink-0 rounded-md border border-input bg-transparent px-2 text-sm font-normal tactil:text-base dark:bg-input/30 sm:w-40"
         >
           {OPCIONES_CODIGO_PAIS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -109,11 +109,11 @@ export function CampoTelefono({
           placeholder={placeholderNumero}
           onChange={(e) => onChangeNumero(e.target.value.replace(/[^0-9]/g, ''))}
           onBlur={onBlurNumero}
-          className="h-10 min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
+          className="h-10 tactil:h-11 min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 text-sm font-normal tactil:text-base aria-invalid:border-destructive dark:bg-input/30"
         />
       </div>
       {error && errorTexto && (
-        <span id={idError} className="text-sm font-normal text-destructive">
+        <span id={idError} className="text-sm font-normal tactil:text-base text-destructive">
           {errorTexto}
         </span>
       )}
