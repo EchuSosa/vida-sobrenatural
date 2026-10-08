@@ -1040,7 +1040,61 @@
   "ministerios": {},
   "bautismo": {},
   "eventos": {
-    "publico": {},
+    "publico": {
+      "titulo": "Eventos",
+      "metaTitulo": "Eventos — Vida Sobrenatural",
+      "metaDescripcion": "Los próximos eventos de Vida Sobrenatural en La Plata: encuentros, campamentos, retiros y más.",
+      "intro": "Lo que se viene en la iglesia. Entrá a cada evento para ver los detalles y, si hace falta, anotarte.",
+      "vacio": "Todavía no hay eventos publicados. Seguinos en las redes para enterarte de los próximos.",
+      "seguinos": "Seguinos en Instagram",
+      "paginado": "Páginas de eventos",
+      "anterior": "Anterior",
+      "siguiente": "Siguiente",
+      "verEvento": "Ver el evento",
+      "sinCosto": "Sin costo",
+      "flyerPorDefecto": "Imagen de {nombre}",
+      "cuando": "Cuándo",
+      "donde": "Dónde",
+      "sede": "Sede {nombre}",
+      "para": "Para quién",
+      "costo": "Costo",
+      "cupo": "Cupo",
+      "lugaresDisponibles": "{disponibles, plural, =0 {No quedan lugares} one {Queda # lugar} other {Quedan # lugares}} de {cupo}",
+      "sinLimite": "Sin límite de lugares",
+      "estado": {
+        "no_requiere": "No hace falta anotarse",
+        "abierta": "Inscripción abierta",
+        "lista_espera": "Cupo completo: hay lista de espera",
+        "cupo_completo": "Cupo completo",
+        "cerrada": "Inscripción cerrada",
+        "cancelado": "Evento cancelado",
+        "solo_admin": "Lo coordina el equipo",
+        "pasado": "Ya pasó"
+      },
+      "explicacion": {
+        "no_requiere": "No hace falta anotarse: vení directamente.",
+        "cupo_completo": "Ya no quedan lugares y este evento no tiene lista de espera.",
+        "cerrada": "La inscripción cerró porque el evento ya empezó.",
+        "cancelado": "Este evento se canceló. Si te habías anotado, te avisamos.",
+        "pasado": "Este evento ya pasó.",
+        "bautismo": "El bautismo se pide desde Mi camino. Cuando te asignemos una fecha, te avisamos.",
+        "irAMiCamino": "Ir a Mi camino",
+        "verCartelera": "Ver los próximos eventos"
+      },
+      "noEncontrado": {
+        "titulo": "No encontramos esta página",
+        "texto": "Puede que el evento se haya borrado o que el link esté mal escrito.",
+        "volver": "Ver los próximos eventos"
+      },
+      "error": {
+        "titulo": "No pudimos cargar los eventos",
+        "texto": "Puede ser un problema momentáneo. Probá de nuevo en unos segundos.",
+        "reintentar": "Reintentar"
+      },
+      "proximosTitulo": "Próximos eventos",
+      "proximosVerTodos": "Ver todos los eventos",
+      "proximosVacio": "Por ahora no hay eventos próximos. Seguinos en las redes para enterarte."
+    },
     "inscripcion": {}
   },
   "misEventos": {},

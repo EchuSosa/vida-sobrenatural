@@ -7,6 +7,7 @@ import { AvisoPorQuery } from '../../components/aviso-por-query';
 import { FOTOS_HEROE } from '@/assets/images/fotos-heroe';
 import imgCardPrimerosPasos from '@/assets/images/cards/card-bienvenida-estas-en-casa.webp';
 import imgCardNosotros from '@/assets/images/cards/card-comunidad-pareja-mayor.webp';
+import { ProximosEventos } from '../../components/eventos/proximos-eventos';
 import imgCardEventos from '@/assets/images/cards/card-jovenes-manos.webp';
 import imgCardVisitanos from '@/assets/images/cards/card-culto-manos.webp';
 
@@ -139,6 +140,9 @@ export default function InicioPage() {
           </li>
         ))}
       </ul>
+
+      {/* spec 011, FR-001: los próximos tres Eventos. */}
+      <ProximosEventos />
     </div>
   );
 }

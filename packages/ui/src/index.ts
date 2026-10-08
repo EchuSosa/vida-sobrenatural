@@ -146,6 +146,7 @@ export { PedirEnNombreDe, type PedirEnNombreDeProps, type EtiquetasPedirEnNombre
 // --- spec 010 ---
 
 // --- spec 011 (EstadoInscripcionBadge, CampoArchivo) ---
+export { CampoArchivo, type CampoArchivoProps } from './components/campo-archivo';
 
 // --- spec 012 ---
 
