@@ -75,6 +75,39 @@ describe('Editar los datos de una Persona (integración, spec 013 T081)', () => 
     expect(sinEmail.body).toMatchObject({ email: null, usaLaApp: false });
   });
 
+  it('D215: el DNI se carga con o sin puntos, se valida, es único (DNI_DUPLICADO con quién lo tiene, nunca el DNI) y vacío se borra', async () => {
+    // Único por corrida: 8 dígitos que no chocan con otras corridas ni con el alta.
+    const base = String(Date.now()).slice(-7);
+    const deRosa = `2${base}`;
+    const r = await patch(id.rosa, { dni: `${deRosa.slice(0, 2)}.${deRosa.slice(2, 5)}.${deRosa.slice(5)}` });
+    expect(r.status).toBe(200);
+    expect(r.body).toMatchObject({ dni: deRosa });
+
+    const invalido = await patch(id.otra, { dni: '12.34' });
+    expect(invalido.status).toBe(400);
+    expect(invalido.body.errors).toEqual([{ campo: 'dni', code: 'DNI_INVALIDO' }]);
+
+    const repetido = await patch(id.otra, { dni: deRosa });
+    expect(repetido.status).toBe(409);
+    expect(repetido.body).toMatchObject({ code: 'DNI_DUPLICADO', errors: [{ campo: 'dni', code: 'DNI_DUPLICADO' }], persona: { id: id.rosa, nombre: 'rosa' } });
+    expect(JSON.stringify(repetido.body)).not.toContain(deRosa);
+
+    // Volver a mandar el propio no choca consigo misma.
+    expect((await patch(id.rosa, { dni: deRosa, direccion: 'Calle 8' })).status).toBe(200);
+    const borrado = await patch(id.rosa, { dni: '' });
+    expect(borrado.body).toMatchObject({ dni: null });
+    expect((await patch(id.otra, { dni: deRosa })).body).toMatchObject({ dni: deRosa });
+    await patch(id.otra, { dni: null });
+  });
+
+  it('D215: el DNI no viaja en el listado de Personas', async () => {
+    await patch(id.rosa, { dni: `3${String(Date.now()).slice(-7)}` });
+    const r = await request(app.getHttpServer()).get('/personas').query({ q: 'rosa' }).set('Authorization', `Bearer ${admin}`);
+    expect(r.status).toBe(200);
+    expect(JSON.stringify(r.body)).not.toMatch(/"dni"/);
+    await patch(id.rosa, { dni: null });
+  });
+
   it('H7.5: el Pastor no edita; un id que no existe es 404', async () => {
     const r = await patch(id.rosa, { direccion: 'x' }, pastor);
     expect(r.status).toBe(403);

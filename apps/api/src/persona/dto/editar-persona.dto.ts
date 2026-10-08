@@ -19,5 +19,6 @@ export class EditarPersonaDto {
   @ApiPropertyOptional() @Allow() profesion?: unknown;
   @ApiPropertyOptional() @Allow() profesionDetalle?: unknown;
   @ApiPropertyOptional({ example: 2012 }) @Allow() congregaDesde?: unknown;
+  @ApiPropertyOptional({ example: '30.123.456', nullable: true, description: 'D215: 7 u 8 dígitos, con o sin puntos; vacío o null lo borra. 400 DNI_INVALIDO, 409 DNI_DUPLICADO con `persona`.' }) @Allow() dni?: unknown;
   @ApiPropertyOptional({ description: 'Vacío o null: sin email (sin acceso a la app, D145).', nullable: true }) @Allow() email?: unknown;
 }

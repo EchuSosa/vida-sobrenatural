@@ -74,6 +74,11 @@ export interface PerfilPersona {
   direccion: string;
   /** D145: null = sin email. */
   email: string | null;
+  /**
+   * D215: solo dígitos; null = no cargado. Viaja solo en el perfil (que exige
+   * `personas.ver`), nunca en listados ni en logs; lo usa el formulario de edición.
+   */
+  dni: string | null;
   sede: { id: string; nombre: string; activa: boolean };
   /** D214: el año; la pantalla calcula "hace N años". */
   congregaDesde: number;

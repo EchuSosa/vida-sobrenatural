@@ -5,6 +5,7 @@ import {
   erroresDeDatosPersonales,
   esMenorDeEdad,
   hoyEnArgentina,
+  normalizarDni,
   normalizarEmail,
   type DatosPersonales,
   type PerfilPersona,
@@ -12,8 +13,9 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException, type AppExceptionErrorField } from '../common/errors/app-exception.js';
 import { PerfilPersonaService } from './perfil-persona.service.js';
+import { dniDuplicado, esUnicidadDe } from './alta-persona.service.js';
 
-/** Los campos que el Admin corrige (los del alta de la 006, más el email; D145). */
+/** Los campos que el Admin corrige (los del alta de la 006, más el email — D145 — y el DNI — D215). */
 export const CAMPOS_EDITABLES = [
   'apellido',
   'nombre',
@@ -27,6 +29,7 @@ export const CAMPOS_EDITABLES = [
   'profesionDetalle',
   'congregaDesde',
   'email',
+  'dni',
 ] as const;
 type CampoEditable = (typeof CAMPOS_EDITABLES)[number];
 export type CambiosPersona = Partial<Record<CampoEditable, unknown>>;
@@ -40,7 +43,8 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * con los cambios aplicados, y los errores salen solo para los campos
  * enviados (un dato viejo que no se toca no bloquea). D133: una fecha que la
  * vuelve menor con un rol de cargo se rechaza. El email se guarda normalizado
- * y único; vacío la deja sin acceso a la app (D145). Archivo nuevo (mapa §3).
+ * y único; vacío la deja sin acceso a la app (D145). El DNI (D215) con el
+ * formato y la unicidad del alta; vacío lo borra. Archivo nuevo (mapa §3).
  */
 @Injectable()
 export class EdicionPersonaService {
@@ -74,7 +78,7 @@ export class EdicionPersonaService {
     const fusion: Partial<Record<keyof DatosPersonales, unknown>> = {
       ...actual,
       fechaNacimiento: actual.fechaNacimiento.toISOString().slice(0, 10),
-      ...Object.fromEntries(enviados.filter((c) => c !== 'email').map((c) => [c, texto(cambios[c])])),
+      ...Object.fromEntries(enviados.filter((c) => c !== 'email' && c !== 'dni').map((c) => [c, texto(cambios[c])])),
     };
     // Si la profesión deja de ser "otro", el detalle se va con ella.
     if (fusion.profesion !== 'otro') fusion.profesionDetalle = null;
@@ -87,6 +91,12 @@ export class EdicionPersonaService {
     if ('email' in cambios) {
       email = emailOpcional(cambios.email);
       if (email === undefined) errores.push({ campo: 'email', code: 'EMAIL_INVALIDO' });
+    }
+    // D215: opcional; vacío lo borra. Mismo formato y unicidad que en el alta.
+    let dni: string | null | undefined;
+    if ('dni' in cambios) {
+      dni = normalizarDni(cambios.dni);
+      if (dni === undefined) errores.push({ campo: 'dni', code: 'DNI_INVALIDO' });
     }
     if (errores.length > 0) throw new AppException('VALIDACION', 400, 'Uno o más campos no son válidos.', errores);
 
@@ -105,6 +115,10 @@ export class EdicionPersonaService {
       const otra = await this.prisma.persona.findFirst({ where: { email, id: { not: id } }, select: { id: true } });
       if (otra) throw emailDuplicado();
     }
+    if (dni) {
+      const conDni = await this.prisma.persona.findFirst({ where: { dni, id: { not: id } }, select: { id: true, nombre: true, apellido: true } });
+      if (conDni) throw dniDuplicado(conDni);
+    }
 
     const datos = {
       ...(tocados.has('apellido') ? { apellido: String(fusion.apellido) } : {}),
@@ -119,11 +133,17 @@ export class EdicionPersonaService {
       ...(tocados.has('profesionDetalle') ? { profesionDetalle: typeof fusion.profesionDetalle === 'string' ? fusion.profesionDetalle : null } : {}),
       ...(tocados.has('congregaDesde') ? { congregaDesde: Number(fusion.congregaDesde) } : {}),
       ...(email !== undefined ? { email } : {}),
+      ...(dni !== undefined ? { dni } : {}),
     };
     try {
       await this.prisma.persona.update({ where: { id }, data: datos });
     } catch (error) {
       const code = (error as { code?: unknown }).code;
+      // Dos ediciones simultáneas: el índice único es la garantía.
+      if (dni && esUnicidadDe(error, 'dni')) {
+        const conDni = await this.prisma.persona.findFirst({ where: { dni, id: { not: id } }, select: { id: true, nombre: true, apellido: true } });
+        throw dniDuplicado(conDni);
+      }
       if (code === 'P2002') throw emailDuplicado();
       if (code === 'P2003') throw new AppException('VALIDACION', 400, 'Uno o más campos no son válidos.', [{ campo: 'sedeId', code: 'SEDE_INVALIDA' }]);
       throw error;
