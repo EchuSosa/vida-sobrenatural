@@ -7,10 +7,11 @@ import { test, expect } from './helpers';
  * registro-bienvenida.spec.ts.
  */
 
-test('entrar a /registro/listo sin sesión redirige a /registro, sin mostrar la confirmación', async ({
+test('entrar a /registro/listo sin sesión lleva al ingreso (vía /registro), sin mostrar la confirmación', async ({
   page,
 }) => {
   await page.goto('/registro/listo');
-  await expect(page).toHaveURL(/\/registro$/);
+  // spec 007 (T024): /registro sin sesión redirige a /ingresar.
+  await expect(page).toHaveURL(/\/ingresar$/);
   await expect(page.getByText('¡Listo, ya sos parte!')).toHaveCount(0);
 });

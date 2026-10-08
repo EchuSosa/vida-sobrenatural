@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
+import { normalizarEmail } from '@vida-sobrenatural/shared-types';
 import { ImagenPortadaService } from '../src/storage/imagen-portada.service.js';
 import { LocalStorageProvider } from '../src/storage/local-storage.provider.js';
 
@@ -178,7 +179,8 @@ async function crearPersonasDemo(sedeId: string) {
  * origen propio).
  */
 async function promoverAdminDemo(sedeId: string) {
-  const email = process.env.SEED_ADMIN_EMAIL;
+  // spec 007 (FR-010): el email se guarda normalizado, como en todo alta.
+  const email = process.env.SEED_ADMIN_EMAIL ? normalizarEmail(process.env.SEED_ADMIN_EMAIL) : undefined;
   if (!email) {
     console.log('SEED_ADMIN_EMAIL no está seteada — no se crea ninguna Persona admin.');
     return;

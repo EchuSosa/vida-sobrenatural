@@ -18,6 +18,7 @@ import { FormularioRegistro } from './formulario-registro';
  * esta pantalla (degradado, no bloqueante).
  */
 export default async function RegistroPage() {
+  // spec 007 (T024): sin sesión, `layout.tsx` ya llevó a /ingresar.
   let sedes: Sede[] = [];
   let errorSedes = false;
   try {

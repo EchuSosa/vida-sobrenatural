@@ -27,7 +27,7 @@ export function useAccionesPublicas() {
   const yaEsMiembro = session?.user.estado === 'activa';
 
   return NAV_PUBLICA_ACCIONES.map((item) => {
-    if (item.href !== '/registro' || !session) return item;
+    if (item.href !== '/ingresar' || !session) return item;
     if (yaEsMiembro) return { href: '/inicio', labelKey: 'irALaApp', destacado: true };
     // FR-042 de la 002 (H-R2): con sesión y sin registro, "Ingresar" junto al
     // nombre confundía — ya entró; lo que le falta es completar el registro.

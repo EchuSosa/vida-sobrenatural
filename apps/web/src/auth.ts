@@ -1,12 +1,13 @@
-import NextAuth, { type Session } from 'next-auth';
+import NextAuth, { CredentialsSignin, type Session } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { tienePermiso, type Permiso } from '@vida-sobrenatural/shared-types';
+import { DURACION_SESION_WEB_S, tienePermiso, type Permiso } from '@vida-sobrenatural/shared-types';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import {
   testLoginHabilitado,
   buscarPersonaPorEmail,
   mintApiToken,
+  autorizarCodigoEmail,
 } from '@vida-sobrenatural/shared-types/auth-server';
 
 /**
@@ -42,9 +43,36 @@ const googleProvider = Google({
   },
 });
 
+/**
+ * spec 007 (T019, contracts/nextauth-codigo-email.md): un `code` del catálogo
+ * (`CODIGO_INCORRECTO`, `CODIGO_SIN_INTENTOS`, `CODIGO_VENCIDO`,
+ * `CODIGO_INVALIDO`) para que la acción de servidor lo muestre en el campo.
+ */
+export class ErrorCodigoIngreso extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
+}
+
+/**
+ * spec 007 (T019): ingreso con un código enviado al email. Registrado
+ * SIEMPRE, también en producción (a diferencia de `test-login`). La API solo
+ * confirma que el email es de quien escribe el código; quién entra y a dónde
+ * lo deciden los mismos callbacks que para Google. Si la API no responde,
+ * `verificarCodigoIngreso` lanza y el ingreso se bloquea (D88, FR-015).
+ */
+const codigoEmailProvider = Credentials({
+  id: 'codigo-email',
+  name: 'Código por email',
+  credentials: { email: {}, codigo: {} },
+  authorize: autorizarCodigoEmail((code) => new ErrorCodigoIngreso(code)),
+});
+
 const proveedores = testLoginHabilitado()
   ? [
       googleProvider,
+      codigoEmailProvider,
       Credentials({
         id: 'test-login',
         name: 'Test login (solo E2E)',
@@ -65,17 +93,20 @@ const proveedores = testLoginHabilitado()
         },
       }),
     ]
-  : [googleProvider];
+  : [googleProvider, codigoEmailProvider];
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: proveedores,
-  session: { strategy: 'jwt' },
+  // spec 007 (FR-016): 30 días, renovándose una vez por día mientras se use.
+  // Igual para Google y para el código.
+  session: { strategy: 'jwt', maxAge: DURACION_SESION_WEB_S, updateAge: 24 * 60 * 60 },
   // H-14 (actualización 2026-09-18): la app no depende de las pantallas por
   // defecto de NextAuth (en inglés, sin el diseño propio) — signIn/signOut
   // ya tienen su propia UI (formulario de /registro, diálogo de "Cerrar
   // sesión" en Perfil); error reutiliza la pantalla de fail-closed de D88.
   pages: {
-    signIn: '/registro',
+    // spec 007: la pantalla de ingreso (Google y código) es /ingresar.
+    signIn: '/ingresar',
     signOut: '/',
     error: '/error-verificacion',
   },
