@@ -77,7 +77,7 @@ export default async function AvisosPage({ searchParams }: { searchParams: Promi
                     )}
                     <span className="flex min-w-0 flex-1 flex-col gap-1">
                       {!aviso.leido && (
-                        <span className="inline-flex items-center gap-1 text-sm font-semibold text-foreground">
+                        <span className="inline-flex items-center gap-1 text-base font-semibold text-foreground">
                           <CircleDot aria-hidden="true" className="size-4" />
                           {t('sinLeer')}
                         </span>

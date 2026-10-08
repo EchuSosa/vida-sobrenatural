@@ -52,6 +52,24 @@ minutos y sirve una sola vez; se pueden pedir hasta 5 por hora para el mismo ema
 
 Para probar como otra Persona sin Google, alcanza con su email: el código llega a Mailpit igual.
 
+### Avisos y mails de avisos (spec 012)
+
+- La pestaña **Avisos** de la app (<http://localhost:3001/avisos>) muestra los avisos de la Persona;
+  el seed demo (`db:seed-demo`) le deja ~25 a la primera Persona Admin (o a la primera Persona, si
+  todavía nadie es Admin), leídos y sin leer, para ver el paginado.
+- Los **mails de avisos importantes** salen solos con la API levantada (`TAREAS_PROGRAMADAS="true"`,
+  cada 30 s, y apenas se confirma la acción) y caen en **Mailpit** (<http://localhost:8025>), igual
+  que el código de ingreso. Sin Mailpit levantado quedan para reintentar (1 min, 10 min, 1 h, 6 h) y
+  al quinto fallo aparecen en el backoffice, en Notificaciones → "Mails que no salieron".
+- Correr una tarea a mano, contra la base de `DATABASE_URL`:
+
+  ```bash
+  pnpm --filter api run tareas:correr emails         # manda los mails pendientes que ya vencieron
+  pnpm --filter api run tareas:correr recordatorios  # recordatorios de Eventos de hoy (8 de la mañana)
+  ```
+
+- **Mandar un aviso** desde el backoffice: Notificaciones → "Enviar un aviso" (solo Admin).
+
 ### Datos de demostración (D120, opcional)
 
 `db:seed` (arriba) es el mínimo para que la app arranque y para los tests — rápido, sin volumen.
