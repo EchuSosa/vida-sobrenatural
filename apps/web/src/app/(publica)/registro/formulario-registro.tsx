@@ -50,7 +50,9 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">{t('tituloPagina')}</h1>
-      <p className="text-muted-foreground">
+      {/* ajustes-ux #31: sin "autorizaste el acceso" (jerga), y el email
+          puede cortarse en cualquier punto en vez de partir una palabra. */}
+      <p className="text-muted-foreground [overflow-wrap:anywhere]">
         {t('introPagina', { email: session?.user.email ?? '' })}
       </p>
 
@@ -90,7 +92,10 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
         {paso === 3 && <Paso3Perfil form={form} />}
         {paso === 4 && <Paso4Resumen form={form} />}
 
-        <div className="flex gap-3">
+        {/* ajustes-ux #28 (docs/15 "Botones"): en celular, apilados a todo el
+            ancho con la principal arriba (col-reverse: "Atrás" va primero en
+            el DOM); en escritorio, a la derecha con la principal a la derecha. */}
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
           {paso > 1 && (
             <Button type="button" variant="outline" size="xl" onClick={atras}>
               {t('botones.atras')}

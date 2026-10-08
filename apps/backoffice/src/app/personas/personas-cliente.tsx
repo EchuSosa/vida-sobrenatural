@@ -39,6 +39,7 @@ import {
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 import { CircleAlert, Lock, Minus, Plus } from 'lucide-react';
+import { BloqueoLiderCurso } from './bloqueo-lider-curso';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 import { AgregarEmail, SinAccesoALaApp } from './acciones-email';
 
@@ -448,7 +449,7 @@ export function RolesDialog({
       // specs/004, T058: si la lista decía que se podía y la API encontró un
       // discipulado o una propuesta (se le asignó recién), se recarga el
       // listado: el panel pasa a nombrarlos, con el enlace a cada uno.
-      if (e instanceof ApiError && e.code === 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS') onCambio();
+      if (e instanceof ApiError && (e.code === 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS' || e.code === 'LIDER_TIENE_GRUPOS_ACTIVOS')) onCambio();
     } finally {
       setRolEnCurso(null);
     }
@@ -499,6 +500,8 @@ export function RolesDialog({
                       // aplastaba la descripción del rol.
                       quitar.motivo === 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS' ? (
                         <BloqueoDiscipulador discipulados={quitar.discipulados} propuestas={quitar.propuestas} />
+                      ) : quitar.motivo === 'LIDER_TIENE_GRUPOS_ACTIVOS' ? (
+                        <BloqueoLiderCurso grupos={quitar.grupos} />
                       ) : (
                         <p className="flex items-start gap-2 text-sm text-muted-foreground">
                           <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />

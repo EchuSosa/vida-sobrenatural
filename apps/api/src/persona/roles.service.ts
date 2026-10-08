@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import {
   EDAD_MINIMA_ROL_DE_CARGO,
+  esMenorDeEdad,
+  hoyEnArgentina,
   puedeQuitarRol,
   type MotivoNoQuitable,
   type RolDeCargo,
@@ -8,7 +10,6 @@ import {
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
-import { calcularEdad } from './calcular-edad.js';
 import { CambioDeRolService } from '../cambio-de-rol/cambio-de-rol.service.js';
 import {
   discipuladosActivosDe,
@@ -93,8 +94,10 @@ export class RolesService {
       // FR-011 — la GARANTÍA (D133/H-128): acá, y no en ningún listado, porque
       // tiene que valer venga el pedido por donde venga. El filtro de edad de
       // GET /personas?soloMayores=true (FR-024) es solo una comodidad de la
-      // pantalla; sin este chequeo, no protegería nada.
-      if (calcularEdad(persona.fechaNacimiento) < EDAD_MINIMA_ROL_DE_CARGO) {
+      // pantalla; sin este chequeo, no protegería nada. La regla es la de
+      // shared-types (spec 013, research #14): una sola, con la fecha civil de
+      // Argentina, la misma que usa el backoffice.
+      if (esMenorDeEdad(persona.fechaNacimiento.toISOString(), hoyEnArgentina())) {
         throw new AppException(
           'PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO',
           409,

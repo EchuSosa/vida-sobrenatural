@@ -1,6 +1,8 @@
 import type { SeccionPerfil } from './tipos';
 import { SeccionBautismo } from './seccion-bautismo';
 import { SeccionCamino } from './seccion-camino';
+import { SeccionVidaDeServicio } from './seccion-vida-de-servicio';
+import { SeccionMinisterios } from './seccion-ministerios';
 import { SeccionEventos } from './seccion-eventos';
 
 /**
@@ -15,6 +17,10 @@ import { SeccionEventos } from './seccion-eventos';
 export const SECCIONES_PERFIL: SeccionPerfil[] = [
   // spec 006 (T047): las cuatro etapas, registrar como hecha y anular.
   { clave: 'etapas', tituloKey: 'etapasPersona.titulo', permiso: 'personas.ver', Componente: SeccionCamino },
+  // spec 008 (T033): en qué está y "Pedir Vida de Servicio en su nombre".
+  { clave: 'vida-de-servicio', tituloKey: 'solicitudesServicio.perfil.titulo', permiso: 'personas.ver', Componente: SeccionVidaDeServicio },
+  // spec 009: dónde sirve, su postulación en revisión, historial y "Postular a un Ministerio" en su nombre.
+  { clave: 'ministerio', tituloKey: 'postulaciones.perfil.titulo', permiso: 'ministerios.ver', Componente: SeccionMinisterios },
   // spec 010 (T049, T050): situación, habilitar el bautismo y pedirlo en su nombre.
   { clave: 'bautismo', tituloKey: 'personas.bautismo.titulo', permiso: 'personas.ver', Componente: SeccionBautismo },
   // spec 011 (FR-048): sus Inscripciones a Evento.

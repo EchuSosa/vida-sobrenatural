@@ -13,6 +13,7 @@ import {
   Trash2,
   Mic,
   BookOpen,
+  MessageSquare,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { CATALOGO_PERMISOS, type Permiso, type RolDeCargo } from '@vida-sobrenatural/shared-types';
@@ -95,7 +96,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
     labelKey: 'catalogos',
     icon: FolderKanban,
     permiso: 'catalogos.ver',
-    rutasRelacionadas: ['/sedes', '/cursos'],
+    // spec 009: Ministerios también se entra por Catálogos (D213).
+    rutasRelacionadas: ['/sedes', '/cursos', '/ministerios'],
   },
   // Lote 0 global (specs/IMPLEMENTACION.md): cada spec agrega SUS rutas recién
   // cuando existe la página — el smoke de axe recorre esta lista entera, así
@@ -110,6 +112,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   //   spec 013 — /comentarios[/[id]] (comentarios.ver), /metricas y /cumpleanos (inicio.ver), /cursos[/[id]] y /cursos/papelera.
   { href: '/personas/[id]', labelKey: 'personas', icon: Users, permiso: 'personas.ver', enMenu: false }, // 013 lote 2: el perfil
   { href: '/cumpleanos', labelKey: 'cumpleanos', icon: Cake, permiso: 'personas.ver', enMenu: false }, // 013 lote 4: se entra desde el Inicio
+  { href: '/comentarios', labelKey: 'comentarios', icon: MessageSquare, permiso: 'comentarios.ver', enMenu: false }, // 013 lote 5: se entra desde el Inicio
+  { href: '/comentarios/[id]', labelKey: 'comentarios', icon: MessageSquare, permiso: 'comentarios.ver', enMenu: false },
   { href: '/cursos', labelKey: 'cursos', icon: GraduationCap, permiso: 'catalogos.ver', enMenu: false }, // 013 lote 6: se entra por Catálogos
   { href: '/cursos/[id]', labelKey: 'cursos', icon: GraduationCap, permiso: 'catalogos.ver', enMenu: false },
   { href: '/cursos/papelera', labelKey: 'cursos', icon: GraduationCap, permiso: 'cursos.papelera.ver', enMenu: false },
@@ -117,6 +121,15 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/personas/nueva', labelKey: 'personas', icon: Users, permiso: 'personas.alta', enMenu: false },
   { href: '/personas/[id]/editar', labelKey: 'personas', icon: Users, permiso: 'personas.editar', enMenu: false }, // 013 lote 7: se entra desde el perfil
   { href: '/solicitudes/historial/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  // --- spec 008 ---
+  { href: '/solicitudes/vida-de-servicio/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  { href: '/grupos/vida-de-servicio/[id]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
+  { href: '/grupos/vida-de-servicio/[id]/semanas/[numero]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
+  // --- spec 009 (se entra por Catálogos y por la bandeja) ---
+  { href: '/solicitudes/postulacion/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  { href: '/ministerios', labelKey: 'catalogos', icon: FolderKanban, permiso: 'ministerios.ver', enMenu: false },
+  { href: '/ministerios/[id]', labelKey: 'catalogos', icon: FolderKanban, permiso: 'ministerios.ver', enMenu: false },
+  { href: '/ministerios/papelera', labelKey: 'papelera', icon: Trash2, permiso: 'ministerios.papelera.ver', enMenu: false },
   // --- spec 010 ---
   { href: '/solicitudes/bautismo/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   // --- spec 011 ---

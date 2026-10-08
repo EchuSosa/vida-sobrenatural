@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CircleAlert, CircleCheck, CircleMinus, Info, Search, Undo2, UserRound } from 'lucide-react';
+import { CircleAlert, CircleCheck, CircleMinus, Info, MessageCircle, Phone, Search, Undo2, UserRound } from 'lucide-react';
 import {
   type EstadoMiDiscipulado,
   type Franja,
@@ -15,6 +15,7 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
+  ButtonLink,
   ConfirmDestructiveDialog,
   EditorDeFranjas,
   MensajeErrorCampo,
@@ -33,15 +34,31 @@ import {
  * da como `buscando`. Las acciones actualizan el estado sin recargar.
  */
 export function MiCaminoCliente({ estadoInicial }: { estadoInicial: EstadoMiDiscipulado }) {
-  const [estado, setEstado] = useState(estadoInicial);
+  const [estado, setEstadoBase] = useState(estadoInicial);
+  // ajustes-ux #47: después de pedir o retirar, el foco va al título del
+  // estado nuevo ("Estamos buscando a tu Discipulador"): el bloque cambia y
+  // quien usa lector de pantalla o teclado sabe dónde quedó.
+  const seccion = useRef<HTMLElement>(null);
+  const [moverFoco, setMoverFoco] = useState(0);
+  function setEstado(nuevo: EstadoMiDiscipulado) {
+    setEstadoBase(nuevo);
+    setMoverFoco((n) => n + 1);
+  }
+  useEffect(() => {
+    if (moverFoco === 0) return;
+    const destino =
+      seccion.current?.querySelector<HTMLElement>('[data-titulo-estado]') ??
+      seccion.current?.querySelector<HTMLElement>('#vida-nueva-titulo');
+    destino?.focus();
+  }, [moverFoco]);
   const t = useTranslations('miCamino.vidaNueva');
   const locale = useLocale();
   // Instantes (pedido, inicio, fin, baja): el día en Argentina, no en UTC.
   const fecha = (iso: string) => formatearDiaEnArgentina(iso, locale);
 
   return (
-    <section aria-labelledby="vida-nueva-titulo" className="flex flex-col gap-4 rounded-lg border border-border p-5">
-      <h2 id="vida-nueva-titulo" className="text-xl font-semibold">
+    <section ref={seccion} aria-labelledby="vida-nueva-titulo" className="flex flex-col gap-4 rounded-lg border border-border p-5">
+      <h2 id="vida-nueva-titulo" tabIndex={-1} className="text-xl font-semibold outline-none">
         {t('titulo')}
       </h2>
 
@@ -70,15 +87,31 @@ export function MiCaminoCliente({ estadoInicial }: { estadoInicial: EstadoMiDisc
         <Aviso icono={<UserRound aria-hidden className="size-5 shrink-0 text-primary" />} titulo={t('enCursoTitulo')}>
           <span className="flex flex-col gap-2">
             <span>{t('enCursoDiscipulador', { nombre: `${estado.discipulador.nombre} ${estado.discipulador.apellido}` })}</span>
-            {estado.discipulador.telefono && (
-              <a href={`tel:${estado.discipulador.telefono}`} className="font-medium text-primary underline underline-offset-2">
-                {t('enCursoTelefono', { telefono: estado.discipulador.telefono })}
-              </a>
-            )}
+            {estado.discipulador.telefono && <span>{t('enCursoTelefono', { telefono: estado.discipulador.telefono })}</span>}
             <span>{t('enCursoDesde', { fecha: fecha(estado.desde) })}</span>
             <span>{t('enCursoYAhora')}</span>
           </span>
         </Aviso>
+      )}
+      {/* ajustes-ux #46: la acción principal del estado "en curso" es
+          escribirle o llamarlo — botones con ícono y verbo, no descubrir que
+          el teléfono subrayado era el botón. */}
+      {estado.estado === 'en_curso' && estado.discipulador.telefono && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <ButtonLink
+            href={`https://wa.me/${estado.discipulador.telefono.replace(/\D/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="xl"
+          >
+            <MessageCircle aria-hidden />
+            {t('enCursoWhatsApp')}
+          </ButtonLink>
+          <ButtonLink href={`tel:${estado.discipulador.telefono.replace(/[^+\d]/g, '')}`} variant="outline" size="xl">
+            <Phone aria-hidden />
+            {t('enCursoLlamar')}
+          </ButtonLink>
+        </div>
       )}
 
       {estado.estado === 'finalizado' && (
@@ -96,7 +129,9 @@ function Aviso({ icono, titulo, children }: { icono: ReactNode; titulo: string; 
     <div className="flex gap-3">
       {icono}
       <div className="flex flex-col gap-1">
-        <p className="font-medium">{titulo}</p>
+        <p data-titulo-estado tabIndex={-1} className="font-medium outline-none">
+          {titulo}
+        </p>
         <div className="text-muted-foreground">{children}</div>
       </div>
     </div>
@@ -111,7 +146,9 @@ function UltimoDesenlace({ ultimo }: { ultimo: 'rechazada' | 'retirada' | 'aband
   return (
     <div className="flex gap-3">
       {icono}
-      <p className="text-muted-foreground">{texto}</p>
+      <p data-titulo-estado tabIndex={-1} className="text-muted-foreground outline-none">
+        {texto}
+      </p>
     </div>
   );
 }
@@ -168,15 +205,20 @@ function FormularioFranjas({
   const te = useTranslations('errors');
   const etiquetas = useEtiquetasFranjas();
   const [franjas, setFranjas] = useState<Franja[]>(inicial);
+  // ajustes-ux #40: lo elegido en los selectores sin "Agregar franja". Con la
+  // lista vacía se toma eso: la persona ve "Martes 19:00 a 21:00" y cree que
+  // ya lo cargó.
+  const [pendiente, setPendiente] = useState<Franja | null>(null);
   const validacion = useValidacionCampos();
 
   const { enviando, ejecutar } = useEnvio(async () => {
-    if (franjas.length === 0) {
+    const aEnviar = franjas.length === 0 && pendiente ? [pendiente] : franjas;
+    if (aEnviar.length === 0) {
       validacion.reemplazar({ franjas: t('vidaNueva.franjasRequeridas') });
       return;
     }
     try {
-      await enviar(franjas);
+      await enviar(aEnviar);
     } catch (error) {
       if (erroresPorCampo(error)) {
         validacion.reemplazar({ franjas: t('vidaNueva.franjasRequeridas') });
@@ -216,6 +258,7 @@ function FormularioFranjas({
           etiquetas={etiquetas}
           idBase="franja-pedido"
           disabled={enviando}
+          onPendienteChange={setPendiente}
         />
         <MensajeErrorCampo id="campo-franjas-error" mensaje={validacion.mensajes.franjas} />
       </fieldset>
@@ -334,6 +377,8 @@ function Buscando({
               descripcion={t('retirarDescripcion')}
               textoConfirmar={t('retirarConfirmar')}
               textoCancelar={t('retirarMantener')}
+              // D151: retirar el pedido se puede deshacer (se vuelve a pedir).
+              tono="neutro"
               onConfirmar={() => void retirar()}
             />
             <Button type="button" variant="outline" className="h-11" onClick={() => setEditando(true)}>

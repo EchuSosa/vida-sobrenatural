@@ -4,6 +4,7 @@ import {
   ESTADOS_ABIERTOS,
   ESTADOS_POR_TIPO,
   ETAPAS_CAMINO,
+  ETAPAS_CONSTRUIDAS,
   NOMBRES_EVENTOS_AVISO,
   TIPOS_SOLICITUD,
   aniosCongregando,
@@ -98,9 +99,12 @@ describe('Mi camino — reglas por etapa (spec 006, D153, D155, D147)', () => {
   });
 
   it('una etapa todavía no construida se ve "Próximamente" pero se puede declarar', () => {
-    const estado = estadoDeEtapa('ministerio', base);
-    expect(estado.estado).toBe('proximamente');
-    expect(estado).toMatchObject({ puedeDeclarar: true });
+    // spec 009: Ministerio ya está construida; la prueba toma cualquiera que no lo esté.
+    for (const etapa of ETAPAS_CAMINO.filter((e) => !ETAPAS_CONSTRUIDAS.includes(e))) {
+      const estado = estadoDeEtapa(etapa, base);
+      expect(estado.estado).toBe('proximamente');
+      expect(estado).toMatchObject({ puedeDeclarar: true });
+    }
   });
 
   it('completa gana a todo, y una declaración pendiente se ve en revisión', () => {

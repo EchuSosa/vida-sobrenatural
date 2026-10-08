@@ -149,14 +149,26 @@ export {
 } from './components/formulario-ingreso-codigo';
 
 // --- spec 008 (EstadoSemana) ---
+export { EstadoSemana, type EstadoSemanaProps } from './components/estado-semana';
+export { ContenidoSemana, type ContenidoSemanaProps } from './components/contenido-semana';
 
 // --- spec 009 (AvisoEstado) ---
+export { AvisoEstado, type AvisoEstadoProps } from './components/aviso-estado';
 
 // --- spec 010 ---
 
 // --- spec 011 (EstadoInscripcionBadge, CampoArchivo) ---
 export { CampoArchivo, type CampoArchivoProps } from './components/campo-archivo';
 export { EstadoInscripcionBadge, type EstadoInscripcionBadgeProps, type EstadoParaBadge } from './components/estado-inscripcion-badge';
+// spec 013 lote 5: "Contanos qué te parece".
+export {
+  FormularioComentario,
+  textosFormularioComentario,
+  type FormularioComentarioProps,
+  type TraductorComentario,
+  type ResultadoEnvioComentario,
+  type TextosFormularioComentario,
+} from './components/formulario-comentario';
 
 // --- spec 012 ---
 

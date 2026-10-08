@@ -945,6 +945,11 @@ model Ministerio {
   id           String    @id @default(uuid())
   nombre       String
   descripcion  String
+  // docs/22 (migración `ministerios_contenido`): la "línea pública" (lo único
+  // que muestra la web pública además del nombre) y si requiere capacitación
+  // o audición antes de servir.
+  lineaPublica      String?
+  requiereFormacion Boolean   @default(false)
   activo       Boolean   @default(true)
   eliminadoEn  DateTime?
   eliminadoPor String?
@@ -963,6 +968,11 @@ model Celula {
   ministerioId String
   ministerio   Ministerio @relation(fields: [ministerioId], references: [id])
   nombre       String
+  // docs/22: qué se hace en esta área (lo ve la Persona al postularse).
+  descripcion  String?
+  // docs/22: "Discipulados Vida Nueva" — al aprobar, el Admin puede otorgar
+  // el rol `discipulador` en el mismo paso (reglas de la 005).
+  ofreceRolDiscipulador Boolean @default(false)
   activo       Boolean    @default(true)
   eliminadoEn  DateTime?
   eliminadoPor String?
@@ -997,6 +1007,9 @@ model Postulacion {
   inactivadaPorId    String?
   reemplazadaPorId   String?
   motivoBaja         String?
+  // docs/22: copia de `Ministerio.requiereFormacion` al postularse — el Admin
+  // ve la marca aunque después cambie el catálogo.
+  requiereFormacion  Boolean                        @default(false)
   createdAt          DateTime                       @default(now())
   updatedAt          DateTime                       @updatedAt
 

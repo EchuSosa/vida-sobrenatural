@@ -44,6 +44,7 @@ export function Paso3Perfil({ form }: { form: UseFormularioRegistroResult }) {
       )}
       <CampoSelect
         label={t('campos.congregaDesde')}
+        ayuda={t('ayudas.congregaDesde')}
         name="congregaDesde"
         required
         opciones={opciones.congregaDesde}

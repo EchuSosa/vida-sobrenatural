@@ -12,7 +12,7 @@ import { Button } from '@vida-sobrenatural/ui';
  * toast breve + el cambio visible en pantalla; acá el "cambio" es el
  * portapapeles).
  */
-export function CampoCopiable({ etiqueta, valor }: { etiqueta: string; valor: string }) {
+export function CampoCopiable({ etiqueta, valor, detalle }: { etiqueta: string; valor: string; detalle?: string }) {
   const t = useTranslations('dar');
 
   async function copiar() {
@@ -20,14 +20,20 @@ export function CampoCopiable({ etiqueta, valor }: { etiqueta: string; valor: st
     toast(t('copiado', { campo: etiqueta }));
   }
 
+  // ajustes-ux #18: "Copiar" con texto visible (un ícono de dos rectángulos
+  // no dice "copiar" a todo el mundo), 44 px, a todo el ancho debajo del dato
+  // en celular. El nombre accesible sigue nombrando el dato ("Copiar Alias").
+  // #20: la etiqueta en 16 px.
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-      <div>
-        <p className="text-sm text-muted-foreground">{etiqueta}</p>
-        <p className="font-mono font-medium">{valor}</p>
+    <div className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="text-base text-muted-foreground">{etiqueta}</p>
+        <p className="font-mono font-medium [overflow-wrap:anywhere]">{valor}</p>
+        {detalle && <p className="text-foreground">{detalle}</p>}
       </div>
-      <Button variant="ghost" size="icon" aria-label={t('copiar', { campo: etiqueta })} onClick={copiar}>
-        <Copy className="size-4" />
+      <Button variant="outline" aria-label={t('copiar', { campo: etiqueta })} onClick={copiar} className="w-full sm:w-auto">
+        <Copy aria-hidden />
+        {t('copiarBoton')}
       </Button>
     </div>
   );

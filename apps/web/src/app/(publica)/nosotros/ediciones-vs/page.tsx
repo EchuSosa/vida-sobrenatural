@@ -30,7 +30,10 @@ function LibroCard({ libro, t }: { libro: Libro; t: ReturnType<typeof useTransla
     // grilla — no un número fijo que reserva siempre el peor caso. En una
     // sola columna (celular) cada tarjeta es su propia fila, así que esto
     // no cambia nada ahí — se resuelve solo, sin media query.
-    <li className="grid grid-rows-subgrid gap-2 row-span-3">
+    // ajustes-ux #22: en celular, una columna con la portada (120 px) a la
+    // izquierda y título y datos a la derecha — en dos columnas de 170 px los
+    // títulos largos ocupaban 8–10 líneas. Desde sm, la grilla con subgrid.
+    <li className="grid grid-cols-[7.5rem_1fr] grid-rows-[auto_1fr] content-start gap-x-4 gap-y-1 sm:row-span-3 sm:grid-cols-1 sm:grid-rows-subgrid sm:gap-2">
       {libro.portadaUrl ? (
         // H-84/D125: caja de proporción fija (PORTADA_ASPECTO, hoy 1:1 —
         // temporal) con la imagen centrada por `object-contain`, sobre el
@@ -39,7 +42,7 @@ function LibroCard({ libro, t }: { libro: Libro; t: ReturnType<typeof useTransla
         // diseñado, no como una imagen rota, y la grilla quede pareja
         // (H-84) sea cual sea la proporción real de cada foto.
         <div
-          className="flex w-full items-center justify-center overflow-hidden rounded-md bg-secondary"
+          className="row-span-2 flex w-full items-center justify-center self-start overflow-hidden rounded-md bg-secondary sm:row-span-1"
           style={{ aspectRatio: `${PORTADA_ASPECTO.ancho} / ${PORTADA_ASPECTO.alto}` }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- portada servida por apps/api (D110), sin loader de next/image configurado para ese host todavía */}
@@ -50,9 +53,11 @@ function LibroCard({ libro, t }: { libro: Libro; t: ReturnType<typeof useTransla
           />
         </div>
       ) : (
-        <PlaceholderImagen aspecto="portada" etiqueta={t('portadaAlt', { titulo: libro.titulo })} />
+        <div className="row-span-2 self-start sm:row-span-1">
+          <PlaceholderImagen aspecto="portada" etiqueta={t('portadaAlt', { titulo: libro.titulo })} />
+        </div>
       )}
-      <p className="font-medium">{libro.titulo}</p>
+      <p className="font-medium [overflow-wrap:anywhere]">{libro.titulo}</p>
       <p className="text-sm text-muted-foreground">
         {t('autorPor', { autor: libro.autor })} · {libro.anio}
       </p>
@@ -81,25 +86,27 @@ export default async function EdicionesVsPage() {
         <p className="text-foreground">{t('comoConseguirTexto')}</p>
         {/* Enlaces propios de Ediciones VS, distintos de los de la iglesia en
             el pie general (footer-publico.tsx) — mismo patrón visual (H-83):
-            solo ícono con aria-label, no texto. */}
-        <nav aria-label={`${t('facebookLabel')}, ${t('instagramLabel')}`} className="flex gap-x-4">
+            ícono + nombre visible y 44×44 (ajustes-ux #23, como el pie, #3). */}
+        <nav aria-label={`${t('facebookLabel')}, ${t('instagramLabel')}`} className="flex gap-x-6">
           <a
             href={t('facebookUrl')}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={t('facebookLabel')}
-            className="hover:text-foreground"
+            className="inline-flex min-h-11 min-w-11 items-center gap-2 hover:text-foreground"
           >
-            <IconoFacebook className="size-5" />
+            <IconoFacebook className="size-6" />
+            {t('facebookNombre')}
           </a>
           <a
             href={t('instagramUrl')}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={t('instagramLabel')}
-            className="hover:text-foreground"
+            className="inline-flex min-h-11 min-w-11 items-center gap-2 hover:text-foreground"
           >
-            <IconoInstagram className="size-5" />
+            <IconoInstagram className="size-6" />
+            {t('instagramNombre')}
           </a>
         </nav>
       </section>
@@ -116,7 +123,7 @@ export default async function EdicionesVsPage() {
         )}
 
         {libros.length > 0 && (
-          <ul aria-label={t('catalogoTitulo')} className="grid grid-cols-2 items-stretch gap-6 sm:grid-cols-3">
+          <ul aria-label={t('catalogoTitulo')} className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-3">
             {libros.map((libro) => (
               <LibroCard key={libro.id} libro={libro} t={t} />
             ))}
