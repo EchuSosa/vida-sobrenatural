@@ -332,20 +332,20 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 7 — Edición de datos de una Persona (Historia 7, P3) — requiere la 006 en `main`
 
-- [ ] T080 [L7] Primero, extraer la regla de D133 que hoy está en línea en `RolesService.otorgarRol` a
+- [X] T080 [L7] Primero, extraer la regla de D133 que hoy está en línea en `RolesService.otorgarRol` a
   `esMenorDeEdad(fechaNacimiento, hoy)` (`packages/shared-types/src/persona.ts`) con su unit test, y que `otorgarRol`
   la use (sin cambio de comportamiento: sus tests siguen verdes). Después, API `PATCH /personas/:id` (`personas.editar`):
   DTO parcial del alta de la 006; D133 con esa función; email normalizado como exige la 007 y único
   (`EMAIL_DUPLICADO`); email vacío solo si la 006 ya lo hizo opcional (D145). — cubre: FR-057, FR-058
-- [ ] T081 [L7] Integración `persona-editar.integration-spec.ts`: H7.2 (fecha que vuelve menor a un Discipulador → 409
+- [X] T081 [L7] Integración `persona-editar.integration-spec.ts`: H7.2 (fecha que vuelve menor a un Discipulador → 409
   con el código existente), H7.3 (email de otra Persona → 409), edición válida devuelve `PerfilPersona` actualizado,
   H7.5 (Pastor 403). — cubre: H7.2, H7.3, H7.5
-- [ ] T082 [L7] Backoffice `app/personas/[id]/editar/` (o `Sheet` desde el perfil, según cómo la 006 haya resuelto el
+- [X] T082 **[Lote 7: página `personas/[id]/editar/` (la 006 resolvió el alta como página); el formulario se extrajo a `components/campos-persona.tsx` y lo usan el alta y la edición; suma el DNI (D215)]** [L7] Backoffice `app/personas/[id]/editar/` (o `Sheet` desde el perfil, según cómo la 006 haya resuelto el
   alta — mismo patrón): reusa el formulario de la 006 en modo edición con los valores actuales; toast "Guardamos los
   cambios" y vuelta al perfil; "Editar datos" solo con `personas.editar`. — cubre: FR-057, H7.1, H7.4
-- [ ] T083 [L7] E2E `apps/backoffice/e2e/persona-editar.spec.ts`: H7.1, H7.2 (error explicado), H7.4, H7.5 (Pastor sin
+- [X] T083 **[Lote 7: más la ruta en el smoke de axe con id real]** [L7] E2E `apps/backoffice/e2e/persona-editar.spec.ts`: H7.1, H7.2 (error explicado), H7.4, H7.5 (Pastor sin
   botón); axe claro y oscuro. — cubre: H7.1, H7.2, H7.4, H7.5
-- [ ] T084 [L7] [CHECKLIST] Pantalla **Editar datos de una Persona**: checklist de `docs/15`. — cubre: FR-062
+- [X] T084 **[Lote 7: `checklists/lote-7-pantallas.md`]** [L7] [CHECKLIST] Pantalla **Editar datos de una Persona**: checklist de `docs/15`. — cubre: FR-062
 
 ---
 

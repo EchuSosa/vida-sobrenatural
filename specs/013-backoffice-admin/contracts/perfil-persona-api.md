@@ -10,6 +10,7 @@ interface PerfilPersona {
   fechaNacimiento: string; edad: number; genero: Genero; estadoCivil: EstadoCivil;
   profesion: Profesion; profesionDetalle: string | null;
   telefono: string; direccion: string; email: string | null;
+  dni: string | null;              // D215: solo dígitos; solo acá (exige personas.ver), nunca en listados ni logs
   sede: { id: string; nombre: string; activa: boolean };
   congregaDesde: number;           // año (D214); la pantalla muestra "desde 2019 (hace 7 años)"
   estado: EstadoPersona; activo: boolean;           // activo = false → "Dada de baja"
@@ -51,5 +52,7 @@ interface GrupoEnPerfil {
 ## `PATCH /personas/:id` (Historia 7)
 
 Permiso: `personas.editar` (Admin). Body: subconjunto de los campos del alta (006), todos opcionales. Respuesta
-`200 PerfilPersona`. Errores: `400 VALIDACION` (por campo), `409 EMAIL_DUPLICADO`,
+`200 PerfilPersona`. Incluye `dni` (D215: 7 u 8 dígitos con o sin puntos; vacío o `null` lo borra). Errores:
+`400 VALIDACION` (por campo, incluido `DNI_INVALIDO`), `409 EMAIL_DUPLICADO`, `409 DNI_DUPLICADO` (campo `dni`, con
+`persona: {id, nombre, apellido}` de quien ya lo tiene; nunca el DNI),
 `409 PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO`, `404 NO_ENCONTRADO`, `403 SIN_PERMISO`.

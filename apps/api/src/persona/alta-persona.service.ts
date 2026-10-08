@@ -177,8 +177,8 @@ function emailDuplicado() {
   return new AppException('EMAIL_DUPLICADO', 409, 'Ese email ya lo usa otra Persona.', [{ campo: 'email', code: 'EMAIL_DUPLICADO' }]);
 }
 
-/** D215: el DNI nunca viaja en la respuesta; solo quién lo tiene. */
-function dniDuplicado(persona: PersonaConMismoDni | null) {
+/** D215: el DNI nunca viaja en la respuesta; solo quién lo tiene. Lo usa también la edición (013). */
+export function dniDuplicado(persona: PersonaConMismoDni | null) {
   return new AppException(
     'DNI_DUPLICADO',
     409,
@@ -192,7 +192,8 @@ function esUnicidadDeEmail(error: unknown): boolean {
   return esUnicidadDe(error, 'email');
 }
 
-function esUnicidadDe(error: unknown, campo: string): boolean {
+/** P2002 del índice único de `campo` (email o dni). Lo usa también la edición (013). */
+export function esUnicidadDe(error: unknown, campo: string): boolean {
   if (typeof error !== 'object' || error === null || (error as { code?: unknown }).code !== 'P2002') return false;
   const meta = (error as { meta?: { driverAdapterError?: { cause?: { constraint?: { index?: string } } }; target?: unknown } }).meta;
   const indice = meta?.driverAdapterError?.cause?.constraint?.index ?? JSON.stringify(meta?.target ?? '');

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { CircleCheck, CircleSlash, Clock, Smartphone, UserRound } from 'lucide-react';
 import { ApiError, aniosCongregando, apiFetch, formatearDiaEnArgentina, formatearFechaLarga, hoyEnArgentina, type PerfilPersona } from '@vida-sobrenatural/shared-types';
-import { AvatarPersona, MigaDePan, Skeleton } from '@vida-sobrenatural/ui';
+import { AvatarPersona, ButtonLink, MigaDePan, Skeleton } from '@vida-sobrenatural/ui';
 import { requerirPermiso, tienePermisoSesion } from '../../../auth';
 import { BloqueConError } from '../../../components/bloque-con-error';
 import { PedirEnNombreDe } from '../../../components/pedir-en-nombre-de';
@@ -21,7 +21,7 @@ import { SeccionSolicitudes } from './seccion-solicitudes';
  * Solicitudes (la bandeja con `persona=`), Grupos y las secciones que suman
  * otras specs (`SECCIONES_PERFIL`). Las acciones (roles, pedir en su nombre)
  * solo con su permiso: el Pastor lo ve todo, incluido el contacto (D64), sin
- * botones de gestión (D142).
+ * botones de gestión (D142). "Editar datos" (013, Historia 7) con `personas.editar`.
  */
 export default async function PerfilPersonaPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requerirPermiso('personas.ver');
@@ -39,6 +39,8 @@ export default async function PerfilPersonaPage({ params }: { params: Promise<{ 
   const locale = await getLocale();
   const nombre = `${perfil.nombre} ${perfil.apellido}`;
   const puedeGestionarRoles = tienePermisoSesion(session, 'personas.gestionar_roles');
+  // spec 013, Historia 7 (T082, H7.5): "Editar datos" solo con `personas.editar` (el Pastor no lo ve).
+  const puedeEditar = tienePermisoSesion(session, 'personas.editar');
   const puedePedirEnNombre = tienePermisoSesion(session, 'solicitudes.crear_en_nombre') && perfil.activo && perfil.estado === 'activa';
   const seccionesExtra = SECCIONES_PERFIL.filter((s) => tienePermisoSesion(session, s.permiso));
   const anioActual = Number(hoyEnArgentina().slice(0, 4));
@@ -120,6 +122,11 @@ export default async function PerfilPersonaPage({ params }: { params: Promise<{ 
             </Dato>
           )}
         </dl>
+        {puedeEditar && (
+          <ButtonLink href={`/personas/${perfil.id}/editar`} variant="outline" size="xl" className="w-fit">
+            {t('editarDatos')}
+          </ButtonLink>
+        )}
       </Seccion>
 
       <Seccion id="roles" titulo={t('secciones.roles')}>
