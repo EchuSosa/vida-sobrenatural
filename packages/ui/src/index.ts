@@ -156,6 +156,15 @@ export {
 
 // --- spec 011 (EstadoInscripcionBadge, CampoArchivo) ---
 export { CampoArchivo, type CampoArchivoProps } from './components/campo-archivo';
+// spec 013 lote 5: "Contanos qué te parece".
+export {
+  FormularioComentario,
+  textosFormularioComentario,
+  type FormularioComentarioProps,
+  type TraductorComentario,
+  type ResultadoEnvioComentario,
+  type TextosFormularioComentario,
+} from './components/formulario-comentario';
 
 // --- spec 012 ---
 
