@@ -646,6 +646,38 @@
       "Diciembre"
     ]
   },
+  "ingreso": {
+    "titulo": "Backoffice — Vida Sobrenatural",
+    "intro": "Necesitás iniciar sesión para continuar.",
+    "sesionCerrada": "Cerraste sesión.",
+    "google": "Entrar con Google",
+    "separador": "o",
+    "tituloEmail": "Entrar con tu email",
+    "ayudaEmail": "Sirve cualquier email: Hotmail, Yahoo, Gmail u otro. No hace falta contraseña.",
+    "campoEmail": "Tu email",
+    "enviarCodigo": "Enviarme el código",
+    "enviandoCodigo": "Enviando…",
+    "tituloCodigo": "Revisá tu mail",
+    "explicacionCodigo": "Te mandamos un código a {email}. Vale por {minutos} minutos.",
+    "campoCodigo": "Código",
+    "ayudaCodigo": "Son 6 números. Si no lo ves, fijate en la carpeta de correo no deseado.",
+    "entrar": "Entrar",
+    "entrando": "Entrando…",
+    "otroCodigo": "Enviarme otro código",
+    "codigoReenviado": "Listo, te mandamos un código nuevo. El anterior ya no sirve.",
+    "otroEmail": "Usar otro email",
+    "tituloResumen": "Revisá esto para seguir:",
+    "errores": {
+      "EMAIL_INVALIDO": "Escribí un email completo, por ejemplo nombre@hotmail.com.",
+      "DEMASIADOS_PEDIDOS": "Pediste muchos códigos seguidos. Probá de nuevo en {minutos, plural, one {# minuto} other {# minutos}}.",
+      "ENVIO_EMAIL_FALLIDO": "No pudimos mandarte el mail. Probá de nuevo en unos minutos.",
+      "CODIGO_INVALIDO": "Escribí los 6 números del código que te mandamos.",
+      "CODIGO_INCORRECTO": "Ese código no coincide. Revisá el último mail que te mandamos, o pedí uno nuevo con «Enviarme otro código».",
+      "CODIGO_SIN_INTENTOS": "Probaste muchas veces con este código. Pedí uno nuevo con «Enviarme otro código».",
+      "CODIGO_VENCIDO": "Este código ya no sirve. Pedí uno nuevo con «Enviarme otro código».",
+      "desconocido": "Algo no salió bien. Probá de nuevo en unos minutos."
+    }
+  },
   "devEntrar": {
     "titulo": "Entrar para probar",
     "descripcion": "Solo en desarrollo: entrás como la persona de ese email, sin pasar por Google.",
