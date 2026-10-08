@@ -86,6 +86,8 @@ const CON_ID_REAL: Record<string, { ruta: (ids: IdsReales) => string; loguearse?
   '/grupos/[id]': { ruta: (ids) => `/grupos/${ids.grupoId}` },
   // spec 013 (T014): el perfil de la Persona que pidió, con su Solicitud en el historial.
   '/personas/[id]': { ruta: (ids) => `/personas/${ids.personaId}` },
+  // spec 013 (T083): el formulario de edición de esa misma Persona.
+  '/personas/[id]/editar': { ruta: (ids) => `/personas/${ids.personaId}/editar` },
 };
 interface IdsReales {
   solicitudId: string;

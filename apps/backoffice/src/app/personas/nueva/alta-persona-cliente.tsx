@@ -1,76 +1,33 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { CircleCheck, TriangleAlert, UserX } from 'lucide-react';
 import {
   ApiError,
-  ESTADOS_CIVILES,
-  GENEROS,
-  PROFESIONES,
   anioEnArgentina,
   apiFetch,
-  erroresDeDatosPersonales,
   erroresPorCampo,
-  esMenorDeEdad,
   formatearDiaEnArgentina,
-  hoyEnArgentina,
-  normalizarDni,
-  opcionesAnioCongregaDesde,
   type CoincidenciaDuplicado,
   type PersonaConMismoDni,
 } from '@vida-sobrenatural/shared-types';
+import { Button, ButtonLink, MensajeErrorCampo, MigaDePan, ResumenErrores, useEnvio, useValidacionCampos } from '@vida-sobrenatural/ui';
 import {
-  Button,
-  ButtonLink,
-  CampoFecha,
-  CampoTelefono,
-  MensajeErrorCampo,
-  MigaDePan,
-  ResumenErrores,
-  useEnvio,
-  useValidacionCampos,
-  type EtiquetasCampoFecha,
-} from '@vida-sobrenatural/ui';
+  CamposPersona,
+  DATOS_PERSONA_VACIOS,
+  cuerpoPersona,
+  erroresLocalesPersona,
+  useMensajeCampoPersona,
+  type DatosPersonaFormulario,
+} from '../../../components/campos-persona';
 
-interface Formulario {
-  apellido: string;
-  nombre: string;
-  genero: string;
-  fechaNacimiento: string;
-  codigoPais: string;
-  numero: string;
-  direccion: string;
-  sedeId: string;
-  estadoCivil: string;
-  profesion: string;
-  profesionDetalle: string;
-  congregaDesde: string;
-  email: string;
-  dni: string;
+interface Formulario extends DatosPersonaFormulario {
   consentimiento: boolean;
 }
 
-const VACIO: Formulario = {
-  apellido: '',
-  nombre: '',
-  genero: '',
-  fechaNacimiento: '',
-  codigoPais: '+54',
-  numero: '',
-  direccion: '',
-  sedeId: '',
-  estadoCivil: '',
-  profesion: '',
-  profesionDetalle: '',
-  congregaDesde: '',
-  email: '',
-  dni: '',
-  consentimiento: false,
-};
-
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const VACIO: Formulario = { ...DATOS_PERSONA_VACIOS, consentimiento: false };
 
 type Creada = { id: string; nombre: string; apellido: string; sinAccesoALaApp: boolean };
 
@@ -81,12 +38,13 @@ type Creada = { id: string; nombre: string; apellido: string; sinAccesoALaApp: b
  * Al guardar: errores por campo con resumen y foco (H-50); si la API avisa un
  * posible duplicado, la lista de coincidencias con "Es otra persona, crear
  * igual" (reenvía lo mismo, sin recargar datos — D145); y al crear, qué sigue.
- * El envío queda protegido de la reentrada (H-57).
+ * El envío queda protegido de la reentrada (H-57). Los campos, sus reglas y
+ * sus mensajes son los de `CamposPersona`, que reusa la edición (013, T082).
  */
 export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: string; nombre: string }>; apiToken: string }) {
   const t = useTranslations('personasAlta');
   const te = useTranslations('errors');
-  const tf = useTranslations('campoFecha');
+  const mensaje = useMensajeCampoPersona();
   const locale = useLocale();
   const validacion = useValidacionCampos();
   const [datos, setDatos] = useState<Formulario>(VACIO);
@@ -104,42 +62,13 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
     if (campo === 'dni') setConMismoDni(null);
   }
 
-  function mensaje(campo: string, code: string): string {
-    if (code.endsWith('_INVALIDO') && code !== 'EMAIL_INVALIDO' && t.has(`errores.${campo}`)) return t(`errores.${campo}`);
-    if (te.has(`campos.${code}`)) return te(`campos.${code}`);
-    if (te.has(code)) return te(code);
-    return t('errorGenerico');
-  }
-
   function cuerpo(confirmarPosibleDuplicado: boolean) {
-    return {
-      apellido: datos.apellido.trim(),
-      nombre: datos.nombre.trim(),
-      genero: datos.genero || undefined,
-      fechaNacimiento: datos.fechaNacimiento || undefined,
-      telefono: datos.numero ? `${datos.codigoPais} ${datos.numero}` : '',
-      direccion: datos.direccion.trim(),
-      sedeId: datos.sedeId || undefined,
-      estadoCivil: datos.estadoCivil || undefined,
-      profesion: datos.profesion || undefined,
-      profesionDetalle: datos.profesion === 'otro' ? datos.profesionDetalle.trim() : undefined,
-      congregaDesde: datos.congregaDesde ? Number(datos.congregaDesde) : undefined,
-      email: datos.email.trim() || null,
-      dni: datos.dni.trim() || null,
-      consentimiento: datos.consentimiento,
-      confirmarPosibleDuplicado,
-    };
+    return { ...cuerpoPersona(datos), consentimiento: datos.consentimiento, confirmarPosibleDuplicado };
   }
 
   /** Las mismas reglas que aplica la API, antes de enviar. */
   function erroresLocales(c: ReturnType<typeof cuerpo>): Record<string, string> {
-    const errores: Record<string, string> = {};
-    for (const e of erroresDeDatosPersonales(c, anioActual)) errores[e.campo] = mensaje(e.campo, e.code);
-    if (!errores.fechaNacimiento && c.fechaNacimiento && esMenorDeEdad(c.fechaNacimiento, hoyEnArgentina())) {
-      errores.fechaNacimiento = mensaje('fechaNacimiento', 'ALTA_MENOR_DE_EDAD');
-    }
-    if (c.email && !EMAIL.test(c.email)) errores.email = mensaje('email', 'EMAIL_INVALIDO');
-    if (normalizarDni(c.dni) === undefined) errores.dni = mensaje('dni', 'DNI_INVALIDO');
+    const errores = erroresLocalesPersona(c, mensaje, { anioActual, soloAdultos: true });
     if (!c.consentimiento) errores.consentimiento = t('errores.consentimiento');
     return errores;
   }
@@ -252,127 +181,22 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
           </p>
         )}
 
-        <Seccion titulo={t('secciones.personales')}>
-          <CampoTexto id="apellido" etiqueta={t('campos.apellido')} valor={datos.apellido} onCambio={(v) => cambiar('apellido', v)} error={m.apellido} autoComplete="off" />
-          <CampoTexto id="nombre" etiqueta={t('campos.nombre')} valor={datos.nombre} onCambio={(v) => cambiar('nombre', v)} error={m.nombre} autoComplete="off" />
-          <CampoLista
-            id="genero"
-            etiqueta={t('campos.genero')}
-            valor={datos.genero}
-            onCambio={(v) => cambiar('genero', v)}
-            error={m.genero}
-            elegir={t('elegir')}
-            opciones={GENEROS.map((g) => ({ value: g, label: t(`opciones.genero.${g}`) }))}
-          />
-          <div className="flex flex-col gap-1">
-            <CampoFecha
-              id="campo-fechaNacimiento"
-              etiqueta={t('campos.fechaNacimiento')}
-              required
-              autoCompletarNacimiento
-              value={datos.fechaNacimiento}
-              onChange={(v) => cambiar('fechaNacimiento', v)}
-              etiquetas={{ dia: tf('dia'), mes: tf('mes'), anio: tf('anio'), meses: tf.raw('meses') as EtiquetasCampoFecha['meses'] }}
-              error={Boolean(m.fechaNacimiento)}
-              idError="campo-fechaNacimiento-error"
-            />
-            <p className="text-sm text-muted-foreground">{t('ayudas.fechaNacimiento')}</p>
-            <MensajeErrorCampo id="campo-fechaNacimiento-error" mensaje={m.fechaNacimiento} />
-          </div>
-          <CampoTexto
-            id="dni"
-            etiqueta={t('campos.dni')}
-            ayuda={t('ayudas.dni')}
-            valor={datos.dni}
-            onCambio={(v) => cambiar('dni', v)}
-            error={m.dni}
-            autoComplete="off"
-            inputMode="numeric"
-          />
-          {conMismoDni && m.dni && (
-            <Link href={`/personas/${conMismoDni.id}`} className="w-fit text-sm underline underline-offset-4">
-              {t('dniDuplicado.ver', { nombre: `${conMismoDni.nombre} ${conMismoDni.apellido}` })}
-            </Link>
-          )}
-        </Seccion>
-
-        <Seccion titulo={t('secciones.contacto')}>
-          <div className="flex flex-col gap-1">
-            <CampoTelefono
-              id="campo-telefono"
-              labelTelefono={t('campos.telefono')}
-              labelCodigo={t('campos.codigoPais')}
-              codigoPais={datos.codigoPais}
-              numero={datos.numero}
-              onChangeCodigo={(v) => cambiar('codigoPais', v)}
-              onChangeNumero={(v) => cambiar('numero', v.replace(/[^0-9\s]/g, ''))}
-              error={Boolean(m.telefono)}
-              errorTexto={m.telefono}
-            />
-          </div>
-          <CampoTexto id="direccion" etiqueta={t('campos.direccion')} valor={datos.direccion} onCambio={(v) => cambiar('direccion', v)} error={m.direccion} autoComplete="off" />
-          <CampoTexto
-            id="email"
-            etiqueta={t('campos.email')}
-            ayuda={t('ayudas.email')}
-            tipo="email"
-            valor={datos.email}
-            onCambio={(v) => cambiar('email', v)}
-            error={m.email}
-            autoComplete="off"
-          />
-        </Seccion>
-
-        <Seccion titulo={t('secciones.iglesia')}>
-          <CampoLista
-            id="sedeId"
-            etiqueta={t('campos.sede')}
-            valor={datos.sedeId}
-            onCambio={(v) => cambiar('sedeId', v)}
-            error={m.sedeId}
-            elegir={t('elegir')}
-            opciones={sedes.map((s) => ({ value: s.id, label: s.nombre }))}
-          />
-          <CampoLista
-            id="congregaDesde"
-            etiqueta={t('campos.congregaDesde')}
-            valor={datos.congregaDesde}
-            onCambio={(v) => cambiar('congregaDesde', v)}
-            error={m.congregaDesde}
-            elegir={t('elegir')}
-            opciones={opcionesAnioCongregaDesde(anioActual).map((anio) => ({
-              value: String(anio),
-              label: anio === anioActual ? t('opciones.esteAnio', { anio }) : String(anio),
-            }))}
-          />
-          <CampoLista
-            id="estadoCivil"
-            etiqueta={t('campos.estadoCivil')}
-            valor={datos.estadoCivil}
-            onCambio={(v) => cambiar('estadoCivil', v)}
-            error={m.estadoCivil}
-            elegir={t('elegir')}
-            opciones={ESTADOS_CIVILES.map((e) => ({ value: e, label: t(`opciones.estadoCivil.${e}`) }))}
-          />
-          <CampoLista
-            id="profesion"
-            etiqueta={t('campos.profesion')}
-            valor={datos.profesion}
-            onCambio={(v) => cambiar('profesion', v)}
-            error={m.profesion}
-            elegir={t('elegir')}
-            opciones={PROFESIONES.map((p) => ({ value: p, label: t(`opciones.profesion.${p}`) }))}
-          />
-          {datos.profesion === 'otro' && (
-            <CampoTexto
-              id="profesionDetalle"
-              etiqueta={t('campos.profesionDetalle')}
-              valor={datos.profesionDetalle}
-              onCambio={(v) => cambiar('profesionDetalle', v)}
-              error={m.profesionDetalle}
-            />
-          )}
-        </Seccion>
+        <CamposPersona
+          datos={datos}
+          cambiar={cambiar}
+          mensajes={m}
+          sedes={sedes}
+          anioActual={anioActual}
+          ayudaFechaNacimiento={t('ayudas.fechaNacimiento')}
+          despuesDelDni={
+            conMismoDni &&
+            m.dni && (
+              <Link href={`/personas/${conMismoDni.id}`} className="w-fit text-sm underline underline-offset-4">
+                {t('dniDuplicado.ver', { nombre: `${conMismoDni.nombre} ${conMismoDni.apellido}` })}
+              </Link>
+            )
+          }
+        />
 
         <div className="flex flex-col gap-1">
           <label className="flex min-h-11 items-start gap-3">
@@ -429,107 +253,6 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
           </Button>
         </div>
       </form>
-    </div>
-  );
-}
-
-function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
-  return (
-    <fieldset className="flex min-w-0 flex-col gap-4 rounded-lg border border-border p-5">
-      <legend className="px-1 text-lg font-semibold">{titulo}</legend>
-      {children}
-    </fieldset>
-  );
-}
-
-function CampoTexto({
-  id,
-  etiqueta,
-  ayuda,
-  tipo = 'text',
-  valor,
-  onCambio,
-  error,
-  autoComplete,
-  inputMode,
-}: {
-  id: string;
-  etiqueta: string;
-  ayuda?: string;
-  tipo?: string;
-  valor: string;
-  onCambio: (v: string) => void;
-  error?: string;
-  autoComplete?: string;
-  inputMode?: 'numeric';
-}) {
-  const describe = [ayuda && `campo-${id}-ayuda`, error && `campo-${id}-error`].filter(Boolean).join(' ') || undefined;
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={`campo-${id}`} className="font-medium">
-        {etiqueta}
-      </label>
-      {ayuda && (
-        <p id={`campo-${id}-ayuda`} className="text-sm text-muted-foreground">
-          {ayuda}
-        </p>
-      )}
-      <input
-        id={`campo-${id}`}
-        name={id}
-        type={tipo}
-        value={valor}
-        autoComplete={autoComplete}
-        inputMode={inputMode}
-        onChange={(e) => onCambio(e.target.value)}
-        aria-invalid={Boolean(error) || undefined}
-        aria-describedby={describe}
-        className="h-11 rounded-md border border-input bg-transparent px-3 aria-invalid:border-destructive dark:bg-input/30"
-      />
-      <MensajeErrorCampo id={`campo-${id}-error`} mensaje={error} />
-    </div>
-  );
-}
-
-function CampoLista({
-  id,
-  etiqueta,
-  valor,
-  onCambio,
-  error,
-  elegir,
-  opciones,
-}: {
-  id: string;
-  etiqueta: string;
-  valor: string;
-  onCambio: (v: string) => void;
-  error?: string;
-  elegir: string;
-  opciones: Array<{ value: string; label: string }>;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={`campo-${id}`} className="font-medium">
-        {etiqueta}
-      </label>
-      <select
-        id={`campo-${id}`}
-        name={id}
-        value={valor}
-        onChange={(e) => onCambio(e.target.value)}
-        aria-invalid={Boolean(error) || undefined}
-        aria-describedby={error ? `campo-${id}-error` : undefined}
-        className="h-11 rounded-md border border-input bg-background px-3 aria-invalid:border-destructive dark:bg-input/30"
-      >
-        <option value="">{elegir}</option>
-        {opciones.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <MensajeErrorCampo id={`campo-${id}-error`} mensaje={error} />
     </div>
   );
 }
