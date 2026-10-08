@@ -83,7 +83,7 @@ Los estados siempre llevan texto + ícono (nunca solo color, D81).
 
 - Español rioplatense con voseo ("Anotate", "Tu camino"), cálido y cercano, sin sonar informal de más (ver el tono de `12-contenido-bienvenida.md`).
 - Frases cortas, una idea por oración. Sin jerga interna ni términos del modelo de datos (`apto_ministerio`, `alcance`).
-- **Glosario de interfaz** (a completar en las specs): qué término ve la persona para cada concepto del modelo. Ej.: "Solicitud" en general; "Anotarme" para Eventos; "Primeros pasos" y "Mi camino" (D92).
+- **Glosario de interfaz** (a completar en las specs): qué término ve la persona para cada concepto del modelo. Ej.: "Solicitud" en general; "Anotarme" para Eventos; "Primeros pasos" y "Mi camino" (D92). En la bandeja del backoffice, "Abiertas" (esperan una respuesta del equipo) y "Resueltas" en vez de los estados crudos de cada tipo (spec 013, D208).
   | Concepto del modelo | Lo que se lee en pantalla |
   |---|---|
   | Declaración de Historial | **"Ya lo hice"** (el botón), "La iglesia lo está revisando" (en revisión); en el backoffice, el tipo **"Historial previo"** (D144, D154) |

@@ -10,6 +10,7 @@ import { apiFetch, ApiError, formatearDiaEnArgentina } from '@vida-sobrenatural/
 import { Button, ConfirmDestructiveDialog, EstadoVacio, MigaDePan, useEnvio } from '@vida-sobrenatural/ui';
 import type { DetalleDiscipuladoAdmin } from '@vida-sobrenatural/shared-types';
 import { PanelMotivo, mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type TextosPanelMotivo } from '@vida-sobrenatural/ui';
+import { EnlacePersona } from '../../../components/enlace-persona';
 import { PanelReasignar } from './reasignar';
 
 type PersonaAdmin = DetalleDiscipuladoAdmin['personas'][number];
@@ -237,9 +238,8 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
         <ul className="flex flex-col gap-2">
           {detalle.personas.map((p) => (
             <li key={p.inscripcionId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3">
-              <span className="font-medium">
-                {p.nombre} {p.apellido}
-              </span>
+              {/* spec 013 (T034): el nombre lleva al perfil. */}
+              <EnlacePersona persona={p} className="font-medium" />
               <span className="inline-flex items-center gap-1.5 text-sm">
                 {p.estadoInscripcion === 'activa' ? (
                   p.bajaPropuesta ? <UserRoundX className="size-4" aria-hidden="true" /> : <Clock className="size-4" aria-hidden="true" />
@@ -314,9 +314,7 @@ export function GrupoDetalleCliente({ detalle, apiToken, puedeGestionar }: { det
             <li key={`${l.discipulador.id}-${l.desde}`} className="flex items-start gap-2">
               <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
               <span>
-                <span className="font-medium">
-                  {l.discipulador.nombre} {l.discipulador.apellido}
-                </span>{' '}
+                <EnlacePersona persona={l.discipulador} className="font-medium" />{' '}
                 —{' '}
                 {l.hasta
                   ? t('detalle.periodo', { desde: formatearDiaEnArgentina(l.desde, locale), hasta: formatearDiaEnArgentina(l.hasta, locale) })

@@ -212,6 +212,8 @@
     "libros": "Libros",
     "papeleraLibros": "Papelera de Libros",
     "catalogos": "Catálogos",
+    "cursos": "Cursos",
+    "cumpleanos": "Cumpleaños",
     "menuMovilTitulo": "Menú",
     "menuMovilDescripcion": "Las secciones del backoffice.",
     "mostrarOcultarMenu": "Mostrar u ocultar el menú"
@@ -580,6 +582,16 @@
     }
   },
   "inicio": {
+    "titulo": "Inicio",
+    "solicitudes": {
+      "titulo": "Esperan una respuesta",
+      "linea": "{cantidad} de {tipo}",
+      "pendientesTutor": "{cantidad, plural, one {# menor espera que lo active su tutor} other {# menores esperan que los active su tutor}}",
+      "vacio": "No hay nada esperando una respuesta.",
+      "error": "No pudimos cargar lo que espera una respuesta.",
+      "reintentar": "Reintentar",
+      "cargando": "Cargando lo que espera una respuesta"
+    },
     "pendientes": {
       "titulo": "Pendientes",
       "descripcion": "Lo que está esperando que alguien del equipo lo mire.",
@@ -919,11 +931,194 @@
       }
     }
   },
-  "metricas": {},
-  "cumpleanos": {},
+  "metricas": {
+    "titulo": "Cómo está la iglesia",
+    "personasActivas": "Personas activas",
+    "porTiempo": "Desde cuándo vienen",
+    "ayudaTiempo": "Contado desde el año en que cada Persona empezó a venir.",
+    "porSede": "Por Sede",
+    "rangos": {
+      "este_anio": "Empezaron este año",
+      "de_1_a_2_anios": "Hace 1 o 2 años",
+      "de_3_a_5_anios": "Hace 3 a 5 años",
+      "mas_de_5_anios": "Hace más de 5 años"
+    },
+    "columnas": {
+      "desde": "Desde cuándo",
+      "sede": "Sede",
+      "cantidad": "Personas y porcentaje"
+    },
+    "sedeInactiva": "Inactiva",
+    "vacio": "Todavía no hay Personas activas para contar.",
+    "error": "No pudimos cargar las métricas.",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando las métricas"
+  },
+  "cumpleanos": {
+    "titulo": "Cumpleaños",
+    "tituloMes": "Cumpleaños de {mes}",
+    "descripcion": "Las Personas que cumplen años este mes, para saludarlas. Tocá el teléfono para llamar o escribir.",
+    "elegirMes": "Elegir el mes",
+    "meses": {
+      "1": "enero",
+      "2": "febrero",
+      "3": "marzo",
+      "4": "abril",
+      "5": "mayo",
+      "6": "junio",
+      "7": "julio",
+      "8": "agosto",
+      "9": "septiembre",
+      "10": "octubre",
+      "11": "noviembre",
+      "12": "diciembre"
+    },
+    "columnas": {
+      "nombre": "Nombre",
+      "dia": "Día",
+      "telefono": "Teléfono"
+    },
+    "cumple": "Cumple {anios}",
+    "cumplio": "Cumplió {anios}",
+    "hoy": "Hoy",
+    "vacioMes": "Nadie cumple años en {mes}.",
+    "paginado": "Paginado de cumpleaños",
+    "cargando": "Cargando los cumpleaños",
+    "errorCargaTitulo": "No pudimos cargar los cumpleaños",
+    "errorCarga": "Podés reintentar en unos segundos. Código de referencia:",
+    "reintentar": "Reintentar",
+    "bloque": {
+      "titulo": "Cumpleaños de esta semana",
+      "vacio": "Nadie cumple años esta semana.",
+      "hoyCumple": "Hoy cumple {anios}",
+      "elDia": "El {fecha}: cumple {anios}",
+      "verMes": "Ver los cumpleaños del mes",
+      "verTodos": "Ver todos los cumpleaños del mes",
+      "error": "No pudimos cargar los cumpleaños."
+    },
+    "sinTelefono": "Sin teléfono"
+  },
   "comentarios": {},
-  "cursos": {},
-  "catalogos": {},
+  "cursos": {
+    "titulo": "Cursos",
+    "descripcion": "Los cursos que la app sabe acompañar. Podés cambiarles el nombre y la descripción, o inactivarlos para que no se abran Grupos nuevos.",
+    "miga": "Catálogos",
+    "categorias": {
+      "vida_nueva": "Vida Nueva",
+      "vida_de_servicio": "Vida de Servicio"
+    },
+    "tipos": {
+      "individual": "Individual",
+      "grupal": "Grupal"
+    },
+    "modalidades": {
+      "seguimiento_por_encuentros": "Seguimiento por encuentros",
+      "liberacion_programada": "Material liberado por semana"
+    },
+    "filtro": "Mostrar",
+    "filtros": {
+      "activos": "Activos",
+      "todos": "Todos"
+    },
+    "columnas": {
+      "nombre": "Nombre",
+      "curso": "Curso",
+      "estado": "Estado",
+      "grupos": "Grupos en curso",
+      "acciones": "Acciones"
+    },
+    "tabla": "Cursos",
+    "vacio": "No hay Cursos activos.",
+    "vacioTodos": "Todavía no hay Cursos.",
+    "activo": "Activo",
+    "inactivo": "Inactivo",
+    "ver": "Ver",
+    "verDe": "Ver el Curso {nombre}",
+    "papelera": "Papelera",
+    "nuevo": {
+      "boton": "Agregar un Curso",
+      "titulo": "Agregar un Curso",
+      "descripcion": "Elegí uno de los Cursos que la app sabe acompañar y ponele el nombre que se va a ver.",
+      "combinacion": "Curso",
+      "nombre": "Nombre",
+      "nombreAyuda": "Como lo van a ver las Personas.",
+      "descripcionCampo": "Descripción (opcional)",
+      "descripcionAyuda": "Hasta 500 caracteres.",
+      "restaurar": "{curso} (está en la papelera: se recupera)",
+      "sinDisponibles": "Ya están todos los Cursos que la app sabe acompañar.",
+      "agregar": "Agregar el Curso",
+      "agregando": "Agregando…",
+      "cancelar": "Volver",
+      "agregado": "Agregamos el Curso {nombre}.",
+      "resumen": "Revisá esto antes de seguir:",
+      "errores": {
+        "combinacion": "Elegí un Curso de la lista.",
+        "nombre": "Escribí un nombre de hasta 120 caracteres.",
+        "descripcion": "La descripción puede tener hasta 500 caracteres."
+      }
+    },
+    "detalle": {
+      "modalidad": "Modalidad",
+      "grupos": "{cantidad, plural, =0 {Sin Grupos en curso} one {# Grupo en curso} other {# Grupos en curso}}",
+      "guardar": "Guardar los cambios",
+      "guardando": "Guardando…",
+      "guardado": "Guardamos los cambios.",
+      "inactivar": "Inactivar",
+      "inactivando": "Inactivando…",
+      "inactivarTitulo": "¿Inactivar el Curso {nombre}?",
+      "inactivarTexto": "No se van a poder abrir Grupos nuevos de este Curso. Lo podés reactivar cuando quieras.",
+      "inactivarConGrupos": "Tiene {cantidad, plural, one {# Grupo en curso, que sigue} other {# Grupos en curso, que siguen}} igual hasta terminar. No se van a poder abrir Grupos nuevos. Para confirmar, escribí el nombre del Curso.",
+      "inactivarConfirmar": "Sí, inactivar",
+      "escribiNombre": "Nombre del Curso",
+      "inactivado": "Inactivamos el Curso.",
+      "reactivar": "Reactivar",
+      "reactivando": "Reactivando…",
+      "reactivarTitulo": "¿Reactivar el Curso {nombre}?",
+      "reactivarTexto": "Se van a poder abrir Grupos nuevos de este Curso.",
+      "reactivarConfirmar": "Sí, reactivar",
+      "reactivado": "Reactivamos el Curso.",
+      "eliminar": "Eliminar",
+      "eliminando": "Eliminando…",
+      "eliminarTitulo": "¿Eliminar el Curso {nombre}?",
+      "eliminarTexto": "Va a la papelera, desde donde lo podés recuperar.",
+      "eliminarConfirmar": "Sí, eliminar",
+      "eliminado": "Eliminamos el Curso. Está en la papelera.",
+      "noSePuedeEliminar": "No se puede eliminar porque tiene Grupos (en curso o terminados). Si no querés que se abran más, inactivalo.",
+      "volver": "Volver",
+      "error": "No pudimos guardar el cambio. Probá de nuevo en unos segundos."
+    },
+    "papeleraPagina": {
+      "titulo": "Papelera de Cursos",
+      "descripcion": "Los Cursos eliminados. Podés recuperarlos.",
+      "vacio": "La papelera está vacía.",
+      "eliminadoEl": "Eliminado el {fecha}",
+      "restaurar": "Recuperar",
+      "restaurarDe": "Recuperar el Curso {nombre}",
+      "restaurado": "Recuperamos el Curso {nombre}.",
+      "error": "No pudimos recuperar el Curso."
+    },
+    "cargando": "Cargando los Cursos",
+    "noEncontradoTitulo": "No encontramos este Curso",
+    "irACursos": "Ir a Cursos",
+    "errorCargaTitulo": "No pudimos cargar los Cursos",
+    "errorCarga": "Podés reintentar en unos segundos. Código de referencia:",
+    "reintentar": "Reintentar"
+  },
+  "catalogos": {
+    "titulo": "Catálogos",
+    "descripcion": "Las listas que usa la app en varios lugares. Entrá a cada una para verla o cambiarla.",
+    "sedes": {
+      "titulo": "Sedes",
+      "texto": "Dónde se reúne la iglesia."
+    },
+    "cursos": {
+      "titulo": "Cursos",
+      "texto": "Vida Nueva y Vida de Servicio."
+    },
+    "cantidad": "{activos, plural, one {# activo} other {# activos}} de {total}",
+    "cantidadSedes": "{activos, plural, one {# activa} other {# activas}} de {total}",
+    "error": "No pudimos contar los registros de los catálogos. Igual podés entrar a cada uno."
+  },
   "etapasPersona": {
     "titulo": "Etapas",
     "completaSistema": "Hecha (en un grupo de la app)",
@@ -962,5 +1157,140 @@
     "irALaApp": "Ir a la app"
   },
   "solicitudesServicio": {},
-  "perfil": {}
+  "perfil": {
+    "miga": "Personas",
+    "edad": "{edad, plural, one {# año} other {# años}}",
+    "fotoDe": "Foto de {nombre}",
+    "verPerfilDe": "Ver el perfil de {nombre}",
+    "marcas": {
+      "activa": "Activa",
+      "dadaDeBaja": "Dada de baja",
+      "noUsaLaApp": "No usa la app",
+      "pendienteTutor": "Pendiente de tutor",
+      "menor": "Menor de edad"
+    },
+    "secciones": {
+      "datos": "Datos",
+      "roles": "Roles",
+      "acciones": "En su nombre",
+      "solicitudes": "Solicitudes",
+      "gruposCursados": "Grupos que cursó",
+      "gruposACargo": "Grupos a cargo",
+      "familia": "Familia"
+    },
+    "datos": {
+      "fechaNacimiento": "Fecha de nacimiento",
+      "genero": "Género",
+      "estadoCivil": "Estado civil",
+      "profesion": "Ocupación",
+      "telefono": "Teléfono",
+      "sinTelefono": "Sin teléfono",
+      "direccion": "Dirección",
+      "email": "Email",
+      "sinEmail": "Sin email",
+      "sede": "Sede",
+      "sedeInactiva": "{nombre} (Sede inactiva)",
+      "congregaDesde": "Viene a la iglesia",
+      "congregaDesdeValor": "Desde {anio} ({anios, plural, =0 {empezó este año} one {hace # año} other {hace # años}})",
+      "usaLaApp": "Usa la app",
+      "usaLaAppSi": "Sí",
+      "usaLaAppNo": "No: no tiene email para entrar",
+      "alta": "Cómo se dio de alta",
+      "altaAutorregistro": "Se registró en la app el {fecha}",
+      "altaAdmin": "La dio de alta {nombre} el {fecha}",
+      "altaAdminSinNombre": "La dio de alta el equipo el {fecha}",
+      "consentimiento": "Consentimiento de datos",
+      "consentimientoApp": "Lo dio en la app el {fecha}",
+      "consentimientoPresencial": "Lo dio su tutor/a en persona el {fecha}",
+      "sinConsentimiento": "Todavía no lo dio",
+      "tutor": "Tutor/a",
+      "tutorConTelefono": "{nombre} — {telefono}"
+    },
+    "opciones": {
+      "genero": {
+        "femenino": "Femenino",
+        "masculino": "Masculino"
+      },
+      "estadoCivil": {
+        "soltero_a": "Soltero/a",
+        "casado_a": "Casado/a",
+        "en_concubinato": "En concubinato",
+        "viudo_a": "Viudo/a",
+        "divorciado_a": "Divorciado/a",
+        "separado_a": "Separado/a"
+      },
+      "profesion": {
+        "salud": "Salud",
+        "educacion": "Educación",
+        "tecnologia_ingenieria": "Tecnología/Ingeniería",
+        "comercio_ventas": "Comercio y Ventas",
+        "oficios_construccion": "Oficios/Construcción",
+        "administracion_finanzas": "Administración y Finanzas",
+        "legal": "Legal",
+        "comunicacion_marketing": "Comunicación y Marketing",
+        "arte_diseno": "Arte y Diseño",
+        "servicios_gastronomia": "Servicios y Gastronomía",
+        "transporte": "Transporte",
+        "estudiante": "Estudiante",
+        "ama_de_casa": "Ama/o de casa",
+        "jubilado_a": "Jubilado/a",
+        "sin_ocupacion": "Sin ocupación",
+        "otro": "Otro"
+      }
+    },
+    "roles": {
+      "deCargo": "De cargo",
+      "delProceso": "Del proceso",
+      "sinDeCargo": "Sin rol de cargo",
+      "sinDelProceso": "Ninguno todavía",
+      "nombres": {
+        "miembro_registrado": "Miembro registrado",
+        "apto_ministerio": "Apto para un Ministerio",
+        "miembro_ministerio": "Miembro de un Ministerio"
+      }
+    },
+    "solicitudes": {
+      "vacio": "Todavía no pidió nada.",
+      "pedidaEl": "Pedida el {fecha}",
+      "verTodas": "Ver todas en la bandeja",
+      "mostrando": "Mostrando las {mostradas} más recientes de {total}.",
+      "error": "No pudimos cargar sus Solicitudes."
+    },
+    "grupos": {
+      "vacioCursados": "Todavía no cursó ningún Grupo.",
+      "vacioACargo": "No tiene Grupos a cargo.",
+      "desdeHasta": "Del {desde} al {hasta}",
+      "desde": "Desde el {desde}",
+      "enCurso": "En curso",
+      "finalizado": "Terminado",
+      "inscripcion": {
+        "activa": "Cursando",
+        "completada": "Lo completó",
+        "dada_de_baja": "Dada de baja",
+        "abandono": "Lo dejó"
+      },
+      "mostrando": "Mostrando los {mostrados} más recientes de {total}.",
+      "verGrupo": "Ver el Grupo de {curso}",
+      "error": "No pudimos cargar sus Grupos."
+    },
+    "familia": {
+      "vacio": "No tiene Relaciones Familiares cargadas.",
+      "relaciones": {
+        "tutor_de": "Su tutor/a",
+        "a_cargo_de": "A su cargo",
+        "conyuge": "Cónyuge",
+        "hijo_a": "Hijo/a",
+        "padre_madre": "Padre o madre",
+        "hermano_a": "Hermano/a"
+      }
+    },
+    "errorSeccion": "No pudimos cargar esta parte del perfil.",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando el perfil",
+    "noEncontradaTitulo": "No encontramos esta Persona",
+    "noEncontradaTexto": "Puede que el enlace esté mal escrito o que ya no exista.",
+    "irAPersonas": "Ir a Personas",
+    "errorCargaTitulo": "No pudimos cargar el perfil",
+    "errorCarga": "Podés reintentar en unos segundos. Código de referencia:"
+  }
 }

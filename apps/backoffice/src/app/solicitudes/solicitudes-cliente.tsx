@@ -4,26 +4,15 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { ESTADOS_POR_TIPO, formatearFechaHora, type Pagina, type PersonaBreve, type SolicitudBandeja, type TipoSolicitud } from '@vida-sobrenatural/shared-types';
-import { ButtonLink, ControlesTabla, Paginacion, TablaDatos, type ColumnaTabla } from '@vida-sobrenatural/ui';
+import { AvatarPersona, ButtonLink, ControlesTabla, Paginacion, TablaDatos, type ColumnaTabla } from '@vida-sobrenatural/ui';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 import { PedirEnNombreDe } from '../../components/pedir-en-nombre-de';
-import { ICONO_TIPO_SOLICITUD, RUTA_DETALLE_SOLICITUD } from '../../config/solicitudes';
-import { EstadoBandeja } from './estado-solicitud-texto';
+import { EnlacePersona } from '../../components/enlace-persona';
+import { RUTA_DETALLE_SOLICITUD } from '../../config/solicitudes';
+import { EstadoBandeja, TipoTexto } from './estado-solicitud-texto';
 import { diasDesde, type VistaBandeja } from './constantes';
 
 const CLASE_SELECT = 'h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30';
-
-/** El tipo de una Solicitud con texto e ícono, nunca solo color (D81). */
-function TipoTexto({ tipo }: { tipo: TipoSolicitud }) {
-  const t = useTranslations('bandeja.tipos');
-  const Icono = ICONO_TIPO_SOLICITUD[tipo];
-  return (
-    <span className="inline-flex items-start gap-1.5">
-      <Icono aria-hidden className="mt-0.5 size-4 shrink-0" />
-      <span>{t(tipo)}</span>
-    </span>
-  );
-}
 
 /**
  * spec 013, T024: la bandeja unificada. Los datos llegan de page.tsx (Server
@@ -93,13 +82,17 @@ export function SolicitudesCliente({
       encabezado: t('columnas.persona'),
       ordenable: true,
       celda: (s) => (
-        <span className="flex flex-col gap-0.5">
-          <span className="font-medium">{nombre(s.persona)}</span>
+        <span className="flex items-start gap-2">
+          <AvatarPersona nombre={s.persona.nombre} apellido={s.persona.apellido} fotoUrl={s.persona.fotoUrl} tamanio="sm" className="max-sm:hidden" />
+          <span className="flex flex-col gap-0.5">
+          {/* FR-006: el nombre lleva al perfil; "Ver", al detalle de la Solicitud. */}
+          <EnlacePersona persona={s.persona} className="font-medium" />
           {variosTipos && (
             <span className="text-muted-foreground sm:hidden">
               <TipoTexto tipo={s.tipo} />
             </span>
           )}
+          </span>
         </span>
       ),
     },

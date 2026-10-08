@@ -150,5 +150,7 @@ export { PedirEnNombreDe, type PedirEnNombreDeProps, type EtiquetasPedirEnNombre
 // --- spec 012 ---
 
 // --- spec 013 (AvatarPersona, BarraProporcion, FormularioComentario) ---
+export { AvatarPersona, type AvatarPersonaProps } from './components/avatar-persona';
+export { BarraProporcion, type BarraProporcionProps } from './components/barra-proporcion';
 
 // --- ajustes-ux (D150, D151) ---

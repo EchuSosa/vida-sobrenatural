@@ -1,8 +1,11 @@
 import { redirect } from 'next/navigation';
-import { EstadoVacio } from '@vida-sobrenatural/ui';
+import { getTranslations } from 'next-intl/server';
 import { aterrizajeDeSesion, requerirPermiso, requerirSesion, tienePermisoSesion } from '../auth';
 import { TarjetaPendientes } from './tarjeta-pendientes';
 import { PantallaSinBackoffice } from '../components/lo-tuyo-en-la-app';
+import { BloqueCumpleanos } from './inicio/bloque-cumpleanos';
+import { BloqueMetricas } from './inicio/bloque-metricas';
+import { BloquePendientes } from './inicio/bloque-pendientes';
 
 /**
  * H-116 (revisión manual): el chequeo de sesión (y la pantalla de
@@ -33,17 +36,27 @@ export default async function InicioBackofficePage() {
   }
 
   const sesion = await requerirPermiso('inicio.ver');
+  const t = await getTranslations('inicio');
   // specs/004, T054g (FR-048): la tarjeta de Pendientes es de quien decide
   // sobre Solicitudes o Grupos — por permiso del catálogo (D132), nunca por rol.
   const vePendientes = tienePermisoSesion(sesion, 'solicitudes.aprobar') || tienePermisoSesion(sesion, 'grupos.gestionar');
+  // spec 013 (Historia 3, D209): bloques independientes — cada uno carga y
+  // falla solo, con su "Reintentar"; el Pastor ve lo mismo, sin acciones.
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Inicio</h1>
-      {vePendientes ? (
-        <TarjetaPendientes apiToken={sesion.apiToken} />
-      ) : (
-        <EstadoVacio mensaje="Todavía no hay métricas ni pendientes para mostrar acá." />
-      )}
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
+      <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
+      <div className="grid items-start gap-6 lg:grid-cols-2">
+        <div className="flex flex-col gap-6">
+          {tienePermisoSesion(sesion, 'solicitudes.ver') && (
+            <BloquePendientes apiToken={sesion.apiToken} vePendientesTutor={tienePermisoSesion(sesion, 'pendientes_tutor.ver')} />
+          )}
+          {vePendientes && <TarjetaPendientes apiToken={sesion.apiToken} />}
+        </div>
+        <div className="flex flex-col gap-6">
+          {tienePermisoSesion(sesion, 'personas.ver') && <BloqueCumpleanos apiToken={sesion.apiToken} />}
+          <BloqueMetricas apiToken={sesion.apiToken} />
+        </div>
+      </div>
     </div>
   );
 }

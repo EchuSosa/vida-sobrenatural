@@ -41,6 +41,7 @@ import {
 } from '@vida-sobrenatural/ui';
 import { toast } from 'sonner';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
+import { EnlacePersona } from '../../components/enlace-persona';
 
 /**
  * Cierre de H-101 (D-paginado, antes de la spec 004): `pagina` llega ya
@@ -128,9 +129,8 @@ export function PendientesTutorCliente({
       encabezado: 'Nombre',
       ordenable: true,
       celda: (persona) => (
-        <span className="font-medium">
-          {persona.nombre} {persona.apellido}
-        </span>
+        // spec 013 (T034): el nombre lleva al perfil.
+        <EnlacePersona persona={persona} className="font-medium" />
       ),
     },
     {

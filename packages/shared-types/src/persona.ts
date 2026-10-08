@@ -283,6 +283,8 @@ export interface PersonaListado {
   id: string;
   nombre: string;
   apellido: string;
+  /** spec 013 (D87, FR-018): foto de Google o null — el avatar de la fila. */
+  fotoUrl: string | null;
   /** D145: null = sin acceso a la app. */
   email: string | null;
   telefono: string;

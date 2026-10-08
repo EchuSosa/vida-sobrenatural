@@ -9,6 +9,7 @@ import {
 } from '../generated/prisma/enums.js';
 import {
   EDAD_MINIMA_ROL_DE_CARGO,
+  INVERSO_RELACION,
   ROLES_DE_CARGO,
   normalizarEmail,
   puedeQuitarRol,
@@ -47,6 +48,8 @@ const PERSONA_LISTADO_SELECT = {
   id: true,
   nombre: true,
   apellido: true,
+  // spec 013 (T016, FR-018): el avatar de la fila.
+  fotoUrl: true,
   email: true,
   telefono: true,
   rol: true,
@@ -54,18 +57,9 @@ const PERSONA_LISTADO_SELECT = {
   adminSembrado: true,
 } as const;
 
-// D112: inversa de cada tipo de Relación Familiar (para detectar el
-// "duplicado espejo" — el mismo vínculo cargado desde el otro lado). `tutor`
-// no tiene un valor inverso en el enum ("a_cargo" se resuelve en código al
-// consultar, no se guarda) — no puede haber espejo para ese tipo.
-const INVERSO_RELACION: Partial<
-  Record<TipoRelacionFamiliar, TipoRelacionFamiliar>
-> = {
-  [TipoRelacionFamiliar.hijo_a]: TipoRelacionFamiliar.padre_madre,
-  [TipoRelacionFamiliar.padre_madre]: TipoRelacionFamiliar.hijo_a,
-  [TipoRelacionFamiliar.conyuge]: TipoRelacionFamiliar.conyuge,
-  [TipoRelacionFamiliar.hermano_a]: TipoRelacionFamiliar.hermano_a,
-};
+// D112: la inversa de cada tipo (`INVERSO_RELACION`) vive en shared-types
+// (`perfil-persona.ts`, spec 013 research #6): una sola tabla para el
+// "duplicado espejo" de acá y para el perfil del backoffice.
 
 const PENDIENTE_TUTOR_SELECT = {
   id: true,
@@ -655,7 +649,7 @@ export class PersonaService {
       );
     }
 
-    const inversa = INVERSO_RELACION[tipo];
+    const inversa = INVERSO_RELACION[tipo] as TipoRelacionFamiliar | undefined;
     if (inversa) {
       const duplicadoEspejo = await this.prisma.relacionFamiliar.findUnique({
         where: {
