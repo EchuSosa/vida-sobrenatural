@@ -262,9 +262,12 @@
     "sinSedes": "Todavía no cargamos la información de la Sede. Volvé a intentarlo más tarde.",
     "errorCargaTitulo": "No pudimos cargar la información de tu Sede",
     "errorCarga": "Puede ser algo pasajero — probá de nuevo en unos segundos.",
-    "elegirSede": "Elegí la Sede a la que te acercaste:",
-    "telefono": "Tel:",
-    "email": "Email:"
+    "elegirSede": "Estas son nuestras Sedes:",
+    "telefono": "Teléfono:",
+    "email": "Email:",
+    "comoLlegar": "Cómo llegar",
+    "llamar": "Llamar",
+    "escribirEmail": "Escribir un email"
   },
   "nosotros": {
     "titulo": "Nosotros",

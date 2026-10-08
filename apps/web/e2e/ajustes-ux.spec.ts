@@ -217,3 +217,14 @@ test.describe('Primeros pasos', () => {
     expect(await tamanoDeLetra(page.getByText(/^No hace falta que hagas nada de esto ya mismo/))).toBeGreaterThanOrEqual(16);
   });
 });
+
+test.describe('Visitanos', () => {
+  test.use({ viewport: CELULAR });
+
+  test('"Cómo llegar" abre el mapa, sin "Elegí la Sede" si no hay nada que elegir, botones de 44 px (#15, #16, #17) @celular', async ({ page }) => {
+    await page.goto('/visitanos');
+    await expect(page.getByText(/Elegí la Sede/)).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Cómo llegar' }).first()).toHaveAttribute('href', /^https:\/\/www\.google\.com\/maps\//);
+    await objetivosDe44(contenido(page));
+  });
+});
