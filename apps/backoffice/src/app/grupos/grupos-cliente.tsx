@@ -8,6 +8,7 @@ import { formatearDiaEnArgentina, type DiscipuladoResumen, type Pagina } from '@
 import { Button, Paginacion, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 import { nombresDe } from '@vida-sobrenatural/ui';
+import { EnlacePersona } from '../../components/enlace-persona';
 import { FILTROS_PENDIENTE, type FiltroPendiente } from './constantes';
 
 /**
@@ -49,13 +50,14 @@ export function GruposCliente({
     {
       id: 'personas',
       encabezado: t('tabla.personas'),
-      celda: (d) => <span className="font-medium">{nombresDe(d.personas.filter((p) => estado === 'finalizado' || p.estadoInscripcion === 'activa'))}</span>,
+      // spec 013 (T034): cada nombre lleva al perfil de la Persona.
+      celda: (d) => <NombresEnlazados personas={d.personas.filter((p) => estado === 'finalizado' || p.estadoInscripcion === 'activa')} />,
     },
     {
       id: 'discipulador',
       encabezado: t('tabla.discipulador'),
       className: 'hidden sm:table-cell',
-      celda: (d) => `${d.discipulador.nombre} ${d.discipulador.apellido}`,
+      celda: (d) => <EnlacePersona persona={d.discipulador} />,
     },
     {
       id: 'desde',
@@ -183,6 +185,20 @@ function EstadoCierre({ d }: { d: DiscipuladoResumen }) {
     <span className="inline-flex items-center gap-1.5">
       {d.motivoCierre === 'completado' ? <CircleCheckBig className="size-4" aria-hidden="true" /> : <Clock className="size-4" aria-hidden="true" />}
       {t(`estado.${d.motivoCierre ?? 'en_curso'}`)}
+    </span>
+  );
+}
+
+/** Los nombres de un Grupo, cada uno enlazado al perfil (spec 013, FR-010). */
+function NombresEnlazados({ personas }: { personas: Array<{ id: string; nombre: string; apellido: string }> }) {
+  return (
+    <span className="font-medium">
+      {personas.map((p, i) => (
+        <span key={p.id}>
+          {i > 0 && ', '}
+          <EnlacePersona persona={p} />
+        </span>
+      ))}
     </span>
   );
 }

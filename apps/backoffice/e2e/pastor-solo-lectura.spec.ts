@@ -87,7 +87,27 @@ test.describe('Pastor: solo lectura (T046)', () => {
     await sinControles(page, [/^Activar$/, /^Cerrar el caso$/]);
   });
 
+  // spec 013 (T091): las pantallas nuevas, sin ningún botón de gestión.
+  test('Perfil de Persona: lo ve entero, sin roles ni "Pedir en su nombre"', async ({ page }) => {
+    await page.goto('/personas/0013e2e0-0000-4000-8000-000000000001');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ana Perfil Con Foto');
+    await sinControles(page, [/^Cambiar roles/, /^Ver el historial de roles/, /^Pedir Vida Nueva/]);
+  });
+
+  test('Catálogos y Cursos: los ve, sin agregar, editar, inactivar, eliminar ni la papelera', async ({ page }) => {
+    await page.goto('/cursos');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('heading', { name: 'Cursos', level: 1 })).toBeVisible();
+    await sinControles(page, [/^Agregar un Curso$/, /^Papelera$/]);
+    await page.getByRole('link', { name: /^Ver el Curso / }).first().click();
+    await expect(page.getByLabel('Nombre')).not.toBeEditable();
+    await sinControles(page, [/^Guardar los cambios$/, /^Inactivar$/, /^Reactivar$/, /^Eliminar$/]);
+  });
+
   test('ninguna pantalla que puede abrir le ofrece un enlace a una que no puede abrir (T071)', async ({ page }) => {
+    // spec 013: el recorrido suma el perfil, Cumpleaños, Catálogos y Cursos — más pantallas que abrir.
+    test.setTimeout(120_000);
     // Los detalles se enlazan desde un menú cerrado (fuera del DOM hasta abrirlo):
     // el helper no los ve solo, así que se abren acá y se le pasan como extra.
     const detalleDe = async (listado: string) => {

@@ -71,6 +71,7 @@ export function SolicitudDetalleCliente({
 }) {
   const t = useTranslations('solicitudes');
   const td = useTranslations('solicitudes.detalle');
+  const tPerfil = useTranslations('perfil');
   const te = useTranslations('errors');
   const tf = useTranslations('franjas');
   const locale = useLocale();
@@ -149,6 +150,10 @@ export function SolicitudDetalleCliente({
         <p className="font-medium">
           <EstadoSolicitudTexto solicitud={solicitud} />
         </p>
+        {/* spec 013 (T027a, FR-010): de la Solicitud a la Persona entera. */}
+        <Link href={`/personas/${solicitud.persona.id}`} className="self-start underline underline-offset-2">
+          {tPerfil('verPerfilDe', { nombre: nombrePersona })}
+        </Link>
       </div>
 
       <section aria-labelledby="horarios-titulo" className="flex flex-col gap-2">

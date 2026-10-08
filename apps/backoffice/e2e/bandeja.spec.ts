@@ -83,7 +83,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('combobox', { name: 'Tipo', exact: true })).toHaveCount(conectados.length > 1 ? 1 : 0);
       await sinViolaciones(page);
 
-      // H1.4: cada fila lleva al detalle de su tipo.
+      // H1.4: el nombre lleva al perfil de la Persona (con su avatar en la fila)...
+      await expect(filas.nth(1).getByRole('link', { name: cargada, exact: true })).toHaveAttribute('href', /^\/personas\/[0-9a-f-]+$/);
+      // ...y cada fila, al detalle de su tipo.
       await page.getByRole('link', { name: `Ver la solicitud de ${cargada}` }).click();
       await expect(page).toHaveURL(new RegExp(`/solicitudes/${solicitudCargada}$`));
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(`Vida Nueva de ${cargada}`);
