@@ -4,7 +4,7 @@ import { CampoTelefono } from '@vida-sobrenatural/ui';
 import type { UseFormularioRegistroResult } from '../../../hooks/use-formulario-registro';
 import { Campo, CampoSelect } from './campo';
 
-/** H-44: JSX del paso 2, movido tal cual desde formulario-registro.tsx — sin cambios. */
+/** H-44: JSX del paso 2. ajustes-ux #32: ayudas en Teléfono y Dirección. */
 export function Paso2Contacto({ form }: { form: UseFormularioRegistroResult }) {
   const { t, datos, sedes, actualizar, validacion, validaciones, estadoCampo } = form;
 
@@ -27,9 +27,11 @@ export function Paso2Contacto({ form }: { form: UseFormularioRegistroResult }) {
         }
         {...estadoCampo('telefono')}
         placeholderNumero={t('soloNumeros')}
+        ayuda={t('ayudas.telefono')}
       />
       <Campo
         label={t('campos.direccion')}
+        ayuda={t('ayudas.direccion')}
         name="direccion"
         required
         value={datos.direccion}

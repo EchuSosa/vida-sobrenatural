@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Button, useEnvio } from '@vida-sobrenatural/ui';
 import {
@@ -14,9 +15,9 @@ import {
   ApiError,
 } from '@vida-sobrenatural/shared-types';
 
-const OPCIONES: { value: TemaPreferidoVisible; label: string; Icono: typeof Sun }[] = [
-  { value: 'claro', label: 'Claro', Icono: Sun },
-  { value: 'oscuro', label: 'Oscuro', Icono: Moon },
+const OPCIONES: { value: TemaPreferidoVisible; labelKey: 'temaClaro' | 'temaOscuro'; Icono: typeof Sun }[] = [
+  { value: 'claro', labelKey: 'temaClaro', Icono: Sun },
+  { value: 'oscuro', labelKey: 'temaOscuro', Icono: Moon },
 ];
 
 /** Selector Claro/Oscuro — Historia 5, FR-027/FR-028 (D116: sin "Sistema"). */
@@ -24,6 +25,7 @@ export function SelectorTema({ valorInicial }: { valorInicial: TemaPreferido }) 
   const { setTheme } = useTheme();
   const { data: session, update } = useSession();
   const [seleccionado, setSeleccionado] = useState(valorInicial);
+  const t = useTranslations('nav');
 
   // H-57: persiste contra la API — mismo guard que el resto de los envíos.
   const { enviando, ejecutar: elegir } = useEnvio(async (tema: TemaPreferido) => {
@@ -51,9 +53,9 @@ export function SelectorTema({ valorInicial }: { valorInicial: TemaPreferido }) 
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="text-sm font-medium">Colores de la app</legend>
+      <legend className="mb-2 text-base font-medium">{t('tema')}</legend>
       <div className="flex gap-2">
-        {OPCIONES.map(({ value, label, Icono }) => (
+        {OPCIONES.map(({ value, labelKey, Icono }) => (
           <Button
             key={value}
             type="button"
@@ -63,7 +65,7 @@ export function SelectorTema({ valorInicial }: { valorInicial: TemaPreferido }) 
             onClick={() => void elegir(value)}
           >
             <Icono className="size-4" aria-hidden="true" />
-            {label}
+            {t(labelKey)}
           </Button>
         ))}
       </div>

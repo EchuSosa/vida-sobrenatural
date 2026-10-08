@@ -1,5 +1,6 @@
 import type { SeccionPerfil } from './tipos';
 import { SeccionCamino } from './seccion-camino';
+import { SeccionMinisterios } from './seccion-ministerios';
 import { SeccionEventos } from './seccion-eventos';
 
 /**
@@ -14,6 +15,8 @@ import { SeccionEventos } from './seccion-eventos';
 export const SECCIONES_PERFIL: SeccionPerfil[] = [
   // spec 006 (T047): las cuatro etapas, registrar como hecha y anular.
   { clave: 'etapas', tituloKey: 'etapasPersona.titulo', permiso: 'personas.ver', Componente: SeccionCamino },
+  // spec 009: dónde sirve, su postulación en revisión, historial y "Postular a un Ministerio" en su nombre.
+  { clave: 'ministerio', tituloKey: 'postulaciones.perfil.titulo', permiso: 'ministerios.ver', Componente: SeccionMinisterios },
   // spec 011 (FR-048): sus Inscripciones a Evento.
   { clave: 'eventos', tituloKey: 'eventos.inscriptos.perfilTitulo', permiso: 'eventos.ver', Componente: SeccionEventos },
 ];

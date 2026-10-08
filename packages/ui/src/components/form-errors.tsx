@@ -50,7 +50,7 @@ export function ResumenErrores({
       ref={ref}
       tabIndex={-1}
       role="alert"
-      className="rounded-md border border-destructive bg-destructive/10 p-4 text-sm text-foreground outline-none"
+      className="rounded-md border border-destructive bg-destructive/10 p-4 text-sm text-foreground tactil:text-base outline-none"
     >
       <p className="font-medium">{titulo}</p>
       <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -84,7 +84,7 @@ export function ResumenErrores({
 export function MensajeErrorCampo({ id, mensaje }: { id: string; mensaje?: string }) {
   if (!mensaje) return null;
   return (
-    <p id={id} className="text-sm font-normal text-destructive">
+    <p id={id} className="text-sm font-normal tactil:text-base text-destructive">
       {mensaje}
     </p>
   );

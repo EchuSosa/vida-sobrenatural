@@ -2,7 +2,8 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import type { useTranslations } from 'next-intl';
 import type { Sede } from '@vida-sobrenatural/shared-types';
-import { HeroConFoto } from '@vida-sobrenatural/ui';
+import { Mail, MapPin, Phone } from 'lucide-react';
+import { ButtonLink, HeroConFoto } from '@vida-sobrenatural/ui';
 import { ChurchJsonLd } from '../../../components/church-json-ld';
 import { FOTOS_HEROE } from '@/assets/images/fotos-heroe';
 
@@ -26,7 +27,13 @@ async function getSedesActivas(): Promise<Sede[]> {
   return response.json();
 }
 
+/**
+ * ajustes-ux #16: el teléfono y el email se tocan (`tel:`, `mailto:`) y la
+ * dirección abre el mapa — botones con ícono y verbo, a todo el ancho en
+ * celular, como el "Llamar" de Mi camino.
+ */
 function SedeCard({ sede, t }: { sede: Sede; t: ReturnType<typeof useTranslations> }) {
+  const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(sede.direccion)}`;
   return (
     <article className="flex flex-col gap-2 rounded-lg border border-border p-5">
       <h2 className="text-xl font-medium">{sede.nombre}</h2>
@@ -38,13 +45,31 @@ function SedeCard({ sede, t }: { sede: Sede; t: ReturnType<typeof useTranslation
         </p>
       )}
       {sede.contactoEmail && (
-        <p className="text-foreground">
+        <p className="text-foreground [overflow-wrap:anywhere]">
           {t('email')} {sede.contactoEmail}
         </p>
       )}
       {sede.descripcionBienvenida && (
         <p className="mt-2 text-muted-foreground">{sede.descripcionBienvenida}</p>
       )}
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <ButtonLink href={mapa} target="_blank" rel="noopener noreferrer" variant="outline" size="xl">
+          <MapPin aria-hidden />
+          {t('comoLlegar')}
+        </ButtonLink>
+        {sede.contactoTelefono && (
+          <ButtonLink href={`tel:${sede.contactoTelefono.replace(/[^+\d]/g, '')}`} variant="outline" size="xl">
+            <Phone aria-hidden />
+            {t('llamar')}
+          </ButtonLink>
+        )}
+        {sede.contactoEmail && (
+          <ButtonLink href={`mailto:${sede.contactoEmail}`} variant="outline" size="xl">
+            <Mail aria-hidden />
+            {t('escribirEmail')}
+          </ButtonLink>
+        )}
+      </div>
     </article>
   );
 }
@@ -63,7 +88,9 @@ export default async function VisitanosPage() {
           pasos. H-123: la foto sale de FOTOS_HEROE (@/assets/images/
           fotos-heroe.ts), no de un import directo. */}
       <HeroConFoto
-        className="aspect-[4/3]"
+        // ajustes-ux #17: 16:9 en celular, para que el primer dato útil no
+        // quede debajo de media pantalla de foto.
+        className="aspect-video sm:aspect-[4/3]"
         foto={<Image src={FOTOS_HEROE.visitanos} alt={t('cabeceraAlt')} fill sizes={SIZES_CABECERA} priority className="object-cover" />}
       >
         <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>

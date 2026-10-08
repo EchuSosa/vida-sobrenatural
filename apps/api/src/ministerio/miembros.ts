@@ -10,7 +10,10 @@ type Db = PrismaService | Prisma.TransactionClient;
  * miembros (009, con paginado) y el alcance `ministerio` de los avisos (012).
  * Lote 0 global: queda acá desde ya porque la consume `resolverDestinatarios`.
  */
-export async function miembrosActivosDe(db: Db, ministerioId: string): Promise<string[]> {
+export async function miembrosActivosDe(
+  db: Db,
+  ministerioId: string,
+): Promise<string[]> {
   const filas = await db.$queryRaw<{ personaId: string }[]>`
     SELECT p."personaId" FROM "postulaciones" p
       JOIN "personas" pe ON pe."id" = p."personaId"

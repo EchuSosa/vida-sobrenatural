@@ -10,10 +10,9 @@ import { EnlaceContanos } from './enlace-contanos';
  * reales de docs/12-contenido-bienvenida.md / docs/09-notas-identidad-visual.md
  * (H-02/H-09, revisión manual, actualización 2026-09-18) — antes tenía el
  * horario incorrecto ("10 y 18 hs") sin corresponderse con la Sede real, y
- * sin enlaces a las redes reales de la iglesia. Los enlaces de redes pasan a
- * ser solo ícono, con aria-label (H-24, actualización 2026-09-20) — antes
- * mostraban el nombre completo escrito. spec 013: enlace a "Contanos qué te
- * parece" (FR-045).
+ * sin enlaces a las redes reales de la iglesia. Los enlaces de redes llevan
+ * ícono y nombre (ajustes-ux #3 deshace la parte "solo ícono" de H-24).
+ * spec 013: enlace a "Contanos qué te parece" (FR-045).
  */
 export function FooterPublico() {
   const t = useTranslations('nav');
@@ -26,9 +25,9 @@ export function FooterPublico() {
         {/* FR-039 (D122): logotipo del pie de página — H-80: Marca ya se
             defiende del stretch de este flex-col por su cuenta. */}
         <Marca variante="logotipo" className="h-6" />
-        <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
+        <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6">
           {NAV_PUBLICA.map((item) => (
-            <Link key={item.href} href={item.href} className="hover:text-foreground">
+            <Link key={item.href} href={item.href} className="inline-flex min-h-11 items-center hover:text-foreground">
               {t(item.labelKey)}
             </Link>
           ))}
@@ -41,24 +40,26 @@ export function FooterPublico() {
           <p>{tf('direccion')}</p>
           <p>{tf('horarios')}</p>
         </div>
-        <nav aria-label={`${tf('facebook')}, ${tf('instagram')}`} className="flex gap-x-4">
+        {/* ajustes-ux #3: área de 44×44 y el nombre visible al lado del
+            ícono — no todo el mundo reconoce el glifo de cada red. */}
+        <nav aria-label={`${tf('facebook')}, ${tf('instagram')}`} className="flex gap-x-6">
           <a
             href={tf('facebookUrl')}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={tf('facebook')}
-            className="hover:text-foreground"
+            className="inline-flex min-h-11 min-w-11 items-center gap-2 text-base hover:text-foreground"
           >
-            <IconoFacebook className="size-5" />
+            <IconoFacebook className="size-6" />
+            {tf('facebook')}
           </a>
           <a
             href={tf('instagramUrl')}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={tf('instagram')}
-            className="hover:text-foreground"
+            className="inline-flex min-h-11 min-w-11 items-center gap-2 text-base hover:text-foreground"
           >
-            <IconoInstagram className="size-5" />
+            <IconoInstagram className="size-6" />
+            {tf('instagram')}
           </a>
         </nav>
       </div>

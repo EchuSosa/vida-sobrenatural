@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { problemaDeFranjaNueva, type Franja } from '@vida-sobrenatural/shared-types';
 import { Button } from './ui/button';
 import { CampoHora } from './campo-hora';
@@ -53,6 +55,23 @@ export interface EditorDeFranjasProps {
   onErrorChange?: (error: string | null, campo: 'desde' | 'hasta') => void;
   /** Mientras la pantalla guarda la franja nueva: "Agregar" en estado de carga (H-57). */
   enviando?: boolean;
+  /**
+   * ajustes-ux #40: avisa la franja que está elegida en los selectores y
+   * todavía no se agregó (o `null` si no sirve). Al abrir la pantalla los
+   * selectores ya muestran "Martes 19:00 a 21:00" y parece cargado: quien
+   * envía con la lista vacía espera que se tome ese horario, y la pantalla
+   * puede tomarlo en vez de devolver un error.
+   */
+  onPendienteChange?: (franja: Franja | null) => void;
+}
+
+/** La franja de los selectores, si se puede agregar tal cual a `cargadas` (ajustes-ux #40). */
+export function franjaPendiente(diaSemana: number, desde: string, hasta: string, cargadas: Franja[]): Franja | null {
+  const inicio = aMinutos(desde);
+  const fin = aMinutos(hasta);
+  if (inicio === null || fin === null || fin <= inicio) return null;
+  const franja = { diaSemana, inicio, fin };
+  return problemaDeFranjaNueva(franja, cargadas) ? null : franja;
 }
 
 function aMinutos(hhmm: string): number | null {
@@ -69,12 +88,19 @@ export function minutosAHHMM(min: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja', disabled, onErrorChange, enviando }: EditorDeFranjasProps) {
+export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja', disabled, onErrorChange, enviando, onPendienteChange }: EditorDeFranjasProps) {
   const [dia, setDia] = useState(2);
   const [desde, setDesde] = useState('19:00');
   const [hasta, setHasta] = useState('21:00');
   const [error, setErrorLocal] = useState<string | null>(null);
   const [campoConError, setCampoConError] = useState<'desde' | 'hasta'>('hasta');
+
+  const pendiente = franjaPendiente(dia, desde, hasta, value);
+  const clavePendiente = pendiente ? `${pendiente.diaSemana}-${pendiente.inicio}-${pendiente.fin}` : '';
+  useEffect(() => {
+    onPendienteChange?.(pendiente);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo cuando cambia la franja elegida (la clave); `pendiente` es un objeto nuevo en cada render y `onPendienteChange` suele ser una función inline.
+  }, [clavePendiente]);
 
   function setError(nuevo: string | null, campo: 'desde' | 'hasta' = 'hasta') {
     setErrorLocal(nuevo);
@@ -107,11 +133,11 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
   return (
     <div className="flex flex-col gap-3">
       {value.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{etiquetas.sinFranjas}</p>
+        <p className="text-sm text-muted-foreground tactil:text-base">{etiquetas.sinFranjas}</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {value.map((f, i) => (
-            <li key={`${f.diaSemana}-${f.inicio}-${f.fin}-${i}`} className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2 text-sm">
+            <li key={`${f.diaSemana}-${f.inicio}-${f.fin}-${i}`} className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2 text-sm tactil:text-base">
               <span>
                 {etiquetas.dias[f.diaSemana]} {minutosAHHMM(f.inicio)}
                 {etiquetas.separador}
@@ -119,13 +145,15 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
               </span>
               <Button
                 type="button"
-                variant="ghost"
-                size="sm"
-                // D81: objetivo táctil de 44 px también en "Quitar" (T012a).
+                variant="outline"
+                size="lg"
+                // D81: objetivo táctil de 44 px también en "Quitar" (T012a);
+                // ajustes-ux #42: ícono + texto, de contorno (botón de un ítem de lista, docs/15).
                 className="h-11 min-w-11"
                 disabled={disabled}
                 onClick={() => onChange(value.filter((_, j) => j !== i))}
               >
+                <X aria-hidden="true" />
                 {etiquetas.quitar}
               </Button>
             </li>
@@ -133,15 +161,18 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
         </ul>
       )}
 
-      <div className="flex flex-wrap items-end gap-2">
-        <div className="flex flex-col gap-1 text-sm font-medium">
+      {/* ajustes-ux #41: en celular, Día en su fila, Desde y Hasta juntos, y
+          "Agregar franja" solo y a todo el ancho debajo; en escritorio, todo
+          en una línea. */}
+      <div className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap">
+        <div className="col-span-2 flex flex-col gap-1 text-sm font-medium tactil:text-base">
           <label htmlFor={idDia}>{etiquetas.dia}</label>
           <select
             id={idDia}
             value={dia}
             disabled={disabled}
             onChange={(e) => setDia(Number(e.target.value))}
-            className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30"
+            className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal tactil:text-base dark:bg-input/30"
           >
             {etiquetas.dias.map((nombre, i) => (
               <option key={i} value={i}>
@@ -170,12 +201,12 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
           error={Boolean(error) && campoConError === 'hasta'}
           idError={idError}
         />
-        <Button type="button" variant="outline" disabled={disabled} loading={enviando} onClick={agregar} className="h-11">
+        <Button type="button" variant="outline" disabled={disabled} loading={enviando} onClick={agregar} className="col-span-2 h-11">
           {etiquetas.agregar}
         </Button>
       </div>
       {error && (
-        <p id={idError} className="text-sm text-destructive">
+        <p id={idError} className="text-sm text-destructive tactil:text-base">
           {error}
         </p>
       )}

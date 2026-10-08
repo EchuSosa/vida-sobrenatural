@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import { ButtonLink, HeroConFoto, HeroConFotoBoton } from '@vida-sobrenatural/ui';
@@ -8,7 +9,6 @@ import { FOTOS_HEROE } from '@/assets/images/fotos-heroe';
 import imgCardPrimerosPasos from '@/assets/images/cards/card-bienvenida-estas-en-casa.webp';
 import imgCardNosotros from '@/assets/images/cards/card-comunidad-pareja-mayor.webp';
 import { ProximosEventos } from '../../components/eventos/proximos-eventos';
-import imgCardEventos from '@/assets/images/cards/card-jovenes-manos.webp';
 import imgCardVisitanos from '@/assets/images/cards/card-culto-manos.webp';
 
 export const metadata = {
@@ -17,10 +17,9 @@ export const metadata = {
     'Iglesia Vida Sobrenatural en La Plata, Buenos Aires. Enterate cómo son los primeros pasos y visitanos.',
 };
 
-// docs/claude_20-fotos-web-publica.md: mismo tamaño que la grilla de dos
-// columnas (sm+) / una columna (celular) que usa /nosotros para sus
-// tarjetas.
-const SIZES_TARJETA = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw';
+// Tres tarjetas en fila desde sm (como "Próximos eventos", debajo), una
+// columna en celular.
+const SIZES_TARJETA = '(min-width: 768px) 240px, (min-width: 640px) 33vw, 100vw';
 // El héroe ocupa el ancho del contenedor (max-w-3xl = 48rem), nunca el
 // viewport completo — no es edge-to-edge.
 const SIZES_HERO = '(min-width: 768px) 768px, 100vw';
@@ -28,7 +27,7 @@ const SIZES_HERO = '(min-width: 768px) 768px, 100vw';
 /**
  * Lote de fotos reales (docs/claude_20-fotos-web-publica.md, sección
  * "Inicio"): esta página pasa de h1+párrafo+dos botones sueltos a un héroe
- * con foto (`hero/hero-culto-congregacion`, 16:9, R2) + cuatro tarjetas de
+ * con foto (`hero/hero-culto-congregacion`, 16:9, R2) + tres tarjetas de
  * navegación (`cards/`, 4:3) — estructura nueva, aprobada a propósito para
  * esta página (R5 del prompt de este lote: la única excepción — el resto
  * de las páginas de este lote NO arman secciones que no tenían).
@@ -77,13 +76,6 @@ export default function InicioPage() {
       alt: t('tarjetaNosotrosAlt'),
     },
     {
-      href: '/eventos',
-      titulo: t('tarjetaEventosTitulo'),
-      descripcion: t('tarjetaEventosDescripcion'),
-      imagen: imgCardEventos,
-      alt: t('tarjetaEventosAlt'),
-    },
-    {
       href: '/visitanos',
       titulo: t('tarjetaVisitanosTitulo'),
       descripcion: t('tarjetaVisitanosDescripcion'),
@@ -124,18 +116,26 @@ export default function InicioPage() {
         </div>
       </HeroConFoto>
 
-      <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      {/* ajustes-ux: sin la tarjeta estática "Eventos" — la sección
+          "Próximos eventos" de abajo la reemplaza (FR-001 de la 011). En
+          celular la foto va en 16:9 para que la página no se haga eterna
+          (#8), y la descripción en 16 px (#7, D150). */}
+      <ul className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {tarjetas.map((tarjeta) => (
           <li key={tarjeta.href}>
             <Link
               href={tarjeta.href}
               className="flex h-full flex-col gap-3 rounded-lg border border-border p-4 transition-colors hover:bg-secondary"
             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md">
+              <div className="relative aspect-video w-full overflow-hidden rounded-md sm:aspect-[4/3]">
                 <Image src={tarjeta.imagen} alt={tarjeta.alt} fill sizes={SIZES_TARJETA} className="object-cover" />
               </div>
-              <span className="font-medium">{tarjeta.titulo}</span>
-              <span className="text-sm text-muted-foreground">{tarjeta.descripcion}</span>
+              {/* ajustes-ux #10: chevrón para que se entienda que se toca. */}
+              <span className="flex items-center justify-between gap-2 font-medium">
+                {tarjeta.titulo}
+                <ChevronRight aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+              </span>
+              <span className="text-base text-muted-foreground">{tarjeta.descripcion}</span>
             </Link>
           </li>
         ))}

@@ -18,9 +18,10 @@ type Db = PrismaService | Prisma.TransactionClient;
  * - vida_nueva / vida_de_servicio: una Inscripción `completada` en un Grupo
  *   de un Curso de esa categoría (individual o grupal cuentan igual).
  * - bautismo: una Solicitud de Bautismo `realizada` (D180).
- * - ministerio: ninguna todavía — solo cuenta la Completitud Manual. La spec
- *   009 decide si una Postulación aprobada la completa (ver
- *   specs/IMPLEMENTACION.md) y, si es así, la suma ACÁ.
+ * - ministerio (spec 009): una Postulación que llegó a `aprobada` — la vigente
+ *   o una que ya no lo está (`inactiva`: solo se llega ahí desde aprobada, por
+ *   cambio de Ministerio o baja). Como el rol `miembro_ministerio` (D170), una
+ *   vez que sirvió en un Ministerio la etapa queda hecha.
  */
 export async function completoPorSistema(db: Db, personaId: string, etapa: EtapaCamino): Promise<boolean> {
   switch (etapa) {
@@ -36,8 +37,10 @@ export async function completoPorSistema(db: Db, personaId: string, etapa: Etapa
       const solicitud = await db.solicitudBautismo.findFirst({ where: { personaId, estado: 'realizada' }, select: { id: true } });
       return solicitud !== null;
     }
-    case 'ministerio':
-      return false;
+    case 'ministerio': {
+      const postulacion = await db.postulacion.findFirst({ where: { personaId, estado: { in: ['aprobada', 'inactiva'] } }, select: { id: true } });
+      return postulacion !== null;
+    }
   }
 }
 

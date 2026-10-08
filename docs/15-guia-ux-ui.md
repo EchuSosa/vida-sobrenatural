@@ -27,7 +27,7 @@ No se inventa un sistema propio: se toman convenciones probadas.
 | Principal | Relleno, color de marca | **Una sola** por pantalla o diálogo |
 | Secundario | Contorno | Alternativas a la principal |
 | Terciario | Solo texto (link) | Volver, ver más, acciones menores |
-| Destructivo | Relleno rojo + ícono | Dar de baja, rechazar, cancelar inscripción, desactivar |
+| Destructivo | Relleno rojo + ícono | Lo que **no se puede deshacer**: eliminar, dar de baja definitiva, rechazar |
 
 **En una lista, el botón de cada ítem es de contorno** (Echu, merge de la 004): repetido en cada fila, el relleno deja de marcar cuál es la acción principal. El relleno queda para la acción principal de la pantalla.
 
@@ -36,6 +36,12 @@ No se inventa un sistema propio: se toman convenciones probadas.
 - **Evitar "Cancelar" como botón de cierre**, porque existe la acción de negocio "Cancelar inscripción". En diálogos: "Sí, cancelar inscripción" / "No, mantenerla". Para cerrar sin hacer nada: "Volver" o "Cerrar".
 - Botones deshabilitados: explicar por qué al lado (ej. "Necesitás completar Vida Nueva para anotarte", D74), no dejar un botón gris sin contexto.
 - Mientras una acción se procesa: botón en estado de carga y bloqueado, para evitar envíos duplicados.
+
+**Confirmaciones: neutras o destructivas (D151).** `ConfirmDestructiveDialog` recibe `tono`:
+- `neutro` — lo que se puede deshacer (retirar un pedido, cancelar una inscripción, cerrar sesión): la confirmación es el botón **principal**, sin rojo ni ícono de advertencia.
+- `destructivo` (por defecto) — lo irreversible: botón **rojo con ícono** (`TriangleAlert`).
+- El botón para cerrar sin hacer nada dice **"Volver"** por defecto (o un "No, mantenerlo" propio), nunca "Cancelar". Quien arma su propio `AlertDialog` usa `BotonConfirmar` (`packages/ui`) con el mismo `tono`.
+- Contraste: el rojo es el `destructive` sólido medido en `docs/17` sobre el pie de un `AlertDialog` (H-56), y el neutro es el `primary` medido para todos los botones principales; los dos en claro y oscuro, incluido el `hover`.
 
 **Acciones destructivas:**
 - Siempre con diálogo de confirmación que nombre lo que se va a afectar.
@@ -108,6 +114,8 @@ Los estados siempre llevan texto + ícono (nunca solo color, D81).
 
 - Acciones principales en la zona del pulgar (mitad inferior de la pantalla).
 - Objetivos táctiles de al menos 44×44 px (D81).
+- **Tamaños en `apps/web` (D150):** letra de **16 px** en etiquetas, botones, ayudas y mensajes de error; 14 px solo para metadatos. Todo `Button` mide **al menos 44 px** de alto, sea cual sea su `size`, y los campos (`Input`, `select`, los `campo-*` de `packages/ui`) también. Cómo: el `<body>` de `apps/web` lleva `data-tactil` y los componentes de `packages/ui` traen la variante `tactil:` (definida en `theme.css`) que solo aplica ahí — el backoffice, sin la marca, conserva su densidad. Un campo o botón escrito a mano en `apps/web` usa `h-11`/`min-h-11` y `text-base` directamente.
+- Enlaces sueltos que se tocan (pie, redes, "Conocé los ministerios", filas de un panel lateral): área de 44 px de alto (`inline-flex min-h-11 items-center`), y los íconos de redes con su nombre visible al lado.
 - Teclado adecuado a cada campo; el botón de envío no queda tapado por el teclado.
 - Sin interacciones que dependan de pasar el mouse por encima.
 
@@ -144,8 +152,9 @@ Definidos en `packages/ui` como variables CSS (formato de shadcn), para modo cla
   | Título de sección (h2) | `text-xl` | `font-medium` |
   | Subtítulo (h3) | `text-lg` | `font-medium` |
   | Texto de cuerpo | `text-base` / `text-sm` | `font-normal` |
-  | Texto secundario/ayuda | `text-sm` | `font-normal`, color `muted-foreground` |
-  | Etiquetas de formulario, botones | `text-sm` | `font-medium` |
+  | Texto secundario/ayuda | `text-base` en `apps/web` (D150), `text-sm` en el backoffice | `font-normal`, color `muted-foreground` |
+  | Etiquetas de formulario, botones | `text-base` en `apps/web` (D150), `text-sm` en el backoffice | `font-medium` |
+  | Metadatos (autor · año, fechas de un listado, pie de página) | `text-sm` | `font-normal`, color `muted-foreground` |
 - **Espaciado:** escala de Tailwind (múltiplos de 4 px), sin valores sueltos.
 - **Bordes redondeados, sombras y duración de animaciones:** pocos valores fijos. Animaciones cortas y desactivadas con `prefers-reduced-motion`.
 - **Íconos:** Lucide (el set de shadcn), siempre con texto visible o `aria-label`.
