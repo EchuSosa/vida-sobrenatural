@@ -241,3 +241,22 @@ test.describe('Dar', () => {
     expect(await tamanoDeLetra(page.getByText('Alias', { exact: true }))).toBeGreaterThanOrEqual(16);
   });
 });
+
+test.describe('Ediciones VS', () => {
+  test.use({ viewport: CELULAR });
+
+  test('una columna en celular con la portada a la izquierda; redes con nombre y 44×44 (#22, #23) @celular', async ({ page }) => {
+    await page.goto('/nosotros/ediciones-vs');
+    const redes = page.getByRole('navigation', { name: /Facebook de Ediciones VS/ });
+    await expect(redes.getByRole('link', { name: 'Facebook de Ediciones VS' })).toHaveText('Facebook');
+    await objetivosDe44(redes);
+
+    const libros = page.getByRole('list', { name: 'Catálogo' }).getByRole('listitem');
+    if ((await libros.count()) > 0) {
+      const primero = libros.first();
+      const portada = await primero.locator(':scope > *').first().boundingBox();
+      const titulo = await primero.locator(':scope > p').first().boundingBox();
+      expect(titulo!.x).toBeGreaterThan(portada!.x + portada!.width - 1);
+    }
+  });
+});
