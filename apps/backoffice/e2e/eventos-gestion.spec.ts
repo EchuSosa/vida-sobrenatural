@@ -31,6 +31,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const nombre = `e2e-evento-${colorScheme}-${Date.now()}`;
       await loguearseComoAdminE2E(page);
       await page.goto('/eventos');
+      await page.waitForLoadState('networkidle');
       await expect(page.getByRole('heading', { name: 'Eventos', level: 1 })).toBeVisible();
       expect((await auditar(page)).violations).toEqual([]);
 
@@ -93,6 +94,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const evento = await crearEventoPorApi({ nombre: `e2e-evento-ciclo-${colorScheme}-${Date.now()}` });
       await loguearseComoAdminE2E(page);
       await page.goto(`/eventos/${evento.id}`);
+      await page.waitForLoadState('networkidle');
       await expect(page.getByRole('heading', { name: evento.nombre, level: 1 })).toBeVisible();
 
       // Cancelar es reversible: confirmación neutra (D151) que nombra el Evento.
@@ -116,6 +118,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Evento eliminado. Está en la papelera.')).toBeVisible();
 
       await page.goto('/eventos/papelera');
+      await page.waitForLoadState('networkidle');
       await expect(page.getByRole('heading', { name: 'Papelera de Eventos' })).toBeVisible();
       expect((await auditar(page)).violations).toEqual([]);
       const fila = page.getByRole('row').filter({ hasText: evento.nombre });
@@ -130,14 +133,17 @@ test('el Pastor ve el listado y el detalle sin ninguna acción (FR-009)', async 
   const evento = await crearEventoPorApi({ nombre: `e2e-evento-pastor-${Date.now()}` });
   await loguearseComoPastorE2E(page);
   await page.goto('/eventos');
+  await page.waitForLoadState('networkidle');
   await expect(page.getByRole('heading', { name: 'Eventos', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Crear un Evento' })).toHaveCount(0);
   await page.goto(`/eventos/${evento.id}`);
+  await page.waitForLoadState('networkidle');
   await expect(page.getByRole('heading', { name: evento.nombre, level: 1 })).toBeVisible();
   await expect(page.getByRole('img', { name: `Código QR que lleva a la página de ${evento.nombre}` })).toBeVisible();
   for (const accion of ['Editar', 'Cancelar el Evento', 'Eliminar', 'Subir flyer']) {
     await expect(page.getByRole('button', { name: accion, exact: true })).toHaveCount(0);
   }
   await page.goto('/eventos/nuevo');
+  await page.waitForLoadState('networkidle');
   await expect(page.getByRole('button', { name: 'Crear el Evento' })).toHaveCount(0);
 });
