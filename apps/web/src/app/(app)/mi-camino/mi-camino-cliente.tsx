@@ -334,6 +334,8 @@ function Buscando({
               descripcion={t('retirarDescripcion')}
               textoConfirmar={t('retirarConfirmar')}
               textoCancelar={t('retirarMantener')}
+              // D151: retirar el pedido se puede deshacer (se vuelve a pedir).
+              tono="neutro"
               onConfirmar={() => void retirar()}
             />
             <Button type="button" variant="outline" className="h-11" onClick={() => setEditando(true)}>

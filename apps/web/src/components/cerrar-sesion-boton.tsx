@@ -26,6 +26,8 @@ export function CerrarSesionBoton() {
       descripcion="Vas a tener que volver a autorizar el acceso con tu cuenta de Google para entrar de nuevo."
       textoConfirmar="Sí, cerrar sesión"
       textoCancelar="Volver"
+      // D151: cerrar sesión es reversible (se vuelve a entrar).
+      tono="neutro"
       onConfirmar={cerrarSesion}
     />
   );
