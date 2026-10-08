@@ -10,7 +10,7 @@ import type { ActualizarCelula } from '../celula.service.js';
 /**
  * spec 009 (contracts/ministerios-api.md). Solo la FORMA: los obligatorios,
  * los largos y los duplicados los valida el servicio con códigos de campo
- * propios (`NOMBRE_REQUERIDO`, `DESCRIPCION_DEMASIADO_LARGA`, …, H-50).
+ * propios (`NOMBRE_REQUERIDO`, `DESCRIPCION_REQUERIDA`, `TEXTO_DEMASIADO_LARGO`, …, H-50).
  */
 export class CrearMinisterioDto implements DatosMinisterio {
   @ApiProperty({

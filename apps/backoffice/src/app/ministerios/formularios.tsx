@@ -89,7 +89,7 @@ export function FormularioMinisterio({
     if (!v.nombre.trim()) locales.nombre = tc('NOMBRE_REQUERIDO');
     else if (v.nombre.trim().length > MINISTERIO_NOMBRE_MAX) locales.nombre = tc('NOMBRE_DEMASIADO_LARGO');
     if (!v.descripcion.trim()) locales.descripcion = tc('DESCRIPCION_REQUERIDA');
-    else if (v.descripcion.trim().length > MINISTERIO_DESCRIPCION_MAX) locales.descripcion = tc('DESCRIPCION_DEMASIADO_LARGA');
+    else if (v.descripcion.trim().length > MINISTERIO_DESCRIPCION_MAX) locales.descripcion = tc('TEXTO_DEMASIADO_LARGO');
     if (v.lineaPublica.trim().length > MINISTERIO_LINEA_PUBLICA_MAX) locales.lineaPublica = tc('LINEA_PUBLICA_DEMASIADO_LARGA');
     if (Object.keys(locales).length > 0) {
       validacion.reemplazar(locales);
@@ -217,7 +217,7 @@ export function FormularioCelula({
     const locales: Record<string, string> = {};
     if (!v.nombre.trim()) locales.nombre = tc('NOMBRE_REQUERIDO');
     else if (v.nombre.trim().length > CELULA_NOMBRE_MAX) locales.nombre = tc('NOMBRE_DEMASIADO_LARGO');
-    if (v.descripcion.trim().length > CELULA_DESCRIPCION_MAX) locales.descripcion = tc('DESCRIPCION_DEMASIADO_LARGA');
+    if (v.descripcion.trim().length > CELULA_DESCRIPCION_MAX) locales.descripcion = tc('TEXTO_DEMASIADO_LARGO');
     if (Object.keys(locales).length > 0) {
       validacion.reemplazar(locales);
       return;

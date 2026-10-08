@@ -37,7 +37,7 @@ export function erroresMinisterio(
     else if (descripcion.length > MINISTERIO_DESCRIPCION_MAX)
       errores.push({
         campo: 'descripcion',
-        code: 'DESCRIPCION_DEMASIADO_LARGA',
+        code: 'TEXTO_DEMASIADO_LARGO',
       });
   }
   if ((c.lineaPublica?.trim().length ?? 0) > MINISTERIO_LINEA_PUBLICA_MAX) {
@@ -67,7 +67,7 @@ export function erroresCelula(
       errores.push({ campo: 'nombre', code: 'NOMBRE_DEMASIADO_LARGO' });
   }
   if ((c.descripcion?.trim().length ?? 0) > CELULA_DESCRIPCION_MAX) {
-    errores.push({ campo: 'descripcion', code: 'DESCRIPCION_DEMASIADO_LARGA' });
+    errores.push({ campo: 'descripcion', code: 'TEXTO_DEMASIADO_LARGO' });
   }
   return errores;
 }

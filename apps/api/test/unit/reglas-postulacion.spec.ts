@@ -213,7 +213,7 @@ describe('campos del catálogo (FR-026, FR-027, docs/22)', () => {
       ),
     ).toEqual([
       { campo: 'nombre', code: 'NOMBRE_DEMASIADO_LARGO' },
-      { campo: 'descripcion', code: 'DESCRIPCION_DEMASIADO_LARGA' },
+      { campo: 'descripcion', code: 'TEXTO_DEMASIADO_LARGO' },
       { campo: 'lineaPublica', code: 'LINEA_PUBLICA_DEMASIADO_LARGA' },
     ]);
     expect(
@@ -236,7 +236,7 @@ describe('campos del catálogo (FR-026, FR-027, docs/22)', () => {
       ),
     ).toEqual([
       { campo: 'nombre', code: 'NOMBRE_DEMASIADO_LARGO' },
-      { campo: 'descripcion', code: 'DESCRIPCION_DEMASIADO_LARGA' },
+      { campo: 'descripcion', code: 'TEXTO_DEMASIADO_LARGO' },
     ]);
     expect(erroresCelula({ descripcion: null }, true)).toEqual([]);
   });
