@@ -1,5 +1,6 @@
-import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E } from './helpers';
+import { test, expect, auditar, loguearseComoAdminE2E } from './helpers';
 import { crearEncuentro, crearGrupo, crearPersona, estadoDeGrupo, sinSesion } from './helpers';
+import { discipuladorEnLaWeb, enLaWeb } from './helpers-006';
 
 /**
  * specs/004, T053 (FR-019 a FR-021, FR-030; Historia 3, escenario 11):
@@ -19,8 +20,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await sinSesion(page);
 
-      await loguearseComoDiscipuladorE2E(page, 1);
-      await page.goto(`/mis-discipulados/${grupoId}`);
+      await discipuladorEnLaWeb(page, 1, colorScheme);
+      await page.goto(enLaWeb(`/mis-discipulados/${grupoId}`));
       await page.getByRole('button', { name: 'Pedir darlo por terminado' }).click();
       await page.getByRole('button', { name: 'Sí, pedirlo' }).click();
       await expect(page.getByText(/Pediste darlo por terminado el .*Falta que el Admin lo confirme/)).toBeVisible();
@@ -42,8 +43,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await sinSesion(page);
 
-      await loguearseComoDiscipuladorE2E(page, 1);
-      await page.goto(`/mis-discipulados/${grupoId}`);
+      await discipuladorEnLaWeb(page, 1, colorScheme);
+      await page.goto(enLaWeb(`/mis-discipulados/${grupoId}`));
       await expect(page.locator('#contenido').getByText('Motivo: Faltan los dos últimos capítulos', { exact: false })).toBeVisible();
       await page.getByRole('button', { name: 'Pedir darlo por terminado' }).click();
       await page.getByRole('button', { name: 'Sí, pedirlo' }).click();
@@ -90,8 +91,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       // El 1 lo sigue viendo hasta que el 2 acepte.
       await sinSesion(page);
-      await loguearseComoDiscipuladorE2E(page, 1);
-      await page.goto(`/mis-discipulados/${grupoId}`);
+      await discipuladorEnLaWeb(page, 1, colorScheme);
+      await page.goto(enLaWeb(`/mis-discipulados/${grupoId}`));
       await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Julián Reasigna ${sufijo}`) })).toBeVisible();
 
       // El Discipulador 2 en un contexto propio: en la suite completa, cambiar
@@ -99,15 +100,15 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const contexto2 = await browser.newContext({ colorScheme });
       const pagina2 = await contexto2.newPage();
       try {
-        await loguearseComoDiscipuladorE2E(pagina2, 2);
-        await pagina2.goto('/mis-discipulados');
+        await discipuladorEnLaWeb(pagina2, 2, colorScheme);
+        await pagina2.goto(enLaWeb('/mis-discipulados'));
         const propuesta = pagina2.locator('article[aria-labelledby^="propuesta-"]').filter({ hasText: `Julián Reasigna ${sufijo}` });
         await expect(propuesta).toContainText('Tomar el discipulado de');
         await propuesta.getByRole('button', { name: 'Aceptar a Julián' }).click();
         await pagina2.getByRole('button', { name: 'Sí, acepto' }).click();
         await expect(pagina2.getByText(/Aceptaste/)).toBeVisible();
         // El 2 ve los Encuentros que registró el 1.
-        await pagina2.goto(`/mis-discipulados/${grupoId}`);
+        await pagina2.goto(enLaWeb(`/mis-discipulados/${grupoId}`));
         // #contenido: la copia oculta del streaming queda afuera (2cc64e9).
         await expect(pagina2.locator('#contenido').getByText(capitulosAnteriores)).toBeVisible();
       } finally {
@@ -116,8 +117,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await sinSesion(page);
 
-      await loguearseComoDiscipuladorE2E(page, 1);
-      await page.goto(`/mis-discipulados/${grupoId}`);
+      await discipuladorEnLaWeb(page, 1, colorScheme);
+      await page.goto(enLaWeb(`/mis-discipulados/${grupoId}`));
       await expect(page.getByRole('heading', { name: 'No encontramos este discipulado' })).toBeVisible();
     });
   });

@@ -1,4 +1,4 @@
-import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E } from './helpers';
+import { test, expect, auditar, loguearseComoAdminE2E } from './helpers';
 import {
   crearGrupo,
   crearPersona,
@@ -10,6 +10,7 @@ import {
   pedirVidaNuevaComo,
   sinSesion,
 } from './helpers';
+import { discipuladorEnLaWeb, enLaWeb } from './helpers-006';
 
 /**
  * specs/004, T054d (FR-042) y T054g (FR-048): en un Grupo de dos, el
@@ -30,8 +31,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await sinSesion(page);
 
-      await loguearseComoDiscipuladorE2E(page, 1);
-      await page.goto(`/mis-discipulados/${grupoId}`);
+      await discipuladorEnLaWeb(page, 1, colorScheme);
+      await page.goto(enLaWeb(`/mis-discipulados/${grupoId}`));
       await expect(page.locator('#contenido').getByText('2 de 2 lugares en el Grupo')).toBeVisible();
       await page.getByRole('button', { name: 'Pedir la baja de Valeria' }).click();
       const panel = page.getByRole('dialog', { name: /Pedir la baja de Valeria/ });

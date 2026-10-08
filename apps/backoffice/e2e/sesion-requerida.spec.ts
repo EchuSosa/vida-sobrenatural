@@ -13,7 +13,8 @@ import { test, expect, auditar } from './helpers';
  * sesión.
  */
 
-const RUTAS_SIN_CHEQUEO_PROPIO_ANTES = ['/catalogos', '/personas', '/solicitudes', '/mi-disponibilidad'];
+// spec 006: /mi-disponibilidad salió del backoffice (D142; ahora redirige a la web app).
+const RUTAS_SIN_CHEQUEO_PROPIO_ANTES = ['/catalogos', '/personas', '/solicitudes'];
 const RUTAS_CON_CHEQUEO_PROPIO_ANTES = ['/libros', '/sedes', '/pendientes-tutor'];
 
 for (const colorScheme of ['light', 'dark'] as const) {

@@ -71,3 +71,32 @@ export async function registrarMenorActivo(page: Page, baseURL: string, email: s
   await api(admin, 'PATCH', `/personas/${persona.id}/activar`, { tutorNombre: 'Mamá', tutorApellido: 'Menor', tutorTelefono: '+5492219000004' });
   await loguearseComoTest(page, email);
 }
+
+/** El token y la Persona de una sesión de `apps/web` (test-login), sin tocar la `page`. */
+export async function sesionDe(baseURL: string, email: string): Promise<{ apiToken: string; personaId: string }> {
+  const ctx = await playwrightRequest.newContext({ baseURL });
+  try {
+    const { csrfToken } = await (await ctx.get('/api/auth/csrf')).json();
+    await ctx.post('/api/auth/callback/test-login', { form: { email, csrfToken } });
+    const session = await (await ctx.get('/api/auth/session')).json();
+    return { apiToken: session.apiToken as string, personaId: session.user.personaId as string };
+  } finally {
+    await ctx.dispose();
+  }
+}
+
+/**
+ * Con sesión, la web app aplica el tema GUARDADO de la Persona. Para las
+ * Personas sembradas que varios specs comparten, cada test fija el suyo (en
+ * claro también), así un test en oscuro no deja a la siguiente en oscuro.
+ */
+export async function usarTema(page: Page, email: string, tema: 'claro' | 'oscuro') {
+  if (tema === 'oscuro') await page.addInitScript(() => window.localStorage.setItem('theme', 'dark'));
+  const { apiToken } = await (await page.request.get('/api/auth/session')).json();
+  const respuesta = await page.request.patch(`${API()}/personas/me/preferencias`, {
+    headers: { Authorization: `Bearer ${apiToken}` },
+    data: { temaPreferido: tema },
+  });
+  if (!respuesta.ok()) throw new Error(`No se pudo guardar el tema: ${respuesta.status()}`);
+  await loguearseComoTest(page, email);
+}

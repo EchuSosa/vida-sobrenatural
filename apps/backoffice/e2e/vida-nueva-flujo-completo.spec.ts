@@ -1,7 +1,8 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, loguearseComo, loguearseComoAdminE2E } from './helpers';
+import { test, expect, auditar, loguearseComoAdminE2E } from './helpers';
 import { apagarDisponibilidad, crearDiscipulador, crearPersona, estadoDeGrupo, estadoMiCamino, pedirVidaNuevaComo, sinScrollHorizontal, sinSesion } from './helpers';
 import { campo, completarFecha, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
+import { enLaWeb, loguearseEnLaWeb } from './helpers-006';
 
 const WEB_BASE_URL = process.env.PLAYWRIGHT_WEB_BASE_URL ?? 'http://localhost:3001';
 
@@ -43,8 +44,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
         const solicitudId = await pedirVidaNuevaComo(persona.email, [{ diaSemana: 3, inicio: 20 * 60, fin: 22 * 60 }]);
 
         // 2. El Discipulador carga ese horario y prende su disponibilidad.
-        await loguearseComo(page, disc.email);
-        await page.goto('/mi-disponibilidad');
+        await loguearseEnLaWeb(page, disc.email, colorScheme);
+        await page.goto(enLaWeb('/mi-disponibilidad'));
         const estado = page.getByTestId('estado-disponibilidad');
         await expect(estado).toContainText('hasta que no cargues tus horarios no aparecés para nuevos discipulados');
         await page.getByLabel('Día', { exact: true }).first().selectOption({ label: 'Miércoles' });
@@ -73,8 +74,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
         // 4. El Discipulador acepta desde Mis discipulados.
         await sinSesion(page);
-        await loguearseComo(page, disc.email);
-        await page.goto('/mis-discipulados');
+        await loguearseEnLaWeb(page, disc.email, colorScheme);
+        await page.goto(enLaWeb('/mis-discipulados'));
         const propuesta = page.getByRole('article', { name: new RegExp(`Tomás Flujo ${sufijo}`) });
         await expect(propuesta).not.toContainText('+54');
         await sinViolaciones(page);
@@ -87,7 +88,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         // 5. Registra un Encuentro.
         await page.getByRole('link', { name: /Ver el discipulado de Tomás/ }).click();
         await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Tomás Flujo ${sufijo}`) })).toBeVisible();
-        const grupoId = page.url().split('/mis-discipulados/')[1];
+        const grupoId = new URL(page.url()).pathname.split('/mis-discipulados/')[1];
         await page.getByRole('button', { name: 'Registrar encuentro' }).click();
         const panel = page.getByRole('dialog', { name: 'Registrar encuentro' });
         await completarFecha(campo(panel, 'Fecha'), '2026-09-01');
