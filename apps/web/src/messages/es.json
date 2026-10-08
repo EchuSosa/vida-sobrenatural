@@ -29,7 +29,7 @@
     "DECLARACION_YA_PENDIENTE": "Ya le avisaste a la iglesia que hiciste esta etapa: el equipo lo está revisando.",
     "ETAPA_YA_COMPLETADA": "Esta etapa ya figura como hecha, así que no hace falta registrarla de nuevo.",
     "ETAPA_EN_CURSO": "Esta etapa está en marcha (hay un pedido abierto o un grupo en curso). Cuando termine, va a figurar como hecha.",
-    "DECLARACION_NO_PENDIENTE": "Esta declaración ya cambió: alguien la resolvió o se retiró. Actualizamos la pantalla.",
+    "DECLARACION_NO_PENDIENTE": "Esto ya cambió: alguien del equipo ya lo resolvió o lo retiraste. Actualizamos la pantalla.",
     "COMPLETITUD_NO_VIGENTE": "Ese registro ya estaba anulado. Actualizamos la pantalla.",
     "HISTORIAL_VIDA_NUEVA_EN_REVISION": "Ya avisaste que hiciste Vida Nueva y el equipo lo está revisando: no hace falta pedirla.",
     "VIDA_NUEVA_COMPLETADA_POR_HISTORIAL": "Vida Nueva ya figura como hecha (registrada por la iglesia), así que no hace falta pedirla.",
