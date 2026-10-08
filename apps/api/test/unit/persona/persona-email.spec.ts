@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../../src/persona/persona.service.js';
 import { PrismaService } from '../../../src/prisma/prisma.service.js';
 import { AppException } from '../../../src/common/errors/app-exception.js';
-import { conTransaccion, proveedorRolesDeEstado } from '../persona-servicio-de-test.js';
+import { conTransaccion, proveedorRolesDeEstado, proveedorNotificaciones } from '../persona-servicio-de-test.js';
 
 /**
  * spec 007, T010 (FR-010, FR-011): mismo email → misma Persona, escrito como
@@ -10,7 +10,7 @@ import { conTransaccion, proveedorRolesDeEstado } from '../persona-servicio-de-t
  */
 async function crearServicio(prismaMock: Record<string, unknown>) {
   const moduleRef = await Test.createTestingModule({
-    providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado()],
+    providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado(), proveedorNotificaciones()],
   }).compile();
   return moduleRef.get(PersonaService);
 }

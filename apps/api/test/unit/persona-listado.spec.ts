@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { proveedorRolesDeEstado } from './persona-servicio-de-test.js';
+import { proveedorRolesDeEstado, proveedorNotificaciones } from './persona-servicio-de-test.js';
 import { calcularEdad, nacidosAntesDeParaEdad } from '../../src/persona/calcular-edad.js';
 
 /**
@@ -22,7 +22,7 @@ async function crearServicio() {
     propuestaDiscipulado: { findMany: propuestas },
   };
   const moduleRef = await Test.createTestingModule({
-    providers: [PersonaService, { provide: PrismaService, useValue: prisma }, proveedorRolesDeEstado()],
+    providers: [PersonaService, { provide: PrismaService, useValue: prisma }, proveedorRolesDeEstado(), proveedorNotificaciones()],
   }).compile();
   return { service: moduleRef.get(PersonaService), findMany, count, liderazgos, propuestas };
 }
