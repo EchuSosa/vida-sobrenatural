@@ -133,6 +133,7 @@ export { Toaster } from './components/ui/sonner';
 // --- spec 006 (CardEtapa, PedirEnNombreDe) ---
 export { CardEtapa, type CardEtapaProps } from './components/card-etapa';
 export { DialogoTextoOpcional, type DialogoTextoOpcionalProps } from './components/dialogo-texto-opcional';
+export { PedirEnNombreDe, type PedirEnNombreDeProps, type EtiquetasPedirEnNombreDe, type PersonaElegible } from './components/pedir-en-nombre-de';
 
 // --- spec 007 (FormularioIngresoCodigo, BotonIngresarGoogle) ---
 

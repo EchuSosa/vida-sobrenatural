@@ -353,7 +353,8 @@
       "resumenErrores": "Revisá esto antes de seguir:",
       "errores": {
         "generico": "No pudimos cargar el pedido. Probá de nuevo en unos segundos."
-      }
+      },
+      "edad": "{edad} años"
     },
     "detalle": {
       "titulo": "Vida Nueva de {nombre}",
