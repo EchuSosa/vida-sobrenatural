@@ -202,7 +202,9 @@
       "DESCRIPCION_IMAGEN_DEMASIADO_LARGA": "El texto alternativo es demasiado largo: acortalo a 500 caracteres.",
       "ARCHIVO_REQUERIDO": "Elegí un archivo.",
       "SEDE_INVALIDA": "Elegí una Sede activa de la lista.",
-      "CONFIG_BAUTISMO_INVALIDA": "Un Evento de bautismo no tiene costo, aprobación, lista de espera ni recordatorio: dejá esos campos vacíos."
+      "CONFIG_BAUTISMO_INVALIDA": "Un Evento de bautismo no tiene costo, aprobación, lista de espera ni recordatorio: dejá esos campos vacíos.",
+      "PERSONA_REQUERIDA": "Elegí a la Persona.",
+      "IDS_INVALIDO": "Elegí al menos una inscripción."
     }
   },
   "nav": {
@@ -612,7 +614,9 @@
       "vacio": "No tenés nada pendiente.",
       "error": "No pudimos cargar los pendientes. Probá recargar la página en unos segundos.",
       "extra": {
-        "historial_declaraciones": "{cantidad, plural, one {# historial previo por revisar} other {# historiales previos por revisar}}"
+        "historial_declaraciones": "{cantidad, plural, one {# historial previo por revisar} other {# historiales previos por revisar}}",
+        "eventos_inscripciones": "{cantidad, plural, one {# inscripción a un Evento por aprobar} other {# inscripciones a Eventos por aprobar}}",
+        "eventos_pagos": "{cantidad, plural, one {# pago de un Evento por verificar} other {# pagos de Eventos por verificar}}"
       }
     }
   },
@@ -1044,8 +1048,145 @@
       "noEncontrado": "No encontramos este Evento",
       "volver": "Volver a Eventos"
     },
-    "inscriptos": {},
-    "pagos": {}
+    "inscriptos": {
+      "titulo": "Inscriptos",
+      "resumen": "{ocupados, plural, one {# lugar ocupado} other {# lugares ocupados}}{cupo, select, null {} other { de {cupo}}} · {enEspera} en lista de espera",
+      "pestanas": "Inscripciones por estado",
+      "estados": {
+        "pendiente": "Por aprobar",
+        "confirmada": "Confirmadas",
+        "lista_espera": "Lista de espera",
+        "rechazada": "Rechazadas",
+        "cancelada": "Canceladas"
+      },
+      "estadoFila": {
+        "confirmada": "Confirmada",
+        "pendiente": "Por aprobar",
+        "lista_espera": "Lugar {posicion} en la lista",
+        "rechazada": "Rechazada",
+        "cancelada": "Cancelada"
+      },
+      "pago": {
+        "sin_pago": "Falta el pago",
+        "pendiente_verificacion": "Pago en revisión",
+        "verificado": "Pago verificado"
+      },
+      "faltaPago": "{dias, plural, =0 {falta el pago (desde hoy)} one {falta el pago, hace # día} other {falta el pago, hace # días}}",
+      "subioDeLista": "Subió desde la lista de espera: avisale",
+      "yaLeAvise": "Ya le avisé",
+      "sinAcceso": "Sin acceso a la app",
+      "anotadaPor": "La anotó {nombre}",
+      "columnas": {
+        "persona": "Persona",
+        "estado": "Estado",
+        "pago": "Pago",
+        "fecha": "Anotada",
+        "acciones": "Acciones",
+        "seleccionar": "Elegir"
+      },
+      "seleccionar": "Elegir a {nombre}",
+      "vacio": "No hay inscripciones en este estado.",
+      "aprobar": "Aprobar",
+      "aprobando": "Aprobando…",
+      "aprobada": "Inscripción aprobada.",
+      "aprobarLote": "Aprobar seleccionadas ({cantidad})",
+      "loteResumen": "{aprobadas, plural, =0 {No se aprobó ninguna} one {Se aprobó #} other {Se aprobaron #}}{fallidas, plural, =0 {.} one {; # no se pudo (ya estaba resuelta o cambió)} other {; # no se pudieron (ya estaban resueltas o cambiaron)}}",
+      "rechazar": "Rechazar",
+      "rechazarTitulo": "¿Rechazar la inscripción de {nombre}?",
+      "rechazarTexto": "Se libera su lugar y, si hay lista de espera, pasa la primera. Le avisamos.",
+      "motivo": "Motivo (opcional)",
+      "motivoAyuda": "Lo ve la Persona. Escribilo con cuidado.",
+      "rechazarSi": "Sí, rechazar",
+      "rechazada": "Inscripción rechazada.",
+      "darDeBaja": "Dar de baja",
+      "darDeBajaTitulo": "¿Dar de baja a {nombre} de este Evento?",
+      "darDeBajaTexto": "Se libera su lugar y, si hay lista de espera, pasa la primera. Le avisamos.",
+      "darDeBajaSi": "Sí, dar de baja",
+      "dadaDeBaja": "Inscripción dada de baja.",
+      "volver": "Volver",
+      "verificarPago": "Verificar el pago",
+      "registrarPago": "Registrar pago",
+      "anotar": "Anotar a una Persona",
+      "anotarTitulo": "Anotar a una Persona",
+      "anotarDescripcion": "Para quien no usa la app o te lo pidió en persona. Se aplican el cupo, la lista y la aprobación.",
+      "buscar": "Buscar por nombre",
+      "buscarAyuda": "Escribí al menos 2 letras.",
+      "sinResultados": "No encontramos a \"{q}\". Si no está cargada, dala de alta en Personas.",
+      "estasAnotando": "Estás anotando a {nombre}",
+      "cambiar": "Elegir otra Persona",
+      "anotarSi": "Anotar",
+      "anotando": "Anotando…",
+      "anotada": "{nombre} quedó anotada: {estado}.",
+      "cerrarPanel": "Cerrar el panel",
+      "errores": {
+        "generico": "No pudimos hacerlo. Probá de nuevo en unos segundos."
+      },
+      "seleccionarTodas": "Elegir todas"
+    },
+    "pagos": {
+      "titulo": "Pago de {nombre}",
+      "miga": "Pago",
+      "evento": "Evento",
+      "persona": "Persona",
+      "monto": "Monto",
+      "medio": "Medio",
+      "medios": {
+        "transferencia": "Transferencia",
+        "efectivo": "Efectivo",
+        "otro": "Otro"
+      },
+      "fecha": "Fecha del pago",
+      "estado": "Estado",
+      "estados": {
+        "pendiente_verificacion": "Esperando verificación",
+        "verificado": "Verificado",
+        "rechazado": "Rechazado"
+      },
+      "cargadoPor": "Lo cargó",
+      "laPersona": "La propia Persona",
+      "revisadoPor": "Revisado por {nombre}",
+      "motivoRechazo": "Motivo del rechazo: {motivo}",
+      "comprobante": "Comprobante",
+      "comprobanteAlt": "Comprobante de pago de {nombre}",
+      "sinComprobante": "Sin comprobante.",
+      "descargar": "Descargar el comprobante",
+      "pdfTitulo": "Comprobante en PDF",
+      "verificar": "Verificar pago",
+      "verificando": "Verificando…",
+      "verificado": "Pago verificado.",
+      "rechazar": "Rechazar pago",
+      "rechazarTitulo": "¿Rechazar el pago de {nombre}?",
+      "rechazarTexto": "Su inscripción se cancela, se libera el lugar y, si hay lista de espera, pasa la primera. Le avisamos con el motivo.",
+      "motivo": "Motivo",
+      "motivoAyuda": "Lo ve la Persona: decile qué falta, por ejemplo \"no se ve el monto\".",
+      "motivoRequerido": "Escribí el motivo para que la Persona sepa qué corregir.",
+      "rechazarSi": "Sí, rechazar el pago",
+      "rechazando": "Rechazando…",
+      "rechazado": "Pago rechazado. Se liberó el lugar.",
+      "volver": "Volver",
+      "registrarTitulo": "Registrar un pago de {nombre}",
+      "registrarDescripcion": "Para un pago en efectivo o que te mandaron por otro lado. Queda verificado.",
+      "archivo": "Comprobante (opcional)",
+      "archivoAyuda": "Foto o PDF, hasta 5 MB.",
+      "elegir": "Elegir archivo",
+      "sinArchivo": "Ningún archivo elegido",
+      "registrar": "Registrar pago",
+      "registrando": "Registrando…",
+      "registrado": "Pago registrado.",
+      "errorMonto": "Escribí el monto con números, por ejemplo 15000.",
+      "errorFecha": "Completá el día, el mes y el año del pago.",
+      "cerrarPanel": "Cerrar el panel",
+      "errores": {
+        "generico": "No pudimos hacerlo. Probá de nuevo en unos segundos."
+      },
+      "errorCarga": {
+        "titulo": "No pudimos cargar el pago",
+        "texto": "Puede ser un problema momentáneo. Probá de nuevo en unos segundos.",
+        "reintentar": "Reintentar"
+      },
+      "noEncontrado": "No encontramos este pago",
+      "volverBandeja": "Volver a Solicitudes"
+    }
   },
   "notificaciones": {},
   "bandeja": {

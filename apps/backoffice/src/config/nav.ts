@@ -107,6 +107,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/eventos/nuevo', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.gestionar', enMenu: false },
   { href: '/eventos/[id]', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver', enMenu: false },
   { href: '/eventos/papelera', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.papelera.ver', enMenu: false },
+  { href: '/solicitudes/inscripcion-evento/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'eventos.ver', enMenu: false },
+  { href: '/solicitudes/pago/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'pagos.verificar', enMenu: false },
 ];
 
 function rolesEfectivos(permiso: Permiso | 'cualquier-sesion'): RolDeCargo[] | 'cualquier-sesion' {
