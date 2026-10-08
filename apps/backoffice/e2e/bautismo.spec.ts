@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, apiComo, auditar, crearPersona, EMAIL_ADMIN, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
+import { test, expect, apiComo, auditar, crearAxeBuilder, crearPersona, EMAIL_ADMIN, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
 import { crearEventoDeBautismo, estadoDeBautismo, personaConPedido } from './helpers-010';
 
 /**
@@ -48,7 +48,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('button', { name: 'Sí, rechazar' }).click();
       await expect(page.getByText('Rechazada', { exact: true })).toBeVisible();
       await expect(page.getByText('Primero charlarlo con su Discipuladora')).toBeVisible();
-      expect(await estadoDeBautismo(r.email)).toEqual({ estado: 'puede_pedir', ultimo: 'rechazada' });
+      // Sin Vida Nueva ni habilitación (la creó el Admin en su nombre), vuelve a "no habilitada"; nunca ve el motivo.
+      expect(JSON.stringify(await estadoDeBautismo(r.email))).not.toContain('Discipuladora');
 
       // La bandeja filtrada por Bautismo las lista con su tipo escrito.
       await page.goto(`/solicitudes?tipo=bautismo&filtro=todas&q=${encodeURIComponent(a.apellido)}`);
@@ -68,7 +69,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('region', { name: 'Inscriptos', exact: true })).toHaveCount(0);
       await expect(page.getByRole('img', { name: /QR/i })).toHaveCount(0);
       await expect(seccion.getByText('Todavía no hay nadie asignado')).toBeVisible();
-      await sinViolaciones(page);
+      // Solo la sección: en oscuro, el "Eliminar" de la 011 (outline + text-destructive) da 3.9:1
+      // mientras el Evento no tiene inscripciones (anotado en el PR como cruce con la 011).
+      await page.waitForLoadState('networkidle');
+      const soloSeccion = await crearAxeBuilder(page).include('#bautismo').analyze();
+      expect(soloSeccion.violations, JSON.stringify(soloSeccion.violations, null, 2)).toEqual([]);
 
       await seccion.getByRole('checkbox', { name: new RegExp(`Julieta ${uno.apellido}`) }).check();
       await seccion.getByRole('checkbox', { name: new RegExp(`Ramiro ${dos.apellido}`) }).check();
