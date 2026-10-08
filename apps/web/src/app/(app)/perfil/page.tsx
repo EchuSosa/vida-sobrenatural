@@ -7,7 +7,6 @@ import { SelectorTema } from '../../../components/selector-tema';
 import { CerrarSesionBoton } from '../../../components/cerrar-sesion-boton';
 import { PerfilFormulario } from '../../../components/perfil-formulario';
 import { EnlaceContanos } from '../../../components/enlace-contanos';
-import { getTranslations } from 'next-intl/server';
 
 /**
  * Perfil de la Persona. ajustes-ux: #50 jerarquía (nombre grande, "Entrás
