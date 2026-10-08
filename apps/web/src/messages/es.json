@@ -35,6 +35,8 @@
     "VIDA_NUEVA_COMPLETADA_POR_HISTORIAL": "Vida Nueva ya figura como hecha (registrada por la iglesia), así que no hace falta pedirla.",
     "POSIBLE_DUPLICADO": "Parece que esta persona ya está cargada. Revisá las coincidencias: si es otra persona, podés crearla igual.",
     "EMAIL_YA_CARGADO": "Esta persona ya tiene un email cargado. Si hay que cambiarlo, editá sus datos.",
+    "DNI_INVALIDO": "El DNI tiene que tener 7 u 8 números. Escribilo solo con números, sin puntos.",
+    "DNI_DUPLICADO": "Ya hay una Persona con este DNI. Revisá si es la misma persona antes de cargarla de nuevo.",
     "CODIGO_INCORRECTO": "Ese código no es el que te mandamos. Revisalo y escribilo de nuevo.",
     "CODIGO_SIN_INTENTOS": "Ese código ya no sirve porque se probó demasiadas veces. Pedí uno nuevo.",
     "CODIGO_VENCIDO": "Ese código venció o ya se usó. Pedí uno nuevo.",

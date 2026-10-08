@@ -84,6 +84,8 @@ const TITULOS: Record<ErrorCode, string> = {
   VIDA_NUEVA_COMPLETADA_POR_HISTORIAL: 'Vida Nueva ya está registrada por la iglesia',
   POSIBLE_DUPLICADO: 'Posible persona duplicada',
   EMAIL_YA_CARGADO: 'La Persona ya tiene email',
+  DNI_INVALIDO: 'DNI inválido',
+  DNI_DUPLICADO: 'Ya hay una Persona con este DNI',
   CODIGO_INCORRECTO: 'Código incorrecto',
   CODIGO_SIN_INTENTOS: 'Sin intentos',
   CODIGO_VENCIDO: 'Código vencido o ya usado',

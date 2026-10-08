@@ -113,6 +113,38 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(await buscar(apellido)).toHaveLength(2);
     });
 
+    test('D215: un DNI ya cargado bloquea debajo del campo, dice quién lo tiene y lleva a esa Persona', async ({ page }) => {
+      const apellido = `e2e-dni-${colorScheme}-${Date.now()}`;
+      const dni = `${colorScheme === 'light' ? 3 : 4}${String(Date.now()).slice(-7)}`;
+      const conPuntos = `${dni.slice(0, 2)}.${dni.slice(2, 5)}.${dni.slice(5)}`;
+      await page.goto('/personas/nueva');
+      await expect(page.getByText('Solo números, sin puntos.')).toBeVisible();
+      await completar(page, { apellido, nombre: 'Primera', telefono: `221${String(Date.now()).slice(-7)}` });
+      await page.getByLabel('DNI (opcional)').fill(conPuntos);
+      await page.getByRole('button', { name: 'Dar de alta' }).click();
+      await expect(page.getByRole('heading', { name: `Listo: Primera ${apellido} ya está cargada` })).toBeVisible();
+
+      await page.getByRole('button', { name: 'Dar de alta otra persona' }).click();
+      // Otra persona en todo lo demás: sin el DNI no habría ningún aviso.
+      await completar(page, { apellido: `${apellido}-b`, nombre: 'Segunda', telefono: `11${String(Date.now()).slice(-8)}`, fecha: '1970-01-01' });
+      await page.getByLabel('DNI (opcional)').fill('12.34');
+      await page.getByRole('button', { name: 'Dar de alta' }).click();
+      await expect(page.locator('#campo-dni-error')).toHaveText('El DNI tiene que tener 7 u 8 números. Escribilo solo con números, sin puntos.');
+
+      await page.getByLabel('DNI (opcional)').fill(dni);
+      await page.getByRole('button', { name: 'Dar de alta' }).click();
+      await expect(page.locator('#campo-dni-error')).toContainText(`Ya hay una Persona con este DNI: Primera ${apellido}.`);
+      await expect(page.getByLabel('DNI (opcional)')).toHaveAttribute('aria-invalid', 'true');
+      // No hay "crear igual": el DNI no se repite.
+      await expect(page.getByRole('button', { name: 'Es otra persona, crear igual' })).toHaveCount(0);
+      await expect(page.getByRole('heading', { name: /ya está cargada/ })).toHaveCount(0);
+      await sinViolaciones(page);
+      expect(await buscar(`${apellido}-b`)).toHaveLength(0);
+
+      await page.getByRole('link', { name: `Ver a Primera ${apellido}` }).click();
+      await expect(page.getByRole('row').filter({ hasText: apellido })).toBeVisible();
+    });
+
     test('un email ya usado se rechaza debajo del campo', async ({ page }) => {
       const apellido = `e2e-mail-${colorScheme}-${Date.now()}`;
       await page.goto('/personas/nueva');

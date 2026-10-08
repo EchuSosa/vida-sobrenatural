@@ -4,12 +4,14 @@ import {
   erroresDeDatosPersonales,
   esMenorDeEdad,
   hoyEnArgentina,
+  normalizarDni,
   normalizarEmail,
   normalizarTelefono,
   sinAccesoALaApp,
   sonPosiblesDuplicados,
   type CoincidenciaDuplicado,
   type DatosPersonales,
+  type PersonaConMismoDni,
 } from '@vida-sobrenatural/shared-types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException, type AppExceptionErrorField } from '../common/errors/app-exception.js';
@@ -24,7 +26,8 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
  * spec 006, Historia 5 (contracts/personas-alta-api.md): el alta de una
  * Persona adulta por el Admin (D145, Flujo 12), con email opcional y aviso de
- * posible duplicado, y "Agregar email" a quien no tiene. Archivo propio: no
+ * posible duplicado, y "Agregar email" a quien no tiene. D215: DNI opcional,
+ * único (bloqueo fuerte, no aviso). Archivo propio: no
  * reescribe `PersonaService` (specs/IMPLEMENTACION.md §3).
  */
 @Injectable()
@@ -45,12 +48,23 @@ export class AltaPersonaService {
     }
     const email = emailOpcional(dto.email);
     if (email === undefined) errores.push({ campo: 'email', code: 'EMAIL_INVALIDO' });
+    // D215: opcional; si viene, 7 u 8 dígitos (con o sin puntos).
+    const dni = normalizarDni(dto.dni);
+    if (dni === undefined) errores.push({ campo: 'dni', code: 'DNI_INVALIDO' });
     if (dto.consentimiento !== true) errores.push({ campo: 'consentimiento', code: 'CONSENTIMIENTO_REQUERIDO' });
     if (errores.length > 0) throw new AppException('VALIDACION', 400, 'Uno o más campos no son válidos.', errores);
 
     const datos = dto as unknown as DatosPersonales;
     // 2. Email ya usado: bloqueo, en el campo (FR-034).
     if (email && (await this.prisma.persona.findUnique({ where: { email }, select: { id: true } }))) throw emailDuplicado();
+
+    // 2b. DNI ya usado (D215): bloqueo fuerte, aunque se haya confirmado el
+    // posible duplicado; se dice quién es para poder ir a su perfil. Entre
+    // todas las Personas, activas o no (el índice único es la garantía).
+    if (dni) {
+      const conDni = await this.prisma.persona.findFirst({ where: { dni }, select: { id: true, nombre: true, apellido: true } });
+      if (conDni) throw dniDuplicado(conDni);
+    }
 
     // 3. Posible duplicado: aviso, no bloqueo (FR-035, D145).
     if (dto.confirmarPosibleDuplicado !== true) {
@@ -77,6 +91,7 @@ export class AltaPersonaService {
             profesionDetalle: datos.profesion === 'otro' ? String(datos.profesionDetalle).trim() : null,
             congregaDesde: datos.congregaDesde,
             email,
+            dni,
             estado: 'activa',
             consentimientoDatos: true,
             consentimientoDatosFecha: new Date(),
@@ -94,6 +109,10 @@ export class AltaPersonaService {
     } catch (error) {
       // Dos altas simultáneas con el mismo email: el índice único es la garantía.
       if (esUnicidadDeEmail(error)) throw emailDuplicado();
+      if (dni && esUnicidadDe(error, 'dni')) {
+        const conDni = await this.prisma.persona.findFirst({ where: { dni }, select: { id: true, nombre: true, apellido: true } });
+        throw dniDuplicado(conDni);
+      }
       if (typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2003') {
         throw new AppException('VALIDACION', 400, 'Uno o más campos no son válidos.', [{ campo: 'sedeId', code: 'SEDE_INVALIDA' }]);
       }
@@ -158,9 +177,24 @@ function emailDuplicado() {
   return new AppException('EMAIL_DUPLICADO', 409, 'Ese email ya lo usa otra Persona.', [{ campo: 'email', code: 'EMAIL_DUPLICADO' }]);
 }
 
+/** D215: el DNI nunca viaja en la respuesta; solo quién lo tiene. */
+function dniDuplicado(persona: PersonaConMismoDni | null) {
+  return new AppException(
+    'DNI_DUPLICADO',
+    409,
+    'Ya hay una Persona con este DNI.',
+    [{ campo: 'dni', code: 'DNI_DUPLICADO' }],
+    persona ? { persona: { id: persona.id, nombre: persona.nombre, apellido: persona.apellido } } : undefined,
+  );
+}
+
 function esUnicidadDeEmail(error: unknown): boolean {
+  return esUnicidadDe(error, 'email');
+}
+
+function esUnicidadDe(error: unknown, campo: string): boolean {
   if (typeof error !== 'object' || error === null || (error as { code?: unknown }).code !== 'P2002') return false;
   const meta = (error as { meta?: { driverAdapterError?: { cause?: { constraint?: { index?: string } } }; target?: unknown } }).meta;
   const indice = meta?.driverAdapterError?.cause?.constraint?.index ?? JSON.stringify(meta?.target ?? '');
-  return indice.includes('email');
+  return indice.includes(campo);
 }
