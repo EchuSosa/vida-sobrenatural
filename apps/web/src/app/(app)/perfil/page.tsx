@@ -3,9 +3,12 @@ import { type PersonaPerfil, apiFetch } from '@vida-sobrenatural/shared-types';
 import { SelectorTema } from '../../../components/selector-tema';
 import { CerrarSesionBoton } from '../../../components/cerrar-sesion-boton';
 import { PerfilFormulario } from '../../../components/perfil-formulario';
+import { EnlaceContanos } from '../../../components/enlace-contanos';
+import { getTranslations } from 'next-intl/server';
 
 export default async function PerfilPage() {
   const session = await auth();
+  const tc = await getTranslations('comentarios');
   const perfil = await apiFetch<PersonaPerfil>('/personas/me', {
     headers: { Authorization: `Bearer ${session?.apiToken}` },
     cache: 'no-store',
@@ -35,6 +38,8 @@ export default async function PerfilPage() {
         />
       )}
       <SelectorTema valorInicial={perfil?.temaPreferido ?? session?.user.temaPreferido ?? 'claro'} />
+      {/* spec 013 (T064, FR-045): "Contanos qué te parece" desde Perfil (docs/14). */}
+      <EnlaceContanos className="inline-flex min-h-11 items-center self-start underline underline-offset-4 hover:no-underline">{tc('abrir')}</EnlaceContanos>
       <CerrarSesionBoton />
     </div>
   );
