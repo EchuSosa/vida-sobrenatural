@@ -131,6 +131,7 @@ export { Toaster } from './components/ui/sonner';
 // Lote 0 global (specs/IMPLEMENTACION.md): cada spec exporta sus componentes
 // nuevos SOLO en su bloque, para que las sesiones en paralelo no choquen.
 // --- spec 006 (CardEtapa, PedirEnNombreDe) ---
+export { CardEtapa, type CardEtapaProps } from './components/card-etapa';
 
 // --- spec 007 (FormularioIngresoCodigo, BotonIngresarGoogle) ---
 

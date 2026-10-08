@@ -14,5 +14,8 @@ import { FuenteBandejaDiscipulado } from './fuente-bandeja.js';
   controllers: [SolicitudDiscipuladoController],
   // FuenteBandejaDiscipulado: se registra en la bandeja unificada (spec 013, T021).
   providers: [SolicitudDiscipuladoService, FuenteBandejaDiscipulado],
+  // spec 006 (lote A): Mi camino reusa `estadoPropio` para la card de Vida
+  // Nueva (FR-005: el mismo estado que GET /discipulado/me, sin recalcularlo).
+  exports: [SolicitudDiscipuladoService],
 })
 export class SolicitudDiscipuladoModule {}

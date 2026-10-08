@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ChevronDown } from 'lucide-react';
 import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@vida-sobrenatural/ui';
+import { esItemActual } from '@vida-sobrenatural/shared-types';
 import { NAV_APP } from '../config/nav-app';
 import { useItemsMas } from './nav-app-mas';
 import { NavAppPerfilMenu } from './nav-app-perfil-menu';
@@ -51,8 +52,10 @@ export function NavAppBar() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background md:sticky md:top-0 md:border-t-0 md:border-b"
     >
       <div className="mx-auto flex max-w-5xl items-center justify-around px-2 py-1 md:justify-start md:gap-8 md:py-3">
-        {NAV_APP.map(({ href, labelKey, icon: Icon }) => {
-          const activo = pathname === href;
+        {NAV_APP.map((item) => {
+          const { href, labelKey, icon: Icon } = item;
+          // spec 006 (FR-023): también en sus subrutas y rutas relacionadas.
+          const activo = esItemActual(item, pathname);
           const enlace = (
             <Link
               key={href}
