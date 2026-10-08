@@ -18,6 +18,7 @@ import {
   formatearFechaHora,
 } from '@vida-sobrenatural/shared-types';
 import {
+  AvatarPersona,
   Button,
   ConfirmDestructiveDialog,
   ControlesTabla,
@@ -107,12 +108,16 @@ export function PersonasCliente({
       encabezado: t('columnas.nombre'),
       ordenable: true,
       celda: (persona) => (
-        <div className="flex flex-col gap-0.5">
-          <span className="font-medium">
-            {persona.apellido}, {persona.nombre}
-          </span>
-          <span className="break-all text-sm text-muted-foreground md:hidden">{persona.email}</span>
-          <span className="text-sm text-muted-foreground sm:hidden">{textoRoles(persona) ?? t('sinRolDeCargo')}</span>
+        <div className="flex items-start gap-3">
+          {/* spec 013 (T034, FR-010, FR-018): avatar y el nombre como enlace al perfil. */}
+          <AvatarPersona nombre={persona.nombre} apellido={persona.apellido} fotoUrl={persona.fotoUrl} tamanio="sm" />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <Link href={`/personas/${persona.id}`} className="font-medium underline underline-offset-2">
+              {persona.apellido}, {persona.nombre}
+            </Link>
+            <span className="break-all text-sm text-muted-foreground md:hidden">{persona.email}</span>
+            <span className="text-sm text-muted-foreground sm:hidden">{textoRoles(persona) ?? t('sinRolDeCargo')}</span>
+          </div>
         </div>
       ),
     },
@@ -236,7 +241,8 @@ const HISTORIAL_TAKE = 100;
  * nunca solo con color (D81). La fila del comando de recuperación dice en
  * palabras que se hizo fuera de la aplicación (H-141), no una celda vacía.
  */
-function HistorialDialog({
+/** spec 013 (T033): exportado para abrirlo también desde el perfil de la Persona, sin duplicarlo. */
+export function HistorialDialog({
   persona,
   apiToken,
   onCerrar,
@@ -372,7 +378,8 @@ function HistorialDialog({
  */
 // D81: objetivos táctiles de al menos 44 px en celular (`max-sm:h-11`);
 // en escritorio quedan del tamaño de las demás tablas del backoffice.
-function RolesDialog({
+/** spec 013 (T033): exportado para abrirlo también desde el perfil de la Persona, sin duplicarlo. */
+export function RolesDialog({
   persona,
   apiToken,
   onCerrar,

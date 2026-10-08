@@ -993,5 +993,139 @@
   "etapasPersona": {},
   "loTuyoEnLaApp": {},
   "solicitudesServicio": {},
-  "perfil": {}
+  "perfil": {
+    "miga": "Personas",
+    "edad": "{edad, plural, one {# año} other {# años}}",
+    "fotoDe": "Foto de {nombre}",
+    "verPerfilDe": "Ver el perfil de {nombre}",
+    "marcas": {
+      "activa": "Activa",
+      "dadaDeBaja": "Dada de baja",
+      "noUsaLaApp": "No usa la app",
+      "pendienteTutor": "Pendiente de tutor",
+      "menor": "Menor de edad"
+    },
+    "secciones": {
+      "datos": "Datos",
+      "roles": "Roles",
+      "acciones": "En su nombre",
+      "solicitudes": "Solicitudes",
+      "gruposCursados": "Grupos que cursó",
+      "gruposACargo": "Grupos a cargo",
+      "familia": "Familia"
+    },
+    "datos": {
+      "fechaNacimiento": "Fecha de nacimiento",
+      "genero": "Género",
+      "estadoCivil": "Estado civil",
+      "profesion": "Ocupación",
+      "telefono": "Teléfono",
+      "direccion": "Dirección",
+      "email": "Email",
+      "sinEmail": "Sin email",
+      "sede": "Sede",
+      "sedeInactiva": "{nombre} (Sede inactiva)",
+      "congregaDesde": "Viene a la iglesia",
+      "congregaDesdeValor": "Desde {anio} ({anios, plural, =0 {empezó este año} one {hace # año} other {hace # años}})",
+      "usaLaApp": "Usa la app",
+      "usaLaAppSi": "Sí",
+      "usaLaAppNo": "No: no tiene email para entrar",
+      "alta": "Cómo se dio de alta",
+      "altaAutorregistro": "Se registró en la app el {fecha}",
+      "altaAdmin": "La dio de alta {nombre} el {fecha}",
+      "altaAdminSinNombre": "La dio de alta el equipo el {fecha}",
+      "consentimiento": "Consentimiento de datos",
+      "consentimientoApp": "Lo dio en la app el {fecha}",
+      "consentimientoPresencial": "Lo dio su tutor/a en persona el {fecha}",
+      "sinConsentimiento": "Todavía no lo dio",
+      "tutor": "Tutor/a",
+      "tutorConTelefono": "{nombre} — {telefono}"
+    },
+    "opciones": {
+      "genero": {
+        "femenino": "Femenino",
+        "masculino": "Masculino"
+      },
+      "estadoCivil": {
+        "soltero_a": "Soltero/a",
+        "casado_a": "Casado/a",
+        "en_concubinato": "En concubinato",
+        "viudo_a": "Viudo/a",
+        "divorciado_a": "Divorciado/a",
+        "separado_a": "Separado/a"
+      },
+      "profesion": {
+        "salud": "Salud",
+        "educacion": "Educación",
+        "tecnologia_ingenieria": "Tecnología/Ingeniería",
+        "comercio_ventas": "Comercio y Ventas",
+        "oficios_construccion": "Oficios/Construcción",
+        "administracion_finanzas": "Administración y Finanzas",
+        "legal": "Legal",
+        "comunicacion_marketing": "Comunicación y Marketing",
+        "arte_diseno": "Arte y Diseño",
+        "servicios_gastronomia": "Servicios y Gastronomía",
+        "transporte": "Transporte",
+        "estudiante": "Estudiante",
+        "ama_de_casa": "Ama/o de casa",
+        "jubilado_a": "Jubilado/a",
+        "sin_ocupacion": "Sin ocupación",
+        "otro": "Otro"
+      }
+    },
+    "roles": {
+      "deCargo": "De cargo",
+      "delProceso": "Del proceso",
+      "sinDeCargo": "Sin rol de cargo",
+      "sinDelProceso": "Ninguno todavía",
+      "nombres": {
+        "miembro_registrado": "Miembro registrado",
+        "apto_ministerio": "Apto para un Ministerio",
+        "miembro_ministerio": "Miembro de un Ministerio"
+      }
+    },
+    "solicitudes": {
+      "vacio": "Todavía no pidió nada.",
+      "pedidaEl": "Pedida el {fecha}",
+      "verTodas": "Ver todas en la bandeja",
+      "mostrando": "Mostrando las {mostradas} más recientes de {total}.",
+      "error": "No pudimos cargar sus Solicitudes."
+    },
+    "grupos": {
+      "vacioCursados": "Todavía no cursó ningún Grupo.",
+      "vacioACargo": "No tiene Grupos a cargo.",
+      "desdeHasta": "Del {desde} al {hasta}",
+      "desde": "Desde el {desde}",
+      "enCurso": "En curso",
+      "finalizado": "Terminado",
+      "inscripcion": {
+        "activa": "Cursando",
+        "completada": "Lo completó",
+        "dada_de_baja": "Dada de baja",
+        "abandono": "Lo dejó"
+      },
+      "mostrando": "Mostrando los {mostrados} más recientes de {total}.",
+      "verGrupo": "Ver el Grupo de {curso}",
+      "error": "No pudimos cargar sus Grupos."
+    },
+    "familia": {
+      "vacio": "No tiene Relaciones Familiares cargadas.",
+      "relaciones": {
+        "tutor_de": "Su tutor/a",
+        "a_cargo_de": "A su cargo",
+        "conyuge": "Cónyuge",
+        "hijo_a": "Hijo/a",
+        "padre_madre": "Padre o madre",
+        "hermano_a": "Hermano/a"
+      }
+    },
+    "errorSeccion": "No pudimos cargar esta parte del perfil.",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando el perfil",
+    "noEncontradaTitulo": "No encontramos esta Persona",
+    "noEncontradaTexto": "Puede que el enlace esté mal escrito o que ya no exista.",
+    "irAPersonas": "Ir a Personas",
+    "errorCargaTitulo": "No pudimos cargar el perfil",
+    "errorCarga": "Podés reintentar en unos segundos. Código de referencia:"
+  }
 }

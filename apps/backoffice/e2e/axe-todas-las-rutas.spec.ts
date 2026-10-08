@@ -87,10 +87,13 @@ const CON_ID_REAL: Record<string, { ruta: (ids: IdsReales) => string; loguearse?
   '/solicitudes/[id]': { ruta: (ids) => `/solicitudes/${ids.solicitudId}` },
   '/grupos/[id]': { ruta: (ids) => `/grupos/${ids.grupoId}` },
   '/mis-discipulados/[id]': { ruta: (ids) => `/mis-discipulados/${ids.grupoId}`, loguearse: (page) => loguearseComoDiscipuladorE2E(page, 1) },
+  // spec 013 (T014): el perfil de la Persona que pidió, con su Solicitud en el historial.
+  '/personas/[id]': { ruta: (ids) => `/personas/${ids.personaId}` },
 };
 interface IdsReales {
   solicitudId: string;
   grupoId: string;
+  personaId: string;
 }
 let idsReales: IdsReales | undefined;
 
@@ -101,7 +104,7 @@ async function asegurarIdsReales(): Promise<IdsReales> {
     const cursa = await crearPersona(`e2e-axe-grupo-${sufijo}@example.com`, { nombre: 'Axe', apellido: `Grupo ${sufijo}` });
     const solicitudId = await pedirVidaNuevaComo(pide.email);
     const { grupoId } = await crearGrupo([cursa]);
-    idsReales = { solicitudId, grupoId };
+    idsReales = { solicitudId, grupoId, personaId: pide.id };
   }
   return idsReales;
 }
