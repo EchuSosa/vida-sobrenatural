@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { aterrizajeDeSesion, requerirPermiso, requerirSesion, tienePermisoSesion } from '../auth';
 import { TarjetaPendientes } from './tarjeta-pendientes';
 import { PantallaSinBackoffice } from '../components/lo-tuyo-en-la-app';
+import { BloqueComentarios } from './inicio/bloque-comentarios';
 import { BloqueCumpleanos } from './inicio/bloque-cumpleanos';
 import { BloqueMetricas } from './inicio/bloque-metricas';
 import { BloquePendientes } from './inicio/bloque-pendientes';
@@ -51,6 +52,8 @@ export default async function InicioBackofficePage() {
             <BloquePendientes apiToken={sesion.apiToken} vePendientesTutor={tienePermisoSesion(sesion, 'pendientes_tutor.ver')} />
           )}
           {vePendientes && <TarjetaPendientes apiToken={sesion.apiToken} />}
+          {/* spec 013 (T065, SC-006): los comentarios nuevos de "Contanos qué te parece". */}
+          {tienePermisoSesion(sesion, 'comentarios.ver') && <BloqueComentarios apiToken={sesion.apiToken} />}
         </div>
         <div className="flex flex-col gap-6">
           {tienePermisoSesion(sesion, 'personas.ver') && <BloqueCumpleanos apiToken={sesion.apiToken} />}

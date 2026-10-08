@@ -13,6 +13,7 @@ import {
   Trash2,
   Mic,
   BookOpen,
+  MessageSquare,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { CATALOGO_PERMISOS, type Permiso, type RolDeCargo } from '@vida-sobrenatural/shared-types';
@@ -111,6 +112,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   //   spec 013 — /comentarios[/[id]] (comentarios.ver), /metricas y /cumpleanos (inicio.ver), /cursos[/[id]] y /cursos/papelera.
   { href: '/personas/[id]', labelKey: 'personas', icon: Users, permiso: 'personas.ver', enMenu: false }, // 013 lote 2: el perfil
   { href: '/cumpleanos', labelKey: 'cumpleanos', icon: Cake, permiso: 'personas.ver', enMenu: false }, // 013 lote 4: se entra desde el Inicio
+  { href: '/comentarios', labelKey: 'comentarios', icon: MessageSquare, permiso: 'comentarios.ver', enMenu: false }, // 013 lote 5: se entra desde el Inicio
+  { href: '/comentarios/[id]', labelKey: 'comentarios', icon: MessageSquare, permiso: 'comentarios.ver', enMenu: false },
   { href: '/cursos', labelKey: 'cursos', icon: GraduationCap, permiso: 'catalogos.ver', enMenu: false }, // 013 lote 6: se entra por Catálogos
   { href: '/cursos/[id]', labelKey: 'cursos', icon: GraduationCap, permiso: 'catalogos.ver', enMenu: false },
   { href: '/cursos/papelera', labelKey: 'cursos', icon: GraduationCap, permiso: 'cursos.papelera.ver', enMenu: false },

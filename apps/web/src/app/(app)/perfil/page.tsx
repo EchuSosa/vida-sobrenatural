@@ -6,6 +6,7 @@ import { type PersonaPerfil, apiFetch } from '@vida-sobrenatural/shared-types';
 import { SelectorTema } from '../../../components/selector-tema';
 import { CerrarSesionBoton } from '../../../components/cerrar-sesion-boton';
 import { PerfilFormulario } from '../../../components/perfil-formulario';
+import { EnlaceContanos } from '../../../components/enlace-contanos';
 
 /**
  * Perfil de la Persona. ajustes-ux: #50 jerarquía (nombre grande, "Entrás
@@ -16,6 +17,7 @@ import { PerfilFormulario } from '../../../components/perfil-formulario';
 export default async function PerfilPage() {
   const t = await getTranslations('perfil');
   const session = await auth();
+  const tc = await getTranslations('comentarios');
   const perfil = await apiFetch<PersonaPerfil>('/personas/me', {
     headers: { Authorization: `Bearer ${session?.apiToken}` },
     cache: 'no-store',
@@ -66,6 +68,8 @@ export default async function PerfilPage() {
       </section>
 
       <SelectorTema valorInicial={perfil?.temaPreferido ?? session?.user.temaPreferido ?? 'claro'} />
+      {/* spec 013 (T064, FR-045): "Contanos qué te parece" desde Perfil (docs/14). */}
+      <EnlaceContanos className="inline-flex min-h-11 items-center self-start underline underline-offset-4 hover:no-underline">{tc('abrir')}</EnlaceContanos>
 
       <section aria-labelledby="perfil-cuenta" className="mt-4 flex flex-col gap-3 border-t border-border pt-6">
         <h2 id="perfil-cuenta" className="text-xl font-medium">

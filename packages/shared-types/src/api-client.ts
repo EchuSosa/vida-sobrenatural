@@ -37,6 +37,18 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * spec 013 (T017, FR-042): el `requestId` del último Problem Details que
+ * recibió esta pestaña (o este proceso), para adjuntarlo a "Contanos qué te
+ * parece" y poder ubicar el error en los logs. Solo en memoria; solo cambia con
+ * una respuesta de error, nunca con una correcta.
+ */
+let requestIdDelUltimoError: string | null = null;
+
+export function ultimoRequestId(): string | null {
+  return requestIdDelUltimoError;
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
@@ -49,6 +61,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
+    if (typeof body?.requestId === 'string' && body.requestId) requestIdDelUltimoError = body.requestId;
     const { type: _t, title: _ti, status: _s, detail: _d, instance: _i, code: _c, requestId: _r, errors: _e, ...extensiones } = body ?? {};
     throw new ApiError(
       body?.code ?? 'ERROR_INTERNO',

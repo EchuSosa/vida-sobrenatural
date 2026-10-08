@@ -1564,7 +1564,57 @@
       "errorFecha": "Completá el día, el mes y el año del pago."
     }
   },
-  "comentarios": {},
+  "comentarios": {
+    "formulario": {
+      "tipoLeyenda": "¿Qué nos querés contar?",
+      "tipos": {
+        "problema": {
+          "etiqueta": "Un problema",
+          "ayuda": "Algo no anda, no se entiende o no te deja seguir."
+        },
+        "sugerencia": {
+          "etiqueta": "Una sugerencia",
+          "ayuda": "Una idea para mejorar la app o algo que te gustaría que tenga."
+        }
+      },
+      "texto": "Contanos",
+      "ayudaTexto": "Con tus palabras: qué estabas haciendo y qué pasó, o qué te gustaría. Hasta 2000 caracteres.",
+      "contador": "{n} de {maximo} caracteres",
+      "aceptaContacto": "Pueden contactarme para preguntarme más",
+      "ayudaAceptaContactoConSesion": "Si te contactamos, usamos el email y el teléfono de tu perfil.",
+      "contactoLeyenda": "¿Cómo te contactamos?",
+      "ayudaContacto": "Dejanos un email o un teléfono (con uno alcanza).",
+      "contactoEmail": "Email (opcional)",
+      "contactoTelefono": "Teléfono (opcional)",
+      "codigoPais": "Código de país",
+      "enviar": "Enviar",
+      "enviando": "Enviando…",
+      "tituloResumen": "Revisá esto antes de enviar:",
+      "errores": {
+        "tipo": "Elegí si es un problema o una sugerencia.",
+        "texto": "Escribí qué nos querés contar, en hasta 2000 caracteres.",
+        "contacto": "Para que te contactemos, dejanos un email o un teléfono. Si preferís que no, desmarcá la casilla.",
+        "contactoEmail": "Escribí un email válido, por ejemplo nombre@ejemplo.com.",
+        "contactoTelefono": "Escribí el número con el código de área, solo con números. Ejemplo: 221 555 0101.",
+        "otro": "Revisá este dato."
+      },
+      "demasiados": "Mandaste varios comentarios seguidos. Probá de nuevo en {minutos, plural, one {un minuto} other {# minutos}}.",
+      "errorGeneral": "No pudimos enviar tu comentario. Probá de nuevo en unos minutos.",
+      "confirmacionTitulo": "¡Gracias! Lo vamos a leer.",
+      "confirmacionDetalle": "Cada comentario lo lee alguien del equipo. Si es un problema, lo revisamos para arreglarlo.",
+      "confirmacionDetalleContacto": "Cada comentario lo lee alguien del equipo. Si necesitamos saber más, te vamos a contactar.",
+      "otro": "Mandar otro comentario"
+    },
+    "abrir": "Contanos qué te parece",
+    "metaTitulo": "Contanos qué te parece",
+    "titulo": "Contanos qué te parece",
+    "descripcion": "¿Algo no anda o se te ocurre cómo mejorar la app? Leemos todo lo que nos mandan.",
+    "volver": "Volver a donde estabas",
+    "errorCargaTitulo": "No pudimos abrir el formulario",
+    "errorCarga": "Probá de nuevo en unos segundos.",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando el formulario"
+  },
   "inicioApp": {
     "saludo": "Hola, {nombre}",
     "pendientesDiscipulador": "{cantidad, plural, one {Tenés # cosa para revisar en tus discipulados} other {Tenés # cosas para revisar en tus discipulados}}",
