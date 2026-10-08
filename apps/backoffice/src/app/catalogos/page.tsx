@@ -12,6 +12,8 @@ export default async function CatalogosPage() {
       <Link href="/sedes" className="text-primary underline underline-offset-4">
         Sedes
       </Link>
+      {/* Lote 0 global: la 013 (lote 6) rehace esta pantalla con Sedes y Cursos; la 009 (lote C)
+          suma Ministerios en este lugar, en su propia línea. */}
       <EstadoVacio mensaje="Cursos, Ministerios y Células todavía no están acá." />
     </div>
   );

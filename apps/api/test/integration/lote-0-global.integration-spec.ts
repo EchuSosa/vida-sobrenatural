@@ -9,6 +9,7 @@ import { NotificacionesService } from '../../src/notificaciones/notificaciones.s
 import { StorageService } from '../../src/storage/storage.service.js';
 import { servirArchivosPublicos } from '../../src/storage/archivos-publicos.js';
 import { completoEtapa } from '../../src/camino/consultas.js';
+import { cancelarInscripcionBautismo, inscribirEnBautismo } from '../../src/evento/inscripcion-bautismo.js';
 import { Escenario } from './discipulado-fixtures.js';
 
 /**
@@ -42,6 +43,8 @@ describe('Lote 0 global (integración)', () => {
     await prisma.entregaNotificacion.deleteMany({ where: { personaId: { in: personas } } });
     await prisma.notificacion.deleteMany({ where: { entidadId: { startsWith: 'l0-' } } });
     await prisma.completitudManual.deleteMany({ where: { personaId: { in: personas } } });
+    await prisma.inscripcionEvento.deleteMany({ where: { personaId: { in: personas } } });
+    await prisma.evento.deleteMany({ where: { nombre: { startsWith: 'l0-' } } });
     await escenario.limpiar();
     await app.close();
   });
@@ -140,6 +143,33 @@ describe('Lote 0 global (integración)', () => {
       const { inscripciones } = await escenario.grupo(discipuladorId, [personaId], adminId);
       await prisma.inscripcion.update({ where: { id: inscripciones[0] }, data: { estado: 'completada' } });
       expect(await completoEtapa(prisma, personaId, 'vida_nueva')).toBe('sistema');
+    });
+  });
+
+  describe('inscripción a un Evento de bautismo (E5 de la 010 con la 011)', () => {
+    it('inscribe salteando cupo y aprobación, y cancela; rechaza un Evento que no es de bautismo', async () => {
+      const personaId = await escenario.persona('bautismo');
+      const base = {
+        sedeId: escenario.sedeId,
+        descripcion: 'Evento de prueba',
+        inicio: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        requiereInscripcion: true,
+        creadoPorId: adminId,
+      };
+      const bautismo = await prisma.evento.create({ data: { ...base, nombre: 'l0-bautismo', slug: `l0-bautismo-${Date.now()}`, tipo: 'bautismo', cupo: 1 } });
+      const general = await prisma.evento.create({ data: { ...base, nombre: 'l0-general', slug: `l0-general-${Date.now()}` } });
+
+      const { inscripcionId } = await prisma.$transaction((tx) =>
+        inscribirEnBautismo(tx, { eventoId: bautismo.id, personaId, creadoPorId: adminId }),
+      );
+      expect((await prisma.inscripcionEvento.findUniqueOrThrow({ where: { id: inscripcionId } })).estado).toBe('confirmada');
+
+      await prisma.$transaction((tx) => cancelarInscripcionBautismo(tx, { inscripcionId, canceladaPorId: adminId, motivo: 'admin' }));
+      expect((await prisma.inscripcionEvento.findUniqueOrThrow({ where: { id: inscripcionId } })).estado).toBe('cancelada');
+
+      await expect(
+        prisma.$transaction((tx) => inscribirEnBautismo(tx, { eventoId: general.id, personaId, creadoPorId: adminId })),
+      ).rejects.toMatchObject({ code: 'EVENTO_NO_ES_DE_BAUTISMO' });
     });
   });
 
