@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 import { useTranslations } from 'next-intl';
 import { Ban, Circle, CircleCheck, CircleMinus, CircleX, Clock, Droplets, Hourglass, Send, Undo2 } from 'lucide-react';
 import type { ExtraBandejaDiscipulado, SolicitudBandeja, SolicitudResumen, TipoSolicitud } from '@vida-sobrenatural/shared-types';
+import { ICONO_TIPO_SOLICITUD } from '../../config/solicitudes';
 import { diasDesde } from './constantes';
 
 /**
@@ -62,4 +63,16 @@ export function EstadoBandeja({ solicitud }: { solicitud: Pick<SolicitudBandeja,
   }
   const clave = `${solicitud.tipo}.${solicitud.estado}` as `${TipoSolicitud}.pendiente`;
   return <TextoConIcono estado={solicitud.estado}>{t.has(clave) ? t(clave) : solicitud.estado}</TextoConIcono>;
+}
+
+/** El tipo de una Solicitud con texto e ícono, nunca solo color (D81). */
+export function TipoTexto({ tipo }: { tipo: TipoSolicitud }) {
+  const t = useTranslations('bandeja.tipos');
+  const Icono = ICONO_TIPO_SOLICITUD[tipo];
+  return (
+    <span className="inline-flex items-start gap-1.5">
+      <Icono aria-hidden className="mt-0.5 size-4 shrink-0" />
+      <span>{t(tipo)}</span>
+    </span>
+  );
 }

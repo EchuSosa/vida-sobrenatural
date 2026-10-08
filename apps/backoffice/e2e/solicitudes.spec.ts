@@ -86,7 +86,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await sinViolaciones(page);
 
       // Retirar la propuesta: vuelve a pendiente y el historial la muestra retirada.
-      await page.getByRole('link', { name: solicitud.nombre }).click();
+      await page.getByRole('link', { name: `Ver la solicitud de ${solicitud.nombre}` }).click();
       await page.getByRole('button', { name: 'Retirar la propuesta' }).click();
       await page.getByRole('button', { name: 'Sí, retirar la propuesta' }).click();
       await expect(page.getByText('Quién puede en sus horarios')).toBeVisible();
