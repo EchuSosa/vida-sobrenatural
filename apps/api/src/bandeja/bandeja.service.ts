@@ -18,9 +18,9 @@ export interface FiltrosBandeja {
 }
 
 /**
- * Lote 0 global: la consulta sobre la vista (orden, filtros, página y
- * conteo). El endpoint `GET /solicitudes` generalizado y la pantalla son de
- * la 013 (lote 1); hasta entonces la 004 sigue con el suyo.
+ * La consulta sobre la vista `solicitudes_bandeja` (orden, filtros, página y
+ * conteo); `BandejaController` la expone (spec 013, T020). La vista decide
+ * el orden y la página; cada `FuenteSolicitudes` hidrata sus filas.
  */
 @Injectable()
 export class BandejaService {

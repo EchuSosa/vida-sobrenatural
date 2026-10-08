@@ -78,7 +78,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `apps/api/prisma/vistas/solicitudes_bandeja.sql` con la rama de Discipulado (§3). Comentario en `schema.prisma` junto a
   `fechaNacimiento` y en el modelo `SolicitudDiscipulado` apuntando a la vista. — cubre: FR-001, FR-025, FR-030,
   FR-040–FR-047, FR-051–FR-056
-- [ ] T011 **[Lote 0 global: coherencia sobre las filas existentes en `lote-0-global.integration-spec.ts`; el test exhaustivo (un registro por tipo y estado) → lote 1]** [L0] Integración `apps/api/test/integration/bandeja-vista.integration-spec.ts` (**test de coherencia**,
+- [x] T011 **[Lote 1: `bandeja-vista.integration-spec.ts`, un registro por tipo y estado de los siete tipos]** **[Lote 0 global: coherencia sobre las filas existentes en `lote-0-global.integration-spec.ts`; el test exhaustivo (un registro por tipo y estado) → lote 1]** [L0] Integración `apps/api/test/integration/bandeja-vista.integration-spec.ts` (**test de coherencia**,
   research #3): por cada tipo de `TIPOS_SOLICITUD` y cada estado de `ESTADOS_POR_TIPO`, insertar un registro y verificar
   que la vista lo devuelve con `abierta === esAbierta(tipo, estado)` y `esperaDesde` correcto (Discipulado con propuesta
   vigente → `propuestaEn`). — cubre: FR-003, FR-007, SC-002
@@ -101,7 +101,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `perfil`, `inicio`, `metricas`, `cumpleanos`, `comentarios`, `cursos`, `catalogos`) y `apps/web/src/messages/es.json`
   (`comentarios`), incluidos tipos y estados de Discipulado para la bandeja. — cubre: FR-064
 
-- [ ] T016 **[Lote 0 global: `PersonaBreve.fotoUrl` opcional ya está; los `select` → lote 1]** [L0] `PersonaBreve` suma `fotoUrl: string | null` (`discipulado.ts`); sumar `fotoUrl` a
+- [ ] T016 **[Lote 0 global: `PersonaBreve.fotoUrl` opcional ya está; lote 1: `fotoUrl` en los `PersonaBreve` de Solicitudes de Discipulado; Grupos y `PERSONA_LISTADO_SELECT` → lote 2]** [L0] `PersonaBreve` suma `fotoUrl: string | null` (`discipulado.ts`); sumar `fotoUrl` a
   `PERSONA_LISTADO_SELECT` y a los `select` que arman `PersonaBreve` en la API (resúmenes de Solicitudes, Grupos);
   `PersonaListado` también. Actualizar en el mismo commit los tests que comparan objetos exactos. — cubre: FR-018,
   FR-011
@@ -117,7 +117,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 1 — Bandeja unificada (Historia 1, P1)
 
-- [ ] T020 [L1] `apps/api/src/bandeja/`: `FuenteSolicitudes` + token `FUENTES_SOLICITUDES` (multi-provider);
+- [x] T020 **[Lote 1: `BandejaController` + `ListarBandejaDto`; el registro es `RegistroFuentesSolicitudes` del lote 0 (no un token multi-provider)]** [L1] `apps/api/src/bandeja/`: `FuenteSolicitudes` + token `FUENTES_SOLICITUDES` (multi-provider);
   `BandejaService.listar(filtros)` sobre la vista con `$queryRaw` (ids + tipo, orden con desempate por `id`), hidrata
   por tipo preservando el orden; `conteoAbiertas()`. `BandejaController`: `GET /solicitudes` (se muda desde
   `solicitud-discipulado.controller.ts`, misma ruta) y `GET /solicitudes/conteo-abiertas`, con la compatibilidad de
@@ -126,32 +126,32 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `apps/backoffice/src/app/solicitudes/constantes.ts` (pasan a importar el de `bandeja.ts`), `estadosDelFiltro`, y
   `SolicitudResumen` (queda como alias de `SolicitudBandeja` o se reemplaza en sus usos). — cubre: FR-001–FR-005,
   FR-008
-- [ ] T021 [L1] `SolicitudDiscipuladoService`: implementar `FuenteSolicitudes` (`resumenes(ids)` = el `resumenes`
+- [x] T021 **[Lote 1: en `solicitud-discipulado/fuente-bandeja.ts`; `resumenes` del servicio pasa a público]** [L1] `SolicitudDiscipuladoService`: implementar `FuenteSolicitudes` (`resumenes(ids)` = el `resumenes`
   actual, con `extra.propuestaVigente`) y registrarla; borrar su `listar` (lo reemplaza la bandeja) actualizando sus
   tests en el mismo commit. — cubre: FR-007, FR-008
-- [ ] T022 [L1] Integración `bandeja.integration-spec.ts`: H1.1 (4 abiertas, orden por espera), H1.5 (resueltas con
+- [x] T022 **[Lote 1: H1.2 con fuente de prueba sobre la rama `bautismo` que la vista ya tiene, sin tocar la vista]** [L1] Integración `bandeja.integration-spec.ts`: H1.1 (4 abiertas, orden por espera), H1.5 (resueltas con
   revisor y fecha), H1.7 (`creadoPor`), H1.8 (45 abiertas → páginas de 20, `total` 45, última página con 5), búsqueda por
   "nombre apellido", `persona=`, `filtro=todas`, `tipo` inválido → 400 con `errors[campo=tipo]`, `estado` que no es del
   tipo → 400, Pastor 200 en lectura, Discipulador 403. Con un **tipo de prueba** registrado solo en el test (fuente
   falsa + rama extra de la vista creada en la base de test) para H1.2: mezcla, filtro por tipo y orden entre tipos. —
   cubre: H1.1, H1.2, H1.5, H1.7, H1.8, FR-004, FR-005, SC-001
-- [ ] T023 [P] [L1] Integración: los tests de la 004 sobre `GET /solicitudes` (filtros por estado, "propuesta a X")
+- [x] T023 **[Lote 1: verdes; única aserción movida: `propuestaVigente` → `extra.propuestaVigente` (forma del contrato)]** [P] [L1] Integración: los tests de la 004 sobre `GET /solicitudes` (filtros por estado, "propuesta a X")
   siguen verdes sin cambios de aserción. — cubre: FR-008
-- [ ] T024 [L1] Backoffice `app/solicitudes/`: la pantalla pasa a la forma base — columnas Tipo (solo si hay más de un
+- [x] T024 **[Lote 1: sin el enlace al perfil ni el avatar, que llegan con el lote 2; "Ver" lleva al detalle]** [L1] Backoffice `app/solicitudes/`: la pantalla pasa a la forma base — columnas Tipo (solo si hay más de un
   tipo), Persona (avatar + enlace al perfil), Estado (texto + ícono, por tipo), Pedida, Espera ("hace N días"), Cargada
   por, Revisada por; filtro Abiertas/Resueltas/Todas, filtro de tipo solo con >1 tipo, filtro de estados solo con un
   tipo elegido, búsqueda y orden con `ControlesTabla` + `useControlesTablaUrl`; fila → `RUTA_DETALLE_SOLICITUD[tipo]`;
   vuelta a página 1 al cambiar filtros. Columnas que colapsan según `docs/15` (identificación y estado nunca se ocultan).
   Estado vacío por filtro ("No hay nada esperando una respuesta" en Abiertas). Días de espera con el `diasDesde`
   existente. — cubre: FR-002, FR-004–FR-006, H1.3, H1.4
-- [ ] T025 [L1] E2E `apps/backoffice/e2e/bandeja.spec.ts`: H1.1, H1.3 (sin filtro de tipo con un solo tipo), H1.4 (fila
+- [x] T025 **[Lote 1: `bandeja.spec.ts`; el "nombre → perfil" de H1.4 se suma en el lote 2]** [L1] E2E `apps/backoffice/e2e/bandeja.spec.ts`: H1.1, H1.3 (sin filtro de tipo con un solo tipo), H1.4 (fila
   → detalle de Discipulado; nombre → perfil), H1.5, H1.6 (Pastor sin acciones), "hace N días" visible en cada fila (FR-002), `?pagina=99` → redirect a la última,
   cambio de filtro → `pagina=1`; axe claro y oscuro; 320 px sin scroll. — cubre: H1.1, H1.3–H1.6, FR-062, SC-007
-- [ ] T026 [L1] Adaptar `solicitudes.spec.ts` (004) a los textos nuevos de la bandeja sin perder sus casos. — cubre:
+- [x] T026 **[Lote 1: `solicitudes.spec.ts` sigue igual — sus selectores ya calzan con la bandeja nueva]** [L1] Adaptar `solicitudes.spec.ts` (004) a los textos nuevos de la bandeja sin perder sus casos. — cubre:
   FR-008
-- [ ] T027a [L1] [CHECKLIST] Pantalla **Solicitud de Discipulado (detalle)** modificada (nombre enlazado al perfil):
+- [ ] T027a **[→ lote 2: el nombre se enlaza cuando existe el perfil]** [L1] [CHECKLIST] Pantalla **Solicitud de Discipulado (detalle)** modificada (nombre enlazado al perfil):
   checklist de `docs/15` sobre lo tocado. — cubre: FR-062
-- [ ] T027 [L1] [CHECKLIST] Pantalla **Solicitudes (bandeja)**: aplicar y tildar el checklist de `docs/15` (una acción
+- [x] T027 **[Lote 1: `checklists/lote-1-pantallas.md`]** [L1] [CHECKLIST] Pantalla **Solicitudes (bandeja)**: aplicar y tildar el checklist de `docs/15` (una acción
   principal — no tiene: decirlo; estados de carga/vacío/error/éxito; feedback; tono; teclado y lector de pantalla;
   contraste claro/oscuro incl. `hover`). — cubre: FR-062
 

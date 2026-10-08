@@ -3,61 +3,68 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { CircleCheck, CircleX, Clock, Send, Undo2 } from 'lucide-react';
-import { type Pagina, type SolicitudResumen, formatearFechaHora } from '@vida-sobrenatural/shared-types';
-import { ControlesTabla, Paginacion, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
+import { ESTADOS_POR_TIPO, formatearFechaHora, type Pagina, type PersonaBreve, type SolicitudBandeja, type TipoSolicitud } from '@vida-sobrenatural/shared-types';
+import { ButtonLink, ControlesTabla, Paginacion, TablaDatos, type ColumnaTabla } from '@vida-sobrenatural/ui';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
 import { PedirEnNombreDe } from '../../components/pedir-en-nombre-de';
-import { FILTROS_ESTADO, diasDesde, type FiltroEstado } from './constantes';
+import { ICONO_TIPO_SOLICITUD, RUTA_DETALLE_SOLICITUD } from '../../config/solicitudes';
+import { EstadoBandeja } from './estado-solicitud-texto';
+import { diasDesde, type VistaBandeja } from './constantes';
 
-const ICONO_ESTADO = { pendiente: Clock, propuesta: Send, aprobada: CircleCheck, rechazada: CircleX, retirada: Undo2 } as const;
+const CLASE_SELECT = 'h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30';
 
-/** El estado de una Solicitud con texto e ícono, nunca solo color (D81). En `propuesta`, a quién y hace cuánto (FR-038). */
-export function EstadoSolicitudTexto({ solicitud }: { solicitud: Pick<SolicitudResumen, 'estado' | 'propuestaVigente'> }) {
-  const t = useTranslations('solicitudes.estados');
-  const Icono = ICONO_ESTADO[solicitud.estado];
-  const vigente = solicitud.propuestaVigente;
+/** El tipo de una Solicitud con texto e ícono, nunca solo color (D81). */
+function TipoTexto({ tipo }: { tipo: TipoSolicitud }) {
+  const t = useTranslations('bandeja.tipos');
+  const Icono = ICONO_TIPO_SOLICITUD[tipo];
   return (
     <span className="inline-flex items-start gap-1.5">
       <Icono aria-hidden className="mt-0.5 size-4 shrink-0" />
-      <span>
-        {solicitud.estado === 'propuesta' && vigente
-          ? t('propuesta', { nombre: `${vigente.discipulador.nombre} ${vigente.discipulador.apellido}`, dias: diasDesde(vigente.propuestaEn) })
-          : t(solicitud.estado === 'propuesta' ? 'pendiente' : solicitud.estado)}
-      </span>
+      <span>{t(tipo)}</span>
     </span>
   );
 }
 
 /**
- * specs/004, T027: la bandeja. Los datos llegan de page.tsx (Server
- * Component); acá solo la sincronización de búsqueda, estado, orden y página
- * con la URL (H-88, H-101) y "Pedir Vida Nueva en nombre de…" para quien
- * tiene `solicitudes.crear_en_nombre`. Cada fila lleva al detalle.
+ * spec 013, T024: la bandeja unificada. Los datos llegan de page.tsx (Server
+ * Component); acá solo la sincronización de filtros, búsqueda, orden y página
+ * con la URL (H-88, H-101). Cambiar un filtro vuelve a la página 1.
+ *
+ * Filtros (FR-004): "Mostrar" (Abiertas / Resueltas / Todas y, con un tipo
+ * elegido, sus estados) y "Tipo" (solo con más de un tipo conectado: un
+ * filtro de una sola opción es ruido). Celular (`docs/15`): Persona, Estado y
+ * la acción nunca se ocultan; el tipo y la espera se repiten dentro de esas
+ * celdas cuando sus columnas se van.
+ *
+ * Sin acciones de resolver propias (FR-006): cada fila lleva al detalle de su
+ * tipo, donde se resuelve. "Pedir Vida Nueva en nombre de…" es de la 004.
  */
 export function SolicitudesCliente({
   pagina,
   paginaActual,
   totalPaginas,
-  filtro,
-  orden,
+  vista,
+  conectados,
   apiToken,
   puedeCrearEnNombre,
 }: {
-  pagina: Pagina<SolicitudResumen>;
+  pagina: Pagina<SolicitudBandeja>;
   paginaActual: number;
   totalPaginas: number;
-  filtro: FiltroEstado;
-  orden: OrdenTabla;
+  vista: VistaBandeja;
+  conectados: TipoSolicitud[];
   apiToken: string;
   puedeCrearEnNombre: boolean;
 }) {
-  const t = useTranslations('solicitudes');
+  const t = useTranslations('bandeja');
+  const tEstados = useTranslations('bandeja.estados');
+  const tTipos = useTranslations('bandeja.tipos');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl({ clavesAReiniciarConBusqueda: ['pagina'] });
+  const variosTipos = conectados.length > 1;
 
   function hrefPagina(numero: number): string {
     const params = new URLSearchParams(searchParams);
@@ -67,43 +74,84 @@ export function SolicitudesCliente({
     return query ? `${pathname}?${query}` : pathname;
   }
 
-  const nombre = (p: { nombre: string; apellido: string }) => `${p.nombre} ${p.apellido}`;
+  function hrefSin(claves: string[]): string {
+    const params = new URLSearchParams(searchParams);
+    for (const clave of claves) params.delete(clave);
+    const query = params.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }
 
-  const columnas: ColumnaTabla<SolicitudResumen>[] = [
+  const nombre = (p: PersonaBreve) => `${p.nombre} ${p.apellido}`;
+  const espera = (s: SolicitudBandeja) => (s.abierta ? t('espera', { dias: diasDesde(s.esperaDesde) }) : t('esperaResuelta'));
+
+  const columnas: ColumnaTabla<SolicitudBandeja>[] = [
+    ...(variosTipos
+      ? [{ id: 'tipo', encabezado: t('columnas.tipo'), className: 'hidden sm:table-cell', celda: (s: SolicitudBandeja) => <TipoTexto tipo={s.tipo} /> }]
+      : []),
     {
       id: 'persona',
       encabezado: t('columnas.persona'),
       ordenable: true,
       celda: (s) => (
-        <Link href={`/solicitudes/${s.id}`} className="font-medium underline underline-offset-2">
-          {nombre(s.persona)}
-        </Link>
+        <span className="flex flex-col gap-0.5">
+          <span className="font-medium">{nombre(s.persona)}</span>
+          {variosTipos && (
+            <span className="text-muted-foreground sm:hidden">
+              <TipoTexto tipo={s.tipo} />
+            </span>
+          )}
+        </span>
       ),
     },
-    { id: 'estado', encabezado: t('columnas.estado'), celda: (s) => <EstadoSolicitudTexto solicitud={s} /> },
+    {
+      id: 'estado',
+      encabezado: t('columnas.estado'),
+      celda: (s) => (
+        <span className="flex flex-col gap-0.5">
+          <EstadoBandeja solicitud={s} />
+          {s.abierta && <span className="text-muted-foreground sm:hidden">{espera(s)}</span>}
+        </span>
+      ),
+    },
+    { id: 'espera', encabezado: t('columnas.espera'), ordenable: true, className: 'hidden sm:table-cell', celda: espera },
     {
       id: 'fecha',
       encabezado: t('columnas.pedida'),
       ordenable: true,
-      className: 'hidden sm:table-cell',
+      className: 'hidden md:table-cell',
       celda: (s) => formatearFechaHora(s.createdAt, locale),
     },
     {
-      id: 'creadaPor',
-      encabezado: t('columnas.creadaPor'),
-      className: 'hidden md:table-cell',
+      id: 'cargadaPor',
+      encabezado: t('columnas.cargadaPor'),
+      className: 'hidden lg:table-cell',
       celda: (s) => (s.creadoPor ? nombre(s.creadoPor) : t('laPersona')),
     },
     {
       id: 'revisadaPor',
       encabezado: t('columnas.revisadaPor'),
       className: 'hidden lg:table-cell',
-      celda: (s) => (s.revisadoPor ? nombre(s.revisadoPor) : t('sinDato')),
+      celda: (s) =>
+        s.revisadoPor
+          ? s.revisadaEn
+            ? t('revisadaPorEl', { nombre: nombre(s.revisadoPor), fecha: formatearFechaHora(s.revisadaEn, locale) })
+            : nombre(s.revisadoPor)
+          : t('sinDato'),
     },
   ];
 
+  const valorMostrar = vista.estado ? `estado:${vista.estado}` : vista.filtro;
+  const hayAlgoAplicado =
+    busqueda.trim() !== '' || vista.filtro !== 'abiertas' || vista.estado !== null || (variosTipos && vista.tipo !== null) || vista.persona !== null;
+  const mensajeVacio = busqueda.trim()
+    ? t('vacioBusqueda', { q: busqueda.trim() })
+    : vista.filtro === 'abiertas' && !vista.estado
+      ? t('vacioAbiertas')
+      : t('vacioFiltro');
+  const personaFiltrada = vista.persona ? pagina.items.find((s) => s.persona.id === vista.persona)?.persona : undefined;
+
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-16">
+    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-16">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
         <p className="text-muted-foreground">{t('descripcion')}</p>
@@ -111,29 +159,71 @@ export function SolicitudesCliente({
 
       {puedeCrearEnNombre && <PedirEnNombreDe apiToken={apiToken} onCreado={() => router.refresh()} />}
 
+      {vista.persona && (
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span>{personaFiltrada ? t('soloDe', { nombre: nombre(personaFiltrada) }) : t('soloDeUnaPersona')}</span>
+          <Link href={hrefSin(['persona', 'pagina'])} className="font-medium underline underline-offset-2">
+            {t('verDeTodos')}
+          </Link>
+        </p>
+      )}
+
       <ControlesTabla
         busqueda={busqueda}
         onBuscarChange={setBusqueda}
         etiquetaBusqueda={t('buscar')}
         placeholderBusqueda={t('buscarPlaceholder')}
         filtros={
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            {t('filtroEstado')}
-            <select
-              value={filtro}
-              onChange={(e) => actualizarParams({ estado: e.target.value === 'abiertas' ? null : e.target.value, pagina: null })}
-              className="h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal dark:bg-input/30"
-            >
-              {FILTROS_ESTADO.map((f) => (
-                <option key={f} value={f}>
-                  {t(`filtros.${f}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <>
+            <label className="flex flex-col gap-1 text-sm font-medium">
+              {t('mostrar')}
+              <select
+                value={valorMostrar}
+                onChange={(e) => {
+                  const valor = e.target.value;
+                  if (valor.startsWith('estado:')) actualizarParams({ estado: valor.slice('estado:'.length), filtro: null, pagina: null });
+                  else actualizarParams({ filtro: valor === 'abiertas' ? null : valor, estado: null, pagina: null });
+                }}
+                className={CLASE_SELECT}
+              >
+                {(['abiertas', 'resueltas', 'todas'] as const).map((f) => (
+                  <option key={f} value={f}>
+                    {t(`filtros.${f}`)}
+                  </option>
+                ))}
+                {vista.tipo && (
+                  <optgroup label={t('porEstado')}>
+                    {ESTADOS_POR_TIPO[vista.tipo].map((estado) => (
+                      <option key={estado} value={`estado:${estado}`}>
+                        {tEstados(`${vista.tipo}.${estado}` as `${TipoSolicitud}.pendiente`)}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </label>
+            {variosTipos && (
+              <label className="flex flex-col gap-1 text-sm font-medium">
+                {t('filtroTipo')}
+                <select
+                  value={vista.tipo ?? ''}
+                  // Los estados son de cada tipo: cambiar de tipo los suelta.
+                  onChange={(e) => actualizarParams({ tipo: e.target.value || null, estado: null, pagina: null })}
+                  className={CLASE_SELECT}
+                >
+                  <option value="">{t('todosLosTipos')}</option>
+                  {conectados.map((tipo) => (
+                    <option key={tipo} value={tipo}>
+                      {tTipos(tipo)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </>
         }
-        hayAlgoAplicado={busqueda.trim() !== '' || filtro !== 'abiertas'}
-        onLimpiar={() => limpiar(['estado', 'pagina'])}
+        hayAlgoAplicado={hayAlgoAplicado}
+        onLimpiar={() => limpiar(['filtro', 'estado', 'tipo', 'persona', 'pagina'])}
         cantidadResultados={pagina.total}
         etiquetaResultados={(cantidad) => t('resultados', { cantidad })}
       />
@@ -141,17 +231,28 @@ export function SolicitudesCliente({
       <TablaDatos
         columnas={columnas}
         datos={pagina.items}
-        obtenerId={(s) => s.id}
+        obtenerId={(s) => `${s.tipo}:${s.id}`}
         etiqueta={t('tabla')}
-        mensajeVacio={busqueda.trim() ? t('vacioBusqueda', { q: busqueda.trim() }) : t('vacio')}
-        orden={orden}
+        mensajeVacio={mensajeVacio}
+        orden={{ columna: vista.orden, direccion: vista.dir }}
         onOrdenar={(columnaId) =>
           actualizarParams({
-            orden: columnaId === 'fecha' ? null : columnaId,
-            dir: orden.columna === columnaId && orden.direccion === 'asc' ? 'desc' : null,
+            orden: columnaId === 'espera' ? null : columnaId,
+            dir: vista.orden === columnaId && vista.dir === 'asc' ? 'desc' : null,
             pagina: null,
           })
         }
+        encabezadoAcciones={t('columnas.acciones')}
+        acciones={(s) => (
+          <ButtonLink
+            variant="outline"
+            size="sm"
+            render={<Link href={RUTA_DETALLE_SOLICITUD[s.tipo](s.id)} />}
+            aria-label={t('verDe', { nombre: nombre(s.persona) })}
+          >
+            {t('ver')}
+          </ButtonLink>
+        )}
       />
 
       <Paginacion

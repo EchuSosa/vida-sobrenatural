@@ -121,7 +121,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const apellido = `EnNombre${sufijo}`;
       await crearPersonaActiva(`e2e-en-nombre-${sufijo}@example.com`, apellido);
       await loguearseComoAdminE2E(page);
-      await page.goto('/solicitudes');
+      // spec 013: la bandeja ordena por espera, así que una recién pedida queda al final; se busca por
+      // su apellido para verla aunque haya más de una página de abiertas.
+      await page.goto(`/solicitudes?q=${apellido}`);
 
       await page.getByRole('button', { name: 'Pedir Vida Nueva en nombre de…' }).click();
       const panel = page.getByRole('dialog');

@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@vida-sobrenatural/ui';
 
-/** Error de la bandeja (GET /solicitudes no respondió): qué pasó, el código de referencia y "Reintentar" (H-04). */
+/** Error de la bandeja (GET /solicitudes no respondió, spec 013): qué pasó, el código de referencia y "Reintentar" (H-04). */
 export default function ErrorSolicitudes({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter();
-  const t = useTranslations('solicitudes');
+  const t = useTranslations('bandeja');
 
   useEffect(() => {
     console.error('[solicitudes/error.tsx]', error.digest, error);

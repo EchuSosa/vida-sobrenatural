@@ -1,22 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { tienePermiso, type EstadoSolicitud } from '@vida-sobrenatural/shared-types';
+import { tienePermiso } from '@vida-sobrenatural/shared-types';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import { PermisosGuard } from '../auth/permisos.guard.js';
 import { RequierePermiso } from '../auth/permisos.decorator.js';
 import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
 import { AppException } from '../common/errors/app-exception.js';
-import { SolicitudDiscipuladoService, type OrdenBandeja } from './solicitud-discipulado.service.js';
+import { SolicitudDiscipuladoService } from './solicitud-discipulado.service.js';
 import { FranjasDto } from './dto/franjas.dto.js';
 import { CrearEnNombreDto } from './dto/crear-en-nombre.dto.js';
 import { ProponerDto } from './dto/proponer.dto.js';
-
-/** H-42: default de la bandeja, acotado a 100 (mismo criterio que GET /personas/pendientes-tutor). */
-const SOLICITUDES_TAKE_DEFAULT = 20;
-
-const ESTADOS: readonly EstadoSolicitud[] = ['pendiente', 'propuesta', 'aprobada', 'rechazada', 'retirada'];
-/** FR-025: por defecto, los dos estados abiertos. */
-const ESTADOS_ABIERTOS: EstadoSolicitud[] = ['pendiente', 'propuesta'];
 
 /**
  * specs/004, Historias 1, 2 y 3 (contracts/solicitudes-api.md). Rutas de la
@@ -67,29 +60,7 @@ export class SolicitudDiscipuladoController {
     return this.service.crearEnNombreDe(dto.personaId, dto.franjas, autorDeSesion(request));
   }
 
-  // ─── La bandeja del Admin (FR-025, FR-038) ───────────────────────────────
-
-  @Get('solicitudes')
-  @RequierePermiso('solicitudes.ver')
-  @ApiOkResponse({ description: 'specs/004, FR-025: la bandeja genérica, paginada. `estado` (lista separada por comas, por defecto pendiente,propuesta), `tipo` (hoy solo discipulado), `orden` (fecha|persona|espera), `dir`, `skip`, `take`, `buscar` (nombre o apellido de la Persona).' })
-  listar(
-    @Query('estado') estadoParam?: string,
-    @Query('tipo') tipo?: string,
-    @Query('orden') ordenParam?: string,
-    @Query('dir') dirParam?: string,
-    @Query('skip') skipParam?: string,
-    @Query('take') takeParam?: string,
-    @Query('buscar') buscar?: string,
-  ) {
-    const skip = Math.max(0, Number(skipParam) || 0);
-    const take = Math.min(100, Math.max(1, Number(takeParam) || SOLICITUDES_TAKE_DEFAULT));
-    // FR-025: el filtro por tipo existe en la estructura; con un solo tipo conectado, otro tipo no trae nada.
-    if (tipo && tipo !== 'discipulado') return { items: [], total: 0 };
-    const pedidos = (estadoParam ?? '').split(',').filter((e): e is EstadoSolicitud => ESTADOS.includes(e as EstadoSolicitud));
-    const orden: OrdenBandeja = ordenParam === 'persona' || ordenParam === 'espera' ? ordenParam : 'fecha';
-    const dir: 'asc' | 'desc' = dirParam === 'desc' ? 'desc' : 'asc';
-    return this.service.listar(pedidos.length > 0 ? pedidos : ESTADOS_ABIERTOS, orden, dir, skip, take, buscar);
-  }
+  // ─── El detalle (FR-038). `GET /solicitudes` (la bandeja) es de la spec 013: `bandeja/` ─
 
   @Get('discipulado/solicitudes/:id')
   @RequierePermiso('solicitudes.ver')

@@ -1,58 +1,48 @@
 import { redirect } from 'next/navigation';
-import { apiFetch, type Pagina, type SolicitudResumen } from '@vida-sobrenatural/shared-types';
+import { apiFetch, type ConteoAbiertas, type Pagina, type SolicitudBandeja, type TipoSolicitud } from '@vida-sobrenatural/shared-types';
 import { requerirPermiso, tienePermisoSesion } from '../../auth';
 import { SolicitudesCliente } from './solicitudes-cliente';
-import { FILTROS_ESTADO, ORDENES, TAMANIO_PAGINA, estadosDelFiltro, type FiltroEstado, type OrdenBandeja } from './constantes';
+import { TAMANIO_PAGINA, leerVistaBandeja, parametrosApi, urlBandeja, type ParametrosBandeja } from './constantes';
 
 const PAGINA_VALIDA = /^[1-9]\d*$/;
 
 /**
- * specs/004, Historia 3 (T027): la bandeja genérica de Solicitudes (FR-025),
- * con el patrón de listado paginado de H-101 (pendientes-tutor): página,
- * búsqueda, estado y orden en la URL, resueltos por la API. Sin filtro por
- * tipo: hay uno solo conectado. El Pastor la ve sin acciones (D64).
+ * spec 013, Historia 1 (T024): la bandeja unificada de Solicitudes — todos los
+ * tipos conectados en una tabla, por defecto lo abierto y lo que más espera
+ * arriba (FR-001–FR-006). Generaliza la bandeja de Discipulado de la 004 con
+ * el patrón de listado paginado de H-101: filtros, búsqueda, orden y página
+ * en la URL, resueltos por la API. Los tipos conectados salen de
+ * `conteo-abiertas` (FR-007: un tipo nuevo aparece sin tocar esta pantalla).
+ * La bandeja no resuelve nada: cada fila lleva al detalle de su tipo. El
+ * Pastor la ve igual (D64).
  */
 export default async function SolicitudesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; estado?: string; orden?: string; dir?: string; pagina?: string }>;
+  searchParams: Promise<ParametrosBandeja & { q?: string; pagina?: string }>;
 }) {
   const session = await requerirPermiso('solicitudes.ver');
-  const { q, estado: estadoParam, orden: ordenParam, dir, pagina: paginaParam } = await searchParams;
-  const buscar = (q ?? '').trim();
-  const filtro: FiltroEstado = FILTROS_ESTADO.includes(estadoParam as FiltroEstado) ? (estadoParam as FiltroEstado) : 'abiertas';
-  const orden: OrdenBandeja = ORDENES.includes(ordenParam as OrdenBandeja) ? (ordenParam as OrdenBandeja) : 'fecha';
-  const direccion: 'asc' | 'desc' = dir === 'desc' ? 'desc' : 'asc';
+  const params = await searchParams;
+  const buscar = (params.q ?? '').trim();
+  const headers = { Authorization: `Bearer ${session.apiToken}` };
 
-  const paginaEsTextoValido = paginaParam === undefined || PAGINA_VALIDA.test(paginaParam);
-  const paginaSolicitada = paginaParam !== undefined && paginaEsTextoValido ? Number.parseInt(paginaParam, 10) : 1;
-  const skip = (paginaSolicitada - 1) * TAMANIO_PAGINA;
+  const conteo = await apiFetch<ConteoAbiertas>('/solicitudes/conteo-abiertas', { headers, cache: 'no-store' });
+  const conectados = Object.keys(conteo) as TipoSolicitud[];
+  const { vista, corregida } = leerVistaBandeja(params, conectados);
 
-  const params = new URLSearchParams({
-    estado: estadosDelFiltro(filtro).join(','),
-    orden,
-    dir: direccion,
-    skip: String(skip),
-    take: String(TAMANIO_PAGINA),
-  });
-  if (buscar) params.set('buscar', buscar);
-  const pagina = await apiFetch<Pagina<SolicitudResumen>>(`/solicitudes?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${session.apiToken}` },
+  const paginaEsTextoValido = params.pagina === undefined || PAGINA_VALIDA.test(params.pagina);
+  const paginaSolicitada = params.pagina !== undefined && paginaEsTextoValido ? Number.parseInt(params.pagina, 10) : 1;
+  if (corregida) redirect(urlBandeja(vista, buscar, paginaSolicitada, conectados));
+
+  const pagina = await apiFetch<Pagina<SolicitudBandeja>>(`/solicitudes?${parametrosApi(vista, buscar, (paginaSolicitada - 1) * TAMANIO_PAGINA)}`, {
+    headers,
     cache: 'no-store',
   });
 
   // H-101: una página inválida o fuera de rango cae en la válida más cercana, con redirect real.
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / TAMANIO_PAGINA));
   if (!paginaEsTextoValido || paginaSolicitada > totalPaginas) {
-    const corregidos = new URLSearchParams();
-    if (buscar) corregidos.set('q', buscar);
-    if (estadoParam) corregidos.set('estado', estadoParam);
-    if (ordenParam) corregidos.set('orden', ordenParam);
-    if (dir) corregidos.set('dir', dir);
-    const paginaFinal = Math.min(paginaSolicitada, totalPaginas);
-    if (paginaFinal > 1) corregidos.set('pagina', String(paginaFinal));
-    const query = corregidos.toString();
-    redirect(query ? `/solicitudes?${query}` : '/solicitudes');
+    redirect(urlBandeja(vista, buscar, Math.min(paginaSolicitada, totalPaginas), conectados));
   }
 
   return (
@@ -60,8 +50,8 @@ export default async function SolicitudesPage({
       pagina={pagina}
       paginaActual={paginaSolicitada}
       totalPaginas={totalPaginas}
-      filtro={filtro}
-      orden={{ columna: orden, direccion }}
+      vista={vista}
+      conectados={conectados}
       apiToken={session.apiToken}
       puedeCrearEnNombre={tienePermisoSesion(session, 'solicitudes.crear_en_nombre')}
     />

@@ -214,7 +214,8 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
     expect(bandeja.body.items.find((s: { id: string }) => s.id === solicitud.id)).toMatchObject({
       estado: 'propuesta',
       revisadoPor: { id: ids.pastor },
-      propuestaVigente: { discipulador: { id: ids.disc } },
+      // spec 013 (bandeja unificada): lo propio de cada tipo viaja en `extra`.
+      extra: { propuestaVigente: { discipulador: { id: ids.disc } } },
     });
     const detalle = await api.get(`/discipulado/solicitudes/${solicitud.id}`).set('Authorization', `Bearer ${admin}`);
     expect(detalle.body.historial).toEqual([expect.objectContaining({ estado: 'pendiente', discipulador: expect.objectContaining({ id: ids.disc }) })]);
