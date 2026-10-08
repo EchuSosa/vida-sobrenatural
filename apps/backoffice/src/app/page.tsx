@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { aterrizajeDeSesion, requerirPermiso, requerirSesion, tienePermisoSesion } from '../auth';
 import { TarjetaPendientes } from './tarjeta-pendientes';
+import { PantallaSinBackoffice } from '../components/lo-tuyo-en-la-app';
 import { BloqueCumpleanos } from './inicio/bloque-cumpleanos';
 import { BloqueMetricas } from './inicio/bloque-metricas';
 import { BloquePendientes } from './inicio/bloque-pendientes';
@@ -27,13 +28,8 @@ export default async function InicioBackofficePage() {
   const aterrizaje = aterrizajeDeSesion(session);
 
   if (!aterrizaje) {
-    const t = await getTranslations('aterrizaje');
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold">{t('sinAccesoTitulo')}</h1>
-        <p className="text-muted-foreground">{t('sinAccesoDescripcion')}</p>
-      </div>
-    );
+    // spec 006 (T061): "Lo tuyo está en la app" para el Discipulador y el Líder de curso.
+    return <PantallaSinBackoffice session={session} />;
   }
   if (aterrizaje.href !== '/') {
     redirect(aterrizaje.href);

@@ -17,6 +17,7 @@ import { calcularEdad } from '../persona/calcular-edad.js';
 import { CruceService } from '../discipulado/cruce.service.js';
 import { EventosDiscipuladoService } from '../discipulado/eventos.js';
 import { cursaOCompletoVidaNueva } from '../discipulado/consultas.js';
+import { bloquearPersona, completitudVigente } from '../camino/consultas.js';
 import { erroresDeFranjas, estadoMiDiscipulado, puedePedirSola } from './reglas-solicitud.js';
 
 type Tx = Prisma.TransactionClient;
@@ -61,6 +62,8 @@ export class SolicitudDiscipuladoService {
     validarFranjasOFallar(franjas);
     try {
       return await this.prisma.$transaction(async (tx) => {
+        // spec 006 (research #5): serializa pedir y declarar "Ya lo hice" de la misma Persona.
+        await bloquearPersona(tx, personaId);
         const persona = await tx.persona.findUnique({
           where: { id: personaId },
           select: { id: true, activo: true, estado: true, fechaNacimiento: true },
@@ -68,6 +71,7 @@ export class SolicitudDiscipuladoService {
         if (!persona || !persona.activo || persona.estado !== 'activa') {
           throw new AppException('NO_ENCONTRADO', 404, 'No existe una Persona activa con ese id.');
         }
+        await exigirSinHistorialDeVidaNueva(tx, personaId);
         if (creadoPorId === null && !puedePedirSola(calcularEdad(persona.fechaNacimiento))) {
           throw new AppException(
             'EDAD_INSUFICIENTE_PARA_PEDIR_SOLO',
@@ -395,6 +399,21 @@ function validarFranjasOFallar(franjas: unknown) {
 
 function soloFranja(f: Franja): Franja {
   return { diaSemana: f.diaSemana, inicio: f.inicio, fin: f.fin };
+}
+
+/**
+ * spec 006, FR-017: el pedido de Vida Nueva (propio o en nombre de) se rechaza
+ * si la Persona contó que ya la hizo y la iglesia lo está revisando, o si ya
+ * figura hecha por historial. Con la fila de la Persona bloqueada.
+ */
+async function exigirSinHistorialDeVidaNueva(tx: Tx, personaId: string) {
+  const pendiente = await tx.declaracionHistorial.findFirst({ where: { personaId, etapa: 'vida_nueva', estado: 'pendiente' }, select: { id: true } });
+  if (pendiente) {
+    throw new AppException('HISTORIAL_VIDA_NUEVA_EN_REVISION', 409, 'La Persona contó que ya hizo Vida Nueva y el equipo lo está revisando.');
+  }
+  if (await completitudVigente(tx, personaId, 'vida_nueva')) {
+    throw new AppException('VIDA_NUEVA_COMPLETADA_POR_HISTORIAL', 409, 'Vida Nueva ya figura como hecha, registrada por la iglesia.');
+  }
 }
 
 async function exigirSinSolicitudAbierta(tx: Tx, personaId: string) {

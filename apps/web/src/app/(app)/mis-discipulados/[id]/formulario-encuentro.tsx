@@ -25,9 +25,10 @@ import {
   useEnvio,
   useValidacionCampos,
   type EtiquetasCampoFecha,
+  mensajeDeError,
+  mensajesDeCampo,
   type ValidacionCampo,
 } from '@vida-sobrenatural/ui';
-import { mensajeDeError, mensajesDeCampo } from '../comun';
 
 export interface PersonaDeAsistencia {
   inscripcionId: string;
@@ -152,10 +153,10 @@ export function FormularioEncuentro({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="campo-capitulos" className="text-sm font-medium">
+            <label htmlFor="campo-capitulos" className="text-base font-medium">
               {t('detalle.formulario.capitulos')}
             </label>
-            <p id="campo-capitulos-ayuda" className="text-sm text-muted-foreground">
+            <p id="campo-capitulos-ayuda" className="text-base text-muted-foreground">
               {t('detalle.formulario.capitulosAyuda')}
             </p>
             <Input
@@ -175,10 +176,10 @@ export function FormularioEncuentro({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="campo-notas" className="text-sm font-medium">
+            <label htmlFor="campo-notas" className="text-base font-medium">
               {t('detalle.formulario.notas')}
             </label>
-            <p id="campo-notas-ayuda" className="text-sm text-muted-foreground">
+            <p id="campo-notas-ayuda" className="text-base text-muted-foreground">
               {t('detalle.formulario.notasAyuda')}
             </p>
             <textarea
@@ -199,12 +200,12 @@ export function FormularioEncuentro({
 
           {personas.length > 0 && (
             <fieldset id="campo-asistencias" tabIndex={-1} className="flex flex-col gap-1 outline-none" aria-describedby="campo-asistencias-ayuda">
-              <legend className="text-sm font-medium">{t('detalle.formulario.asistencia')}</legend>
-              <p id="campo-asistencias-ayuda" className="text-sm text-muted-foreground">
+              <legend className="text-base font-medium">{t('detalle.formulario.asistencia')}</legend>
+              <p id="campo-asistencias-ayuda" className="text-base text-muted-foreground">
                 {t('detalle.formulario.asistenciaAyuda')}
               </p>
               {personas.map((p) => (
-                <label key={p.inscripcionId} className="flex min-h-11 items-center gap-3 text-sm">
+                <label key={p.inscripcionId} className="flex min-h-11 items-center gap-3 text-base">
                   <input
                     type="checkbox"
                     className="size-5 accent-primary"

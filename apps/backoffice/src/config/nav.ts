@@ -9,7 +9,6 @@ import {
   CalendarDays,
   Bell,
   FolderKanban,
-  CalendarClock,
   Building2,
   Trash2,
   Mic,
@@ -85,20 +84,6 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
     enMenu: false,
   },
   { href: '/catalogos', labelKey: 'catalogos', icon: FolderKanban, permiso: 'catalogos.ver' },
-  {
-    href: '/mis-discipulados',
-    labelKey: 'misDiscipulados',
-    icon: UsersRound,
-    permiso: 'mis_discipulados.ver',
-  },
-  { href: '/mis-discipulados/[id]', labelKey: 'misDiscipulados', icon: UsersRound, permiso: 'mis_discipulados.ver', enMenu: false },
-  {
-    href: '/mi-disponibilidad',
-    labelKey: 'miDisponibilidad',
-    icon: CalendarClock,
-    permiso: 'mi_disponibilidad.ver',
-  },
-  { href: '/mis-grupos', labelKey: 'misGrupos', icon: UsersRound, permiso: 'mis_grupos.ver' },
   // Lote 0 global (specs/IMPLEMENTACION.md): cada spec agrega SUS rutas recién
   // cuando existe la página — el smoke de axe recorre esta lista entera, así
   // que una ruta sin página rompe los e2e. Los permisos ya están en
@@ -115,6 +100,9 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/cursos', labelKey: 'cursos', icon: GraduationCap, permiso: 'catalogos.ver', enMenu: false }, // 013 lote 6: se entra por Catálogos
   { href: '/cursos/[id]', labelKey: 'cursos', icon: GraduationCap, permiso: 'catalogos.ver', enMenu: false },
   { href: '/cursos/papelera', labelKey: 'cursos', icon: GraduationCap, permiso: 'cursos.papelera.ver', enMenu: false },
+  // --- spec 006 ---
+  { href: '/personas/nueva', labelKey: 'personas', icon: Users, permiso: 'personas.alta', enMenu: false },
+  { href: '/solicitudes/historial/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
 ];
 
 function rolesEfectivos(permiso: Permiso | 'cualquier-sesion'): RolDeCargo[] | 'cualquier-sesion' {

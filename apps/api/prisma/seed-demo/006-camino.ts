@@ -90,5 +90,48 @@ export async function sembrarDemo006(ctx: ContextoSeedDemo): Promise<void> {
     });
   }
 
-  console.log('Mi camino (006): declaraciones y Completitudes demo listas (o ya existentes).');
+  // ─── Lote D: Personas sin email y posibles duplicados (FR-043) ─────────
+  const discipuladora = await prisma.persona.findFirst({ where: { rol: { has: 'discipulador' } }, select: { id: true } });
+
+  async function sinEmail(nombre: string, apellido: string, telefono: string, fecha: string): Promise<{ id: string; nueva: boolean }> {
+    const existente = await prisma.persona.findFirst({ where: { nombre, apellido, email: null }, select: { id: true } });
+    if (existente) return { id: existente.id, nueva: false };
+    const creada = await prisma.persona.create({
+      data: {
+        ...comunes,
+        nombre,
+        apellido,
+        telefono,
+        fechaNacimiento: new Date(`${fecha}T00:00:00.000Z`),
+        email: null,
+        origenAlta: 'admin',
+        altaPor: admin?.id ?? null,
+        consentimientoDatosOrigen: 'presencial',
+        consentimientoDatosFecha: new Date(),
+        estadoCivil: 'viudo_a',
+        profesion: 'jubilado_a',
+      },
+      select: { id: true },
+    });
+    return { id: creada.id, nueva: true };
+  }
+
+  // Tres Personas sin acceso a la app; a una la pidió la Discipuladora.
+  await sinEmail('Elsa Margarita', 'Domínguez Villafañe', '+54 9 221 820-0001', '1944-08-21');
+  await sinEmail('Héctor Rubén', 'Aguirre del Valle', '+54 9 221 820-0002', '1939-11-02');
+  const conPedido = await sinEmail('Nélida', 'Ibáñez Quiroga', '+54 9 221 820-0003', '1951-01-30');
+  if (conPedido.nueva && discipuladora) {
+    await prisma.solicitudDiscipulado.create({
+      data: { personaId: conPedido.id, creadoPorId: discipuladora.id, franjas: { create: [{ diaSemana: 4, inicio: 10 * 60, fin: 12 * 60 }] } },
+    });
+  }
+
+  // Par duplicado por teléfono, escrito distinto (los dos válidos para TELEFONO_REGEX).
+  await persona('demo-dup-telefono-1@example.com', 'Marta', 'Suárez', '+54 9 221 555 0101');
+  await sinEmail('Marta Beatriz', 'Suárez Ledesma', '+54 221 5550101', '1950-09-09');
+  // Homónimos con la misma fecha y tildes distintas.
+  await sinEmail('José', 'Pérez', '+54 9 221 830-0001', '1972-03-14');
+  await persona('demo-homonimo-jose@example.com', 'Jose', 'Perez', '+54 9 221 830-0002');
+
+  console.log('Mi camino (006): declaraciones, Completitudes, Personas sin email y duplicados demo listos (o ya existentes).');
 }

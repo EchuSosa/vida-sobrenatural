@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { apiFetch, ApiError } from '@vida-sobrenatural/shared-types';
-import { requerirPermiso, tienePermisoSesion } from '../../../auth';
-import type { DetalleMiDiscipulado } from '../comun';
+import type { DetalleMiDiscipulado } from '@vida-sobrenatural/shared-types';
+import { requerirPermiso, tienePermisoSesion } from '../../../../auth';
 import { DetalleMiDiscipuladoCliente } from './detalle-cliente';
 
 /**

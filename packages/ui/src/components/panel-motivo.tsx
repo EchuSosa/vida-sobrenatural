@@ -2,19 +2,11 @@
 
 import { useState, type ReactNode } from 'react';
 import { MOTIVO_MAX } from '@vida-sobrenatural/shared-types';
-import {
-  Button,
-  MensajeErrorCampo,
-  ResumenErrores,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  useEnvio,
-  useValidacionCampos,
-} from '@vida-sobrenatural/ui';
+import { Button } from './ui/button';
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from './ui/sheet';
+import { MensajeErrorCampo, ResumenErrores } from './form-errors';
+import { useEnvio } from '../hooks/use-envio';
+import { useValidacionCampos } from '../hooks/use-validacion-campos';
 
 export interface TextosPanelMotivo {
   titulo: string;
@@ -31,6 +23,9 @@ export interface TextosPanelMotivo {
 }
 
 /**
+ * spec 006 (lote C): movido de `apps/backoffice/src/app/mis-discipulados/` a
+ * `packages/ui` — lo usan el Discipulador (web app) y el Admin (Grupos).
+ *
  * specs/004, lote B: el panel con un motivo opcional que usan declinar una
  * propuesta, pedir una baja y rechazar una finalización o una baja (FR-037,
  * FR-019a, FR-042). Una sola pieza para las cuatro (Principio XI). Valida el
@@ -84,10 +79,10 @@ export function PanelMotivo({
           {children}
           <ResumenErrores errores={validacion.resumen} foco={validacion.foco} titulo={textos.resumen} />
           <div className="flex flex-col gap-1">
-            <label htmlFor="campo-motivo" className="text-sm font-medium">
+            <label htmlFor="campo-motivo" className="text-base font-medium">
               {textos.etiqueta}
             </label>
-            <p id="campo-motivo-ayuda" className="text-sm text-muted-foreground">
+            <p id="campo-motivo-ayuda" className="text-base text-muted-foreground">
               {textos.ayuda}
             </p>
             <textarea
@@ -101,7 +96,7 @@ export function PanelMotivo({
               onBlur={() => validacion.revalidar('motivo', motivo, reglaLargo)}
               aria-invalid={Boolean(validacion.mensajes.motivo)}
               aria-describedby={validacion.mensajes.motivo ? 'campo-motivo-ayuda campo-motivo-error' : 'campo-motivo-ayuda'}
-              className="min-h-24 rounded-md border border-input bg-transparent px-3 py-2 text-base aria-invalid:border-destructive md:text-sm dark:bg-input/30"
+              className="min-h-24 rounded-md border border-input bg-transparent px-3 py-2 text-base aria-invalid:border-destructive dark:bg-input/30"
             />
             <MensajeErrorCampo id="campo-motivo-error" mensaje={validacion.mensajes.motivo} />
           </div>

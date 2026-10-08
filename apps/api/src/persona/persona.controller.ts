@@ -16,7 +16,10 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { tienePermiso } from '@vida-sobrenatural/shared-types';
 import { PersonaService } from './persona.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { buscarPersonasSinAcceso } from './busqueda-sin-acceso.js';
 import { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import { ActivarPersonaDto } from './dto/activar-persona.dto.js';
 import { ActualizarPreferenciasDto } from './dto/actualizar-preferencias.dto.js';
@@ -36,7 +39,11 @@ const PERSONAS_TAKE_DEFAULT = 20;
 @ApiTags('personas')
 @Controller('personas')
 export class PersonaController {
-  constructor(private readonly personaService: PersonaService) {}
+  constructor(
+    private readonly personaService: PersonaService,
+    // spec 006 (Pregunta 5): la búsqueda acotada vive en su propio archivo.
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get('by-email')
   @UseGuards(InternalLookupGuard)
@@ -200,7 +207,12 @@ export class PersonaController {
     description:
       'Búsqueda acotada de Personas — H-29, D108 (elegir a quién vincular como tutor).',
   })
-  buscarPersonas(@Query('q') q: string) {
+  buscarPersonas(@Query('q') q: string, @Req() request?: AuthenticatedRequest) {
+    // spec 006 (Pregunta 5): quien no ve Personas (el Discipulador) solo
+    // encuentra a quien no tiene acceso a la app, con nombre, apellido y edad.
+    if (!tienePermiso(request?.user?.rol ?? [], 'personas.ver')) {
+      return buscarPersonasSinAcceso(this.prisma, q ?? '');
+    }
     return this.personaService.buscarPersonas(q ?? '');
   }
 

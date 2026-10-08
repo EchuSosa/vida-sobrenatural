@@ -61,6 +61,41 @@ describe('SolicitudDiscipuladoService — pedir Vida Nueva (T015)', () => {
     });
   });
 
+  describe('historial previo (spec 006, FR-017)', () => {
+    it('con un "Ya lo hice" de Vida Nueva en revisión → HISTORIAL_VIDA_NUEVA_EN_REVISION, propio o en nombre de', async () => {
+      const { service, base } = await crearServicio({
+        personas: [{ id: 'ana' }, { id: 'admin' }],
+        declaraciones: [{ id: 'd1', personaId: 'ana', etapa: 'vida_nueva', estado: 'pendiente' }],
+      });
+      expect((await errorDe(service.crearPropia('ana', [MARTES_19_A_21]))).code).toBe('HISTORIAL_VIDA_NUEVA_EN_REVISION');
+      expect((await errorDe(service.crearEnNombreDe('ana', [MARTES_19_A_21], 'admin'))).code).toBe('HISTORIAL_VIDA_NUEVA_EN_REVISION');
+      expect(base.solicitudes).toHaveLength(0);
+    });
+
+    it('con Vida Nueva registrada por la iglesia → VIDA_NUEVA_COMPLETADA_POR_HISTORIAL; anulada, deja pedir', async () => {
+      const { service } = await crearServicio({
+        personas: [{ id: 'ana' }, { id: 'beto' }],
+        completitudes: [
+          { id: 'c1', personaId: 'ana', etapa: 'vida_nueva', anuladaEn: null },
+          { id: 'c2', personaId: 'beto', etapa: 'vida_nueva', anuladaEn: new Date() },
+        ],
+      });
+      expect((await errorDe(service.crearPropia('ana', [MARTES_19_A_21]))).code).toBe('VIDA_NUEVA_COMPLETADA_POR_HISTORIAL');
+      await expect(service.crearPropia('beto', [MARTES_19_A_21])).resolves.toMatchObject({ estado: 'pendiente' });
+    });
+
+    it('un "Ya lo hice" de otra etapa o ya resuelto no traba el pedido', async () => {
+      const { service } = await crearServicio({
+        personas: [{ id: 'ana' }],
+        declaraciones: [
+          { id: 'd1', personaId: 'ana', etapa: 'bautismo', estado: 'pendiente' },
+          { id: 'd2', personaId: 'ana', etapa: 'vida_nueva', estado: 'rechazada' },
+        ],
+      });
+      await expect(service.crearPropia('ana', [MARTES_19_A_21])).resolves.toMatchObject({ estado: 'pendiente' });
+    });
+  });
+
   describe('sin duplicados (FR-001, FR-008, FR-042)', () => {
     it.each(['pendiente', 'propuesta'] as const)('con una Solicitud %s abierta → SOLICITUD_DISCIPULADO_YA_PENDIENTE', async (estado) => {
       const { service, base } = await crearServicio({ personas: [{ id: 'ana' }], solicitudes: [solicitud('ana', estado)] });

@@ -7,7 +7,7 @@ import { ArrowRightLeft, CircleCheckBig, Clock, UserRoundX } from 'lucide-react'
 import { formatearDiaEnArgentina, type DiscipuladoResumen, type Pagina } from '@vida-sobrenatural/shared-types';
 import { Button, Paginacion, TablaDatos, type ColumnaTabla, type OrdenTabla } from '@vida-sobrenatural/ui';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
-import { nombresDe } from '../mis-discipulados/comun';
+import { nombresDe } from '@vida-sobrenatural/ui';
 import { EnlacePersona } from '../../components/enlace-persona';
 import { FILTROS_PENDIENTE, type FiltroPendiente } from './constantes';
 

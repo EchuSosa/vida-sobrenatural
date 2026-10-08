@@ -1,37 +1,30 @@
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoOtroRolE2E, loguearseSinPersonaE2E } from './helpers';
 
 /**
- * H-134 (specs/005, T068): `/` resuelve DESTINO, no permiso. Tres casos:
- * quien tiene Inicio se queda en Inicio; quien no, aterriza en el primer
- * ítem de SU menú (derivado de sus roles); y una sesión sin ninguna
- * pantalla (`rol = []`) ve una pantalla terminal — sin redirect, porque
- * redirigir ahí sería un bucle infinito. El 404 usa el mismo resolutor.
+ * H-134 (specs/005, T068): `/` resuelve DESTINO, no permiso. Quien tiene
+ * Inicio se queda en Inicio; quien no tiene ninguna pantalla ve una pantalla
+ * terminal — sin redirect, porque redirigir ahí sería un bucle infinito. El
+ * 404 usa el mismo resolutor. spec 006 (D142): el Discipulador y el Líder de
+ * curso ya no tienen pantallas acá; su terminal es "Lo tuyo está en la app".
  */
 
-test('un Discipulador que entra a / aterriza en el primer ítem de su menú, no en un 404', async ({ page, permitirErrorDeConsola }) => {
+test('un Discipulador que entra a / ve "Lo tuyo está en la app", sin redirect ni 404 (spec 006, D142)', async ({ page, permitirErrorDeConsola }) => {
   // El propio test visita una ruta inexistente: Chromium loguea el 404 del documento.
   permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 404/);
-  await loguearseComoOtroRolE2E(page); // e2e-otro-rol: ['discipulador'], sin inicio.ver
-  await page.goto('/');
+  await loguearseComoOtroRolE2E(page); // e2e-otro-rol: ['discipulador'], sin ningún ítem del backoffice
+  const respuesta = await page.goto('/');
   await page.waitForLoadState('networkidle');
+  expect(respuesta?.request().redirectedFrom()).toBeNull();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('heading', { name: 'Lo tuyo está en la app', level: 1 })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Ir a la app' })).toHaveAttribute('href', /\/mis-discipulados$/);
+  expect((await auditar(page)).violations).toEqual([]);
 
-  // El destino se deriva del menú de esa sesión, no de una ruta escrita en el test.
-  // El primer link de la LISTA del menú (el logo, que va a `/`, no es un ítem).
-  const primerItem = page.getByRole('navigation', { name: 'Principal' }).getByRole('list').getByRole('link').first();
-  const destino = await primerItem.getAttribute('href');
-  expect(destino).not.toBe('/');
-  await expect(page).toHaveURL(new RegExp(`${destino}$`));
-  await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toHaveCount(0);
-
-  // Y el 404 lo lleva al mismo destino — antes su botón iba a `/` fijo, y para
-  // quien no tiene Inicio eso era volver al mismo 404.
+  // Y el 404 lo lleva a la app, no a un 404 de nuevo (H-134).
   await page.goto('/ruta-que-no-existe');
   await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toBeVisible();
-  // El 404 con sesión vive dentro del shell: un solo <main> (antes duplicaba el landmark).
   expect((await auditar(page)).violations).toEqual([]);
-  await page.getByRole('link', { name: /^Ir a / }).click();
-  await expect(page).toHaveURL(new RegExp(`${destino}$`));
-  await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Ir a la app' })).toHaveAttribute('href', /\/mis-discipulados$/);
 });
 
 test('una sesión con rol = [] ve la pantalla terminal en / y NO termina en un redirect', async ({ page, permitirErrorDeConsola }) => {

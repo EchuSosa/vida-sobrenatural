@@ -1,7 +1,8 @@
 import type { Page } from '@playwright/test';
 import { hoyEnArgentina, type MiDisponibilidad } from '@vida-sobrenatural/shared-types';
-import { test, expect, auditar, crearPersona, idDePersona, idsEnElCruce, loguearseComoDiscipuladorE2E, pedirVidaNuevaComo } from './helpers';
+import { test, expect, auditar, crearPersona, idDePersona, idsEnElCruce, pedirVidaNuevaComo } from './helpers';
 import { campo, completarFecha, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
+import { discipuladorEnLaWeb, enLaWeb } from './helpers-006';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
@@ -18,7 +19,7 @@ function sumarDias(fecha: string, dias: number): string {
  * (otros specs la usan para el vacío de FR-047). Por la API, con su sesión.
  */
 async function reiniciarDisponibilidad(page: Page) {
-  const { apiToken } = await (await page.request.get('/api/auth/session')).json();
+  const { apiToken } = await (await page.request.get(enLaWeb('/api/auth/session'))).json();
   const headers = { Authorization: `Bearer ${apiToken}` };
   const actual: MiDisponibilidad = await (await page.request.get(`${API_BASE_URL}/disponibilidad/me`, { headers })).json();
   for (const f of actual.franjas) await page.request.delete(`${API_BASE_URL}/disponibilidad/me/franjas/${f.id}`, { headers });
@@ -56,9 +57,9 @@ test.describe('a 320 px, con datos cargados', () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
   test.beforeEach(async ({ page }) => {
-    await loguearseComoDiscipuladorE2E(page, 'sin-agenda');
+    await discipuladorEnLaWeb(page, 'sin-agenda');
     await reiniciarDisponibilidad(page);
-    const { apiToken } = await (await page.request.get('/api/auth/session')).json();
+    const { apiToken } = await (await page.request.get(enLaWeb('/api/auth/session'))).json();
     const headers = { Authorization: `Bearer ${apiToken}` };
     const hoy = hoyEnArgentina();
     await page.request.post(`${API_BASE_URL}/disponibilidad/me/franjas`, { headers, data: { diaSemana: 3, inicio: 19 * 60, fin: 21 * 60 } });
@@ -70,7 +71,7 @@ test.describe('a 320 px, con datos cargados', () => {
   });
 
   test('sin scroll horizontal y con objetivos táctiles de 44 px @celular', async ({ page }) => {
-    await page.goto('/mi-disponibilidad');
+    await page.goto(enLaWeb('/mi-disponibilidad'));
     await expect(page.getByText(/^Vigente: hasta el .* no aparecés para nuevos discipulados\.$/)).toBeVisible();
     const sinDesborde = await page.evaluate(() => document.scrollingElement!.scrollWidth <= window.innerWidth);
     expect(sinDesborde, 'hay scroll horizontal a 320 px').toBe(true);
@@ -90,7 +91,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
   test.describe(`modo ${tema}`, () => {
     test.beforeEach(async ({ page }) => {
       if (tema === 'oscuro') await page.addInitScript(() => window.localStorage.setItem('theme', 'dark'));
-      await loguearseComoDiscipuladorE2E(page, 'sin-agenda');
+      await discipuladorEnLaWeb(page, 'sin-agenda', tema === 'oscuro' ? 'dark' : 'light');
       await reiniciarDisponibilidad(page);
     });
 
@@ -100,7 +101,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
 
     test('agenda, toggle, períodos y máximo, con la frase de arriba siempre al día @celular @webkit', async ({ page }) => {
       const estado = page.getByTestId('estado-disponibilidad');
-      await page.goto('/mi-disponibilidad');
+      await page.goto(enLaWeb('/mi-disponibilidad'));
 
       // FR-047: sin agenda, el vacío dice por qué no aparece.
       await expect(page.getByRole('heading', { name: 'Mi disponibilidad', level: 1 })).toBeVisible();

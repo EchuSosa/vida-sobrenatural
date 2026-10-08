@@ -1,7 +1,8 @@
 import { apiFetch } from '@vida-sobrenatural/shared-types';
-import { requerirPermiso, tienePermisoSesion } from '../../auth';
+import type { MisDiscipuladosRespuesta } from '@vida-sobrenatural/shared-types';
+import { requerirPermiso, tienePermisoSesion } from '../../../auth';
 import { MisDiscipuladosCliente } from './mis-discipulados-cliente';
-import type { MisDiscipuladosRespuesta } from './comun';
+import { SelectorMiCamino } from '../mi-camino/selector-mi-camino';
 
 /**
  * specs/004, T037e/T046 (D134, FR-037, FR-046, FR-047): el escritorio del
@@ -9,7 +10,7 @@ import type { MisDiscipuladosRespuesta } from './comun';
  * servidor; "cargando" es loading.tsx y "error" es error.tsx.
  */
 export default async function MisDiscipuladosPage() {
-  // H-132: exige el mismo permiso que le asigna NAV_BACKOFFICE.
+  // spec 006 (FR-024): sin el permiso, vuelve a Mi camino sin ver datos.
   const session = await requerirPermiso('mis_discipulados.ver');
   const datos = await apiFetch<MisDiscipuladosRespuesta>('/discipulado/mis-discipulados', {
     headers: { Authorization: `Bearer ${session.apiToken}` },
@@ -21,6 +22,7 @@ export default async function MisDiscipuladosPage() {
       apiToken={session.apiToken}
       puedeGestionar={tienePermisoSesion(session, 'mis_discipulados.gestionar')}
       puedeCrearEnNombre={tienePermisoSesion(session, 'solicitudes.crear_en_nombre')}
+      selector={<SelectorMiCamino actual="/mis-discipulados" />}
     />
   );
 }

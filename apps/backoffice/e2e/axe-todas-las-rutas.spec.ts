@@ -8,7 +8,6 @@ import {
   loguearseComoPastorE2E,
   loguearseComoOtroRolE2E,
   loguearseComoLiderCursoE2E,
-  loguearseComoDiscipuladorE2E,
   crearGrupo,
   crearPersona,
   pedirVidaNuevaComo,
@@ -77,16 +76,14 @@ async function esperarPaginaReal(page: Page, href: string) {
 }
 
 /**
- * specs/004, T062: las tres rutas `[id]` de la 004 se auditan con ids REALES
+ * specs/004, T062: las rutas `[id]` de la 004 se auditan con ids REALES
  * (una Solicitud pendiente y un Grupo en curso, armados por la API una vez por
  * corrida), no con el `[id]` literal: su pantalla tiene contenido propio que el
- * 404 no muestra. `/mis-discipulados/[id]` se abre con el Discipulador que
- * lidera ese Grupo (el 1 sembrado), no con la sesión genérica del rol.
+ * 404 no muestra. (`/mis-discipulados/[id]` pasó a la web app, spec 006.)
  */
 const CON_ID_REAL: Record<string, { ruta: (ids: IdsReales) => string; loguearse?: (page: Page) => Promise<void> }> = {
   '/solicitudes/[id]': { ruta: (ids) => `/solicitudes/${ids.solicitudId}` },
   '/grupos/[id]': { ruta: (ids) => `/grupos/${ids.grupoId}` },
-  '/mis-discipulados/[id]': { ruta: (ids) => `/mis-discipulados/${ids.grupoId}`, loguearse: (page) => loguearseComoDiscipuladorE2E(page, 1) },
   // spec 013 (T014): el perfil de la Persona que pidió, con su Solicitud en el historial.
   '/personas/[id]': { ruta: (ids) => `/personas/${ids.personaId}` },
 };

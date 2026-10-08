@@ -266,6 +266,11 @@ export interface BusquedaPersona {
   email: string | null;
   telefono: string;
   rol: string[];
+  /**
+   * spec 006 (Pregunta 5): solo en la búsqueda acotada de quien no ve
+   * Personas (el Discipulador): ahí tampoco vienen email ni teléfono.
+   */
+  edad?: number;
 }
 
 /**
@@ -334,6 +339,15 @@ export interface CoincidenciaDuplicado {
   telefono: string;
   activa: boolean;
   porque: MotivoPosibleDuplicado[];
+}
+
+/**
+ * spec 006 (FR-037, FR-038, D145): sin email no hay ingreso a la app — el
+ * login busca por un email concreto y nunca encuentra a quien no tiene.
+ * Personas lo muestra como "Sin acceso a la app".
+ */
+export function sinAccesoALaApp(persona: { email: string | null }): boolean {
+  return persona.email === null || persona.email.trim() === '';
 }
 
 /** Lo que `sonPosiblesDuplicados` necesita de cada Persona. */

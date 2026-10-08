@@ -1,4 +1,5 @@
 import type { SeccionPerfil } from './tipos';
+import { SeccionCamino } from './seccion-camino';
 
 /**
  * Lote 0 global (spec 013, research #5): las secciones que suman otras specs
@@ -9,4 +10,7 @@ import type { SeccionPerfil } from './tipos';
  * `seccion-ministerios.tsx` 009, `seccion-bautismo.tsx` 010,
  * `seccion-eventos.tsx` 011), en ese orden.
  */
-export const SECCIONES_PERFIL: SeccionPerfil[] = [];
+export const SECCIONES_PERFIL: SeccionPerfil[] = [
+  // spec 006 (T047): las cuatro etapas, registrar como hecha y anular.
+  { clave: 'etapas', tituloKey: 'etapasPersona.titulo', permiso: 'personas.ver', Componente: SeccionCamino },
+];

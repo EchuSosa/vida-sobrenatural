@@ -1,4 +1,6 @@
-import NextAuth from 'next-auth';
+import NextAuth, { type Session } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { tienePermiso, type Permiso } from '@vida-sobrenatural/shared-types';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import {
@@ -174,3 +176,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
+/**
+ * spec 006, T020 (FR-024, contracts/navegacion.md): las pantallas del
+ * Discipulador en la web app (Mis discipulados, Mi disponibilidad) exigen un
+ * permiso del catálogo (D132), resuelto con la MISMA regla que el backoffice
+ * (`tienePermiso` de shared-types). Sin el permiso, la persona vuelve a Mi
+ * camino sin ver datos de nadie (la API, además, se los rechaza). Sin sesión,
+ * lo resuelve el layout de la app.
+ */
+export async function requerirPermiso(permiso: Permiso): Promise<Session> {
+  const session = await auth();
+  if (!session) redirect('/registro');
+  if (!tienePermisoSesion(session, permiso)) redirect('/mi-camino');
+  return session;
+}
+
+/** Qué mostrar DENTRO de una pantalla según un permiso del catálogo (nunca un rol literal). */
+export function tienePermisoSesion(session: Session, permiso: Permiso): boolean {
+  return tienePermiso(session.user.rol, permiso);
+}
