@@ -60,6 +60,9 @@ describe('Vida de Servicio — ediciones del Admin (spec 008, T018/T068)', () =>
     const inicio = sumarDias(hoy, 7);
     const semanas = cronogramaPropuesto(inicio, 8);
     semanas[3] = sumarDias(semanas[3], 1);
+    const disponibles = (await admin('get', '/grupos/vida-de-servicio/lideres-disponibles')).body as Array<{ id: string }>;
+    expect(disponibles.map((p) => p.id)).toEqual(expect.arrayContaining([lider1, lider2]));
+    expect(disponibles.map((p) => p.id)).not.toContain(adminId);
     const res = await admin('post', '/grupos/vida-de-servicio', { nombre: `  Primavera ${vs.sufijo} `, sedeId: vs.sedeId, fechaInicio: inicio, semanas, lideres: [lider1, lider2] });
     expect(res.status).toBe(201);
     const { grupoId } = res.body as { grupoId: string };

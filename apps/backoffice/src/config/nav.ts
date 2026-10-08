@@ -119,6 +119,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/solicitudes/historial/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   // --- spec 008 ---
   { href: '/solicitudes/vida-de-servicio/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  { href: '/grupos/vida-de-servicio/[id]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
+  { href: '/grupos/vida-de-servicio/[id]/semanas/[numero]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
   // --- spec 011 ---
   { href: '/eventos/nuevo', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.gestionar', enMenu: false },
   { href: '/eventos/[id]', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver', enMenu: false },

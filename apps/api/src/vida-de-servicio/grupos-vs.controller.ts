@@ -53,6 +53,13 @@ export class GruposVsController {
     return this.ediciones.crear(dto);
   }
 
+  @Get('lideres-disponibles')
+  @RequierePermiso('grupos.gestionar')
+  @ApiOkResponse({ description: 'spec 008, FR-003: Personas activas con lider_curso, para crear una edición o sumar un Líder.' })
+  lideresDisponibles() {
+    return this.ediciones.lideresDisponibles();
+  }
+
   @Get(':grupoId')
   @RequierePermiso('grupos.ver')
   @ApiOkResponse({ description: 'spec 008, FR-038: EdicionAdminDetalle. 404 GRUPO_NO_ENCONTRADO.' })

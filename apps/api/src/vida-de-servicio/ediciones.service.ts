@@ -104,6 +104,17 @@ export class EdicionesService {
     };
   }
 
+  /** GET /grupos/vida-de-servicio/lideres-disponibles (FR-003): las Personas activas con `lider_curso`, para elegir. */
+  async lideresDisponibles(): Promise<Array<{ id: string; nombre: string; apellido: string }>> {
+    const personas = await this.prisma.persona.findMany({
+      where: { estado: 'activa', rol: { has: 'lider_curso' } },
+      orderBy: [{ apellido: 'asc' }, { nombre: 'asc' }],
+      take: 500,
+      select: { id: true, nombre: true, apellido: true, rol: true },
+    });
+    return personas.filter((p) => tienePermiso(p.rol, 'mis_grupos.gestionar')).map(({ id, nombre, apellido }) => ({ id, nombre, apellido }));
+  }
+
   /** GET /grupos/vida-de-servicio/:grupoId (FR-038). */
   detalle(grupoId: string): Promise<EdicionAdminDetalle> {
     return detalleDeEdicionAdmin(this.prisma, grupoId);
