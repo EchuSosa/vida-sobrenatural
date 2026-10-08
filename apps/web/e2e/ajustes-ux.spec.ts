@@ -207,3 +207,13 @@ test.describe('Nosotros', () => {
     expect(altoLista).toBeLessThan(1000);
   });
 });
+
+test.describe('Primeros pasos', () => {
+  test.use({ viewport: CELULAR });
+
+  test('"Conocé los ministerios" de 44 px y la nota final en 16 px (#11, #12) @celular', async ({ page }) => {
+    await page.goto('/primeros-pasos');
+    await objetivosDe44(contenido(page));
+    expect(await tamanoDeLetra(page.getByText(/^No hace falta que hagas nada de esto ya mismo/))).toBeGreaterThanOrEqual(16);
+  });
+});
