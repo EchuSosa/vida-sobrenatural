@@ -141,8 +141,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await sinViolaciones(page);
       expect(await buscar(`${apellido}-b`)).toHaveLength(0);
 
-      await page.getByRole('link', { name: `Ver a Primera ${apellido}` }).click();
-      await expect(page.getByRole('row').filter({ hasText: apellido })).toBeVisible();
+      // D215: lleva al perfil de esa Persona.
+      await page.getByRole('link', { name: `Ver el perfil de Primera ${apellido}` }).click();
+      await expect(page).toHaveURL(/\/personas\/[0-9a-f-]{36}$/);
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(`Primera ${apellido}`);
     });
 
     test('un email ya usado se rechaza debajo del campo', async ({ page }) => {

@@ -766,7 +766,7 @@
     },
     "dniDuplicado": {
       "mensaje": "Ya hay una Persona con este DNI: {nombre}. No se puede cargar dos veces: si es la misma persona, revisá sus datos en su perfil.",
-      "ver": "Ver a {nombre}"
+      "ver": "Ver el perfil de {nombre}"
     },
     "exito": {
       "titulo": "Listo: {nombre} ya está cargada",

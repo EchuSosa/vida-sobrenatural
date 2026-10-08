@@ -290,7 +290,7 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
             inputMode="numeric"
           />
           {conMismoDni && m.dni && (
-            <Link href={`/personas?q=${encodeURIComponent(conMismoDni.apellido)}`} className="w-fit text-sm underline underline-offset-4">
+            <Link href={`/personas/${conMismoDni.id}`} className="w-fit text-sm underline underline-offset-4">
               {t('dniDuplicado.ver', { nombre: `${conMismoDni.nombre} ${conMismoDni.apellido}` })}
             </Link>
           )}
