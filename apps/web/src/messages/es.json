@@ -565,6 +565,8 @@
       "historialTexto": "La iglesia registró que hiciste esta etapa.",
       "revisionTitulo": "Nos contaste que ya lo hiciste",
       "revisionTexto": "La iglesia lo está revisando desde el {fecha}. Cuando lo confirme, lo vas a ver acá.",
+      "solicitudRevisionTitulo": "En revisión",
+      "solicitudRevisionTexto": "Lo pediste el {fecha}. El equipo lo está revisando y te contamos acá cómo sigue.",
       "noConfirmadaTitulo": "No pudimos confirmarlo",
       "noConfirmadaTexto": "Escribinos y lo vemos juntos. Si querés, podés volver a contarnos con \"Ya lo hice\".",
       "noConfirmadaMotivo": "Lo que nos dijo el equipo: «{motivo}»",

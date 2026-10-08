@@ -87,6 +87,26 @@ describe('Mi camino — estadoDeEtapa (spec 006, T005, data-model §reglas)', ()
     }
   });
 
+  it('Ajustes 2: la etapa informa su pedido propio en revisión → el encabezado dice "En revisión" (no "La podés empezar"); completa o declarada siguen ganando', () => {
+    const enRevision = { estado: 'solicitud_en_revision', desde: '2026-10-05T12:00:00Z' } as const;
+    const ministerioHabilitado = con({ completas: { vida_nueva: 'sistema', vida_de_servicio: 'sistema' }, propios: { ministerio: enRevision } });
+    expect(estadoDeEtapa('ministerio', ministerioHabilitado)).toEqual({
+      etapa: 'ministerio',
+      estado: 'solicitud_en_revision',
+      desde: '2026-10-05T12:00:00Z',
+      puedeDeclarar: true,
+    });
+    // Sin pedido propio, la misma etapa está disponible.
+    expect(estadoDeEtapa('ministerio', { ...ministerioHabilitado, propios: {} }).estado).toBe('disponible');
+    // Un estado propio de OTRA etapa no la toca.
+    expect(estadoDeEtapa('vida_nueva', con({ propios: { ministerio: enRevision } })).estado).toBe('disponible');
+    // Precedencia: completa y "Ya lo hice" pendiente ganan.
+    expect(estadoDeEtapa('ministerio', con({ completas: { ministerio: 'sistema' }, propios: { ministerio: enRevision } })).estado).toBe('completada');
+    expect(estadoDeEtapa('ministerio', con({ ultimaDeclaracion: { ministerio: declaracion('pendiente') }, propios: { ministerio: enRevision } })).estado).toBe(
+      'en_revision',
+    );
+  });
+
   it('menor de 12: Vida Nueva disponible pero sin "Ya lo hice" (la card muestra el texto del tutor, FR-044)', () => {
     expect(estadoDeEtapa('vida_nueva', con({ edad: 10, vidaNueva: VN.lo_pide_su_tutor }))).toEqual({
       etapa: 'vida_nueva',

@@ -92,6 +92,13 @@ export default async function MiCaminoPage() {
           estado: { icono: <Hourglass className={ICONO} />, texto: t('estados.revisionTitulo'), detalle: t('estados.revisionTexto', { fecha: fecha(estado.desde) }) },
         };
 
+      case 'solicitud_en_revision':
+        // Ajustes 2: la etapa informó que su pedido propio está en revisión (ej. una postulación a un Ministerio).
+        return {
+          aviso,
+          estado: { icono: <Hourglass className={ICONO} />, texto: t('estados.solicitudRevisionTitulo'), detalle: t('estados.solicitudRevisionTexto', { fecha: fecha(estado.desde) }) },
+        };
+
       case 'en_curso':
         if (estado.etapa === 'vida_nueva' && vn.estado === 'buscando') {
           return {
