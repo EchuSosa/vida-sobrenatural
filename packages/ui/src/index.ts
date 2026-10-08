@@ -147,6 +147,7 @@ export { PedirEnNombreDe, type PedirEnNombreDeProps, type EtiquetasPedirEnNombre
 
 // --- spec 011 (EstadoInscripcionBadge, CampoArchivo) ---
 export { CampoArchivo, type CampoArchivoProps } from './components/campo-archivo';
+export { EstadoInscripcionBadge, type EstadoInscripcionBadgeProps, type EstadoParaBadge } from './components/estado-inscripcion-badge';
 
 // --- spec 012 ---
 
