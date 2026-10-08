@@ -648,7 +648,128 @@
     "ministerio": "Ministerio",
     "bautismo": "Bautismo"
   },
-  "personasAlta": {},
+  "personasAlta": {
+    "botonAlta": "Dar de alta una persona",
+    "personas": "Personas",
+    "titulo": "Dar de alta una persona",
+    "descripcion": "Para quien no se registra sola en la app: gente mayor, quien no tiene email o lo prefiere así. Son los mismos datos del registro.",
+    "sinAcceso": "Sin acceso a la app",
+    "sinEmail": "Sin email",
+    "secciones": {
+      "personales": "Datos personales",
+      "contacto": "Contacto",
+      "iglesia": "En la iglesia"
+    },
+    "campos": {
+      "apellido": "Apellido",
+      "nombre": "Nombre",
+      "genero": "Género",
+      "fechaNacimiento": "Fecha de nacimiento",
+      "telefono": "Teléfono",
+      "codigoPais": "Código de país",
+      "direccion": "Dirección",
+      "email": "Email (opcional)",
+      "sede": "Sede",
+      "congregaDesde": "¿En qué año empezó a venir a la iglesia?",
+      "estadoCivil": "Estado civil",
+      "profesion": "Profesión u ocupación",
+      "profesionDetalle": "¿Cuál?",
+      "consentimiento": "La persona me dio su consentimiento, en persona o por WhatsApp, para guardar estos datos."
+    },
+    "ayudas": {
+      "fechaNacimiento": "Desde acá solo se dan de alta mayores de 18.",
+      "email": "Si no tiene, dejalo vacío: no va a poder entrar a la app, pero el equipo puede pedir Vida Nueva o registrar etapas en su nombre."
+    },
+    "errores": {
+      "apellido": "Escribí el apellido.",
+      "nombre": "Escribí el nombre.",
+      "genero": "Elegí el género.",
+      "fechaNacimiento": "Completá el día, el mes y el año de nacimiento.",
+      "telefono": "Escribí el número con el código de área, solo con números. Ejemplo: 221 555 0101.",
+      "direccion": "Escribí la dirección.",
+      "sedeId": "Elegí la Sede.",
+      "estadoCivil": "Elegí el estado civil.",
+      "profesion": "Elegí la profesión u ocupación.",
+      "profesionDetalle": "Contanos cuál es la profesión.",
+      "congregaDesde": "Elegí el año en que empezó a venir.",
+      "consentimiento": "Marcá la casilla para confirmar que la persona dio su consentimiento."
+    },
+    "opciones": {
+      "genero": {
+        "femenino": "Femenino",
+        "masculino": "Masculino"
+      },
+      "estadoCivil": {
+        "soltero_a": "Soltero/a",
+        "casado_a": "Casado/a",
+        "en_concubinato": "En concubinato",
+        "viudo_a": "Viudo/a",
+        "divorciado_a": "Divorciado/a",
+        "separado_a": "Separado/a"
+      },
+      "profesion": {
+        "salud": "Salud",
+        "educacion": "Educación",
+        "tecnologia_ingenieria": "Tecnología/Ingeniería",
+        "comercio_ventas": "Comercio y Ventas",
+        "oficios_construccion": "Oficios/Construcción",
+        "administracion_finanzas": "Administración y Finanzas",
+        "legal": "Legal",
+        "comunicacion_marketing": "Comunicación y Marketing",
+        "arte_diseno": "Arte y Diseño",
+        "servicios_gastronomia": "Servicios y Gastronomía",
+        "transporte": "Transporte",
+        "estudiante": "Estudiante",
+        "ama_de_casa": "Ama/o de casa",
+        "jubilado_a": "Jubilado/a",
+        "sin_ocupacion": "Sin ocupación",
+        "otro": "Otro"
+      },
+      "esteAnio": "Este año ({anio})"
+    },
+    "elegir": "Elegí una opción",
+    "resumenErrores": "Revisá esto antes de guardar:",
+    "guardar": "Dar de alta",
+    "guardando": "Guardando…",
+    "volver": "Volver a Personas",
+    "errorGenerico": "No pudimos guardar. Probá de nuevo en unos segundos.",
+    "duplicado": {
+      "titulo": "Puede que esta persona ya esté cargada",
+      "descripcion": "Encontramos estas personas parecidas. Fijate si es alguna de ellas antes de crear otra.",
+      "inactiva": "inactiva",
+      "datos": "Nació el {fecha} · Teléfono: {telefono}",
+      "porque": "Coincide en: {motivos}",
+      "motivos": {
+        "telefono": "el teléfono",
+        "nombre_apellido_fecha": "nombre, apellido y fecha de nacimiento"
+      },
+      "ver": "Buscar a {nombre} en Personas",
+      "crearIgual": "Es otra persona, crear igual"
+    },
+    "exito": {
+      "titulo": "Listo: {nombre} ya está cargada",
+      "sinEmail": "No va a poder entrar a la app. Desde acá el equipo puede pedir Vida Nueva en su nombre o registrar las etapas que ya hizo. Si después tiene email, se lo podés agregar desde Personas.",
+      "conEmail": "Puede entrar a la app con ese email (con Google o con un código por email).",
+      "otra": "Dar de alta otra persona",
+      "volver": "Volver a Personas"
+    },
+    "agregarEmail": {
+      "boton": "Agregar email",
+      "botonDe": "Agregar email a {nombre}",
+      "titulo": "Agregar email a {nombre}",
+      "descripcion": "Con un email, va a poder entrar a la app. Un email lo puede usar una sola persona.",
+      "etiqueta": "Email",
+      "guardar": "Guardar email",
+      "guardando": "Guardando…",
+      "listo": "Listo: {nombre} ya puede entrar a la app con ese email.",
+      "resumenErrores": "Revisá esto antes de guardar:",
+      "errorGenerico": "No pudimos guardar el email. Probá de nuevo en unos segundos."
+    },
+    "errorCargaTitulo": "No pudimos abrir el formulario",
+    "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
+    "reintentar": "Reintentar",
+    "irAPersonas": "Ir a Personas"
+  },
   "historialPrevio": {
     "titulo": "{nombre} contó que ya hizo {etapa}",
     "edad": "{edad} años",

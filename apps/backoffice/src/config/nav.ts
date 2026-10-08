@@ -94,6 +94,7 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   //   spec 012 — /notificaciones/nueva (notificaciones.enviar, enMenu: false; /notificaciones ya está).
   //   spec 013 — /comentarios[/[id]] (comentarios.ver), /metricas y /cumpleanos (inicio.ver), /cursos[/[id]] y /cursos/papelera.
   // --- spec 006 ---
+  { href: '/personas/nueva', labelKey: 'personas', icon: Users, permiso: 'personas.alta', enMenu: false },
   { href: '/solicitudes/historial/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
 ];
 

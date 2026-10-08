@@ -3,6 +3,12 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 
 /**
+ * Las Personas de e2e: email `e2e-…` o, para las que el Admin da de alta SIN
+ * email (spec 006, D145), apellido `e2e-…`.
+ */
+const PERSONAS_E2E = { OR: [{ email: { startsWith: 'e2e-' } }, { email: null, apellido: { startsWith: 'e2e-' } }] };
+
+/**
  * H-17 (revisión manual, actualización 2026-09-18): los e2e de apps/web y
  * apps/backoffice crean entidades reales contra la API que tengan levantada
  * —por defecto la de desarrollo (`localhost:3333` / DB `vidasobrenatural`),
@@ -33,7 +39,7 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
     nombre: 'RelacionFamiliar (de Personas de e2e)',
     borrar: async () => {
       const idsE2E = (
-        await prisma.persona.findMany({ where: { email: { startsWith: 'e2e-' } }, select: { id: true } })
+        await prisma.persona.findMany({ where: PERSONAS_E2E, select: { id: true } })
       ).map((p) => p.id);
       if (idsE2E.length === 0) return 0;
       const { count } = await prisma.relacionFamiliar.deleteMany({
@@ -51,7 +57,7 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
     nombre: 'CambioDeRol (de Personas de e2e)',
     borrar: async () => {
       const idsE2E = (
-        await prisma.persona.findMany({ where: { email: { startsWith: 'e2e-' } }, select: { id: true } })
+        await prisma.persona.findMany({ where: PERSONAS_E2E, select: { id: true } })
       ).map((p) => p.id);
       if (idsE2E.length === 0) return 0;
       const { count } = await prisma.cambioDeRol.deleteMany({
@@ -68,7 +74,7 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
     nombre: 'specs 006–013 (de Personas, Eventos, Ministerios y Sedes de e2e)',
     borrar: async () => {
       const idsE2E = (
-        await prisma.persona.findMany({ where: { email: { startsWith: 'e2e-' } }, select: { id: true } })
+        await prisma.persona.findMany({ where: PERSONAS_E2E, select: { id: true } })
       ).map((p) => p.id);
       const eventoIds = (
         await prisma.evento.findMany({
@@ -124,7 +130,7 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
     nombre: 'discipulado (de Personas de e2e)',
     borrar: async () => {
       const idsE2E = (
-        await prisma.persona.findMany({ where: { email: { startsWith: 'e2e-' } }, select: { id: true } })
+        await prisma.persona.findMany({ where: PERSONAS_E2E, select: { id: true } })
       ).map((p) => p.id);
       if (idsE2E.length === 0) return 0;
 
@@ -167,7 +173,7 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
   },
   {
     nombre: 'Persona',
-    borrar: async () => (await prisma.persona.deleteMany({ where: { email: { startsWith: 'e2e-' } } })).count,
+    borrar: async () => (await prisma.persona.deleteMany({ where: PERSONAS_E2E })).count,
   },
   {
     nombre: 'Sede',

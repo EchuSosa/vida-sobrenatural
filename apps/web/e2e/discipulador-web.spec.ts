@@ -121,3 +121,65 @@ test('el Inicio avisa cuántas cosas tiene para revisar la Discipuladora; sin el
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Hola, Ana');
   await expect(page.getByRole('link', { name: /para revisar en tus discipulados/ })).toHaveCount(0);
 });
+
+test('pedir Vida Nueva en nombre de alguien sin app: la busca, carga horarios y queda pedido; no la encuentra → remite al equipo, sin alta (T067) @celular', async ({
+  page,
+  baseURL,
+  permitirErrorDeConsola,
+}) => {
+  // El segundo pedido de la misma Persona lo rechaza la API a propósito (409).
+  permitirErrorDeConsola(/the server responded with a status of 409/);
+  const apellido = `e2e-ennombre-${Date.now()}`;
+  const admin = await sesionDe(baseURL!, 'e2e-admin@example.com');
+  const sedes: Array<{ id: string }> = await (await page.request.get(`${process.env.API_BASE_URL ?? 'http://localhost:3334'}/sedes`)).json();
+  const persona = await api(admin.apiToken, 'POST', '/personas/alta', {
+    apellido,
+    nombre: 'Elsa',
+    genero: 'femenino',
+    fechaNacimiento: '1945-04-04',
+    telefono: `+54 9 221 ${String(Date.now()).slice(-7)}`,
+    direccion: 'Calle 1 y 50',
+    sedeId: sedes[0].id,
+    estadoCivil: 'viudo_a',
+    profesion: 'jubilado_a',
+    congregaDesde: 1990,
+    email: null,
+    consentimiento: true,
+  });
+
+  try {
+    await loguearseComoTest(page, DISCIPULADORA_2);
+    await usarTema(page, DISCIPULADORA_2, 'claro');
+    await page.goto('/mis-discipulados');
+    await page.waitForLoadState('networkidle');
+
+    // No la encuentra: el texto remite al equipo y no hay ninguna forma de dar de alta.
+    await page.getByRole('button', { name: 'Pedir Vida Nueva en nombre de…' }).click();
+    let panel = page.getByRole('dialog');
+    await panel.getByLabel('Buscar a la persona').fill('zzzz-nadie-se-llama-asi');
+    await expect(panel.getByText('No la encontramos. Si todavía no está cargada, pedile al equipo de la iglesia que la dé de alta.')).toBeVisible();
+    await expect(panel.getByRole('button', { name: /alta/i })).toHaveCount(0);
+
+    // La encuentra (sin email, con la edad), carga una franja y pide.
+    await panel.getByLabel('Buscar a la persona').fill(apellido);
+    await panel.getByRole('button', { name: new RegExp(`Elsa ${apellido}`) }).click();
+    await expect(panel.getByText(`Estás pidiendo en nombre de Elsa ${apellido}.`)).toBeVisible();
+    await panel.getByRole('button', { name: 'Agregar franja' }).click();
+    await sinViolaciones(page, 'claro');
+    await panel.getByRole('button', { name: 'Pedir Vida Nueva' }).click();
+    await expect(page.getByText('Listo, el equipo lo revisa.')).toBeVisible();
+
+    // Otra vez: la API lo rechaza y el porqué aparece en el panel.
+    await page.getByRole('button', { name: 'Pedir Vida Nueva en nombre de…' }).click();
+    panel = page.getByRole('dialog');
+    await panel.getByLabel('Buscar a la persona').fill(apellido);
+    await panel.getByRole('button', { name: new RegExp(`Elsa ${apellido}`) }).click();
+    await panel.getByRole('button', { name: 'Agregar franja' }).click();
+    await panel.getByRole('button', { name: 'Pedir Vida Nueva' }).click();
+    await expect(panel.getByRole('alert').filter({ hasNotText: 'Revisá' })).toBeVisible();
+  } finally {
+    const { items } = await api(admin.apiToken, 'GET', `/solicitudes?buscar=${encodeURIComponent(apellido)}`);
+    for (const s of items as Array<{ id: string }>) await api(admin.apiToken, 'POST', `/discipulado/solicitudes/${s.id}/rechazar`).catch(() => undefined);
+    void persona;
+  }
+});

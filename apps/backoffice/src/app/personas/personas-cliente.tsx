@@ -14,11 +14,13 @@ import {
   type RolDeCargo,
   ROLES_DE_CARGO,
   apiFetch,
+  sinAccesoALaApp,
   ApiError,
   formatearFechaHora,
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
+  ButtonLink,
   ConfirmDestructiveDialog,
   ControlesTabla,
   EstadoActivoBadge,
@@ -37,6 +39,7 @@ import {
 import { toast } from 'sonner';
 import { CircleAlert, Lock, Minus, Plus } from 'lucide-react';
 import { useControlesTablaUrl } from '../../hooks/use-controles-tabla-url';
+import { AgregarEmail, SinAccesoALaApp } from './acciones-email';
 
 function rolesDeCargo(rol: string[]): RolDeCargo[] {
   return ROLES_DE_CARGO.filter((r) => rol.includes(r));
@@ -60,6 +63,8 @@ export function PersonasCliente({
   apiToken,
   orden,
   puedeGestionarRoles,
+  puedeDarDeAlta = false,
+  puedeEditarEmail = false,
 }: {
   pagina: Pagina<PersonaListado>;
   paginaActual: number;
@@ -67,8 +72,13 @@ export function PersonasCliente({
   apiToken: string;
   orden: OrdenTabla;
   puedeGestionarRoles: boolean;
+  /** spec 006 (T080): "Dar de alta una persona" (`personas.alta`). */
+  puedeDarDeAlta?: boolean;
+  /** spec 006 (T080): "Agregar email" a quien no tiene (`personas.editar_email`). */
+  puedeEditarEmail?: boolean;
 }) {
   const t = useTranslations('personas');
+  const tAlta = useTranslations('personasAlta');
   const router = useRouter();
   const pathname = usePathname();
   const searchParamsNav = useSearchParams();
@@ -111,7 +121,15 @@ export function PersonasCliente({
           <span className="font-medium">
             {persona.apellido}, {persona.nombre}
           </span>
-          <span className="break-all text-sm text-muted-foreground md:hidden">{persona.email}</span>
+          {/* spec 006 (FR-037): sin email, sin acceso a la app — con ícono y texto (D81). */}
+          {sinAccesoALaApp(persona) ? (
+            <span className="flex flex-col gap-1">
+              <SinAccesoALaApp />
+              {puedeEditarEmail && <AgregarEmail personaId={persona.id} nombre={`${persona.nombre} ${persona.apellido}`} apiToken={apiToken} />}
+            </span>
+          ) : (
+            <span className="break-all text-sm text-muted-foreground md:hidden">{persona.email}</span>
+          )}
           <span className="text-sm text-muted-foreground sm:hidden">{textoRoles(persona) ?? t('sinRolDeCargo')}</span>
         </div>
       ),
@@ -122,7 +140,7 @@ export function PersonasCliente({
       className: 'hidden md:table-cell',
       celda: (persona) => (
         <span className="text-muted-foreground">
-          {persona.email}
+          {persona.email ?? tAlta('sinEmail')}
           {persona.telefono && ` — ${persona.telefono}`}
         </span>
       ),
@@ -139,6 +157,12 @@ export function PersonasCliente({
     <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
       <p className="text-muted-foreground">{t('descripcion')}</p>
+      {puedeDarDeAlta && (
+        <ButtonLink href="/personas/nueva" size="xl" className="w-fit">
+          <Plus aria-hidden />
+          {tAlta('botonAlta')}
+        </ButtonLink>
+      )}
 
       <ControlesTabla
         busqueda={busqueda}

@@ -21,12 +21,19 @@ export class ApiError extends Error {
   readonly code: ErrorCode;
   readonly requestId: string;
   readonly errors?: ApiFieldError[];
+  /**
+   * spec 006: los miembros de extensión del Problem Details (RFC 9457 §3.2)
+   * que manda la API para que el cliente actúe — ej. las `coincidencias` de
+   * POSIBLE_DUPLICADO. Lo que no es un miembro estándar.
+   */
+  readonly extensiones?: Record<string, unknown>;
 
-  constructor(code: ErrorCode, detail: string, requestId: string, errors?: ApiFieldError[]) {
+  constructor(code: ErrorCode, detail: string, requestId: string, errors?: ApiFieldError[], extensiones?: Record<string, unknown>) {
     super(detail);
     this.code = code;
     this.requestId = requestId;
     this.errors = errors;
+    this.extensiones = extensiones;
   }
 }
 
@@ -42,11 +49,13 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
+    const { type: _t, title: _ti, status: _s, detail: _d, instance: _i, code: _c, requestId: _r, errors: _e, ...extensiones } = body ?? {};
     throw new ApiError(
       body?.code ?? 'ERROR_INTERNO',
       body?.detail ?? 'Ocurrió un error inesperado.',
       body?.requestId ?? '',
       body?.errors,
+      Object.keys(extensiones).length > 0 ? extensiones : undefined,
     );
   }
 

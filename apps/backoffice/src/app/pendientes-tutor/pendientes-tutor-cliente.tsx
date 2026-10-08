@@ -349,7 +349,8 @@ function ActivarDialog({
                   {tutorElegido.nombre} {tutorElegido.apellido}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {tutorElegido.email} — {tutorElegido.telefono}
+                  {/* spec 006 (FR-038): el email es opcional (D145). */}
+                  {[tutorElegido.email, tutorElegido.telefono].filter(Boolean).join(' — ')}
                 </p>
               </div>
               <Button variant="ghost" size="sm" onClick={() => setTutorElegido(null)}>
@@ -388,7 +389,8 @@ function ActivarDialog({
                             {/* H-75 (revisión manual ronda 8): sin el `&&`, una Persona sin
                                 teléfono (campo vacío, no ausente — el modelo lo pide siempre)
                                 dejaba un guion final colgando, sin nada después. */}
-                            — {r.email}
+                            {/* spec 006 (FR-038): el email es opcional (D145). */}
+                            {r.email && ` — ${r.email}`}
                             {r.telefono && ` — ${r.telefono}`}
                           </span>
                         </button>
