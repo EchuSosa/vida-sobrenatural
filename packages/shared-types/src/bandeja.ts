@@ -58,10 +58,19 @@ export function esTipoSolicitud(valor: string): valor is TipoSolicitud {
   return (TIPOS_SOLICITUD as readonly string[]).includes(valor);
 }
 
-export type FiltroAbiertas = 'abiertas' | 'resueltas' | 'todas';
+export const FILTROS_ABIERTAS = ['abiertas', 'resueltas', 'todas'] as const;
+export type FiltroAbiertas = (typeof FILTROS_ABIERTAS)[number];
 
 /** D208: por defecto "más tiempo esperando". */
-export type OrdenBandeja = 'espera' | 'fecha' | 'persona';
+export const ORDENES_BANDEJA = ['espera', 'fecha', 'persona'] as const;
+export type OrdenBandeja = (typeof ORDENES_BANDEJA)[number];
+
+/** `take` máximo de `GET /solicitudes` (contracts/bandeja-api.md). */
+export const BANDEJA_TAKE_MAX = 100;
+
+export function esEstadoDeTipo(tipo: TipoSolicitud, estado: string): boolean {
+  return ESTADOS_POR_TIPO[tipo].includes(estado);
+}
 
 export const BANDEJA_PAGINA = 20;
 
@@ -81,6 +90,11 @@ export interface SolicitudBandeja {
   /** Lo que cada tipo agrega para su columna "Detalle" (ej. la propuesta vigente de Discipulado). */
   extra?: Record<string, unknown>;
 }
+
+/** Lo que Discipulado (004) suma en `extra`: "propuesta a X, hace N días" (FR-008). */
+export type ExtraBandejaDiscipulado = {
+  propuestaVigente?: { discipulador: PersonaBreve; propuestaEn: string };
+};
 
 /** `GET /solicitudes/conteo-abiertas`: un número por tipo conectado (0 si no hay). */
 export type ConteoAbiertas = { [T in TipoSolicitud]?: number };

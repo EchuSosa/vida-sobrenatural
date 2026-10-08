@@ -82,7 +82,11 @@ export interface PersonaBreve {
   fotoUrl?: string | null;
 }
 
-/** Fila de la bandeja genérica de Solicitudes (FR-025). */
+/**
+ * Una Solicitud de Discipulado resumida (detalle de la 004). En la bandeja
+ * unificada (spec 013) viaja como `SolicitudBandeja`, con la propuesta
+ * vigente en `extra.propuestaVigente`.
+ */
 export interface SolicitudResumen {
   id: string;
   tipo: TipoSolicitud;
@@ -90,6 +94,8 @@ export interface SolicitudResumen {
   estado: EstadoSolicitud;
   createdAt: string;
   revisadoPor: PersonaBreve | null;
+  /** spec 013 (bandeja, FR-002): cuándo se resolvió; null mientras está abierta. */
+  revisadaEn: string | null;
   creadoPor: PersonaBreve | null;
   /** "propuesta a X, hace N días" (FR-038); null salvo en estado `propuesta`. */
   propuestaVigente: { discipulador: PersonaBreve; propuestaEn: string } | null;

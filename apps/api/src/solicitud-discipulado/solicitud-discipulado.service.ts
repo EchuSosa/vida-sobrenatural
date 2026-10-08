@@ -5,7 +5,6 @@ import type {
   EstadoSolicitud,
   EventoDiscipulado,
   Franja,
-  Pagina,
   PersonaBreve,
   PropuestaHistorial,
   SolicitudDetalle,
@@ -21,8 +20,6 @@ import { cursaOCompletoVidaNueva } from '../discipulado/consultas.js';
 import { erroresDeFranjas, estadoMiDiscipulado, puedePedirSola } from './reglas-solicitud.js';
 
 type Tx = Prisma.TransactionClient;
-
-export type OrdenBandeja = 'fecha' | 'persona' | 'espera';
 
 interface SolicitudBloqueada {
   id: string;
@@ -179,53 +176,7 @@ export class SolicitudDiscipuladoService {
     });
   }
 
-  // ─── La bandeja y el detalle (FR-025, FR-038) ──────────────────────────
-
-  /**
-   * GET /solicitudes — la bandeja genérica (FR-025). Sin relación Prisma a
-   * Persona (referencia lógica), así que el orden por persona y por espera
-   * se resuelve en SQL con un JOIN; los datos de cada fila, en lote.
-   * `espera` = desde cuándo espera algo: la propuesta vigente o, si no hay,
-   * el pedido. `buscar` filtra por nombre y apellido de la Persona, en la base.
-   */
-  async listar(
-    estados: EstadoSolicitud[],
-    orden: OrdenBandeja,
-    dir: 'asc' | 'desc',
-    skip: number,
-    take: number,
-    buscar?: string,
-  ): Promise<Pagina<SolicitudResumen>> {
-    const termino = buscar?.trim();
-    const porNombre = termino
-      ? Prisma.sql`AND (p."nombre" ILIKE ${`%${termino}%`} OR p."apellido" ILIKE ${`%${termino}%`} OR (p."nombre" || ' ' || p."apellido") ILIKE ${`%${termino}%`})`
-      : Prisma.empty;
-    const filtro = Prisma.sql`s."estado"::text IN (${Prisma.join(estados)}) ${porNombre}`;
-    const direccion = dir === 'desc' ? Prisma.sql`DESC` : Prisma.sql`ASC`;
-    const criterio =
-      orden === 'persona'
-        ? Prisma.sql`p."apellido" ${direccion}, p."nombre" ${direccion}`
-        : orden === 'espera'
-          ? Prisma.sql`COALESCE(pr."propuestaEn", s."createdAt") ${direccion}`
-          : Prisma.sql`s."createdAt" ${direccion}`;
-
-    const [filas, totales] = await Promise.all([
-      this.prisma.$queryRaw<{ id: string }[]>`
-        SELECT s."id" FROM "solicitudes_discipulado" s
-        JOIN "personas" p ON p."id" = s."personaId"
-        LEFT JOIN "propuestas_discipulado" pr ON pr."solicitudId" = s."id" AND pr."estado" = 'pendiente'
-        WHERE ${filtro}
-        ORDER BY ${criterio}, s."id" ASC
-        OFFSET ${skip} LIMIT ${take}`,
-      this.prisma.$queryRaw<{ total: bigint }[]>`
-        SELECT COUNT(*)::bigint AS "total" FROM "solicitudes_discipulado" s
-        JOIN "personas" p ON p."id" = s."personaId"
-        WHERE ${filtro}`,
-    ]);
-    const ids = filas.map((f) => f.id);
-    const porId = new Map((await this.resumenes(ids)).map((r) => [r.id, r]));
-    return { items: ids.map((id) => porId.get(id)!).filter(Boolean), total: Number(totales[0]?.total ?? 0) };
-  }
+  // ─── El detalle (FR-038). La bandeja es de la spec 013 (`bandeja/`) ─────
 
   /** GET /discipulado/solicitudes/:id — el historial solo para quien tiene `solicitudes.aprobar` (el Pastor no ve motivos). */
   async detalle(id: string, conHistorial: boolean): Promise<SolicitudDetalle> {
@@ -381,16 +332,20 @@ export class SolicitudDiscipuladoService {
 
   // ─── Auxiliares ─────────────────────────────────────────────────────────
 
-  /** Las filas de la bandeja, en lote: una consulta por relación, no una por fila (H-42). */
-  private async resumenes(ids: string[]): Promise<SolicitudResumen[]> {
+  /**
+   * Las Solicitudes resumidas, en lote: una consulta por relación, no una por
+   * fila (H-42). Las usa el detalle y la fuente de la bandeja unificada
+   * (`fuente-bandeja.ts`, spec 013). Devuelve en el orden de `ids`.
+   */
+  async resumenes(ids: readonly string[]): Promise<SolicitudResumen[]> {
     if (ids.length === 0) return [];
     const [solicitudes, propuestas] = await Promise.all([
       this.prisma.solicitudDiscipulado.findMany({
-        where: { id: { in: ids } },
-        select: { id: true, personaId: true, estado: true, createdAt: true, creadoPorId: true, revisadoPorId: true },
+        where: { id: { in: [...ids] } },
+        select: { id: true, personaId: true, estado: true, createdAt: true, creadoPorId: true, revisadoPorId: true, revisadaEn: true },
       }),
       this.prisma.propuestaDiscipulado.findMany({
-        where: { solicitudId: { in: ids }, estado: 'pendiente' },
+        where: { solicitudId: { in: [...ids] }, estado: 'pendiente' },
         select: { solicitudId: true, discipuladorId: true, propuestaEn: true },
       }),
     ]);
@@ -399,7 +354,9 @@ export class SolicitudDiscipuladoService {
       ...propuestas.map((p) => p.discipuladorId),
     ]);
     const vigentePorSolicitud = new Map(propuestas.map((p) => [p.solicitudId, p]));
-    return solicitudes.map((s) => {
+    const porId = new Map(solicitudes.map((s) => [s.id, s]));
+    const enOrden = ids.map((id) => porId.get(id)).filter((s): s is (typeof solicitudes)[number] => s !== undefined);
+    return enOrden.map((s) => {
       const vigente = s.estado === 'propuesta' ? vigentePorSolicitud.get(s.id) : undefined;
       return {
         id: s.id,
@@ -408,6 +365,7 @@ export class SolicitudDiscipuladoService {
         estado: s.estado,
         createdAt: s.createdAt.toISOString(),
         revisadoPor: (s.revisadoPorId && nombres.get(s.revisadoPorId)) || null,
+        revisadaEn: s.revisadaEn?.toISOString() ?? null,
         creadoPor: (s.creadoPorId && nombres.get(s.creadoPorId)) || null,
         propuestaVigente: vigente
           ? {
@@ -488,12 +446,12 @@ async function retirarPropuestaPendiente(tx: Tx, solicitudId: string, retiradaPo
 async function nombresDe(db: PrismaService, ids: Array<string | null>): Promise<Map<string, PersonaBreve>> {
   const unicos = [...new Set(ids.filter((id): id is string => !!id))];
   if (unicos.length === 0) return new Map();
-  const personas = await db.persona.findMany({ where: { id: { in: unicos } }, select: { id: true, nombre: true, apellido: true } });
+  const personas = await db.persona.findMany({ where: { id: { in: unicos } }, select: { id: true, nombre: true, apellido: true, fotoUrl: true } });
   return new Map(personas.map((p) => [p.id, p]));
 }
 
 function personaDesconocida(id: string): PersonaBreve {
-  return { id, nombre: '', apellido: '' };
+  return { id, nombre: '', apellido: '', fotoUrl: null };
 }
 
 /** P2002: violación de un índice único (acá, los parciales de Solicitud y Propuesta). */
