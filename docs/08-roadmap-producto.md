@@ -58,8 +58,10 @@
 
 **Grupos de Extensión (grupos pequeños/hogareños):**
 - Cada Grupo de Extensión tiene: rango etario objetivo, género objetivo, día y horario de reunión, y un líder.
-- Al querer sumarse, la Persona indica género (ya lo tiene en su perfil), edad (calculada de su fecha de nacimiento) y disponibilidad horaria — el sistema (o el Admin, a definir) filtra y ofrece un listado de Grupos compatibles con esos criterios.
-- Requiere su propia sesión de diseño (¿el matching es automático o el Admin sigue curando manualmente como hoy?, entidades, flujos) antes de especificarse.
+- Cada Grupo tiene también una **dirección o zona** donde se reúne.
+- **Cómo funciona hoy (relato de Echu, 8/10/2026):** a quien quiere sumarse le pasan un **listado de Grupos** filtrado por su edad y la cercanía a su domicilio, con el **líder y la dirección** de cada uno. **La persona elige** el Grupo según la cercanía y los horarios, **se contacta directamente con el líder** y empieza a ir. **El Admin no decide ni asigna.**
+- Por eso, a diferencia de Vida Nueva (donde el Admin propone y el Discipulador acepta, D138), acá la app **filtra y muestra**, y **elige la persona**: se le ofrecen los Grupos compatibles por género, edad (de su fecha de nacimiento), horario y cercanía, con el líder y cómo contactarlo.
+- Requiere su propia sesión de diseño antes de especificarse. Temas a resolver ahí: cómo se mide la cercanía sin pedir el domicilio exacto (barrio o zona, que es un dato menos sensible), qué datos de contacto del líder se muestran y a quién, si la app registra a qué Grupo se sumó la persona (o solo informa), y el rol del líder de Grupo en la app.
 
 **Herramientas del Admin / back office:**
 - Dashboard con métricas avanzadas (altas por mes, conversión Visitante → Bautismo → Ministerio, abandono por curso) — más allá de los conteos básicos que ya están en el MVP.
