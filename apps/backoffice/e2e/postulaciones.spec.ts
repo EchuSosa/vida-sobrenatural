@@ -100,19 +100,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(await estadoDe(EMAILS_009.enNombre)).toMatchObject({ estado: 'pendiente' });
     });
 
-    test('rechazar con motivo: queda en el backoffice, la Persona ve que no avanzó sin el motivo; el Pastor ve sin acciones (FR-014, FR-019, FR-023)', async ({ page }) => {
+    test('rechazar con motivo: queda en el backoffice y la Persona ve que no avanzó, sin el motivo (FR-014, FR-019)', async ({ page }) => {
       await prepararSinPostulacion(EMAILS_009.postulante);
       const mesa = await ministerioPorNombre(MINISTERIOS_009.mesa);
       const id = await postularComo(EMAILS_009.postulante, mesa.id);
 
-      await loguearseComoPastorE2E(page);
-      await page.goto(`/solicitudes/postulacion/${id}`);
-      await expect(page.getByText('Ves esta postulación en modo lectura.')).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Aprobar', exact: true })).toHaveCount(0);
-      await expect(page.getByRole('button', { name: 'Rechazar', exact: true })).toHaveCount(0);
-      await sinViolaciones(page);
-
-      await page.context().clearCookies(); // otra sesión: la del Pastor no se pisa sola
       await loguearseComoAdminE2E(page);
       await page.goto(`/solicitudes/postulacion/${id}`);
       await page.waitForLoadState('networkidle');
@@ -127,6 +119,19 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const estado = await estadoDe(EMAILS_009.postulante);
       expect(estado).toMatchObject({ estado: 'puede_postularse', ultimo: { tipo: 'rechazada' } });
       expect(JSON.stringify(estado)).not.toContain('completo');
+    });
+
+    test('el Pastor ve la postulación sin acciones (FR-023)', async ({ page }) => {
+      await prepararSinPostulacion(EMAILS_009.cambio);
+      const mesa = await ministerioPorNombre(MINISTERIOS_009.mesa);
+      const id = await postularComo(EMAILS_009.cambio, mesa.id);
+      await loguearseComoPastorE2E(page);
+      await page.goto(`/solicitudes/postulacion/${id}`);
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(MINISTERIOS_009.mesa);
+      await expect(page.getByText('Ves esta postulación en modo lectura.')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Aprobar', exact: true })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Rechazar', exact: true })).toHaveCount(0);
+      await sinViolaciones(page);
     });
   });
 }

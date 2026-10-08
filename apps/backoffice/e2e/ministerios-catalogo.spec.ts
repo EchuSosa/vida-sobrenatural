@@ -100,7 +100,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Todavía nadie sirve en este Ministerio.')).toBeVisible();
     });
 
-    test('eliminar uno vacío lo manda a la papelera y se restaura; el Pastor ve sin acciones', async ({ page }) => {
+    test('eliminar uno vacío lo manda a la papelera y se restaura', async ({ page }) => {
       const nombre = `e2e-Vacío ${colorScheme} ${Date.now()}`;
       await loguearseComoAdminE2E(page);
       await crearMinisterio(page, nombre);
@@ -120,15 +120,19 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(restaurar).toHaveCount(0);
       await page.goto('/ministerios');
       await expect(page.getByRole('link', { name: nombre })).toBeVisible();
+    });
 
-      await page.context().clearCookies(); // otra sesión: la del Admin no se pisa sola
+    test('el Pastor ve el catálogo y el detalle sin acciones ni papelera (FR-023)', async ({ page }) => {
       await loguearseComoPastorE2E(page);
       await page.goto('/ministerios');
+      await expect(page.getByRole('heading', { name: 'Ministerios', level: 1 })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Crear Ministerio' })).toHaveCount(0);
       await expect(page.getByRole('link', { name: 'Papelera' })).toHaveCount(0);
-      await page.getByRole('link', { name: nombre }).click();
-      await expect(page.getByText('Ves el catálogo en modo lectura.')).toBeVisible();
+      await page.getByRole('link', { name: 'e2e-Bienvenida' }).click();
+      await expect(page.getByRole('heading', { name: 'e2e-Bienvenida', level: 1 })).toBeVisible();
+      await expect(page.getByRole('main').getByText('Ves el catálogo en modo lectura.')).toBeVisible();
       await expect(page.getByRole('button', { name: 'Inactivar', exact: true })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: /Dar de baja/ })).toHaveCount(0);
       await sinViolaciones(page);
     });
   });
