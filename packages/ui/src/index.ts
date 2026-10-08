@@ -132,6 +132,7 @@ export { Toaster } from './components/ui/sonner';
 // nuevos SOLO en su bloque, para que las sesiones en paralelo no choquen.
 // --- spec 006 (CardEtapa, PedirEnNombreDe) ---
 export { CardEtapa, type CardEtapaProps } from './components/card-etapa';
+export { DialogoTextoOpcional, type DialogoTextoOpcionalProps } from './components/dialogo-texto-opcional';
 
 // --- spec 007 (FormularioIngresoCodigo, BotonIngresarGoogle) ---
 
