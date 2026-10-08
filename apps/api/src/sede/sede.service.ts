@@ -170,6 +170,15 @@ export class SedeService {
         `No se puede eliminar: tiene ${existente._count.personas} Persona(s) asociada(s). Inactivala en su lugar.`,
       );
     }
+    // spec 011, T012: los Eventos (no eliminados) también son datos relacionados (D119).
+    const eventos = await this.prisma.evento.count({ where: { sedeId: id, eliminadoEn: null } });
+    if (eventos > 0) {
+      throw new AppException(
+        'SEDE_TIENE_DATOS_RELACIONADOS',
+        409,
+        `No se puede eliminar: tiene ${eventos} Evento(s). Inactivala en su lugar.`,
+      );
+    }
     // Mismo motivo que el guard de `update()`: eliminar la única Sede
     // activa deja a la parte pública sin qué mostrar, igual que
     // desactivarla — es, en los hechos, la misma situación.
