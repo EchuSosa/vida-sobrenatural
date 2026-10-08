@@ -1,4 +1,4 @@
-import type { EstadoMiDiscipulado } from './discipulado.js';
+import type { EstadoMiDiscipulado, PersonaBreve } from './discipulado.js';
 import { EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO } from './persona.js';
 
 /**
@@ -165,4 +165,40 @@ export function estadoDeEtapa(etapa: EtapaCamino, hechos: HechosCamino): EstadoE
  */
 export function esItemActual(item: { href: string; rutasRelacionadas?: readonly string[] }, pathname: string): boolean {
   return [item.href, ...(item.rutasRelacionadas ?? [])].some((ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`));
+}
+
+// ─── Lote B: el lado del Admin (contracts/historial-admin-api.md) ──────────
+
+/** Lo que el sistema ya sabe de una Persona en una etapa (FR-013, FR-014). Sin notas de Encuentros (D134). */
+export interface ContextoEtapa {
+  /** Completa y por qué camino, o `null`. */
+  completa: ComoSeCompleto | null;
+  /** En marcha en el sistema (hoy solo Vida Nueva: pedido abierto o Grupo en curso). */
+  enCurso: boolean;
+  completitudVigente: { id: string; origen: OrigenCompletitud; registradaEn: string; registradaPor: PersonaBreve | null; nota: string | null } | null;
+}
+
+/** `GET /historial/declaraciones/:id` (FR-013): el detalle para el Admin y el Pastor. */
+export interface DeclaracionDetalle {
+  id: string;
+  etapa: EtapaCamino;
+  estado: EstadoDeclaracion;
+  comentario: string | null;
+  createdAt: string;
+  revisadoPor: PersonaBreve | null;
+  revisadaEn: string | null;
+  motivoRechazo: string | null;
+  persona: PersonaBreve & { edad: number; sinAccesoALaApp: boolean };
+  contexto: ContextoEtapa & { declaracionesAnteriores: Array<{ estado: EstadoDeclaracion; fecha: string }> };
+}
+
+/** Una etapa de `GET /personas/:id/camino` (FR-014): lo que necesita el Admin para registrar o anular. */
+export interface EtapaDePersonaAdmin extends ContextoEtapa {
+  etapa: EtapaCamino;
+  declaracionPendiente: { id: string; createdAt: string } | null;
+}
+
+/** `GET /personas/:id/camino`: siempre las cuatro, en ETAPAS_CAMINO. */
+export interface CaminoDePersonaAdmin {
+  etapas: EtapaDePersonaAdmin[];
 }

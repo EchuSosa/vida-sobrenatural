@@ -334,6 +334,15 @@ export interface CoincidenciaDuplicado {
   porque: MotivoPosibleDuplicado[];
 }
 
+/**
+ * spec 006 (FR-037, FR-038, D145): sin email no hay ingreso a la app — el
+ * login busca por un email concreto y nunca encuentra a quien no tiene.
+ * Personas lo muestra como "Sin acceso a la app".
+ */
+export function sinAccesoALaApp(persona: { email: string | null }): boolean {
+  return persona.email === null || persona.email.trim() === '';
+}
+
 /** Lo que `sonPosiblesDuplicados` necesita de cada Persona. */
 export type DatosParaDuplicado = Pick<DatosPersonales, 'nombre' | 'apellido' | 'fechaNacimiento' | 'telefono'>;
 
