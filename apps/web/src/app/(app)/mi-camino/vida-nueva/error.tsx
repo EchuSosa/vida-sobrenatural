@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@vida-sobrenatural/ui';
 
-/** Error de Mi camino (GET /camino/me no respondió): qué pasó, el código de referencia y "Reintentar" (docs/15). */
-export default function ErrorMiCamino({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+/** Error de Vida Nueva (GET /discipulado/me no respondió): qué pasó, el código de referencia y "Reintentar" (docs/15). */
+export default function ErrorVidaNueva({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter();
   const t = useTranslations('miCamino');
 
   useEffect(() => {
-    console.error('[mi-camino/error.tsx]', error.digest, error);
+    console.error('[mi-camino/vida-nueva/error.tsx]', error.digest, error);
   }, [error]);
 
   // H-04: reset() solo remonta el segmento; router.refresh() vuelve a pedir los datos.
