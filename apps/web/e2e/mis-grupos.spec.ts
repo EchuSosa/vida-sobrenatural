@@ -14,6 +14,8 @@ import { EMAIL_LIDER_1, EMAIL_LIDER_2, crearEdicionPorApi, inscribirPorApi, regi
 
 async function sinViolaciones(page: Page, tema: 'claro' | 'oscuro') {
   await esperarTema(page, tema);
+  // Después de navegar del lado del cliente, Next escribe el <title> un instante más tarde (metadatos en streaming).
+  await expect(page).toHaveTitle(/.+/);
   const { violations } = await auditar(page);
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
 }

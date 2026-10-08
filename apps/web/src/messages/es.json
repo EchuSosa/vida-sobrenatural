@@ -1266,7 +1266,9 @@
       "guardadoAviso": "Ya lo pueden ver quienes están inscriptos.",
       "vistaPrevia": "Así lo ven los inscriptos",
       "terminada": "Esta edición ya terminó: el material se puede ver pero no cambiar.",
-      "noEncontradaTitulo": "No encontramos esa semana"
+      "noEncontradaTitulo": "No encontramos esa semana",
+      "elegirArchivo": "Elegir un archivo",
+      "sinArchivoNuevo": "Elegí uno por vez: se suma a la lista."
     },
     "asistencia": {
       "titulo": "Tomar asistencia",

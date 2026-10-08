@@ -20,7 +20,7 @@ import {
   type ArchivoDeContenido,
   type EnlaceDeContenido,
 } from '@vida-sobrenatural/shared-types';
-import { Button, Input, MensajeErrorCampo, ResumenErrores, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, CampoArchivo, Input, MensajeErrorCampo, ResumenErrores, useEnvio } from '@vida-sobrenatural/ui';
 
 interface Nuevo {
   clave: string;
@@ -170,9 +170,6 @@ export function FormularioMaterial({
 
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-1 text-lg font-semibold">{t('archivosTitulo')}</legend>
-        <p id="ayuda-archivos" className="text-base text-muted-foreground">
-          {t('archivosAyuda')}
-        </p>
         {inicial.archivos.length > 0 && (
           <ul className="flex flex-col gap-2">
             {inicial.archivos.map((a) => {
@@ -237,29 +234,21 @@ export function FormularioMaterial({
             )}
           </div>
         ))}
-        {/* El input de archivo va DENTRO de su etiqueta visible ("Agregar archivos"), con el aspecto de un botón:
-            con teclado se enfoca el input (anillo en la etiqueta) y Enter/Espacio abre el selector. */}
-        <label
-          htmlFor="campo-archivosNuevos"
-          className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 text-base font-medium hover:bg-muted has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50 sm:w-fit"
-        >
-          <Plus aria-hidden className="size-4" />
-          {t('agregarArchivos')}
-          <input
-            id="campo-archivosNuevos"
-            type="file"
-            multiple
-            accept={MIME_CONTENIDO_ADMITIDOS.join(',')}
-            aria-describedby={describir('archivosNuevos', 'ayuda-archivos')}
-            className="sr-only"
-            onChange={(e) => {
-              const elegidos = [...(e.target.files ?? [])];
-              setNuevos((xs) => [...xs, ...elegidos.map((archivo) => ({ clave: `${archivo.name}-${archivo.size}-${Math.random()}`, archivo, alt: '' }))]);
-              e.target.value = '';
-            }}
-          />
-        </label>
-        <MensajeErrorCampo id="error-archivosNuevos" mensaje={err('archivosNuevos')} />
+        {/* CampoArchivo (packages/ui, de la 011: "la otra lo reusa"): un archivo por vez; cada uno se suma a la lista de arriba. */}
+        <CampoArchivo
+          id="campo-archivosNuevos"
+          etiqueta={t('agregarArchivos')}
+          ayuda={t('archivosAyuda')}
+          textoBoton={t('elegirArchivo')}
+          textoSinArchivo={t('sinArchivoNuevo')}
+          accept={MIME_CONTENIDO_ADMITIDOS.join(',')}
+          archivo={null}
+          onElegir={(archivo) => {
+            if (archivo) setNuevos((xs) => [...xs, { clave: `${archivo.name}-${archivo.size}-${Math.random()}`, archivo, alt: '' }]);
+          }}
+          error={err('archivosNuevos')}
+          className="[&_label]:text-base [&_p]:text-base"
+        />
       </fieldset>
 
       <fieldset className="flex flex-col gap-3" id="campo-enlaces" tabIndex={-1}>
