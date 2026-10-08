@@ -61,9 +61,11 @@ export function NavAppBar() {
               key={href}
               href={href}
               aria-current={activo ? 'page' : undefined}
-              className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 px-2 py-1 text-xs text-muted-foreground aria-[current=page]:text-foreground aria-[current=page]:font-semibold md:flex-row md:gap-2 md:text-sm"
+              // ajustes-ux #5: etiquetas en 14 px (antes 12) e íconos de 24 px;
+              // px-1 en celular para que las cinco sigan entrando a 320 px.
+              className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 px-1 py-1 text-sm text-muted-foreground aria-[current=page]:text-foreground aria-[current=page]:font-semibold sm:px-2 md:flex-row md:gap-2"
             >
-              <Icon className="size-5" />
+              <Icon className="size-6 md:size-5" />
               <span>{t(labelKey)}</span>
             </Link>
           );
