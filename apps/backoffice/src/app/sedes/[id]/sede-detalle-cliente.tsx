@@ -46,6 +46,7 @@ export function SedeDetalleCliente({
   const [erroresCampoGuardar, setErroresCampoGuardar] = useState<ErrorDeCampo[] | null>(null);
   const [avisoUnicaActiva, setAvisoUnicaActiva] = useState(false);
   const te = useTranslations('errors');
+  const tcat = useTranslations('catalogos');
 
   const { enviando, ejecutar: guardar } = useEnvio(async (valores: ValoresSede) => {
     setErrorGuardar(null);
@@ -108,7 +109,10 @@ export function SedeDetalleCliente({
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
       {/* H-103/docs/15-guia-ux-ui.md: la miga de pan es el único sistema de
           ubicación — reemplaza al "← Volver a Sedes" escrito a mano. */}
-      <MigaDePan tramos={[{ label: 'Sedes', href: '/sedes' }, { label: sede.nombre }]} LinkComponente={Link} />
+      <MigaDePan
+        tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: 'Sedes', href: '/sedes' }, { label: sede.nombre }]}
+        LinkComponente={Link}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">

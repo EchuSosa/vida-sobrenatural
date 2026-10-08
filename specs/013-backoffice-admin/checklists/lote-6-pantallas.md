@@ -44,8 +44,11 @@ levantada con el seed demo, claro y oscuro, Admin y Pastor) y con `cursos.spec.t
   algo que no puede hacer (reactivar el Curso es del Admin). El texto sale de `errors.CURSO_INACTIVO` de la web
   app (next-intl). El botón sigue con `useEnvio` (H-57) y la lista se refresca: la propuesta queda pendiente.
 
-## Sedes — T077 (pendiente)
+## Sedes — T077
 
-- [ ] Las pantallas de Sedes no se tocaron: `/sedes` sigue siendo un ítem del menú (el mapa no le da a la 013
-  la línea de Sedes en `nav.ts`) y su miga sigue empezando en "Sedes". Se llega también desde la tarjeta de
-  Catálogos (e2e). Ver "Pregunta para Echu" en el PR.
+- [x] **Navegación:** Sedes ya no es un ítem del menú lateral (D213); se entra por la tarjeta de Catálogos. En
+  `/sedes`, `/sedes/[id]` y `/sedes/papelera` (y en Cursos) el ítem Catálogos queda marcado con
+  `aria-current="page"` además del resaltado (no solo color, D81).
+- [x] **Miga:** `Catálogos › Sedes` en el listado (antes no tenía), `Catálogos › Sedes › Nombre` en el detalle y
+  `Catálogos › Sedes › Papelera`; "Catálogos" sale de next-intl. El resto de las pantallas no cambió.
+- [x] e2e: `cursos.spec.ts` (menú sin Sedes, `aria-current`, migas) y `sedes.spec.ts` (miga del detalle).

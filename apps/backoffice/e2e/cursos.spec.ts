@@ -115,10 +115,25 @@ test('H6.5: agregar "Vida Nueva grupal", inactivarlo, reactivarlo, eliminarlo y 
   await expect(page.getByText('La papelera está vacía.')).toBeVisible();
 });
 
-test('Sedes sigue accesible desde Catálogos', async ({ page }) => {
+test('Sedes vive bajo Catálogos (D213, T077): fuera del menú, Catálogos marcado y la miga empieza en Catálogos', async ({ page }) => {
   await loguearseComoAdminE2E(page);
   await page.goto('/catalogos');
+  const menu = page.getByRole('navigation', { name: 'Principal' });
+  await expect(menu.getByRole('link', { name: 'Sedes', exact: true })).toHaveCount(0);
   await page.getByRole('link', { name: /Dónde se reúne la iglesia/ }).click();
   await expect(page).toHaveURL(/\/sedes$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sedes');
+  await expect(menu.getByRole('link', { name: 'Catálogos' })).toHaveAttribute('aria-current', 'page');
+  const miga = page.getByRole('navigation', { name: 'Ruta' });
+  await expect(miga.getByRole('link', { name: 'Catálogos' })).toHaveAttribute('href', '/catalogos');
+  await expect(miga).toContainText('Sedes');
+
+  await page.goto('/sedes/papelera');
+  await expect(menu.getByRole('link', { name: 'Catálogos' })).toHaveAttribute('aria-current', 'page');
+  await expect(miga.getByRole('link', { name: 'Catálogos' })).toBeVisible();
+  await expect(miga.getByRole('link', { name: 'Sedes' })).toBeVisible();
+
+  // En Cursos también: es el otro catálogo.
+  await page.goto('/cursos');
+  await expect(menu.getByRole('link', { name: 'Catálogos' })).toHaveAttribute('aria-current', 'page');
 });

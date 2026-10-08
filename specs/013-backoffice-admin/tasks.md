@@ -313,7 +313,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   (eliminar con un Grupo finalizado → 409), H6.5 (papelera y restaurar), Curso eliminado → `exigirActivo` rechaza,
   sumar a un Grupo en curso de un Curso inactivo sigue funcionando, `PATCH` con `categoria` → 400, H6.6 (Pastor:
   GET 200, escritura 403), `catalogos/resumen`. — cubre: H6.2–H6.6, FR-052, FR-054
-- [x] T074 **[Lote 6: el tramo Catálogos en las migas de Sedes queda pendiente (T077)]** [L6] Backoffice `app/catalogos/`: tarjetas por catálogo con activos/total y enlace (Sedes, Cursos; las demás
+- [x] T074 **[Lote 6; el tramo Catálogos en las migas de Sedes llegó con T077]** [L6] Backoffice `app/catalogos/`: tarjetas por catálogo con activos/total y enlace (Sedes, Cursos; las demás
   cuando existan), textos a next-intl. `app/cursos/` (listado con filtro activos/todos, columnas de FR-051, alta en modal
   con las combinaciones disponibles), `app/cursos/[id]` (editar nombre y descripción; Inactivar con confirmación simple
   o reforzada según `gruposEnCurso` — neutra, D151; Reactivar; Eliminar deshabilitado con explicación y oferta de
@@ -325,7 +325,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   H6.1, H6.3–H6.6, FR-060
 - [x] T076 **[Lote 6: `checklists/lote-6-pantallas.md`]** [L6] [CHECKLIST] Pantallas **Catálogos**, **Cursos (listado)**, **Curso (detalle)** y **Papelera de
   Cursos**: checklist de `docs/15`, cada una por separado. — cubre: FR-062
-- [ ] T077 **[Pendiente: la línea de `/sedes` en `nav.ts` y sus migas no son de la 013 en el mapa — Pregunta para Echu]** [L6] [CHECKLIST] Pantallas de **Sedes** (listado, detalle, papelera) modificadas solo en la miga de pan y el
+- [x] T077 **[PR de ajustes `ajustes-dni-curso-sedes`, aprobado por Echu el 2026-10-08: `/sedes` con `enMenu: false`, Catálogos marcado en `/sedes` y `/cursos` (`rutasRelacionadas` + `esItemActual`), miga "Catálogos ›" en listado, detalle y papelera; e2e en `cursos.spec.ts` y `sedes.spec.ts`]** [L6] [CHECKLIST] Pantallas de **Sedes** (listado, detalle, papelera) modificadas solo en la miga de pan y el
   menú: verificar el ítem del checklist de navegación (miga, `aria-current`) y que el resto no cambió. — cubre: FR-060
 
 ---

@@ -29,6 +29,7 @@ export function PapeleraCliente({
 }) {
   const router = useRouter();
   const te = useTranslations('errors');
+  const tcat = useTranslations('catalogos');
   const locale = useLocale();
   const procesandoRef = useRef(new Set<string>());
   const [restaurandoId, setRestaurandoId] = useState<string | null>(null);
@@ -74,7 +75,7 @@ export function PapeleraCliente({
       {/* H-95: la miga de pan reemplaza el "Volver a X" escrito a mano — va
           arriba del <h1>, mismo componente en toda la app. */}
       <MigaDePan
-        tramos={[{ label: 'Sedes', href: '/sedes' }, { label: 'Papelera' }]}
+        tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: 'Sedes', href: '/sedes' }, { label: 'Papelera' }]}
         LinkComponente={Link}
       />
       {/* H-96: el texto de acá abajo es lo único que necesita saber quien
