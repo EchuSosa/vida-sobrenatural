@@ -107,7 +107,7 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   //   spec 008 — /grupos/servicio/[id] (grupos.ver, enMenu: false).
   //   spec 009 — /ministerios, /ministerios/[id], /ministerios/papelera (ministerios.ver / .papelera.ver, enMenu: false: se entra por Catálogos).
   //   spec 011 — /eventos/[id], /eventos/nuevo, /eventos/papelera (enMenu: false; /eventos ya está).
-  //   spec 012 — /notificaciones/nueva (notificaciones.enviar, enMenu: false; /notificaciones ya está).
+  //   spec 012 — /notificaciones/[id] (notificaciones.ver, enMenu: false; /notificaciones ya está; mandar es un diálogo, sin ruta propia).
   //   spec 013 — /comentarios[/[id]] (comentarios.ver), /metricas y /cumpleanos (inicio.ver), /cursos[/[id]] y /cursos/papelera.
   { href: '/personas/[id]', labelKey: 'personas', icon: Users, permiso: 'personas.ver', enMenu: false }, // 013 lote 2: el perfil
   { href: '/cumpleanos', labelKey: 'cumpleanos', icon: Cake, permiso: 'personas.ver', enMenu: false }, // 013 lote 4: se entra desde el Inicio
@@ -129,6 +129,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/eventos/papelera', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.papelera.ver', enMenu: false },
   { href: '/solicitudes/inscripcion-evento/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'eventos.ver', enMenu: false },
   { href: '/solicitudes/pago/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'pagos.verificar', enMenu: false },
+  // --- spec 012 ---
+  { href: '/notificaciones/[id]', labelKey: 'notificaciones', icon: Bell, permiso: 'notificaciones.ver', enMenu: false },
 ];
 
 function rolesEfectivos(permiso: Permiso | 'cualquier-sesion'): RolDeCargo[] | 'cualquier-sesion' {

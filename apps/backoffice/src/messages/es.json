@@ -1442,7 +1442,155 @@
       "volverBandeja": "Volver a Solicitudes"
     }
   },
-  "notificaciones": {},
+  "notificaciones": {
+    "titulo": "Notificaciones",
+    "descripcion": "Los avisos que la iglesia mandó a las personas desde acá. Les llegan a la pestaña Avisos de la app y, si son importantes, también por mail.",
+    "enviar": "Enviar un aviso",
+    "etiquetaTabla": "Avisos enviados",
+    "columnas": {
+      "titulo": "Título",
+      "alcance": "A quién le llegó",
+      "importante": "Importante",
+      "leidas": "Leído por",
+      "fecha": "Fecha",
+      "autor": "Quién lo mandó",
+      "acciones": "Acciones"
+    },
+    "alcance": {
+      "todos": "A todas las personas",
+      "grupo": "Grupo: {nombre}",
+      "ministerio": "Ministerio: {nombre}",
+      "grupoSinNombre": "A un grupo",
+      "ministerioSinNombre": "A un ministerio"
+    },
+    "importanteSi": "También por mail",
+    "importanteNo": "Solo en la app",
+    "leidasTexto": "{leidas} de {destinatarios}",
+    "ver": "Ver",
+    "vacio": "Todavía no mandaste ningún aviso.",
+    "vacioPastor": "Todavía no se mandó ningún aviso.",
+    "paginado": "Páginas de avisos enviados",
+    "anterior": "Anterior",
+    "siguiente": "Siguiente",
+    "enviado": "Listo, mandamos el aviso.",
+    "fallidos": {
+      "titulo": "Mails que no salieron",
+      "descripcion": "Mails de avisos automáticos de los últimos 30 días que no se pudieron mandar. Avisales a esas personas por otro medio.",
+      "todoBien": "Todos los mails de los últimos 30 días salieron bien.",
+      "etiquetaTabla": "Mails que no salieron",
+      "columnas": {
+        "persona": "Persona",
+        "aviso": "Aviso",
+        "fecha": "Fecha",
+        "motivo": "Por qué"
+      },
+      "motivo": {
+        "SIN_EMAIL": "No tiene email cargado",
+        "PERSONA_INACTIVA": "La persona ya no está activa",
+        "ENVIO_FALLIDO": "El servidor de mail no lo aceptó"
+      },
+      "paginado": "Páginas de mails que no salieron"
+    },
+    "eventoDesconocido": "Aviso automático",
+    "dialogo": {
+      "titulo": "Enviar un aviso",
+      "descripcion": "Le llega a la pestaña Avisos de cada persona. Si lo marcás como importante, también por mail.",
+      "tituloEtiqueta": "Título",
+      "tituloAyuda": "Va como asunto del mail si es importante: no pongas datos personales.",
+      "mensajeEtiqueta": "Mensaje",
+      "contador": "{actual} de {maximo}",
+      "alcanceEtiqueta": "A quién le llega",
+      "alcanceTodos": "A todas las personas",
+      "alcanceGrupo": "A un grupo",
+      "alcanceMinisterio": "A un ministerio",
+      "sinGrupos": "Por ahora no hay grupos en curso con personas.",
+      "sinMinisterios": "Por ahora no hay ministerios para elegir.",
+      "grupoEtiqueta": "Grupo",
+      "ministerioEtiqueta": "Ministerio",
+      "elegir": "Elegí uno",
+      "opcionGrupo": "{curso} — {nombre}",
+      "importanteEtiqueta": "Importante — también se manda por mail",
+      "importanteAdvertencia": "Usalo solo para lo que de verdad no se puede perder: si todo es importante, nada lo es.",
+      "contando": "Contando personas…",
+      "conteo": "{personas, plural, one {Le va a llegar a # persona} other {Le va a llegar a # personas}}",
+      "conteoEmail": "{conEmail, plural, one {# lo recibe también por mail} other {# lo reciben también por mail}}",
+      "conteoError": "No pudimos contar a cuántas personas les llega.",
+      "seguir": "Revisar y mandar",
+      "cancelar": "Volver sin mandar",
+      "confirmarTitulo": "{personas, plural, one {¿Mandar este aviso a # persona?} other {¿Mandar este aviso a # personas?}}",
+      "confirmarEmail": "{conEmail, plural, =0 {Nadie lo recibe por mail.} one {# lo recibe también por mail.} other {# lo reciben también por mail.}}",
+      "confirmarDespues": "Les aparece en la pestaña Avisos de la app apenas lo mandes. Después no se puede editar ni borrar.",
+      "mandar": "Mandar aviso",
+      "enviando": "Enviando…",
+      "volver": "Volver a editar",
+      "errorGenerico": "No pudimos mandar el aviso. Probá de nuevo en unos segundos.",
+      "resumenErrores": "Revisá estos campos:"
+    },
+    "detalle": {
+      "miga": "Notificaciones",
+      "autor": "Lo mandó {nombre}",
+      "fecha": "El {fecha}",
+      "alcance": "A quién le llegó",
+      "lectura": "{leidas} de {destinatarios} lo leyeron",
+      "mensaje": "Mensaje",
+      "emails": "Mails",
+      "soloApp": "Fue solo por la app: no era importante.",
+      "enviados": "{n, plural, one {# enviado} other {# enviados}}",
+      "pendientes": "{n, plural, one {# por salir} other {# por salir}}",
+      "fallidos": "{n, plural, one {# no se pudo enviar} other {# no se pudieron enviar}}",
+      "fallidasTitulo": "A quiénes no les llegó el mail",
+      "fallidasAyuda": "Avisales por otro medio (teléfono o en persona).",
+      "noEditable": "Un aviso mandado no se edita ni se borra.",
+      "volver": "Volver a Notificaciones"
+    },
+    "noEncontrado": {
+      "titulo": "No encontramos ese aviso",
+      "texto": "Puede que el enlace esté mal o que sea un aviso automático."
+    },
+    "errorCarga": {
+      "titulo": "No pudimos cargar las notificaciones",
+      "texto": "Puede ser un problema momentáneo. Probá de nuevo en unos segundos.",
+      "reintentar": "Reintentar",
+      "codigo": "Código de referencia: {codigo}"
+    },
+    "eventos": {
+      "discipulado": {
+        "propuesta_nueva": "Propuesta nueva para discipular",
+        "propuesta_aceptada": "Ya tiene Discipulador (Vida Nueva)",
+        "solicitud_rechazada": "Pedido de Vida Nueva que no siguió"
+      },
+      "persona": {
+        "cuenta_activada": "Cuenta activada"
+      },
+      "historial": {
+        "declaracion_confirmada": "Historial previo confirmado",
+        "declaracion_rechazada": "Historial previo no confirmado"
+      },
+      "vida_servicio": {
+        "inscripcion_aprobada": "Inscripción a Vida de Servicio aprobada",
+        "inscripcion_rechazada": "Pedido de Vida de Servicio que no siguió"
+      },
+      "ministerio": {
+        "postulacion_aprobada": "Postulación a un ministerio aprobada",
+        "postulacion_rechazada": "Postulación a un ministerio que no siguió"
+      },
+      "bautismo": {
+        "solicitud_aceptada": "Pedido de bautismo aceptado",
+        "solicitud_rechazada": "Pedido de bautismo que no siguió",
+        "fecha_asignada": "Fecha de bautismo asignada",
+        "evento_cancelado": "Bautismo suspendido"
+      },
+      "evento": {
+        "inscripcion_confirmada": "Inscripción a un evento confirmada",
+        "inscripcion_rechazada": "Inscripción a un evento que no siguió",
+        "inscripcion_cancelada_por_admin": "Inscripción a un evento cancelada",
+        "lista_espera_promovida": "Pasó de la lista de espera",
+        "pago_verificado": "Pago verificado",
+        "pago_rechazado": "Pago no validado",
+        "cancelado": "Evento cancelado"
+      }
+    }
+  },
   "bandeja": {
     "titulo": "Solicitudes",
     "descripcion": "Todo lo que las Personas pidieron y espera una respuesta del equipo. Abrí una para resolverla.",
