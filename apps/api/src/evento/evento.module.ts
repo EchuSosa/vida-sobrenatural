@@ -5,6 +5,17 @@ import { EventosPublicosController } from './eventos-publicos.controller.js';
 import { EventosPublicosService } from './eventos-publicos.service.js';
 import { EventosGestionController } from './eventos-gestion.controller.js';
 import { EventosGestionService } from './eventos-gestion.service.js';
+import { InscripcionPropiaController } from './inscripcion-propia.controller.js';
+import { InscripcionPropiaService } from './inscripcion-propia.service.js';
+import { MisEventosService } from './mis-eventos.service.js';
+import { LimitePedidosGuard } from './limite-pedidos.guard.js';
+import { PagosController } from './pagos.controller.js';
+import { PagosPersonaService } from './pagos-persona.service.js';
+import { PagosAdminService } from './pagos-admin.service.js';
+import { InscriptosController } from './inscriptos.controller.js';
+import { InscriptosService } from './inscriptos.service.js';
+import { EventosConsultasService } from './eventos-consultas.service.js';
+import { FuenteBandejaInscripcionEvento, FuenteBandejaPago } from './fuentes-bandeja.js';
 
 /**
  * spec 011 — Eventos, inscripciones y pagos. Al cancelar un Evento llama,
@@ -15,8 +26,8 @@ import { EventosGestionService } from './eventos-gestion.service.js';
  */
 @Module({
   imports: [BautismoModule, StorageModule],
-  controllers: [EventosPublicosController, EventosGestionController],
-  providers: [EventosPublicosService, EventosGestionService],
-  exports: [EventosGestionService],
+  controllers: [EventosPublicosController, InscripcionPropiaController, PagosController, InscriptosController, EventosGestionController],
+  providers: [EventosPublicosService, EventosGestionService, InscripcionPropiaService, MisEventosService, LimitePedidosGuard, PagosPersonaService, PagosAdminService, InscriptosService, EventosConsultasService, FuenteBandejaInscripcionEvento, FuenteBandejaPago],
+  exports: [EventosGestionService, EventosConsultasService, InscriptosService],
 })
 export class EventoModule {}

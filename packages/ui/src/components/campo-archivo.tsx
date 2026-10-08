@@ -29,6 +29,8 @@ export interface CampoArchivoProps {
   error?: string;
   disabled?: boolean;
   required?: boolean;
+  /** D150: `base` (16 px) en `apps/web`; `sm` en el backoffice. */
+  tamanoTexto?: 'sm' | 'base';
   className?: string;
 }
 
@@ -44,8 +46,10 @@ export function CampoArchivo({
   error,
   disabled,
   required,
+  tamanoTexto = 'sm',
   className,
 }: CampoArchivoProps) {
+  const texto = tamanoTexto === 'base' ? 'text-base' : 'text-sm';
   const base = useId();
   const idAyuda = `${base}-ayuda`;
   const idError = `${base}-error`;
@@ -54,10 +58,10 @@ export function CampoArchivo({
 
   return (
     <div className={cn('flex flex-col gap-1', className)}>
-      <label htmlFor={id} className="text-sm font-medium">
+      <label htmlFor={id} className={cn(texto, 'font-medium')}>
         {etiqueta}
       </label>
-      <p id={idAyuda} className="text-sm text-muted-foreground">
+      <p id={idAyuda} className={cn(texto, 'text-muted-foreground')}>
         {ayuda}
       </p>
       <div className="flex flex-wrap items-center gap-3">
@@ -76,18 +80,18 @@ export function CampoArchivo({
           />
           <span
             aria-hidden="true"
-            className="inline-flex h-11 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background peer-disabled:opacity-50 peer-aria-invalid:border-destructive"
+            className={cn("inline-flex h-11 items-center gap-2 rounded-md border border-input bg-background px-4 font-medium", texto, " peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background peer-disabled:opacity-50 peer-aria-invalid:border-destructive")}
           >
             <FileUp className="size-4" />
             {textoBoton}
           </span>
         </span>
-        <span id={idNombre} className="min-w-0 break-all text-sm text-muted-foreground">
+        <span id={idNombre} className={cn('min-w-0 break-all text-muted-foreground', texto)}>
           {archivo ? archivo.name : textoSinArchivo}
         </span>
       </div>
       {error && (
-        <p id={idError} className="text-sm font-normal text-destructive">
+        <p id={idError} className={cn('font-normal text-destructive', texto)}>
           {error}
         </p>
       )}

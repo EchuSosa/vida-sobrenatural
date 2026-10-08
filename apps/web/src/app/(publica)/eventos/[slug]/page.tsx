@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -6,6 +7,7 @@ import { formatearInicioEvento, formatearMoneda, type EventoPublico } from '@vid
 import { ButtonLink, MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
 import { obtenerEventoPublico } from '../../../../components/eventos/api-eventos';
 import { EstadoEventoPublico, estadoPublico } from '../../../../components/eventos/estado-evento-publico';
+import { AccionInscripcion } from '../../../../components/eventos/accion-inscripcion';
 
 const DESCRIPCION_META_MAX = 160;
 
@@ -61,8 +63,8 @@ function EventoJsonLd({ evento }: { evento: EventoPublico }) {
  * Evento: todo dato clave como texto aunque esté en el flyer (D83), el estado
  * con texto + ícono, y los cancelados o pasados siguen resolviendo su URL. Un
  * eliminado responde 404. En un bautismo no hay "Anotarme": se pide desde Mi
- * camino, y nunca se muestra quién se inscribió. La acción de anotarse (la
- * isla con la sesión) llega con el lote B.
+ * camino, y nunca se muestra quién se inscribió. La acción de anotarse es
+ * una isla de cliente con la sesión (T052).
  */
 export default async function EventoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -71,7 +73,7 @@ export default async function EventoPage({ params }: { params: Promise<{ slug: s
   const estado = estadoPublico(evento.estadoInscripcion, evento.inicio, evento.fin, new Date());
 
   const explicacion =
-    estado === 'cancelado' || estado === 'pasado' || estado === 'cerrada' || estado === 'cupo_completo' || estado === 'no_requiere'
+    estado === 'cancelado' || estado === 'pasado' || estado === 'cerrada' || estado === 'no_requiere'
       ? t(`explicacion.${estado}`)
       : evento.tipo === 'bautismo'
         ? t('explicacion.bautismo')
@@ -139,6 +141,12 @@ export default async function EventoPage({ params }: { params: Promise<{ slug: s
                 </Link>
               ) : null}
             </div>
+          )}
+
+          {evento.tipo === 'general' && (estado === 'abierta' || estado === 'lista_espera' || estado === 'cupo_completo') && (
+            <Suspense fallback={null}>
+              <AccionInscripcion evento={evento} />
+            </Suspense>
           )}
         </div>
       </div>
