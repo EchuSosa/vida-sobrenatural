@@ -16,6 +16,7 @@ import { calcularEdad } from '../persona/calcular-edad.js';
 import { errorDeValidacion } from '../discipulado/validaciones.js';
 import { nombresDe } from '../discipulado/consultas.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
+import { BautismoService } from '../bautismo/bautismo.service.js';
 import { bloquearPersona, completoEtapa, vidaNuevaEnMarcha } from './consultas.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
@@ -32,6 +33,8 @@ export class HistorialAdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificaciones: NotificacionesService,
+    // spec 010 (H3): confirmar "ya se bautizó" retira la Solicitud de Bautismo abierta, si hay.
+    private readonly bautismo: BautismoService,
   ) {}
 
   /** GET /historial/declaraciones/:id (FR-013). */
@@ -90,6 +93,7 @@ export class HistorialAdminService {
       await tx.completitudManual.create({
         data: { personaId: d.personaId, etapa: d.etapa, origen: 'declaracion', declaracionId: id, registradaPorId: autorId },
       });
+      if (d.etapa === 'bautismo') await this.bautismo.retirarPorDeclaracion(tx, d.personaId);
       await this.notificaciones.emitir(tx, {
         nombre: 'historial.declaracion_confirmada',
         a: { tipo: 'persona', personaId: d.personaId },
@@ -159,6 +163,7 @@ export class HistorialAdminService {
           },
           select: { id: true },
         });
+        if (etapa === 'bautismo') await this.bautismo.retirarPorDeclaracion(tx, personaId);
         await this.notificaciones.emitir(tx, {
           nombre: 'historial.completitud_registrada',
           a: { tipo: 'persona', personaId },
