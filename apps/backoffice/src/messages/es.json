@@ -212,6 +212,7 @@
     "libros": "Libros",
     "papeleraLibros": "Papelera de Libros",
     "catalogos": "Catálogos",
+    "cursos": "Cursos",
     "cumpleanos": "Cumpleaños",
     "misDiscipulados": "Mis discipulados",
     "miDisponibilidad": "Mi disponibilidad",
@@ -1064,8 +1065,126 @@
     "sinTelefono": "Sin teléfono"
   },
   "comentarios": {},
-  "cursos": {},
-  "catalogos": {},
+  "cursos": {
+    "titulo": "Cursos",
+    "descripcion": "Los cursos que la app sabe acompañar. Podés cambiarles el nombre y la descripción, o inactivarlos para que no se abran Grupos nuevos.",
+    "miga": "Catálogos",
+    "categorias": {
+      "vida_nueva": "Vida Nueva",
+      "vida_de_servicio": "Vida de Servicio"
+    },
+    "tipos": {
+      "individual": "Individual",
+      "grupal": "Grupal"
+    },
+    "modalidades": {
+      "seguimiento_por_encuentros": "Seguimiento por encuentros",
+      "liberacion_programada": "Material liberado por semana"
+    },
+    "filtro": "Mostrar",
+    "filtros": {
+      "activos": "Activos",
+      "todos": "Todos"
+    },
+    "columnas": {
+      "nombre": "Nombre",
+      "curso": "Curso",
+      "estado": "Estado",
+      "grupos": "Grupos en curso",
+      "acciones": "Acciones"
+    },
+    "tabla": "Cursos",
+    "vacio": "No hay Cursos activos.",
+    "vacioTodos": "Todavía no hay Cursos.",
+    "activo": "Activo",
+    "inactivo": "Inactivo",
+    "ver": "Ver",
+    "verDe": "Ver el Curso {nombre}",
+    "papelera": "Papelera",
+    "nuevo": {
+      "boton": "Agregar un Curso",
+      "titulo": "Agregar un Curso",
+      "descripcion": "Elegí uno de los Cursos que la app sabe acompañar y ponele el nombre que se va a ver.",
+      "combinacion": "Curso",
+      "nombre": "Nombre",
+      "nombreAyuda": "Como lo van a ver las Personas.",
+      "descripcionCampo": "Descripción (opcional)",
+      "descripcionAyuda": "Hasta 500 caracteres.",
+      "restaurar": "{curso} (está en la papelera: se recupera)",
+      "sinDisponibles": "Ya están todos los Cursos que la app sabe acompañar.",
+      "agregar": "Agregar el Curso",
+      "agregando": "Agregando…",
+      "cancelar": "Volver",
+      "agregado": "Agregamos el Curso {nombre}.",
+      "resumen": "Revisá esto antes de seguir:",
+      "errores": {
+        "combinacion": "Elegí un Curso de la lista.",
+        "nombre": "Escribí un nombre de hasta 120 caracteres.",
+        "descripcion": "La descripción puede tener hasta 500 caracteres."
+      }
+    },
+    "detalle": {
+      "modalidad": "Modalidad",
+      "grupos": "{cantidad, plural, =0 {Sin Grupos en curso} one {# Grupo en curso} other {# Grupos en curso}}",
+      "guardar": "Guardar los cambios",
+      "guardando": "Guardando…",
+      "guardado": "Guardamos los cambios.",
+      "inactivar": "Inactivar",
+      "inactivando": "Inactivando…",
+      "inactivarTitulo": "¿Inactivar el Curso {nombre}?",
+      "inactivarTexto": "No se van a poder abrir Grupos nuevos de este Curso. Lo podés reactivar cuando quieras.",
+      "inactivarConGrupos": "Tiene {cantidad, plural, one {# Grupo en curso, que sigue} other {# Grupos en curso, que siguen}} igual hasta terminar. No se van a poder abrir Grupos nuevos. Para confirmar, escribí el nombre del Curso.",
+      "inactivarConfirmar": "Sí, inactivar",
+      "escribiNombre": "Nombre del Curso",
+      "inactivado": "Inactivamos el Curso.",
+      "reactivar": "Reactivar",
+      "reactivando": "Reactivando…",
+      "reactivarTitulo": "¿Reactivar el Curso {nombre}?",
+      "reactivarTexto": "Se van a poder abrir Grupos nuevos de este Curso.",
+      "reactivarConfirmar": "Sí, reactivar",
+      "reactivado": "Reactivamos el Curso.",
+      "eliminar": "Eliminar",
+      "eliminando": "Eliminando…",
+      "eliminarTitulo": "¿Eliminar el Curso {nombre}?",
+      "eliminarTexto": "Va a la papelera, desde donde lo podés recuperar.",
+      "eliminarConfirmar": "Sí, eliminar",
+      "eliminado": "Eliminamos el Curso. Está en la papelera.",
+      "noSePuedeEliminar": "No se puede eliminar porque tiene Grupos (en curso o terminados). Si no querés que se abran más, inactivalo.",
+      "volver": "Volver",
+      "error": "No pudimos guardar el cambio. Probá de nuevo en unos segundos."
+    },
+    "papeleraPagina": {
+      "titulo": "Papelera de Cursos",
+      "descripcion": "Los Cursos eliminados. Podés recuperarlos.",
+      "vacio": "La papelera está vacía.",
+      "eliminadoEl": "Eliminado el {fecha}",
+      "restaurar": "Recuperar",
+      "restaurarDe": "Recuperar el Curso {nombre}",
+      "restaurado": "Recuperamos el Curso {nombre}.",
+      "error": "No pudimos recuperar el Curso."
+    },
+    "cargando": "Cargando los Cursos",
+    "noEncontradoTitulo": "No encontramos este Curso",
+    "irACursos": "Ir a Cursos",
+    "errorCargaTitulo": "No pudimos cargar los Cursos",
+    "errorCarga": "Podés reintentar en unos segundos. Código de referencia:",
+    "reintentar": "Reintentar"
+  },
+  "catalogos": {
+    "titulo": "Catálogos",
+    "descripcion": "Las listas que usa la app en varios lugares. Entrá a cada una para verla o cambiarla.",
+    "sedes": {
+      "titulo": "Sedes",
+      "texto": "Dónde se reúne la iglesia."
+    },
+    "cursos": {
+      "titulo": "Cursos",
+      "texto": "Vida Nueva y Vida de Servicio."
+    },
+    "cantidad": "{activos, plural, one {# activo} other {# activos}} de {total}",
+    "cantidadSedes": "{activos, plural, one {# activa} other {# activas}} de {total}",
+    "error": "No pudimos contar los registros de los catálogos. Igual podés entrar a cada uno."
+  },
   "etapasPersona": {},
   "loTuyoEnLaApp": {},
   "solicitudesServicio": {},
