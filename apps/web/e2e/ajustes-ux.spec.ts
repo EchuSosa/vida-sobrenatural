@@ -194,3 +194,16 @@ test.describe('Perfil', () => {
     await expect(page.getByRole('status').filter({ hasText: 'Guardamos tus cambios.' })).toBeVisible();
   });
 });
+
+test.describe('Nosotros', () => {
+  test.use({ viewport: CELULAR });
+
+  test('índice compacto en celular, con chevrón en cada tarjeta (#9, #10) @celular', async ({ page }) => {
+    await page.goto('/nosotros');
+    const lista = contenido(page).getByRole('list').first();
+    await expect(lista.getByRole('link')).toHaveCount(6);
+    await expect(lista.locator('svg.lucide-chevron-right')).toHaveCount(6);
+    const altoLista = await alto(lista);
+    expect(altoLista).toBeLessThan(1000);
+  });
+});

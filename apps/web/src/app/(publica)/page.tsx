@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import { ButtonLink, HeroConFoto, HeroConFotoBoton } from '@vida-sobrenatural/ui';
@@ -129,7 +130,11 @@ export default function InicioPage() {
               <div className="relative aspect-video w-full overflow-hidden rounded-md sm:aspect-[4/3]">
                 <Image src={tarjeta.imagen} alt={tarjeta.alt} fill sizes={SIZES_TARJETA} className="object-cover" />
               </div>
-              <span className="font-medium">{tarjeta.titulo}</span>
+              {/* ajustes-ux #10: chevrón para que se entienda que se toca. */}
+              <span className="flex items-center justify-between gap-2 font-medium">
+                {tarjeta.titulo}
+                <ChevronRight aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+              </span>
               <span className="text-base text-muted-foreground">{tarjeta.descripcion}</span>
             </Link>
           </li>
