@@ -32,7 +32,7 @@ export default async function AsistenciaPage({ params, searchParams }: { params:
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 pt-16 pb-32">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
       <MigaDePan tramos={[{ label: t('titulo'), href: '/mis-grupos' }, { label: grupo.nombre, href: `/mis-grupos/${grupo.grupoId}` }, { label: t('asistencia.titulo') }]} LinkComponente={Link} />
       <h1 className="text-3xl font-semibold tracking-tight">{t('asistencia.titulo')}</h1>
       {grupo.estado !== 'en_curso' ? (

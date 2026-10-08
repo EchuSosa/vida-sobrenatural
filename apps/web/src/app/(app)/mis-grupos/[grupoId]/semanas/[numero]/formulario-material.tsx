@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -58,7 +58,6 @@ export function FormularioMaterial({
   const [enlaces, setEnlaces] = useState<EnlaceDeContenido[]>(inicial.enlaces);
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [foco, setFoco] = useState(0);
-  const inputArchivos = useRef<HTMLInputElement>(null);
   const tamanio = (bytes: number) => formatearTamanio(bytes, locale);
 
   const mensaje = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : tg('errorGenerico'));
@@ -238,25 +237,28 @@ export function FormularioMaterial({
             )}
           </div>
         ))}
-        <input
-          ref={inputArchivos}
-          id="campo-archivosNuevos"
-          type="file"
-          multiple
-          accept={MIME_CONTENIDO_ADMITIDOS.join(',')}
-          aria-describedby={describir('archivosNuevos', 'ayuda-archivos')}
-          className="sr-only"
-          tabIndex={-1}
-          onChange={(e) => {
-            const elegidos = [...(e.target.files ?? [])];
-            setNuevos((xs) => [...xs, ...elegidos.map((archivo) => ({ clave: `${archivo.name}-${archivo.size}-${Math.random()}`, archivo, alt: '' }))]);
-            e.target.value = '';
-          }}
-        />
-        <Button type="button" variant="outline" size="xl" className="w-full text-base sm:w-fit" onClick={() => inputArchivos.current?.click()}>
-          <Plus aria-hidden />
+        {/* El input de archivo va DENTRO de su etiqueta visible ("Agregar archivos"), con el aspecto de un botón:
+            con teclado se enfoca el input (anillo en la etiqueta) y Enter/Espacio abre el selector. */}
+        <label
+          htmlFor="campo-archivosNuevos"
+          className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 text-base font-medium hover:bg-muted has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50 sm:w-fit"
+        >
+          <Plus aria-hidden className="size-4" />
           {t('agregarArchivos')}
-        </Button>
+          <input
+            id="campo-archivosNuevos"
+            type="file"
+            multiple
+            accept={MIME_CONTENIDO_ADMITIDOS.join(',')}
+            aria-describedby={describir('archivosNuevos', 'ayuda-archivos')}
+            className="sr-only"
+            onChange={(e) => {
+              const elegidos = [...(e.target.files ?? [])];
+              setNuevos((xs) => [...xs, ...elegidos.map((archivo) => ({ clave: `${archivo.name}-${archivo.size}-${Math.random()}`, archivo, alt: '' }))]);
+              e.target.value = '';
+            }}
+          />
+        </label>
         <MensajeErrorCampo id="error-archivosNuevos" mensaje={err('archivosNuevos')} />
       </fieldset>
 

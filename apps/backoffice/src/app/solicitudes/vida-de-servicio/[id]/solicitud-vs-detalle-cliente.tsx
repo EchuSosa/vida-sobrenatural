@@ -254,7 +254,7 @@ function AprobarInscripcion({
           </Button>
         }
       />
-      <AlertDialogContent data-tono="neutro">
+      <AlertDialogContent className="max-h-[90dvh] overflow-y-auto" data-tono="neutro">
         <form
           className="flex flex-col gap-4"
           onSubmit={(e) => {

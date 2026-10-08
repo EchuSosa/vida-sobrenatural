@@ -103,7 +103,7 @@ export function PedirVidaDeServicio({ ediciones }: { ediciones: OpcionEdicion[] 
           </Button>
         }
       />
-      <AlertDialogContent>
+      <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
         <form
           className="flex flex-col gap-4"
           onSubmit={(e) => {

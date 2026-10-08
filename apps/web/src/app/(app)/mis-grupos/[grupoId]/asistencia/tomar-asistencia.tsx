@@ -140,8 +140,8 @@ export function TomarAsistencia({
               );
             })}
           </ul>
-          <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background p-4">
-            <div className="mx-auto flex max-w-2xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="sticky bottom-20 z-10 -mx-4 border-t border-border bg-background p-4 md:bottom-0">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-base font-medium" aria-live="polite" data-testid="contador-asistencia">
                 {t('contador', { presentes, ausentes: ausentes.size })}
               </p>
