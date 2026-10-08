@@ -882,7 +882,6 @@
   "ministerios": {
     "titulo": "Ministerios",
     "catalogos": "Catálogos",
-    "enlaceCatalogos": "Ministerios y sus áreas",
     "crear": "Crear Ministerio",
     "papelera": "Papelera",
     "buscar": "Buscar por nombre",
@@ -997,7 +996,8 @@
     "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos este código:",
     "reintentar": "Reintentar",
     "noEncontradoTitulo": "Este Ministerio no existe o está en la papelera",
-    "volverALista": "Volver a Ministerios"
+    "volverALista": "Volver a Ministerios",
+    "tarjetaTexto": "Dónde se sirve en la iglesia, con sus áreas."
   },
   "postulaciones": {
     "titulo": "Postulación de {nombre} a {ministerio}",

@@ -151,7 +151,7 @@ export function MinisteriosCliente({
             <SheetTitle>{t('crear')}</SheetTitle>
             <SheetDescription>{t('form.descripcionSheet')}</SheetDescription>
           </SheetHeader>
-          <div className="px-4 pb-6">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
             <FormularioMinisterio
               inicial={{ nombre: '', descripcion: '', lineaPublica: '', requiereFormacion: false }}
               textoEnviar={t('form.crear')}

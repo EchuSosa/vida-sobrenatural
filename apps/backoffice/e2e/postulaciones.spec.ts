@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
+import { test, expect, apiComo, auditar, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
 import { EMAILS_009, MINISTERIOS_009, aprobarComoAdmin, estadoDe, ministerioPorNombre, postularComo, prepararSinPostulacion } from './helpers-009';
 
 /**
@@ -75,6 +75,29 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('button', { name: 'Sí, confirmar el cambio' }).click();
       await expect(page.getByText('Aprobada', { exact: true })).toBeVisible();
       expect(await estadoDe(EMAILS_009.cambio)).toMatchObject({ estado: 'miembro', membresia: { ministerio: { nombre: MINISTERIOS_009.mesa } } });
+    });
+
+    test('en nombre de (FR-024): desde el Perfil de Persona, con su nombre a la vista; queda pendiente y cargada por el Admin', async ({ page }) => {
+      await prepararSinPostulacion(EMAILS_009.enNombre);
+      const { id } = await apiComo<{ id: string }>(EMAILS_009.enNombre, 'GET', '/personas/me');
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/personas/${id}`);
+      const seccion = page.getByRole('region', { name: 'Ministerio' });
+      await expect(seccion).toContainText('Hoy no sirve en ningún Ministerio.');
+      await page.waitForLoadState('networkidle');
+      await seccion.getByRole('button', { name: 'Postular a un Ministerio' }).click();
+      const panel = page.getByRole('dialog');
+      await expect(panel).toContainText('Actuás en nombre de EnNombre E2E Ministerio.');
+      await panel.getByRole('button', { name: 'Postular', exact: true }).click();
+      await expect(panel.locator('#campo-ministerioId-error')).toHaveText('Elegí un Ministerio.');
+      await sinViolaciones(page);
+      await panel.getByLabel('Ministerio', { exact: true }).selectOption({ label: MINISTERIOS_009.bienvenida });
+      await panel.getByLabel('Seguridad').check();
+      await panel.getByRole('button', { name: 'Postular', exact: true }).click();
+      await expect(seccion).toContainText(`Postulación en revisión a ${MINISTERIOS_009.bienvenida}`);
+      await seccion.getByRole('link', { name: 'Ver la postulación' }).click();
+      await expect(page.getByText('Cargada por E2E E2E en su nombre')).toBeVisible();
+      expect(await estadoDe(EMAILS_009.enNombre)).toMatchObject({ estado: 'pendiente' });
     });
 
     test('rechazar con motivo: queda en el backoffice, la Persona ve que no avanzó sin el motivo; el Pastor ve sin acciones (FR-014, FR-019, FR-023)', async ({ page }) => {

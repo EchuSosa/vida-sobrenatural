@@ -390,7 +390,7 @@ export function MinisterioDetalleCliente({
             </SheetTitle>
             <SheetDescription>{m.nombre}</SheetDescription>
           </SheetHeader>
-          <div className="px-4 pb-6">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
             {panel?.tipo === 'ministerio' && (
               <FormularioMinisterio
                 inicial={{ nombre: m.nombre, descripcion: m.descripcion, lineaPublica: m.lineaPublica, requiereFormacion: m.requiereFormacion }}

@@ -36,7 +36,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const nombre = `e2e-Catálogo ${colorScheme} ${Date.now()}`;
       await loguearseComoAdminE2E(page);
       await page.goto('/catalogos');
-      await page.getByRole('link', { name: 'Ministerios y sus áreas' }).click();
+      await page.getByRole('link', { name: /Ministerios/ }).click();
       await expect(page.getByRole('heading', { name: 'Ministerios', level: 1 })).toBeVisible();
       await sinViolaciones(page);
 

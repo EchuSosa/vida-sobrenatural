@@ -10,6 +10,7 @@ export const EMAILS_009 = {
   postulante: 'e2e-ministerio-postulante@example.com',
   cambio: 'e2e-ministerio-cambio@example.com',
   catalogo: 'e2e-ministerio-catalogo@example.com',
+  enNombre: 'e2e-ministerio-en-nombre@example.com',
 } as const;
 
 export const MINISTERIOS_009 = {
