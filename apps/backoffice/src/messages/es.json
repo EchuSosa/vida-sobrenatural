@@ -230,7 +230,8 @@
     "cumpleanos": "Cumpleaños",
     "menuMovilTitulo": "Menú",
     "menuMovilDescripcion": "Las secciones del backoffice.",
-    "mostrarOcultarMenu": "Mostrar u ocultar el menú"
+    "mostrarOcultarMenu": "Mostrar u ocultar el menú",
+    "comentarios": "Comentarios"
   },
   "libros": {
     "arrastrar": {
@@ -1258,7 +1259,132 @@
     },
     "sinTelefono": "Sin teléfono"
   },
-  "comentarios": {},
+  "comentarios": {
+    "formulario": {
+      "tipoLeyenda": "¿Qué nos querés contar?",
+      "tipos": {
+        "problema": {
+          "etiqueta": "Un problema",
+          "ayuda": "Algo no anda, no se entiende o no te deja seguir."
+        },
+        "sugerencia": {
+          "etiqueta": "Una sugerencia",
+          "ayuda": "Una idea para mejorar la app o algo que te gustaría que tenga."
+        }
+      },
+      "texto": "Contanos",
+      "ayudaTexto": "Con tus palabras: qué estabas haciendo y qué pasó, o qué te gustaría. Hasta 2000 caracteres.",
+      "contador": "{n} de {maximo} caracteres",
+      "aceptaContacto": "Pueden contactarme para preguntarme más",
+      "ayudaAceptaContactoConSesion": "Si te contactamos, usamos el email y el teléfono de tu perfil.",
+      "contactoLeyenda": "¿Cómo te contactamos?",
+      "ayudaContacto": "Dejanos un email o un teléfono (con uno alcanza).",
+      "contactoEmail": "Email (opcional)",
+      "contactoTelefono": "Teléfono (opcional)",
+      "codigoPais": "Código de país",
+      "enviar": "Enviar",
+      "enviando": "Enviando…",
+      "tituloResumen": "Revisá esto antes de enviar:",
+      "errores": {
+        "tipo": "Elegí si es un problema o una sugerencia.",
+        "texto": "Escribí qué nos querés contar, en hasta 2000 caracteres.",
+        "contacto": "Para que te contactemos, dejanos un email o un teléfono. Si preferís que no, desmarcá la casilla.",
+        "contactoEmail": "Escribí un email válido, por ejemplo nombre@ejemplo.com.",
+        "contactoTelefono": "Escribí el número con el código de área, solo con números. Ejemplo: 221 555 0101.",
+        "otro": "Revisá este dato."
+      },
+      "demasiados": "Mandaste varios comentarios seguidos. Probá de nuevo en {minutos, plural, one {un minuto} other {# minutos}}.",
+      "errorGeneral": "No pudimos enviar tu comentario. Probá de nuevo en unos minutos.",
+      "confirmacionTitulo": "¡Gracias! Lo vamos a leer.",
+      "confirmacionDetalle": "Cada comentario lo lee alguien del equipo. Si es un problema, lo revisamos para arreglarlo.",
+      "confirmacionDetalleContacto": "Cada comentario lo lee alguien del equipo. Si necesitamos saber más, te vamos a contactar.",
+      "otro": "Mandar otro comentario"
+    },
+    "abrir": "Contanos qué te parece",
+    "panelTitulo": "Contanos qué te parece",
+    "panelDescripcion": "¿Algo no anda o se te ocurre cómo mejorar el backoffice? Lo lee la persona que desarrolla la app.",
+    "cerrarPanel": "Cerrar",
+    "cerrar": "Cerrar",
+    "titulo": "Comentarios",
+    "descripcion": "Lo que nos cuentan desde \"Contanos qué te parece\", en la web y en el backoffice. Los nuevos aparecen en \"Sin revisar\".",
+    "filtros": {
+      "revisado": "Estado",
+      "tipo": "Tipo",
+      "no": "Sin revisar",
+      "si": "Revisados",
+      "todos": "Todos",
+      "todosLosTipos": "Todos los tipos",
+      "problema": "Problemas",
+      "sugerencia": "Sugerencias"
+    },
+    "vacio": {
+      "no": "No hay comentarios sin revisar.",
+      "si": "Todavía no hay comentarios revisados.",
+      "todos": "Todavía nadie mandó un comentario."
+    },
+    "vacioTipo": "No hay comentarios de este tipo con este filtro.",
+    "columnas": {
+      "comentario": "Comentario",
+      "quien": "Quién",
+      "estado": "Estado"
+    },
+    "tipo": {
+      "problema": "Problema",
+      "sugerencia": "Sugerencia"
+    },
+    "sinSesion": "Sin sesión",
+    "aceptaContacto": "Acepta que la contacten",
+    "revisado": "Revisado",
+    "sinRevisar": "Sin revisar",
+    "revisadoPor": "Revisado por {nombre} el {fecha}",
+    "desde": "{app} · {pagina}",
+    "apps": {
+      "web": "Web",
+      "backoffice": "Backoffice"
+    },
+    "paginado": "Páginas de comentarios",
+    "miga": "Comentarios",
+    "detalleTitulo": "{tipo} del {fecha}",
+    "texto": "Lo que escribió",
+    "datos": "Datos",
+    "datosTecnicos": "Datos técnicos",
+    "campos": {
+      "quien": "Quién",
+      "fecha": "Fecha",
+      "app": "App",
+      "pagina": "Pantalla",
+      "navegador": "Navegador",
+      "requestId": "Último código de error",
+      "estado": "Estado"
+    },
+    "sinDato": "No se registró",
+    "contacto": "Cómo contactarla",
+    "contactoEmail": "Email",
+    "contactoTelefono": "Teléfono",
+    "contactoSinDatos": "Aceptó que la contacten, pero su perfil no tiene email ni teléfono.",
+    "noAceptaContacto": "No pidió que la contacten.",
+    "marcar": "Marcar como revisado",
+    "marcando": "Marcando…",
+    "deshacer": "Deshacer",
+    "deshaciendo": "Deshaciendo…",
+    "marcado": "Lo marcaste como revisado.",
+    "deshecho": "Volvió a \"Sin revisar\".",
+    "errorAccion": "No pudimos guardar el cambio. Probá de nuevo.",
+    "volver": "Volver a Comentarios",
+    "errorCargaTitulo": "No pudimos cargar los comentarios",
+    "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando los comentarios",
+    "noEncontradoTitulo": "No encontramos ese comentario",
+    "noEncontradoTexto": "Puede que el enlace esté incompleto.",
+    "bloque": {
+      "titulo": "Comentarios nuevos",
+      "cuantos": "{n, plural, =0 {No hay comentarios sin revisar.} one {Hay # comentario sin revisar.} other {Hay # comentarios sin revisar.}}",
+      "vacio": "No hay comentarios nuevos.",
+      "verTodos": "Ver los comentarios",
+      "error": "No pudimos cargar los comentarios."
+    }
+  },
   "cursos": {
     "titulo": "Cursos",
     "descripcion": "Los cursos que la app sabe acompañar. Podés cambiarles el nombre y la descripción, o inactivarlos para que no se abran Grupos nuevos.",
