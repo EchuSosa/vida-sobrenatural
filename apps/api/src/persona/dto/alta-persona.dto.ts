@@ -23,6 +23,9 @@ export class AltaPersonaDto {
   @ApiPropertyOptional({ description: 'Opcional (D145): sin email, la Persona no tiene acceso a la app.' })
   @Allow()
   email?: unknown;
+  @ApiPropertyOptional({ example: '30.123.456', description: 'D215: opcional; 7 u 8 dígitos, con o sin puntos. 400 DNI_INVALIDO, 409 DNI_DUPLICADO con `persona`.' })
+  @Allow()
+  dni?: unknown;
   @ApiProperty({ description: 'D78: la Persona dio su consentimiento en persona o por WhatsApp.' })
   @Allow()
   consentimiento!: unknown;

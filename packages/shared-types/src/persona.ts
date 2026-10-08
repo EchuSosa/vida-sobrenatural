@@ -322,9 +322,31 @@ export interface DatosPersonales {
 /** Body de POST /personas/alta (spec 006, contracts/personas-alta-api.md). */
 export interface DatosAltaPersona extends DatosPersonales {
   email?: string | null;
+  /** D215: opcional; con o sin puntos, se guarda solo con dígitos (`normalizarDni`). */
+  dni?: string | null;
   consentimiento: true;
   /** Reintento después de un 409 POSIBLE_DUPLICADO ("Es otra persona, crear igual"). */
   confirmarPosibleDuplicado?: boolean;
+}
+
+/**
+ * D215: el DNI que carga el Admin. `null` = no vino (o vino vacío);
+ * `undefined` = no es un DNI (7 u 8 dígitos, con o sin puntos o espacios);
+ * si no, solo los dígitos, como se guarda.
+ */
+export function normalizarDni(valor: unknown): string | null | undefined {
+  if (valor === undefined || valor === null) return null;
+  if (typeof valor !== 'string') return undefined;
+  const limpio = valor.replace(/[\s.]/g, '');
+  if (limpio === '') return null;
+  return /^\d{7,8}$/.test(limpio) ? limpio : undefined;
+}
+
+/** D215: extensión del 409 DNI_DUPLICADO — quién ya tiene ese DNI (nunca el DNI). */
+export interface PersonaConMismoDni {
+  id: string;
+  nombre: string;
+  apellido: string;
 }
 
 /** Por qué dos Personas pueden ser la misma (aviso, no bloqueo — D145). */

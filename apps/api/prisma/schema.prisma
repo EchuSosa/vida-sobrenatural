@@ -123,6 +123,12 @@ model Persona {
   // (trim + minúsculas, `normalizarEmail`, spec 007): la migración del lote 0
   // normalizó los existentes y falla si dos chocan.
   email    String? @unique
+  // D215: opcional, solo lo carga el Admin (alta y edición en el backoffice,
+  // nunca el registro propio). Solo dígitos (7 u 8, `normalizarDni`). Único
+  // entre todas las Personas, activas o no, con un índice único parcial
+  // `WHERE dni IS NOT NULL` en SQL (migración `dni_persona`). Dato sensible:
+  // no va a listados, a logs ni a quien no tenga `personas.ver`.
+  dni      String?
   nombre   String
   apellido String
 

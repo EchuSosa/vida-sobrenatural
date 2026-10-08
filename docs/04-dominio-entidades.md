@@ -6,6 +6,7 @@
   - `idioma_preferido` (default `es`, no se pide en el registro): define en qué idioma se le envían las notificaciones y se muestra la interfaz cuando haya más de un idioma disponible (D84).
   - `tema_preferido` (`claro` por defecto / `oscuro` / `sistema`, D106).
   - `email` **opcional** (D145): único entre quienes lo tienen y guardado normalizado (minúsculas, sin espacios — spec 007). En el auto-registro siempre llega (SSO o código por email).
+  - `dni` **opcional** (D215): solo lo carga el Admin en el backoffice (nunca el registro propio); 7 u 8 dígitos, guardado sin puntos, único entre todas las Personas (activas o no). Si coincide, el alta se bloquea y se dice quién lo tiene. No se muestra en listados ni va a logs.
   - `telefono_normalizado` (solo dígitos, lo escribe la API) para el aviso de posible duplicado del alta (D145).
   - `bautismo_habilitado_en` / `bautismo_habilitado_por`: la habilitación del Admin para pedir el bautismo sin Vida Nueva (D147).
   - `origen_alta` (`autorregistro` / `admin`) y `alta_por` (quién la dio de alta, si fue desde el backoffice), junto con la fecha del consentimiento de datos (D78) y si se obtuvo dentro o fuera de la app.

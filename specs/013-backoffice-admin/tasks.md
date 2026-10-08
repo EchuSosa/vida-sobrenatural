@@ -300,11 +300,11 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `disponibles-para-alta`, alta acotada a `CURSOS_RECONOCIDOS` (restaurar si está en la papelera), `PATCH` sin
   categoría/tipo/modalidad, `DELETE` lógico con `CURSO_TIENE_GRUPOS`, papelera y restaurar. `CursoService.exigirActivo(
   cursoId, tx)` → `CURSO_INACTIVO` si `activo = false` o `eliminadoEn` no es nulo. `GET /catalogos/resumen`. — cubre: FR-050–FR-056
-- [ ] T071 **[Pendiente: `discipulado/propuestas.service.ts` no es de la 013 en el mapa (§3) — queda como Pregunta para Echu con el parche de una línea en el PR]** [L6] Llamar `exigirActivo` en la aceptación de propuesta de la 004 (`propuestas.service.ts`, rama sin
+- [x] T071 **[PR de ajustes `ajustes-dni-curso-sedes`, aprobado por Echu el 2026-10-08: la llamada va en la rama que crea el Grupo; texto de `CURSO_INACTIVO` para el Discipulador en la web app (la 006 movió la pantalla). Unit en `propuesta-aceptar-declinar.spec.ts`; la integración no apaga el Curso de Vida Nueva individual porque lo comparten las demás suites en paralelo]** [L6] Llamar `exigirActivo` en la aceptación de propuesta de la 004 (`propuestas.service.ts`, rama sin
   `grupoDestinoId` que crea el Grupo, dentro de la misma transacción); la rama "sumar a este Grupo" no se bloquea.
   Traducir `CURSO_INACTIVO` en la pantalla donde el Discipulador acepta (backoffice hoy; web app si la 006 ya la movió).
   — cubre: FR-054
-- [ ] T071a **[Pendiente con T071]** [L6] [CHECKLIST] Pantalla del Discipulador **donde acepta una propuesta**, modificada por T071 (mensaje de
+- [x] T071a **[Con T071: `checklists/lote-6-pantallas.md`]** [L6] [CHECKLIST] Pantalla del Discipulador **donde acepta una propuesta**, modificada por T071 (mensaje de
   error nuevo): checklist de `docs/15` sobre lo tocado. — cubre: FR-062
 - [x] T072 **[Lote 6]** [P] [L6] Unit `curso-alta.spec.ts`: combinación reconocida libre → ok; existente → `CURSO_YA_EXISTE`;
   eliminada → restaurar; no reconocida → `CURSO_NO_RECONOCIDO`. — cubre: FR-056
@@ -313,7 +313,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   (eliminar con un Grupo finalizado → 409), H6.5 (papelera y restaurar), Curso eliminado → `exigirActivo` rechaza,
   sumar a un Grupo en curso de un Curso inactivo sigue funcionando, `PATCH` con `categoria` → 400, H6.6 (Pastor:
   GET 200, escritura 403), `catalogos/resumen`. — cubre: H6.2–H6.6, FR-052, FR-054
-- [x] T074 **[Lote 6: el tramo Catálogos en las migas de Sedes queda pendiente (T077)]** [L6] Backoffice `app/catalogos/`: tarjetas por catálogo con activos/total y enlace (Sedes, Cursos; las demás
+- [x] T074 **[Lote 6; el tramo Catálogos en las migas de Sedes llegó con T077]** [L6] Backoffice `app/catalogos/`: tarjetas por catálogo con activos/total y enlace (Sedes, Cursos; las demás
   cuando existan), textos a next-intl. `app/cursos/` (listado con filtro activos/todos, columnas de FR-051, alta en modal
   con las combinaciones disponibles), `app/cursos/[id]` (editar nombre y descripción; Inactivar con confirmación simple
   o reforzada según `gruposEnCurso` — neutra, D151; Reactivar; Eliminar deshabilitado con explicación y oferta de
@@ -325,7 +325,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   H6.1, H6.3–H6.6, FR-060
 - [x] T076 **[Lote 6: `checklists/lote-6-pantallas.md`]** [L6] [CHECKLIST] Pantallas **Catálogos**, **Cursos (listado)**, **Curso (detalle)** y **Papelera de
   Cursos**: checklist de `docs/15`, cada una por separado. — cubre: FR-062
-- [ ] T077 **[Pendiente: la línea de `/sedes` en `nav.ts` y sus migas no son de la 013 en el mapa — Pregunta para Echu]** [L6] [CHECKLIST] Pantallas de **Sedes** (listado, detalle, papelera) modificadas solo en la miga de pan y el
+- [x] T077 **[PR de ajustes `ajustes-dni-curso-sedes`, aprobado por Echu el 2026-10-08: `/sedes` con `enMenu: false`, Catálogos marcado en `/sedes` y `/cursos` (`rutasRelacionadas` + `esItemActual`), miga "Catálogos ›" en listado, detalle y papelera; e2e en `cursos.spec.ts` y `sedes.spec.ts`]** [L6] [CHECKLIST] Pantallas de **Sedes** (listado, detalle, papelera) modificadas solo en la miga de pan y el
   menú: verificar el ítem del checklist de navegación (miga, `aria-current`) y que el resto no cambió. — cubre: FR-060
 
 ---

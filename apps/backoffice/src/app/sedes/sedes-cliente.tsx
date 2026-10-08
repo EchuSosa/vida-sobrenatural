@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   EstadoActivoBadge,
+  MigaDePan,
   Sheet,
   SheetContent,
   SheetHeader,
@@ -81,6 +82,7 @@ export function SedesCliente({
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
   const tc = useTranslations('comun');
+  const tcat = useTranslations('catalogos');
   const procesandoRef = useRef(new Set<string>());
   const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
   const hayAlgoAplicado = busqueda.trim() !== '' || filtro === 'todas';
@@ -171,6 +173,8 @@ export function SedesCliente({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
+      {/* D213: Sedes vive bajo Catálogos. */}
+      <MigaDePan tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: 'Sedes' }]} LinkComponente={Link} />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Sedes</h1>
         <div className="flex gap-2">

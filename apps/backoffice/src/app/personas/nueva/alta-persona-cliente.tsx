@@ -16,8 +16,10 @@ import {
   esMenorDeEdad,
   formatearDiaEnArgentina,
   hoyEnArgentina,
+  normalizarDni,
   opcionesAnioCongregaDesde,
   type CoincidenciaDuplicado,
+  type PersonaConMismoDni,
 } from '@vida-sobrenatural/shared-types';
 import {
   Button,
@@ -46,6 +48,7 @@ interface Formulario {
   profesionDetalle: string;
   congregaDesde: string;
   email: string;
+  dni: string;
   consentimiento: boolean;
 }
 
@@ -63,6 +66,7 @@ const VACIO: Formulario = {
   profesionDetalle: '',
   congregaDesde: '',
   email: '',
+  dni: '',
   consentimiento: false,
 };
 
@@ -88,6 +92,8 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
   const [datos, setDatos] = useState<Formulario>(VACIO);
   const [coincidencias, setCoincidencias] = useState<CoincidenciaDuplicado[] | null>(null);
   const [creada, setCreada] = useState<Creada | null>(null);
+  // D215: quién ya tiene el DNI escrito (para ir a su perfil en vez de cargarla de nuevo).
+  const [conMismoDni, setConMismoDni] = useState<PersonaConMismoDni | null>(null);
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const anioActual = anioEnArgentina();
 
@@ -95,6 +101,7 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
     setDatos((d) => ({ ...d, [campo]: valor }));
     validacion.limpiar(campo === 'codigoPais' || campo === 'numero' ? 'telefono' : campo);
     setCoincidencias(null);
+    if (campo === 'dni') setConMismoDni(null);
   }
 
   function mensaje(campo: string, code: string): string {
@@ -118,6 +125,7 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
       profesionDetalle: datos.profesion === 'otro' ? datos.profesionDetalle.trim() : undefined,
       congregaDesde: datos.congregaDesde ? Number(datos.congregaDesde) : undefined,
       email: datos.email.trim() || null,
+      dni: datos.dni.trim() || null,
       consentimiento: datos.consentimiento,
       confirmarPosibleDuplicado,
     };
@@ -131,6 +139,7 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
       errores.fechaNacimiento = mensaje('fechaNacimiento', 'ALTA_MENOR_DE_EDAD');
     }
     if (c.email && !EMAIL.test(c.email)) errores.email = mensaje('email', 'EMAIL_INVALIDO');
+    if (normalizarDni(c.dni) === undefined) errores.dni = mensaje('dni', 'DNI_INVALIDO');
     if (!c.consentimiento) errores.consentimiento = t('errores.consentimiento');
     return errores;
   }
@@ -154,6 +163,16 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
     } catch (error) {
       if (error instanceof ApiError && error.code === 'POSIBLE_DUPLICADO') {
         setCoincidencias((error.extensiones?.coincidencias as CoincidenciaDuplicado[] | undefined) ?? []);
+        return;
+      }
+      // D215: el DNI repetido no se puede crear igual; se dice quién lo tiene.
+      if (error instanceof ApiError && error.code === 'DNI_DUPLICADO') {
+        const persona = (error.extensiones?.persona as PersonaConMismoDni | undefined) ?? null;
+        setCoincidencias(null);
+        setConMismoDni(persona);
+        validacion.reemplazar({
+          dni: persona ? t('dniDuplicado.mensaje', { nombre: `${persona.nombre} ${persona.apellido}` }) : mensaje('dni', 'DNI_DUPLICADO'),
+        });
         return;
       }
       const campos = erroresPorCampo(error);
@@ -194,6 +213,7 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
               onClick={() => {
                 setCreada(null);
                 setDatos(VACIO);
+                setConMismoDni(null);
                 validacion.reset();
               }}
             >
@@ -259,6 +279,21 @@ export function AltaPersonaCliente({ sedes, apiToken }: { sedes: Array<{ id: str
             <p className="text-sm text-muted-foreground">{t('ayudas.fechaNacimiento')}</p>
             <MensajeErrorCampo id="campo-fechaNacimiento-error" mensaje={m.fechaNacimiento} />
           </div>
+          <CampoTexto
+            id="dni"
+            etiqueta={t('campos.dni')}
+            ayuda={t('ayudas.dni')}
+            valor={datos.dni}
+            onCambio={(v) => cambiar('dni', v)}
+            error={m.dni}
+            autoComplete="off"
+            inputMode="numeric"
+          />
+          {conMismoDni && m.dni && (
+            <Link href={`/personas/${conMismoDni.id}`} className="w-fit text-sm underline underline-offset-4">
+              {t('dniDuplicado.ver', { nombre: `${conMismoDni.nombre} ${conMismoDni.apellido}` })}
+            </Link>
+          )}
         </Seccion>
 
         <Seccion titulo={t('secciones.contacto')}>
@@ -416,6 +451,7 @@ function CampoTexto({
   onCambio,
   error,
   autoComplete,
+  inputMode,
 }: {
   id: string;
   etiqueta: string;
@@ -425,6 +461,7 @@ function CampoTexto({
   onCambio: (v: string) => void;
   error?: string;
   autoComplete?: string;
+  inputMode?: 'numeric';
 }) {
   const describe = [ayuda && `campo-${id}-ayuda`, error && `campo-${id}-error`].filter(Boolean).join(' ') || undefined;
   return (
@@ -443,6 +480,7 @@ function CampoTexto({
         type={tipo}
         value={valor}
         autoComplete={autoComplete}
+        inputMode={inputMode}
         onChange={(e) => onCambio(e.target.value)}
         aria-invalid={Boolean(error) || undefined}
         aria-describedby={describe}

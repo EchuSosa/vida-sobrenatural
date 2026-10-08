@@ -53,6 +53,8 @@
     "VIDA_NUEVA_COMPLETADA_POR_HISTORIAL": "Vida Nueva ya figura como hecha (registrada por la iglesia), así que no hace falta pedirla.",
     "POSIBLE_DUPLICADO": "Parece que esta persona ya está cargada. Revisá las coincidencias: si es otra persona, podés crearla igual.",
     "EMAIL_YA_CARGADO": "Esta persona ya tiene un email cargado. Si hay que cambiarlo, editá sus datos.",
+    "DNI_INVALIDO": "El DNI tiene que tener 7 u 8 números. Escribilo solo con números, sin puntos.",
+    "DNI_DUPLICADO": "Ya hay una Persona con este DNI. Revisá si es la misma persona antes de cargarla de nuevo.",
     "CODIGO_INCORRECTO": "Ese código no es el que te mandamos. Revisalo y escribilo de nuevo.",
     "CODIGO_SIN_INTENTOS": "Ese código ya no sirve porque se probó demasiadas veces. Pedí uno nuevo.",
     "CODIGO_VENCIDO": "Ese código venció o ya se usó. Pedí uno nuevo.",
@@ -145,6 +147,8 @@
       "NOTA_DEMASIADO_LARGA": "Escribí hasta 500 caracteres.",
       "CONGREGADESDE_INVALIDO": "Elegí el año en que empezaste a venir a la iglesia.",
       "EMAIL_INVALIDO": "Escribí un email válido, por ejemplo nombre@ejemplo.com.",
+      "DNI_INVALIDO": "El DNI tiene que tener 7 u 8 números. Escribilo solo con números, sin puntos.",
+      "DNI_DUPLICADO": "Ya hay una Persona con este DNI. Revisá si es la misma persona antes de cargarla de nuevo.",
       "CODIGO_INVALIDO": "Escribí los 6 números del código que te mandamos.",
       "EDICION_NO_DISPONIBLE": "Esa edición ya no tiene la inscripción abierta. Elegí otra.",
       "EDICION_YA_CURSADA": "Esta persona ya estuvo en esa edición. Elegí otra.",
@@ -681,6 +685,7 @@
       "codigoPais": "Código de país",
       "direccion": "Dirección",
       "email": "Email (opcional)",
+      "dni": "DNI (opcional)",
       "sede": "Sede",
       "congregaDesde": "¿En qué año empezó a venir a la iglesia?",
       "estadoCivil": "Estado civil",
@@ -690,7 +695,8 @@
     },
     "ayudas": {
       "fechaNacimiento": "Desde acá solo se dan de alta mayores de 18.",
-      "email": "Si no tiene, dejalo vacío: no va a poder entrar a la app, pero el equipo puede pedir Vida Nueva o registrar etapas en su nombre."
+      "email": "Si no tiene, dejalo vacío: no va a poder entrar a la app, pero el equipo puede pedir Vida Nueva o registrar etapas en su nombre.",
+      "dni": "Solo números, sin puntos."
     },
     "errores": {
       "apellido": "Escribí el apellido.",
@@ -757,6 +763,10 @@
       },
       "ver": "Buscar a {nombre} en Personas",
       "crearIgual": "Es otra persona, crear igual"
+    },
+    "dniDuplicado": {
+      "mensaje": "Ya hay una Persona con este DNI: {nombre}. No se puede cargar dos veces: si es la misma persona, revisá sus datos en su perfil.",
+      "ver": "Ver el perfil de {nombre}"
     },
     "exito": {
       "titulo": "Listo: {nombre} ya está cargada",

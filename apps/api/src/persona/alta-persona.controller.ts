@@ -22,7 +22,7 @@ export class AltaPersonaController {
 
   @Post('alta')
   @RequierePermiso('personas.alta')
-  @ApiCreatedResponse({ description: 'spec 006, FR-031 a FR-036: alta de una Persona adulta, email opcional. 400 VALIDACION (todos los campos), 409 EMAIL_DUPLICADO, 409 POSIBLE_DUPLICADO con `coincidencias`.' })
+  @ApiCreatedResponse({ description: 'spec 006, FR-031 a FR-036: alta de una Persona adulta, email opcional. 400 VALIDACION (todos los campos), 409 EMAIL_DUPLICADO, 409 DNI_DUPLICADO con `persona` (D215), 409 POSIBLE_DUPLICADO con `coincidencias`.' })
   alta(@Body() dto: AltaPersonaDto, @Req() request: AuthenticatedRequest) {
     return this.service.alta(dto, personaDeSesion(request));
   }
