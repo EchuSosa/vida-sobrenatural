@@ -63,7 +63,7 @@ describe('db:recrear-admin (integración, contra base de datos de test)', () => 
       sedeId,
       estadoCivil: 'soltero_a' as const,
       profesion: 'otro' as const,
-      tiempoCongregacion: 'menos_6_meses' as const,
+      congregaDesde: 2020,
       estado: 'activa' as const,
       activo: true,
       consentimientoDatos: true,

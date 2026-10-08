@@ -18,7 +18,12 @@ export type RolDeCargo = 'admin' | 'pastor' | 'discipulador' | 'lider_curso';
  * `miembro_registrado`; FR-021: no se suma ninguno cuyo evento de origen
  * (Vida Nueva, Vida de Servicio, Ministerios) todavía no existe.
  */
-export type RolDeEstado = 'miembro_registrado';
+export type RolDeEstado =
+  | 'miembro_registrado'
+  // spec 008 (D159, D160): al completar Vida de Servicio o con su Completitud Manual.
+  | 'apto_ministerio'
+  // spec 009 (D170): al aprobarse la primera Postulación; no se quita (acumulativo).
+  | 'miembro_ministerio';
 
 /**
  * Los cuatro valores de `RolDeCargo` como lista — Historia 2: la valida el
@@ -69,7 +74,38 @@ export type Permiso =
   | 'solicitudes.crear_en_nombre'
   | 'grupos.gestionar'
   | 'mis_discipulados.gestionar'
-  | 'mi_disponibilidad.gestionar';
+  | 'mi_disponibilidad.gestionar'
+  // Lote 0 global — specs 006–013. Cada spec usa los suyos; ninguna agrega
+  // permisos nuevos sin pasar por acá (D132).
+  // spec 006 (D143, D145, D144, D153)
+  | 'personas.alta'
+  | 'personas.editar_email'
+  | 'historial.resolver'
+  | 'completitud_manual.gestionar'
+  // spec 008
+  | 'vida_servicio.inscribir_en_nombre'
+  | 'mis_grupos.gestionar'
+  // spec 009
+  | 'ministerios.ver'
+  | 'ministerios.gestionar'
+  | 'ministerios.papelera.ver'
+  | 'postulaciones.crear_en_nombre'
+  // spec 010 (D187: no reusa solicitudes.crear_en_nombre, que incluye al Discipulador)
+  | 'bautismo.habilitar'
+  | 'bautismo.crear_en_nombre'
+  // spec 011
+  | 'eventos.gestionar'
+  | 'eventos.papelera.ver'
+  | 'inscripciones_evento.gestionar'
+  | 'pagos.verificar'
+  // spec 012
+  | 'notificaciones.enviar'
+  // spec 013
+  | 'comentarios.ver'
+  | 'comentarios.gestionar'
+  | 'cursos.gestionar'
+  | 'cursos.papelera.ver'
+  | 'personas.editar';
 
 export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'inicio.ver': ['admin', 'pastor'],
@@ -106,6 +142,35 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'grupos.gestionar': ['admin'],
   'mis_discipulados.gestionar': ['discipulador'],
   'mi_disponibilidad.gestionar': ['discipulador'],
+  // spec 006 — D143: dar de alta Personas es solo del Admin.
+  'personas.alta': ['admin'],
+  'personas.editar_email': ['admin'],
+  'historial.resolver': ['admin'],
+  'completitud_manual.gestionar': ['admin'],
+  // spec 008
+  'vida_servicio.inscribir_en_nombre': ['admin'],
+  'mis_grupos.gestionar': ['lider_curso'],
+  // spec 009
+  'ministerios.ver': ['admin', 'pastor'],
+  'ministerios.gestionar': ['admin'],
+  'ministerios.papelera.ver': ['admin'],
+  'postulaciones.crear_en_nombre': ['admin'],
+  // spec 010
+  'bautismo.habilitar': ['admin'],
+  'bautismo.crear_en_nombre': ['admin'],
+  // spec 011 — el Pastor ve (eventos.ver), no gestiona.
+  'eventos.gestionar': ['admin'],
+  'eventos.papelera.ver': ['admin'],
+  'inscripciones_evento.gestionar': ['admin'],
+  'pagos.verificar': ['admin'],
+  // spec 012 — el Pastor ve (notificaciones.ver), no envía.
+  'notificaciones.enviar': ['admin'],
+  // spec 013
+  'comentarios.ver': ['admin', 'pastor'],
+  'comentarios.gestionar': ['admin'],
+  'cursos.gestionar': ['admin'],
+  'cursos.papelera.ver': ['admin'],
+  'personas.editar': ['admin'],
 };
 
 /**
@@ -125,6 +190,7 @@ export type MotivoNoQuitable = Extract<
   ErrorCode,
   | 'SESION_SIN_PERSONA'
   | 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'
+  | 'LIDER_TIENE_GRUPOS_ACTIVOS'
   | 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO'
   | 'ADMIN_NO_PUEDE_AUTO_REVOCARSE'
 >;
@@ -136,13 +202,26 @@ export type MotivoNoQuitable = Extract<
  */
 export type ResultadoQuitarRol =
   | { puede: true }
-  | { puede: false; motivo: Exclude<MotivoNoQuitable, 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'> }
+  | { puede: false; motivo: Exclude<MotivoNoQuitable, 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS' | 'LIDER_TIENE_GRUPOS_ACTIVOS'> }
+  | {
+      // spec 008 (D167, FR-040): quitar `lider_curso` a quien lidera una
+      // edición de Vida de Servicio en curso — nombrándolas.
+      puede: false;
+      motivo: 'LIDER_TIENE_GRUPOS_ACTIVOS';
+      grupos: GrupoServicioActivo[];
+    }
   | {
       puede: false;
       motivo: 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS';
       discipulados: DiscipuladoActivo[];
       propuestas: PropuestaPendiente[];
     };
+
+/** Una edición de Vida de Servicio en curso que la Persona lidera (D167). */
+export interface GrupoServicioActivo {
+  grupoId: string;
+  nombre: string | null;
+}
 
 /** Lo que `puedeQuitarRol` necesita saber de la Persona destino. */
 export interface PersonaParaQuitarRol {
@@ -156,6 +235,8 @@ export interface PersonaParaQuitarRol {
    */
   discipuladosActivos: readonly DiscipuladoActivo[];
   propuestasPendientes: readonly PropuestaPendiente[];
+  /** spec 008 (D167): `gruposServicioActivosDe` en la API, mismo criterio que los de arriba. */
+  gruposServicioActivos: readonly GrupoServicioActivo[];
 }
 
 /**
@@ -193,6 +274,9 @@ export function puedeQuitarRol(
       discipulados: [...persona.discipuladosActivos],
       propuestas: [...persona.propuestasPendientes],
     };
+  }
+  if (rol === 'lider_curso' && persona.gruposServicioActivos.length > 0) {
+    return { puede: false, motivo: 'LIDER_TIENE_GRUPOS_ACTIVOS', grupos: [...persona.gruposServicioActivos] };
   }
   if (rol === 'admin' && persona.adminSembrado) return { puede: false, motivo: 'NO_SE_PUEDE_DEGRADAR_AL_ADMIN_SEMBRADO' };
   if (rol === 'admin' && persona.id === autorId) return { puede: false, motivo: 'ADMIN_NO_PUEDE_AUTO_REVOCARSE' };

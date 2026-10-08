@@ -105,6 +105,8 @@ export default defineConfig({
         NEXTAUTH_SECRET: envE2e.NEXTAUTH_SECRET,
         INTERNAL_API_SECRET: envE2e.INTERNAL_API_SECRET,
         API_BASE_URL: `http://localhost:${PUERTO_API}`,
+        // Lote 0 global (specs 006, 011, 013): enlaces y QR a la web app.
+        NEXT_PUBLIC_WEB_APP_URL: `http://localhost:${PUERTO_WEB_AUXILIAR}`,
         NEXT_PUBLIC_API_BASE_URL: `http://localhost:${PUERTO_API}`,
         ALLOW_TEST_LOGIN: 'true',
         PORT: String(PUERTO_APP),

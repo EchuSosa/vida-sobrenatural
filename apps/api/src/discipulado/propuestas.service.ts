@@ -12,7 +12,7 @@ import { calcularEdad } from '../persona/calcular-edad.js';
 import { EventosDiscipuladoService } from './eventos.js';
 import { evaluar } from './reglas-de-asignacion/reglas.js';
 import { bloquearGrupo, bloquearPersona, bloquearPropuesta, type PropuestaBloqueada } from './bloqueos.js';
-import { cursaOCompletoVidaNueva, franjasDeSolicitudes } from './consultas.js';
+import { cursaOCompletoVidaNueva, franjasDe, franjasDeSolicitudes } from './consultas.js';
 import { normalizarMotivo } from './validaciones.js';
 
 type Tx = Prisma.TransactionClient;
@@ -66,7 +66,7 @@ export class PropuestasService {
       : [];
     const solicitudIds = [
       ...propuestas.map((p) => p.solicitudId).filter((id): id is string => id !== null),
-      ...inscripciones.map((i) => i.solicitudId),
+      ...inscripciones.map((i) => i.solicitudId).filter((id): id is string => id !== null),
     ];
     const solicitudes = await this.prisma.solicitudDiscipulado.findMany({
       where: { id: { in: solicitudIds } },
@@ -107,7 +107,7 @@ export class PropuestasService {
         // franjas son las de sus Solicitudes, todas juntas.
         const delGrupo = (p.grupoId && inscripcionesPorGrupo.get(p.grupoId)) || [];
         personaId = delGrupo[0]?.personaId;
-        franjasObjetivo = delGrupo.flatMap((i) => franjas.get(i.solicitudId) ?? []);
+        franjasObjetivo = delGrupo.flatMap((i) => franjasDe(franjas, i.solicitudId));
         if (p.grupoId) grupoDestino = { grupoId: p.grupoId, personas: delGrupo.map((i) => nombreCompleto(i.personaId)) };
       }
 
@@ -284,6 +284,8 @@ export class PropuestasService {
 
     const inscripciones = await tx.inscripcion.findMany({ where: { grupoId: grupo.id, estado: 'activa' }, select: { personaId: true, solicitudId: true } });
     for (const i of inscripciones) {
+      // Vida Nueva: toda Inscripción nace de una Solicitud de Discipulado.
+      if (i.solicitudId === null) continue;
       eventos.push({
         nombre: 'propuesta_aceptada',
         a: { tipo: 'persona', personaId: i.personaId },

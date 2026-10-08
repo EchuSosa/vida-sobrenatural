@@ -22,6 +22,14 @@ export interface ConfirmDestructiveDialogProps {
   textoConfirmar: string;
   textoCancelar?: string;
   onConfirmar: () => void;
+  /**
+   * D151: `neutro` para lo que se puede deshacer (retirar un pedido, cancelar
+   * una inscripción); `destructivo` (por defecto) para lo irreversible. Lote 0
+   * global: la prop ya existe para que las specs 006–013 la pasen desde el
+   * principio; el aspecto de cada tono (rojo + ícono solo en `destructivo`) lo
+   * aplica la sesión `ajustes-ux` (specs/IMPLEMENTACION.md).
+   */
+  tono?: 'destructivo' | 'neutro';
 }
 
 /**
@@ -47,13 +55,14 @@ export function ConfirmDestructiveDialog({
   textoConfirmar,
   textoCancelar = 'Cancelar',
   onConfirmar,
+  tono = 'destructivo',
 }: ConfirmDestructiveDialogProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger render={trigger as React.ReactElement} />
-      <AlertDialogContent>
+      <AlertDialogContent data-tono={tono}>
         <AlertDialogHeader>
           <AlertDialogTitle>{titulo}</AlertDialogTitle>
           {descripcion && <AlertDialogDescription>{descripcion}</AlertDialogDescription>}

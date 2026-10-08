@@ -292,7 +292,7 @@ export async function crearMenorPendienteTutor(email: string, nombre = 'E2E', ap
         sedeId,
         estadoCivil: 'soltero_a',
         profesion: 'estudiante',
-        tiempoCongregacion: 'menos_6_meses',
+        congregaDesde: 2020,
         consentimientoDatos: false,
       },
     });
@@ -334,7 +334,7 @@ export async function crearPersonaActiva(email: string, apellido: string) {
         sedeId,
         estadoCivil: 'soltero_a',
         profesion: 'estudiante',
-        tiempoCongregacion: 'menos_6_meses',
+        congregaDesde: 2020,
         consentimientoDatos: true,
       },
     });
@@ -433,7 +433,7 @@ export async function crearPersona(email: string, o: OpcionesPersona): Promise<P
     sedeId: sedes[0].id,
     estadoCivil: 'soltero_a',
     profesion: 'estudiante',
-    tiempoCongregacion: 'menos_6_meses',
+    congregaDesde: 2020,
     consentimientoDatos: true,
   });
   return { id: await idDe(email), email };

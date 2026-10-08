@@ -67,7 +67,7 @@ async function sembrarPersona(email: string, apellido: string, rol: string[], se
       estadoCivil: 'soltero_a',
       profesion: 'otro',
       profesionDetalle: 'Fixture de e2e',
-      tiempoCongregacion: 'menos_6_meses',
+      congregaDesde: 2020,
       estado: 'activa',
       activo: true,
       consentimientoDatos: true,

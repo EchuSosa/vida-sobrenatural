@@ -104,3 +104,20 @@ export function formatearFechaHora(fecha: string | Date, locale: string): string
 export function formatearMoneda(monto: number, locale: string, moneda = 'ARS'): string {
   return new Intl.NumberFormat(conRegion(locale), { style: 'currency', currency: moneda }).format(monto);
 }
+
+/**
+ * spec 011 (research #15): el INSTANTE de una fecha civil + hora de
+ * Argentina (`2026-11-14`, `23:30` → `2026-11-15T02:30:00.000Z`). Argentina no
+ * tiene horario de verano desde 2009: el desfase es UTC-3 fijo. Única
+ * implementación (Principio XI), junto a `diaCivilEnArgentina`.
+ */
+export function instanteEnArgentina(fechaCivil: string, hora: string): Date {
+  const [anio, mes, dia] = fechaCivil.split('-').map(Number);
+  const [hh, mm] = hora.split(':').map(Number);
+  return new Date(Date.UTC(anio, mes - 1, dia, hh + 3, mm));
+}
+
+/** El año civil de "ahora" en Argentina (D214: `congregaDesde`, métricas). */
+export function anioEnArgentina(ahora: Date = new Date()): number {
+  return Number(diaCivilEnArgentina(ahora).slice(0, 4));
+}

@@ -78,7 +78,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     estadoCivil: '',
     profesion: '',
     profesionDetalle: '',
-    tiempoCongregacion: '',
+    congregaDesde: '',
     consentimientoDatos: false,
   });
 
@@ -149,7 +149,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
       esValido: () => datos.profesion !== 'otro' || datos.profesionDetalle.trim() !== '',
       mensaje: t('errorCampo'),
     } satisfies ValidacionCampo<string>,
-    tiempoCongregacion: requerido,
+    congregaDesde: requerido,
   };
 
   function pasoValido(numeroPaso: number): boolean {
@@ -163,7 +163,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     }
     if (numeroPaso === 3) {
       const detalleOk = datos.profesion !== 'otro' || Boolean(datos.profesionDetalle);
-      return Boolean(datos.estadoCivil && datos.profesion && datos.tiempoCongregacion && detalleOk);
+      return Boolean(datos.estadoCivil && datos.profesion && datos.congregaDesde && detalleOk);
     }
     return true;
   }
@@ -190,7 +190,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
       } else {
         validacion.limpiar('profesionDetalle');
       }
-      validacion.revalidar('tiempoCongregacion', datos.tiempoCongregacion, validaciones.tiempoCongregacion);
+      validacion.revalidar('congregaDesde', datos.congregaDesde, validaciones.congregaDesde);
     }
   }
 
@@ -225,7 +225,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
       estadoCivil: datos.estadoCivil,
       profesion: datos.profesion,
       profesionDetalle: datos.profesion === 'otro' ? datos.profesionDetalle : undefined,
-      tiempoCongregacion: datos.tiempoCongregacion,
+      congregaDesde: Number(datos.congregaDesde),
       consentimientoDatos: datos.consentimientoDatos,
       // Foto de perfil de Google — no es un campo del formulario, se toma
       // directo de la sesión (no editable por ahora).
@@ -275,7 +275,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
             estadoCivil: t('campos.estadoCivil'),
             profesion: t('campos.profesion'),
             profesionDetalle: t('campos.profesionDetalle'),
-            tiempoCongregacion: t('campos.tiempoCongregacion'),
+            congregaDesde: t('campos.congregaDesde'),
             // H-104: la casilla de consentimiento participa del sistema de
             // errores como cualquier otro campo.
             consentimientoDatos: t('campos.consentimiento'),

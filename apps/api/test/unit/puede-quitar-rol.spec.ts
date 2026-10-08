@@ -8,7 +8,7 @@ import { puedeQuitarRol } from '@vida-sobrenatural/shared-types';
  */
 describe('puedeQuitarRol', () => {
   // specs/004 (D137): sin discipulados activos ni propuestas pendientes.
-  const libre = { discipuladosActivos: [], propuestasPendientes: [] };
+  const libre = { discipuladosActivos: [], propuestasPendientes: [], gruposServicioActivos: [] };
   const comun = { id: 'p1', adminSembrado: false, ...libre };
   const sembrada = { id: 's1', adminSembrado: true, ...libre };
   const discipulado = { grupoId: 'g1', persona: { nombre: 'Ana', apellido: 'Pérez' } };
@@ -79,5 +79,25 @@ describe('puedeQuitarRol', () => {
   it('pastor y lider_curso de otra Persona, pedidos por un Admin identificado: sí', () => {
     expect(puedeQuitarRol('pastor', comun, 'otro-admin')).toEqual({ puede: true });
     expect(puedeQuitarRol('lider_curso', comun, 'otro-admin')).toEqual({ puede: true });
+  });
+
+  // spec 008 (D167, FR-040): quitar `lider_curso` a quien lidera ediciones de
+  // Vida de Servicio en curso se bloquea, nombrándolas.
+  describe('caso 4 — lider_curso con ediciones en curso (spec 008)', () => {
+    const edicion = { grupoId: 'vs-1', nombre: 'Edición otoño' };
+    const conEdicion = { ...comun, gruposServicioActivos: [edicion] };
+    it('con una edición en curso no se puede, y la nombra', () => {
+      expect(puedeQuitarRol('lider_curso', conEdicion, 'otro-admin')).toEqual({
+        puede: false,
+        motivo: 'LIDER_TIENE_GRUPOS_ACTIVOS',
+        grupos: [edicion],
+      });
+    });
+    it('sin ediciones en curso se puede', () => {
+      expect(puedeQuitarRol('lider_curso', comun, 'otro-admin')).toEqual({ puede: true });
+    });
+    it('no afecta a los otros roles', () => {
+      expect(puedeQuitarRol('discipulador', conEdicion, 'otro-admin')).toEqual({ puede: true });
+    });
   });
 });

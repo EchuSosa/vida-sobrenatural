@@ -9,10 +9,22 @@ import {
   IsUUID,
   IsUrl,
   Matches,
+  ValidateBy,
   ValidateIf,
 } from 'class-validator';
-import { EstadoCivil, Genero, Profesion, TiempoCongregacion } from '../../generated/prisma/enums.js';
-import { TELEFONO_REGEX } from '@vida-sobrenatural/shared-types';
+import { EstadoCivil, Genero, Profesion } from '../../generated/prisma/enums.js';
+import { TELEFONO_REGEX, anioEnArgentina, congregaDesdeValido } from '@vida-sobrenatural/shared-types';
+
+/**
+ * D214: año entero entre 1900 y el año en curso (en Argentina). Código de
+ * campo derivado: CONGREGADESDE_INVALIDO. Lo reusa el alta por el Admin (006).
+ */
+export function EsAnioCongregaDesde(): PropertyDecorator {
+  return ValidateBy({
+    name: 'esAnioCongregaDesde',
+    validator: { validate: (valor: unknown) => congregaDesdeValido(valor, anioEnArgentina()) },
+  });
+}
 
 /** Formulario obligatorio de FR-006, completado luego de la autorización SSO. */
 export class RegistroPersonaDto {
@@ -68,9 +80,9 @@ export class RegistroPersonaDto {
   @IsNotEmpty()
   profesionDetalle?: string;
 
-  @ApiProperty({ enum: TiempoCongregacion })
-  @IsEnum(TiempoCongregacion)
-  tiempoCongregacion!: TiempoCongregacion;
+  @ApiProperty({ example: 2019, description: 'D214: año en que empezó a venir a la iglesia.' })
+  @EsAnioCongregaDesde()
+  congregaDesde!: number;
 
   @ApiProperty()
   @IsBoolean()

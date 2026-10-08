@@ -43,16 +43,16 @@ export function Paso3Perfil({ form }: { form: UseFormularioRegistroResult }) {
         />
       )}
       <CampoSelect
-        label={t('campos.tiempoCongregacion')}
-        name="tiempoCongregacion"
+        label={t('campos.congregaDesde')}
+        name="congregaDesde"
         required
-        opciones={opciones.tiempoCongregacion}
-        value={datos.tiempoCongregacion}
-        onChange={(v) => actualizar('tiempoCongregacion', v)}
+        opciones={opciones.congregaDesde}
+        value={datos.congregaDesde}
+        onChange={(v) => actualizar('congregaDesde', v)}
         onBlur={() =>
-          validacion.revalidar('tiempoCongregacion', datos.tiempoCongregacion, validaciones.tiempoCongregacion)
+          validacion.revalidar('congregaDesde', datos.congregaDesde, validaciones.congregaDesde)
         }
-        {...estadoCampo('tiempoCongregacion')}
+        {...estadoCampo('congregaDesde')}
         placeholder={t('elegirOpcion')}
       />
     </>

@@ -99,7 +99,7 @@ async function crearPersonasDemo(sedeId: string) {
     estadoCivil: 'soltero_a' as const,
     profesion: 'otro' as const,
     profesionDetalle: 'Dato de ejemplo',
-    tiempoCongregacion: 'menos_6_meses' as const,
+    congregaDesde: 2020,
   };
 
   const personas: Array<Parameters<typeof prisma.persona.create>[0]['data']> = [
@@ -147,7 +147,7 @@ async function crearPersonasDemo(sedeId: string) {
   ];
 
   for (const persona of personas) {
-    const existente = await prisma.persona.findUnique({ where: { email: persona.email } });
+    const existente = await prisma.persona.findUnique({ where: { email: persona.email ?? undefined } });
     if (existente) {
       console.log(`Ya existe una Persona demo con email ${persona.email}, no se duplica.`);
       continue;
@@ -211,7 +211,7 @@ async function promoverAdminDemo(sedeId: string) {
       estadoCivil: 'soltero_a',
       profesion: 'otro',
       profesionDetalle: 'Dato de ejemplo',
-      tiempoCongregacion: 'menos_6_meses',
+      congregaDesde: 2020,
       estado: 'activa',
       activo: true,
       consentimientoDatos: true,
@@ -400,6 +400,26 @@ async function crearCursoVidaNueva() {
   console.log(`Curso Vida Nueva (individual) listo (${curso.id}).`);
 }
 
+/**
+ * Lote 0 global (spec 008, D158): el Curso "Vida de Servicio" — grupal, con
+ * liberación programada y Vida Nueva como prerrequisito (`CURSOS_RECONOCIDOS`).
+ * Mismo criterio que el de arriba: se busca por (categoria, tipo).
+ */
+async function crearCursoVidaDeServicio() {
+  const curso = await prisma.curso.upsert({
+    where: { categoria_tipo: { categoria: 'vida_de_servicio', tipo: 'grupal' } },
+    update: {},
+    create: {
+      nombre: 'Vida de Servicio',
+      categoria: 'vida_de_servicio',
+      tipo: 'grupal',
+      modalidad: 'liberacion_programada',
+      prerequisitoCategoria: 'vida_nueva',
+    },
+  });
+  console.log(`Curso Vida de Servicio listo (${curso.id}).`);
+}
+
 async function main() {
   const sede = await crearSedeDemo();
   await crearPersonasDemo(sede.id);
@@ -407,6 +427,7 @@ async function main() {
   await crearPalabraProfeticaDemo();
   await crearLibrosDemo();
   await crearCursoVidaNueva();
+  await crearCursoVidaDeServicio();
 }
 
 main()

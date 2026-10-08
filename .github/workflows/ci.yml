@@ -122,6 +122,11 @@ jobs:
           DATABASE_URL="postgresql://vidasobrenatural:vidasobrenatural_dev@localhost:5432/vidasobrenatural_test?schema=public"
           NEXTAUTH_SECRET="test-secret"
           INTERNAL_API_SECRET="test-internal"
+          SMTP_HOST="localhost"
+          SMTP_PORT=1025
+          CODIGO_INGRESO_SECRET="test-codigo"
+          WEB_URL="http://localhost:3001"
+          TAREAS_PROGRAMADAS="false"
           EOF
 
       - name: Build de shared-types
@@ -160,6 +165,13 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      # spec 007 (D140): los emails de los e2e (código de ingreso, avisos
+      # importantes) van a Mailpit; los tests los leen por su API (8025).
+      mailpit:
+        image: axllent/mailpit:latest
+        ports:
+          - 1025:1025
+          - 8025:8025
     steps:
       - uses: actions/checkout@v4
 
@@ -186,6 +198,11 @@ jobs:
           NEXTAUTH_SECRET="e2e-secret"
           INTERNAL_API_SECRET="e2e-internal"
           STORAGE_DIR="./storage/portadas-e2e"
+          SMTP_HOST="localhost"
+          SMTP_PORT=1025
+          CODIGO_INGRESO_SECRET="e2e-codigo"
+          WEB_URL="http://localhost:3001"
+          TAREAS_PROGRAMADAS="false"
           EOF
 
       - name: Build de shared-types

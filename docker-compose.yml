@@ -12,5 +12,15 @@ services:
     volumes:
       - vida_sobrenatural_db_data:/var/lib/postgresql/data
 
+  # spec 007 (D140): servidor SMTP de prueba. La API manda por localhost:1025 y
+  # los emails se leen en http://localhost:8025 (también por API, para los e2e).
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: vida-sobrenatural-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   vida_sobrenatural_db_data:

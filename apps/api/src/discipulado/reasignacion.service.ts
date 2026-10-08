@@ -5,7 +5,7 @@ import { AppException } from '../common/errors/app-exception.js';
 import { CruceService } from './cruce.service.js';
 import { EventosDiscipuladoService } from './eventos.js';
 import { bloquearGrupo, bloquearPersona, bloquearReasignacionPendiente } from './bloqueos.js';
-import { estaDisponible, franjasDeSolicitudes } from './consultas.js';
+import { estaDisponible, franjasDe, franjasDeSolicitudes } from './consultas.js';
 import { exigirEnCurso } from './finalizacion.service.js';
 import { interseccionDeFranjas } from './validaciones.js';
 
@@ -45,7 +45,7 @@ export class ReasignacionService {
       this.prisma.inscripcion.findMany({ where: { grupoId, estado: 'activa' }, select: { personaId: true, solicitudId: true }, orderBy: { createdAt: 'asc' } }),
     ]);
     const franjas = await franjasDeSolicitudes(this.prisma, inscripciones.map((i) => i.solicitudId));
-    const objetivo = interseccionDeFranjas(inscripciones.map((i) => franjas.get(i.solicitudId) ?? []));
+    const objetivo = interseccionDeFranjas(inscripciones.map((i) => franjasDe(franjas, i.solicitudId)));
     // Género: el de la primera Persona. Un Grupo se arma con la regla de
     // género (D138); si el Admin juntó géneros distintos (D25), la regla se
     // evalúa contra la primera y el Admin igual ve a todos con la razón.

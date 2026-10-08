@@ -147,11 +147,15 @@ describe('PersonaService.buscarPersonas (GET /personas/buscar, el buscador de tu
 
     const { items } = await service.listarPersonas(0, 20, undefined, 'apellido', 'asc', false, 'admin-1');
 
-    expect(liderazgos).toHaveBeenCalledTimes(1);
+    // spec 008 (D167): una consulta de Liderazgos para los discipulados (Vida
+    // Nueva) y otra para las ediciones de Vida de Servicio — siempre por página.
+    expect(liderazgos).toHaveBeenCalledTimes(2);
     expect(propuestas).toHaveBeenCalledTimes(1);
-    expect(liderazgos.mock.calls[0][0].where.personaId).toEqual({ in: pagina.map((p) => p.id) });
+    for (const [args] of liderazgos.mock.calls) expect(args.where.personaId).toEqual({ in: pagina.map((p) => p.id) });
+    expect(liderazgos.mock.calls.map(([args]) => args.where.grupo.curso.categoria).sort()).toEqual(['vida_de_servicio', 'vida_nueva']);
     expect(propuestas.mock.calls[0][0].where.discipuladorId).toEqual({ in: pagina.map((p) => p.id) });
     // Sin discipulados ni propuestas, quitar discipulador se ofrece (cierra H-127).
     expect(items.every((p) => p.quitar.discipulador.puede)).toBe(true);
+    expect(items.every((p) => p.quitar.lider_curso.puede)).toBe(true);
   });
 });

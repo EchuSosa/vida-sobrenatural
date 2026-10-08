@@ -10,6 +10,7 @@ import {
 import {
   EDAD_MINIMA_ROL_DE_CARGO,
   ROLES_DE_CARGO,
+  normalizarEmail,
   puedeQuitarRol,
   type ResultadoQuitarRol,
   type RolDeCargo,
@@ -19,6 +20,7 @@ import { RolesDeEstadoService } from './roles-de-estado.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import {
   discipuladosActivosDeVarias,
+  gruposServicioActivosDeVarias,
   propuestasPendientesDeVarias,
 } from '../discipulado/discipulados-activos.js';
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
@@ -85,7 +87,8 @@ export class PersonaService {
   /** GET /personas/by-email — uso interno, ver contracts/auth-integration.md. */
   async findByEmail(email: string) {
     const persona = await this.prisma.persona.findUnique({
-      where: { email },
+      // spec 007 (FR-010): mismo email → misma Persona, escrito como sea.
+      where: { email: normalizarEmail(email) },
       // temaPreferido: para que NextAuth pueda hidratar session.user.temaPreferido
       // sin flash (specs/002-base-transversal, research.md Decisión 3).
       select: {
@@ -235,7 +238,7 @@ export class PersonaService {
       return await this.prisma.$transaction(async (tx) => {
         const creada = await tx.persona.create({
           data: {
-            email: emailDeSesion,
+            email: normalizarEmail(emailDeSesion),
             nombre: dto.nombre,
             apellido: dto.apellido,
             genero: dto.genero,
@@ -248,7 +251,7 @@ export class PersonaService {
             // Solo tiene sentido cuando profesion = otro — el DTO ya lo exige
             // en ese caso y lo deja opcional en cualquier otro (ver dto).
             profesionDetalle: dto.profesionDetalle,
-            tiempoCongregacion: dto.tiempoCongregacion,
+            congregaDesde: dto.congregaDesde,
             fotoUrl: dto.fotoUrl,
             estado: esMayorDeEdad
               ? EstadoPersona.activa
@@ -426,9 +429,10 @@ export class PersonaService {
     // crece con las filas. Los mismos datos que consulta quitarRol, para que
     // la pantalla y la API respondan igual.
     const ids = items.map((p) => p.id);
-    const [discipuladosPorPersona, propuestasPorPersona] = await Promise.all([
+    const [discipuladosPorPersona, propuestasPorPersona, gruposServicioPorPersona] = await Promise.all([
       discipuladosActivosDeVarias(this.prisma, ids),
       propuestasPendientesDeVarias(this.prisma, ids),
+      gruposServicioActivosDeVarias(this.prisma, ids),
     ]);
     // T062 (D132): por cada rol de cargo, si quien mira se lo puede quitar y,
     // si no, por qué — la misma función con la que quitarRol rechaza. La
@@ -440,6 +444,7 @@ export class PersonaService {
           adminSembrado,
           discipuladosActivos: discipuladosPorPersona.get(persona.id) ?? [],
           propuestasPendientes: propuestasPorPersona.get(persona.id) ?? [],
+          gruposServicioActivos: gruposServicioPorPersona.get(persona.id) ?? [],
         };
         return {
           ...persona,

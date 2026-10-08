@@ -51,7 +51,7 @@ const DATOS_PROVISORIOS = {
   estadoCivil: 'soltero_a',
   profesion: 'otro',
   profesionDetalle: 'A completar',
-  tiempoCongregacion: 'menos_6_meses',
+  congregaDesde: 2020,
 } as const;
 
 function fallar(mensaje: string): never {

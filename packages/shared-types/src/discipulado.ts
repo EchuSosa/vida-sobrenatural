@@ -65,8 +65,11 @@ export function problemaDeFranjaNueva(nueva: Franja, cargadas: readonly Franja[]
 
 export type EstadoSolicitud = 'pendiente' | 'propuesta' | 'aprobada' | 'rechazada' | 'retirada';
 
-/** Hoy solo Discipulado está conectado; el filtro por tipo existe y la interfaz no lo muestra (FR-025). */
-export type TipoSolicitud = 'discipulado';
+/**
+ * El tipo de una Solicitud vive en `bandeja.ts` (D178, lote 0 global: los siete
+ * tipos de la bandeja unificada). Se importa acá para `SolicitudResumen`.
+ */
+import type { TipoSolicitud } from './bandeja.js';
 
 /** Las reglas de asignación vigentes (D138). Sumar una regla suma un valor acá y una función en la API. */
 export type NombreRegla = 'horario' | 'genero';
@@ -75,6 +78,8 @@ export interface PersonaBreve {
   id: string;
   nombre: string;
   apellido: string;
+  /** spec 013 (D87, T016): foto de Google o null; opcional hasta que la 013 la sume a todos los select. */
+  fotoUrl?: string | null;
 }
 
 /** Fila de la bandeja genérica de Solicitudes (FR-025). */
@@ -276,4 +281,19 @@ export interface PendientesAdmin {
   propuestasSinRespuesta: { cantidad: number; enlace: string };
   finalizacionesPropuestas: { cantidad: number; enlace: string };
   bajasPropuestas: { cantidad: number; enlace: string };
+  /**
+   * Lote 0 global: las filas que suman las specs 006–011 (bajas y
+   * finalizaciones de Vida de Servicio, Bautismos sin fecha, pagos por
+   * verificar…), cada una registrada desde su módulo con
+   * `RegistroPendientesAdmin`. El texto es `inicio.pendientes.extra.<clave>`
+   * (con `{cantidad}`) del backoffice. Solo vienen las que tienen cantidad > 0.
+   */
+  extra: LineaPendienteAdmin[];
+}
+
+export interface LineaPendienteAdmin {
+  /** Única entre specs, `<dominio>_<que>` (sin puntos: es clave de next-intl), ej. `vida_servicio_bajas`. */
+  clave: string;
+  cantidad: number;
+  enlace: string;
 }

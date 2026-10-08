@@ -61,7 +61,7 @@ describe('Admin sembrado indegradable (integración, contra base de datos de tes
           sedeId,
           estadoCivil: 'soltero_a',
           profesion: 'otro',
-          tiempoCongregacion: 'menos_6_meses',
+          congregaDesde: 2020,
           estado: 'activa',
           activo: true,
           consentimientoDatos: true,

@@ -21,7 +21,7 @@ function dtoAdultoValido(overrides: Partial<RegistroPersonaDto> = {}): RegistroP
     sedeId: 'sede-1',
     estadoCivil: 'soltero_a',
     profesion: 'salud',
-    tiempoCongregacion: 'menos_6_meses',
+    congregaDesde: 2020,
     consentimientoDatos: true,
     ...overrides,
   } as RegistroPersonaDto;

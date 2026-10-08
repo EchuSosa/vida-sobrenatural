@@ -67,7 +67,7 @@ async function registrarMenorActivo(page: Page, baseURL: string, email: string) 
     sedeId: sedes[0].id,
     estadoCivil: 'soltero_a',
     profesion: 'estudiante',
-    tiempoCongregacion: 'menos_6_meses',
+    congregaDesde: 2020,
     consentimientoDatos: false,
   });
   const admin = await tokenDe(baseURL, 'e2e-admin@example.com');

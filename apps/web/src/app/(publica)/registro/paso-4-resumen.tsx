@@ -90,8 +90,7 @@ function ResumenDatos({
   const generoLabel = opciones.genero.find((o) => o.value === datos.genero)?.label ?? '';
   const estadoCivilLabel = opciones.estadoCivil.find((o) => o.value === datos.estadoCivil)?.label ?? '';
   const profesionLabel = opciones.profesion.find((o) => o.value === datos.profesion)?.label ?? '';
-  const tiempoLabel =
-    opciones.tiempoCongregacion.find((o) => o.value === datos.tiempoCongregacion)?.label ?? '';
+  const congregaDesdeLabel = opciones.congregaDesde.find((o) => o.value === datos.congregaDesde)?.label ?? '';
 
   const grupos: { paso: number; titulo: string; filas: { label: string; valor: string }[] }[] = [
     {
@@ -125,7 +124,7 @@ function ResumenDatos({
         ...(datos.profesion === 'otro'
           ? [{ label: t('campos.profesionDetalle'), valor: datos.profesionDetalle }]
           : []),
-        { label: t('campos.tiempoCongregacion'), valor: tiempoLabel },
+        { label: t('campos.congregaDesde'), valor: congregaDesdeLabel },
       ],
     },
   ];

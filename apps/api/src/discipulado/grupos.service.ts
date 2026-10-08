@@ -9,7 +9,7 @@ import type {
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { AppException } from '../common/errors/app-exception.js';
-import { comoFechaCivil, franjasDeSolicitudes, nombresDe } from './consultas.js';
+import { capitulosDe, comoFechaCivil, franjasDe, franjasDeSolicitudes, nombresDe } from './consultas.js';
 import { interseccionDeFranjas } from './validaciones.js';
 
 export type FiltroPendiente = 'finalizacion' | 'baja' | 'reasignacion';
@@ -77,7 +77,7 @@ export class GruposService {
       encuentros: encuentros.map((e) => ({
         id: e.id,
         fecha: comoFechaCivil(e.fecha),
-        capitulos: e.capitulos,
+        capitulos: capitulosDe(e.capitulos),
         asistencias: e.asistencias.map((a) => ({ personaId: a.inscripcion.personaId, presente: a.presente })),
         updatedAt: e.updatedAt.toISOString(),
       })),
@@ -87,7 +87,7 @@ export class GruposService {
         hasta: l.hasta?.toISOString() ?? null,
       })),
       // research #14: la agenda de hoy del Discipulador ∩ las franjas de cada Persona activa.
-      franjasDelGrupo: inscripciones.length === 0 ? [] : interseccionDeFranjas([agenda, ...inscripciones.map((i) => franjas.get(i.solicitudId) ?? [])]),
+      franjasDelGrupo: inscripciones.length === 0 ? [] : interseccionDeFranjas([agenda, ...inscripciones.map((i) => franjasDe(franjas, i.solicitudId))]),
     };
   }
 
@@ -174,7 +174,7 @@ export class GruposService {
           motivoCierre: g.motivoCierre,
           lugar: { ocupado: delGrupo.filter((i) => i.estado === 'activa').length, maximo: (lider && maximos.get(lider.personaId)) ?? 1 },
           cantidadEncuentros: g._count.encuentros,
-          ultimoEncuentro: ultimo ? { fecha: comoFechaCivil(ultimo.fecha), capitulos: ultimo.capitulos } : null,
+          ultimoEncuentro: ultimo ? { fecha: comoFechaCivil(ultimo.fecha), capitulos: capitulosDe(ultimo.capitulos) } : null,
           propuestaFinalizacionEn: g.propuestaFinalizacionEn?.toISOString() ?? null,
           reasignacionPropuesta: reasignacion
             ? { discipulador: breve(reasignacion.discipuladorId), propuestaEn: reasignacion.propuestaEn.toISOString() }

@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { pinoHttp } from 'pino-http';
 import { AppModule } from './app.module.js';
 import { configurarApp } from './configurar-app.js';
+import { servirArchivosPublicos } from './storage/archivos-publicos.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -43,7 +44,9 @@ async function bootstrap() {
   // su propia ruta — distinta del endpoint de subida (POST /libros/:id/portada,
   // que sí exige rol Admin). STORAGE_DIR es el mismo directorio que usa
   // LocalStorageProvider (research.md Decisión 3).
-  app.useStaticAssets(process.env.STORAGE_DIR ?? './storage/portadas', { prefix: '/archivos/portadas/' });
+  // Lote 0 global (D168): las áreas privadas viven bajo `.privado/` dentro de
+  // la misma carpeta, y `dotfiles: 'deny'` hace que nunca se sirvan.
+  servirArchivosPublicos(app);
   // Desarrollo local únicamente — apps/web y apps/backoffice corren en otro
   // puerto. No se usan cookies de sesión hacia esta API (solo Bearer JWT), así
   // que reflejar el origin es suficiente sin necesitar `credentials: true`.

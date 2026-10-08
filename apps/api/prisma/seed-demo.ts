@@ -5,7 +5,6 @@ import type {
   EstadoCivil,
   Genero,
   Profesion,
-  TiempoCongregacion,
 } from '../src/generated/prisma/enums.js';
 
 /**
@@ -69,9 +68,10 @@ const ESTADOS_CIVILES: EstadoCivil[] = [
   'soltero_a', 'casado_a', 'en_concubinato', 'viudo_a', 'divorciado_a', 'separado_a',
 ];
 
-const TIEMPOS_CONGREGACION: TiempoCongregacion[] = [
-  'menos_6_meses', 'de_6_meses_a_1_anio', 'de_1_a_3_anios', 'de_3_a_5_anios', 'mas_5_anios',
-];
+// D214: año en que empezó a venir — repartidos para que la métrica de la 013
+// tenga Personas en los cuatro rangos (este año, 1–2, 3–5, más de 5).
+const ANIO_ACTUAL = new Date().getFullYear();
+const ANIOS_CONGREGA_DESDE: number[] = [ANIO_ACTUAL, ANIO_ACTUAL - 1, ANIO_ACTUAL - 2, ANIO_ACTUAL - 4, ANIO_ACTUAL - 9, 1998];
 
 function elegir<T>(lista: T[], indice: number): T {
   return lista[indice % lista.length];
@@ -201,7 +201,7 @@ async function crearPersonasVolumenDemo(sedeIds: { laPlata: string; buenosAires:
         estadoCivil: elegir(ESTADOS_CIVILES, i),
         profesion,
         profesionDetalle: profesion === 'otro' ? 'Oficio de ejemplo' : undefined,
-        tiempoCongregacion: elegir(TIEMPOS_CONGREGACION, i),
+        congregaDesde: elegir(ANIOS_CONGREGA_DESDE, i),
         estado: esMenor ? 'pendiente_tutor' : 'activa',
         // Una de cada ~11 Personas pendientes queda no autorizada (activo
         // false) — mismo caso que ya cubre el seed mínimo, con volumen.
@@ -241,7 +241,7 @@ async function crearEscenarioTutores(sedeId: string) {
         sedeId,
         estadoCivil: 'casado_a',
         profesion: 'salud',
-        tiempoCongregacion: 'mas_5_anios',
+        congregaDesde: 2020,
         estado: 'activa',
         activo: true,
         consentimientoDatos: true,
@@ -265,7 +265,7 @@ async function crearEscenarioTutores(sedeId: string) {
         sedeId,
         estadoCivil: 'soltero_a',
         profesion: 'estudiante',
-        tiempoCongregacion: 'menos_6_meses',
+        congregaDesde: 2020,
         estado: 'pendiente_tutor',
         activo: true,
         consentimientoDatos: false,
@@ -289,7 +289,7 @@ async function crearEscenarioTutores(sedeId: string) {
         sedeId,
         estadoCivil: 'soltero_a',
         profesion: 'estudiante',
-        tiempoCongregacion: 'menos_6_meses',
+        congregaDesde: 2020,
         estado: 'pendiente_tutor',
         activo: true,
         consentimientoDatos: false,
@@ -315,7 +315,7 @@ async function crearPersonasHostiles(sedeId: string) {
     estadoCivil: 'soltero_a' as const,
     profesion: 'otro' as const,
     profesionDetalle: 'Dato de ejemplo',
-    tiempoCongregacion: 'menos_6_meses' as const,
+    congregaDesde: 2020,
     fechaNacimiento: fechaNacimientoConEdad(35, 0),
     genero: 'femenino' as const,
     estado: 'activa' as const,
