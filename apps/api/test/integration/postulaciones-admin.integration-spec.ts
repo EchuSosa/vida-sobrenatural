@@ -391,6 +391,7 @@ describe('Postulaciones del Admin (spec 009, T026/T049/T053)', () => {
     const perfil = (await admin('get', `/personas/${id}/ministerio`))
       .body as MinisterioDePersona;
     expect(perfil).toMatchObject({
+      persona: { id },
       actual: null,
       pendiente: { ministerio: { id: bienvenida.id } },
     });

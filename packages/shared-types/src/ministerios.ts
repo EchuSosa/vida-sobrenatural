@@ -254,6 +254,7 @@ export interface PostulacionEnNombreDe extends NuevaPostulacion {
 
 /** `GET /personas/:id/ministerio` — la sección del Perfil de Persona. */
 export interface MinisterioDePersona {
+  persona: PersonaBreve;
   actual: { postulacionId: string; ministerio: { id: string; nombre: string }; celula: { id: string; nombre: string } | null; desde: string } | null;
   pendiente: { postulacionId: string; ministerio: { id: string; nombre: string }; createdAt: string } | null;
   historial: PostulacionHistorial[];

@@ -433,7 +433,7 @@ export class PostulacionAdminService {
   ): Promise<MinisterioDePersona> {
     const persona = await this.prisma.persona.findUnique({
       where: { id: personaId },
-      select: { id: true },
+      select: { id: true, nombre: true, apellido: true, fotoUrl: true },
     });
     if (!persona)
       throw new AppException(
@@ -463,6 +463,7 @@ export class PostulacionAdminService {
       historialDe(this.prisma, personaId, verMotivos),
     ]);
     return {
+      persona,
       actual: actual
         ? {
             postulacionId: actual.id,
