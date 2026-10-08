@@ -47,11 +47,11 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   Exportar desde `index.ts`. — cubre: FR-001–FR-003, FR-007
 - [x] T003 **[Lote 0 global: en `lote-0-global.spec.ts` (abiertas de cada tipo ⊂ sus estados, D186, D196); los casos por estado de discipulado → lote 1]** [P] [L0] Unit `apps/api/test/unit/es-abierta.spec.ts`: para `discipulado`, `pendiente` y `propuesta` →
   abierta; `aprobada`, `rechazada`, `retirada` → resuelta; un estado desconocido → error de tipo/`false`. — cubre: FR-003
-- [ ] T004 **[Lote 0 global: `iniciales` hecho; `PerfilPersona` y demás, y mover `INVERSO_RELACION` → lote 2]** [L0] `packages/shared-types/src/perfil-persona.ts`: `PerfilPersona`, `RelacionFamiliarVista`,
+- [x] T004 **[Lote 0 global: `iniciales`; lote 2: el resto, `INVERSO_RELACION` movido; `RelacionDesde` = qué es el familiar para la Persona del perfil]** [L0] `packages/shared-types/src/perfil-persona.ts`: `PerfilPersona`, `RelacionFamiliarVista`,
   `RelacionDesde`, `GrupoEnPerfil`, `relacionDesde(tipo, lado)`, `INVERSO_RELACION` **movido** desde
   `apps/api/src/persona/persona.service.ts` (que pasa a importarlo), `iniciales(nombre, apellido)`. — cubre: FR-011,
   FR-014, research #6
-- [ ] T005 **[Lote 0 global: → lote 2]** [P] [L0] Unit `apps/api/test/unit/relacion-desde.spec.ts`: cada tipo desde los dos lados (`tutor` →
+- [x] T005 **[Lote 2]** [P] [L0] Unit `apps/api/test/unit/relacion-desde.spec.ts`: cada tipo desde los dos lados (`tutor` →
   "tutor de"/"a cargo de", `hijo_a` ↔ `padre_madre`, `conyuge` y `hermano_a` simétricas); `iniciales` con tildes,
   apellidos compuestos y nombre vacío. Y que el test existente de duplicado espejo de `persona.service` siga verde. —
   cubre: FR-014, H2.5
@@ -82,7 +82,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   research #3): por cada tipo de `TIPOS_SOLICITUD` y cada estado de `ESTADOS_POR_TIPO`, insertar un registro y verificar
   que la vista lo devuelve con `abierta === esAbierta(tipo, estado)` y `esperaDesde` correcto (Discipulado con propuesta
   vigente → `propuestaEn`). — cubre: FR-003, FR-007, SC-002
-- [ ] T012 **[Lote 0 global: → lote 2 (`AvatarPersona`) y lote 3 (`BarraProporcion`)]** [P] [L0] `packages/ui`: `AvatarPersona` (foto con `alt="Foto de <nombre>"`, `onError` → iniciales; iniciales
+- [ ] T012 **[Lote 2: `AvatarPersona` hecho; `BarraProporcion` → lote 3]** [P] [L0] `packages/ui`: `AvatarPersona` (foto con `alt="Foto de <nombre>"`, `onError` → iniciales; iniciales
   sobre `--secondary`/`--secondary-foreground` con contraste medido en los dos temas, D118, `docs/17`), `BarraProporcion`
   (barra horizontal `aria-hidden`, ancho %, token `--primary`, sin animación con `prefers-reduced-motion`). Exportar. —
   cubre: FR-011, FR-018, FR-023, H2.1
@@ -91,7 +91,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `ResumenErrores`, `useEnvio`; recibe `enviar(datos)`, `conSesion`, `paginaOrigen`; estado de confirmación con "qué
   pasa después"; le pasa `navigator.userAgent` a `resumirNavegador` y toma `ultimoRequestId()` (T017). Va en
   `packages/ui/src/components/`. Sin conectar a ninguna app todavía. — cubre: FR-041, FR-042, FR-045
-- [ ] T014 **[Lote 0 global: → cada lote, en el bloque de la 013 en `nav.ts` (una ruta sin página rompe el smoke de axe)]** [L0] `apps/backoffice/src/config/nav.ts`: rutas nuevas (`/personas/[id]`, `/personas/[id]/editar`,
+- [ ] T014 **[Lote 0 global: → cada lote, en el bloque de la 013 en `nav.ts`; lote 2: `/personas/[id]` (el smoke de axe lo abre con una Persona real); `solicitudes.ts` ya estaba]** [L0] `apps/backoffice/src/config/nav.ts`: rutas nuevas (`/personas/[id]`, `/personas/[id]/editar`,
   `/cumpleanos`, `/comentarios`, `/comentarios/[id]`, `/cursos`, `/cursos/[id]`, `/cursos/papelera`) con su permiso y
   `enMenu: false`; `/sedes` pasa a `enMenu: false`; `aria-current` en Catálogos para `/sedes*` y `/cursos*` (research
   #13). `apps/backoffice/src/config/solicitudes.ts`: `RUTA_DETALLE_SOLICITUD` e `ICONO_TIPO_SOLICITUD` con
@@ -101,7 +101,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `perfil`, `inicio`, `metricas`, `cumpleanos`, `comentarios`, `cursos`, `catalogos`) y `apps/web/src/messages/es.json`
   (`comentarios`), incluidos tipos y estados de Discipulado para la bandeja. — cubre: FR-064
 
-- [ ] T016 **[Lote 0 global: `PersonaBreve.fotoUrl` opcional ya está; lote 1: `fotoUrl` en los `PersonaBreve` de Solicitudes de Discipulado; Grupos y `PERSONA_LISTADO_SELECT` → lote 2]** [L0] `PersonaBreve` suma `fotoUrl: string | null` (`discipulado.ts`); sumar `fotoUrl` a
+- [x] T016 **[Lote 1: Solicitudes de Discipulado; lote 2: `PERSONA_LISTADO_SELECT` y `PersonaListado`. Los `PersonaBreve` de Grupos quedan sin foto: los Grupos no muestran avatar]** [L0] `PersonaBreve` suma `fotoUrl: string | null` (`discipulado.ts`); sumar `fotoUrl` a
   `PERSONA_LISTADO_SELECT` y a los `select` que arman `PersonaBreve` en la API (resúmenes de Solicitudes, Grupos);
   `PersonaListado` también. Actualizar en el mismo commit los tests que comparan objetos exactos. — cubre: FR-018,
   FR-011
@@ -149,7 +149,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   cambio de filtro → `pagina=1`; axe claro y oscuro; 320 px sin scroll. — cubre: H1.1, H1.3–H1.6, FR-062, SC-007
 - [x] T026 **[Lote 1: `solicitudes.spec.ts` sigue igual — sus selectores ya calzan con la bandeja nueva]** [L1] Adaptar `solicitudes.spec.ts` (004) a los textos nuevos de la bandeja sin perder sus casos. — cubre:
   FR-008
-- [ ] T027a **[→ lote 2: el nombre se enlaza cuando existe el perfil]** [L1] [CHECKLIST] Pantalla **Solicitud de Discipulado (detalle)** modificada (nombre enlazado al perfil):
+- [x] T027a **[Lote 2: "Ver el perfil de…"; `checklists/lote-2-pantallas.md`]** [L1] [CHECKLIST] Pantalla **Solicitud de Discipulado (detalle)** modificada (nombre enlazado al perfil):
   checklist de `docs/15` sobre lo tocado. — cubre: FR-062
 - [x] T027 **[Lote 1: `checklists/lote-1-pantallas.md`]** [L1] [CHECKLIST] Pantalla **Solicitudes (bandeja)**: aplicar y tildar el checklist de `docs/15` (una acción
   principal — no tiene: decirlo; estados de carga/vacío/error/éxito; feedback; tono; teclado y lector de pantalla;
@@ -159,19 +159,19 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 2 — Perfil de Persona (Historia 2, P1)
 
-- [ ] T030 [L2] API `GET /personas/:id/perfil` (`personas.ver`) con `select` explícito: datos de FR-011, `usaLaApp`,
+- [x] T030 **[Lote 2: `persona/perfil-persona.{service,controller}.ts`; suma `quitar` para el panel de roles; un id que no es uuid también es 404]** [L2] API `GET /personas/:id/perfil` (`personas.ver`) con `select` explícito: datos de FR-011, `usaLaApp`,
   `altaPor`, consentimiento, tutor solo si es menor, roles separados (`ROLES_DE_CARGO` vs. el resto), relaciones en las
   dos direcciones con `relacionDesde`; 404 `NO_ENCONTRADO`; nunca notas ni campos técnicos
   (`contracts/perfil-persona-api.md`). — cubre: FR-011, FR-012, FR-014, FR-015, FR-017
-- [ ] T031 [L2] API `GET /personas/:id/grupos` (`personas.ver`): Inscripciones (cursados) y Liderazgos (a cargo), 20 más
+- [x] T031 **[Lote 2]** [L2] API `GET /personas/:id/grupos` (`personas.ver`): Inscripciones (cursados) y Liderazgos (a cargo), 20 más
   recientes de cada uno + totales, con Curso y estados. — cubre: FR-013
-- [ ] T032 [L2] Integración `perfil-persona.integration-spec.ts`: Persona con Google (foto) y sin; H2.2 (dos Solicitudes
+- [x] T032 **[Lote 2]** [L2] Integración `perfil-persona.integration-spec.ts`: Persona con Google (foto) y sin; H2.2 (dos Solicitudes
   y un Grupo finalizado, vía bandeja `persona=`), H2.3 (Discipulador con Grupos a cargo vigentes y pasados), H2.4 (menor
   con tutor registrado y tutor por texto), H2.5 (relación guardada desde el otro lado), H2.7 (la respuesta no contiene
   `notas` en ningún nivel — se verifica serializando y buscando la clave), Persona con `activo = false` → 200 con
   `activo: false`, id inexistente → 404, Pastor 200, Discipulador 403, límite de 20 + totales. — cubre: H2.2–H2.5, H2.7,
   H2.8, FR-013, FR-017
-- [ ] T033 [L2] Backoffice `app/personas/[id]/` (`page.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`): cabecera con
+- [x] T033 **[Lote 2: la acción "Pedir Vida Nueva en su nombre" usa el `PedirEnNombreDe` existente con la Persona fija]** [L2] Backoffice `app/personas/[id]/` (`page.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`): cabecera con
   `AvatarPersona`, nombre, edad, Sede, estado y marcas ("Dada de baja", "No usa la app", "Pendiente de tutor") en texto +
   ícono; secciones Datos, Roles (con acceso al panel de roles y al historial existentes de `personas-cliente.tsx`,
   extraídos a componentes reutilizables sin duplicarlos), Historial de Solicitudes (bandeja `persona=`, "Ver todas en
@@ -180,19 +180,19 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   de la Persona: "Pedir Vida Nueva en su nombre" (`pedir-en-nombre-de.tsx`, si tiene `solicitudes.crear_en_nombre`),
   con el nombre de la Persona visible (D97). Miga de pan Personas › Nombre. `@celular`. — cubre: FR-010–FR-016, H2.1,
   H2.6, H2.9
-- [ ] T034 [L2] Backoffice `app/personas/`: columna con `AvatarPersona` y el nombre como enlace al perfil; el resto del
+- [x] T034 **[Lote 2: `EnlacePersona` único]** [L2] Backoffice `app/personas/`: columna con `AvatarPersona` y el nombre como enlace al perfil; el resto del
   listado sin cambios. Enlazar al perfil también los nombres de Grupos, detalle de Solicitud y Pendientes de tutor. —
   cubre: FR-010, FR-018
-- [ ] T035 [L2] E2E `apps/backoffice/e2e/perfil-persona.spec.ts`: desde el listado al perfil (avatar en la fila, FR-018); H2.1 (foto con alt; sin
+- [x] T035 **[Lote 2: fixtures con ids fijos en `sembrar-e2e/013-backoffice.ts`]** [L2] E2E `apps/backoffice/e2e/perfil-persona.spec.ts`: desde el listado al perfil (avatar en la fila, FR-018); H2.1 (foto con alt; sin
   foto, iniciales), el Admin abre el panel de roles y el historial desde el perfil (FR-012) y ve "Pedir Vida Nueva en
   su nombre" con el nombre de la Persona visible (FR-016), H2.2, H2.3, H2.4, H2.6 (Pastor: contacto visible, sin botones de gestión), H2.8 (id inexistente → "No
   encontramos esta Persona" con enlace), Persona con `activo = false` muestra "Dada de baja" (FR-017), H2.9 `@celular` (360 px sin scroll, tamaño de letra de etiquetas y botones
   ≥ 16 px y alto ≥ 44 px medidos con `getComputedStyle`/`boundingBox`); axe claro y oscuro. — cubre: H2.1–H2.4, H2.6,
   H2.8, H2.9, FR-063, SC-003, SC-007
-- [ ] T036 [L2] [CHECKLIST] Pantalla **Perfil de Persona**: checklist de `docs/15` + D150. — cubre: FR-062, FR-063
-- [ ] T037a [L2] [CHECKLIST] Pantallas **Grupos (listado)**, **Grupo (detalle)** y **Pendientes de tutor**, modificadas
+- [x] T036 **[Lote 2: `checklists/lote-2-pantallas.md`]** [L2] [CHECKLIST] Pantalla **Perfil de Persona**: checklist de `docs/15` + D150. — cubre: FR-062, FR-063
+- [x] T037a **[Lote 2: `checklists/lote-2-pantallas.md`]** [L2] [CHECKLIST] Pantallas **Grupos (listado)**, **Grupo (detalle)** y **Pendientes de tutor**, modificadas
   por T034 (nombres enlazados al perfil): checklist de `docs/15` sobre lo tocado, una por una. — cubre: FR-062
-- [ ] T037 [L2] [CHECKLIST] Pantalla **Personas (listado)** modificada: checklist de `docs/15` (avatar en celular, foco
+- [x] T037 **[Lote 2: `checklists/lote-2-pantallas.md`]** [L2] [CHECKLIST] Pantalla **Personas (listado)** modificada: checklist de `docs/15` (avatar en celular, foco
   y lector de pantalla del enlace). — cubre: FR-062
 
 ---
