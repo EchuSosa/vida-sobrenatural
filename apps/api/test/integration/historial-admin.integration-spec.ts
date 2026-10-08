@@ -123,7 +123,10 @@ describe('Historial previo del Admin (spec 006, T036/T038)', () => {
 
   it('el detalle trae lo que el sistema sabe de esa etapa y las declaraciones anteriores, sin notas', async () => {
     const id = await esc.persona('detalle');
-    await prisma.declaracionHistorial.create({ data: { personaId: id, etapa: 'bautismo', estado: 'rechazada', revisadoPorId: adminId, revisadaEn: new Date('2026-09-01T12:00:00Z') } });
+    // La anterior se crea con fecha propia: si las dos caen en el mismo
+    // milisegundo (pasa en el runner del CI), `createdAt < d.createdAt` la deja
+    // afuera y el test falla sin que el código esté mal.
+    await prisma.declaracionHistorial.create({ data: { personaId: id, etapa: 'bautismo', estado: 'rechazada', revisadoPorId: adminId, revisadaEn: new Date('2026-09-01T12:00:00Z'), createdAt: new Date('2026-08-30T12:00:00Z') } });
     const { id: decl } = await declaracion(id, 'bautismo', 'Otra vez');
     const res = await como(pastorId, PASTOR, 'get', `/historial/declaraciones/${decl}`);
     expect(res.status).toBe(200);
