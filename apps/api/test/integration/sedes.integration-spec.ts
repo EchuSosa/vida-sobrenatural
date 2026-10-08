@@ -189,6 +189,29 @@ describe('DELETE /sedes/:id (integración) — D119, eliminar es distinto de ina
     expect(enBaseDeDatos?.eliminadoEn).toBeNull();
   });
 
+  it('spec 011 (T012): no se puede eliminar una Sede con Eventos — los Eventos son datos relacionados', async () => {
+    const sedeId = await crearSede(`Sede integ con Eventos ${Date.now()}`);
+    const evento = await prisma.evento.create({
+      data: {
+        sedeId,
+        nombre: 'Evento de la Sede',
+        slug: `evento-sede-integ-${Date.now()}`,
+        descripcion: 'Descripción',
+        inicio: new Date(Date.now() + 86_400_000),
+        requiereInscripcion: false,
+        creadoPorId: 'integ',
+      },
+    });
+
+    const token = await mintAdminToken();
+    const response = await request(app.getHttpServer()).delete(`/sedes/${sedeId}`).set('Authorization', `Bearer ${token}`);
+    await prisma.evento.delete({ where: { id: evento.id } });
+
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('SEDE_TIENE_DATOS_RELACIONADOS');
+    expect(response.body.detail).toContain('Evento');
+  });
+
   it('elimina una Sede sin datos relacionados, y desaparece tanto de Activas como de Todas', async () => {
     // Dos Sedes: la que se elimina, y otra para no chocar con el guard de "única Sede activa".
     await crearSede(`Sede integ testigo ${Date.now()}`);
