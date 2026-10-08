@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { aterrizajeDeSesion, requerirPermiso, requerirSesion, tienePermisoSesion } from '../auth';
 import { TarjetaPendientes } from './tarjeta-pendientes';
+import { BloqueCumpleanos } from './inicio/bloque-cumpleanos';
 import { BloqueMetricas } from './inicio/bloque-metricas';
 import { BloquePendientes } from './inicio/bloque-pendientes';
 
@@ -55,7 +56,10 @@ export default async function InicioBackofficePage() {
           )}
           {vePendientes && <TarjetaPendientes apiToken={sesion.apiToken} />}
         </div>
-        <BloqueMetricas apiToken={sesion.apiToken} />
+        <div className="flex flex-col gap-6">
+          {tienePermisoSesion(sesion, 'personas.ver') && <BloqueCumpleanos apiToken={sesion.apiToken} />}
+          <BloqueMetricas apiToken={sesion.apiToken} />
+        </div>
       </div>
     </div>
   );

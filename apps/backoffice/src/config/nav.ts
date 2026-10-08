@@ -1,4 +1,5 @@
 import {
+  Cake,
   Home,
   Users,
   UserRoundCheck,
@@ -109,6 +110,7 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   //   spec 012 — /notificaciones/nueva (notificaciones.enviar, enMenu: false; /notificaciones ya está).
   //   spec 013 — /comentarios[/[id]] (comentarios.ver), /metricas y /cumpleanos (inicio.ver), /cursos[/[id]] y /cursos/papelera.
   { href: '/personas/[id]', labelKey: 'personas', icon: Users, permiso: 'personas.ver', enMenu: false }, // 013 lote 2: el perfil
+  { href: '/cumpleanos', labelKey: 'cumpleanos', icon: Cake, permiso: 'personas.ver', enMenu: false }, // 013 lote 4: se entra desde el Inicio
 ];
 
 function rolesEfectivos(permiso: Permiso | 'cualquier-sesion'): RolDeCargo[] | 'cualquier-sesion' {

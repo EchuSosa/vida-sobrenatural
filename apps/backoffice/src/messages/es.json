@@ -212,6 +212,7 @@
     "libros": "Libros",
     "papeleraLibros": "Papelera de Libros",
     "catalogos": "Catálogos",
+    "cumpleanos": "Cumpleaños",
     "misDiscipulados": "Mis discipulados",
     "miDisponibilidad": "Mi disponibilidad",
     "misGrupos": "Mis grupos",
@@ -1018,7 +1019,49 @@
     "reintentar": "Reintentar",
     "cargando": "Cargando las métricas"
   },
-  "cumpleanos": {},
+  "cumpleanos": {
+    "titulo": "Cumpleaños",
+    "tituloMes": "Cumpleaños de {mes}",
+    "descripcion": "Las Personas que cumplen años este mes, para saludarlas. Tocá el teléfono para llamar o escribir.",
+    "elegirMes": "Elegir el mes",
+    "meses": {
+      "1": "enero",
+      "2": "febrero",
+      "3": "marzo",
+      "4": "abril",
+      "5": "mayo",
+      "6": "junio",
+      "7": "julio",
+      "8": "agosto",
+      "9": "septiembre",
+      "10": "octubre",
+      "11": "noviembre",
+      "12": "diciembre"
+    },
+    "columnas": {
+      "nombre": "Nombre",
+      "dia": "Día",
+      "telefono": "Teléfono"
+    },
+    "cumple": "Cumple {anios}",
+    "cumplio": "Cumplió {anios}",
+    "hoy": "Hoy",
+    "vacioMes": "Nadie cumple años en {mes}.",
+    "paginado": "Paginado de cumpleaños",
+    "cargando": "Cargando los cumpleaños",
+    "errorCargaTitulo": "No pudimos cargar los cumpleaños",
+    "errorCarga": "Podés reintentar en unos segundos. Código de referencia:",
+    "reintentar": "Reintentar",
+    "bloque": {
+      "titulo": "Cumpleaños de esta semana",
+      "vacio": "Nadie cumple años esta semana.",
+      "hoyCumple": "Hoy cumple {anios}",
+      "elDia": "El {fecha}: cumple {anios}",
+      "verMes": "Ver los cumpleaños del mes",
+      "verTodos": "Ver todos los cumpleaños del mes",
+      "error": "No pudimos cargar los cumpleaños."
+    }
+  },
   "comentarios": {},
   "cursos": {},
   "catalogos": {},

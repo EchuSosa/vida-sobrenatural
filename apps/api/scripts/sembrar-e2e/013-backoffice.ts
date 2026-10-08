@@ -1,3 +1,4 @@
+import { hoyEnArgentina } from '@vida-sobrenatural/shared-types';
 import type { ContextoSembrarE2e } from './contexto.js';
 
 /**
@@ -10,6 +11,7 @@ export const PERFIL_E2E = {
   menor: '0013e2e0-0000-4000-8000-000000000002',
   tutor: '0013e2e0-0000-4000-8000-000000000003',
   baja: '0013e2e0-0000-4000-8000-000000000004',
+  cumpleHoy: '0013e2e0-0000-4000-8000-000000000005',
 } as const;
 
 /** Un PNG de 1×1 como data URI: la "foto de Google" sin depender de la red en el CI. */
@@ -45,10 +47,13 @@ export async function sembrarE2e013(ctx: ContextoSembrarE2e): Promise<void> {
       fotoUrl: null,
       consentimientoDatosOrigen: 'presencial' as const,
     },
+    // spec 013 (T053): cumple 30 hoy (fecha civil de Argentina del día de la corrida).
+    { id: PERFIL_E2E.cumpleHoy, email: 'e2e-cumple-hoy@example.com', nombre: 'Celia', apellido: 'Cumple Hoy', fechaNacimiento: new Date(`${Number(hoyEnArgentina().slice(0, 4)) - 30}${hoyEnArgentina().slice(4)}`), fotoUrl: null },
     { id: PERFIL_E2E.baja, email: 'e2e-perfil-baja@example.com', nombre: 'Berta', apellido: 'Perfil Baja', fechaNacimiento: new Date('1975-07-07'), fotoUrl: null, activo: false },
   ];
   for (const p of personas) {
-    await prisma.persona.upsert({ where: { id: p.id }, update: {}, create: { ...base, ...p } });
+    // La fecha del cumpleaños de hoy se actualiza en cada corrida; el resto queda como se creó.
+    await prisma.persona.upsert({ where: { id: p.id }, update: p.id === PERFIL_E2E.cumpleHoy ? { fechaNacimiento: p.fechaNacimiento } : {}, create: { ...base, ...p } });
   }
   const vinculo = { personaId: PERFIL_E2E.menor, familiarId: PERFIL_E2E.tutor, tipoRelacion: 'tutor' as const };
   await prisma.relacionFamiliar.upsert({ where: { personaId_familiarId_tipoRelacion: vinculo }, update: {}, create: vinculo });
