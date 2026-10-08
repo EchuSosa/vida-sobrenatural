@@ -66,9 +66,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('link', { name: 'Sin revisar' })).toHaveAttribute('aria-current', 'page');
       await sinViolaciones(page);
       await page.getByRole('link', { name: new RegExp(sufijo) }).click();
+      // El listado también muestra el extracto: esperar al detalle antes de mirar nada.
+      await expect(page).toHaveURL(/\/comentarios\/[^/?]+$/);
+      await expect(page.getByRole('heading', { level: 1, name: /^Problema del / })).toBeVisible();
 
       await expect(page.getByText(`<b>hola</b> no anda el mapa ${sufijo}`)).toBeVisible();
-      await expect(page.getByText('Sin sesión')).toBeVisible();
+      await expect(page.getByText('Sin sesión', { exact: true })).toBeVisible();
       await expect(page.getByText('Web', { exact: true })).toBeVisible();
       await sinViolaciones(page);
 
@@ -81,7 +84,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto('/comentarios');
       await expect(page.getByRole('link', { name: new RegExp(sufijo) })).toHaveCount(0);
       await page.getByRole('link', { name: 'Revisados' }).click();
+      await expect(page).toHaveURL(/revisado=si/);
       await page.getByRole('link', { name: new RegExp(sufijo) }).click();
+      await expect(page).toHaveURL(/\/comentarios\/[^/?]+$/);
       await page.getByRole('button', { name: 'Deshacer' }).click();
       await expect(page.getByText('Volvió a "Sin revisar".')).toBeVisible();
       await expect(page.getByRole('button', { name: 'Marcar como revisado' })).toBeVisible();
@@ -95,6 +100,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto('/comentarios');
       await expect(page.getByRole('link', { name: new RegExp(sufijo) })).toBeVisible();
       await page.goto(`/comentarios/${c.id}`);
+      await expect(page.getByRole('heading', { level: 1, name: /^Problema del / })).toBeVisible();
       await expect(page.getByText(`Para el Pastor ${sufijo}`)).toBeVisible();
       await expect(page.getByRole('button', { name: 'Marcar como revisado' })).toHaveCount(0);
       await sinViolaciones(page);
