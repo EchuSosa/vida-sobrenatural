@@ -79,7 +79,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       // H1.3: el filtro por tipo solo existe con más de un tipo conectado.
       const conectados = Object.keys(await api<Record<string, number>>(page, 'GET', '/solicitudes/conteo-abiertas'));
-      await expect(page.getByLabel('Tipo', { exact: true })).toHaveCount(conectados.length > 1 ? 1 : 0);
+      // Por rol y nombre: el <label> envuelve al <select>, así que su texto incluye las opciones.
+      await expect(page.getByRole('combobox', { name: 'Tipo', exact: true })).toHaveCount(conectados.length > 1 ? 1 : 0);
       await sinViolaciones(page);
 
       // H1.4: cada fila lleva al detalle de su tipo.
@@ -110,6 +111,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await sinViolaciones(page);
 
       // Con un tipo (implícito o elegido), el filtro ofrece sus estados (FR-004).
+      // Con más de un tipo conectado (la 006 suma el historial), hay que elegirlo.
+      const conectados = Object.keys(await api<Record<string, number>>(page, 'GET', '/solicitudes/conteo-abiertas'));
+      if (conectados.length > 1) {
+        await page.getByRole('combobox', { name: 'Tipo', exact: true }).selectOption('discipulado');
+        await expect(page).toHaveURL(/tipo=discipulado/);
+      }
       await page.getByLabel('Mostrar').selectOption({ label: 'Rechazada' });
       await expect(page).toHaveURL(/estado=rechazada/);
       await expect(page.getByRole('row').filter({ hasText: sola })).toHaveCount(1);
