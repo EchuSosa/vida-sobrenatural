@@ -489,7 +489,9 @@
     "entidad": "Entidad",
     "cuit": "CUIT",
     "cuenta": "Cuenta",
+    "cuentaDetalle": "Cuenta en Pesos, Banco Santander",
     "copiar": "Copiar {campo}",
+    "copiarBoton": "Copiar",
     "copiado": "{campo} copiado"
   },
   "comun": {

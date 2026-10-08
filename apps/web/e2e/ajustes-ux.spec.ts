@@ -228,3 +228,16 @@ test.describe('Visitanos', () => {
     await objetivosDe44(contenido(page));
   });
 });
+
+test.describe('Dar', () => {
+  test.use({ viewport: CELULAR });
+
+  test('"Copiar" con texto visible y 44 px, también en CUIT y cuenta; etiquetas en 16 px (#18, #19, #20) @celular', async ({ page }) => {
+    await page.goto('/dar');
+    for (const dato of ['Alias', 'CBU', 'CUIT', 'Cuenta']) {
+      await expect(page.getByRole('button', { name: `Copiar ${dato}` })).toHaveText('Copiar');
+    }
+    await objetivosDe44(contenido(page));
+    expect(await tamanoDeLetra(page.getByText('Alias', { exact: true }))).toBeGreaterThanOrEqual(16);
+  });
+});
