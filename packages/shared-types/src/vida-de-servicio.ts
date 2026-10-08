@@ -101,7 +101,7 @@ export function sePuedeProponerFinalizacion(fechas: readonly string[], hoy: stri
 }
 
 export function ultimaFecha(fechas: readonly string[]): string | null {
-  return fechas.length === 0 ? null : [...fechas].sort().at(-1)!;
+  return fechas.length === 0 ? null : [...fechas].sort((a, b) => a.localeCompare(b)).at(-1)!;
 }
 
 export type EstadoSemanaLider = 'sin_material' | 'cargado_por_liberar' | 'liberada' | 'vencida_sin_material';
