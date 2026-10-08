@@ -83,9 +83,13 @@ export default async function PerfilPersonaPage({ params }: { params: Promise<{ 
       <Seccion id="datos" titulo={t('secciones.datos')}>
         <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
           <Dato termino={t('datos.telefono')}>
-            <a href={`tel:${perfil.telefono.replace(/[^\d+]/g, '')}`} className="inline-flex min-h-11 items-center underline underline-offset-2">
-              {perfil.telefono}
-            </a>
+            {perfil.telefono.replace(/[^\d+]/g, '') ? (
+              <a href={`tel:${perfil.telefono.replace(/[^\d+]/g, '')}`} className="inline-flex min-h-11 items-center underline underline-offset-2">
+                {perfil.telefono}
+              </a>
+            ) : (
+              t('datos.sinTelefono')
+            )}
           </Dato>
           <Dato termino={t('datos.email')}>{perfil.email ?? t('datos.sinEmail')}</Dato>
           <Dato termino={t('datos.direccion')}>{perfil.direccion}</Dato>

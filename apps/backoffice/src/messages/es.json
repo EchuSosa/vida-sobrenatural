@@ -1060,7 +1060,8 @@
       "verMes": "Ver los cumpleaños del mes",
       "verTodos": "Ver todos los cumpleaños del mes",
       "error": "No pudimos cargar los cumpleaños."
-    }
+    },
+    "sinTelefono": "Sin teléfono"
   },
   "comentarios": {},
   "cursos": {},
@@ -1095,6 +1096,7 @@
       "estadoCivil": "Estado civil",
       "profesion": "Ocupación",
       "telefono": "Teléfono",
+      "sinTelefono": "Sin teléfono",
       "direccion": "Dirección",
       "email": "Email",
       "sinEmail": "Sin email",

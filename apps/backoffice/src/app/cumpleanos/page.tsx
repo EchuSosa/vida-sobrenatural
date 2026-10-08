@@ -90,9 +90,9 @@ export default async function CumpleanosPage({ searchParams }: { searchParams: P
                       <span className="flex flex-col gap-0.5">
                         <EnlacePersona persona={c.persona} className="font-medium" />
                         <span className="text-muted-foreground">{t(c.yaPaso ? 'cumplio' : 'cumple', { anios: c.cumple })}</span>
-                        <a href={`tel:${c.telefono.replace(/[^\d+]/g, '')}`} className="inline-flex min-h-11 items-center underline underline-offset-2 sm:hidden">
-                          {c.telefono}
-                        </a>
+                        <span className="sm:hidden">
+                          <Telefono telefono={c.telefono} sinTelefono={t('sinTelefono')} />
+                        </span>
                       </span>
                     </span>
                   </th>
@@ -108,9 +108,7 @@ export default async function CumpleanosPage({ searchParams }: { searchParams: P
                     </span>
                   </td>
                   <td className="hidden px-3 py-3 align-top sm:table-cell">
-                    <a href={`tel:${c.telefono.replace(/[^\d+]/g, '')}`} className="underline underline-offset-2">
-                      {c.telefono}
-                    </a>
+                    <Telefono telefono={c.telefono} sinTelefono={t('sinTelefono')} />
                   </td>
                 </tr>
               ))}
@@ -120,5 +118,16 @@ export default async function CumpleanosPage({ searchParams }: { searchParams: P
       )}
       <PaginacionCumpleanos mes={mes} paginaActual={pagina} totalPaginas={totalPaginas} etiqueta={t('paginado')} />
     </div>
+  );
+}
+
+/** El teléfono como enlace `tel:` de 44 px; una Persona cargada sin teléfono lo dice en palabras. */
+function Telefono({ telefono, sinTelefono }: { telefono: string; sinTelefono: string }) {
+  const digitos = telefono.replace(/[^\d+]/g, '');
+  if (!digitos) return <span className="text-muted-foreground">{sinTelefono}</span>;
+  return (
+    <a href={`tel:${digitos}`} className="inline-flex min-h-11 items-center underline underline-offset-2">
+      {telefono}
+    </a>
   );
 }
