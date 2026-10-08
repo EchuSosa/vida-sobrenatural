@@ -22,6 +22,13 @@ export const ETAPAS_CAMINO: readonly EtapaCamino[] = ['vida_nueva', 'vida_de_ser
 export const ETAPAS_CONSTRUIDAS: readonly EtapaCamino[] = ['vida_nueva'];
 
 export type EstadoDeclaracion = 'pendiente' | 'confirmada' | 'rechazada' | 'retirada';
+
+/** FR-009: comentario opcional de "Ya lo hice" (CHECK `declaracion_textos_largo`). */
+export const COMENTARIO_DECLARACION_MAX = 500;
+/** FR-013: motivo opcional de "No confirmar" — lo lee la Persona. */
+export const MOTIVO_RECHAZO_DECLARACION_MAX = 500;
+/** FR-014: nota opcional del Admin al registrar una etapa hecha. */
+export const NOTA_COMPLETITUD_MAX = 500;
 export type OrigenCompletitud = 'declaracion' | 'admin';
 
 /** Por qué camino quedó completa una etapa (FR-016). */
@@ -78,6 +85,20 @@ export interface CaminoDeLaPersona {
   etapas: EstadoEtapa[];
   /** El de `GET /discipulado/me`, para el texto y el enlace de la card de Vida Nueva (FR-005). */
   vidaNueva: EstadoMiDiscipulado;
+  /**
+   * T041: a quién escribirle si una declaración no se confirmó — el contacto de
+   * la Sede de la Persona (`Sede.contactoTelefono`, el mismo de Visitanos).
+   * `telefono: null` → la card dice "acercate a la Sede".
+   */
+  sede: { nombre: string; telefono: string | null } | null;
+}
+
+/** `POST /camino/me/declaraciones` (201). */
+export interface DeclaracionCreada {
+  id: string;
+  etapa: EtapaCamino;
+  estado: 'pendiente';
+  createdAt: string;
 }
 
 /** Hechos que la API junta por Persona para calcular todo lo de arriba sin Prisma. */
@@ -133,4 +154,15 @@ export function estadoDeEtapa(etapa: EtapaCamino, hechos: HechosCamino): EstadoE
     return { etapa, estado: 'bloqueada', requisito: requisitoDeEtapa(etapa), ...comun };
   }
   return { etapa, estado: 'disponible', ...comun };
+}
+
+/**
+ * spec 006, FR-023 (T022, contracts/navegacion.md): ¿la pestaña de la barra
+ * de la app es la actual? Sí si la ruta es la suya o cuelga de alguna de sus
+ * `rutasRelacionadas` (por segmento: `/mi-camino/vida-nueva` sí, `/mi-caminos`
+ * no). Así Mi camino queda marcada en sus subrutas, en Mis discipulados y en
+ * Mi disponibilidad.
+ */
+export function esItemActual(item: { href: string; rutasRelacionadas?: readonly string[] }, pathname: string): boolean {
+  return [item.href, ...(item.rutasRelacionadas ?? [])].some((ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`));
 }

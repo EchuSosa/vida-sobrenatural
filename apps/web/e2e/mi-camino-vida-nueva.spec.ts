@@ -1,5 +1,6 @@
-import { request as playwrightRequest, type Page } from '@playwright/test';
-import { test, expect, auditar, loguearseComoTest, registrarPersonaDeTest, usarTemaOscuro, esperarTema } from './helpers';
+import type { Page } from '@playwright/test';
+import { test, expect, auditar, registrarPersonaDeTest, usarTemaOscuro, esperarTema } from './helpers';
+import { api, registrarMenorActivo, tokenDe } from './helpers-006';
 import { campo, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
@@ -8,72 +9,10 @@ import { campo, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
  * rechazar) se hace por API con la sesión de e2e-admin, que siembra
  * sembrar-e2e-admin.ts; e2e-discipulador@ ya tiene agenda (martes 19–21) y la
  * disponibilidad prendida.
+ *
+ * spec 006 (T027): Vida Nueva pasó de `/mi-camino` a `/mi-camino/vida-nueva`;
+ * lo que se afirma no cambia.
  */
-
-const API = () => process.env.API_BASE_URL ?? 'http://localhost:3334';
-
-/** El token de API de una sesión de `apps/web` iniciada con test-login, en un contexto propio (no toca la `page`). */
-async function tokenDe(baseURL: string, email: string): Promise<string> {
-  const ctx = await playwrightRequest.newContext({ baseURL });
-  try {
-    const { csrfToken } = await (await ctx.get('/api/auth/csrf')).json();
-    await ctx.post('/api/auth/callback/test-login', { form: { email, csrfToken } });
-    const session = await (await ctx.get('/api/auth/session')).json();
-    return session.apiToken as string;
-  } finally {
-    await ctx.dispose();
-  }
-}
-
-async function api(token: string, metodo: 'GET' | 'POST' | 'PATCH', ruta: string, data?: unknown) {
-  const ctx = await playwrightRequest.newContext();
-  try {
-    const response = await ctx.fetch(`${API()}${ruta}`, {
-      method: metodo,
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      data,
-    });
-    const cuerpo = await response.text();
-    if (!response.ok()) throw new Error(`${metodo} ${ruta} respondió ${response.status()}: ${cuerpo}`);
-    return cuerpo ? JSON.parse(cuerpo) : undefined;
-  } finally {
-    await ctx.dispose();
-  }
-}
-
-/** Fecha `YYYY-MM-DD` de hace `anios` años menos un día (cumplidos). */
-function nacidoHace(anios: number): string {
-  const fecha = new Date();
-  fecha.setUTCFullYear(fecha.getUTCFullYear() - anios);
-  fecha.setUTCDate(fecha.getUTCDate() - 1);
-  return fecha.toISOString().slice(0, 10);
-}
-
-/**
- * Un menor de 12 con acceso a la app (FR-044): se registra por API (queda
- * `pendiente_tutor`) y e2e-admin lo activa con los datos del tutor, como en
- * el backoffice. Después la `page` inicia sesión como él.
- */
-async function registrarMenorActivo(page: Page, baseURL: string, email: string) {
-  const token = await tokenDe(baseURL, email);
-  const sedes: Array<{ id: string }> = await (await page.request.get(`${API()}/sedes`)).json();
-  const persona = await api(token, 'POST', '/personas', {
-    apellido: 'Menor',
-    nombre: 'Lucía',
-    genero: 'femenino',
-    fechaNacimiento: nacidoHace(10),
-    telefono: '+5492219000003',
-    direccion: 'Calle 1 y 50',
-    sedeId: sedes[0].id,
-    estadoCivil: 'soltero_a',
-    profesion: 'estudiante',
-    congregaDesde: 2020,
-    consentimientoDatos: false,
-  });
-  const admin = await tokenDe(baseURL, 'e2e-admin@example.com');
-  await api(admin, 'PATCH', `/personas/${persona.id}/activar`, { tutorNombre: 'Mamá', tutorApellido: 'Menor', tutorTelefono: '+5492219000004' });
-  await loguearseComoTest(page, email);
-}
 
 /**
  * La tarjeta de Vida Nueva. Las búsquedas de texto van adentro de ella: al
@@ -99,7 +38,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       const email = `e2e-mi-camino-menor-${tema}-${Date.now()}@example.com`;
       await registrarMenorActivo(page, baseURL!, email);
       if (tema === 'oscuro') await usarTemaOscuro(page, email);
-      await page.goto('/mi-camino');
+      await page.goto('/mi-camino/vida-nueva');
       await page.waitForLoadState('networkidle');
 
       await expect(tarjeta(page).getByText('Este pedido lo hace tu mamá, tu papá o tu tutor')).toBeVisible();
@@ -111,7 +50,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       const email = `e2e-mi-camino-${tema}-${Date.now()}@example.com`;
       await registrarPersonaDeTest(page, email);
       if (tema === 'oscuro') await usarTemaOscuro(page, email);
-      await page.goto('/mi-camino');
+      await page.goto('/mi-camino/vida-nueva');
       await page.waitForLoadState('networkidle');
       await sinViolaciones(page, tema);
 
@@ -179,7 +118,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       };
       await api(admin, 'POST', `/discipulado/solicitudes/${solicitudId}/proponer`, { discipuladorId: propuesto.id });
 
-      await page.goto('/mi-camino');
+      await page.goto('/mi-camino/vida-nueva');
       await page.waitForLoadState('networkidle');
       await expect(tarjeta(page).getByText('Estamos buscando a tu Discipulador')).toBeVisible();
       await expect(page.getByText(propuesto.apellido)).toHaveCount(0);
@@ -217,7 +156,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       const ayer = new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10);
       await api(disc, 'POST', `/discipulado/mis-discipulados/${grupoId}/encuentros`, { fecha: ayer, capitulos: '1 y 2', notas: nota });
 
-      await page.goto('/mi-camino');
+      await page.goto('/mi-camino/vida-nueva');
       await page.waitForLoadState('networkidle');
       await expect(tarjeta(page).getByText('Estás haciendo Vida Nueva')).toBeVisible();
       await expect(tarjeta(page).getByText(`Tu Discipulador es ${discipuladora.nombre} ${discipuladora.apellido}.`)).toBeVisible();

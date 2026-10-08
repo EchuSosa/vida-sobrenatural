@@ -1,4 +1,4 @@
-import type { ComoSeCompleto, EtapaCamino } from '@vida-sobrenatural/shared-types';
+import { ETAPAS_CAMINO, type ComoSeCompleto, type Completas, type EtapaCamino, type HechosCamino } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 
@@ -61,4 +61,46 @@ export async function completoEtapa(db: Db, personaId: string, etapa: EtapaCamin
 export async function bloquearPersona(tx: Prisma.TransactionClient, personaId: string): Promise<boolean> {
   const filas = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "personas" WHERE "id" = ${personaId} FOR UPDATE`;
   return filas.length > 0;
+}
+
+/**
+ * FR-010/FR-014: Vida Nueva "en marcha dentro del sistema" — un pedido abierto
+ * (`pendiente` o `propuesta`) o una Inscripción `activa` en un Grupo de Vida
+ * Nueva. Mientras tanto no se declara "Ya lo hice" ni se registra la etapa
+ * hecha (`ETAPA_EN_CURSO`): primero se retira el pedido o se cierra el Grupo.
+ * La Inscripción `completada` no es "en marcha": la cubre `completoEtapa`.
+ */
+export async function vidaNuevaEnMarcha(db: Db, personaId: string): Promise<boolean> {
+  const [pedido, inscripcion] = await Promise.all([
+    db.solicitudDiscipulado.findFirst({ where: { personaId, estado: { in: ['pendiente', 'propuesta'] } }, select: { id: true } }),
+    db.inscripcion.findFirst({
+      where: { personaId, estado: 'activa', grupo: { curso: { categoria: 'vida_nueva' } } },
+      select: { id: true },
+    }),
+  ]);
+  return pedido !== null || inscripcion !== null;
+}
+
+/** Las cuatro etapas, con por qué camino se completó cada una (FR-016), para `HechosCamino`. */
+export async function etapasCompletas(db: Db, personaId: string): Promise<Completas> {
+  const resultados = await Promise.all(ETAPAS_CAMINO.map(async (etapa) => [etapa, await completoEtapa(db, personaId, etapa)] as const));
+  const completas: Completas = {};
+  for (const [etapa, como] of resultados) if (como) completas[etapa] = como;
+  return completas;
+}
+
+/** La declaración MÁS RECIENTE de cada etapa, en cualquier estado (`HechosCamino.ultimaDeclaracion`). */
+export async function ultimasDeclaraciones(db: Db, personaId: string): Promise<HechosCamino['ultimaDeclaracion']> {
+  const filas = await db.declaracionHistorial.findMany({
+    where: { personaId },
+    distinct: ['etapa'],
+    orderBy: [{ etapa: 'asc' }, { createdAt: 'desc' }],
+    select: { id: true, etapa: true, estado: true, createdAt: true, revisadaEn: true, motivoRechazo: true },
+  });
+  const ultima: HechosCamino['ultimaDeclaracion'] = {};
+  for (const f of filas) {
+    // La fecha que importa: cuándo la revisaron (rechazada/confirmada) o, si no, cuándo la contó.
+    ultima[f.etapa] = { id: f.id, estado: f.estado, fecha: (f.revisadaEn ?? f.createdAt).toISOString(), motivo: f.motivoRechazo };
+  }
+  return ultima;
 }

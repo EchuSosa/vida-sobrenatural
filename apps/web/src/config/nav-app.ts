@@ -10,11 +10,17 @@ export interface ItemNavApp {
   /** Clave en messages/es.json, namespace "nav" (FR-030 — sin texto fijo acá). */
   labelKey: string;
   icon: ComponentType<{ className?: string }>;
+  /**
+   * spec 006 (FR-023): otras rutas en las que esta pestaña cuenta como la
+   * actual (`aria-current="page"`); la comparación es por segmento
+   * (`esItemActual` de shared-types).
+   */
+  rutasRelacionadas?: readonly string[];
 }
 
 export const NAV_APP: ItemNavApp[] = [
   { href: '/inicio', labelKey: 'inicio', icon: Home },
-  { href: '/mi-camino', labelKey: 'miCamino', icon: MapIcon },
+  { href: '/mi-camino', labelKey: 'miCamino', icon: MapIcon, rutasRelacionadas: ['/mis-discipulados', '/mi-disponibilidad'] },
   // H-26 (revisión manual, actualización 2026-09-20, D107): /mis-eventos,
   // no /eventos — esa URL ya la usa la cartelera pública (`(publica)/eventos`)
   // y Next.js no permite que dos route groups resuelvan la misma URL.

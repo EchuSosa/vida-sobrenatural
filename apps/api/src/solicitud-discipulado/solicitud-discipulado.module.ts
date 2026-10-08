@@ -13,5 +13,8 @@ import { SolicitudDiscipuladoService } from './solicitud-discipulado.service.js'
   imports: [DiscipuladoModule],
   controllers: [SolicitudDiscipuladoController],
   providers: [SolicitudDiscipuladoService],
+  // spec 006 (lote A): Mi camino reusa `estadoPropio` para la card de Vida
+  // Nueva (FR-005: el mismo estado que GET /discipulado/me, sin recalcularlo).
+  exports: [SolicitudDiscipuladoService],
 })
 export class SolicitudDiscipuladoModule {}
