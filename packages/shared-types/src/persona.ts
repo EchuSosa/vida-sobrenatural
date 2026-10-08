@@ -266,6 +266,11 @@ export interface BusquedaPersona {
   email: string | null;
   telefono: string;
   rol: string[];
+  /**
+   * spec 006 (Pregunta 5): solo en la búsqueda acotada de quien no ve
+   * Personas (el Discipulador): ahí tampoco vienen email ni teléfono.
+   */
+  edad?: number;
 }
 
 /**
