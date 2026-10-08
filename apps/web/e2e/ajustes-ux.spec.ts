@@ -91,9 +91,9 @@ test.describe('Registro', () => {
     const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
     await expect(resumen.getByRole('link', { name: 'Escribí tu apellido.' })).toBeVisible();
     await expect(resumen.getByRole('link', { name: 'Escribí tu nombre.' })).toBeVisible();
-    // Ningún enlace del resumen repite el genérico "Revisá este dato." (Género
-    // se afirma por su mensaje en el campo, no en el resumen: en CI el
-    // select nativo puede quedar con la primera opción elegida).
+    // Ningún enlace del resumen repite el genérico "Revisá este dato.". Género
+    // no se afirma acá: en CI no apareció en el resumen y no se pudo ver por
+    // qué sin el informe (anotado en el PR).
     await expect(page.getByText('Revisá este dato.')).toHaveCount(0);
   });
 
