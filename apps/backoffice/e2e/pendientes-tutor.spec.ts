@@ -325,10 +325,10 @@ test('el panel de Activar atrapa el foco y lo hace ciclar en orden (T029)', asyn
 test('el Discipulador no ve Pendientes de tutor ni entra por URL (D139)', async ({ page, permitirErrorDeConsola }) => {
   permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 404/);
   await loguearseComoDiscipuladorE2E(page);
-  await page.goto('/mis-discipulados');
-  const menu = page.getByRole('navigation', { name: 'Principal' });
-  await expect(menu.getByRole('link', { name: 'Mis discipulados' })).toBeVisible();
-  await expect(menu.getByRole('link', { name: 'Pendientes tutor' })).toHaveCount(0);
+  await page.goto('/');
+  // spec 006 (D142): sin ítems del backoffice; lo suyo está en la web app.
+  await expect(page.getByRole('heading', { name: 'Lo tuyo está en la app', level: 1 })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Pendientes tutor' })).toHaveCount(0);
 
   await page.goto('/pendientes-tutor');
   await expect(page.getByRole('heading', { name: 'No encontramos esta sección' })).toBeVisible();

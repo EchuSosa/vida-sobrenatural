@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { ArrowRightLeft, CircleCheckBig, Clock, Info, Lock, UserRoundX } from 'lucide-react';
 import { apiFetch, ApiError, formatearDiaEnArgentina } from '@vida-sobrenatural/shared-types';
 import { Button, ConfirmDestructiveDialog, EstadoVacio, MigaDePan, useEnvio } from '@vida-sobrenatural/ui';
-import { mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type DetalleDiscipuladoAdmin } from '../../mis-discipulados/comun';
-import { PanelMotivo, type TextosPanelMotivo } from '../../mis-discipulados/panel-motivo';
+import type { DetalleDiscipuladoAdmin } from '@vida-sobrenatural/shared-types';
+import { PanelMotivo, mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type TextosPanelMotivo } from '@vida-sobrenatural/ui';
 import { PanelReasignar } from './reasignar';
 
 type PersonaAdmin = DetalleDiscipuladoAdmin['personas'][number];

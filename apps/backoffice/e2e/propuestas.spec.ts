@@ -1,5 +1,6 @@
-import { test, expect, auditar, loguearseComoDiscipuladorE2E } from './helpers';
+import { test, expect, auditar } from './helpers';
 import { crearPersona, crearPropuesta, estadoDeSolicitud, sinScrollHorizontal, sinSesion } from './helpers';
+import { discipuladorEnLaWeb, enLaWeb } from './helpers-006';
 
 /**
  * specs/004, T037f (FR-037, FR-046, FR-047): el Discipulador responde sus
@@ -21,8 +22,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await sinSesion(page);
 
-      await loguearseComoDiscipuladorE2E(page, 1);
-      await page.goto('/mis-discipulados');
+      await discipuladorEnLaWeb(page, 1, colorScheme);
+      await page.goto(enLaWeb('/mis-discipulados'));
       const tarjeta = page.getByRole('article', { name: new RegExp(`Rocío Declina ${sufijo}`) });
       await expect(tarjeta).toBeVisible();
       // Las propuestas van primero: su encabezado antecede al de los discipulados.
@@ -54,8 +55,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await sinSesion(page);
 
-      await loguearseComoDiscipuladorE2E(page, 1);
-      await page.goto('/mis-discipulados');
+      await discipuladorEnLaWeb(page, 1, colorScheme);
+      await page.goto(enLaWeb('/mis-discipulados'));
       const tarjeta = page.getByRole('article', { name: new RegExp(`Martina Acepta ${sufijo}`) });
       const aceptar = tarjeta.getByRole('button', { name: 'Aceptar a Martina' });
       // docs/15, Celular: la acción principal es un objetivo táctil de al menos 44 px.
@@ -74,8 +75,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('sin agenda ve el aviso de FR-047 con el enlace a Mi disponibilidad', async ({ page }) => {
       await sinSesion(page);
-      await loguearseComoDiscipuladorE2E(page, 'sin-agenda');
-      await page.goto('/mis-discipulados');
+      await discipuladorEnLaWeb(page, 'sin-agenda', colorScheme);
+      await page.goto(enLaWeb('/mis-discipulados'));
       await expect(page.getByRole('heading', { name: 'Todavía no cargaste tus horarios' })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Cargar mis horarios' })).toHaveAttribute('href', '/mi-disponibilidad');
       await expect(page.getByText('Todavía no acompañás a nadie.', { exact: false })).toBeVisible();

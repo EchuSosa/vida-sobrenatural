@@ -71,6 +71,8 @@ export default async function PersonasPage({
       // T028: qué mostrar se decide leyendo el catálogo (D132), nunca un
       // `rol.includes('admin')` — la API vuelve a chequear el mismo permiso.
       puedeGestionarRoles={tienePermisoSesion(session, 'personas.gestionar_roles')}
+      puedeDarDeAlta={tienePermisoSesion(session, 'personas.alta')}
+      puedeEditarEmail={tienePermisoSesion(session, 'personas.editar_email')}
     />
   );
 }

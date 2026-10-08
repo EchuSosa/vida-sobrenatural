@@ -16,6 +16,7 @@ import { AccionesVidaDeServicio } from './tarjeta-vida-de-servicio';
 import { AccionesMinisterio } from './tarjeta-ministerio';
 import { AccionesBautismo } from './tarjeta-bautismo';
 import type { PropsAccionesEtapa } from './acciones-etapa';
+import { SelectorMiCamino } from './selector-mi-camino';
 
 /**
  * spec 006, Historia 1 y la parte de la Persona de la Historia 2 (T031, T041):
@@ -164,6 +165,7 @@ export default async function MiCaminoPage() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
+      <SelectorMiCamino actual="/mi-camino" />
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">{t('titulo')}</h1>
         <p className="text-base text-muted-foreground">{t('estados.introduccion')}</p>

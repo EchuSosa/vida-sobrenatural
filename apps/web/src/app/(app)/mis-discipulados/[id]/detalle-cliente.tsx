@@ -7,9 +7,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { CircleCheckBig, Clock, Info, MapPin, Pencil, Phone, UserRoundX } from 'lucide-react';
 import { apiFetch, type EncuentroDelDiscipulador, formatearDiaEnArgentina } from '@vida-sobrenatural/shared-types';
-import { Button, ConfirmDestructiveDialog, EstadoVacio, MigaDePan, useEnvio } from '@vida-sobrenatural/ui';
-import { mensajeDeError, mensajesDeCampo, nombresDe, type DetalleMiDiscipulado } from '../comun';
-import { PanelMotivo } from '../panel-motivo';
+import type { DetalleMiDiscipulado } from '@vida-sobrenatural/shared-types';
+import { Button, ConfirmDestructiveDialog, EstadoVacio, MigaDePan, PanelMotivo, mensajeDeError, mensajesDeCampo, nombresDe, useEnvio } from '@vida-sobrenatural/ui';
 import { FormularioEncuentro } from './formulario-encuentro';
 
 type PersonaDetalle = DetalleMiDiscipulado['personas'][number];
@@ -30,6 +29,7 @@ export function DetalleMiDiscipuladoCliente({
   puedeGestionar: boolean;
 }) {
   const t = useTranslations('misDiscipulados');
+  const tm = useTranslations('miCamino');
   const locale = useLocale();
   const router = useRouter();
   const [formulario, setFormulario] = useState<{ encuentro: EncuentroDelDiscipulador | null } | null>(null);
@@ -41,7 +41,7 @@ export function DetalleMiDiscipuladoCliente({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-8">
-      <MigaDePan tramos={[{ label: t('titulo'), href: '/mis-discipulados' }, { label: nombres }]} LinkComponente={Link} />
+      <MigaDePan tramos={[{ label: tm('titulo'), href: '/mi-camino' }, { label: t('titulo'), href: '/mis-discipulados' }, { label: nombres }]} LinkComponente={Link} />
 
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">{t('detalle.titulo', { nombres })}</h1>
@@ -296,6 +296,7 @@ function SeccionFinalizacion({ detalle, apiToken, gestiona }: { detalle: Detalle
           <p className="text-sm text-muted-foreground">{t('detalle.finalizacion.texto')}</p>
           {gestiona && (
             <ConfirmDestructiveDialog
+              tono="neutro"
               trigger={
                 <Button variant="outline" size="xl" className="w-full sm:w-fit" loading={enviando} loadingText={t('detalle.finalizacion.proponiendo')}>
                   {t('detalle.finalizacion.proponer')}

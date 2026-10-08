@@ -22,7 +22,7 @@ import {
   useEnvio,
 } from '@vida-sobrenatural/ui';
 import { CruceDiscipuladores, type EtiquetasCruce } from '../../../components/cruce';
-import { mensajeDeError } from '../../mis-discipulados/comun';
+import { mensajeDeError } from '@vida-sobrenatural/ui';
 
 /**
  * specs/004, T052 (FR-030): cambiar de Discipulador PROPONE, no asigna. El

@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { ButtonLink } from '@vida-sobrenatural/ui';
+import { tienePermiso } from '@vida-sobrenatural/shared-types';
 import { itemDeAterrizaje } from '../config/nav';
+import { urlDeLaWebApp } from '../config/web-app';
 
 /**
  * H-134: el botón de salida del 404 — va al MISMO destino que `/` resuelve
@@ -24,10 +26,22 @@ export function BotonAterrizaje() {
   const { data: session } = useSession();
   const t = useTranslations('aterrizaje');
   const tNav = useTranslations('nav');
+  const tLaApp = useTranslations('loTuyoEnLaApp');
   if (!session) return null;
 
   const aterrizaje = itemDeAterrizaje(session.user.rol);
-  if (!aterrizaje) return <p className="text-muted-foreground">{t('sinAccesoDescripcion')}</p>;
+  if (!aterrizaje) {
+    // spec 006 (T061): si lo suyo está en la web app, el botón lleva allá (por permiso, no por rol).
+    const discipulador = tienePermiso(session.user.rol, 'mis_discipulados.ver');
+    if (discipulador || tienePermiso(session.user.rol, 'mis_grupos.ver')) {
+      return (
+        <ButtonLink href={urlDeLaWebApp(discipulador ? '/mis-discipulados' : '/mi-camino')} size="xl" className="mx-auto">
+          {tLaApp('irALaApp')}
+        </ButtonLink>
+      );
+    }
+    return <p className="text-muted-foreground">{t('sinAccesoDescripcion')}</p>;
+  }
   return (
     <ButtonLink render={<Link href={aterrizaje.href} />} size="xl" className="mx-auto">
       {t('irA', { seccion: tNav(aterrizaje.labelKey) })}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent, type ReactNode } from 'react';
+import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { CalendarClock, CalendarDays, CircleCheck, Info, Pencil, Trash2 } from 'lucide-react';
@@ -31,6 +32,7 @@ import {
   CampoFecha,
   EditorDeFranjas,
   MensajeErrorCampo,
+  MigaDePan,
   ResumenErrores,
   minutosAHHMM,
   useEnvio,
@@ -63,12 +65,17 @@ export function MiDisponibilidadCliente({
   inicial,
   apiToken,
   puedeGestionar,
+  selector,
 }: {
   inicial: MiDisponibilidad;
   apiToken: string;
   puedeGestionar: boolean;
+  /** spec 006 (T058): "Mi camino · Mis discipulados", con Mis discipulados activo. */
+  selector?: ReactNode;
 }) {
   const t = useTranslations('miDisponibilidad');
+  const tm = useTranslations('miCamino');
+  const tmd = useTranslations('misDiscipulados');
   const tf = useTranslations('franjas');
   const te = useTranslations('errors');
   const locale = useLocale();
@@ -280,6 +287,11 @@ export function MiDisponibilidadCliente({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-8 sm:py-16">
+      <MigaDePan
+        tramos={[{ label: tm('titulo'), href: '/mi-camino' }, { label: tmd('titulo'), href: '/mis-discipulados' }, { label: t('titulo') }]}
+        LinkComponente={Link}
+      />
+      {selector}
       <div className="flex flex-col gap-3">
         <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
         <p className="text-muted-foreground">{t('intro')}</p>
@@ -297,7 +309,7 @@ export function MiDisponibilidadCliente({
         <h2 id="titulo-agenda" className="text-xl font-medium">
           {t('agenda.titulo')}
         </h2>
-        <p className="text-sm text-muted-foreground">{t('agenda.ayuda')}</p>
+        <p className="text-base text-muted-foreground">{t('agenda.ayuda')}</p>
         {/* Los resúmenes aparecen recién al primer intento de envío (`foco` > 0): ResumenErrores se
             enfoca al montarse, y montado por una validación al salir del campo le robaba el foco
             (y corría el botón bajo el dedo) — justo lo que H-72 quiere evitar. */}
@@ -325,7 +337,7 @@ export function MiDisponibilidadCliente({
           )}
           <span>{datos.disponible ? t('toggle.prendida') : t('toggle.apagada')}</span>
         </p>
-        <p className="text-sm text-muted-foreground">{t('toggle.ayuda')}</p>
+        <p className="text-base text-muted-foreground">{t('toggle.ayuda')}</p>
         <Button
           type="button"
           // Una sola acción principal por pantalla: prender es LA acción
@@ -382,7 +394,7 @@ export function MiDisponibilidadCliente({
         <h2 id="titulo-bloqueos" className="text-xl font-medium">
           {t('bloqueos.titulo')}
         </h2>
-        <p className="text-sm text-muted-foreground">{t('bloqueos.ayuda')}</p>
+        <p className="text-base text-muted-foreground">{t('bloqueos.ayuda')}</p>
         {datos.bloqueos.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t('bloqueos.vacio')}</p>
         ) : (
@@ -411,6 +423,7 @@ export function MiDisponibilidadCliente({
                     {t('bloqueos.editar')}
                   </Button>
                   <ConfirmDestructiveDialog
+                    tono="neutro"
                     trigger={
                       <Button
                         type="button"
@@ -491,7 +504,8 @@ export function MiDisponibilidadCliente({
       )}
 
       <AlertDialog open={franjaABorrar !== null} onOpenChange={(abierto) => !abierto && setFranjaABorrar(null)}>
-        <AlertDialogContent>
+        {/* D151: borrar una franja se deshace volviéndola a cargar → tono neutro. */}
+        <AlertDialogContent data-tono="neutro">
           <AlertDialogHeader>
             <AlertDialogTitle>{franjaABorrar ? t('agenda.confirmarTitulo', { franja: textoFranja(franjaABorrar) }) : ''}</AlertDialogTitle>
             <AlertDialogDescription>{t('agenda.confirmarDescripcion')}</AlertDialogDescription>

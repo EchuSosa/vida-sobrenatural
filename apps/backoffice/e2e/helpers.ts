@@ -380,7 +380,7 @@ async function sesionDe(email: string): Promise<{ apiToken: string; personaId: s
 }
 
 /** Una llamada a la API como `email`. Falla ruidoso si la API no responde 2xx. */
-async function apiComo<T>(email: string, metodo: 'GET' | 'POST' | 'PUT' | 'DELETE', ruta: string, datos?: unknown): Promise<T> {
+export async function apiComo<T>(email: string, metodo: 'GET' | 'POST' | 'PUT' | 'DELETE', ruta: string, datos?: unknown): Promise<T> {
   const { apiToken } = await sesionDe(email);
   const ctx = await playwrightRequest.newContext();
   try {

@@ -1,6 +1,7 @@
-import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoDiscipuladorE2E, loguearseComoPastorE2E } from './helpers';
+import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
 import { crearEncuentro, crearGrupo, crearPersona, sinScrollHorizontal, sinSesion } from './helpers';
 import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
+import { discipuladorEnLaWeb, enLaWeb } from './helpers-006';
 
 /**
  * specs/004, T048 (FR-009, FR-011, FR-013a, FR-029, FR-041, D134): el
@@ -19,8 +20,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await sinSesion(page);
 
-      await loguearseComoDiscipuladorE2E(page, 1);
-      await page.goto(`/mis-discipulados/${grupoId}`);
+      await discipuladorEnLaWeb(page, 1, colorScheme);
+      await page.goto(enLaWeb(`/mis-discipulados/${grupoId}`));
       await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Lucía Encuentro ${sufijo}`) })).toBeVisible();
       // #contenido: mientras la página llega por streaming, React deja una copia oculta fuera (2cc64e9).
       await expect(page.locator('#contenido').getByText('Todavía no registraste ningún encuentro.', { exact: false })).toBeVisible();
@@ -102,8 +103,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await sinSesion(page);
 
-      await loguearseComoDiscipuladorE2E(page, 2);
-      await page.goto(`/mis-discipulados/${grupoId}`);
+      await discipuladorEnLaWeb(page, 2, colorScheme);
+      await page.goto(enLaWeb(`/mis-discipulados/${grupoId}`));
       await expect(page.getByRole('heading', { name: 'No encontramos este discipulado' })).toBeVisible();
       await expect(page.getByText(`Ajena ${sufijo}`)).toHaveCount(0);
     });

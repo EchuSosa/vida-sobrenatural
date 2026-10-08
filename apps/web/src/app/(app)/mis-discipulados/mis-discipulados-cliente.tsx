@@ -1,16 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { AlertTriangle, CalendarClock, CheckCircle2, CircleCheckBig, Clock, Phone, UsersRound } from 'lucide-react';
-import { apiFetch, ApiError, type MiDiscipulado, type PropuestaParaMi, formatearDiaEnArgentina } from '@vida-sobrenatural/shared-types';
-import { Button, ButtonLink, ConfirmDestructiveDialog, EstadoVacio, useEnvio } from '@vida-sobrenatural/ui';
-import { mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type MisDiscipuladosRespuesta } from './comun';
-import { PanelMotivo } from './panel-motivo';
-import { PedirEnNombreDe } from '../../components/pedir-en-nombre-de';
+import { AlertTriangle, CalendarClock, CheckCircle2, CircleCheckBig, CircleX, Clock, Phone, UsersRound } from 'lucide-react';
+import {
+  apiFetch,
+  ApiError,
+  formatearDiaEnArgentina,
+  pendientesDelDiscipulador,
+  type MiDiscipulado,
+  type MisDiscipuladosRespuesta,
+  type PropuestaParaMi,
+  type RechazoPendiente,
+} from '@vida-sobrenatural/shared-types';
+import {
+  Button,
+  ButtonLink,
+  ConfirmDestructiveDialog,
+  EstadoVacio,
+  MigaDePan,
+  PanelMotivo,
+  mensajeDeError,
+  mensajesDeCampo,
+  nombresDe,
+  textoFranja,
+  useEnvio,
+} from '@vida-sobrenatural/ui';
+import { PedirEnNombreDe } from './pedir-en-nombre-de';
 
 /**
  * specs/004, T037e y T046 (FR-037, FR-046, FR-047): la lista del
@@ -25,21 +44,32 @@ export function MisDiscipuladosCliente({
   apiToken,
   puedeGestionar,
   puedeCrearEnNombre,
+  selector,
 }: {
   datos: MisDiscipuladosRespuesta;
   apiToken: string;
   puedeGestionar: boolean;
   puedeCrearEnNombre: boolean;
+  /** spec 006 (T058): "Mi camino · Mis discipulados", que arma el Server Component. */
+  selector?: ReactNode;
 }) {
   const t = useTranslations('misDiscipulados');
+  const tm = useTranslations('miCamino');
   const router = useRouter();
   const { propuestas, discipulados, tieneAgenda } = datos;
+  // spec 006, FR-021: primero lo que espera una respuesta suya.
+  const { rechazos } = pendientesDelDiscipulador(datos);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-8">
+      <MigaDePan tramos={[{ label: tm('titulo'), href: '/mi-camino' }, { label: t('titulo') }]} LinkComponente={Link} />
+      {selector}
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
         <p className="text-muted-foreground">{t('descripcion')}</p>
+        <Link href="/mi-disponibilidad" className="inline-flex min-h-11 w-fit items-center text-base font-medium text-primary underline underline-offset-4">
+          {t('irADisponibilidad')}
+        </Link>
         {puedeCrearEnNombre && <PedirEnNombreDe apiToken={apiToken} onCreado={() => router.refresh()} />}
       </header>
 
@@ -53,6 +83,19 @@ export function MisDiscipuladosCliente({
           <ButtonLink size="xl" className="w-full sm:w-fit" render={<Link href="/mi-disponibilidad" />}>
             {t('sinAgenda.accion')}
           </ButtonLink>
+        </section>
+      )}
+
+      {rechazos.length > 0 && (
+        <section aria-labelledby="rechazos" className="flex flex-col gap-3">
+          <h2 id="rechazos" className="text-lg font-semibold">
+            {t('rechazos.titulo')}
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {rechazos.map((r) => (
+              <TarjetaRechazo key={`${r.tipo}-${r.grupoId}-${r.tipo === 'baja' ? r.persona : ''}`} rechazo={r} />
+            ))}
+          </ul>
         </section>
       )}
 
@@ -85,6 +128,27 @@ export function MisDiscipuladosCliente({
         )}
       </section>
     </div>
+  );
+}
+
+/** spec 006, FR-021: un rechazo del Admin con su motivo, que lleva al discipulado para volver a proponerlo o seguir. */
+function TarjetaRechazo({ rechazo }: { rechazo: RechazoPendiente }) {
+  const t = useTranslations('misDiscipulados.rechazos');
+  const locale = useLocale();
+  const fecha = formatearDiaEnArgentina(rechazo.en, locale);
+  const titulo =
+    rechazo.tipo === 'finalizacion' ? t('finalizacion', { nombres: rechazo.personas.join(', '), fecha }) : t('baja', { nombre: rechazo.persona, fecha });
+  return (
+    <li className="flex flex-col gap-2 rounded-lg border border-border p-4">
+      <p className="flex items-start gap-2 font-medium">
+        <CircleX aria-hidden className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+        {titulo}
+      </p>
+      <p className="text-muted-foreground">{rechazo.motivo ? t('motivo', { motivo: rechazo.motivo }) : t('sinMotivo')}</p>
+      <Link href={`/mis-discipulados/${rechazo.grupoId}`} className="inline-flex min-h-11 w-fit items-center text-base font-medium text-primary underline underline-offset-4">
+        {t('ver')}
+      </Link>
+    </li>
   );
 }
 
@@ -198,6 +262,7 @@ function TarjetaPropuesta({ propuesta, apiToken, puedeGestionar }: { propuesta: 
           // para la acción principal de la pantalla.
           <div className="flex flex-col gap-2 pt-1 sm:flex-row-reverse sm:justify-start">
             <ConfirmDestructiveDialog
+              tono="neutro"
               trigger={
                 <Button size="xl" variant="outline" className="w-full sm:w-auto" loading={aceptando} loadingText={t('propuestas.aceptando')}>
                   {t('propuestas.aceptar', { nombre: propuesta.persona.nombre })}
@@ -280,7 +345,7 @@ function TarjetaDiscipulado({ discipulado }: { discipulado: MiDiscipulado }) {
             ))}
           </ul>
         )}
-        <ButtonLink variant="outline" size="xl" className="w-full sm:w-fit" render={<Link href={`/mis-discipulados/${discipulado.grupoId}`} />}>
+        <ButtonLink variant="outline" size="xl" className="h-auto min-h-11 w-full whitespace-normal py-2 text-center text-base sm:w-fit" render={<Link href={`/mis-discipulados/${discipulado.grupoId}`} />}>
           {t('discipulados.ver', { nombres })}
         </ButtonLink>
       </article>

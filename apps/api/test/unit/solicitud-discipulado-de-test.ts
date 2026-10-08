@@ -65,6 +65,9 @@ export interface Base {
   propuestas: PropuestaFake[];
   inscripciones: InscripcionFake[];
   liderazgos: Array<{ grupoId: string; personaId: string; hasta: Date | null }>;
+  /** spec 006 (FR-017): "Ya lo hice" y etapas registradas por la iglesia. */
+  declaraciones?: Array<{ id: string; personaId: string; etapa: string; estado: string }>;
+  completitudes?: Array<{ id: string; personaId: string; etapa: string; anuladaEn: Date | null }>;
 }
 
 export const ADULTA = new Date('1985-06-15T00:00:00Z');
@@ -189,6 +192,14 @@ function prismaEnMemoria(base: Base) {
         base.inscripciones
           .filter((i) => i.personaId === where.personaId)
           .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+    },
+    declaracionHistorial: {
+      findFirst: async ({ where }: { where: { personaId: string; etapa: string; estado: string } }) =>
+        (base.declaraciones ?? []).find((d) => d.personaId === where.personaId && d.etapa === where.etapa && d.estado === where.estado) ?? null,
+    },
+    completitudManual: {
+      findFirst: async ({ where }: { where: { personaId: string; etapa: string } }) =>
+        (base.completitudes ?? []).find((c) => c.personaId === where.personaId && c.etapa === where.etapa && c.anuladaEn === null) ?? null,
     },
     liderazgo: {
       findFirst: async ({ where }: { where: { grupoId: string } }) =>

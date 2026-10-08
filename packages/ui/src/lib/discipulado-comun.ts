@@ -3,17 +3,18 @@ import {
   erroresPorCampo,
   type Franja,
 } from '@vida-sobrenatural/shared-types';
-import { minutosAHHMM } from '@vida-sobrenatural/ui';
+import { minutosAHHMM } from '../components/editor-de-franjas';
 
 /**
  * specs/004, lote B: piezas que comparten las pantallas del discipulado
  * (`/mis-discipulados` y `/grupos`, las dos del lote). Sin `'use client'`: las
  * importan tanto los Server Components como las islas de cliente.
+ *
+ * spec 006 (lote C): movidas a `packages/ui` porque Mis discipulados pasó a la
+ * web app y Grupos sigue en el backoffice (Principio XI).
  */
 
-export type { DetalleDiscipuladoAdmin, DetalleMiDiscipulado, MisDiscipuladosRespuesta } from '@vida-sobrenatural/shared-types';
-
-type Traductor = ((clave: string) => string) & { has: (clave: string) => boolean };
+export type Traductor = ((clave: string) => string) & { has: (clave: string) => boolean };
 
 /**
  * El mensaje de un error de la API: el texto de su código en `errors` (una
