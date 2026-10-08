@@ -30,6 +30,7 @@
     "db:reset-demo": "prisma migrate reset --force && prisma db seed && tsx prisma/seed-demo.ts",
     "db:studio": "prisma studio",
     "db:contar": "tsx scripts/contar.ts",
+    "tareas:correr": "tsx scripts/correr-tarea.ts",
     "db:limpiar-e2e": "tsx scripts/limpiar-e2e.ts",
     "db:sembrar-e2e-admin": "tsx scripts/sembrar-e2e-admin.ts",
     "db:recrear-admin": "tsx scripts/recrear-admin.ts",

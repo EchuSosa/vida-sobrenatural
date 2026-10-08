@@ -3,6 +3,7 @@ import { NotificacionesService } from './notificaciones.service.js';
 import { AvisosController } from './avisos.controller.js';
 import { NotificacionesController } from './notificaciones.controller.js';
 import { AvisosService } from './avisos.service.js';
+import { EnvioEmailsService } from './envio-emails.service.js';
 
 /**
  * spec 012 — dueño de `notificaciones` y `entregas_notificacion`. Global: las
@@ -12,7 +13,7 @@ import { AvisosService } from './avisos.service.js';
 @Global()
 @Module({
   controllers: [AvisosController, NotificacionesController],
-  providers: [NotificacionesService, AvisosService],
-  exports: [NotificacionesService],
+  providers: [NotificacionesService, AvisosService, EnvioEmailsService],
+  exports: [NotificacionesService, EnvioEmailsService],
 })
 export class NotificacionesModule {}

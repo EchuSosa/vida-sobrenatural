@@ -95,13 +95,14 @@ describe('Lote 0 global (integración)', () => {
       expect(await prisma.entregaNotificacion.count({ where: { personaId } })).toBe(0);
 
       const { hayEmails } = await prisma.$transaction((tx) => avisos.emitir(tx, evento));
-      // `importante` y con email → una entrega en la app y otra por email (pendiente).
+      // `importante` y con email → una entrega en la app y otra por email (nace
+      // pendiente; el envío de la 012 puede haberla tomado ya desde otro archivo).
       expect(hayEmails).toBe(true);
       const entregas = await prisma.entregaNotificacion.findMany({ where: { personaId }, select: { canal: true, estado: true } });
       expect(entregas).toEqual(
         expect.arrayContaining([
           { canal: 'app', estado: 'enviada' },
-          { canal: 'email', estado: 'pendiente' },
+          { canal: 'email', estado: expect.stringMatching(/^(pendiente|enviada|fallida)$/) },
         ]),
       );
     });

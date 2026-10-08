@@ -6,5 +6,200 @@
     "instrucciones": "Escribilo en la pantalla donde lo pediste. Vale por {minutos} minutos y sirve una sola vez.",
     "siNoFuisteVos": "Si no fuiste vos, ignorá este mail: nadie puede entrar sin este código.",
     "firma": "Iglesia Vida Sobrenatural"
+  },
+  "avisos": {
+    "eventos": {
+      "discipulado": {
+        "propuesta_nueva": {
+          "asunto": "Tenés una propuesta nueva en Mis discipulados",
+          "titulo": "Tenés una propuesta nueva para discipular",
+          "parrafos": [
+            "El equipo de la iglesia te propone acompañar a una persona en Vida Nueva.",
+            "Entrá a la app para ver sus datos y responder si podés."
+          ],
+          "boton": "Ver la propuesta"
+        },
+        "propuesta_aceptada": {
+          "asunto": "Hay novedades sobre tu pedido",
+          "titulo": "¡Ya tenés quien te acompañe en Vida Nueva!",
+          "parrafos": [
+            "Tu discipulador o discipuladora se va a comunicar con vos en estos días.",
+            "En Mi camino ves sus datos de contacto."
+          ],
+          "boton": "Ir a Mi camino"
+        },
+        "solicitud_rechazada": {
+          "asunto": "Hay novedades sobre tu pedido",
+          "titulo": "Tu pedido de Vida Nueva no siguió adelante",
+          "parrafos": [
+            "Si tenés dudas, hablá con alguien del equipo de la iglesia: con gusto te ayudamos."
+          ],
+          "boton": "Ir a Mi camino"
+        }
+      },
+      "persona": {
+        "cuenta_activada": {
+          "asunto": "Tu cuenta de Vida Sobrenatural ya está activa",
+          "titulo": "Tu cuenta ya está activa",
+          "parrafos": [
+            "Ya podés entrar a la app y usar todo lo que tiene: tu camino en la iglesia, los eventos y los avisos."
+          ],
+          "boton": "Entrar a la app"
+        }
+      },
+      "historial": {
+        "declaracion_confirmada": {
+          "asunto": "Hay novedades sobre lo que nos contaste",
+          "titulo": "Confirmamos lo que nos contaste",
+          "parrafos": [
+            "Esa etapa ya figura como hecha en Mi camino."
+          ],
+          "boton": "Ir a Mi camino"
+        },
+        "declaracion_rechazada": {
+          "asunto": "Hay novedades sobre lo que nos contaste",
+          "titulo": "No pudimos confirmar lo que nos contaste",
+          "parrafos": [
+            "En Mi camino ves el detalle.",
+            "Si tenés dudas, hablá con alguien del equipo de la iglesia: con gusto te ayudamos."
+          ],
+          "boton": "Ir a Mi camino"
+        }
+      },
+      "vida_servicio": {
+        "inscripcion_aprobada": {
+          "asunto": "Hay novedades sobre tu pedido",
+          "titulo": "¡Ya estás en Vida de Servicio!",
+          "parrafos": [
+            "Te sumamos a una edición. En Mi camino ves el cronograma."
+          ],
+          "boton": "Ir a Mi camino"
+        },
+        "inscripcion_rechazada": {
+          "asunto": "Hay novedades sobre tu pedido",
+          "titulo": "Tu pedido de Vida de Servicio no siguió adelante",
+          "parrafos": [
+            "Si tenés dudas, hablá con alguien del equipo de la iglesia: con gusto te ayudamos."
+          ],
+          "boton": "Ir a Mi camino"
+        }
+      },
+      "ministerio": {
+        "postulacion_aprobada": {
+          "asunto": "Hay novedades sobre tu postulación",
+          "titulo": "¡Ya sos parte de {ministerio}!",
+          "parrafos": [
+            "Alguien del ministerio se va a comunicar con vos."
+          ],
+          "boton": "Ir a Mi camino"
+        },
+        "postulacion_rechazada": {
+          "asunto": "Hay novedades sobre tu postulación",
+          "titulo": "Tu postulación no siguió adelante",
+          "parrafos": [
+            "Si tenés dudas, hablá con alguien del equipo de la iglesia: con gusto te ayudamos."
+          ],
+          "boton": "Ir a Mi camino"
+        }
+      },
+      "bautismo": {
+        "solicitud_aceptada": {
+          "asunto": "Hay novedades sobre tu pedido",
+          "titulo": "Hay una novedad sobre tu pedido",
+          "parrafos": [
+            "Entrá a la app para verla en Mi camino."
+          ],
+          "boton": "Ir a Mi camino"
+        },
+        "solicitud_rechazada": {
+          "asunto": "Hay novedades sobre tu pedido",
+          "titulo": "Hay una novedad sobre tu pedido",
+          "parrafos": [
+            "Entrá a la app para verla en Mi camino."
+          ],
+          "boton": "Ir a Mi camino"
+        },
+        "fecha_asignada": {
+          "asunto": "Hay novedades sobre tu pedido",
+          "titulo": "Hay una novedad sobre tu pedido",
+          "parrafos": [
+            "Entrá a la app para verla en Mi camino."
+          ],
+          "boton": "Ir a Mi camino"
+        },
+        "evento_cancelado": {
+          "asunto": "Hay novedades sobre tu pedido",
+          "titulo": "Hay una novedad sobre tu pedido",
+          "parrafos": [
+            "Entrá a la app para verla en Mi camino."
+          ],
+          "boton": "Ir a Mi camino"
+        }
+      },
+      "evento": {
+        "inscripcion_confirmada": {
+          "asunto": "Tu lugar en {evento} está confirmado",
+          "titulo": "Tu lugar en {evento} está confirmado",
+          "parrafos": [
+            "Te esperamos. Los datos del evento están en Mis eventos."
+          ],
+          "boton": "Ir a Mis eventos"
+        },
+        "inscripcion_rechazada": {
+          "asunto": "Hay novedades sobre tu inscripción",
+          "titulo": "Tu inscripción a {evento} no siguió adelante",
+          "parrafos": [
+            "Si tenés dudas, hablá con alguien del equipo de la iglesia: con gusto te ayudamos."
+          ],
+          "boton": "Ir a Mis eventos"
+        },
+        "inscripcion_cancelada_por_admin": {
+          "asunto": "Hay novedades sobre tu inscripción",
+          "titulo": "Se canceló tu inscripción a {evento}",
+          "parrafos": [
+            "Si tenés dudas, hablá con alguien del equipo de la iglesia: con gusto te ayudamos."
+          ],
+          "boton": "Ir a Mis eventos"
+        },
+        "lista_espera_promovida": {
+          "asunto": "¡Se liberó un lugar en {evento}!",
+          "titulo": "¡Se liberó un lugar en {evento}!",
+          "parrafos": [
+            "Ya no estás en lista de espera. En Mis eventos ves lo que sigue."
+          ],
+          "boton": "Ir a Mis eventos"
+        },
+        "pago_verificado": {
+          "asunto": "Recibimos tu pago",
+          "titulo": "Recibimos tu pago de {evento}",
+          "parrafos": [
+            "Está todo en orden. Te esperamos."
+          ],
+          "boton": "Ir a Mis eventos"
+        },
+        "pago_rechazado": {
+          "asunto": "Hay novedades sobre tu pago",
+          "titulo": "No pudimos validar tu pago de {evento}",
+          "parrafos": [
+            "En Mis eventos ves qué pasó y podés volver a cargarlo."
+          ],
+          "boton": "Ir a Mis eventos"
+        },
+        "cancelado": {
+          "asunto": "Se canceló {evento}",
+          "titulo": "Se canceló {evento}",
+          "parrafos": [
+            "Lamentamos el cambio. En la página del evento ves el detalle."
+          ],
+          "boton": "Ver el evento"
+        }
+      }
+    },
+    "manual": {
+      "boton": "Ver el aviso"
+    },
+    "pie": "Te escribimos porque es un aviso importante sobre tu camino en la iglesia.",
+    "direccion": "Iglesia Vida Sobrenatural · Calle 23 N°1665, La Plata",
+    "logoAlt": "Vida Sobrenatural"
   }
 }
