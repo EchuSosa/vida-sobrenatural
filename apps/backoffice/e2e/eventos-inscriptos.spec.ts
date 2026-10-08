@@ -14,6 +14,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
     test.use({ colorScheme });
 
     test('aprobar en lote, rechazar con promoción, anotar a una Persona y dar de baja', async ({ page }) => {
+      // Arma su escenario por la API (varias Personas e inscripciones): más que los 30 s por defecto en CI.
+      test.setTimeout(120_000);
       const sufijo = `${colorScheme}-${Date.now()}`;
       const evento = await crearEventoPorApi({ nombre: `e2e-evento-insc-${sufijo}`, cupo: 2, permiteListaEspera: true, requiereAprobacion: true });
       const personas = await Promise.all(
@@ -66,6 +68,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
 
     test('verificar y rechazar pagos desde la bandeja; registrar un pago en efectivo', async ({ page }) => {
+      // Arma su escenario por la API (varias Personas e inscripciones): más que los 30 s por defecto en CI.
+      test.setTimeout(120_000);
       const sufijo = `${colorScheme}-${Date.now()}`;
       const evento = await crearEventoPorApi({ nombre: `e2e-evento-pago-${sufijo}`, cupo: 2, permiteListaEspera: true, costo: '15000', instruccionesPago: 'Alias VS' });
       const [ana, beto, carla] = await Promise.all(
