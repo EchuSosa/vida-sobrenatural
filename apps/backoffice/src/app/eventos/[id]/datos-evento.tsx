@@ -304,7 +304,7 @@ function QrEvento({ id, nombre, urlPublica, qrDataUrl }: { id: string; nombre: s
           <Copy aria-hidden="true" />
           {t('copiar')}
         </Button>
-        <ButtonLink variant="outline" render={<Link href={`/eventos/${id}/qr.png`} download prefetch={false} />}>
+        <ButtonLink variant="outline" render={<a href={`/api/eventos/${id}/qr.png`} download aria-label={t('descargar')} />}>
           <Download aria-hidden="true" />
           {t('descargar')}
         </ButtonLink>

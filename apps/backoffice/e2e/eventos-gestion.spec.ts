@@ -66,7 +66,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('img', { name: `Código QR que lleva a la página de ${nombre}` })).toBeVisible();
       const link = await page.getByLabel('Link del Evento').inputValue();
       expect(link).toMatch(new RegExp(`/eventos/${nombre}$`));
-      const qr = await page.request.get(`/eventos/${id}/qr.png`);
+      const qr = await page.request.get(`/api/eventos/${id}/qr.png`);
       expect(qr.status()).toBe(200);
       expect(qr.headers()['content-type']).toBe('image/png');
       expect((await auditar(page)).violations).toEqual([]);

@@ -59,7 +59,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
     test('las secciones sin funcionalidad muestran un estado vacío, no un error', async ({
       page,
     }) => {
-      for (const ruta of ['/ministerios', '/eventos']) {
+      // spec 011: `/eventos` ya es la cartelera de Eventos: con Eventos de otros specs no está vacía.
+      for (const ruta of ['/ministerios']) {
         const respuesta = await page.goto(ruta);
         expect(respuesta?.status()).toBe(200);
         await expect(page.getByText(/todavía no/i)).toBeVisible();
