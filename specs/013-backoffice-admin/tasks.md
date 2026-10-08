@@ -55,10 +55,10 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   "tutor de"/"a cargo de", `hijo_a` ↔ `padre_madre`, `conyuge` y `hermano_a` simétricas); `iniciales` con tildes,
   apellidos compuestos y nombre vacío. Y que el test existente de duplicado espejo de `persona.service` siga verde. —
   cubre: FR-014, H2.5
-- [ ] T006 **[Lote 0 global: constantes hechas; `Cumpleanero` y `proximoCumpleanos` → lote 4]** [P] [L0] `packages/shared-types/src/cumpleanos.ts`: `Cumpleanero`, `proximoCumpleanos(fechaNacimiento,
+- [x] T006 **[Lote 4: también `cumpleanosEsteAnio`, `festejoEnAnio`, `sumarDias`]** [P] [L0] `packages/shared-types/src/cumpleanos.ts`: `Cumpleanero`, `proximoCumpleanos(fechaNacimiento,
   hoy)` → `{ fecha, dia, cumple, esHoy }`, `CUMPLEANOS_DIAS_SEMANA = 7`, `CUMPLEANOS_PAGINA = 50`; reusa
   `hoyEnArgentina` (no otra implementación). — cubre: FR-030–FR-033
-- [ ] T007 **[Lote 0 global: → lote 4]** [P] [L0] Unit `apps/api/test/unit/proximo-cumpleanos.spec.ts`: hoy es el cumpleaños (`esHoy`, `cumple`
+- [x] T007 **[Lote 4]** [P] [L0] Unit `apps/api/test/unit/proximo-cumpleanos.spec.ts`: hoy es el cumpleaños (`esHoy`, `cumple`
   correcto); mañana; 29/2 en año bisiesto (29) y no bisiesto (28); 31/12 con hoy 28/12 (cruza año); `hoy` calculado a
   las 02:30 UTC del día 7 da el 6 en Argentina. — cubre: H4.1, H4.2, H4.3, FR-032, FR-033
 - [x] T008 **[Lote 0 global: `Metricas`, constantes de comentarios y `CURSOS_RECONOCIDOS` (con Vida de Servicio) hechos; `CursoListado`/`CursoDetalle` y los tipos de comentarios → lotes 5 y 6]** [P] [L0] `packages/shared-types/src/metricas.ts` (`Metricas`; `RangoCongregacion`/`ORDEN_RANGO_CONGREGACION`/`rangoCongregacion` ya en `persona.ts`, D214),
@@ -82,7 +82,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   research #3): por cada tipo de `TIPOS_SOLICITUD` y cada estado de `ESTADOS_POR_TIPO`, insertar un registro y verificar
   que la vista lo devuelve con `abierta === esAbierta(tipo, estado)` y `esperaDesde` correcto (Discipulado con propuesta
   vigente → `propuestaEn`). — cubre: FR-003, FR-007, SC-002
-- [ ] T012 **[Lote 2: `AvatarPersona` hecho; `BarraProporcion` → lote 3]** [P] [L0] `packages/ui`: `AvatarPersona` (foto con `alt="Foto de <nombre>"`, `onError` → iniciales; iniciales
+- [x] T012 **[Lote 2 `AvatarPersona`, lote 3 `BarraProporcion`, con tests en `packages/ui/test`]** [P] [L0] `packages/ui`: `AvatarPersona` (foto con `alt="Foto de <nombre>"`, `onError` → iniciales; iniciales
   sobre `--secondary`/`--secondary-foreground` con contraste medido en los dos temas, D118, `docs/17`), `BarraProporcion`
   (barra horizontal `aria-hidden`, ancho %, token `--primary`, sin animación con `prefers-reduced-motion`). Exportar. —
   cubre: FR-011, FR-018, FR-023, H2.1
@@ -199,13 +199,13 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 3 — Inicio y métricas (Historia 3, P2)
 
-- [ ] T040 [L3] API `apps/api/src/inicio/`: `GET /inicio/metricas` (`inicio.ver`) con las tres consultas de research #7;
+- [x] T040 **[Lote 3: `inicio/metricas.service.ts`]** [L3] API `apps/api/src/inicio/`: `GET /inicio/metricas` (`inicio.ver`) con las tres consultas de research #7;
   los cuatro rangos de D214 siempre presentes, calculados desde `congregaDesde` con `rangoCongregacion`; Sedes no eliminadas con `activa`. — cubre: FR-022–FR-025
-- [ ] T041 [L3] Integración `metricas.integration-spec.ts`: H3.1 (120 activas, 8 pendientes de tutor y 3 con
+- [x] T041 **[Lote 3: los conteos exactos en una Sede propia (otros specs corren en paralelo); H3.2 exacto y H3.4 en el unit `metricas.spec.ts`]** [L3] Integración `metricas.integration-spec.ts`: H3.1 (120 activas, 8 pendientes de tutor y 3 con
   `activo = false` → 120; incluye un menor activado y una Persona sin email), H3.2 (los cuatro rangos de D214 en orden, uno en 0, con `congregaDesde` sembrado para cada rango), H3.3
   (Sede inactiva presente con `activa: false`; Sede eliminada ausente), H3.4 (base sin Personas activas → todo 0, sin
   error), Pastor 200, Discipulador 403. Cotejar contra `COUNT` directo. — cubre: H3.1–H3.4, SC-005
-- [ ] T042 [L3] Backoffice `app/page.tsx` + `app/inicio/`: cuatro bloques independientes (`BloquePendientes`,
+- [x] T042 **[Lote 3: los bloques piden sus datos desde el navegador (`useDatosApi`) para cargar y fallar solos; el de comentarios espera al lote 5]** [L3] Backoffice `app/page.tsx` + `app/inicio/`: cuatro bloques independientes (`BloquePendientes`,
   `BloqueMetricas`, `BloqueCumpleanos`, `BloqueComentarios`), cada uno con `Suspense`, esqueleto, vacío y error con
   "Reintentar" que no tumba a los otros. Pendientes: `conteo-abiertas` por tipo con enlace a
   `/solicitudes?tipo=X`, la `TarjetaPendientes` existente y la cantidad de Pendientes de tutor. Métricas: número grande
@@ -213,34 +213,34 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   en que cada Persona empezó a venir" (A6, D214). Los bloques de cumpleaños y comentarios se conectan en los
   lotes 4 y 5 (si no están, el bloque no se muestra). El cálculo de porcentajes con total 0 devuelve 0 sin dividir. Migrar a next-intl el h1 y los textos fijos. Pastor igual, sin
   acciones. `@celular`. — cubre: FR-020–FR-024, FR-064, H3.5, H3.6
-- [ ] T043 [L3] E2E `apps/backoffice/e2e/inicio.spec.ts`: H3.2 (cuatro rangos con número y % visibles como texto), H3.4
+- [x] T043 **[Lote 3]** [L3] E2E `apps/backoffice/e2e/inicio.spec.ts`: H3.2 (cuatro rangos con número y % visibles como texto), H3.4
   (con `page.route` sobre `GET /inicio/metricas` devolviendo `personasActivas: 0` y todo en 0: estado vacío, sin
   "NaN"), H3.5 (con `page.route` sobre `GET /solicitudes/conteo-abiertas` devolviendo `{discipulado: 5, bautismo: 2}`:
   "5 de Discipulado · 2 de Bautismo", cada uno enlaza a `/solicitudes?tipo=…`; con todo en 0, el mensaje), H3.6 (interceptar `GET /inicio/metricas` con 500: el bloque muestra error y
   "Reintentar", los otros se ven), `@celular` 360 px; axe claro y oscuro. — cubre: H3.2, H3.4–H3.6, FR-020, FR-063
-- [ ] T044 [L3] [CHECKLIST] Pantalla **Inicio**: checklist de `docs/15` + D150 (cuatro estados **por bloque**). —
+- [x] T044 **[Lotes 3 y 4: `checklists/lote-3-4-pantallas.md`]** [L3] [CHECKLIST] Pantalla **Inicio**: checklist de `docs/15` + D150 (cuatro estados **por bloque**). —
   cubre: FR-062, FR-063
 
 ---
 
 ## Lote 4 — Cumpleaños (Historia 4, P2)
 
-- [ ] T050 [L4] API `GET /personas/cumpleanos?mes=` (`personas.ver`, paginado de a 50) y `GET /inicio/cumpleanos-semana`
+- [x] T050 **[Lote 4: `inicio/cumpleanos.{service,controller}.ts`]** [L4] API `GET /personas/cumpleanos?mes=` (`personas.ver`, paginado de a 50) y `GET /inicio/cumpleanos-semana`
   (`inicio.ver`) (`contracts/inicio-api.md`), con el índice de expresión; filtro `estado = activa`, `activo = true`;
   29/2 → 28/2 en no bisiesto calculado con `proximoCumpleanos`. — cubre: FR-030–FR-033
-- [ ] T051 [L4] Integración `cumpleanos.integration-spec.ts`: H4.1 (orden por día y apellido, `cumple`, `esHoy`), H4.3
+- [x] T051 **[Lote 4: con el reloj fijado en el servicio]** [L4] Integración `cumpleanos.integration-spec.ts`: H4.1 (orden por día y apellido, `cumple`, `esHoy`), H4.3
   (29/2 en febrero de un año no bisiesto aparece día 28), H4.4 (`mes=12`), H4.5 (`pendiente_tutor` y `activo = false`
   ausentes), semana que cruza fin de mes y fin de año (reloj fijado en el test), `mes=13` → 400. — cubre: H4.1, H4.3–H4.5,
   FR-031, SC-005
-- [ ] T052 [L4] Backoffice `app/cumpleanos/` (`page.tsx`, `loading.tsx`, `error.tsx`): selector de mes (enlaces reales,
+- [x] T052 **[Lote 4]** [L4] Backoffice `app/cumpleanos/` (`page.tsx`, `loading.tsx`, `error.tsx`): selector de mes (enlaces reales,
   mes actual por defecto, `?mes=` inválido → redirect al actual), tabla Nombre (avatar + enlace al perfil), Día, Cumple,
   Teléfono (enlace `tel:`), marca "Hoy" con ícono; vacío "Nadie cumple años en <mes>". `BloqueCumpleanos` del Inicio:
   hoy y próximos 7 días, vacío "Nadie cumple años esta semana" con enlace al mes. `@celular`. — cubre: FR-030, FR-031,
   H4.6
-- [ ] T053 [L4] E2E `apps/backoffice/e2e/cumpleanos.spec.ts` con reloj fijado (`page.clock`): H4.1, H4.2 (23:30 del 6/10
+- [x] T053 **[Lote 4: H4.2 queda en la integración (el reloj del navegador no mueve a la API); el e2e usa una Persona sembrada que cumple hoy]** [L4] E2E `apps/backoffice/e2e/cumpleanos.spec.ts` con reloj fijado (`page.clock`): H4.1, H4.2 (23:30 del 6/10
   en Argentina → "Hoy" es el 6), H4.6 (bloque vacío con enlace), `?mes=abc` → redirect; `@celular`; axe claro y
   oscuro. — cubre: H4.1, H4.2, H4.6, FR-063
-- [ ] T054 [L4] [CHECKLIST] Pantalla **Cumpleaños**: checklist de `docs/15` + D150. — cubre: FR-062, FR-063
+- [x] T054 **[Lotes 3 y 4: `checklists/lote-3-4-pantallas.md`]** [L4] [CHECKLIST] Pantalla **Cumpleaños**: checklist de `docs/15` + D150. — cubre: FR-062, FR-063
 
 ---
 
