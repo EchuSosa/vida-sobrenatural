@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CursoModule } from '../curso/curso.module.js';
 import { CruceService } from './cruce.service.js';
-import { EventosDiscipuladoService } from './eventos.js';
 import { PropuestasService } from './propuestas.service.js';
 import { MisDiscipuladosService } from './mis-discipulados.service.js';
 import { EncuentrosService } from './encuentros.service.js';
@@ -15,8 +14,8 @@ import { GruposController } from './grupos.controller.js';
 
 /**
  * specs/004-vida-nueva-discipulado. El lote 0 dejó la base compartida: el
- * cruce (T011c) y los eventos (T011b), que también consume el módulo de
- * Solicitudes (lote A). El lote B suma el discipulado propiamente dicho:
+ * cruce (T011c), que también consume el módulo de Solicitudes (lote A). Los
+ * avisos van por `NotificacionesService.emitir` (spec 012, módulo global). El lote B suma el discipulado propiamente dicho:
  * propuestas (aceptar/declinar), Mis discipulados, Encuentros, finalización,
  * baja, reasignación, la vista de Grupos y los pendientes del Admin. Las
  * funciones de `discipulados-activos.ts` (D137) y `consultas.ts` se importan
@@ -28,7 +27,6 @@ import { GruposController } from './grupos.controller.js';
   controllers: [MisDiscipuladosController, GruposController],
   providers: [
     CruceService,
-    EventosDiscipuladoService,
     PropuestasService,
     MisDiscipuladosService,
     EncuentrosService,
@@ -38,6 +36,6 @@ import { GruposController } from './grupos.controller.js';
     GruposService,
     PendientesAdminService,
   ],
-  exports: [CruceService, EventosDiscipuladoService],
+  exports: [CruceService],
 })
 export class DiscipuladoModule {}

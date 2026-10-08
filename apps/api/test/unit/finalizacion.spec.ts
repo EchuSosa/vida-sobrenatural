@@ -21,7 +21,7 @@ describe('FinalizacionService.proponer', () => {
     const { servicio, prisma, emitir } = armar({ estado: 'en_curso', propuestaFinalizacionEn: null });
     await servicio.proponer('d', 'g-1');
     expect(prisma.grupo.update).toHaveBeenCalledWith(expect.objectContaining({ data: { propuestaFinalizacionEn: expect.any(Date), propuestaFinalizacionPorId: 'd' } }));
-    expect(emitir).toHaveBeenCalledWith({ nombre: 'finalizacion_propuesta', a: { tipo: 'admin' }, datos: { grupoId: 'g-1' } });
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.finalizacion_propuesta', a: { tipo: 'admin' }, datos: { grupoId: 'g-1' } });
   });
 
   it('ya propuesta → FINALIZACION_YA_PROPUESTA', async () => {

@@ -6,6 +6,7 @@ import type { Server } from 'node:http';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { configurarApp } from '../../src/configurar-app.js';
+import { limpiarAvisos } from './notificaciones-fixtures.js';
 
 async function mintToken(claims: { email: string; personaId: string | null; estado: string | null; rol: string[] }): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -82,6 +83,7 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
     await prisma.franjaSolicitud.deleteMany({ where: { solicitudId: { in: solicitudIds } } });
     await prisma.solicitudDiscipulado.deleteMany({ where: { id: { in: solicitudIds } } });
     await prisma.franjaAgenda.deleteMany({ where: { personaId: { in: personaIds } } });
+    await limpiarAvisos(prisma, personaIds); // spec 012
     await prisma.persona.deleteMany({ where: { id: { in: personaIds } } });
     await prisma.sede.delete({ where: { id: sedeId } });
     await app.close();

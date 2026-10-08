@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import type { EventoDiscipulado } from '@vida-sobrenatural/shared-types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { AppException } from '../common/errors/app-exception.js';
-import { EventosDiscipuladoService } from './eventos.js';
+import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { bloquearGrupo, type GrupoBloqueado } from './bloqueos.js';
 import { exigirLiderazgoVigente } from './consultas.js';
 import { normalizarMotivo } from './validaciones.js';
@@ -43,7 +42,7 @@ export async function retirarReasignacionPendiente(tx: Tx, grupoId: string): Pro
 export class FinalizacionService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventos: EventosDiscipuladoService,
+    private readonly notificaciones: NotificacionesService,
   ) {}
 
   async proponer(discipuladorId: string, grupoId: string): Promise<void> {
@@ -59,12 +58,11 @@ export class FinalizacionService {
         data: { propuestaFinalizacionEn: new Date(), propuestaFinalizacionPorId: discipuladorId },
         select: { id: true },
       });
+      await this.notificaciones.emitir(tx, { nombre: 'discipulado.finalizacion_propuesta', a: { tipo: 'admin' }, datos: { grupoId } });
     });
-    this.eventos.emitir({ nombre: 'finalizacion_propuesta', a: { tipo: 'admin' }, datos: { grupoId } });
   }
 
   async confirmar(grupoId: string, adminId: string): Promise<void> {
-    const eventos: EventoDiscipulado[] = [];
     await this.prisma.$transaction(async (tx) => {
       const grupo = await bloquearGrupo(tx, grupoId);
       exigirEnCurso(grupo);
@@ -80,10 +78,13 @@ export class FinalizacionService {
       });
       await retirarReasignacionPendiente(tx, grupoId);
       for (const i of activas) {
-        eventos.push({ nombre: 'finalizacion_confirmada', a: { tipo: 'persona', personaId: i.personaId }, datos: { grupoId, inscripcionId: i.id } });
+        await this.notificaciones.emitir(tx, {
+          nombre: 'discipulado.finalizacion_confirmada',
+          a: { tipo: 'persona', personaId: i.personaId },
+          datos: { grupoId, inscripcionId: i.id },
+        });
       }
     });
-    for (const e of eventos) this.eventos.emitir(e);
   }
 
   /** FR-019a: limpia la propuesta y guarda el rechazo con su motivo; el Grupo sigue en curso. */

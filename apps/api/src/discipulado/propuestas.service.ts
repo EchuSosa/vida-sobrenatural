@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   franjasCoinciden,
-  type EventoDiscipulado,
+  type EventoAviso,
   type Franja,
   type PropuestaParaMi,
 } from '@vida-sobrenatural/shared-types';
@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
-import { EventosDiscipuladoService } from './eventos.js';
+import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { CursoService } from '../curso/curso.service.js';
 import { evaluar } from './reglas-de-asignacion/reglas.js';
 import { bloquearGrupo, bloquearPersona, bloquearPropuesta, type PropuestaBloqueada } from './bloqueos.js';
@@ -36,7 +36,7 @@ function propuestaNoVigente(): AppException {
 export class PropuestasService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventos: EventosDiscipuladoService,
+    private readonly notificaciones: NotificacionesService,
     private readonly cursos: CursoService,
   ) {}
 
@@ -135,7 +135,7 @@ export class PropuestasService {
 
   /** POST /discipulado/propuestas/:id/aceptar — contracts/discipulado-api.md, paso por paso. */
   async aceptar(propuestaId: string, discipuladorId: string): Promise<{ grupoId: string }> {
-    const eventos: EventoDiscipulado[] = [];
+    const eventos: EventoAviso[] = [];
     const resultado = await this.prisma.$transaction(async (tx) => {
       const leida = await this.leerPropia(tx, propuestaId, discipuladorId);
 
@@ -164,17 +164,18 @@ export class PropuestasService {
         data: { estado: 'aceptada', respondidaEn: ahora },
         select: { id: true },
       });
+      // spec 012 (D197): dentro de la transacción — si se deshace, no queda aviso.
+      for (const e of eventos) await this.notificaciones.emitir(tx, e);
       return { grupoId };
     });
-    // Después de confirmar (contracts/eventos.md): nunca un evento de algo que se deshizo.
-    for (const e of eventos) this.eventos.emitir(e);
+    this.notificaciones.empujarEmails();
     return resultado;
   }
 
   /** POST /discipulado/propuestas/:id/declinar — la Solicitud vuelve a `pendiente`; una reasignación no toca el Grupo. */
   async declinar(propuestaId: string, discipuladorId: string, motivo: string | undefined): Promise<void> {
     const motivoLimpio = normalizarMotivo(motivo);
-    const evento = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const leida = await this.leerPropia(tx, propuestaId, discipuladorId);
       if (leida.solicitudId) await tx.$queryRaw`SELECT "id" FROM "solicitudes_discipulado" WHERE "id" = ${leida.solicitudId} FOR UPDATE`;
       if (leida.tipo === 'reasignacion' && leida.grupoId) await bloquearGrupo(tx, leida.grupoId);
@@ -189,18 +190,16 @@ export class PropuestasService {
       if (propuesta.tipo === 'nueva' && propuesta.solicitudId) {
         await tx.solicitudDiscipulado.update({ where: { id: propuesta.solicitudId }, data: { estado: 'pendiente' }, select: { id: true } });
       }
-      const e: EventoDiscipulado = {
-        nombre: 'propuesta_declinada',
+      await this.notificaciones.emitir(tx, {
+        nombre: 'discipulado.propuesta_declinada',
         a: { tipo: 'admin' },
         datos: {
           propuestaId: propuesta.id,
           ...(propuesta.solicitudId ? { solicitudId: propuesta.solicitudId } : {}),
           ...(propuesta.grupoId ? { grupoId: propuesta.grupoId } : {}),
         },
-      };
-      return e;
+      });
     });
-    this.eventos.emitir(evento);
   }
 
   /** La Propuesta, sin bloquear, solo si es de este Discipulador — ajena o inexistente: 404 (Principio V). */
@@ -220,7 +219,7 @@ export class PropuestasService {
     propuesta: PropuestaBloqueada,
     maximo: number,
     grupoDestino: Awaited<ReturnType<typeof bloquearGrupo>> | null,
-    eventos: EventoDiscipulado[],
+    eventos: EventoAviso[],
   ): Promise<string> {
     const solicitud = await tx.solicitudDiscipulado.findUnique({
       where: { id: propuesta.solicitudId! },
@@ -261,7 +260,7 @@ export class PropuestasService {
     });
     await tx.solicitudDiscipulado.update({ where: { id: solicitud.id }, data: { estado: 'aprobada', grupoId }, select: { id: true } });
     eventos.push({
-      nombre: 'propuesta_aceptada',
+      nombre: 'discipulado.propuesta_aceptada',
       a: { tipo: 'persona', personaId: solicitud.personaId },
       datos: { solicitudId: solicitud.id, grupoId, discipuladorId: propuesta.discipuladorId },
     });
@@ -273,7 +272,7 @@ export class PropuestasService {
     propuesta: PropuestaBloqueada,
     grupo: Awaited<ReturnType<typeof bloquearGrupo>> | null,
     ahora: Date,
-    eventos: EventoDiscipulado[],
+    eventos: EventoAviso[],
   ): Promise<string> {
     if (!grupo || grupo.estado !== 'en_curso') {
       throw new AppException('DISCIPULADO_NO_EN_CURSO', 409, 'Este discipulado ya no está en curso.');
@@ -291,7 +290,7 @@ export class PropuestasService {
       // Vida Nueva: toda Inscripción nace de una Solicitud de Discipulado.
       if (i.solicitudId === null) continue;
       eventos.push({
-        nombre: 'propuesta_aceptada',
+        nombre: 'discipulado.propuesta_aceptada',
         a: { tipo: 'persona', personaId: i.personaId },
         datos: { solicitudId: i.solicitudId, grupoId: grupo.id, discipuladorId: propuesta.discipuladorId },
       });

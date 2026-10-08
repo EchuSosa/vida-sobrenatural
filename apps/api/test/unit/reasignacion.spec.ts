@@ -34,7 +34,7 @@ describe('ReasignacionService.proponer', () => {
     );
     expect(prisma.liderazgo.updateMany).not.toHaveBeenCalled();
     expect(prisma.liderazgo.create).not.toHaveBeenCalled();
-    expect(emitir).toHaveBeenCalledWith(expect.objectContaining({ nombre: 'propuesta_nueva', a: { tipo: 'discipulador', personaId: 'nuevo' } }));
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ nombre: 'discipulado.propuesta_nueva', a: { tipo: 'discipulador', personaId: 'nuevo' } }));
   });
 
   it('al mismo Discipulador → REASIGNACION_AL_MISMO_DISCIPULADOR', async () => {

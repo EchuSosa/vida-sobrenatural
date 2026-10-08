@@ -12,13 +12,28 @@ import { resolverDestinatarios } from './destinatarios.js';
  * transacción se deshace, no queda nada. El mail sale después (proceso de la
  * 012, lote C); `hayEmails` le sirve a quien llama para "empujarlo".
  *
- * Lote 0 global: el mecanismo completo, aunque los consumidores lleguen
- * después. La 004 todavía emite por `EventosDiscipuladoService` (solo log);
- * conectarla es el lote B de la 012.
+ * Después de confirmar, quien emitió un importante puede llamar a
+ * `empujarEmails()` para que el mail salga ya; si no lo hace, la tarea
+ * programada lo manda en la próxima vuelta (spec 012, lote C).
  */
 @Injectable()
 export class NotificacionesService {
   private readonly logger = new Logger('Avisos');
+  private envioEmails: (() => void) | null = null;
+
+  /** Lo registra `EnvioEmailsService` al arrancar (lote C): así este servicio no depende del envío. */
+  registrarEnvioEmails(empujar: () => void): void {
+    this.envioEmails = empujar;
+  }
+
+  /** Despierta el envío de mails pendientes, sin esperarlo ni propagar errores. Siempre DESPUÉS de confirmar. */
+  empujarEmails(): void {
+    try {
+      this.envioEmails?.();
+    } catch {
+      // El envío tiene su propio reintento: nunca rompe la acción que avisó.
+    }
+  }
 
   async emitir(tx: Prisma.TransactionClient, evento: EventoAviso): Promise<{ hayEmails: boolean }> {
     const entrada = entradaDe(evento.nombre);

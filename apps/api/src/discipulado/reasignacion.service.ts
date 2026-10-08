@@ -3,7 +3,7 @@ import type { Cruce } from '@vida-sobrenatural/shared-types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { CruceService } from './cruce.service.js';
-import { EventosDiscipuladoService } from './eventos.js';
+import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { bloquearGrupo, bloquearPersona, bloquearReasignacionPendiente } from './bloqueos.js';
 import { estaDisponible, franjasDe, franjasDeSolicitudes } from './consultas.js';
 import { exigirEnCurso } from './finalizacion.service.js';
@@ -26,7 +26,7 @@ export class ReasignacionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cruce: CruceService,
-    private readonly eventos: EventosDiscipuladoService,
+    private readonly notificaciones: NotificacionesService,
   ) {}
 
   /**
@@ -81,6 +81,11 @@ export class ReasignacionService {
           data: { tipo: 'reasignacion', grupoId, discipuladorId, propuestaPorId: adminId, estado: 'pendiente' },
           select: { id: true },
         });
+        await this.notificaciones.emitir(tx, {
+          nombre: 'discipulado.propuesta_nueva',
+          a: { tipo: 'discipulador', personaId: discipuladorId },
+          datos: { propuestaId: propuesta.id, grupoId },
+        });
         return propuesta.id;
       })
       .catch((e: unknown) => {
@@ -89,23 +94,24 @@ export class ReasignacionService {
         if (typeof e === 'object' && e !== null && (e as { code?: unknown }).code === 'P2002') throw yaPropuesta();
         throw e;
       });
-    this.eventos.emitir({ nombre: 'propuesta_nueva', a: { tipo: 'discipulador', personaId: discipuladorId }, datos: { propuestaId, grupoId } });
+    this.notificaciones.empujarEmails();
     return { propuestaId };
   }
 
   async retirar(grupoId: string): Promise<void> {
-    const retirada = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       await bloquearGrupo(tx, grupoId);
       const pendiente = await bloquearReasignacionPendiente(tx, grupoId);
       if (!pendiente) throw new AppException('PROPUESTA_NO_VIGENTE', 409, 'No hay una reasignación propuesta: ya se respondió o ya se retiró.');
       await tx.propuestaDiscipulado.update({ where: { id: pendiente.id }, data: { estado: 'retirada', retiradaPor: 'admin' }, select: { id: true } });
-      return pendiente;
-    });
-    // Lo retiró el Admin: a quien le importa enterarse es al Discipulador que la tenía.
-    this.eventos.emitir({
-      nombre: 'propuesta_retirada',
-      a: { tipo: 'discipulador', personaId: retirada.discipuladorId },
-      datos: { propuestaId: retirada.id, retiradaPor: 'admin' },
+      // El catálogo (D201) manda `propuesta_retirada` al Admin: solo log, sin
+      // aviso. Antes la 004 lo dirigía al Discipulador (que no recibía nada:
+      // solo se logueaba). Avisarle a él es una Pregunta para Echu (PR de la 012).
+      await this.notificaciones.emitir(tx, {
+        nombre: 'discipulado.propuesta_retirada',
+        a: { tipo: 'admin' },
+        datos: { propuestaId: pendiente.id, retiradaPor: 'admin' },
+      });
     });
   }
 }

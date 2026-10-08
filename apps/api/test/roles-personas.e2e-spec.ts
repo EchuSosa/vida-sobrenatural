@@ -6,6 +6,7 @@ import type { Server } from 'node:http';
 import { AppModule } from '../src/app.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { configurarApp } from '../src/configurar-app.js';
+import { limpiarAvisos } from './integration/notificaciones-fixtures.js';
 
 /**
  * specs/005-roles-permisos-acceso, T026 (Historia 2): de punta a punta — HTTP
@@ -156,6 +157,7 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     await prisma.grupo.deleteMany({ where: { id: { in: grupos } } });
     // Historia 6: la FK de cambios_de_rol es RESTRICT — primero el historial
     // de las Personas de esta corrida (base de test, verificada por H-130).
+    await limpiarAvisos(prisma, personasDeLaCorrida); // spec 012: avisos de la activación y del discipulado
     await prisma.cambioDeRol.deleteMany({ where: { persona: deLaCorrida } });
     await prisma.persona.deleteMany({ where: deLaCorrida });
     await prisma.sede.delete({ where: { id: sedeId } });
