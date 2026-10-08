@@ -911,7 +911,64 @@
     "pagos": {}
   },
   "notificaciones": {},
-  "bandeja": {},
+  "bandeja": {
+    "tipos": {
+      "discipulado": "Vida Nueva",
+      "historial": "\"Ya lo hice\"",
+      "vida_de_servicio": "Vida de Servicio",
+      "postulacion": "Postulación a un Ministerio",
+      "bautismo": "Bautismo",
+      "inscripcion_evento": "Inscripción a un Evento",
+      "pago": "Pago de un Evento"
+    },
+    "estados": {
+      "discipulado": {
+        "pendiente": "Pendiente",
+        "propuesta": "Propuesta a un Discipulador",
+        "aprobada": "Aprobada",
+        "rechazada": "Rechazada",
+        "retirada": "Retirada por la Persona"
+      },
+      "historial": {
+        "pendiente": "Para revisar",
+        "confirmada": "Confirmada",
+        "rechazada": "No confirmada",
+        "retirada": "Retirada por la Persona"
+      },
+      "vida_de_servicio": {
+        "pendiente": "Pendiente",
+        "aprobada": "Aprobada",
+        "rechazada": "Rechazada",
+        "retirada": "Retirada por la Persona"
+      },
+      "postulacion": {
+        "pendiente": "Pendiente",
+        "aprobada": "Aprobada",
+        "rechazada": "Rechazada",
+        "inactiva": "Ya no vigente",
+        "retirada": "Retirada por la Persona"
+      },
+      "bautismo": {
+        "pendiente": "Pendiente",
+        "aprobada": "Aceptada",
+        "rechazada": "Rechazada",
+        "retirada": "Retirada por la Persona",
+        "realizada": "Se bautizó"
+      },
+      "inscripcion_evento": {
+        "confirmada": "Confirmada",
+        "pendiente": "Esperando aprobación",
+        "rechazada": "Rechazada",
+        "lista_espera": "En lista de espera",
+        "cancelada": "Cancelada"
+      },
+      "pago": {
+        "pendiente_verificacion": "Para verificar",
+        "verificado": "Verificado",
+        "rechazado": "Rechazado"
+      }
+    }
+  },
   "metricas": {},
   "cumpleanos": {},
   "comentarios": {},

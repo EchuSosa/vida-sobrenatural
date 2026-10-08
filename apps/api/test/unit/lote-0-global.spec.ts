@@ -19,6 +19,14 @@ import {
   reglaDeEtapa,
   type HechosCamino,
 } from '@vida-sobrenatural/shared-types';
+import { readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
+
+const mensajes = (app: 'web' | 'backoffice') =>
+  JSON.parse(readFileSync(join(repoRoot, 'apps', app, 'src/messages/es.json'), 'utf8')) as Record<string, any>;
 
 // Lote 0 global (specs 006–013): las reglas puras compartidas que ya usan
 // varias specs. Cada spec suma sus casos en su propio archivo de test.
@@ -162,5 +170,26 @@ describe('Permisos nuevos del lote 0 (D132, D142)', () => {
     for (const permiso of nuevos) expect({ permiso, roles: CATALOGO_PERMISOS[permiso] }).toEqual({ permiso, roles: ['admin'] });
     // Lo que el Pastor sí ve (D142: lee todo el backoffice).
     for (const permiso of ['ministerios.ver', 'comentarios.ver'] as const) expect(CATALOGO_PERMISOS[permiso]).toContain('pastor');
+  });
+});
+
+describe('Textos del lote 0 (D84)', () => {
+  it('la bandeja tiene el nombre de cada tipo y de cada uno de sus estados', () => {
+    const { bandeja } = mensajes('backoffice');
+    for (const tipo of TIPOS_SOLICITUD) {
+      expect(typeof bandeja.tipos[tipo]).toBe('string');
+      expect(Object.keys(bandeja.estados[tipo]).sort()).toEqual([...ESTADOS_POR_TIPO[tipo]].sort());
+    }
+  });
+
+  it('cada aviso que le llega a una Persona tiene título y detalle, sin nombres de Personas', () => {
+    const { avisos } = mensajes('web');
+    for (const nombre of NOMBRES_EVENTOS_AVISO) {
+      if (CATALOGO_AVISOS[nombre].destinatario === 'admin') continue;
+      const [dominio, evento] = nombre.split('.');
+      const textos = avisos.eventos[dominio]?.[evento];
+      expect({ nombre, titulo: typeof textos?.titulo, detalle: typeof textos?.detalle }).toEqual({ nombre, titulo: 'string', detalle: 'string' });
+      expect(`${textos.titulo} ${textos.detalle}`).not.toMatch(/\{(nombre|apellido|persona)\}/);
+    }
   });
 });
