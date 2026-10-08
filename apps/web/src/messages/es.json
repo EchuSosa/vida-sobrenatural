@@ -357,6 +357,12 @@
   },
   "registro": {
     "tituloPagina": "Completá tus datos",
+    "listo": {
+      "titulo": "¡Listo, ya sos parte!",
+      "texto": "Tu registro se completó. En Mi camino vas a ver cómo sigue tu proceso en la iglesia y qué podés hacer ahora.",
+      "irAMiCamino": "Ir a mi camino",
+      "volverAPrimerosPasos": "Volver a Primeros pasos"
+    },
     "introPagina": "Entraste con tu cuenta ({email}). Faltan unos datos para terminar tu registro.",
     "cargando": "Cargando…",
     "tituloNoAutenticado": "Registrarme",

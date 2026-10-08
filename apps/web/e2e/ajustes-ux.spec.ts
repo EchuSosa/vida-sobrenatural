@@ -1,5 +1,6 @@
-import { test, expect, registrarPersonaDeTest } from './helpers';
-import { objetivosDe44, tamanoDeLetra, contenido } from './helpers-ajustes-ux';
+import { test, expect, registrarPersonaDeTest, loguearseComoTest } from './helpers';
+import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
+import { objetivosDe44, tamanoDeLetra, contenido, alto } from './helpers-ajustes-ux';
 
 /**
  * ajustes-ux — los hallazgos de la revisión de UX de `apps/web` del
@@ -68,5 +69,80 @@ test.describe('Barra de la app', () => {
     const panel = page.getByRole('navigation', { name: 'Secundario' });
     await expect(panel).toBeVisible();
     await objetivosDe44(panel);
+  });
+});
+
+test.describe('Registro', () => {
+  test.use({ viewport: CELULAR });
+
+  test('errores que dicen qué hacer, campos de 44 px con etiqueta de 16 px, intro sin "autorizaste" (#27, #29, #30, #31) @celular', async ({ page }) => {
+    await loguearseComoTest(page, `e2e-ux-reg-err-${Date.now()}@example.com`);
+    await page.goto('/registro');
+    await expect(page.getByText(/Entraste con tu cuenta/)).toBeVisible();
+    await expect(page.getByText(/autorizaste/)).toHaveCount(0);
+
+    const apellido = page.getByLabel('Apellido');
+    await apellido.fill('');
+    await page.getByLabel('Nombre').fill('');
+    expect(await alto(apellido)).toBeGreaterThanOrEqual(44);
+    expect(await tamanoDeLetra(page.locator('label', { has: apellido }))).toBeGreaterThanOrEqual(16);
+
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
+    await expect(resumen.getByRole('link', { name: 'Escribí tu apellido.' })).toBeVisible();
+    await expect(resumen.getByRole('link', { name: 'Escribí tu nombre.' })).toBeVisible();
+    await expect(resumen.getByRole('link', { name: 'Elegí una opción en Género.' })).toBeVisible();
+    await expect(page.getByText('Revisá este dato.')).toHaveCount(0);
+  });
+
+  test('botones apilados a todo el ancho con el principal arriba, ayudas en Teléfono y Dirección (#28, #32) @celular', async ({ page }) => {
+    await loguearseComoTest(page, `e2e-ux-reg-bot-${Date.now()}@example.com`);
+    await page.goto('/registro');
+    await page.getByLabel('Apellido').fill('García');
+    await page.getByLabel('Nombre').fill('Ana');
+    await page.getByLabel('Género').selectOption('femenino');
+    await completarFecha(campo(page, 'Fecha de nacimiento'), '1958-05-20');
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+
+    await expect(page.getByLabel('Dirección')).toHaveAccessibleDescription(/no la compartimos/);
+    await expect(page.getByLabel('Número de teléfono')).toHaveAccessibleDescription(/Discipulador/);
+
+    const siguiente = await page.getByRole('button', { name: 'Siguiente' }).boundingBox();
+    const atras = await page.getByRole('button', { name: 'Atrás' }).boundingBox();
+    expect(siguiente && atras).toBeTruthy();
+    expect(siguiente!.y).toBeLessThan(atras!.y);
+    expect(siguiente!.width).toBeGreaterThan(CELULAR.width - 64);
+  });
+
+  test('resumen: "Editar" de 44 px y casilla de consentimiento grande; "¡Listo!" lleva a Mi camino (#34, #35, #36) @celular', async ({ page }) => {
+    await loguearseComoTest(page, `e2e-ux-reg-listo-${Date.now()}@example.com`);
+    await page.goto('/registro');
+    await page.getByLabel('Apellido').fill('García');
+    await page.getByLabel('Nombre').fill('Ana');
+    await page.getByLabel('Género').selectOption('femenino');
+    await completarFecha(campo(page, 'Fecha de nacimiento'), '1958-05-20');
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.getByLabel('Código de país').selectOption('+54');
+    await page.getByLabel('Número de teléfono').fill('92211234567');
+    await page.getByLabel('Dirección').fill('Calle 1 y 50');
+    await page.getByLabel('Sede').selectOption({ index: 1 });
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.getByLabel('Estado civil').selectOption('casado_a');
+    await page.getByLabel('Profesión').selectOption('salud');
+    await page.getByLabel('¿En qué año empezaste a venir a la iglesia?').selectOption('2020');
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+
+    for (const editar of await page.getByRole('button', { name: /^Editar/ }).all()) {
+      expect(await alto(editar)).toBeGreaterThanOrEqual(44);
+    }
+    const casilla = page.getByRole('checkbox');
+    expect(await alto(casilla)).toBeGreaterThanOrEqual(20);
+    await page.getByText('Doy mi consentimiento').click();
+    await expect(casilla).toBeChecked();
+
+    await page.getByRole('button', { name: 'Registrarme' }).click();
+    await expect(page).toHaveURL(/\/registro\/listo/);
+    await page.getByRole('link', { name: 'Ir a mi camino' }).click();
+    await expect(page).toHaveURL(/\/mi-camino$/);
   });
 });
