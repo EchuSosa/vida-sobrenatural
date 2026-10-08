@@ -137,6 +137,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // La única acción por fila es ir al detalle.
       await expect(page.getByRole('row').filter({ hasText: sola }).getByRole('button')).toHaveCount(0);
       await expect(page.getByRole('link', { name: `Ver la solicitud de ${sola}` })).toBeVisible();
+      // D216: los Pagos son del Admin — el Pastor no tiene "Pago de un Evento" en el filtro de tipo, y `?tipo=pago` se descarta.
+      await expect(page.getByRole('option', { name: 'Pago de un Evento' })).toHaveCount(0);
+      await page.goto(`/solicitudes?q=${apellido}&tipo=pago`);
+      await expect(page).not.toHaveURL(/tipo=pago/);
       await sinViolaciones(page);
     });
   });

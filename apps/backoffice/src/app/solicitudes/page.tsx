@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { apiFetch, type ConteoAbiertas, type Pagina, type SolicitudBandeja, type TipoSolicitud } from '@vida-sobrenatural/shared-types';
+import { apiFetch, PERMISO_EXTRA_POR_TIPO, type ConteoAbiertas, type Pagina, type SolicitudBandeja, type TipoSolicitud } from '@vida-sobrenatural/shared-types';
 import { requerirPermiso, tienePermisoSesion } from '../../auth';
 import { SolicitudesCliente } from './solicitudes-cliente';
 import { TAMANIO_PAGINA, leerVistaBandeja, parametrosApi, urlBandeja, type ParametrosBandeja } from './constantes';
@@ -27,7 +27,11 @@ export default async function SolicitudesPage({
   const headers = { Authorization: `Bearer ${session.apiToken}` };
 
   const conteo = await apiFetch<ConteoAbiertas>('/solicitudes/conteo-abiertas', { headers, cache: 'no-store' });
-  const conectados = Object.keys(conteo) as TipoSolicitud[];
+  // D216: la API ya omite los tipos que esta sesión no puede ver; el filtro de tipo se arma igual con la misma regla.
+  const conectados = (Object.keys(conteo) as TipoSolicitud[]).filter((tipo) => {
+    const permiso = PERMISO_EXTRA_POR_TIPO[tipo];
+    return permiso === undefined || tienePermisoSesion(session, permiso);
+  });
   const { vista, corregida } = leerVistaBandeja(params, conectados);
 
   const paginaEsTextoValido = params.pagina === undefined || PAGINA_VALIDA.test(params.pagina);
