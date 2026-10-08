@@ -84,7 +84,7 @@ export function PedirEnNombreDe({ etiquetas, buscar, enviar, mensajeDeError, per
         if (valor) setInstancia((n) => n + 1);
       }}
     >
-      <Button type="button" onClick={() => setAbierto(true)} className="h-11 self-start">
+      <Button type="button" onClick={() => setAbierto(true)} className="h-11 self-start text-base">
         {etiquetas.boton}
       </Button>
       <SheetContent side="right" etiquetaCerrar={etiquetas.cerrarPanel}>

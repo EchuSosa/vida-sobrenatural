@@ -1,5 +1,6 @@
 import { Home, MapIcon, CalendarDays, Bell, User } from 'lucide-react';
 import type { ComponentType } from 'react';
+import type { Permiso } from '@vida-sobrenatural/shared-types';
 
 /**
  * Barra de navegación de la app con sesión iniciada — Historia 1, FR-003.
@@ -27,4 +28,22 @@ export const NAV_APP: ItemNavApp[] = [
   { href: '/mis-eventos', labelKey: 'eventos', icon: CalendarDays },
   { href: '/avisos', labelKey: 'avisos', icon: Bell },
   { href: '/perfil', labelKey: 'perfil', icon: User },
+];
+
+/**
+ * spec 006, FR-023 (D156, contracts/navegacion.md): el selector de arriba de
+ * Mi camino — "Mi camino · Mis discipulados". Cada ítem con su permiso del
+ * catálogo (D132); se muestra solo si la sesión ve dos o más. La spec de Vida
+ * de Servicio suma `{ href: '/mis-grupos', labelKey: 'misGrupos', permiso: 'mis_grupos.ver' }`.
+ * `labelKey` es del namespace `miCamino.selector`.
+ */
+export interface ItemSubnavMiCamino {
+  href: string;
+  labelKey: string;
+  permiso: Permiso | 'cualquier-sesion';
+}
+
+export const SUBNAV_MI_CAMINO: ItemSubnavMiCamino[] = [
+  { href: '/mi-camino', labelKey: 'miCamino', permiso: 'cualquier-sesion' },
+  { href: '/mis-discipulados', labelKey: 'misDiscipulados', permiso: 'mis_discipulados.ver' },
 ];
