@@ -60,6 +60,7 @@ export function CampoTelefono({
   errorTexto,
   placeholderNumero,
   requerido = true,
+  ayuda,
 }: {
   /** H-50: id del input de número — permite que un `<ResumenErrores>` enlace y enfoque este campo. */
   id?: string;
@@ -75,12 +76,21 @@ export function CampoTelefono({
   errorTexto?: string;
   placeholderNumero?: string;
   requerido?: boolean;
+  /** ajustes-ux #32/#55: una línea de ayuda debajo de la etiqueta (por qué pedimos el dato, cómo escribirlo). */
+  ayuda?: string;
 }) {
   const idError = id ? `${id}-error` : undefined;
+  const idAyuda = id && ayuda ? `${id}-ayuda` : undefined;
+  const descripcion = [idAyuda, error ? idError : undefined].filter(Boolean).join(' ') || undefined;
   const mostrarNombrePais = usePantallaDesdeSm();
   return (
     <div className="flex flex-col gap-1 text-sm font-medium tactil:text-base">
       {labelTelefono}
+      {ayuda && (
+        <span id={idAyuda} className="text-sm font-normal text-muted-foreground tactil:text-base">
+          {ayuda}
+        </span>
+      )}
       <div className="flex gap-2">
         <select
           name="telefonoCodigoPais"
@@ -104,7 +114,7 @@ export function CampoTelefono({
           required={requerido}
           aria-label={labelTelefono}
           aria-invalid={error || undefined}
-          aria-describedby={error && idError ? idError : undefined}
+          aria-describedby={descripcion}
           value={numero}
           placeholder={placeholderNumero}
           onChange={(e) => onChangeNumero(e.target.value.replace(/[^0-9]/g, ''))}

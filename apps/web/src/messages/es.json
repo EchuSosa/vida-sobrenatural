@@ -391,6 +391,11 @@
       "editar": "Editar"
     },
     "errorCampo": "Revisá este dato.",
+    "ayudas": {
+      "telefono": "Para que tu Discipulador pueda escribirte.",
+      "direccion": "Para saber de qué zona sos. No la compartimos.",
+      "congregaDesde": "Aunque sea aproximado. Si recién empezás, elegí \"Este año\"."
+    },
     "errores": {
       "apellido": "Escribí tu apellido.",
       "nombre": "Escribí tu nombre.",
