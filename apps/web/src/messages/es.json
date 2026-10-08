@@ -357,7 +357,7 @@
   },
   "registro": {
     "tituloPagina": "Completá tus datos",
-    "introPagina": "Ya autorizaste el acceso con {email}. Faltan estos datos para terminar tu registro.",
+    "introPagina": "Entraste con tu cuenta ({email}). Faltan unos datos para terminar tu registro.",
     "cargando": "Cargando…",
     "tituloNoAutenticado": "Registrarme",
     "textoNoAutenticado": "Para registrarte, primero autorizá el acceso con tu cuenta de Google.",
