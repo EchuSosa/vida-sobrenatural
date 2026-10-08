@@ -155,3 +155,14 @@ export function estadoDeEtapa(etapa: EtapaCamino, hechos: HechosCamino): EstadoE
   }
   return { etapa, estado: 'disponible', ...comun };
 }
+
+/**
+ * spec 006, FR-023 (T022, contracts/navegacion.md): ¿la pestaña de la barra
+ * de la app es la actual? Sí si la ruta es la suya o cuelga de alguna de sus
+ * `rutasRelacionadas` (por segmento: `/mi-camino/vida-nueva` sí, `/mi-caminos`
+ * no). Así Mi camino queda marcada en sus subrutas, en Mis discipulados y en
+ * Mi disponibilidad.
+ */
+export function esItemActual(item: { href: string; rutasRelacionadas?: readonly string[] }, pathname: string): boolean {
+  return [item.href, ...(item.rutasRelacionadas ?? [])].some((ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`));
+}
