@@ -165,7 +165,7 @@ empezar.
 - [x] T043 **[revisado: el servicio loguea solo el evento; Auth.js deja el error de red sin email ni código. Ojo: `next dev` imprime los argumentos de las acciones de servidor (solo en desarrollo); por eso la web ya no le pasa el email a `verificarCodigo`]** [P] Revisar con `git grep` que ningún log ni `Sentry.capture*` nuevo incluye email, código o IP (FR-020).
 - [x] T044 **[hecho]** [P] Actualizar `specs/revision-manual/COMO-ARRANCAR.md` con las variables nuevas y cómo leer un código en Mailpit durante la revisión manual.
 - [ ] T045 **[pendiente: no se corrió `/speckit-analyze`; los cambios de diseño quedaron anotados en cada tarea]** Correr `/speckit-analyze` y dejar `tasks.md` y `plan.md` al día con lo que haya cambiado al implementar.
-- [ ] T046 **[API unitarios e integración en verde local; los e2e de Playwright los corre el CI del PR (sin consentimiento para `prisma migrate reset`)]** Cierre: las tres suites en verde — `pnpm --filter api run test`, `pnpm --filter api run test:e2e`, y los e2e de `apps/web` y `apps/backoffice` (con Mailpit arriba). Pedirle a Echu el consentimiento para el `prisma migrate reset` de los e2e antes de correrlos.
+- [x] T046 **[las tres suites en verde en el CI de la PR #22 (verificación, integración y e2e de web y backoffice con Mailpit); en local, API unitarios e integración]** Cierre: las tres suites en verde — `pnpm --filter api run test`, `pnpm --filter api run test:e2e`, y los e2e de `apps/web` y `apps/backoffice` (con Mailpit arriba). Pedirle a Echu el consentimiento para el `prisma migrate reset` de los e2e antes de correrlos.
 
 ---
 
