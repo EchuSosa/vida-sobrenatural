@@ -1,1 +1,10 @@
-{}
+{
+  "codigoIngreso": {
+    "asunto": "Tu código para entrar: {codigo}",
+    "saludo": "¡Hola!",
+    "intro": "Este es tu código para entrar a Vida Sobrenatural:",
+    "instrucciones": "Escribilo en la pantalla donde lo pediste. Vale por {minutos} minutos y sirve una sola vez.",
+    "siNoFuisteVos": "Si no fuiste vos, ignorá este mail: nadie puede entrar sin este código.",
+    "firma": "Iglesia Vida Sobrenatural"
+  }
+}
