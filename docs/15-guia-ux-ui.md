@@ -84,6 +84,18 @@ Los estados siempre llevan texto + ícono (nunca solo color, D81).
 - Español rioplatense con voseo ("Anotate", "Tu camino"), cálido y cercano, sin sonar informal de más (ver el tono de `12-contenido-bienvenida.md`).
 - Frases cortas, una idea por oración. Sin jerga interna ni términos del modelo de datos (`apto_ministerio`, `alcance`).
 - **Glosario de interfaz** (a completar en las specs): qué término ve la persona para cada concepto del modelo. Ej.: "Solicitud" en general; "Anotarme" para Eventos; "Primeros pasos" y "Mi camino" (D92).
+  | Concepto del modelo | Lo que se lee en pantalla |
+  |---|---|
+  | Declaración de Historial | **"Ya lo hice"** (el botón), "La iglesia lo está revisando" (en revisión); en el backoffice, el tipo **"Historial previo"** (D144, D154) |
+  | Completitud Manual | **"Registrado por la iglesia"** (en Mi camino); "Registrar una etapa hecha" (backoffice). Nunca "Completitud Manual" ni "declaración" para la Persona |
+  | Grupo de Vida de Servicio | **"edición"** ("Crear una edición", "Mis grupos" para el Líder) |
+  | Contenido de una semana | **"material"**; pedir inscripción: **"Quiero anotarme"**; Líder: **"Tomar asistencia"** |
+  | Postulación | **"Postulación"** / **"Postularme"**, **"Retirar postulación"**, **"Elegí un Ministerio"**, Célula opcional: **"No tengo preferencia"** |
+  | Solicitud de Bautismo `aprobada` | **"aceptada"** ("Aceptamos tu pedido, te avisamos la próxima fecha", D147); **"No puedo ese día"** |
+  | Inscripción a Evento | **"Anotarme"**, **"Lista de espera"**, **"Subir comprobante"**, **"Falta el pago"** |
+  | Notificación | **"Aviso"** (la pestaña Avisos; "Enviar un aviso" en el backoffice) |
+  | Bandeja de Solicitudes | **"Abiertas"** (esperan una acción del Admin) / **"Resueltas"** (D208) |
+  | `Persona.congregaDesde` | **"¿En qué año empezaste a venir a la iglesia?"**, con la opción **"Este año"**; al mostrarlo, "desde 2019" o "hace 7 años" (D214) |
 - Todo texto sale de los archivos de `next-intl` (D84), lo que facilita revisar el tono en un solo lugar.
 
 ## Permisos y onboarding
@@ -197,6 +209,10 @@ a medias dos veces.
 - **Finales de flujo** (`registro/listo`): es el cierre de un recorrido, no una hoja de un árbol.
 
 Un enlace "Volver a X" escrito a mano en cualquier otro lado es un defecto, no una variante.
+
+**El selector de Mi camino no es una miga de pan** (D156): "Mi camino · Mis discipulados · Mis grupos" es subnavegación de **una** sección (enlaces reales en un `<nav>` con `aria-label`, el actual marcado sin depender del color), no un segundo sistema de ubicación. Dentro de cada una, la miga sigue el patrón de arriba (`Mis discipulados › Nombre`).
+
+**Bloques independientes** (Inicio del backoffice, perfil de Persona — D209): una pantalla hecha de bloques que cargan y fallan por separado aplica los cuatro estados **por bloque**: si uno falla muestra su error con "Reintentar" y los demás se siguen viendo.
 
 ## Listados paginados — el patrón para que uno nuevo no nazca con "cargar más" (H-101)
 

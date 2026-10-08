@@ -146,8 +146,8 @@ bloquea ninguna gestión (todo se puede hacer desde las otras pantallas), por es
 **Acceptance Scenarios**:
 
 1. **Given** 120 Personas activas, 8 pendientes de tutor y 3 dadas de baja (`activo = false`), **Then** "Personas activas" dice 120.
-2. **Given** la distribución por tiempo de congregación, **Then** se muestran los cinco rangos en su orden natural
-   (de menos de 6 meses a más de 5 años), cada uno con cantidad y porcentaje **en texto**, y un gráfico de barras
+2. **Given** la distribución por tiempo de congregación (calculada al momento desde `congregaDesde`, D214), **Then**
+   se muestran los cuatro rangos en su orden natural (de "empezó este año" a "más de 5 años"), cada uno con cantidad y porcentaje **en texto**, y un gráfico de barras
    que no es la única forma de leer el dato (D81).
 3. **Given** dos Sedes, una inactiva, **Then** la distribución por Sede las muestra a las dos, la inactiva marcada
    como tal en texto.
@@ -347,7 +347,8 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
   enlaza), la bandeja, los Grupos, Pendientes de tutor y cualquier nombre de Persona del backoffice.
 - **FR-011**: El perfil MUST mostrar: foto (`foto_url`, D87) o iniciales; nombre y apellido; edad y fecha de
   nacimiento; género; estado civil; profesión; teléfono; dirección; email (o "Sin email"); Sede; tiempo de
-  congregación (como lo declaró); estado (`activa`/`pendiente_tutor`); origen del alta y quién la hizo
+  congregación (el año en que empezó a venir, `congregaDesde`, y cuánto tiempo hace, calculado al mostrarlo —
+  D214); estado (`activa`/`pendiente_tutor`); origen del alta y quién la hizo
   (`origen_alta`, `alta_por`) con la fecha y el origen del consentimiento (D78); si usa la app; y, si es menor, los
   datos del tutor.
 - **FR-012**: El perfil MUST mostrar los roles de la Persona separados en **de cargo** y **del proceso** (D131), y
@@ -377,7 +378,9 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
   enlazado a la bandeja filtrada, y mantener la tarjeta de pendientes de discipulado existente (004).
 - **FR-022**: "Personas activas" MUST contar las Personas con `estado = activa` y `activo = true`, incluidas
   las que no usan la app y las menores activadas por su tutor.
-- **FR-023**: La distribución por tiempo de congregación MUST mostrar los cinco rangos en su orden natural, con
+- **FR-023**: La distribución por tiempo de congregación MUST calcularse al momento desde `Persona.congregaDesde`
+  (D214) con `rangoCongregacion` de `shared-types` y mostrar los cuatro rangos (`ORDEN_RANGO_CONGREGACION`) en su
+  orden natural, con
   cantidad y porcentaje en texto (sobre las Personas activas) y una representación gráfica que no sea la única
   forma de leer el dato (D81).
 - **FR-024**: La distribución por Sede MUST mostrar cada Sede no eliminada con su cantidad y porcentaje de
@@ -514,8 +517,11 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
   registro); sigue con su pantalla y su cantidad se muestra en el bloque de pendientes del Inicio.
 - **A5 — Persona activa**: `estado = activa` y `activo = true` (no dada de baja); incluye menores activados y Personas sin app (D97: su
   avance "cuenta para métricas", Flujo 12 paso 5).
-- **A6 — Tiempo de congregación**: se muestra **como fue declarado** al registrarse (el campo es estático); la
-  métrica lo aclara en una línea de ayuda. Recalcularlo con el tiempo queda como pregunta (Preguntas para Echu, 3).
+- **A6 — Tiempo de congregación** (D214, decisión de Echu del 2026-10-07): se guarda el **año** en que la Persona
+  empezó a venir (`congregaDesde`) y el tiempo se calcula al mostrarlo, así la métrica se mantiene al día. Rangos:
+  `este_anio` (0 años), `de_1_a_2_anios`, `de_3_a_5_anios`, `mas_de_5_anios` (más de 5). La pregunta del registro y
+  del alta pasa a ser "¿En qué año empezaste a venir a la iglesia?" (lista de años + "Este año"); ese cambio ya lo
+  hizo el lote 0 global.
 - **A7 — Cumpleaños**: solo Personas activas (A5), sin importar la edad; el Pastor los ve (D64).
 - **A8 — Comentarios**: el límite por origen reusa la huella de origen y el mecanismo de conteo por ventana de la 007
   (sin infraestructura nueva). Si la 007 no está mergeada al implementar, el lote de comentarios espera.
@@ -529,15 +535,17 @@ nacimiento de alguien con un rol de cargo a una fecha que la vuelve menor y ver 
 
 ## Preguntas para Echu
 
+> **Respondidas por Echu el 2026-10-07: se adoptan las recomendaciones de cada pregunta** (numeradas en `docs/05-decisiones.md`, D153–D213). **Excepción: la pregunta 3 (tiempo de congregación) cambió** — se guarda el año en que la Persona empezó a venir (`congregaDesde`) y el tiempo se calcula al mostrarlo (D214).
+
 1. **"Contanos qué te parece" entero (formulario en las tres apps + email + listado) ¿va en esta spec?** Ninguna otra
    spec lo tiene y `docs/02` lo pone en el MVP. **Recomendación (aplicada)**: sí, entero acá; si alguna spec en
    paralelo (ej. la 012) también lo especificó, se queda quien llegue primero a `main` y la otra borra su parte.
 2. **¿Editar los datos de una Persona (incluidos fecha de nacimiento y email) es de esta spec o de la 006?** Flujo 9 lo
    pide y nadie lo asignó. **Recomendación (aplicada)**: acá, como Historia 7 (P3), reusando el formulario de alta de
    la 006; si la 006 ya incluye "editar", se saca la Historia 7.
-3. **Tiempo de congregación es estático**: quien declaró "menos de 6 meses" hace dos años sigue ahí. **Recomendación
-   (aplicada)**: mostrarlo como declarado, con una aclaración en la métrica; recalcularlo (sumando el tiempo desde
-   el registro) queda para Fase 2 junto con el dashboard.
+3. **Tiempo de congregación es estático**: quien declaró "menos de 6 meses" hace dos años sigue ahí. **Respuesta de
+   Echu (2026-10-07), distinta de la recomendación**: se guarda el año en que la Persona empezó a venir
+   (`congregaDesde`) y el tiempo se calcula al mostrarlo (D214). Ver A6.
 4. **Cursos: ¿hace falta "Crear Curso"?** Las combinaciones las define el código y hoy existen todas. **Recomendación
    (aplicada)**: alta solo para combinaciones que el código reconoce y no tienen registro; en la práctica el Admin
    edita nombre y descripción e inactiva. Inventar categorías nuevas no está en el MVP.

@@ -40,7 +40,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 - [ ] T001 [L0] Verificar `main` actualizado, que `.specify/feature.json` apunta a `specs/013-backoffice-admin`, y qué
   specs de 006–011 ya están mergeadas: anotar en el PR de implementación qué ramas de la vista y qué secciones del
   perfil se conectan en esta corrida (plan.md → Dependencias). Mirar el último número de `docs/05` antes de numerar
-  DN-1..DN-7 (D89, D103). — cubre: plan
+  D178 y D207–D213 (la DN-1 de esta spec quedó unificada en D178, con la precisión D207) (D89, D103). — cubre: plan
 - [ ] T002 [L0] `packages/shared-types/src/bandeja.ts`: `TipoSolicitud` (movido desde `discipulado.ts`, que lo
   reexporta), `TIPOS_SOLICITUD`, `ESTADOS_POR_TIPO`, `ESTADOS_ABIERTOS`, `esAbierta`, `FiltroAbiertas`, `OrdenBandeja`
   (`espera|fecha|persona`), `SolicitudBandeja`, `ConteoAbiertas`, `BANDEJA_PAGINA = 20` (`contracts/bandeja-api.md`).
@@ -61,7 +61,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 - [ ] T007 [P] [L0] Unit `apps/api/test/unit/proximo-cumpleanos.spec.ts`: hoy es el cumpleaños (`esHoy`, `cumple`
   correcto); mañana; 29/2 en año bisiesto (29) y no bisiesto (28); 31/12 con hoy 28/12 (cruza año); `hoy` calculado a
   las 02:30 UTC del día 7 da el 6 en Argentina. — cubre: H4.1, H4.2, H4.3, FR-032, FR-033
-- [ ] T008 [P] [L0] `packages/shared-types/src/metricas.ts` (`Metricas`, `ORDEN_TIEMPO_CONGREGACION`),
+- [ ] T008 [P] [L0] `packages/shared-types/src/metricas.ts` (`Metricas`; `RangoCongregacion`/`ORDEN_RANGO_CONGREGACION`/`rangoCongregacion` ya en `persona.ts`, D214),
   `comentario.ts` (tipos de `contracts/comentarios-api.md`, `COMENTARIO_TEXTO_MAX = 2000`,
   `COMENTARIOS_POR_HORA_SIN_SESION = 5`, `COMENTARIOS_POR_HORA_CON_SESION = 20`), `curso.ts` (`CursoListado`,
   `CursoDetalle`, `CURSOS_RECONOCIDOS` con las dos combinaciones de Vida Nueva, `CURSO_DESCRIPCION_MAX = 500`). —
@@ -200,20 +200,20 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 ## Lote 3 — Inicio y métricas (Historia 3, P2)
 
 - [ ] T040 [L3] API `apps/api/src/inicio/`: `GET /inicio/metricas` (`inicio.ver`) con las tres consultas de research #7;
-  los cinco rangos siempre presentes; Sedes no eliminadas con `activa`. — cubre: FR-022–FR-025
+  los cuatro rangos de D214 siempre presentes, calculados desde `congregaDesde` con `rangoCongregacion`; Sedes no eliminadas con `activa`. — cubre: FR-022–FR-025
 - [ ] T041 [L3] Integración `metricas.integration-spec.ts`: H3.1 (120 activas, 8 pendientes de tutor y 3 con
-  `activo = false` → 120; incluye un menor activado y una Persona sin email), H3.2 (rangos en orden, uno en 0), H3.3
+  `activo = false` → 120; incluye un menor activado y una Persona sin email), H3.2 (los cuatro rangos de D214 en orden, uno en 0, con `congregaDesde` sembrado para cada rango), H3.3
   (Sede inactiva presente con `activa: false`; Sede eliminada ausente), H3.4 (base sin Personas activas → todo 0, sin
   error), Pastor 200, Discipulador 403. Cotejar contra `COUNT` directo. — cubre: H3.1–H3.4, SC-005
 - [ ] T042 [L3] Backoffice `app/page.tsx` + `app/inicio/`: cuatro bloques independientes (`BloquePendientes`,
   `BloqueMetricas`, `BloqueCumpleanos`, `BloqueComentarios`), cada uno con `Suspense`, esqueleto, vacío y error con
   "Reintentar" que no tumba a los otros. Pendientes: `conteo-abiertas` por tipo con enlace a
   `/solicitudes?tipo=X`, la `TarjetaPendientes` existente y la cantidad de Pendientes de tutor. Métricas: número grande
-  de Personas activas; tabla de rangos y de Sedes con cantidad y porcentaje en texto + `BarraProporcion`; ayuda "Es el
-  tiempo que cada Persona declaró al registrarse" (A6). Los bloques de cumpleaños y comentarios se conectan en los
+  de Personas activas; tabla de rangos y de Sedes con cantidad y porcentaje en texto + `BarraProporcion`; ayuda "Contado desde el año
+  en que cada Persona empezó a venir" (A6, D214). Los bloques de cumpleaños y comentarios se conectan en los
   lotes 4 y 5 (si no están, el bloque no se muestra). El cálculo de porcentajes con total 0 devuelve 0 sin dividir. Migrar a next-intl el h1 y los textos fijos. Pastor igual, sin
   acciones. `@celular`. — cubre: FR-020–FR-024, FR-064, H3.5, H3.6
-- [ ] T043 [L3] E2E `apps/backoffice/e2e/inicio.spec.ts`: H3.2 (cinco rangos con número y % visibles como texto), H3.4
+- [ ] T043 [L3] E2E `apps/backoffice/e2e/inicio.spec.ts`: H3.2 (cuatro rangos con número y % visibles como texto), H3.4
   (con `page.route` sobre `GET /inicio/metricas` devolviendo `personasActivas: 0` y todo en 0: estado vacío, sin
   "NaN"), H3.5 (con `page.route` sobre `GET /solicitudes/conteo-abiertas` devolviendo `{discipulado: 5, bautismo: 2}`:
   "5 de Discipulado · 2 de Bautismo", cada uno enlaza a `/solicitudes?tipo=…`; con todo en 0, el mensaje), H3.6 (interceptar `GET /inicio/metricas` con 500: el bloque muestra error y
@@ -363,7 +363,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   (script simple con 50 pedidos, resultado en el PR). — cubre: SC-004
 - [ ] T094 [LF] Las tres suites en verde (`pnpm --filter api run test`, `pnpm --filter api run test:e2e`, e2e de
   `apps/web` y `apps/backoffice`) y pasada de `quickstart.md`. — cubre: Constitución (Governance)
-- [ ] T095 [LF] Aplicar "Cambios a docs al mergear" de `plan.md` y numerar DN-1..DN-7 en `docs/05` (mirando el último
+- [ ] T095 [LF] Aplicar "Cambios a docs al mergear" de `plan.md` y numerar D178 y D207–D213 (la DN-1 de esta spec quedó unificada en D178, con la precisión D207) en `docs/05` (mirando el último
   número). — cubre: Principio I
 
 ---

@@ -49,7 +49,7 @@ Los frontends necesitan saber dónde está la API — en el `.env.local` de cada
 - **ORM**: Prisma
 - **Base de datos**: PostgreSQL
 - **Datos de demo**: script de seed de Prisma con datos ficticios en español (generador tipo Faker) + escenarios armados a mano (D99).
-- **Tareas programadas**: `@nestjs/schedule` — recordatorios de Eventos (D49, D73), sincronización de YouTube (D93) y envío/reintento de entregas de notificaciones (D100).
+- **Tareas programadas**: `@nestjs/schedule` — recordatorios de Eventos (D49, D73), sincronización de YouTube (D93) y envío/reintento de entregas de notificaciones (D100). Viven todas en **un único módulo** (`apps/api/src/tareas-programadas/`), cada una invocable a mano con `pnpm --filter api run tareas:correr <nombre>` y apagable con `TAREAS_PROGRAMADAS=false` (tests) — D205. La API necesita además `WEB_URL` (la URL pública de la web app) para armar los enlaces de los mails.
 - **Errores**: filtro global de excepciones con formato Problem Details (RFC 9457) + `code` + `requestId` (D101).
 - **Logs**: estructurados en JSON (ej. `nestjs-pino`), con `requestId` y sin datos personales sensibles.
 - **Seguridad** (base propuesta, ver `13-requisitos-no-funcionales.md`): guards/policies para autorización por registro, `class-validator` (whitelist), `helmet`, `@nestjs/throttler`, CORS limitado a los dos frontends.

@@ -92,8 +92,8 @@ de inversas (Principio XI).
 
 ## 7. Métricas al momento
 
-**Decisión**: tres consultas agregadas (`COUNT`, `GROUP BY "tiempoCongregacion"`, `GROUP BY "sedeId"`) sobre
-`personas` con `estado = 'activa' AND activo = true`, en `GET /inicio/metricas`. Los cinco rangos se completan con 0
+**Decisión**: tres consultas agregadas (`COUNT`, `GROUP BY "congregaDesde"` (D214: el rango se calcula en la API con `rangoCongregacion`), `GROUP BY "sedeId"`) sobre
+`personas` con `estado = 'activa' AND activo = true`, en `GET /inicio/metricas`. Los cuatro rangos se completan con 0
 en la API (un rango sin Personas igual aparece). Porcentajes redondeados a entero en el cliente, con
 `Intl.NumberFormat` (`formato.ts`).
 

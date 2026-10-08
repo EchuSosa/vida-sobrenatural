@@ -42,7 +42,7 @@ Fase 0 del plan. Cada decisión: qué se eligió, por qué, y qué se descartó.
 
 ## 4. Declaración y Completitud: dos entidades
 
-Ver Decisión nueva 2 en `plan.md`. Detalle del ciclo:
+Ver D154 en `plan.md`. Detalle del ciclo:
 
 ```text
 Declaración:  pendiente ──confirmar(Admin)──▶ confirmada  (+ crea Completitud origen=declaracion)
@@ -131,7 +131,7 @@ declaracion_historial_confirmada si había declaración.
   `AltaPersonaDto` extiende la base de datos personales con `email?` y `consentimiento: true`. El
   formulario del backoffice usa los mismos componentes de campo de `packages/ui` (`CampoTelefono`,
   `CampoFecha`) y, si algún paso del registro tiene un componente propio de `apps/web` que el alta
-  necesita (selector de profesión, de tiempo congregándose), se baja a `packages/ui`.
+  necesita (selector de profesión, del año en que empezó a venir — D214), se baja a `packages/ui`.
 - **Rationale**: FR-031 ("mismas validaciones, en un solo lugar") y Principio XI (H-33 fue
   exactamente esto: `TELEFONO_REGEX` duplicada).
 - **Alternatives**: reusar el wizard de 4 pasos (D94) en el backoffice — descartado: D94 es para
@@ -198,4 +198,4 @@ declaracion_historial_confirmada si había declaración.
   ninguno, el texto actual. Variable nueva en `apps/backoffice/.env.local.example`, en el `env` del
   `webServer` de `apps/backoffice/playwright.config.ts` y en `specs/revision-manual/COMO-ARRANCAR.md` (`http://localhost:3001` en local,
   D104).
-- **Rationale**: ver Decisión nueva 5. Un `redirect` server-side evita pintar la pantalla vieja.
+- **Rationale**: ver D157. Un `redirect` server-side evita pintar la pantalla vieja.

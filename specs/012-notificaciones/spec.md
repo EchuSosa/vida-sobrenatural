@@ -511,6 +511,8 @@ transición lo emite.
 
 ## Preguntas para Echu
 
+> **Respondidas por Echu el 2026-10-07: se adoptan las recomendaciones de cada pregunta** (numeradas en `docs/05-decisiones.md`, D153–D213).
+
 1. **¿El Discipulador recibe por mail cuando le proponen un discipulado nuevo?** Hoy le llega solo
    como aviso en la app (D96 no lo lista como importante). **Recomiendo que sí** (importante): la
    propuesta espera su respuesta, el Admin la ve "sin respuesta" a los 3 días (004), y sin push el

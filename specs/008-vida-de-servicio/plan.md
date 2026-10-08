@@ -193,55 +193,55 @@ más dos módulos chicos que dejan de ser "de discipulado" porque ahora los usan
   faltas, que vive en lote 0 (`shared-types` + una consulta compartida en el módulo). La finalización
   (B) necesita Inscripciones (A) solo para su test e2e: el test las crea por servicio.
 
-## Decisiones nuevas (se numeran al mergear)
+## Decisiones nuevas (numeradas en `docs/05-decisiones.md`: D158–D168)
 
-1. **Bajas de Vida de Servicio con doble check y tipo elegido** — el Líder propone `dada_de_baja` o
+1. **D158** — **Bajas de Vida de Servicio con doble check y tipo elegido** — el Líder propone `dada_de_baja` o
    `abandono`, el Admin confirma (puede corregir el tipo) o rechaza, y el Admin también puede aplicarla
    directo. *Porqué*: `docs/03` ("propone") y el Flujo 4 ("puede ejecutar") se contradecían; una baja
    le cierra a la Persona el paso a Ministerio y conviene que la mire alguien más, como en Vida Nueva;
    la vía directa del Admin cubre el aviso por WhatsApp (D69, mismo criterio). *(Pregunta 1 para
    Echu.)*
-2. **Apto para Ministerio es un rol de estado** (`apto_ministerio` en `Persona.rol`, escrito por
+2. **D159** — **Apto para Ministerio es un rol de estado** (`apto_ministerio` en `Persona.rol`, escrito por
    `RolesDeEstadoService`), no una columna. "En curso: Vida de Servicio" no se guarda: se deriva de la
    Inscripción `activa`. *Porqué*: D131 ya lo clasifica como rol de estado; una columna aparte sería
    una segunda fuente de verdad (Principio XI), y derivar "en curso" sigue a D137.
-3. **Completitud Manual de Vida de Servicio otorga Apto para Ministerio.** *Porqué*: quien hizo Vida de
+3. **D160** — **Completitud Manual de Vida de Servicio otorga Apto para Ministerio.** *Porqué*: quien hizo Vida de
    Servicio antes de la app no tiene otro camino; D40 solo contemplaba la Inscripción. *(Pregunta 2.)*
-4. **El Cronograma no tiene tabla propia**: son los `ItemCronograma` del Grupo; y **un Contenido por
+4. **D161** — **El Cronograma no tiene tabla propia**: son los `ItemCronograma` del Grupo; y **un Contenido por
    semana con varias piezas** (texto, archivos, enlaces) en vez de un Contenido tipado por pieza. Precisa
    D17 y el diagrama ER. *Porqué*: research #2 y #3.
-5. **La liberación se calcula al leer; el aviso sale una vez** (`liberacionAvisadaEn`), y el proceso
+5. **D162** — **La liberación se calcula al leer; el aviso sale una vez** (`liberacionAvisadaEn`), y el proceso
    programado que avisa las liberaciones por fecha es de la 012. *Porqué*: que la gente vea su material
    no puede depender de que corra un proceso (research #4).
-6. **Pedido "para la próxima edición"**: si no hay ninguna edición con inscripción abierta, la Persona
+6. **D163** — **Pedido "para la próxima edición"**: si no hay ninguna edición con inscripción abierta, la Persona
    puede pedir sin elegir; el Admin la asigna al aprobar. Y la inscripción abierta/cerrada solo limita
    lo que elige la Persona, no lo que aprueba el Admin. *(Pregunta 4.)*
-7. **Alerta de faltas desde 2** (`FALTAS_PARA_ALERTA = 2`), resolviendo la diferencia entre D42 ("más
+7. **D164** — **Alerta de faltas desde 2** (`FALTAS_PARA_ALERTA = 2`), resolviendo la diferencia entre D42 ("más
    de 2") y `docs/02`/Flujo 4 ("2 o más"). *(Pregunta 5.)*
-8. **El Líder de curso ve el teléfono de sus inscriptos activos** (no la dirección). *(Pregunta 3.)*
-9. **Al darse de baja, la Persona conserva el material liberado hasta ese día**; "contenido restante"
+8. **D165** — **El Líder de curso ve el teléfono de sus inscriptos activos** (no la dirección). *(Pregunta 3.)*
+9. **D166** — **Al darse de baja, la Persona conserva el material liberado hasta ese día**; "contenido restante"
    (Flujo 4, paso 13) es lo que se libera después.
-10. **Los discipulados activos (D137) son solo de Grupos de Vida Nueva**, y quitar `lider_curso` se
+10. **D167** — **Los discipulados activos (D137) son solo de Grupos de Vida Nueva**, y quitar `lider_curso` se
     bloquea si lidera una edición en curso. *Porqué*: sin el filtro, liderar Vida de Servicio contaría
     como discipulado.
-11. **Primer archivo privado del sistema**: `StorageService` suma lectura y visibilidad privada; los
+11. **D168** — **Primer archivo privado del sistema**: `StorageService` suma lectura y visibilidad privada; los
     archivos se validan por contenido y se sirven por la API con permiso por pedido.
 
 ## Cambios a docs al mergear
 
 - `docs/04-dominio-entidades.md`: (a) Cronograma = items del Grupo, sin entidad aparte; Contenido con
-  varias piezas (decisión 4); (b) "Apto para Ministerio" se guarda como rol de estado (decisión 2);
+  varias piezas (D161); (b) "Apto para Ministerio" se guarda como rol de estado (D159);
   (c) Inscripción puede nacer de una Solicitud de Discipulado o de una Solicitud de inscripción a Vida
   de Servicio; (d) la Solicitud de inscripción a Vida de Servicio se suma al "Patrón común de
   Solicitudes".
 - `docs/diagrama-er.mermaid`: quitar `CRONOGRAMA`, `ITEM_CRONOGRAMA.grupo_id`, `CONTENIDO` con
   `ARCHIVO_CONTENIDO` y `ENLACE_CONTENIDO`, `SOLICITUD_VIDA_SERVICIO`.
-- `docs/07-flujos-casos-de-uso.md`: Flujo 4 pasos 10–12 (bajas con doble check, decisión 1;
-  umbral, decisión 7) y la opción "para la próxima edición" (decisión 6); **Flujo 5 pasos 1–3**
+- `docs/07-flujos-casos-de-uso.md`: Flujo 4 pasos 10–12 (bajas con doble check, D158;
+  umbral, D164) y la opción "para la próxima edición" (D163); **Flujo 5 pasos 1–3**
   (activación manual del flag a partir de un pedido, D28) quedan superados por D40 — marcar como
   enmendados.
 - `docs/03-roles-permisos.md`: Líder de curso usa la web app (D142), ve el teléfono de sus inscriptos
-  (decisión 8); Apto para Ministerio también por Completitud Manual de Vida de Servicio (decisión 3).
+  (D165); Apto para Ministerio también por Completitud Manual de Vida de Servicio (D160).
 - `docs/05-decisiones.md`: numerar las 11 decisiones de arriba (mirando el último número, D89/D103) y
   anotar que D28 queda superada por D40.
 - `docs/14-navegacion.md`: el ítem "Líder de curso → Mis grupos" sale del backoffice y pasa a la web

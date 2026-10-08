@@ -168,7 +168,7 @@ se pisan.
 - [ ] T064 [P] Sumar las rutas nuevas (`/solicitudes/bautismo/[id]` con un id de fixture, y la sección del Evento) a `apps/backoffice/e2e/axe-todas-las-rutas.spec.ts`, y verificar que `/mi-camino` con la card ya está en `apps/web/e2e/axe-todas-las-rutas.spec.ts` (SC-007).
 - [ ] T065 Releer `specs/010-bautismo/checklists/pantallas.md` completo; lo que no cumple va a "Observaciones", no se arregla en silencio.
 - [ ] T066 Las tres suites en verde: `pnpm --filter api run test`, `pnpm --filter api run test:e2e`, y los e2e de `apps/web` y `apps/backoffice` (CLAUDE.md).
-- [ ] T067 Al mergear (no en esta rama): numerar DN-1 a DN-9 en `docs/05-decisiones.md` mirando el último número, y aplicar "Cambios a docs al mergear" de `plan.md` (`docs/04`, ER, `docs/07` Flujo 6, `docs/03`, `docs/14`, `docs/15`) con las respuestas de Echu a las Preguntas.
+- [ ] T067 Al mergear (no en esta rama): numerar D179–D187 (la DN-8 de esta spec quedó unificada en D178, con la precisión D186) en `docs/05-decisiones.md` mirando el último número, y aplicar "Cambios a docs al mergear" de `plan.md` (`docs/04`, ER, `docs/07` Flujo 6, `docs/03`, `docs/14`, `docs/15`) con las respuestas de Echu a las Preguntas.
 
 ---
 

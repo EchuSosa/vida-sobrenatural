@@ -8,7 +8,7 @@ relación Persona–Grupo (004).
 ## Enums
 
 ```prisma
-enum TipoEvento { general bautismo }                     // D147, decisión nueva DN-1
+enum TipoEvento { general bautismo }                     // D147, decisión nueva D188
 enum EstadoEvento { publicado cancelado }                // el `activo` del ER (D119: estado del negocio)
 enum EstadoInscripcionEvento { confirmada pendiente rechazada lista_espera cancelada } // docs/04
 enum MotivoCancelacionInscripcion { persona admin pago_rechazado }                      // research #5
@@ -26,9 +26,9 @@ enum EstadoPago { pendiente_verificacion verificado rechazado }                 
 | `slug` | `String @unique` | generado al crear, nunca cambia (research #9) |
 | `descripcion` | `String` | 1–5000, texto plano con saltos de línea |
 | `tipo` | `TipoEvento @default(general)` | no cambia con Inscripciones (FR-014) |
-| `inicio` | `DateTime @db.Timestamptz` | obligatorio (DN-2) |
+| `inicio` | `DateTime @db.Timestamptz` | obligatorio (D189) |
 | `fin` | `DateTime? @db.Timestamptz` | `> inicio` (CHECK) |
-| `lugar` | `String?` | 0–300; `null` = dirección de la Sede (DN-3) |
+| `lugar` | `String?` | 0–300; `null` = dirección de la Sede (D190) |
 | `publicoObjetivo` | `String?` | 0–120, informativo |
 | `imagenUrl` / `imagenRuta` | `String?` | flyer público (research #7); `imagenRuta` para borrar el archivo |
 | `descripcionImagen` | `String?` | obligatorio si hay imagen (CHECK, D83), 1–500 |
@@ -37,7 +37,7 @@ enum EstadoPago { pendiente_verificacion verificado rechazado }                 
 | `cupo` | `Int?` | `>= 1` (CHECK) |
 | `permiteListaEspera` | `Boolean @default(false)` | solo con cupo (CHECK) |
 | `costo` | `Decimal? @db.Decimal(10,2)` | `> 0` (CHECK) |
-| `instruccionesPago` | `String?` | obligatorio si hay costo (CHECK, DN-4), 1–1000 |
+| `instruccionesPago` | `String?` | obligatorio si hay costo (CHECK, D191), 1–1000 |
 | `diasAnticipacionRecordatorio` | `Int?` | 1–60, solo con inscripción (CHECK) |
 | `estado` | `EstadoEvento @default(publicado)` | |
 | `canceladoEn` / `canceladoPorId` | `DateTime?` / `String?` | se completan al cancelar, se limpian al reactivar |

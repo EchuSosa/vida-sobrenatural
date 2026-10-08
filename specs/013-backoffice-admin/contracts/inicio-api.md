@@ -7,7 +7,7 @@ Permiso: `inicio.ver`. Respuesta `200 Metricas`:
 ```ts
 {
   personasActivas: number;
-  porTiempoCongregacion: { valor: TiempoCongregacion; cantidad: number }[]; // los 5, en ORDEN_TIEMPO_CONGREGACION
+  porTiempoCongregacion: { valor: RangoCongregacion; cantidad: number }[]; // los 4, en ORDEN_RANGO_CONGREGACION (D214)
   porSede: { sedeId: string; nombre: string; activa: boolean; cantidad: number }[]; // Sedes no eliminadas, por nombre
 }
 ```

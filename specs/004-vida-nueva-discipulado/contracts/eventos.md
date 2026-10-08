@@ -1,5 +1,7 @@
 # Contrato: eventos para el sistema de notificaciones futuro (FR-023, FR-048)
 
+> **Reemplazado** por `specs/012-notificaciones/contracts/emision.md` (D197): los avisos se emiten con `NotificacionesService.emitir(tx, evento)` **dentro** de la transacción del cambio, no después del commit, y los nombres de los eventos pasan a `discipulado.*` del catálogo `CATALOGO_AVISOS`. Este archivo queda como historia.
+
 El envío de notificaciones está fuera de alcance. Lo que este spec deja es **la costura**: cada
 transición emite un evento tipado con destinatario y datos, y hoy una sola función lo recibe y
 escribe un log estructurado sin datos personales (Principio X). Cuando exista el sistema de

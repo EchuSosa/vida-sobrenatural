@@ -193,7 +193,7 @@ se pisan; el **lote 0** es secuencial y va primero.
 - [ ] T082 E2E del flujo crítico completo `apps/web/e2e/eventos-flujo-critico.spec.ts` (`@celular`, cruzando backoffice por API o helpers): Admin crea Evento con cupo 1, lista y costo → Persona A se anota → Persona B queda en lista → A cancela → B confirmada → B sube comprobante → Admin verifica → B ve "Pago verificado"; axe en claro y oscuro en cada pantalla de la Persona (SC-007, SC-006).
 - [ ] T083 Medir SC-002 a mano con la quickstart (escenario 4) y anotar el tiempo en el PR; recorrer `quickstart.md` completa.
 - [ ] T084 Correr las tres suites en verde: `pnpm --filter api run test`, `pnpm --filter api run test:e2e`, y los e2e de `apps/web` (incluido `celular`) y `apps/backoffice` (CLAUDE.md, Governance). Lint y typecheck de las cinco piezas.
-- [ ] T085 Preparar (sin aplicar en la rama si hay otras specs abiertas) los "Cambios a docs al mergear" de `plan.md` y la numeración de DN-1…DN-9, para aplicarlos en el merge.
+- [ ] T085 Preparar (sin aplicar en la rama si hay otras specs abiertas) los "Cambios a docs al mergear" de `plan.md` y la numeración de D188–D196 (la DN-9 de esta spec quedó unificada en D178, con la precisión D196), para aplicarlos en el merge.
 
 ---
 

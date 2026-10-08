@@ -182,44 +182,43 @@ de un solo tipo.
 | **D150 (tamaños en el celular)** — la tarea que lo implemente | El `Button` de 44 px y la letra de 16 px en `apps/web`. Si no llegó, se usa el `Button` vigente y la tarea de checklist lo verifica cuando llegue. | — |
 | Ya construidas: **003** (`StorageService`, `ImagenPortadaService`), **004** (bandeja de Solicitudes, `PendientesAdmin`, patrón de sucesos), **005** (`CATALOGO_PERMISOS`, auditoría de roles) | Se usan, no se vuelven a decidir. | Generalización de `StorageService` e `ImagenPortadaService` sin cambiar el comportamiento de portadas. |
 
-## Decisiones nuevas (se numeran al mergear)
+## Decisiones nuevas (numeradas en `docs/05-decisiones.md`: D188–D196; la DN-9 quedó unificada en D178 y precisada en D196)
 
-Ninguna va a `docs/05-decisiones.md` desde esta rama (trabajo en paralelo). Al mergear se numeran
-a continuación de la última D vigente.
+Numeradas en el lote 0 global (`lote-0-global`), con su porqué en `docs/05-decisiones.md`.
 
-- **DN-1 — Tipo de Evento: `general` o `bautismo`.** Un Evento de bautismo (D147) tiene inscripción
+- **D188 — Tipo de Evento: `general` o `bautismo`.** Un Evento de bautismo (D147) tiene inscripción
   solo por el Admin, sin aprobación, sin costo, sin lista de espera y sin recordatorio a todos; su
   página pública no ofrece anotarse ni muestra a quiénes. **Porqué**: D147 dice que la fecha de
   bautismo "es un Evento", pero a un bautismo no se anota cualquiera: se llega por una Solicitud
   aceptada. Un tipo, y no una combinación de flags, deja que la 010 los encuentre y que las reglas
   se apliquen solas.
-- **DN-2 — El Evento tiene inicio con hora y fin opcional** (enmienda el `fecha` del ER). **Porqué**:
+- **D189 — El Evento tiene inicio con hora y fin opcional** (enmienda el `fecha` del ER). **Porqué**:
   la hora hace falta para cerrar inscripciones, para el recordatorio `evento_proximo` y para que la
   información sea útil; los campamentos duran varios días.
-- **DN-3 — `lugar` opcional, con la dirección de la Sede por defecto.** **Porqué**: D83 pide el
+- **D190 — `lugar` opcional, con la dirección de la Sede por defecto.** **Porqué**: D83 pide el
   lugar como texto y el ER no lo tenía; muchos Eventos (campamentos, jornadas afuera) no son en la
   Sede.
-- **DN-4 — Instrucciones de pago por Evento, obligatorias si tiene costo.** **Porqué**: D148 deja a
+- **D191 — Instrucciones de pago por Evento, obligatorias si tiene costo.** **Porqué**: D148 deja a
   la Persona "confirmada, falta el pago": tiene que saber a dónde pagar sin preguntar por WhatsApp.
   Sigue siendo un registro de un pago externo (D67).
-- **DN-5 — Ocupación y rechazo de pago.** Ocupan lugar las Inscripciones `confirmada` y `pendiente`.
+- **D192 — Ocupación y rechazo de pago.** Ocupan lugar las Inscripciones `confirmada` y `pendiente`.
   Rechazar un Pago deja la Inscripción `cancelada` con motivo `pago_rechazado` (no un estado nuevo)
   y promueve. Un Pago que carga el Admin nace `verificado`. **Porqué**: Flujo 8 paso 9 ya trata a
   `pendiente` como lugar ocupado; D148 pide liberar el lugar; `rechazada` ya significa otra cosa
   (respuesta a una inscripción con aprobación).
-- **DN-6 — Cancelar un Evento avisa a sus inscriptos como importante; cambiar fecha, hora o lugar,
+- **D193 — Cancelar un Evento avisa a sus inscriptos como importante; cambiar fecha, hora o lugar,
   como normal.** Propone sumar el disparador `evento_actualizado` (alcance `evento`) a los cuatro de
   `docs/04`; lo implementa la 012. **Porqué**: quien se anotó a un campamento que se suspende tiene
   que enterarse aunque no abra la app; hoy `docs/16` no lo lista (Preguntas para Echu, P4).
-- **DN-7 — Reglas de calendario**: el `slug` se genera al crear y nunca cambia; las inscripciones
+- **D194 — Reglas de calendario**: el `slug` se genera al crear y nunca cambia; las inscripciones
   cierran al inicio del Evento; no hay borrador ni plazo automático de pago; la lista de espera es
   por orden de llegada. **Porqué**: los QR se imprimen y los links se comparten; lo demás es lo más
   simple que cubre el Flujo 8 (Principio IV).
-- **DN-8 — Comprobantes**: JPG, PNG, WebP o PDF hasta 5 MB, validados por contenido, imágenes
+- **D195 — Comprobantes**: JPG, PNG, WebP o PDF hasta 5 MB, validados por contenido, imágenes
   re-codificadas sin metadatos, privados, visibles solo para la dueña y quien verifica pagos (el
   Pastor ve el estado, no el archivo). **Porqué**: `docs/13` ("dueño + Admin"); el PDF es como
   muchos bancos exportan una transferencia; quitar EXIF evita guardar la ubicación de la Persona.
-- **DN-9 — La bandeja de Solicitudes se compone de fuentes por tipo** (técnica, research #12).
+- **D178 — La bandeja de Solicitudes se compone de fuentes por tipo** (técnica, research #12).
   **Porqué**: con un segundo y un tercer tipo (Eventos, Bautismo), copiar la consulta por tipo
   viola el Principio XI y paginar en memoria rompe `docs/15`.
 
@@ -233,12 +232,12 @@ a continuación de la última D vigente.
 - `docs/07-flujos-casos-de-uso.md` — Flujo 8 paso 7: reemplazar "a definir en la Sesión 5" por D148;
   paso 6: el Admin registra en nombre y queda verificado; agregar el Evento de bautismo como caso
   del paso 1 (D147).
-- `docs/16-sistemas-transversales.md` — si Echu acepta DN-6: "Evento cancelado" en la lista de
+- `docs/16-sistemas-transversales.md` — si Echu acepta D193: "Evento cancelado" en la lista de
   importantes.
 - `docs/15-guia-ux-ui.md` — glosario: "Anotarme", "Lista de espera", "Subir comprobante", "Falta el
   pago".
 - `docs/06-preguntas-abiertas.md` — cerrar la del Flujo 8 paso 7 si sigue listada.
-- `docs/05-decisiones.md` — DN-1 a DN-9 con su número.
+- `docs/05-decisiones.md` — D188–D196 (la DN-9 de esta spec quedó unificada en D178, con la precisión D196) con su número.
 
 ## Complexity Tracking
 
