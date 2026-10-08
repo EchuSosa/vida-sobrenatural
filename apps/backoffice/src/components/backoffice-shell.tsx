@@ -17,7 +17,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@vida-sobrenatural/ui';
-import type { RolDeCargo } from '@vida-sobrenatural/shared-types';
+import { esItemActual, type RolDeCargo } from '@vida-sobrenatural/shared-types';
 import { itemsParaRoles } from '../config/nav';
 import { MenuUsuario } from './selector-tema';
 
@@ -62,19 +62,23 @@ export function BackofficeShell({ children }: { children: React.ReactNode }) {
           <SidebarContent>
             <SidebarGroup>
               <SidebarMenu>
-                {items.map(({ href, labelKey, icon: Icon }) => (
-                  <SidebarMenuItem key={href}>
-                    <SidebarMenuButton
-                      isActive={pathname === href}
-                      render={
-                        <Link href={href} aria-current={pathname === href ? 'page' : undefined}>
-                          <Icon />
-                          <span>{t(labelKey)}</span>
-                        </Link>
-                      }
-                    />
-                  </SidebarMenuItem>
-                ))}
+                {items.map(({ href, labelKey, icon: Icon, rutasRelacionadas }) => {
+                  // D213: Catálogos queda marcado también en Sedes y Cursos.
+                  const actual = pathname === href || (rutasRelacionadas !== undefined && esItemActual({ href, rutasRelacionadas }, pathname));
+                  return (
+                    <SidebarMenuItem key={href}>
+                      <SidebarMenuButton
+                        isActive={actual}
+                        render={
+                          <Link href={href} aria-current={actual ? 'page' : undefined}>
+                            <Icon />
+                            <span>{t(labelKey)}</span>
+                          </Link>
+                        }
+                      />
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroup>
           </SidebarContent>

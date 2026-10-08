@@ -1,0 +1,31 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Button } from '@vida-sobrenatural/ui';
+
+/** El "error" de las pantallas de Eventos (Principio VIII): qué pasó, código y reintentar. */
+export function ErrorEventos({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const t = useTranslations('eventos.gestion.errorCarga');
+  const router = useRouter();
+  useEffect(() => {
+    console.error('[eventos/error.tsx]', error.digest, error);
+  }, [error]);
+  return (
+    <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16 text-center" role="alert">
+      <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
+      <p className="text-muted-foreground">{t('texto')}</p>
+      <p className="text-sm text-muted-foreground">{t('referencia', { codigo: error.digest ?? 'sin-id' })}</p>
+      <Button
+        className="mx-auto"
+        onClick={() => {
+          router.refresh();
+          reset();
+        }}
+      >
+        {t('reintentar')}
+      </Button>
+    </div>
+  );
+}

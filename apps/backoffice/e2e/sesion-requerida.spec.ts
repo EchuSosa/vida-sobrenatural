@@ -28,7 +28,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
         await expect(page.getByRole('heading', { name: 'Backoffice — Vida Sobrenatural' })).toBeVisible();
         await expect(page.getByText('Necesitás iniciar sesión para continuar.')).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Ingresar con Google' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Entrar con Google' })).toBeVisible();
 
         // Ninguna pantalla real de la ruta se asoma — ni el <h1> propio
         // (algunas antes lo repetían, ej. "Sedes", "Libros") ni el
@@ -52,7 +52,7 @@ test('ingresar desde /libros sin sesión vuelve a /libros, no a la raíz (H-116)
   // callbackUrl y el destino quedaba en la raíz sin importar de dónde se
   // hubiera entrado.
   const pedidoDeIngreso = page.waitForRequest((req) => req.url().includes('/api/auth/signin/google'));
-  await page.getByRole('button', { name: 'Ingresar con Google' }).click();
+  await page.getByRole('button', { name: 'Entrar con Google' }).click();
   const request = await pedidoDeIngreso;
   expect(request.postData()).toContain('callbackUrl=%2Flibros');
 });

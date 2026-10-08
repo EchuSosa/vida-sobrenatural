@@ -42,6 +42,16 @@ Se prueba entrando a **http://localhost:3001**.
 > El seed es idempotente: se puede correr las veces que haga falta. `SEED_ADMIN_EMAIL` con tu email
 > real de Google es lo que te da el rol `admin` para entrar al backoffice (H-12).
 
+### Entrar con un código por email (spec 007)
+
+En las dos apps, además de Google, se puede entrar con **cualquier email** (Hotmail, Yahoo…): en
+<http://localhost:3001/ingresar> (o en la pantalla sin sesión del backoffice) escribí el email y tocá
+"Enviarme el código". El mail no sale a internet: lo atrapa **Mailpit**. Abrí
+<http://localhost:8025>, buscá el mail "Tu código para entrar: …" y escribí esos 6 números. Vale 15
+minutos y sirve una sola vez; se pueden pedir hasta 5 por hora para el mismo email.
+
+Para probar como otra Persona sin Google, alcanza con su email: el código llega a Mailpit igual.
+
 ### Datos de demostración (D120, opcional)
 
 `db:seed` (arriba) es el mínimo para que la app arranque y para los tests — rápido, sin volumen.

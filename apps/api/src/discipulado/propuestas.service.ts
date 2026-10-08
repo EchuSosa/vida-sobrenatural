@@ -10,6 +10,7 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
 import { EventosDiscipuladoService } from './eventos.js';
+import { CursoService } from '../curso/curso.service.js';
 import { evaluar } from './reglas-de-asignacion/reglas.js';
 import { bloquearGrupo, bloquearPersona, bloquearPropuesta, type PropuestaBloqueada } from './bloqueos.js';
 import { cursaOCompletoVidaNueva, franjasDe, franjasDeSolicitudes } from './consultas.js';
@@ -36,6 +37,7 @@ export class PropuestasService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventos: EventosDiscipuladoService,
+    private readonly cursos: CursoService,
   ) {}
 
   /** FR-037: las propuestas pendientes de esta Persona como Discipulador, más antiguas primero. Sin teléfono ni dirección. */
@@ -246,6 +248,8 @@ export class PropuestasService {
         tx.persona.findUnique({ where: { id: solicitud.personaId }, select: { sedeId: true } }),
       ]);
       if (!curso || !persona) throw new AppException('ERROR_INTERNO', 500, 'Falta el Curso de Vida Nueva o la Persona.');
+      // 013 FR-054 (D212): un Curso inactivo no abre Grupos nuevos; los que ya están en curso siguen.
+      await this.cursos.exigirActivo(curso.id, tx);
       const grupo = await tx.grupo.create({ data: { cursoId: curso.id, sedeId: persona.sedeId, estado: 'en_curso' }, select: { id: true } });
       grupoId = grupo.id;
       await tx.liderazgo.create({ data: { personaId: propuesta.discipuladorId, grupoId, propuestaId: propuesta.id }, select: { id: true } });

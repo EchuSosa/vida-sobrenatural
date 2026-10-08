@@ -1,6 +1,6 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { useEffect } from 'react';
 import { type Sede } from '@vida-sobrenatural/shared-types';
 import { Button, PasoIndicador, ResumenErrores } from '@vida-sobrenatural/ui';
 import { useFormularioRegistro } from '../../../hooks/use-formulario-registro';
@@ -38,18 +38,11 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
     );
   }
 
+  // spec 007 (T024): sin sesión, el ingreso (Google o código) está en un solo
+  // lugar, /ingresar — page.tsx ya redirige en el servidor; esto cubre la
+  // sesión que se pierde con la pantalla abierta.
   if (status === 'unauthenticated') {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">{t('tituloNoAutenticado')}</h1>
-        <p className="text-muted-foreground">{t('textoNoAutenticado')}</p>
-        {/* H-85: el destino ya no es /registro directo — /ingresar lo
-            resuelve en el servidor según el estado real de la Persona. */}
-        <Button size="xl" className="w-fit" onClick={() => signIn('google', { callbackUrl: '/ingresar' })}>
-          {t('botones.continuarGoogle')}
-        </Button>
-      </div>
-    );
+    return <RedirigirAIngresar texto={t('cargando')} />;
   }
 
   const { paso, error, validacion, enviando, handleSubmit, siguiente, atras, tituloPaso, encabezadoRef } = form;
@@ -117,4 +110,14 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
       </form>
     </div>
   );
+}
+
+function RedirigirAIngresar({ texto }: { texto: string }) {
+  useEffect(() => {
+    // Carga completa a propósito (no `router.replace`): si el servidor sí ve
+    // una sesión que el `SessionProvider` todavía no tiene, /ingresar vuelve
+    // a /registro y una navegación del cliente entraría en un ciclo.
+    window.location.replace('/ingresar');
+  }, []);
+  return <div className="mx-auto max-w-xl px-4 py-16">{texto}</div>;
 }

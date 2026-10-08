@@ -104,6 +104,9 @@ export type ErrorCode =
   | 'VIDA_NUEVA_COMPLETADA_POR_HISTORIAL' // FR-017
   | 'POSIBLE_DUPLICADO' // FR-035, con `coincidencias`
   | 'EMAIL_YA_CARGADO' // FR-037
+  // D215 — DNI opcional en el alta del Admin
+  | 'DNI_INVALIDO'
+  | 'DNI_DUPLICADO' // con `persona` ({ id, nombre, apellido })
   // spec 007 — contracts/codigo-ingreso-api.md
   | 'CODIGO_INCORRECTO'
   | 'CODIGO_SIN_INTENTOS'

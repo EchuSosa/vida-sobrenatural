@@ -41,6 +41,12 @@ export interface ItemNavBackoffice {
    * (H-61) las recorra igual, sin mantener una segunda lista a mano.
    */
   enMenu?: boolean;
+  /**
+   * D213: rutas que cuelgan de este ítem sin ser subrutas suyas — el ítem queda
+   * marcado (`aria-current`) también ahí (`esItemActual`, shared-types). Ej.:
+   * Sedes y Cursos viven bajo Catálogos.
+   */
+  rutasRelacionadas?: readonly string[];
 }
 
 export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
@@ -58,7 +64,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/grupos/[id]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
   { href: '/eventos', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver' },
   { href: '/notificaciones', labelKey: 'notificaciones', icon: Bell, permiso: 'notificaciones.ver' },
-  { href: '/sedes', labelKey: 'sedes', icon: Building2, permiso: 'sedes.ver' },
+  // D213 (013 T077): Sedes sale del menú y se entra por Catálogos.
+  { href: '/sedes', labelKey: 'sedes', icon: Building2, permiso: 'sedes.ver', enMenu: false },
   { href: '/sedes/[id]', labelKey: 'sedes', icon: Building2, permiso: 'sedes.ver', enMenu: false },
   {
     href: '/sedes/papelera',
@@ -83,7 +90,13 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
     permiso: 'libros.papelera.ver',
     enMenu: false,
   },
-  { href: '/catalogos', labelKey: 'catalogos', icon: FolderKanban, permiso: 'catalogos.ver' },
+  {
+    href: '/catalogos',
+    labelKey: 'catalogos',
+    icon: FolderKanban,
+    permiso: 'catalogos.ver',
+    rutasRelacionadas: ['/sedes', '/cursos'],
+  },
   // Lote 0 global (specs/IMPLEMENTACION.md): cada spec agrega SUS rutas recién
   // cuando existe la página — el smoke de axe recorre esta lista entera, así
   // que una ruta sin página rompe los e2e. Los permisos ya están en
@@ -103,6 +116,10 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   // --- spec 006 ---
   { href: '/personas/nueva', labelKey: 'personas', icon: Users, permiso: 'personas.alta', enMenu: false },
   { href: '/solicitudes/historial/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  // --- spec 011 ---
+  { href: '/eventos/nuevo', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.gestionar', enMenu: false },
+  { href: '/eventos/[id]', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver', enMenu: false },
+  { href: '/eventos/papelera', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.papelera.ver', enMenu: false },
 ];
 
 function rolesEfectivos(permiso: Permiso | 'cualquier-sesion'): RolDeCargo[] | 'cualquier-sesion' {

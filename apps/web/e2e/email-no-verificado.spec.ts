@@ -18,8 +18,9 @@ test('un intento de login con email no verificado se rechaza y no deja sesión a
   });
   expect(respuestaLogin.url()).toContain('/email-no-verificado');
 
-  // Sin sesión válida: /registro debe seguir pidiendo autorizar con Google,
-  // no dejar completar el formulario (FR-017 — nunca vincula ni crea Persona).
+  // Sin sesión válida: /registro no deja completar el formulario y lleva al
+  // ingreso (spec 007, T024) — FR-017: nunca vincula ni crea Persona.
   await page.goto('/registro');
-  await expect(page.getByRole('button', { name: 'Continuar con Google' })).toBeVisible();
+  await expect(page).toHaveURL(/\/ingresar$/);
+  await expect(page.getByRole('button', { name: 'Entrar con Google' })).toBeVisible();
 });

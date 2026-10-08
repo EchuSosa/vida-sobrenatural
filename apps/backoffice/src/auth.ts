@@ -1,4 +1,4 @@
-import NextAuth, { type Session } from 'next-auth';
+import NextAuth, { CredentialsSignin, type Session } from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import { notFound } from 'next/navigation';
@@ -6,8 +6,9 @@ import {
   testLoginHabilitado,
   buscarPersonaPorEmail,
   mintApiToken,
+  autorizarCodigoEmail,
 } from '@vida-sobrenatural/shared-types/auth-server';
-import { tienePermiso, type Permiso } from '@vida-sobrenatural/shared-types';
+import { DURACION_SESION_BACKOFFICE_S, tienePermiso, type Permiso } from '@vida-sobrenatural/shared-types';
 import { itemDeAterrizaje, type ItemNavBackoffice } from './config/nav';
 
 /**
@@ -44,9 +45,35 @@ const googleProvider = Google({
  * excluye siempre. `apps/backoffice/playwright.config.ts` ya existe (H-34).
  */
 
+/**
+ * spec 007 (T034, contracts/nextauth-codigo-email.md): el `code` del error del
+ * código (`CODIGO_INCORRECTO`, `CODIGO_SIN_INTENTOS`, `CODIGO_VENCIDO`,
+ * `CODIGO_INVALIDO`) para mostrarlo en el campo.
+ */
+export class ErrorCodigoIngreso extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
+}
+
+/**
+ * spec 007 (T034): el equipo sin Google entra con un código enviado al email.
+ * Registrado SIEMPRE, también en producción. El `authorize()` es el mismo que
+ * el de la web (shared-types/auth-server, H-41); quién entra lo deciden los
+ * mismos callbacks que para Google (FR-013, FR-014).
+ */
+const codigoEmailProvider = Credentials({
+  id: 'codigo-email',
+  name: 'Código por email',
+  credentials: { email: {}, codigo: {} },
+  authorize: autorizarCodigoEmail((code) => new ErrorCodigoIngreso(code)),
+});
+
 const providers = testLoginHabilitado()
   ? [
       googleProvider,
+      codigoEmailProvider,
       Credentials({
         id: 'test-login',
         name: 'Test login (solo E2E)',
@@ -58,11 +85,13 @@ const providers = testLoginHabilitado()
         },
       }),
     ]
-  : [googleProvider];
+  : [googleProvider, codigoEmailProvider];
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
-  session: { strategy: 'jwt' },
+  // spec 007 (FR-016): 7 días, renovándose una vez por día mientras se use.
+  // Igual para Google y para el código.
+  session: { strategy: 'jwt', maxAge: DURACION_SESION_BACKOFFICE_S, updateAge: 24 * 60 * 60 },
   // H-14 (actualización 2026-09-18): el backoffice no depende de las
   // pantallas por defecto de NextAuth — todavía no tiene una página de
   // error propia, así que error/signIn/signOut vuelven al Inicio, que ya

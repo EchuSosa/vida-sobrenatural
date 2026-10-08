@@ -33,6 +33,7 @@ async function bootstrap() {
           'req.body.tutorApellido',
           'req.body.apellido',
           'req.body.nombre',
+          'req.body.dni', // D215
         ],
         censor: '[redactado]',
       },

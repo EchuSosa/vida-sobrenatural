@@ -195,4 +195,64 @@ describe('Alta de adultos por el Admin (spec 006, T068/T073)', () => {
     expect(login.status).toBe(200);
     expect(login.body).toMatchObject({ id: sin });
   });
+
+  describe('DNI opcional (D215)', () => {
+    // Ocho dígitos propios de esta corrida, para no chocar con otras.
+    const raiz = String(Date.now()).slice(-6);
+    const dni = (n: number) => `${n}${raiz}`.padStart(8, '1').slice(-8);
+
+    it('con puntos: se guarda solo con dígitos y no vuelve en la respuesta', async () => {
+      const crudo = dni(10);
+      const res = await alta(datos({ dni: `${crudo.slice(0, 2)}.${crudo.slice(2, 5)}.${crudo.slice(5)}` }));
+      expect(res.status).toBe(201);
+      expect(JSON.stringify(res.body)).not.toContain(crudo);
+      expect((await prisma.persona.findUniqueOrThrow({ where: { id: res.body.id } })).dni).toBe(crudo);
+    });
+
+    it('sin DNI, dos Personas no chocan', async () => {
+      expect((await alta(datos({ dni: null }))).status).toBe(201);
+      expect((await alta(datos({ dni: '' }))).status).toBe(201);
+    });
+
+    it('mal escrito → VALIDACION en el campo, junto con los demás', async () => {
+      const res = await alta(datos({ dni: '12.34', direccion: '' }));
+      expect(res.status).toBe(400);
+      expect(res.body.errors).toEqual(expect.arrayContaining([{ campo: 'dni', code: 'DNI_INVALIDO' }, expect.objectContaining({ campo: 'direccion' })]));
+    });
+
+    it('repetido → 409 DNI_DUPLICADO en el campo con quién lo tiene (sin el DNI), aunque se confirme y aunque esté inactiva', async () => {
+      const crudo = dni(20);
+      const primera = await alta(datos({ dni: crudo, nombre: 'Elsa' }));
+      expect(primera.status).toBe(201);
+      await prisma.persona.update({ where: { id: primera.body.id }, data: { activo: false } });
+      const res = await alta(datos({ dni: `${crudo.slice(0, 2)}.${crudo.slice(2)}`, confirmarPosibleDuplicado: true }));
+      expect(res.status).toBe(409);
+      expect(res.body).toMatchObject({
+        code: 'DNI_DUPLICADO',
+        errors: [{ campo: 'dni', code: 'DNI_DUPLICADO' }],
+        persona: { id: primera.body.id, nombre: 'Elsa', apellido: `Alta${sufijo}` },
+      });
+      expect(JSON.stringify(res.body)).not.toContain(crudo);
+      expect(await prisma.persona.count({ where: { dni: crudo } })).toBe(1);
+    });
+
+    it('dos altas a la vez con el mismo DNI → una sola Persona', async () => {
+      const crudo = dni(30);
+      const [a, b] = await Promise.all([alta(datos({ dni: crudo })), alta(datos({ dni: crudo }))]);
+      expect([a.status, b.status].sort((x, y) => x - y)).toEqual([201, 409]);
+      expect([a.body.code, b.body.code]).toContain('DNI_DUPLICADO');
+      expect(await prisma.persona.count({ where: { dni: crudo } })).toBe(1);
+    });
+
+    it('el listado de Personas no lo muestra', async () => {
+      const crudo = dni(40);
+      expect((await alta(datos({ dni: crudo }))).status).toBe(201);
+      const res = await request(app.getHttpServer())
+        .get(`/personas?q=${encodeURIComponent(`Alta${sufijo}`)}`)
+        .set('Authorization', `Bearer ${await tokenDe(adminId, ADMIN)}`);
+      expect(res.status).toBe(200);
+      expect(JSON.stringify(res.body)).not.toContain(crudo);
+      expect(JSON.stringify(res.body)).not.toContain('"dni"');
+    });
+  });
 });

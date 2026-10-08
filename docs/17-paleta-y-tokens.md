@@ -194,6 +194,24 @@ Mínimos de D81: 4.5:1 para texto, 3:1 para elementos de interfaz y foco.
 | Texto del acento (hover neutro) sobre acento | 12.92 | 12.01 |
 | Anillo de foco sobre fondo | 5.5 | 6.5 |
 
+### Email (spec 007, T041)
+
+Un mail no lee variables CSS y no todos los clientes entienden `oklch()`: las plantillas de
+`apps/api/src/email/plantillas/` usan `COLORES_EMAIL` (`colores.ts`), con los tokens del **tema
+claro** pasados a hex y el nombre del token al lado de cada valor. Los mails no tienen tema oscuro
+propio (cada cliente de correo decide). Medidos con la conversión OKLCH → sRGB y la fórmula de
+contraste de WCAG 2.x:
+
+| Par (mail) | Tokens | Valores | Contraste |
+|---|---|---|---|
+| Texto sobre la tarjeta | `--foreground` / `--card` | `#2f1e17` / `#ffffff` | 15.9 |
+| Código sobre su recuadro | `--foreground` / `--muted` | `#2f1e17` / `#f2eee6` | 13.7 |
+| "Si no fuiste vos…" sobre la tarjeta | `--muted-foreground` / `--card` | `#6b5a4f` / `#ffffff` | 6.6 |
+| Firma sobre la tarjeta | `--primary` / `--card` | `#a14e2b` / `#ffffff` | 5.8 |
+| Tarjeta sobre el fondo del mail | `--card` / `--background` | `#ffffff` / `#fbf9f4` | decorativo (con borde `--border` `#ded8ce`) |
+
+Si cambia un token del tema claro, se cambia también en `COLORES_EMAIL` y se vuelve a medir acá.
+
 **Velo de `HeroConFoto`** (`--velo-heroe`/`--velo-heroe-texto`/`--velo-heroe-opacidad`,
 packages/ui/src/components/hero-con-foto.tsx): no entra en esta tabla — el fondo no es un token fijo,
 es una foto, así que el contraste depende de cuál. H-123: la medición dejó de ser una tabla escrita a

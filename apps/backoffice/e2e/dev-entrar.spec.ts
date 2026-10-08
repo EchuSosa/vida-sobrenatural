@@ -9,10 +9,10 @@ import { test, expect, auditar } from './helpers';
  */
 test('sin sesión, /dev/entrar ofrece el login de prueba y entra como la persona del email', async ({ page }) => {
   await page.goto('/dev/entrar');
-  await expect(page.getByRole('button', { name: 'Ingresar con Google' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Entrar con Google' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Entrar para probar' })).toBeVisible();
   expect((await auditar(page)).violations).toEqual([]);
-  await page.getByLabel('Email').fill('e2e-admin@example.com');
+  await page.getByLabel('Email', { exact: true }).fill('e2e-admin@example.com');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await expect(page.getByRole('navigation', { name: 'Principal' })).toBeVisible();
   const sesion = await (await page.request.get('/api/auth/session')).json();
@@ -26,14 +26,14 @@ test('con sesión, /dev/entrar cambia de persona', async ({ page, permitirErrorD
   // que no existe en producción). Antes lo tapaba la redirección a /mis-discipulados.
   permitirErrorDeConsola(/ClientFetchError: Failed to fetch/);
   await page.goto('/dev/entrar');
-  await page.getByLabel('Email').fill('e2e-admin@example.com');
+  await page.getByLabel('Email', { exact: true }).fill('e2e-admin@example.com');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await expect(page.getByRole('navigation', { name: 'Principal' })).toBeVisible();
 
   await page.goto('/dev/entrar');
   await expect(page.getByRole('heading', { level: 1, name: 'Entrar para probar' })).toBeVisible();
   await page.getByRole('button', { name: 'Entrar', exact: true }).waitFor();
-  await page.getByLabel('Email').fill('e2e-discipulador@example.com');
+  await page.getByLabel('Email', { exact: true }).fill('e2e-discipulador@example.com');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   // spec 006 (D142): lo del Discipulador está en la web app.
   await expect(page.getByRole('heading', { name: 'Lo tuyo está en la app', level: 1 })).toBeVisible();

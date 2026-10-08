@@ -29,5 +29,6 @@ export const NAV_PUBLICA_ACCIONES: ItemNavPublica[] = [
   { href: '/dar', labelKey: 'dar', destacado: true },
   // Reutiliza el punto de entrada ya construido en el spec 001 (ahí vive el
   // botón real de signIn('google', ...), no un login propio).
-  { href: '/registro', labelKey: 'ingresar', destacado: true },
+  // spec 007 (T024): un solo lugar de ingreso, con Google o con código.
+  { href: '/ingresar', labelKey: 'ingresar', destacado: true },
 ];

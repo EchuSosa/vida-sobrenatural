@@ -138,6 +138,15 @@ export { mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type Traductor
 export { PedirEnNombreDe, type PedirEnNombreDeProps, type EtiquetasPedirEnNombreDe, type PersonaElegible } from './components/pedir-en-nombre-de';
 
 // --- spec 007 (FormularioIngresoCodigo, BotonIngresarGoogle) ---
+export { BotonIngresarGoogle } from './components/boton-ingresar-google';
+export {
+  FormularioIngresoCodigo,
+  type FormularioIngresoCodigoProps,
+  type TextosFormularioIngresoCodigo,
+  type ResultadoIngreso,
+  type CampoIngreso,
+  type PasoIngreso,
+} from './components/formulario-ingreso-codigo';
 
 // --- spec 008 (EstadoSemana) ---
 
@@ -146,6 +155,7 @@ export { PedirEnNombreDe, type PedirEnNombreDeProps, type EtiquetasPedirEnNombre
 // --- spec 010 ---
 
 // --- spec 011 (EstadoInscripcionBadge, CampoArchivo) ---
+export { CampoArchivo, type CampoArchivoProps } from './components/campo-archivo';
 
 // --- spec 012 ---
 

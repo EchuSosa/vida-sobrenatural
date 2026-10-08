@@ -79,7 +79,11 @@ export class PersonaService {
   ) {}
 
   /** GET /personas/by-email — uso interno, ver contracts/auth-integration.md. */
-  async findByEmail(email: string) {
+  async findByEmail(email: string | undefined) {
+    // Sin email (query sin el parámetro) no hay a quién buscar: 404, no un 500.
+    if (typeof email !== 'string' || !email.trim()) {
+      throw new AppException('NO_ENCONTRADO', 404, 'No existe una Persona con ese email.');
+    }
     const persona = await this.prisma.persona.findUnique({
       // spec 007 (FR-010): mismo email → misma Persona, escrito como sea.
       where: { email: normalizarEmail(email) },
