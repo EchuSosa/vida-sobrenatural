@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { Marca } from '@vida-sobrenatural/ui';
 import { NAV_PUBLICA } from '../config/nav-publica';
 import { IconoFacebook, IconoInstagram } from './iconos-redes';
+import { EnlaceContanos } from './enlace-contanos';
 
 /**
  * Pie de página de la web pública — FR-006. Dirección, horarios y redes
@@ -11,10 +12,12 @@ import { IconoFacebook, IconoInstagram } from './iconos-redes';
  * horario incorrecto ("10 y 18 hs") sin corresponderse con la Sede real, y
  * sin enlaces a las redes reales de la iglesia. Los enlaces de redes llevan
  * ícono y nombre (ajustes-ux #3 deshace la parte "solo ícono" de H-24).
+ * spec 013: enlace a "Contanos qué te parece" (FR-045).
  */
 export function FooterPublico() {
   const t = useTranslations('nav');
   const tf = useTranslations('footer');
+  const tc = useTranslations('comentarios');
 
   return (
     <footer className="mt-auto border-t border-border">
@@ -29,6 +32,10 @@ export function FooterPublico() {
             </Link>
           ))}
         </nav>
+        {/* spec 013 (T064, FR-045): "Contanos qué te parece", con la pantalla de origen. */}
+        <EnlaceContanos className="inline-flex min-h-11 items-center self-start text-foreground underline underline-offset-4 hover:no-underline">
+          {tc('abrir')}
+        </EnlaceContanos>
         <div className="flex flex-col gap-1">
           <p>{tf('direccion')}</p>
           <p>{tf('horarios')}</p>

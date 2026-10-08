@@ -5,12 +5,14 @@ import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Button, MenuUsuario as MenuUsuarioCompartido } from '@vida-sobrenatural/ui';
 import {
   type TemaPreferido,
   type TemaPreferidoVisible,
   TEMA_A_NEXT_THEMES,
 } from '@vida-sobrenatural/shared-types';
+import { PanelComentario } from './panel-comentario';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
 
@@ -28,11 +30,15 @@ const OPCIONES: { value: TemaPreferidoVisible; label: string; Icono: typeof Sun 
  * packages/ui (ya lo usaban el header público y la barra de la app,
  * H-38/H-47) en vez de su propia estructura — acá era la única de las tres
  * que todavía dejaba "Cerrar sesión" afuera del desplegable, como botón
- * suelto (contradice docs/14-navegacion.md sección 1).
+ * suelto (contradice docs/14-navegacion.md sección 1). spec 013 (T065):
+ * suma "Contanos qué te parece", que abre `PanelComentario`.
  */
 export function MenuUsuario() {
   const { setTheme } = useTheme();
   const { data: session, update } = useSession();
+  const tc = useTranslations('comentarios');
+  // spec 013 (T065): "Contanos qué te parece" abre un panel aparte (el menú se cierra antes).
+  const [comentarioAbierto, setComentarioAbierto] = useState(false);
   const [seleccionado, setSeleccionado] = useState<TemaPreferido>(
     (session?.user.temaPreferido as TemaPreferido) ?? 'claro',
   );
@@ -59,18 +65,22 @@ export function MenuUsuario() {
   }
 
   return (
-    <MenuUsuarioCompartido
-      trigger={
-        <Button variant="ghost" size="sm">
-          {session.user.name}
-        </Button>
-      }
-      labelColoresDeLaApp="Colores de la app"
-      opcionesTema={OPCIONES}
-      temaSeleccionado={seleccionado}
-      onElegirTema={(value) => elegir(value as TemaPreferido)}
-      labelCerrarSesion="Cerrar sesión"
-      onCerrarSesion={() => signOut({ callbackUrl: '/?sesion=cerrada' })}
-    />
+    <>
+      <MenuUsuarioCompartido
+        trigger={
+          <Button variant="ghost" size="sm">
+            {session.user.name}
+          </Button>
+        }
+        acciones={[{ label: tc('abrir'), alElegir: () => setComentarioAbierto(true) }]}
+        labelColoresDeLaApp="Colores de la app"
+        opcionesTema={OPCIONES}
+        temaSeleccionado={seleccionado}
+        onElegirTema={(value) => elegir(value as TemaPreferido)}
+        labelCerrarSesion="Cerrar sesión"
+        onCerrarSesion={() => signOut({ callbackUrl: '/?sesion=cerrada' })}
+      />
+      <PanelComentario abierto={comentarioAbierto} alCambiar={setComentarioAbierto} />
+    </>
   );
 }

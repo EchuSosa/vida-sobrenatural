@@ -78,6 +78,16 @@ interface ProblemaApi {
   reintentarEn?: number;
 }
 
+/**
+ * La IP del navegador para `X-Origen-Cliente` (007, 013): la primera de
+ * `x-forwarded-for`, o `x-real-ip`. La API guarda solo su huella. Una sola
+ * versión para las acciones de servidor de las dos apps.
+ */
+export function origenDeHeaders(h: { get(nombre: string): string | null }): string {
+  const reenviado = h.get('x-forwarded-for')?.split(',')[0]?.trim();
+  return reenviado || h.get('x-real-ip')?.trim() || 'desconocido';
+}
+
 function urlApi(ruta: string): string {
   return `${process.env.API_BASE_URL ?? 'http://localhost:3333'}${ruta}`;
 }
@@ -160,4 +170,40 @@ export function autorizarCodigoEmail(crearError: (code: string) => Error) {
     if (!resultado.ok) throw crearError(resultado.code);
     return { id: resultado.email, email: resultado.email, name: null, emailVerificadoPorProveedor: true as const };
   };
+}
+
+/**
+ * spec 013 (T064, T065, contracts/comentarios-api.md): "Contanos qué te
+ * parece", igual en las dos apps. Lo llama el servidor de Next con el secreto
+ * interno y la IP en `X-Origen-Cliente` (como el código de ingreso), y el
+ * token de la API solo si hay una Persona con sesión. Nunca se loguea el
+ * texto ni el contacto.
+ */
+export type ResultadoComentario =
+  | { ok: true }
+  | { ok: false; errores: Array<{ campo: string; code: string }>; code?: string; reintentarEn?: number };
+
+export async function enviarComentarioApi(datos: unknown, origen: string, apiToken?: string | null): Promise<ResultadoComentario> {
+  const fallido: ResultadoComentario = { ok: false, errores: [], code: 'ERROR_INTERNO' };
+  let response: Response;
+  try {
+    response = await fetch(urlApi('/comentarios'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Secret': process.env.INTERNAL_API_SECRET ?? '',
+        'X-Origen-Cliente': origen,
+        ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+      },
+      body: JSON.stringify(datos),
+    });
+  } catch {
+    return fallido;
+  }
+  if (response.status === 201) return { ok: true };
+  if (response.status === 400 || response.status === 429) {
+    const problema = (await leerProblema(response)) as { code?: string; errors?: Array<{ campo: string; code: string }>; reintentarEn?: number };
+    return { ok: false, errores: problema.errors ?? [], code: problema.code, ...(problema.reintentarEn ? { reintentarEn: problema.reintentarEn } : {}) };
+  }
+  return fallido;
 }

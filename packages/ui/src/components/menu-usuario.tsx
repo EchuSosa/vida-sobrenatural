@@ -37,6 +37,12 @@ export interface MenuUsuarioProps {
    * sesión).
    */
   perfil?: ReactElement;
+  /**
+   * spec 013 (T065): ítems extra arriba de los colores — en el backoffice,
+   * "Contanos qué te parece". El menú se cierra antes de llamar `alElegir`
+   * (abre un panel aparte, nunca anidado, como el diálogo de cerrar sesión).
+   */
+  acciones?: Array<{ label: string; alElegir: () => void }>;
   labelColoresDeLaApp: string;
   opcionesTema: OpcionTemaMenu[];
   temaSeleccionado: string;
@@ -66,6 +72,7 @@ export function MenuUsuario({
   trigger,
   ariaLabel,
   perfil,
+  acciones,
   labelColoresDeLaApp,
   opcionesTema,
   temaSeleccionado,
@@ -90,6 +97,22 @@ export function MenuUsuario({
           {perfil && (
             <>
               <DropdownMenuItem render={perfil} />
+              <DropdownMenuSeparator />
+            </>
+          )}
+          {acciones && acciones.length > 0 && (
+            <>
+              {acciones.map(({ label, alElegir }) => (
+                <DropdownMenuItem
+                  key={label}
+                  onClick={() => {
+                    setMenuAbierto(false);
+                    alElegir();
+                  }}
+                >
+                  {label}
+                </DropdownMenuItem>
+              ))}
               <DropdownMenuSeparator />
             </>
           )}

@@ -3,6 +3,8 @@ import { apiFetch, type DiscipuladoResumen, type Pagina } from '@vida-sobrenatur
 import { requerirPermiso } from '../../auth';
 import { GruposCliente } from './grupos-cliente';
 import { FILTROS_PENDIENTE, TAMANIO_PAGINA, type FiltroPendiente } from './constantes';
+import { SelectorCurso } from './vida-de-servicio/selector-curso';
+import { ListadoEdiciones } from './vida-de-servicio/listado-ediciones';
 
 const PAGINA_VALIDA = /^[1-9]\d*$/;
 
@@ -16,11 +18,21 @@ const PAGINA_VALIDA = /^[1-9]\d*$/;
 export default async function GruposPage({
   searchParams,
 }: {
-  searchParams: Promise<{ estado?: string; pendiente?: string; dir?: string; pagina?: string }>;
+  searchParams: Promise<{ estado?: string; pendiente?: string; dir?: string; pagina?: string; curso?: string }>;
 }) {
   // H-132: exige el mismo permiso que le asigna NAV_BACKOFFICE.
   const session = await requerirPermiso('grupos.ver');
-  const { estado: estadoParam, pendiente: pendienteParam, dir: dirParam, pagina: paginaParam } = await searchParams;
+  // spec 008 (FR-038): el filtro por curso; Vida de Servicio tiene su propio listado.
+  const consulta = await searchParams;
+  if (consulta.curso === 'vida_de_servicio') {
+    return (
+      <>
+        <SelectorCurso actual="vida_de_servicio" />
+        <ListadoEdiciones session={session} searchParams={consulta} />
+      </>
+    );
+  }
+  const { estado: estadoParam, pendiente: pendienteParam, dir: dirParam, pagina: paginaParam } = consulta;
   const estado = estadoParam === 'finalizado' ? 'finalizado' : 'en_curso';
   const pendiente = FILTROS_PENDIENTE.includes(pendienteParam as FiltroPendiente) ? (pendienteParam as FiltroPendiente) : null;
   const dir = dirParam === 'asc' ? 'asc' : 'desc';
@@ -47,6 +59,8 @@ export default async function GruposPage({
   }
 
   return (
+    <>
+    <SelectorCurso actual="vida_nueva" />
     <GruposCliente
       pagina={pagina}
       paginaActual={paginaSolicitada}
@@ -55,5 +69,6 @@ export default async function GruposPage({
       pendiente={pendiente}
       orden={{ columna: 'desde', direccion: dir }}
     />
+    </>
   );
 }

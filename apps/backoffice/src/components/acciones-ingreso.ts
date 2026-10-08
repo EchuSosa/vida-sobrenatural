@@ -4,7 +4,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { AuthError, CredentialsSignin } from 'next-auth';
 import { normalizarEmail } from '@vida-sobrenatural/shared-types';
-import { pedirCodigoIngreso } from '@vida-sobrenatural/shared-types/auth-server';
+import { origenDeHeaders, pedirCodigoIngreso } from '@vida-sobrenatural/shared-types/auth-server';
 import type { ResultadoIngreso } from '@vida-sobrenatural/ui';
 import { signIn } from '../auth';
 
@@ -16,9 +16,7 @@ import { signIn } from '../auth';
  */
 
 async function origenCliente(): Promise<string> {
-  const h = await headers();
-  const reenviado = h.get('x-forwarded-for')?.split(',')[0]?.trim();
-  return reenviado || h.get('x-real-ip')?.trim() || 'desconocido';
+  return origenDeHeaders(await headers());
 }
 
 /** Solo una ruta interna del backoffice; cualquier otra cosa vuelve a la raíz. */
