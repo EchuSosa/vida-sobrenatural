@@ -95,7 +95,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
     labelKey: 'catalogos',
     icon: FolderKanban,
     permiso: 'catalogos.ver',
-    rutasRelacionadas: ['/sedes', '/cursos'],
+    // spec 009: Ministerios también se entra por Catálogos (D213).
+    rutasRelacionadas: ['/sedes', '/cursos', '/ministerios'],
   },
   // Lote 0 global (specs/IMPLEMENTACION.md): cada spec agrega SUS rutas recién
   // cuando existe la página — el smoke de axe recorre esta lista entera, así
