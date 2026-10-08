@@ -49,6 +49,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       // Dar de baja a Beto (neutro) desde Confirmadas.
       await seccion.getByRole('link', { name: /Confirmadas/ }).click();
+      // La pestaña se remonta al cambiar (key={estado}): esperar a que llegue la nueva antes de abrir el diálogo,
+      // o se abre sobre la fila vieja de "Por aprobar" y se desmonta con ella.
+      await expect(seccion.getByRole('link', { name: /Confirmadas/ })).toHaveAttribute('aria-current', 'page');
       await page.waitForLoadState('networkidle');
       await seccion.getByRole('row').filter({ hasText: 'Beto' }).getByRole('button', { name: 'Dar de baja' }).click();
       await expect(page.locator('[data-tono="neutro"]')).toHaveCount(1);
