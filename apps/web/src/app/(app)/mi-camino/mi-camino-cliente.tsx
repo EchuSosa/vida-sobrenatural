@@ -107,7 +107,7 @@ export function MiCaminoCliente({ estadoInicial }: { estadoInicial: EstadoMiDisc
             <MessageCircle aria-hidden />
             {t('enCursoWhatsApp')}
           </ButtonLink>
-          <ButtonLink href={`tel:${estado.discipulador.telefono.replace(/\s/g, '')}`} variant="outline" size="xl">
+          <ButtonLink href={`tel:${estado.discipulador.telefono.replace(/[^+\d]/g, '')}`} variant="outline" size="xl">
             <Phone aria-hidden />
             {t('enCursoLlamar')}
           </ButtonLink>

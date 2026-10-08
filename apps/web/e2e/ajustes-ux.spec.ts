@@ -104,7 +104,7 @@ test.describe('Registro', () => {
     await completarFecha(campo(page, 'Fecha de nacimiento'), '1958-05-20');
     await page.getByRole('button', { name: 'Siguiente' }).click();
 
-    await expect(page.getByLabel('Dirección')).toHaveAccessibleDescription(/no la compartimos/);
+    await expect(page.getByLabel('Dirección')).toHaveAccessibleDescription(/no la compartimos/i);
     await expect(page.getByLabel('Número de teléfono')).toHaveAccessibleDescription(/Discipulador/);
 
     const siguiente = await page.getByRole('button', { name: 'Siguiente' }).boundingBox();
