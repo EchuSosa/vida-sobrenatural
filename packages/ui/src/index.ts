@@ -149,6 +149,7 @@ export {
 } from './components/formulario-ingreso-codigo';
 
 // --- spec 008 (EstadoSemana) ---
+export { EstadoSemana, type EstadoSemanaProps } from './components/estado-semana';
 
 // --- spec 009 (AvisoEstado) ---
 
