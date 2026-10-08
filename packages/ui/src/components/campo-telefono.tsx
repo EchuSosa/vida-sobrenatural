@@ -47,6 +47,22 @@ export const OPCIONES_CODIGO_PAIS = [
   { value: '+1', label: '+1 Estados Unidos / Canadá' },
 ];
 
+/**
+ * Un teléfono guardado ("+54 9 221 555 0101") separado en código de país y
+ * número para volver a mostrarlo en este campo. El código es el más largo de
+ * `OPCIONES_CODIGO_PAIS` con el que empieza (así "+5492215550101", sin
+ * espacio, no se parte en "+5492"); si no coincide ninguno, "+54" y el
+ * número entero. El número queda solo con dígitos.
+ */
+export function separarTelefono(telefono: string): { codigoPais: string; numero: string } {
+  const limpio = telefono.trim();
+  const codigo = OPCIONES_CODIGO_PAIS.map((o) => o.value)
+    .filter((c) => limpio.startsWith(c))
+    .sort((a, b) => b.length - a.length)[0];
+  if (!codigo) return { codigoPais: '+54', numero: limpio.replace(/\D/g, '') };
+  return { codigoPais: codigo, numero: limpio.slice(codigo.length).replace(/\D/g, '') };
+}
+
 export function CampoTelefono({
   id,
   labelTelefono,

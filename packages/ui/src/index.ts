@@ -8,7 +8,7 @@ export { PlaceholderImagen, type PlaceholderImagenProps } from './components/pla
 export { Marca, type MarcaProps } from './components/marca';
 export { MigaDePan, type MigaDePanProps, type TramoMiga } from './components/miga-de-pan';
 export { PasoIndicador, type PasoIndicadorProps } from './components/paso-indicador';
-export { CampoTelefono, OPCIONES_CODIGO_PAIS } from './components/campo-telefono';
+export { CampoTelefono, OPCIONES_CODIGO_PAIS, separarTelefono } from './components/campo-telefono';
 export { CampoAutocompletado, type CampoAutocompletadoProps } from './components/campo-autocompletado';
 export { MarkdownSeguro, type MarkdownSeguroProps } from './components/markdown-seguro';
 export { EditorMarkdown, type EditorMarkdownProps, type EtiquetasEditorMarkdown } from './components/editor-markdown';
