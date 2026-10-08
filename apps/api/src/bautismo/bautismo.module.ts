@@ -33,12 +33,6 @@ export class BautismoModule implements OnModuleInit {
 
   onModuleInit(): void {
     this.fuentes.registrar(new FuenteBautismo(this.prisma));
-    // FR-006: hasta la 012, la forma en que el Admin se entera de un pedido nuevo.
-    this.pendientes.registrar({
-      clave: 'bautismo_pendientes',
-      enlace: '/solicitudes?tipo=bautismo',
-      contar: () => this.prisma.solicitudBautismo.count({ where: { estado: 'pendiente' } }),
-    });
     // FR-029: aceptadas sin fecha, y Eventos que ya pasaron con asignadas sin confirmar.
     this.pendientes.registrar({
       clave: 'bautismo_esperando_fecha',

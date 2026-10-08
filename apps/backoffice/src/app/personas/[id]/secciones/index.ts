@@ -1,4 +1,5 @@
 import type { SeccionPerfil } from './tipos';
+import { SeccionBautismo } from './seccion-bautismo';
 import { SeccionCamino } from './seccion-camino';
 import { SeccionEventos } from './seccion-eventos';
 
@@ -14,6 +15,8 @@ import { SeccionEventos } from './seccion-eventos';
 export const SECCIONES_PERFIL: SeccionPerfil[] = [
   // spec 006 (T047): las cuatro etapas, registrar como hecha y anular.
   { clave: 'etapas', tituloKey: 'etapasPersona.titulo', permiso: 'personas.ver', Componente: SeccionCamino },
+  // spec 010 (T049, T050): situación, habilitar el bautismo y pedirlo en su nombre.
+  { clave: 'bautismo', tituloKey: 'personas.bautismo.titulo', permiso: 'personas.ver', Componente: SeccionBautismo },
   // spec 011 (FR-048): sus Inscripciones a Evento.
   { clave: 'eventos', tituloKey: 'eventos.inscriptos.perfilTitulo', permiso: 'eventos.ver', Componente: SeccionEventos },
 ];

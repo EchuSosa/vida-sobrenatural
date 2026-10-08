@@ -326,14 +326,14 @@ describe('Bautismo — el Admin (integración)', () => {
       expect(res.body.items).toEqual([expect.objectContaining({ tipo: 'bautismo', id: s.id, estado: 'aprobada', abierta: false, extra: { evento: expect.objectContaining({ id: ev.id }) } })]);
     });
 
-    it('los pendientes del Inicio cuentan pedidos, aceptadas sin fecha y Eventos pasados sin confirmar', async () => {
+    it('los pendientes del Inicio cuentan aceptadas sin fecha y Eventos pasados sin confirmar (los pedidos nuevos ya los cuenta la bandeja)', async () => {
       const ev = await esc.eventoBautismo({ inicio: AYER() });
       await esc.asignada(await esc.persona('pend-pasado'), ev.id);
       await esc.solicitud(await esc.persona('pend-pendiente'));
       await esc.solicitud(await esc.persona('pend-espera'), 'aprobada');
       const res = await http().get('/discipulado/pendientes-admin').set('Authorization', admin);
       const claves = res.body.extra.map((l: { clave: string }) => l.clave);
-      expect(claves).toEqual(expect.arrayContaining(['bautismo_pendientes', 'bautismo_esperando_fecha', 'bautismo_sin_confirmar']));
+      expect(claves).toEqual(expect.arrayContaining(['bautismo_esperando_fecha', 'bautismo_sin_confirmar']));
     });
   });
 });
