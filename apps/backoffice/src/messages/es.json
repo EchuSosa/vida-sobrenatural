@@ -1121,7 +1121,9 @@
       "errores": {
         "generico": "No pudimos hacerlo. Probá de nuevo en unos segundos."
       },
-      "seleccionarTodas": "Elegir todas"
+      "seleccionarTodas": "Elegir todas",
+      "perfilTitulo": "Eventos",
+      "perfilVacio": "No se anotó a ningún Evento."
     },
     "pagos": {
       "titulo": "Pago de {nombre}",
