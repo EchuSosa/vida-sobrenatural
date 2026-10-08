@@ -1095,9 +1095,115 @@
       "proximosVerTodos": "Ver todos los eventos",
       "proximosVacio": "Por ahora no hay eventos próximos. Seguinos en las redes para enterarte."
     },
-    "inscripcion": {}
+    "inscripcion": {
+      "titulo": "Inscripción",
+      "cargando": "Buscando tu inscripción…",
+      "anotarme": "Anotarme",
+      "anotarmeLista": "Anotarme en la lista de espera",
+      "sinSesionTexto": "Para anotarte, ingresá con tu cuenta. Si es tu primera vez, te registrás en un par de minutos.",
+      "listaTexto": "El cupo está completo, pero podés anotarte en la lista de espera: si se libera un lugar, pasás automáticamente.",
+      "cupoCompletoBoton": "Cupo completo",
+      "cupoCompletoTexto": "Ya no quedan lugares y este evento no tiene lista de espera.",
+      "sinCuentaActiva": "Para anotarte necesitás terminar tu registro.",
+      "terminarRegistro": "Terminar mi registro",
+      "confirmarTitulo": "¿Te anotamos a {nombre}?",
+      "confirmarCuando": "Cuándo: {cuando}",
+      "confirmarDonde": "Dónde: {lugar}",
+      "confirmarCosto": "Costo: {costo}. Después de anotarte vas a ver cómo pagar.",
+      "confirmarAprobacion": "El equipo revisa cada inscripción y te avisa.",
+      "confirmarLista": "Vas a quedar en la lista de espera.",
+      "confirmarSi": "Sí, anotarme",
+      "confirmarNo": "Volver",
+      "anotando": "Anotándote…",
+      "estado": {
+        "confirmada": "Estás anotada",
+        "pendiente": "Inscripción en revisión",
+        "lista_espera": "Lugar {posicion} en la lista de espera",
+        "rechazada": "Inscripción no aprobada",
+        "cancelada": "Inscripción cancelada"
+      },
+      "pago": {
+        "sin_pago": "Falta el pago",
+        "pendiente_verificacion": "Pago en revisión",
+        "verificado": "Pago verificado"
+      },
+      "queSigue": {
+        "confirmada": "¡Listo! Te esperamos el {cuando} en {lugar}.",
+        "confirmadaConCosto": "Ya tenés tu lugar. Para completar la inscripción, pagá y subí el comprobante:",
+        "pendiente": "Recibimos tu inscripción. El equipo la revisa y te avisamos.",
+        "lista_espera": "Quedaste en el lugar {posicion} de la lista de espera. Si se libera un lugar, pasás automáticamente y te avisamos.",
+        "rechazada": "Esta vez tu inscripción no fue aprobada. Si tenés dudas, hablá con el equipo de la iglesia.",
+        "cancelada": "Cancelaste tu inscripción. Si querés, podés volver a anotarte."
+      },
+      "subirComprobante": "Subir el comprobante",
+      "verMisEventos": "Ver mis eventos",
+      "errorCarga": "No pudimos ver tu inscripción. Recargá la página para intentar de nuevo.",
+      "errores": {
+        "generico": "No pudimos anotarte. Probá de nuevo en unos segundos."
+      }
+    }
   },
-  "misEventos": {},
+  "misEventos": {
+    "titulo": "Mis eventos",
+    "intro": "Tus inscripciones y lo que se viene en la iglesia.",
+    "misInscripciones": "Mis inscripciones",
+    "pasadas": "Ver las pasadas",
+    "proximasLink": "Ver las próximas",
+    "pasadasTitulo": "Inscripciones pasadas",
+    "sinInscripciones": "Todavía no te anotaste a ningún evento.",
+    "sinPasadas": "No tenés inscripciones a eventos que ya pasaron.",
+    "verEventos": "Ver eventos",
+    "proximosEventos": "Próximos eventos",
+    "sinProximos": "Por ahora no hay eventos próximos.",
+    "verEvento": "Ver el evento",
+    "cancelar": "Cancelar inscripción",
+    "cancelando": "Cancelando…",
+    "cancelarTitulo": "¿Cancelar tu inscripción a {nombre}?",
+    "cancelarTexto": "Si te arrepentís, podés volver a anotarte mientras haya lugar.",
+    "cancelarTextoLista": "Vas a salir de la lista de espera. Si volvés a anotarte, quedás al final.",
+    "cancelarTextoPago": "Ya tenías el pago verificado: hablá con el equipo para la devolución.",
+    "cancelarSi": "Sí, cancelar inscripción",
+    "cancelarNo": "No, mantenerla",
+    "cancelada": "Cancelaste tu inscripción.",
+    "subirComprobante": "Subir el comprobante",
+    "volverASubir": "Subir otro comprobante",
+    "pagoRechazado": "El equipo no pudo verificar tu pago: {motivo}",
+    "promovida": "¡Se liberó un lugar y pasaste de la lista de espera!",
+    "errorCarga": {
+      "titulo": "No pudimos cargar tus eventos",
+      "texto": "Puede ser un problema momentáneo. Probá de nuevo en unos segundos.",
+      "reintentar": "Reintentar"
+    },
+    "errores": {
+      "generico": "No pudimos hacerlo. Probá de nuevo en unos segundos."
+    },
+    "comprobante": {
+      "titulo": "Subir el comprobante de pago",
+      "descripcion": "Para {nombre}. El equipo lo revisa y te avisamos.",
+      "instrucciones": "Cómo pagar",
+      "monto": "Monto que pagaste (en pesos)",
+      "medio": "Cómo pagaste",
+      "medios": {
+        "transferencia": "Transferencia",
+        "efectivo": "Efectivo",
+        "otro": "Otro"
+      },
+      "fecha": "Fecha del pago",
+      "archivo": "Comprobante",
+      "archivoAyuda": "Foto o captura (JPG, PNG o WebP) o PDF, hasta 5 MB.",
+      "elegir": "Elegir archivo",
+      "sinArchivo": "Ningún archivo elegido",
+      "enviar": "Enviar comprobante",
+      "enviando": "Enviando…",
+      "cerrar": "Cerrar",
+      "enviado": "Recibimos tu comprobante. El equipo lo revisa y te avisamos.",
+      "errorArchivo": "Elegí la foto o el PDF del comprobante.",
+      "errorTipo": "El comprobante tiene que ser JPG, PNG, WebP o PDF: elegí otro archivo.",
+      "errorTamano": "El archivo pesa más de 5 MB: probá con una captura o un PDF más liviano.",
+      "errorMonto": "Escribí el monto con números, por ejemplo 15000.",
+      "errorFecha": "Completá el día, el mes y el año del pago."
+    }
+  },
   "comentarios": {},
   "inicioApp": {
     "saludo": "Hola, {nombre}",

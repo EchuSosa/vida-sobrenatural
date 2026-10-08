@@ -24,3 +24,28 @@ export async function accionDeAdmin(baseURL: string, eventoId: string, accion: '
   const token = await tokenDe(baseURL, EMAIL_ADMIN_E2E);
   await api(token, 'POST', `/eventos/${eventoId}/${accion}`);
 }
+
+/** Una Persona mayor de edad y `activa`, registrada por la API (el test-login le da la cuenta). Devuelve su id. */
+export async function crearPersonaActiva(baseURL: string, email: string, nombre: string): Promise<string> {
+  const token = await tokenDe(baseURL, email);
+  const sedes: Array<{ id: string }> = await (await fetch(`${API()}/sedes`)).json();
+  const persona = await api(token, 'POST', '/personas', {
+    apellido: 'E2E',
+    nombre,
+    genero: 'femenino',
+    fechaNacimiento: '1990-05-20',
+    telefono: '+5492219000011',
+    direccion: 'Calle 1 y 50',
+    sedeId: sedes[0].id,
+    estadoCivil: 'soltero_a',
+    profesion: 'educacion',
+    congregaDesde: 2020,
+    consentimientoDatos: true,
+  });
+  return persona.id as string;
+}
+
+/** Anota a una Persona (por su sesión de test-login) a un Evento, por la API. */
+export async function anotarPorApi(baseURL: string, email: string, eventoId: string) {
+  return api(await tokenDe(baseURL, email), 'POST', `/eventos/${eventoId}/inscripciones/me`);
+}

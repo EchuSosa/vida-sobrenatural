@@ -12,12 +12,13 @@ import { accionDeAdmin, crearEventoComoAdmin } from './helpers-011';
 
 const marca = `e2e-pub-${Date.now()}`;
 const eventos: Record<string, EventoDetalle> = {};
+// Las horas son cercanas a propósito: la cartelera pagina de a 12 y los otros specs crean Eventos a +3 h o más.
 
 test.beforeAll(async ({ baseURL }) => {
   const en = (horas: number) => new Date(Date.now() + horas * 3_600_000).toISOString();
   eventos.primero = await crearEventoComoAdmin(baseURL!, {
     nombre: `${marca} campamento`,
-    inicio: en(3),
+    inicio: en(1),
     lugar: 'Quinta Los Pinos',
     publicoObjetivo: 'Jóvenes de 15 a 25',
     requiereInscripcion: true,
@@ -26,12 +27,12 @@ test.beforeAll(async ({ baseURL }) => {
     costo: '15000',
     instruccionesPago: 'Alias VIDA.SOBRENATURAL',
   });
-  eventos.informativo = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} noche de alabanza`, inicio: en(5) });
-  eventos.bautismo = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} bautismos`, inicio: en(6), tipo: 'bautismo' });
-  eventos.cancelado = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} cancelado`, inicio: en(4) });
+  eventos.informativo = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} noche de alabanza`, inicio: en(1.5) });
+  eventos.bautismo = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} bautismos`, inicio: en(2), tipo: 'bautismo' });
+  eventos.cancelado = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} cancelado`, inicio: en(1.2) });
   await accionDeAdmin(baseURL!, eventos.cancelado.id, 'cancelar');
   eventos.pasado = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} pasado`, inicio: en(-72) });
-  eventos.eliminado = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} eliminado`, inicio: en(4) });
+  eventos.eliminado = await crearEventoComoAdmin(baseURL!, { nombre: `${marca} eliminado`, inicio: en(1.2) });
   await accionDeAdmin(baseURL!, eventos.eliminado.id, 'eliminar');
 });
 
