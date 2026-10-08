@@ -1,5 +1,6 @@
 import type { SeccionPerfil } from './tipos';
 import { SeccionCamino } from './seccion-camino';
+import { SeccionEventos } from './seccion-eventos';
 
 /**
  * Lote 0 global (spec 013, research #5): las secciones que suman otras specs
@@ -13,4 +14,6 @@ import { SeccionCamino } from './seccion-camino';
 export const SECCIONES_PERFIL: SeccionPerfil[] = [
   // spec 006 (T047): las cuatro etapas, registrar como hecha y anular.
   { clave: 'etapas', tituloKey: 'etapasPersona.titulo', permiso: 'personas.ver', Componente: SeccionCamino },
+  // spec 011 (FR-048): sus Inscripciones a Evento.
+  { clave: 'eventos', tituloKey: 'eventos.inscriptos.perfilTitulo', permiso: 'eventos.ver', Componente: SeccionEventos },
 ];

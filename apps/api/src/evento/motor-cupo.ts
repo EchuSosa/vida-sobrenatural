@@ -28,8 +28,15 @@ export function conBloqueoDeEvento<T>(
     const filas = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM eventos WHERE id = ${eventoId} FOR UPDATE`;
     if (filas.length === 0) throw new AppException('NO_ENCONTRADO', 404, 'Evento no encontrado.');
     return fn(tx);
-  });
+  }, OPCIONES_TRANSACCION_DE_CUPO);
 }
+
+/**
+ * El QR en el culto: muchas Personas a la vez esperando el mismo bloqueo. Más
+ * margen que el de Prisma por defecto (2 s para conseguir conexión, 5 s de
+ * transacción) para que la cola no termine en errores.
+ */
+export const OPCIONES_TRANSACCION_DE_CUPO = { maxWait: 15_000, timeout: 20_000 } as const;
 
 /** Inscripciones que ocupan lugar (`confirmada` + `pendiente`, D192). */
 export function contarOcupados(tx: Prisma.TransactionClient, eventoId: string): Promise<number> {

@@ -180,7 +180,9 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
     expect(bandeja.status).toBe(200);
     const deBeto = bandeja.body.items.find((s: { persona: { id: string } }) => s.persona.id === ids.beto);
     expect(deBeto).toMatchObject({ estado: 'pendiente', tipo: 'discipulado', creadoPor: { id: ids.disc } });
-    expect(bandeja.body.items.every((s: { estado: string }) => ['pendiente', 'propuesta'].includes(s.estado))).toBe(true);
+    // spec 011: la bandeja también trae Inscripciones a Evento y Pagos (otros estados abiertos, D178):
+    // lo que se afirma es que solo vienen las abiertas, no los estados de Discipulado.
+    expect(bandeja.body.items.every((s: { abierta: boolean }) => s.abierta)).toBe(true);
 
     // `buscar` filtra por nombre en la base, con el total de lo filtrado.
     const buscada = await request(app.getHttpServer()).get(`/solicitudes?buscar=beto%20Integraci`).set('Authorization', `Bearer ${admin}`);

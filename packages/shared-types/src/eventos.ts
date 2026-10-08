@@ -190,3 +190,105 @@ export function estadoPagoDeInscripcion(
   if (pagos.some((p) => p.estado === 'pendiente_verificacion')) return { estado: 'pendiente_verificacion', ultimoRechazo };
   return { estado: 'sin_pago', ultimoRechazo };
 }
+
+/** El último Pago de una Inscripción, para la Persona (FR-024). */
+export interface UltimoPagoInscripcion {
+  id: string;
+  estado: EstadoPago;
+  monto: string;
+  medio: MedioPago;
+  fechaPago: string;
+  motivoRechazo: string | null;
+  tieneComprobante: boolean;
+}
+
+/** Una Inscripción vista por su dueña (contracts/inscripciones-api.md). */
+export interface MiInscripcionEvento {
+  id: string;
+  estado: EstadoInscripcionEvento;
+  createdAt: string;
+  /** Solo en `lista_espera` (FR-017). */
+  posicionEnLista: number | null;
+  promovidaEn: string | null;
+  motivoRechazo: string | null;
+  motivoCancelacion: MotivoCancelacionInscripcion | null;
+  estadoPago: EstadoPagoInscripcion;
+  /** Motivo del último pago rechazado, para saber qué corregir. */
+  ultimoRechazoPago: string | null;
+  ultimoPago: UltimoPagoInscripcion | null;
+  evento: EventoPublico;
+}
+
+/** `GET /eventos/:id/mi-inscripcion`: lo que necesita la isla de la página del Evento. */
+export interface MiInscripcionEnEvento {
+  inscripcion: MiInscripcionEvento | null;
+  lugaresDisponibles: number | null;
+  estadoInscripcion: EstadoInscripcionDeEvento;
+}
+
+export type CuandoMisInscripciones = 'proximas' | 'pasadas';
+
+/** `PagoResumen` (contracts/pagos-api.md). */
+export interface PagoResumen {
+  id: string;
+  inscripcionEventoId: string;
+  monto: string;
+  medio: MedioPago;
+  fechaPago: string;
+  estado: EstadoPago;
+  tieneComprobante: boolean;
+  comprobanteMime: string | null;
+  creadoPor: { id: string; nombre: string; apellido: string } | null;
+  verificadoPor: { id: string; nombre: string; apellido: string } | null;
+  revisadoEn: string | null;
+  motivoRechazo: string | null;
+  createdAt: string;
+}
+
+/** Fila de `GET /pagos` y de la bandeja: el Pago con su Persona y su Evento. */
+export interface PagoEnBandeja extends PagoResumen {
+  persona: { id: string; nombre: string; apellido: string };
+  evento: { id: string; nombre: string; inicio: string; slug: string };
+}
+
+export const MEDIOS_PAGO: readonly MedioPago[] = ['transferencia', 'efectivo', 'otro'];
+export const MOTIVO_RECHAZO_PAGO_MAX = 500;
+
+type PersonaBreveEvento = { id: string; nombre: string; apellido: string };
+
+/** Fila de `GET /eventos/:id/inscripciones` (backoffice, FR-025). */
+export interface InscripcionEventoResumen {
+  id: string;
+  persona: PersonaBreveEvento & { tieneAcceso: boolean };
+  estado: EstadoInscripcionEvento;
+  createdAt: string;
+  creadoPor: PersonaBreveEvento | null;
+  posicionEnLista: number | null;
+  /** Subió desde la lista y el Admin todavía no marcó "Ya le avisé". */
+  promovidaSinVer: boolean;
+  estadoPago: EstadoPagoInscripcion;
+  /** Confirmada en un Evento con costo, sin Pago verificado ni en revisión: días desde que se anotó. */
+  diasSinPago: number | null;
+  /** El Pago en revisión (para verificarlo desde el detalle). */
+  pagoPendienteId: string | null;
+  revisadoPor: PersonaBreveEvento | null;
+  motivoRechazo: string | null;
+  motivoCancelacion: MotivoCancelacionInscripcion | null;
+}
+
+/** Inscripción con su Evento, para el perfil de una Persona y para la 010 (FR-048). */
+export interface InscripcionDePersona {
+  id: string;
+  estado: EstadoInscripcionEvento;
+  createdAt: string;
+  estadoPago: EstadoPagoInscripcion;
+  evento: { id: string; slug: string; nombre: string; tipo: TipoEvento; inicio: string; estado: EstadoEvento };
+}
+
+export interface ResultadoAprobarLote {
+  aprobadas: string[];
+  fallidas: Array<{ id: string; code: string }>;
+}
+
+export const APROBAR_LOTE_MAX = 50;
+export const MOTIVO_RECHAZO_INSCRIPCION_MAX = 500;

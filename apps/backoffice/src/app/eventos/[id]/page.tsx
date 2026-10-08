@@ -19,11 +19,11 @@ export default async function EventoDetallePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ creado?: string }>;
+  searchParams: Promise<{ creado?: string; estado?: string }>;
 }) {
   const session = await requerirPermiso('eventos.ver');
   const { id } = await params;
-  const { creado } = await searchParams;
+  const { creado, estado } = await searchParams;
   let evento: EventoDetalle;
   try {
     evento = await apiFetch<EventoDetalle>(`/eventos/${id}`, { headers: { Authorization: `Bearer ${session.apiToken}` } });
@@ -47,7 +47,13 @@ export default async function EventoDetallePage({
         qrDataUrl={qrDataUrl}
         recienCreado={creado === '1'}
       />
-      <InscriptosEvento evento={evento} />
+      <InscriptosEvento
+        evento={evento}
+        apiToken={session.apiToken}
+        estado={estado}
+        puedeGestionar={tienePermisoSesion(session, 'inscripciones_evento.gestionar')}
+        puedeVerificar={tienePermisoSesion(session, 'pagos.verificar')}
+      />
     </div>
   );
 }
