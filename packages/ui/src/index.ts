@@ -150,6 +150,7 @@ export {
 
 // --- spec 008 (EstadoSemana) ---
 export { EstadoSemana, type EstadoSemanaProps } from './components/estado-semana';
+export { ContenidoSemana, type ContenidoSemanaProps } from './components/contenido-semana';
 
 // --- spec 009 (AvisoEstado) ---
 

@@ -379,3 +379,10 @@ export interface VidaDeServicioDePersona {
   edicion: EdicionResumen | null;
   ediciones: EdicionAbierta[];
 }
+
+/** "2,4 MB" / "830 KB": el tamaño de un archivo para leer en pantalla (FR-023 dice el límite en MB). */
+export function formatearTamanio(bytes: number, locale: string): string {
+  const formato = (n: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n);
+  if (bytes >= 1024 * 1024) return `${formato(bytes / (1024 * 1024))} MB`;
+  return `${formato(Math.max(1, Math.round(bytes / 1024)))} KB`;
+}
