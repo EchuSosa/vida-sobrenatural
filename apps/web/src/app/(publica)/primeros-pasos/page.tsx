@@ -77,10 +77,12 @@ export default function PrimerosPasosPage() {
             <strong>{t('paso4')}</strong> — {t('paso4Descripcion')}
           </li>
         </ol>
-        <Link href="/ministerios" className="w-fit font-medium text-primary underline underline-offset-2">
+        {/* ajustes-ux #11: área de toque de 44 px (antes 24). #12: la nota
+            final es la frase que más tranquiliza — en cuerpo normal. */}
+        <Link href="/ministerios" className="inline-flex min-h-11 w-fit items-center font-medium text-primary underline underline-offset-2">
           {t('conoceMinisterios')}
         </Link>
-        <p className="text-sm text-muted-foreground">{t('notaFinal')}</p>
+        <p className="text-base text-foreground">{t('notaFinal')}</p>
       </section>
 
       <div className="flex flex-col gap-3 sm:flex-row">

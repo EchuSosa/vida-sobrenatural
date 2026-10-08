@@ -56,16 +56,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(respuestaSede?.status()).toBe(404);
     });
 
-    test('las secciones sin funcionalidad muestran un estado vacío, no un error', async ({
-      page,
-    }) => {
-      // spec 011: `/eventos` ya es la cartelera de Eventos: con Eventos de otros specs no está vacía.
-      for (const ruta of ['/ministerios']) {
-        const respuesta = await page.goto(ruta);
-        expect(respuesta?.status()).toBe(200);
-        await expect(page.getByText(/todavía no/i)).toBeVisible();
-      }
-    });
+    // Las dos secciones que este test veía vacías ya tienen contenido: /eventos es la
+    // cartelera (spec 011) y /ministerios muestra los reales (spec 009); con los
+    // Eventos y Ministerios que siembran los e2e, el estado vacío ya no se ve acá.
 
     // H-02 (revisión manual, actualización 2026-09-18): copy real en
     // Primeros pasos y Nosotros, con los pendientes marcados como tales.

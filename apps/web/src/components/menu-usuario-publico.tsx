@@ -111,12 +111,12 @@ export function ItemsUsuarioCelular({ onNavigate }: { onNavigate?: () => void })
   }
 
   return (
-    <div className="flex flex-col gap-4 border-t border-border pt-4">
-      <Link href="/perfil" onClick={onNavigate} className="text-sm font-medium">
+    <div className="flex flex-col gap-4 border-t border-border pt-2 pb-4">
+      <Link href="/perfil" onClick={onNavigate} className="flex min-h-12 items-center text-base font-medium">
         {t('perfil')}
       </Link>
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-medium">{t('tema')}</legend>
+        <legend className="mb-2 text-base font-medium">{t('tema')}</legend>
         <div className="flex gap-2">
           {OPCIONES_TEMA.map(({ value, labelKey, Icono }) => (
             <Button

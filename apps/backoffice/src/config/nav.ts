@@ -95,7 +95,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
     labelKey: 'catalogos',
     icon: FolderKanban,
     permiso: 'catalogos.ver',
-    rutasRelacionadas: ['/sedes', '/cursos'],
+    // spec 009: Ministerios también se entra por Catálogos (D213).
+    rutasRelacionadas: ['/sedes', '/cursos', '/ministerios'],
   },
   // Lote 0 global (specs/IMPLEMENTACION.md): cada spec agrega SUS rutas recién
   // cuando existe la página — el smoke de axe recorre esta lista entera, así
@@ -121,6 +122,11 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/solicitudes/vida-de-servicio/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   { href: '/grupos/vida-de-servicio/[id]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
   { href: '/grupos/vida-de-servicio/[id]/semanas/[numero]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
+  // --- spec 009 (se entra por Catálogos y por la bandeja) ---
+  { href: '/solicitudes/postulacion/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  { href: '/ministerios', labelKey: 'catalogos', icon: FolderKanban, permiso: 'ministerios.ver', enMenu: false },
+  { href: '/ministerios/[id]', labelKey: 'catalogos', icon: FolderKanban, permiso: 'ministerios.ver', enMenu: false },
+  { href: '/ministerios/papelera', labelKey: 'papelera', icon: Trash2, permiso: 'ministerios.papelera.ver', enMenu: false },
   // --- spec 011 ---
   { href: '/eventos/nuevo', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.gestionar', enMenu: false },
   { href: '/eventos/[id]', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver', enMenu: false },

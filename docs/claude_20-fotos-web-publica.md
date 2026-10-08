@@ -34,7 +34,7 @@ Las fotos **no se recortan de nuevo en CSS** salvo por diferencia mínima de pro
 | Héroe alternativo (A/B o modo oscuro) | `hero/hero-multitud-bn` | Congregación en blanco y negro con el swoosh de la marca | Sin usar, a propósito — no hay A/B testing ni una decisión de foto distinta por tema en esta app. Usada solo para medir el peor caso de contraste del velo de `HeroConFoto` (ver `packages/ui/src/components/hero-con-foto.tsx`). |
 | Tarjeta Primeros pasos | `cards/card-bienvenida-estas-en-casa` | Equipo de bienvenida frente al cartel "Estás en casa" | ✅ aplicado (tarjeta, lazy) |
 | Tarjeta Nosotros | `cards/card-comunidad-pareja-mayor` | Pareja mayor entre la congregación | ✅ aplicado (tarjeta, lazy) |
-| Tarjeta Eventos | `cards/card-jovenes-manos` | Jóvenes con las manos levantadas en un culto | ✅ aplicado (tarjeta, lazy) |
+| Tarjeta Eventos | `cards/card-jovenes-manos` | Jóvenes con las manos levantadas en un culto | ⏸ sin usar: la tarjeta se sacó del Inicio porque "Próximos eventos" la reemplaza (FR-001 de la 011, ajustes-ux) |
 | Tarjeta Visitanos | `cards/card-culto-manos` | Congregación con manos levantadas frente al escenario | ✅ aplicado (tarjeta, lazy) — misma foto que la Cabecera de Visitanos, a propósito (ver esa sección) |
 
 ### Nosotros (página de entrada, seis tarjetas — D122)

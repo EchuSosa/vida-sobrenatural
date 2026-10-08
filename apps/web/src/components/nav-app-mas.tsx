@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
 import { Button, Marca, Sheet, SheetTrigger, SheetContent, SheetTitle } from '@vida-sobrenatural/ui';
 import { NAV_PUBLICA } from '../config/nav-publica';
-import { useAccionesPublicas } from './nav-publica-header';
+import { CLASES_ITEM_PANEL, useAccionesPublicas } from './nav-publica-header';
 
 /**
  * H-37 (revisión manual ronda 3, D107, docs/14-navegacion.md sección 2): la
@@ -49,7 +49,7 @@ export function NavAppTopBarCelular() {
     <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
       {/* H-87: acá no había marca, solo el nombre en texto — isotipo, no
           logotipo (7.5:1 produce scroll horizontal a 320px, H-62). */}
-      <Link href="/inicio">
+      <Link href="/inicio" className="flex min-h-11 min-w-11 items-center">
         <Marca variante="isotipo" />
       </Link>
       <Sheet open={abierto} onOpenChange={setAbierto}>
@@ -70,9 +70,10 @@ export function NavAppTopBarCelular() {
             <Marca variante="isotipo" />
             {t('mas')}
           </SheetTitle>
-          <nav aria-label={t('secundario')} className="flex flex-col gap-4 overflow-y-auto px-4 py-4">
+          {/* ajustes-ux #2: filas de 48 px con separador, como el panel público. */}
+          <nav aria-label={t('secundario')} className="flex flex-col overflow-y-auto px-4 py-2">
             {items.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setAbierto(false)} className="text-sm font-medium">
+              <Link key={item.href} href={item.href} onClick={() => setAbierto(false)} className={CLASES_ITEM_PANEL}>
                 {item.label}
               </Link>
             ))}

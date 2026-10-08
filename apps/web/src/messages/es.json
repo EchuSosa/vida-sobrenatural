@@ -205,7 +205,11 @@
     "tema": "Colores de la app",
     "temaClaro": "Claro",
     "temaOscuro": "Oscuro",
-    "cerrarSesion": "Cerrar sesión"
+    "cerrarSesion": "Cerrar sesión",
+    "cerrarSesionTitulo": "¿Cerrar sesión?",
+    "cerrarSesionDescripcion": "Para volver a entrar, vas a tener que ingresar de nuevo desde \"Ingresar\".",
+    "cerrarSesionConfirmar": "Sí, cerrar sesión",
+    "cerrarSesionVolver": "Volver"
   },
   "inicio": {
     "tarjetaPrimerosPasosTitulo": "Primeros pasos",
@@ -214,9 +218,6 @@
     "tarjetaNosotrosTitulo": "Nosotros",
     "tarjetaNosotrosDescripcion": "Quiénes somos, en qué creemos y nuestro liderazgo.",
     "tarjetaNosotrosAlt": "Pareja mayor entre la congregación",
-    "tarjetaEventosTitulo": "Eventos",
-    "tarjetaEventosDescripcion": "Próximos eventos de Vida Sobrenatural.",
-    "tarjetaEventosAlt": "Jóvenes con las manos levantadas en un culto",
     "tarjetaVisitanosTitulo": "Visitanos",
     "tarjetaVisitanosDescripcion": "Dirección, horarios y contacto de Vida Sobrenatural.",
     "tarjetaVisitanosAlt": "Congregación con manos levantadas frente al escenario",
@@ -250,9 +251,12 @@
     "sinSedes": "Todavía no cargamos la información de la Sede. Volvé a intentarlo más tarde.",
     "errorCargaTitulo": "No pudimos cargar la información de tu Sede",
     "errorCarga": "Puede ser algo pasajero — probá de nuevo en unos segundos.",
-    "elegirSede": "Elegí la Sede a la que te acercaste:",
-    "telefono": "Tel:",
-    "email": "Email:"
+    "elegirSede": "Estas son nuestras Sedes:",
+    "telefono": "Teléfono:",
+    "email": "Email:",
+    "comoLlegar": "Cómo llegar",
+    "llamar": "Llamar",
+    "escribirEmail": "Escribir un email"
   },
   "nosotros": {
     "titulo": "Nosotros",
@@ -358,11 +362,13 @@
     "errorTexto": "Puede ser algo pasajero — probá de nuevo en unos segundos.",
     "portadaAlt": "Portada de {titulo}",
     "portadaPendiente": "Portada pendiente",
-    "autorPor": "por {autor}"
+    "autorPor": "por {autor}",
+    "facebookNombre": "Facebook",
+    "instagramNombre": "Instagram"
   },
   "registro": {
     "tituloPagina": "Completá tus datos",
-    "introPagina": "Ya autorizaste el acceso con {email}. Faltan estos datos para terminar tu registro.",
+    "introPagina": "Entraste con tu cuenta ({email}). Faltan unos datos para terminar tu registro.",
     "cargando": "Cargando…",
     "tituloNoAutenticado": "Registrarme",
     "textoNoAutenticado": "Para registrarte, primero autorizá el acceso con tu cuenta de Google.",
@@ -433,6 +439,28 @@
         "sin_ocupacion": "Sin ocupación",
         "otro": "Otro"
       }
+    },
+    "listo": {
+      "titulo": "¡Listo, ya sos parte!",
+      "texto": "Tu registro se completó. En Mi camino vas a ver cómo sigue tu proceso en la iglesia y qué podés hacer ahora.",
+      "irAMiCamino": "Ir a mi camino",
+      "volverAPrimerosPasos": "Volver a Primeros pasos"
+    },
+    "ayudas": {
+      "telefono": "Para que tu Discipulador pueda escribirte.",
+      "direccion": "Para saber de qué zona sos. No la compartimos.",
+      "congregaDesde": "Aunque sea aproximado. Si recién empezás, elegí \"Este año\"."
+    },
+    "errores": {
+      "apellido": "Escribí tu apellido.",
+      "nombre": "Escribí tu nombre.",
+      "genero": "Elegí una opción en Género.",
+      "direccion": "Escribí tu dirección, por ejemplo: calle 7 n.º 1234.",
+      "sedeId": "Elegí la Sede a la que vas.",
+      "estadoCivil": "Elegí una opción en Estado civil.",
+      "profesion": "Elegí una opción en Profesión.",
+      "profesionDetalle": "Escribí a qué te dedicás.",
+      "congregaDesde": "Elegí el año en que empezaste a venir. Si es tu primer año, elegí \"Este año\"."
     }
   },
   "footer": {
@@ -453,7 +481,9 @@
     "cuit": "CUIT",
     "cuenta": "Cuenta",
     "copiar": "Copiar {campo}",
-    "copiado": "{campo} copiado"
+    "copiado": "{campo} copiado",
+    "cuentaDetalle": "Cuenta en Pesos, Banco Santander",
+    "copiarBoton": "Copiar"
   },
   "comun": {
     "cerrarPanel": "Cerrar el panel"
@@ -465,7 +495,7 @@
       "introduccion": "Vida Nueva es el primer paso después de la Bienvenida: te juntás con una persona del equipo, un Discipulador, para recorrer juntos el libro Vida Nueva.",
       "franjasTitulo": "¿Qué días y horarios podés?",
       "franjasAyuda": "Cargá al menos un horario. Con eso buscamos a alguien que pueda en esos momentos.",
-      "franjasRequeridas": "Agregá al menos un día y horario con \"Agregar franja\".",
+      "franjasRequeridas": "Elegí un día y un horario en el que la hora de fin sea después de la de inicio, y tocá \"Agregar franja\".",
       "pedir": "Quiero empezar Vida Nueva",
       "pedidoEnviado": "Recibimos tu pedido de Vida Nueva.",
       "buscandoTitulo": "Estamos buscando a tu Discipulador",
@@ -491,11 +521,13 @@
       "tutorTexto": "Para empezar Vida Nueva, pediles que hablen con el equipo de tu sede. Ellos cargan el pedido por vos, y después vas a ver acá cómo sigue.",
       "enCursoTitulo": "Estás haciendo Vida Nueva",
       "enCursoDiscipulador": "Tu Discipulador es {nombre}.",
-      "enCursoTelefono": "Llamar o escribir al {telefono}",
+      "enCursoTelefono": "Su teléfono es {telefono}.",
       "enCursoDesde": "Empezaste el {fecha}.",
       "enCursoYAhora": "Tu Discipulador se va a comunicar con vos para combinar los encuentros. Si preferís, podés escribirle vos.",
       "finalizadoTitulo": "¡Terminaste Vida Nueva!",
-      "finalizadoTexto": "Lo terminaste el {fecha}. El próximo paso lo vas a ver acá apenas esté disponible; mientras tanto, podés hablar con el equipo de tu sede."
+      "finalizadoTexto": "Lo terminaste el {fecha}. El próximo paso lo vas a ver acá apenas esté disponible; mientras tanto, podés hablar con el equipo de tu sede.",
+      "enCursoWhatsApp": "Escribirle por WhatsApp",
+      "enCursoLlamar": "Llamar"
     },
     "errores": {
       "generico": "No pudimos guardar tu pedido. Probá de nuevo en unos segundos."
@@ -560,7 +592,34 @@
       "misDiscipulados": "Mis discipulados",
       "misGrupos": "Mis grupos"
     },
-    "ministerio": {},
+    "ministerio": {
+      "noAptaTitulo": "Primero, Vida de Servicio",
+      "noAptaTexto": "Cuando termines Vida de Servicio vas a poder postularte a un Ministerio. Mientras tanto, podés conocerlos.",
+      "conocer": "Conocé los Ministerios",
+      "elegir": "Elegí un Ministerio",
+      "ultimoRechazada": "Tu postulación a {ministerio} no avanzó esta vez. Podés postularte de nuevo, a ese o a otro Ministerio.",
+      "ultimoRetirada": "Retiraste tu postulación a {ministerio} el {fecha}. Podés volver a postularte cuando quieras.",
+      "ultimoBaja": "Dejaste de servir en {ministerio} el {fecha}. Cuando quieras, podés volver a postularte.",
+      "pendienteTitulo": "Tu postulación está en revisión",
+      "pendienteTexto": "Te postulaste a {ministerio} el {fecha}. El equipo la va a revisar y te contamos acá cómo sigue.",
+      "pendienteTextoCelula": "Te postulaste a {ministerio} ({celula}) el {fecha}. El equipo la va a revisar y te contamos acá cómo sigue.",
+      "requiereFormacion": "Este ministerio requiere capacitación o audición: el equipo te va a contactar.",
+      "retirar": "Retirar postulación",
+      "retirarTitulo": "¿Retirar tu postulación a {ministerio}?",
+      "retirarDescripcion": "El equipo deja de revisarla. Podés volver a postularte cuando quieras.",
+      "retirarConfirmar": "Sí, retirarla",
+      "retirarMantener": "No, dejarla",
+      "retirada": "Listo, retiraste tu postulación.",
+      "miembroTitulo": "Estás sirviendo en {ministerio}",
+      "miembroCelula": "En el área {celula}.",
+      "miembroDesde": "Desde el {fecha}.",
+      "ministerioPausado": "{ministerio} está en pausa por ahora. Si tenés dudas, consultá en tu Sede.",
+      "celulaPausada": "El área {celula} está en pausa por ahora. Si tenés dudas, consultá en tu Sede.",
+      "cambiar": "Quiero cambiar de Ministerio",
+      "pendienteOtroTitulo": "También te postulaste a {ministerio}",
+      "pendienteOtroTexto": "Si el equipo la aprueba, pasás a servir ahí y dejás {actual}.",
+      "errorGenerico": "No pudimos guardarlo. Probá de nuevo en unos segundos."
+    },
     "bautismo": {}
   },
   "franjas": {
@@ -1288,7 +1347,57 @@
     },
     "noEncontradoTitulo": "No encontramos esa edición"
   },
-  "ministerios": {},
+  "ministerios": {
+    "titulo": "Ministerios",
+    "introduccion1": "Durante nuestro curso Vida de Servicio tenemos la posibilidad de comenzar a servir a otro nivel y desarrollar los dones y ministerios que nos fueron dados para bendición. Primeramente, en tu casa, en tu trabajo o lugar de estudio y luego también como parte de los equipos de nuestra congregación.",
+    "introduccion2": "Te compartimos una lista de ministerios que en este momento desarrollamos activamente en Vida Sobrenatural. Este listado podrá variar a través del tiempo, pero es un punto de partida. Algunos ministerios requieren habilidades particulares o capacitaciones específicas y quizás todavía no sea el tiempo para poder integrarte, pero todo comienza por la disposición y el llamado a sumarse a servir en alguna de las otras opciones mientras te seguís capacitando.",
+    "paraEmpezarTitulo": "Para empezar a servir ya",
+    "paraEmpezarTexto": "Primero te recomendamos estos ministerios que te activarán de una manera bien directa en bendecir a otros junto a un equipo.",
+    "conFormacionTitulo": "Requieren formación previa",
+    "conFormacionTexto": "También tenés como opción sumarte a los siguientes ministerios, pero que requieren capacitaciones o formación previa para poder participar. Es necesario consultar, en algunos casos hacer audiciones o crecer en el proceso de madurez hasta poder participar.",
+    "requiereFormacionEtiqueta": "Requiere formación",
+    "areas": "Áreas",
+    "vacio": "Todavía no hay Ministerios cargados. Cuando estén, los vas a ver acá.",
+    "volverMiCamino": "Volver a Mi camino",
+    "avisoNoAptaTitulo": "Para postularte, primero terminá Vida de Servicio",
+    "avisoNoAptaTexto": "Mientras tanto, podés conocer cada Ministerio y pensar dónde te gustaría servir.",
+    "requiereFormacionAviso": "Este ministerio requiere capacitación o audición: el equipo te va a contactar.",
+    "yaEsMiembroTitulo": "Ya estás sirviendo en este Ministerio",
+    "yaEsMiembroTexto": "Lo ves en tu card de Ministerio, en Mi camino.",
+    "tienePendienteTitulo": "Ya tenés una postulación en revisión a {ministerio}",
+    "tienePendienteTexto": "Mientras la revisan no podés postularte a otro. Si querés cambiarla, retirala desde Mi camino.",
+    "irAMiCamino": "Ir a Mi camino",
+    "formTitulo": "Postularme",
+    "celulaEtiqueta": "¿En qué área te gustaría servir?",
+    "celulaAyuda": "Si todavía no sabés, elegí \"No tengo preferencia\" y lo charlás con el equipo.",
+    "sinPreferencia": "No tengo preferencia",
+    "motivacionEtiqueta": "¿Por qué te gustaría servir acá? (opcional)",
+    "motivacionAyuda": "Contanos lo que quieras: lo lee el equipo.",
+    "disponibilidadEtiqueta": "¿Qué días y horarios podrías? (opcional)",
+    "disponibilidadAyuda": "Por ejemplo: \"Domingos a la mañana\".",
+    "contador": "{cantidad} de {maximo} caracteres",
+    "demasiadoLargo": "Puede tener hasta {maximo} caracteres: acortalo un poco.",
+    "enviar": "Postularme",
+    "enviado": "Recibimos tu postulación. Te avisamos cuando el equipo la revise.",
+    "resumenErrores": "Revisá esto antes de seguir:",
+    "errorGenerico": "No pudimos enviar tu postulación. Probá de nuevo en unos segundos.",
+    "errorCargaTitulo": "No pudimos cargar los Ministerios",
+    "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos este código:",
+    "reintentar": "Reintentar",
+    "noEncontradoTitulo": "Este Ministerio no está disponible",
+    "noEncontradoTexto": "Puede que esté en pausa. Mirá los demás Ministerios.",
+    "volverALista": "Volver a Ministerios",
+    "publico": {
+      "migaPrimerosPasos": "Primeros pasos",
+      "introduccion": "Estos son los equipos en los que servimos en Vida Sobrenatural.",
+      "vacio": "Todavía no publicamos los Ministerios acá — pronto vas a poder conocerlos.",
+      "ctaTitulo": "¿Querés sumarte?",
+      "ctaSinSesionTexto": "Servir en un Ministerio es el cuarto paso del camino. Empezá por conocer los primeros pasos.",
+      "ctaSinSesion": "Ver Primeros pasos",
+      "ctaConSesionTexto": "Mirá en Mi camino en qué etapa estás y cuándo podés postularte.",
+      "ctaConSesion": "Ir a Mi camino"
+    }
+  },
   "bautismo": {},
   "eventos": {
     "publico": {
@@ -1469,5 +1578,18 @@
     "errorTitulo": "No pudimos mostrar tu Inicio",
     "errorTexto": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
     "reintentar": "Reintentar"
+  },
+  "perfil": {
+    "titulo": "Perfil",
+    "entrasCon": "Entrás con",
+    "misDatos": "Mis datos",
+    "cuenta": "Tu cuenta",
+    "errorCarga": "No pudimos cargar tus datos. Puede ser un problema de conexión: probá de nuevo en un rato.",
+    "reintentar": "Reintentar",
+    "guardar": "Guardar cambios",
+    "guardando": "Guardando…",
+    "guardado": "Guardamos tus cambios.",
+    "errorGuardar": "No pudimos guardar tus cambios. Probá de nuevo en un rato.",
+    "ayudaTelefono": "Con la característica, sin el 0 ni el 15."
   }
 }

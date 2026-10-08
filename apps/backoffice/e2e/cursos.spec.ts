@@ -42,7 +42,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catálogos');
       await expect(page.getByRole('link', { name: /Dónde se reúne la iglesia/ })).toHaveAttribute('href', '/sedes');
       await expect(page.getByRole('link', { name: /Vida Nueva y Vida de Servicio/ })).toHaveAttribute('href', '/cursos');
-      await expect(page.getByRole('link', { name: /Ministerios/ })).toHaveCount(0);
+      // spec 009: la tarjeta de Ministerios ya existe.
+      await expect(page.getByRole('link', { name: /Ministerios/ })).toHaveAttribute('href', '/ministerios');
       await sinViolaciones(page);
 
       await page.getByRole('link', { name: /Vida Nueva y Vida de Servicio/ }).click();

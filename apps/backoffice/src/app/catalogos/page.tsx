@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { Building2, ChevronRight, GraduationCap } from 'lucide-react';
+import { Building2, ChevronRight, GraduationCap, HandHeart } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { apiFetch, type ResumenCatalogos } from '@vida-sobrenatural/shared-types';
 import { requerirPermiso } from '../../auth';
@@ -15,6 +15,7 @@ export default async function CatalogosPage() {
   // H-132: exige el mismo permiso que le asigna NAV_BACKOFFICE.
   const session = await requerirPermiso('catalogos.ver');
   const t = await getTranslations('catalogos');
+  const tm = await getTranslations('ministerios');
   let resumen: ResumenCatalogos | null = null;
   try {
     resumen = await apiFetch<ResumenCatalogos>('/catalogos/resumen', { headers: { Authorization: `Bearer ${session.apiToken}` }, cache: 'no-store' });
@@ -37,6 +38,7 @@ export default async function CatalogosPage() {
           {resumen && t('cantidad', resumen.cursos)}
         </Tarjeta>
         {/* spec 009 (lote C): la tarjeta de Ministerios y Células va acá, en su propia línea. */}
+        <Tarjeta href="/ministerios" icono={<HandHeart aria-hidden className="size-5" />} titulo={tm('titulo')} texto={tm('tarjetaTexto')} />
       </ul>
     </div>
   );
