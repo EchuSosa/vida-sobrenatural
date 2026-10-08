@@ -178,7 +178,7 @@ checklist de `docs/15-guia-ux-ui.md` (D114). **Lotes** al final.
 - [X] T078 `apps/api/prisma/seed-demo.ts` (FR-045, D120): edición en curso a medio liberar con dos Líderes e inscriptos en los cuatro estados, alguien con 3 faltas, una baja propuesta, una edición finalizada con Aptas para Ministerio, una Persona bloqueada por prerrequisito, una con pedido "para la próxima edición"; datos hostiles (título de 120 caracteres, texto de 10.000 con enlaces, archivo con nombre de 200, nombre de edición de 80). Prefijo `demo-`.
 - [X] T079 Unit `apps/api/test/unit/eventos-vida-de-servicio.spec.ts` (extender T012): cada transición de los contratos emite el evento de `contracts/eventos.md` con destinatario, prioridad y disparador (FR-041, SC-008), con el servicio real y un espía sobre `emitirEventoVidaDeServicio`.
 - [X] T080 Recorrer `quickstart.md` entero a mano y anotar en el PR lo que no coincida.
-- [ ] T081 Las tres suites en verde (`pnpm --filter api run test`, `pnpm --filter api run test:e2e`, e2e de `apps/web` —incluido `celular`— y `apps/backoffice`) y lint + typecheck de todo el monorepo. Recién entonces, abrir la revisión manual (D152).
+- [X] T081 Las tres suites en verde (`pnpm --filter api run test`, `pnpm --filter api run test:e2e`, e2e de `apps/web` —incluido `celular`— y `apps/backoffice`) y lint + typecheck de todo el monorepo. Recién entonces, abrir la revisión manual (D152).
 
 ---
 
