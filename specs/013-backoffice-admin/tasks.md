@@ -105,7 +105,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `PERSONA_LISTADO_SELECT` y a los `select` que arman `PersonaBreve` en la API (resúmenes de Solicitudes, Grupos);
   `PersonaListado` también. Actualizar en el mismo commit los tests que comparan objetos exactos. — cubre: FR-018,
   FR-011
-- [ ] T017 **[Lote 0 global: → lote 5]** [L0] `packages/shared-types`: `resumirNavegador(userAgent)` en `comentario.ts` y `ultimoRequestId()` en
+- [X] T017 **[Lote 0 global: → lote 5; hecho en el lote 5]** [L0] `packages/shared-types`: `resumirNavegador(userAgent)` en `comentario.ts` y `ultimoRequestId()` en
   `api-client.ts` (`apiFetch` recuerda en memoria el `requestId` del último Problem Details). Unit
   `apps/api/test/unit/resumir-navegador.spec.ts` (Chrome Android, Safari iOS, Firefox escritorio, cadena vacía, user
   agent desconocido → "Otro") y `ultimo-request-id.spec.ts` (se actualiza con cada error, no con respuestas OK). —
@@ -246,7 +246,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 5 — "Contanos qué te parece" (Historia 5, P2) — requiere la 007 en `main`
 
-- [ ] T060 [L5] API `apps/api/src/comentario/`: `POST /comentarios` público con sesión opcional (guard que acepta token
+- [X] T060 **[Lote 5: `POST /comentarios` también exige `X-Internal-Secret` (lo llama el servidor de Next, como la 007), así el límite por origen no se saltea; sesión opcional con `SesionOpcionalGuard`; enlace del email con `BACKOFFICE_URL`]** [L5] API `apps/api/src/comentario/`: `POST /comentarios` público con sesión opcional (guard que acepta token
   si viene), lee `X-Origen-Cliente` y guarda solo la huella (helper de la 007), valida DTO (`contracts/comentarios-api.md`,
   códigos de campo según `validation-exception-factory`), descarta datos de contacto si hay sesión, límite por ventana de una hora
   (5 por huella sin sesión, 20 por Persona con sesión) → `429 DEMASIADOS_PEDIDOS` con `reintentarEn`; la regla cruzada de
@@ -254,13 +254,13 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   confirmar, email con `EmailService` a `EMAIL_COMENTARIOS_DESTINO` (asunto sin datos sensibles), falla capturada a
   Sentry sin texto ni contacto. Documentar la variable en `.env.example` y en `docs/11` vía "Cambios a docs". — cubre:
   FR-040–FR-044, A8, A9
-- [ ] T061 [L5] API listado `GET /comentarios`, `GET /comentarios/conteo-sin-revisar`, `GET /comentarios/:id`
+- [X] T061 **[Lote 5]** [L5] API listado `GET /comentarios`, `GET /comentarios/conteo-sin-revisar`, `GET /comentarios/:id`
   (`comentarios.ver`), `POST|DELETE /comentarios/:id/revisado` (`comentarios.gestionar`, idempotentes: marcar uno ya revisado no cambia quién ni cuándo). — cubre: FR-046,
   FR-047
 - [ ] T062 [P] [L5] Unit `comentario-limites.spec.ts`: cálculo de `reintentarEn` (el más viejo de la ventana sale en N
   segundos), umbral exacto 5/6 y 20/21, sin sesión vs. con sesión; validación de contacto (acepta sin email ni teléfono
   → `CONTACTO_INVALIDO` en el campo `contacto`; con sesión ignora el contacto enviado). — cubre: FR-041, FR-043, H5.3, H5.5
-- [ ] T063 [L5] Integración `comentarios.integration-spec.ts` (con `EmailServiceFalso` de la 007): H5.1 (sin sesión,
+- [X] T063 **[Lote 5]** [L5] Integración `comentarios.integration-spec.ts` (con `EmailServiceFalso` de la 007): H5.1 (sin sesión,
   guarda página, navegador, requestId, huella y **no** la IP), H5.2 (con sesión, `personaId` y sin contacto propio),
   H5.3, H5.4 (vacío y 2001 caracteres → `errors[campo=texto, code=TEXTO_INVALIDO]`), H5.5 (sexto en la hora → 429), H5.6 (email enviado con
   asunto sin texto; `EmailService` que falla → igual 201 y guardado), H5.7 (marcar y deshacer, idempotente, registra
