@@ -17,6 +17,7 @@ import { errorDeValidacion } from '../discipulado/validaciones.js';
 import { nombresDe } from '../discipulado/consultas.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { bloquearPersona, completoEtapa, vidaNuevaEnMarcha } from './consultas.js';
+import { alCompletarCategoria } from '../vida-de-servicio/efectos.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -90,6 +91,7 @@ export class HistorialAdminService {
       await tx.completitudManual.create({
         data: { personaId: d.personaId, etapa: d.etapa, origen: 'declaracion', declaracionId: id, registradaPorId: autorId },
       });
+      await alCompletarCategoria(tx, d.personaId, d.etapa); // spec 008, FR-042
       await this.notificaciones.emitir(tx, {
         nombre: 'historial.declaracion_confirmada',
         a: { tipo: 'persona', personaId: d.personaId },
@@ -159,6 +161,7 @@ export class HistorialAdminService {
           },
           select: { id: true },
         });
+        await alCompletarCategoria(tx, personaId, etapa); // spec 008, FR-042
         await this.notificaciones.emitir(tx, {
           nombre: 'historial.completitud_registrada',
           a: { tipo: 'persona', personaId },

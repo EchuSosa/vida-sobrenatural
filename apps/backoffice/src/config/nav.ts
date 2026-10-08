@@ -118,6 +118,10 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/personas/nueva', labelKey: 'personas', icon: Users, permiso: 'personas.alta', enMenu: false },
   { href: '/personas/[id]/editar', labelKey: 'personas', icon: Users, permiso: 'personas.editar', enMenu: false }, // 013 lote 7: se entra desde el perfil
   { href: '/solicitudes/historial/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  // --- spec 008 ---
+  { href: '/solicitudes/vida-de-servicio/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  { href: '/grupos/vida-de-servicio/[id]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
+  { href: '/grupos/vida-de-servicio/[id]/semanas/[numero]', labelKey: 'grupos', icon: UsersRound, permiso: 'grupos.ver', enMenu: false },
   // --- spec 009 (se entra por Catálogos y por la bandeja) ---
   { href: '/solicitudes/postulacion/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   { href: '/ministerios', labelKey: 'catalogos', icon: FolderKanban, permiso: 'ministerios.ver', enMenu: false },
