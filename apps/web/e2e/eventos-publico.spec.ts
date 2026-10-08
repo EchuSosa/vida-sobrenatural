@@ -49,6 +49,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
 
     test('la cartelera muestra los próximos en orden y deja afuera cancelados, pasados y eliminados @celular', async ({ page }) => {
       await page.goto('/eventos');
+      await page.waitForLoadState('networkidle');
       await esperarTema(page, tema);
       await expect(page.getByRole('heading', { name: 'Eventos', level: 1 })).toBeVisible();
       const titulos = await page.getByRole('heading', { level: 2 }).filter({ hasText: marca }).allInnerTexts();
@@ -63,6 +64,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
 
     test('la página del Evento tiene todo como texto, metadatos y JSON-LD @celular', async ({ page }) => {
       await page.goto(`/eventos/${eventos.primero.slug}`);
+      await page.waitForLoadState('networkidle');
       await esperarTema(page, tema);
       await expect(page.getByRole('heading', { name: `${marca} campamento`, level: 1 })).toBeVisible();
       await expect(page.getByText('Inscripción abierta')).toBeVisible();
@@ -80,30 +82,37 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinScrollHorizontal(page);
     });
 
-    test('informativo, cancelado, pasado y bautismo dicen qué pasa; el eliminado es 404 @celular', async ({ page }) => {
+    test('informativo, cancelado, pasado y bautismo dicen qué pasa; el eliminado no se encuentra @celular', async ({ page }) => {
       await page.goto(`/eventos/${eventos.informativo.slug}`);
+      await page.waitForLoadState('networkidle');
       await esperarTema(page, tema);
       await expect(page.getByText('No hace falta anotarse: vení directamente.')).toBeVisible();
       await expect(page.getByRole('button', { name: 'Anotarme' })).toHaveCount(0);
 
       await page.goto(`/eventos/${eventos.cancelado.slug}`);
+      await page.waitForLoadState('networkidle');
       await expect(page.getByText('Evento cancelado', { exact: true })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Ver los próximos eventos' })).toBeVisible();
       expect((await auditar(page)).violations).toEqual([]);
 
       await page.goto(`/eventos/${eventos.pasado.slug}`);
+      await page.waitForLoadState('networkidle');
       await expect(page.getByText('Ya pasó', { exact: true })).toBeVisible();
 
       // FR-046: el bautismo se pide desde Mi camino; sin "Anotarme" ni inscriptos.
       await page.goto(`/eventos/${eventos.bautismo.slug}`);
+      await page.waitForLoadState('networkidle');
       await expect(page.getByText('El bautismo se pide desde Mi camino', { exact: false })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Ir a Mi camino' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Anotarme' })).toHaveCount(0);
       expect((await auditar(page)).violations).toEqual([]);
 
-      const respuesta = await page.goto(`/eventos/${eventos.eliminado.slug}`);
-      expect(respuesta?.status()).toBe(404);
+      // FR-043: "No encontramos esta página". La respuesta ya empezó a transmitirse
+      // (loading.tsx), así que Next la marca `noindex` en vez de cambiar el código.
+      await page.goto(`/eventos/${eventos.eliminado.slug}`);
+      await page.waitForLoadState('networkidle');
       await expect(page.getByRole('heading', { name: 'No encontramos esta página' })).toBeVisible();
+      await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute('content', /noindex/);
     });
   });
 }

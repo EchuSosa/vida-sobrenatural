@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { EstadoVacio, Paginacion } from '@vida-sobrenatural/ui';
+import { EstadoVacio } from '@vida-sobrenatural/ui';
+import { PaginacionEventos } from '../../../components/eventos/paginacion-eventos';
 import { obtenerCartelera } from '../../../components/eventos/api-eventos';
 import { TarjetaEvento } from '../../../components/eventos/tarjeta-evento';
 
@@ -59,14 +59,7 @@ export default async function EventosPage({ searchParams }: { searchParams: Prom
         </ul>
       )}
       {totalPaginas > 1 && (
-        <Paginacion
-          paginaActual={pagina}
-          totalPaginas={totalPaginas}
-          renderEnlace={(p) => <Link href={p <= 1 ? '/eventos' : `/eventos?pagina=${p}`} />}
-          etiquetaNav={t('paginado')}
-          etiquetaAnterior={t('anterior')}
-          etiquetaSiguiente={t('siguiente')}
-        />
+        <PaginacionEventos paginaActual={pagina} totalPaginas={totalPaginas} />
       )}
     </div>
   );

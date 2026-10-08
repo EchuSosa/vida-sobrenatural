@@ -31,7 +31,7 @@ export async function obtenerEventoPublico(slug: string): Promise<EventoPublico 
 /** Para el sitemap (FR-006). Si la API no responde, el sitemap sale sin Eventos en vez de fallar. */
 export async function obtenerSlugsDeEventos(): Promise<Array<{ slug: string; updatedAt: string }>> {
   try {
-    const r = await fetch(`${API()}/eventos/publicos/slugs`, { next: { revalidate: REVALIDAR_EVENTOS_SEGUNDOS } });
+    const r = await fetch(`${API()}/eventos/publicos/slugs`, { cache: 'no-store' });
     return r.ok ? r.json() : [];
   } catch {
     return [];
