@@ -35,23 +35,34 @@ export function useAccionesPublicas() {
   }).map((item) => ({ ...item, label: t(item.labelKey) }));
 }
 
+/**
+ * Clases de un ítem de los paneles laterales (hamburguesa público y "Más" de
+ * la app): ajustes-ux #2 — antes medían 20 px de alto con 16 px entre uno y
+ * otro; ahora cada uno es una fila de 48 px con separador, en 16 px (D150).
+ * Exportado: lo usa también nav-app-mas.tsx (Principio XI).
+ */
+export const CLASES_ITEM_PANEL =
+  'flex min-h-12 items-center border-b border-border py-3 text-base font-medium text-foreground last:border-b-0';
+
 function EnlaceMenu({
   href,
   label,
   activo,
   onNavigate,
+  enPanel = false,
 }: {
   href: string;
   label: string;
   activo: boolean;
   onNavigate?: () => void;
+  enPanel?: boolean;
 }) {
   return (
     <Link
       href={href}
       aria-current={activo ? 'page' : undefined}
       onClick={onNavigate}
-      className="text-sm font-medium text-foreground/80 hover:text-foreground aria-[current=page]:font-semibold aria-[current=page]:text-foreground aria-[current=page]:underline aria-[current=page]:underline-offset-4"
+      className={`${enPanel ? CLASES_ITEM_PANEL : 'text-sm font-medium text-foreground/80 hover:text-foreground'} aria-[current=page]:font-semibold aria-[current=page]:text-foreground aria-[current=page]:underline aria-[current=page]:underline-offset-4`}
     >
       {label}
     </Link>
@@ -74,7 +85,7 @@ export function NavPublicaHeader() {
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
         {/* FR-037/FR-040 (D122): logotipo en escritorio, isotipo en celular
             (H-80/H-87, componente Marca de packages/ui). */}
-        <Link href="/" aria-current={pathname === '/' ? 'page' : undefined} className="flex items-center">
+        <Link href="/" aria-current={pathname === '/' ? 'page' : undefined} className="flex min-h-11 min-w-11 items-center">
           <span className="md:hidden">
             <Marca variante="isotipo" />
           </span>
@@ -119,12 +130,16 @@ export function NavPublicaHeader() {
 
         {/* Celular Y tablet (hasta 1023px, H-105): menú hamburguesa (accesible — FR-014, T049) */}
         <div className="flex items-center gap-2 lg:hidden">
+          {/* ajustes-ux #1: con D150 estas acciones ya miden 44 px y van en
+              16 px. A 320 px "Completar registro" no entra en una línea: ahí
+              se parte en dos, en vez de empujar el hamburguesa afuera. */}
           {acciones.map((item) => (
             <ButtonLink
               key={item.href}
               render={<Link href={item.href} />}
               variant={item.href === '/dar' ? 'outline' : 'default'}
               size="sm"
+              className="max-[379px]:whitespace-normal max-[379px]:text-center max-[379px]:leading-tight"
             >
               {item.label}
             </ButtonLink>
@@ -147,7 +162,7 @@ export function NavPublicaHeader() {
               <SheetTitle className="flex h-14 shrink-0 items-center border-b border-border px-4 text-base font-semibold">
                 <Marca variante="isotipo" />
               </SheetTitle>
-              <nav aria-label={`${t('principal')} (celular)`} className="flex flex-col gap-4 overflow-y-auto px-4 py-4">
+              <nav aria-label={`${t('principal')} (celular)`} className="flex flex-col overflow-y-auto px-4 py-2">
                 {NAV_PUBLICA.map((item) => (
                   <EnlaceMenu
                     key={item.href}
@@ -155,6 +170,20 @@ export function NavPublicaHeader() {
                     label={t(item.labelKey)}
                     activo={pathname === item.href}
                     onNavigate={() => setAbierto(false)}
+                    enPanel
+                  />
+                ))}
+                {/* ajustes-ux #4: con el panel abierto, "Dar" e "Ingresar" del
+                    header quedan detrás del velo — se repiten acá, como ya
+                    hace "Más" en la app. */}
+                {acciones.map((item) => (
+                  <EnlaceMenu
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    activo={pathname === item.href}
+                    onNavigate={() => setAbierto(false)}
+                    enPanel
                   />
                 ))}
                 {/* H-38: mismos ítems de usuario que el DropdownMenu de escritorio, sin sesión no renderiza nada. */}
