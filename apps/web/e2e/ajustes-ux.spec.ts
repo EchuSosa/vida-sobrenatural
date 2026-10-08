@@ -172,3 +172,25 @@ test.describe('Mi camino — Vida Nueva', () => {
     await expect(tarjeta.getByText('Martes 19:00 a 21:00')).toBeVisible();
   });
 });
+
+test.describe('Perfil', () => {
+  test.use({ viewport: CELULAR });
+
+  test('jerarquía, todo de 44 px, "Cerrar sesión" aparte y neutro, y el éxito queda en pantalla (#50, #51, #52, #54, D151) @celular', async ({ page }) => {
+    await registrarPersonaDeTest(page, `e2e-ux-perfil-${Date.now()}@example.com`);
+    await page.goto('/perfil');
+    await expect(page.getByText(/^Entrás con /)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Mis datos' })).toBeVisible();
+    await objetivosDe44(contenido(page));
+
+    const cuenta = page.getByRole('region', { name: 'Tu cuenta' });
+    await cuenta.getByRole('button', { name: 'Cerrar sesión' }).click();
+    const confirmar = page.getByRole('alertdialog').getByRole('button', { name: 'Sí, cerrar sesión' });
+    await expect(confirmar).not.toHaveClass(/bg-destructive/);
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Volver' }).click();
+
+    await page.getByLabel('Dirección').fill('Calle 7 n.º 1234');
+    await page.getByRole('button', { name: 'Guardar cambios' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Guardamos tus cambios.' })).toBeVisible();
+  });
+});

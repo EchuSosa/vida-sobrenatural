@@ -1,6 +1,8 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import { LogOut } from 'lucide-react';
 import { ConfirmDestructiveDialog, Button, useEnvio } from '@vida-sobrenatural/ui';
 
 /**
@@ -11,6 +13,7 @@ import { ConfirmDestructiveDialog, Button, useEnvio } from '@vida-sobrenatural/u
  * el diálogo al confirmar, pero signOut() sigue siendo un envío real).
  */
 export function CerrarSesionBoton() {
+  const t = useTranslations('nav');
   const { ejecutar: cerrarSesion } = useEnvio(async () => {
     await signOut({ callbackUrl: '/?sesion=cerrada' });
   });
@@ -18,14 +21,17 @@ export function CerrarSesionBoton() {
   return (
     <ConfirmDestructiveDialog
       trigger={
-        <Button variant="outline" size="sm">
-          Cerrar sesión
+        // ajustes-ux #52: con ícono y verbo, a todo el ancho en celular. No
+        // rojo: cerrar sesión se deshace volviendo a entrar (D151).
+        <Button variant="outline" size="sm" className="w-full sm:w-auto sm:self-start">
+          <LogOut aria-hidden />
+          {t('cerrarSesion')}
         </Button>
       }
-      titulo="¿Cerrar sesión?"
-      descripcion="Vas a tener que volver a autorizar el acceso con tu cuenta de Google para entrar de nuevo."
-      textoConfirmar="Sí, cerrar sesión"
-      textoCancelar="Volver"
+      titulo={t('cerrarSesionTitulo')}
+      descripcion={t('cerrarSesionDescripcion')}
+      textoConfirmar={t('cerrarSesionConfirmar')}
+      textoCancelar={t('cerrarSesionVolver')}
       // D151: cerrar sesión es reversible (se vuelve a entrar).
       tono="neutro"
       onConfirmar={cerrarSesion}

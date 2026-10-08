@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { CircleCheck } from 'lucide-react';
 import {
   type EstadoCivil,
   type Profesion,
@@ -46,6 +47,9 @@ function separarTelefono(telefono: string) {
 export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
   const { data: session } = useSession();
   const t = useTranslations('registro');
+  const tp = useTranslations('perfil');
+  // #54: el éxito queda también en pantalla, no solo en el toast (docs/15 "Éxito").
+  const [guardado, setGuardado] = useState(false);
   const opciones = useOpcionesRegistro();
   const telefonoInicial = separarTelefono(perfil.telefono);
 
@@ -68,24 +72,26 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
     profesionDetalle: t('campos.profesionDetalle'),
   };
 
-  const requerido: ValidacionCampo<string> = { esValido: (v) => v.trim() !== '', mensaje: t('errorCampo') };
+  // ajustes-ux #27: los mismos mensajes que dicen qué hacer que el registro.
+  const requerido = (mensaje: string): ValidacionCampo<string> => ({ esValido: (v) => v.trim() !== '', mensaje });
   const validaciones = {
     telefono: {
       // Sin espacio — es el mismo formato que arma el body del PATCH más abajo.
       esValido: (v: { codigoPais: string; numero: string }) => TELEFONO_REGEX.test(`${v.codigoPais}${v.numero}`),
       mensaje: mensajeDeCampo('TELEFONO_INVALIDO', t('campos.numeroTelefono')),
     } satisfies ValidacionCampo<{ codigoPais: string; numero: string }>,
-    direccion: requerido,
-    estadoCivil: requerido,
-    profesion: requerido,
+    direccion: requerido(t('errores.direccion')),
+    estadoCivil: requerido(t('errores.estadoCivil')),
+    profesion: requerido(t('errores.profesion')),
     profesionDetalle: {
       esValido: () => profesion !== 'otro' || profesionDetalle.trim() !== '',
-      mensaje: t('errorCampo'),
+      mensaje: t('errores.profesionDetalle'),
     } satisfies ValidacionCampo<string>,
   };
 
   const { enviando: guardando, ejecutar: guardar } = useEnvio(async () => {
     validacion.reset();
+    setGuardado(false);
     try {
       await apiFetch('/personas/me', {
         method: 'PATCH',
@@ -101,7 +107,8 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           profesionDetalle: profesion === 'otro' ? profesionDetalle : undefined,
         }),
       });
-      toast.success('Guardamos tus cambios.');
+      toast.success(tp('guardado'));
+      setGuardado(true);
     } catch (error) {
       const campos = erroresPorCampo(error);
       if (campos) {
@@ -109,7 +116,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           Object.fromEntries(campos.map(({ campo, code }) => [campo, mensajeDeCampo(code, etiquetasCampo[campo] ?? campo)])),
         );
       } else {
-        const mensaje = error instanceof ApiError ? error.message : 'No pudimos guardar tus cambios.';
+        const mensaje = error instanceof ApiError ? error.message : tp('errorGuardar');
         toast.error(mensaje);
       }
     }
@@ -147,8 +154,10 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
         }
         error={Boolean(validacion.mensajes.telefono)}
         errorTexto={validacion.mensajes.telefono}
+        // ajustes-ux #55: cómo se escribe el número, para reconocer si está bien.
+        ayuda={tp('ayudaTelefono')}
       />
-      <label className="flex flex-col gap-1 text-sm font-medium">
+      <label className="flex flex-col gap-1 text-base font-medium">
         {t('campos.direccion')}
         <input
           id="campo-direccion"
@@ -161,11 +170,11 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           required
           aria-invalid={Boolean(validacion.mensajes.direccion) || undefined}
           aria-describedby={validacion.mensajes.direccion ? 'campo-direccion-error' : undefined}
-          className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
+          className="h-11 rounded-md border border-input bg-transparent px-3 text-base font-normal aria-invalid:border-destructive dark:bg-input/30"
         />
         <MensajeErrorCampo id="campo-direccion-error" mensaje={validacion.mensajes.direccion} />
       </label>
-      <label className="flex flex-col gap-1 text-sm font-medium">
+      <label className="flex flex-col gap-1 text-base font-medium">
         {t('campos.estadoCivil')}
         <select
           id="campo-estadoCivil"
@@ -178,7 +187,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           required
           aria-invalid={Boolean(validacion.mensajes.estadoCivil) || undefined}
           aria-describedby={validacion.mensajes.estadoCivil ? 'campo-estadoCivil-error' : undefined}
-          className="h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
+          className="h-11 rounded-md border border-input bg-transparent px-2 text-base font-normal aria-invalid:border-destructive dark:bg-input/30"
         >
           {opciones.estadoCivil.map((o) => (
             <option key={o.value} value={o.value}>
@@ -188,7 +197,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
         </select>
         <MensajeErrorCampo id="campo-estadoCivil-error" mensaje={validacion.mensajes.estadoCivil} />
       </label>
-      <label className="flex flex-col gap-1 text-sm font-medium">
+      <label className="flex flex-col gap-1 text-base font-medium">
         {t('campos.profesion')}
         <select
           id="campo-profesion"
@@ -201,7 +210,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           required
           aria-invalid={Boolean(validacion.mensajes.profesion) || undefined}
           aria-describedby={validacion.mensajes.profesion ? 'campo-profesion-error' : undefined}
-          className="h-10 rounded-md border border-input bg-transparent px-2 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
+          className="h-11 rounded-md border border-input bg-transparent px-2 text-base font-normal aria-invalid:border-destructive dark:bg-input/30"
         >
           {opciones.profesion.map((o) => (
             <option key={o.value} value={o.value}>
@@ -212,7 +221,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
         <MensajeErrorCampo id="campo-profesion-error" mensaje={validacion.mensajes.profesion} />
       </label>
       {profesion === 'otro' && (
-        <label className="flex flex-col gap-1 text-sm font-medium">
+        <label className="flex flex-col gap-1 text-base font-medium">
           {t('campos.profesionDetalle')}
           <input
             id="campo-profesionDetalle"
@@ -225,13 +234,19 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
             required
             aria-invalid={Boolean(validacion.mensajes.profesionDetalle) || undefined}
             aria-describedby={validacion.mensajes.profesionDetalle ? 'campo-profesionDetalle-error' : undefined}
-            className="h-10 rounded-md border border-input bg-transparent px-3 text-sm font-normal aria-invalid:border-destructive dark:bg-input/30"
+            className="h-11 rounded-md border border-input bg-transparent px-3 text-base font-normal aria-invalid:border-destructive dark:bg-input/30"
           />
           <MensajeErrorCampo id="campo-profesionDetalle-error" mensaje={validacion.mensajes.profesionDetalle} />
         </label>
       )}
-      <Button type="submit" loading={guardando} loadingText="Guardando…" className="self-start">
-        Guardar cambios
+      {guardado && (
+        <p role="status" className="flex items-center gap-2 text-foreground">
+          <CircleCheck aria-hidden className="size-5 shrink-0 text-success" />
+          {tp('guardado')}
+        </p>
+      )}
+      <Button type="submit" loading={guardando} loadingText={tp('guardando')} className="w-full sm:w-auto sm:self-end">
+        {tp('guardar')}
       </Button>
     </form>
   );

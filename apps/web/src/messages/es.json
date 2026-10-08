@@ -203,7 +203,24 @@
     "tema": "Colores de la app",
     "temaClaro": "Claro",
     "temaOscuro": "Oscuro",
-    "cerrarSesion": "Cerrar sesión"
+    "cerrarSesion": "Cerrar sesión",
+    "cerrarSesionTitulo": "¿Cerrar sesión?",
+    "cerrarSesionDescripcion": "Para volver a entrar, vas a tener que ingresar de nuevo desde \"Ingresar\".",
+    "cerrarSesionConfirmar": "Sí, cerrar sesión",
+    "cerrarSesionVolver": "Volver"
+  },
+  "perfil": {
+    "titulo": "Perfil",
+    "entrasCon": "Entrás con",
+    "misDatos": "Mis datos",
+    "cuenta": "Tu cuenta",
+    "errorCarga": "No pudimos cargar tus datos. Puede ser un problema de conexión: probá de nuevo en un rato.",
+    "reintentar": "Reintentar",
+    "guardar": "Guardar cambios",
+    "guardando": "Guardando…",
+    "guardado": "Guardamos tus cambios.",
+    "errorGuardar": "No pudimos guardar tus cambios. Probá de nuevo en un rato.",
+    "ayudaTelefono": "Con la característica, sin el 0 ni el 15."
   },
   "inicio": {
     "tarjetaPrimerosPasosTitulo": "Primeros pasos",
