@@ -19,6 +19,7 @@ function cardMinisterio(page: Page) {
 }
 
 async function sinViolaciones(page: Page, tema: 'claro' | 'oscuro') {
+  await page.waitForLoadState('networkidle');
   await esperarTema(page, tema);
   const { violations } = await auditar(page);
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -92,6 +93,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await cardMinisterio(page).getByRole('link', { name: 'Conocé los Ministerios' }).click();
       await expect(page.getByText('Para postularte, primero terminá Vida de Servicio')).toBeVisible();
       await page.getByRole('link', { name: new RegExp(MINISTERIOS_009.bienvenida) }).click();
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(MINISTERIOS_009.bienvenida);
       await expect(page.getByRole('button', { name: 'Postularme' })).toHaveCount(0);
       await expect(page.getByText('Para postularte, primero terminá Vida de Servicio')).toBeVisible();
       await sinViolaciones(page, tema);
@@ -112,6 +114,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
     });
 
     test('pública: muestra los activos con su línea, no el pausado ni las áreas; sin scroll a 320 px @celular', async ({ page }) => {
+      if (tema === 'oscuro') await page.addInitScript(() => window.localStorage.setItem('theme', 'dark'));
       await page.goto('/ministerios');
       await page.waitForLoadState('networkidle');
       await expect(page.getByRole('heading', { name: MINISTERIOS_009.bienvenida })).toBeVisible();
