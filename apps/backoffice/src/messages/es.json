@@ -805,6 +805,16 @@
     }
   },
   "inicio": {
+    "titulo": "Inicio",
+    "solicitudes": {
+      "titulo": "Esperan una respuesta",
+      "linea": "{cantidad} de {tipo}",
+      "pendientesTutor": "{cantidad, plural, one {# menor espera que lo active su tutor} other {# menores esperan que los active su tutor}}",
+      "vacio": "No hay nada esperando una respuesta.",
+      "error": "No pudimos cargar lo que espera una respuesta.",
+      "reintentar": "Reintentar",
+      "cargando": "Cargando lo que espera una respuesta"
+    },
     "pendientes": {
       "titulo": "Pendientes",
       "descripcion": "Lo que está esperando que alguien del equipo lo mire.",
@@ -985,7 +995,29 @@
       }
     }
   },
-  "metricas": {},
+  "metricas": {
+    "titulo": "Cómo está la iglesia",
+    "personasActivas": "Personas activas",
+    "porTiempo": "Desde cuándo vienen",
+    "ayudaTiempo": "Contado desde el año en que cada Persona empezó a venir.",
+    "porSede": "Por Sede",
+    "rangos": {
+      "este_anio": "Empezaron este año",
+      "de_1_a_2_anios": "Hace 1 o 2 años",
+      "de_3_a_5_anios": "Hace 3 a 5 años",
+      "mas_de_5_anios": "Hace más de 5 años"
+    },
+    "columnas": {
+      "desde": "Desde cuándo",
+      "sede": "Sede",
+      "cantidad": "Personas y porcentaje"
+    },
+    "sedeInactiva": "Inactiva",
+    "vacio": "Todavía no hay Personas activas para contar.",
+    "error": "No pudimos cargar las métricas.",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando las métricas"
+  },
   "cumpleanos": {},
   "comentarios": {},
   "cursos": {},
