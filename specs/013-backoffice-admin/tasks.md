@@ -332,12 +332,12 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 7 — Edición de datos de una Persona (Historia 7, P3) — requiere la 006 en `main`
 
-- [ ] T080 [L7] Primero, extraer la regla de D133 que hoy está en línea en `RolesService.otorgarRol` a
+- [X] T080 [L7] Primero, extraer la regla de D133 que hoy está en línea en `RolesService.otorgarRol` a
   `esMenorDeEdad(fechaNacimiento, hoy)` (`packages/shared-types/src/persona.ts`) con su unit test, y que `otorgarRol`
   la use (sin cambio de comportamiento: sus tests siguen verdes). Después, API `PATCH /personas/:id` (`personas.editar`):
   DTO parcial del alta de la 006; D133 con esa función; email normalizado como exige la 007 y único
   (`EMAIL_DUPLICADO`); email vacío solo si la 006 ya lo hizo opcional (D145). — cubre: FR-057, FR-058
-- [ ] T081 [L7] Integración `persona-editar.integration-spec.ts`: H7.2 (fecha que vuelve menor a un Discipulador → 409
+- [X] T081 [L7] Integración `persona-editar.integration-spec.ts`: H7.2 (fecha que vuelve menor a un Discipulador → 409
   con el código existente), H7.3 (email de otra Persona → 409), edición válida devuelve `PerfilPersona` actualizado,
   H7.5 (Pastor 403). — cubre: H7.2, H7.3, H7.5
 - [ ] T082 [L7] Backoffice `app/personas/[id]/editar/` (o `Sheet` desde el perfil, según cómo la 006 haya resuelto el
