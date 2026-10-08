@@ -146,3 +146,29 @@ test.describe('Registro', () => {
     await expect(page).toHaveURL(/\/mi-camino$/);
   });
 });
+
+test.describe('Mi camino — Vida Nueva', () => {
+  test.use({ viewport: CELULAR });
+
+  test('pedir sin tocar "Agregar franja" toma el horario elegido; el foco va al estado nuevo; "Quitar" con ícono y de 44 px (#40, #41, #42, #47) @celular', async ({ page }) => {
+    await registrarPersonaDeTest(page, `e2e-ux-franjas-${Date.now()}@example.com`);
+    await page.goto('/mi-camino/vida-nueva');
+    const tarjeta = page.getByRole('region', { name: 'Vida Nueva' });
+
+    // #41: "Agregar franja" solo y a todo el ancho del editor, debajo de Desde/Hasta.
+    const agregar = await tarjeta.getByRole('button', { name: 'Agregar franja' }).boundingBox();
+    const hasta = await tarjeta.getByRole('group', { name: 'Hasta' }).boundingBox();
+    expect(agregar!.y).toBeGreaterThan(hasta!.y + hasta!.height - 1);
+
+    await tarjeta.getByRole('button', { name: 'Agregar franja' }).click();
+    const quitar = tarjeta.getByRole('button', { name: 'Quitar' });
+    expect(await alto(quitar)).toBeGreaterThanOrEqual(44);
+    await expect(quitar.locator('svg')).toHaveCount(1);
+    await quitar.click();
+
+    // #40: la lista quedó vacía, pero en los selectores sigue Martes 19 a 21.
+    await tarjeta.getByRole('button', { name: 'Quiero empezar Vida Nueva' }).click();
+    await expect(tarjeta.getByText('Estamos buscando a tu Discipulador')).toBeFocused();
+    await expect(tarjeta.getByText('Martes 19:00 a 21:00')).toBeVisible();
+  });
+});
