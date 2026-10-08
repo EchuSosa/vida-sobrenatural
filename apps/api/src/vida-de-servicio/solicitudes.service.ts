@@ -173,7 +173,7 @@ export class SolicitudesVidaDeServicioService {
 
   /** GET /personas/:id/vida-de-servicio — la sección del perfil del backoffice (FR-013). */
   async deUnaPersona(personaId: string): Promise<VidaDeServicioDePersona> {
-    const persona = await this.prisma.persona.findUnique({ where: { id: personaId }, select: { id: true } });
+    const persona = await this.prisma.persona.findUnique({ where: { id: personaId }, select: { nombre: true, apellido: true } });
     if (!persona) throw new AppException('NO_ENCONTRADO', HttpStatus.NOT_FOUND, 'No existe una Persona con ese id.');
     const estado = await estadoDeVidaDeServicio(this.prisma, personaId);
     let motivo = estado.estado === 'no_cumple' ? estado.motivo : null;
@@ -186,6 +186,7 @@ export class SolicitudesVidaDeServicioService {
     }
     const edicion = estado.estado === 'en_curso' || (estado.estado === 'completada' && estado.edicion) ? (estado.edicion ?? null) : null;
     return {
+      persona,
       estado: estado.estado,
       motivo,
       puedePedirEnSuNombre,

@@ -1,5 +1,6 @@
 import type { SeccionPerfil } from './tipos';
 import { SeccionCamino } from './seccion-camino';
+import { SeccionVidaDeServicio } from './seccion-vida-de-servicio';
 import { SeccionEventos } from './seccion-eventos';
 
 /**
@@ -14,6 +15,8 @@ import { SeccionEventos } from './seccion-eventos';
 export const SECCIONES_PERFIL: SeccionPerfil[] = [
   // spec 006 (T047): las cuatro etapas, registrar como hecha y anular.
   { clave: 'etapas', tituloKey: 'etapasPersona.titulo', permiso: 'personas.ver', Componente: SeccionCamino },
+  // spec 008 (T033): en qué está y "Pedir Vida de Servicio en su nombre".
+  { clave: 'vida-de-servicio', tituloKey: 'solicitudesServicio.perfil.titulo', permiso: 'personas.ver', Componente: SeccionVidaDeServicio },
   // spec 011 (FR-048): sus Inscripciones a Evento.
   { clave: 'eventos', tituloKey: 'eventos.inscriptos.perfilTitulo', permiso: 'eventos.ver', Componente: SeccionEventos },
 ];

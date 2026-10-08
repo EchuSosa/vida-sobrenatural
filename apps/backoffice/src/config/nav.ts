@@ -117,6 +117,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/personas/nueva', labelKey: 'personas', icon: Users, permiso: 'personas.alta', enMenu: false },
   { href: '/personas/[id]/editar', labelKey: 'personas', icon: Users, permiso: 'personas.editar', enMenu: false }, // 013 lote 7: se entra desde el perfil
   { href: '/solicitudes/historial/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  // --- spec 008 ---
+  { href: '/solicitudes/vida-de-servicio/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   // --- spec 011 ---
   { href: '/eventos/nuevo', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.gestionar', enMenu: false },
   { href: '/eventos/[id]', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver', enMenu: false },

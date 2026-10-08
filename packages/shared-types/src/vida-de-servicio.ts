@@ -371,6 +371,7 @@ export interface SolicitudVidaServicioDetalle {
 
 /** `GET /personas/:id/vida-de-servicio` — la sección del perfil (FR-013): qué puede hacer el Admin. */
 export interface VidaDeServicioDePersona {
+  persona: { nombre: string; apellido: string };
   estado: EstadoMiVidaDeServicio['estado'];
   motivo: MotivoNoCumple | null;
   /** Se puede pedir en su nombre ahora mismo. */
