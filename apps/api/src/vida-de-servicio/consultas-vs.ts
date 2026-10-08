@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { alertaFaltas, diaDeLaSemana, hoyEnArgentina, type EdicionAbierta } from '@vida-sobrenatural/shared-types';
+import { MOTIVO_MAX, alertaFaltas, diaDeLaSemana, hoyEnArgentina, type EdicionAbierta } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
@@ -202,4 +202,11 @@ export async function bloquearGrupo(tx: Prisma.TransactionClient, grupoId: strin
 /** Bloquea la fila de la Inscripción. */
 export async function bloquearInscripcion(tx: Prisma.TransactionClient, inscripcionId: string): Promise<void> {
   await tx.$queryRaw`SELECT "id" FROM "inscripciones" WHERE "id" = ${inscripcionId} FOR UPDATE`;
+}
+
+/** Un texto opcional de hasta `MOTIVO_MAX` (500) con el campo que corresponda (comentario de una baja, FR-032). */
+export function comentarioOpcional(valor: string | undefined | null, campo: string): string | null {
+  const limpio = valor?.trim() ?? '';
+  if (limpio.length > MOTIVO_MAX) throw new AppException('VALIDACION', HttpStatus.BAD_REQUEST, 'Uno o más campos no son válidos.', [{ campo, code: 'MOTIVO_DEMASIADO_LARGO' }]);
+  return limpio === '' ? null : limpio;
 }
