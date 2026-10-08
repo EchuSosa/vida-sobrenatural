@@ -24,6 +24,16 @@ import type {
  * duplicar ni pisar lo que un Admin haya podido editar a mano.
  */
 
+// Lote 0 global: una parte por spec, cada una en su archivo (specs/IMPLEMENTACION.md).
+import { sembrarDemo006 } from './seed-demo/006-camino.js';
+import { sembrarDemo007 } from './seed-demo/007-ingreso.js';
+import { sembrarDemo008 } from './seed-demo/008-vida-de-servicio.js';
+import { sembrarDemo009 } from './seed-demo/009-ministerios.js';
+import { sembrarDemo010 } from './seed-demo/010-bautismo.js';
+import { sembrarDemo011 } from './seed-demo/011-eventos.js';
+import { sembrarDemo012 } from './seed-demo/012-avisos.js';
+import { sembrarDemo013 } from './seed-demo/013-backoffice.js';
+
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
@@ -462,6 +472,16 @@ async function main() {
   await crearEscenarioTutores(sedes.laPlata.id);
   await crearPersonasHostiles(sedes.laPlata.id);
   await crearLibrosHostiles();
+
+  const ctx = { prisma, sedes: { laPlata: sedes.laPlata.id, buenosAires: sedes.buenosAires.id, rosario: sedes.rosario.id } };
+  await sembrarDemo006(ctx);
+  await sembrarDemo007(ctx);
+  await sembrarDemo008(ctx);
+  await sembrarDemo009(ctx);
+  await sembrarDemo010(ctx);
+  await sembrarDemo011(ctx);
+  await sembrarDemo012(ctx);
+  await sembrarDemo013(ctx);
 }
 
 main()

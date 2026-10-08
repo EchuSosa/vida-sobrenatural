@@ -1,6 +1,15 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
+// Lote 0 global: los fixtures de cada spec, cada uno en su archivo (specs/IMPLEMENTACION.md).
+import { sembrarE2e006 } from './sembrar-e2e/006-camino.js';
+import { sembrarE2e007 } from './sembrar-e2e/007-ingreso.js';
+import { sembrarE2e008 } from './sembrar-e2e/008-vida-de-servicio.js';
+import { sembrarE2e009 } from './sembrar-e2e/009-ministerios.js';
+import { sembrarE2e010 } from './sembrar-e2e/010-bautismo.js';
+import { sembrarE2e011 } from './sembrar-e2e/011-eventos.js';
+import { sembrarE2e012 } from './sembrar-e2e/012-avisos.js';
+import { sembrarE2e013 } from './sembrar-e2e/013-backoffice.js';
 
 /**
  * H-34 (revisión manual ronda 3): los e2e de `apps/backoffice` necesitan una
@@ -120,6 +129,16 @@ async function main() {
     genero: 'femenino',
     disponibleDiscipulado: false,
   });
+
+  const ctx = { prisma, sedeId: sede.id };
+  await sembrarE2e006(ctx);
+  await sembrarE2e007(ctx);
+  await sembrarE2e008(ctx);
+  await sembrarE2e009(ctx);
+  await sembrarE2e010(ctx);
+  await sembrarE2e011(ctx);
+  await sembrarE2e012(ctx);
+  await sembrarE2e013(ctx);
 }
 
 main()
