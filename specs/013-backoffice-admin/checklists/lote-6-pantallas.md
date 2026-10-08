@@ -1,4 +1,4 @@
-# Checklist de pantallas — lote 6 (T076, T077)
+# Checklist de pantallas — lote 6 (T071a, T076, T077)
 
 Verificación contra el "Checklist por pantalla" de `docs/15-guia-ux-ui.md` (D114). Cómo: a mano (pantalla
 levantada con el seed demo, claro y oscuro, Admin y Pastor) y con `cursos.spec.ts` y
@@ -36,6 +36,13 @@ levantada con el seed demo, claro y oscuro, Admin y Pastor) y con `cursos.spec.t
 
 - [x] Lista con fecha de eliminación y "Recuperar" (de contorno, con nombre accesible propio por fila y
   carga mientras recupera); vacío "La papelera está vacía."; miga `Catálogos › Cursos › Papelera`.
+
+## Mis discipulados (web app, Discipulador) — T071a
+
+- [x] Solo cambia el mensaje cuando el Curso está inactivo: el toast de error de "Aceptar" dice qué pasó y qué
+  sigue con palabras del Discipulador ("el equipo lo pausó", "la propuesta sigue esperándote"), sin pedirle
+  algo que no puede hacer (reactivar el Curso es del Admin). El texto sale de `errors.CURSO_INACTIVO` de la web
+  app (next-intl). El botón sigue con `useEnvio` (H-57) y la lista se refresca: la propuesta queda pendiente.
 
 ## Sedes — T077 (pendiente)
 

@@ -103,7 +103,7 @@
     "PAGO_NO_PENDIENTE": "Este pago ya se revisó. Actualizamos la pantalla.",
     "NOTIFICACION_SIN_DESTINATARIOS": "Ese grupo no tiene personas activas a quienes mandarles el aviso. Elegí otro.",
     "ALCANCE_NO_DISPONIBLE": "Ese grupo o ministerio ya no está disponible. Elegí otro.",
-    "CURSO_INACTIVO": "Este Curso está inactivo y no admite Grupos nuevos. Reactivalo desde Catálogos o elegí otro.",
+    "CURSO_INACTIVO": "Por ahora no se pueden empezar discipulados nuevos de este Curso: el equipo lo pausó. La propuesta sigue esperándote; si tenés dudas, hablá con el equipo.",
     "CURSO_TIENE_GRUPOS": "No se puede eliminar: tiene Grupos. Inactivalo en su lugar.",
     "CURSO_NO_RECONOCIDO": "Esa combinación de Curso no existe en el sistema.",
     "CURSO_YA_EXISTE": "Ese Curso ya existe. Si está en la papelera, restauralo.",

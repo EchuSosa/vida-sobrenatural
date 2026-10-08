@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CursoModule } from '../curso/curso.module.js';
 import { CruceService } from './cruce.service.js';
 import { EventosDiscipuladoService } from './eventos.js';
 import { PropuestasService } from './propuestas.service.js';
@@ -22,6 +23,8 @@ import { GruposController } from './grupos.controller.js';
  * directo donde hacen falta, como funciones, no como provider.
  */
 @Module({
+  // 013 FR-054: `CursoService.exigirActivo` al aceptar una propuesta que abre un Grupo.
+  imports: [CursoModule],
   controllers: [MisDiscipuladosController, GruposController],
   providers: [
     CruceService,

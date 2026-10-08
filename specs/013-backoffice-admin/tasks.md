@@ -300,11 +300,11 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   `disponibles-para-alta`, alta acotada a `CURSOS_RECONOCIDOS` (restaurar si está en la papelera), `PATCH` sin
   categoría/tipo/modalidad, `DELETE` lógico con `CURSO_TIENE_GRUPOS`, papelera y restaurar. `CursoService.exigirActivo(
   cursoId, tx)` → `CURSO_INACTIVO` si `activo = false` o `eliminadoEn` no es nulo. `GET /catalogos/resumen`. — cubre: FR-050–FR-056
-- [ ] T071 **[Pendiente: `discipulado/propuestas.service.ts` no es de la 013 en el mapa (§3) — queda como Pregunta para Echu con el parche de una línea en el PR]** [L6] Llamar `exigirActivo` en la aceptación de propuesta de la 004 (`propuestas.service.ts`, rama sin
+- [x] T071 **[PR de ajustes `ajustes-dni-curso-sedes`, aprobado por Echu el 2026-10-08: la llamada va en la rama que crea el Grupo; texto de `CURSO_INACTIVO` para el Discipulador en la web app (la 006 movió la pantalla). Unit en `propuesta-aceptar-declinar.spec.ts`; la integración no apaga el Curso de Vida Nueva individual porque lo comparten las demás suites en paralelo]** [L6] Llamar `exigirActivo` en la aceptación de propuesta de la 004 (`propuestas.service.ts`, rama sin
   `grupoDestinoId` que crea el Grupo, dentro de la misma transacción); la rama "sumar a este Grupo" no se bloquea.
   Traducir `CURSO_INACTIVO` en la pantalla donde el Discipulador acepta (backoffice hoy; web app si la 006 ya la movió).
   — cubre: FR-054
-- [ ] T071a **[Pendiente con T071]** [L6] [CHECKLIST] Pantalla del Discipulador **donde acepta una propuesta**, modificada por T071 (mensaje de
+- [x] T071a **[Con T071: `checklists/lote-6-pantallas.md`]** [L6] [CHECKLIST] Pantalla del Discipulador **donde acepta una propuesta**, modificada por T071 (mensaje de
   error nuevo): checklist de `docs/15` sobre lo tocado. — cubre: FR-062
 - [x] T072 **[Lote 6]** [P] [L6] Unit `curso-alta.spec.ts`: combinación reconocida libre → ok; existente → `CURSO_YA_EXISTE`;
   eliminada → restaurar; no reconocida → `CURSO_NO_RECONOCIDO`. — cubre: FR-056

@@ -32,7 +32,9 @@ function armar(filas: FilasBloqueadas) {
   prisma.persona.findUnique.mockResolvedValue({ sedeId: 'sede-1' });
   prisma.grupo.create.mockResolvedValue({ id: 'grupo-nuevo' });
   const { eventos, emitir } = eventosEspia();
-  return { prisma, emitir, servicio: new PropuestasService(comoPrisma(prisma), eventos) };
+  // 013 FR-054: el Curso activo lo decide CursoService (acá, siempre activo salvo que el test diga otra cosa).
+  const cursos = { exigirActivo: jest.fn().mockResolvedValue(undefined) };
+  return { prisma, emitir, cursos, servicio: new PropuestasService(comoPrisma(prisma), eventos, cursos as never) };
 }
 
 describe('PropuestasService.aceptar', () => {
@@ -70,6 +72,17 @@ describe('PropuestasService.aceptar', () => {
     expect(emitir).toHaveBeenCalledWith(expect.objectContaining({ nombre: 'propuesta_aceptada', a: { tipo: 'persona', personaId: 'persona-1' } }));
   });
 
+  it('`nueva` con el Curso inactivo → CURSO_INACTIVO, sin Grupo ni Liderazgo y la Propuesta sigue pendiente (013 FR-054)', async () => {
+    const { servicio, prisma, cursos, emitir } = armar({ propuesta: propuestaNueva() });
+    cursos.exigirActivo.mockRejectedValue(Object.assign(new Error('inactivo'), { code: 'CURSO_INACTIVO' }));
+    expect(await codigoDe(servicio.aceptar('prop-1', DISCIPULADOR))).toBe('CURSO_INACTIVO');
+    expect(cursos.exigirActivo).toHaveBeenCalledWith('curso-vn', expect.anything());
+    expect(prisma.grupo.create).not.toHaveBeenCalled();
+    expect(prisma.liderazgo.create).not.toHaveBeenCalled();
+    expect(prisma.propuestaDiscipulado.update).not.toHaveBeenCalled();
+    expect(emitir).not.toHaveBeenCalled();
+  });
+
   it('`nueva` si la Persona ya cursa o completó Vida Nueva → VIDA_NUEVA_EN_CURSO_O_COMPLETADA', async () => {
     const { servicio, prisma } = armar({ propuesta: propuestaNueva() });
     prisma.inscripcion.findFirst.mockResolvedValue({ id: 'otra' });
@@ -91,8 +104,8 @@ describe('PropuestasService.aceptar', () => {
     expect(emitir).not.toHaveBeenCalled();
   });
 
-  it('con grupoDestinoId y lugar → suma la Inscripción al Grupo destino, sin Grupo ni Liderazgo nuevos (FR-045)', async () => {
-    const { servicio, prisma } = armar({
+  it('con grupoDestinoId y lugar → suma la Inscripción al Grupo destino, sin Grupo ni Liderazgo nuevos (FR-045); un Grupo ya en curso sigue aunque el Curso esté inactivo (013 FR-054)', async () => {
+    const { servicio, prisma, cursos } = armar({
       propuesta: propuestaNueva({ grupoDestinoId: 'g-dest' }),
       grupo: { id: 'g-dest', estado: 'en_curso', propuestaFinalizacionEn: null },
       persona: { ...discipuladorOk, maxPersonasPorGrupo: 3 },
@@ -103,6 +116,7 @@ describe('PropuestasService.aceptar', () => {
     expect(prisma.grupo.create).not.toHaveBeenCalled();
     expect(prisma.liderazgo.create).not.toHaveBeenCalled();
     expect(prisma.inscripcion.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ grupoId: 'g-dest' }) }));
+    expect(cursos.exigirActivo).not.toHaveBeenCalled();
   });
 
   it('`reasignacion` cierra el Liderazgo vigente (cerradoPorId = quien propuso) y abre otro', async () => {
