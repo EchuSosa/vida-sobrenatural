@@ -17,7 +17,7 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import { Button, ConfirmDestructiveDialog, MigaDePan, minutosAHHMM, useEnvio } from '@vida-sobrenatural/ui';
 import { CruceDiscipuladores, type EtiquetasCruce } from '../../../components/cruce';
-import { EstadoSolicitudTexto } from '../solicitudes-cliente';
+import { EstadoSolicitudTexto } from '../estado-solicitud-texto';
 import { diasDesde } from '../constantes';
 
 interface Eleccion {
