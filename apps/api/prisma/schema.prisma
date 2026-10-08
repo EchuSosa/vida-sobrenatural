@@ -986,7 +986,8 @@ model Celula {
 }
 
 // La membresía ES la Postulación `aprobada` (D170). Una pendiente y una
-// aprobada por Persona como máximo (índices parciales en SQL).
+// aprobada por Persona como máximo (índices parciales en SQL); las de un área
+// que se sirve en paralelo (`enParalelo`, D217) llevan su propia aprobada.
 model Postulacion {
   id                 String                         @id @default(uuid())
   personaId          String
@@ -1010,6 +1011,10 @@ model Postulacion {
   // docs/22: copia de `Ministerio.requiereFormacion` al postularse — el Admin
   // ve la marca aunque después cambie el catálogo.
   requiereFormacion  Boolean                        @default(false)
+  // D217: copia de `Celula.ofreceRolDiscipulador` al postularse — "Discipulados
+  // Vida Nueva" se sirve en paralelo con cualquier Ministerio (docs/22): su
+  // aprobada no reemplaza la membresía ni cuenta para `postulaciones_una_aprobada`.
+  enParalelo         Boolean                        @default(false)
   createdAt          DateTime                       @default(now())
   updatedAt          DateTime                       @updatedAt
 

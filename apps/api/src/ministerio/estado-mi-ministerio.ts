@@ -13,6 +13,8 @@ export interface PostulacionParaEstado {
   estado: EstadoPostulacion;
   motivoInactivacion: MotivoInactivacionPostulacion | null;
   requiereFormacion: boolean;
+  /** D217: a un área que se sirve en paralelo ("Discipulados Vida Nueva"). */
+  enParalelo: boolean;
   ministerio: { id: string; nombre: string; activo: boolean };
   celula: { id: string; nombre: string; activo: boolean } | null;
   createdAt: Date;
@@ -44,11 +46,14 @@ export function estadoMiMinisterio(
           ? { id: pendiente.celula.id, nombre: pendiente.celula.nombre }
           : null,
         requiereFormacion: pendiente.requiereFormacion,
+        enParalelo: pendiente.enParalelo,
         createdAt: pendiente.createdAt.toISOString(),
       }
     : null;
 
-  const aprobada = postulaciones.find((p) => p.estado === 'aprobada');
+  // D217: con la membresía del Ministerio y una en paralelo, la card muestra la del Ministerio.
+  const aprobadas = postulaciones.filter((p) => p.estado === 'aprobada');
+  const aprobada = aprobadas.find((p) => !p.enParalelo) ?? aprobadas[0];
   if (aprobada) {
     return {
       estado: 'miembro',
@@ -57,6 +62,7 @@ export function estadoMiMinisterio(
         ministerio: aprobada.ministerio,
         celula: aprobada.celula,
         desde: (aprobada.revisadaEn ?? aprobada.createdAt).toISOString(),
+        enParalelo: aprobada.enParalelo,
       },
       pendiente: pendienteVista,
     };

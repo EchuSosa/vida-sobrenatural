@@ -92,9 +92,9 @@ export class PostulacionPersonaService {
         404,
         'Ese Ministerio no está disponible.',
       );
-    const aprobada = propias.find((p) => p.estado === 'aprobada');
+    // D217: puede tener dos aprobadas (la del Ministerio y la en paralelo).
     const pendiente = propias.find((p) => p.estado === 'pendiente');
-    if (aprobada?.ministerioId === ministerioId)
+    if (propias.some((p) => p.estado === 'aprobada' && p.ministerioId === ministerioId))
       return { ...ministerio, situacion: 'ya_es_miembro' };
     if (pendiente)
       return {
@@ -121,6 +121,7 @@ export class PostulacionPersonaService {
           estado: true,
           motivoInactivacion: true,
           requiereFormacion: true,
+          enParalelo: true,
           createdAt: true,
           revisadaEn: true,
           retiradaEn: true,
