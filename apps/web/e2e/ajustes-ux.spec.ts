@@ -85,7 +85,7 @@ test.describe('Registro', () => {
     await apellido.fill('');
     await page.getByLabel('Nombre').fill('');
     expect(await alto(apellido)).toBeGreaterThanOrEqual(44);
-    expect(await tamanoDeLetra(page.locator('label', { has: apellido }))).toBeGreaterThanOrEqual(16);
+    expect(await tamanoDeLetra(page.locator('label[for="campo-apellido"]'))).toBeGreaterThanOrEqual(16);
 
     await page.getByRole('button', { name: 'Siguiente' }).click();
     const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
