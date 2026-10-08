@@ -121,3 +121,43 @@ export function instanteEnArgentina(fechaCivil: string, hora: string): Date {
 export function anioEnArgentina(ahora: Date = new Date()): number {
   return Number(diaCivilEnArgentina(ahora).slice(0, 4));
 }
+
+const ZONA_ARGENTINA = 'America/Argentina/Buenos_Aires';
+
+/**
+ * spec 011 (research #15) — cuándo es un Evento, en la hora de la iglesia sin
+ * importar dónde esté quien mira: "sábado 14 de noviembre, 19:00"; con fin el
+ * mismo día, "… 19:00 a 21:00"; con fin otro día, "… 19:00 al domingo 15 de
+ * noviembre, 13:00".
+ */
+export function formatearInicioEvento(inicio: string | Date, fin: string | Date | null, locale: string): string {
+  const dia = new Intl.DateTimeFormat(conRegion(locale), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: ZONA_ARGENTINA,
+  });
+  const hora = new Intl.DateTimeFormat(conRegion(locale), {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: ZONA_ARGENTINA,
+  });
+  // "sábado, 14 de noviembre" → "sábado 14 de noviembre" (la coma va antes de la hora).
+  const diaDe = (v: string | Date) => dia.format(comoFecha(v)).replace(/^(\p{L}+),/u, '$1');
+  const desde = `${diaDe(inicio)}, ${hora.format(comoFecha(inicio))}`;
+  if (!fin) return desde;
+  if (diaCivilEnArgentina(inicio) === diaCivilEnArgentina(fin)) return `${desde} a ${hora.format(comoFecha(fin))}`;
+  return `${desde} al ${diaDe(fin)}, ${hora.format(comoFecha(fin))}`;
+}
+
+/** La fecha civil (`YYYY-MM-DD`) y la hora (`HH:mm`) de un instante en Argentina — para precargar un formulario. */
+export function partesEnArgentina(instante: string | Date): { fecha: string; hora: string } {
+  const hora = new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: ZONA_ARGENTINA,
+  }).format(comoFecha(instante));
+  return { fecha: diaCivilEnArgentina(instante), hora };
+}
