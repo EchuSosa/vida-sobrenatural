@@ -61,7 +61,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 - [x] T007 **[Lote 4]** [P] [L0] Unit `apps/api/test/unit/proximo-cumpleanos.spec.ts`: hoy es el cumpleaños (`esHoy`, `cumple`
   correcto); mañana; 29/2 en año bisiesto (29) y no bisiesto (28); 31/12 con hoy 28/12 (cruza año); `hoy` calculado a
   las 02:30 UTC del día 7 da el 6 en Argentina. — cubre: H4.1, H4.2, H4.3, FR-032, FR-033
-- [x] T008 **[Lote 0 global: `Metricas`, constantes de comentarios y `CURSOS_RECONOCIDOS` (con Vida de Servicio) hechos; `CursoListado`/`CursoDetalle` y los tipos de comentarios → lotes 5 y 6]** [P] [L0] `packages/shared-types/src/metricas.ts` (`Metricas`; `RangoCongregacion`/`ORDEN_RANGO_CONGREGACION`/`rangoCongregacion` ya en `persona.ts`, D214),
+- [x] T008 **[Lote 0 global: `Metricas`, constantes de comentarios y `CURSOS_RECONOCIDOS`; lote 6: `CursoListado`/`CursoDetalle` y demás; los tipos de comentarios → lote 5]** [P] [L0] `packages/shared-types/src/metricas.ts` (`Metricas`; `RangoCongregacion`/`ORDEN_RANGO_CONGREGACION`/`rangoCongregacion` ya en `persona.ts`, D214),
   `comentario.ts` (tipos de `contracts/comentarios-api.md`, `COMENTARIO_TEXTO_MAX = 2000`,
   `COMENTARIOS_POR_HORA_SIN_SESION = 5`, `COMENTARIOS_POR_HORA_CON_SESION = 20`), `curso.ts` (`CursoListado`,
   `CursoDetalle`, `CURSOS_RECONOCIDOS` con las dos combinaciones de Vida Nueva, `CURSO_DESCRIPCION_MAX = 500`). —
@@ -296,36 +296,36 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 6 — Catálogos y Cursos (Historia 6, P3)
 
-- [ ] T070 [L6] API `apps/api/src/curso/` (`contracts/cursos-api.md`): listado con `gruposEnCurso`/`tieneGrupos`, detalle,
+- [x] T070 **[Lote 6: `curso/`; `exigirActivo` exportado por `CursoModule`]** [L6] API `apps/api/src/curso/` (`contracts/cursos-api.md`): listado con `gruposEnCurso`/`tieneGrupos`, detalle,
   `disponibles-para-alta`, alta acotada a `CURSOS_RECONOCIDOS` (restaurar si está en la papelera), `PATCH` sin
   categoría/tipo/modalidad, `DELETE` lógico con `CURSO_TIENE_GRUPOS`, papelera y restaurar. `CursoService.exigirActivo(
   cursoId, tx)` → `CURSO_INACTIVO` si `activo = false` o `eliminadoEn` no es nulo. `GET /catalogos/resumen`. — cubre: FR-050–FR-056
-- [ ] T071 [L6] Llamar `exigirActivo` en la aceptación de propuesta de la 004 (`propuestas.service.ts`, rama sin
+- [ ] T071 **[Pendiente: `discipulado/propuestas.service.ts` no es de la 013 en el mapa (§3) — queda como Pregunta para Echu con el parche de una línea en el PR]** [L6] Llamar `exigirActivo` en la aceptación de propuesta de la 004 (`propuestas.service.ts`, rama sin
   `grupoDestinoId` que crea el Grupo, dentro de la misma transacción); la rama "sumar a este Grupo" no se bloquea.
   Traducir `CURSO_INACTIVO` en la pantalla donde el Discipulador acepta (backoffice hoy; web app si la 006 ya la movió).
   — cubre: FR-054
-- [ ] T071a [L6] [CHECKLIST] Pantalla del Discipulador **donde acepta una propuesta**, modificada por T071 (mensaje de
+- [ ] T071a **[Pendiente con T071]** [L6] [CHECKLIST] Pantalla del Discipulador **donde acepta una propuesta**, modificada por T071 (mensaje de
   error nuevo): checklist de `docs/15` sobre lo tocado. — cubre: FR-062
-- [ ] T072 [P] [L6] Unit `curso-alta.spec.ts`: combinación reconocida libre → ok; existente → `CURSO_YA_EXISTE`;
+- [x] T072 **[Lote 6]** [P] [L6] Unit `curso-alta.spec.ts`: combinación reconocida libre → ok; existente → `CURSO_YA_EXISTE`;
   eliminada → restaurar; no reconocida → `CURSO_NO_RECONOCIDO`. — cubre: FR-056
-- [ ] T073 [L6] Integración `cursos.integration-spec.ts`: H6.2 (listado con Grupos en curso), H6.3 (inactivar con Grupos
+- [x] T073 **[Lote 6: sobre "Vida Nueva grupal" (el individual lo comparten otros tests); "aceptar una propuesta → CURSO_INACTIVO" espera a T071, `exigirActivo` se prueba directo]** [L6] Integración `cursos.integration-spec.ts`: H6.2 (listado con Grupos en curso), H6.3 (inactivar con Grupos
   en curso: los Grupos siguen; aceptar una propuesta nueva → `CURSO_INACTIVO`, la propuesta queda sin aceptar y la Solicitud sigue abierta), H6.4
   (eliminar con un Grupo finalizado → 409), H6.5 (papelera y restaurar), Curso eliminado → `exigirActivo` rechaza,
   sumar a un Grupo en curso de un Curso inactivo sigue funcionando, `PATCH` con `categoria` → 400, H6.6 (Pastor:
   GET 200, escritura 403), `catalogos/resumen`. — cubre: H6.2–H6.6, FR-052, FR-054
-- [ ] T074 [L6] Backoffice `app/catalogos/`: tarjetas por catálogo con activos/total y enlace (Sedes, Cursos; las demás
+- [x] T074 **[Lote 6: el tramo Catálogos en las migas de Sedes queda pendiente (T077)]** [L6] Backoffice `app/catalogos/`: tarjetas por catálogo con activos/total y enlace (Sedes, Cursos; las demás
   cuando existan), textos a next-intl. `app/cursos/` (listado con filtro activos/todos, columnas de FR-051, alta en modal
   con las combinaciones disponibles), `app/cursos/[id]` (editar nombre y descripción; Inactivar con confirmación simple
   o reforzada según `gruposEnCurso` — neutra, D151; Reactivar; Eliminar deshabilitado con explicación y oferta de
   inactivar si `tieneGrupos`), `app/cursos/papelera`. Migas Catálogos › Cursos › Nombre; sumar el tramo Catálogos a
   las migas de Sedes. Cada ruta con `loading`/`error` (y `not-found` en el detalle). — cubre: FR-050–FR-055, FR-060
-- [ ] T075 [L6] E2E `apps/backoffice/e2e/cursos.spec.ts`: H6.1 (Catálogos sin tarjetas de lo que no existe), H6.3
+- [x] T075 **[Lote 6]** [L6] E2E `apps/backoffice/e2e/cursos.spec.ts`: H6.1 (Catálogos sin tarjetas de lo que no existe), H6.3
   (confirmación reforzada: el botón se habilita solo con el nombre exacto), H6.4 (botón deshabilitado con su
   explicación), H6.5, H6.6 (Pastor); Sedes sigue accesible desde Catálogos con su miga; axe claro y oscuro. — cubre:
   H6.1, H6.3–H6.6, FR-060
-- [ ] T076 [L6] [CHECKLIST] Pantallas **Catálogos**, **Cursos (listado)**, **Curso (detalle)** y **Papelera de
+- [x] T076 **[Lote 6: `checklists/lote-6-pantallas.md`]** [L6] [CHECKLIST] Pantallas **Catálogos**, **Cursos (listado)**, **Curso (detalle)** y **Papelera de
   Cursos**: checklist de `docs/15`, cada una por separado. — cubre: FR-062
-- [ ] T077 [L6] [CHECKLIST] Pantallas de **Sedes** (listado, detalle, papelera) modificadas solo en la miga de pan y el
+- [ ] T077 **[Pendiente: la línea de `/sedes` en `nav.ts` y sus migas no son de la 013 en el mapa — Pregunta para Echu]** [L6] [CHECKLIST] Pantallas de **Sedes** (listado, detalle, papelera) modificadas solo en la miga de pan y el
   menú: verificar el ítem del checklist de navegación (miga, `aria-current`) y que el resto no cambió. — cubre: FR-060
 
 ---
@@ -351,19 +351,19 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote final — cierre (después de los lotes que se implementen)
 
-- [ ] T090 [LF] `apps/api/prisma/seed-demo.ts` (D120): comentarios de los dos tipos, revisados y no, con y sin sesión,
+- [x] T090 **[Cumpleaños hoy, mañana, fin de mes y 29/2, Relaciones Familiares en las dos direcciones, nombres largos con tildes; los comentarios esperan al lote 5 y el Curso inactivo no se siembra (el demo usa los dos Cursos reconocidos para Grupos)]** [LF] `apps/api/prisma/seed-demo.ts` (D120): comentarios de los dos tipos, revisados y no, con y sin sesión,
   uno de 2000 caracteres y uno con HTML; Personas con cumpleaños hoy, mañana, último día del mes y 29/2; una Persona con
   historial en todos los tipos conectados y Relaciones Familiares en las dos direcciones; un Curso inactivo; nombres
   largos y con tildes. — cubre: FR-065
-- [ ] T091 [LF] `pastor-solo-lectura.spec.ts`: sumar las pantallas nuevas (ningún botón de gestión) y un recorrido por
+- [x] T091 **[Perfil y Cursos en `pastor-solo-lectura.spec.ts`; los 403 de escritura nuevos están en las integraciones de cada lote]** [LF] `pastor-solo-lectura.spec.ts`: sumar las pantallas nuevas (ningún botón de gestión) y un recorrido por
   los endpoints de escritura nuevos esperando 403. — cubre: SC-008, FR-061
 - [ ] T092 [LF] `axe-todas-las-rutas.spec.ts` verde con las rutas nuevas en claro y oscuro y a 320 px. — cubre: SC-007,
   FR-062
-- [ ] T093 [LF] Medir p95 de `GET /solicitudes`, `/personas/:id/perfil` e `/inicio/metricas` con `db:reset-demo`
+- [x] T093 **[p95 con el seed demo, 50 pedidos por endpoint: en el PR]** [LF] Medir p95 de `GET /solicitudes`, `/personas/:id/perfil` e `/inicio/metricas` con `db:reset-demo`
   (script simple con 50 pedidos, resultado en el PR). — cubre: SC-004
 - [ ] T094 [LF] Las tres suites en verde (`pnpm --filter api run test`, `pnpm --filter api run test:e2e`, e2e de
   `apps/web` y `apps/backoffice`) y pasada de `quickstart.md`. — cubre: Constitución (Governance)
-- [ ] T095 [LF] Aplicar "Cambios a docs al mergear" de `plan.md` y numerar D178 y D207–D213 (la DN-1 de esta spec quedó unificada en D178, con la precisión D207) en `docs/05` (mirando el último
+- [ ] T095 **[D178 y D207–D213 ya están en `docs/05` (lote 0 global) y casi todos los cambios de `docs/02`, `04` y `14` también; se sumó el glosario de `docs/15`. Lo de "Contanos" (`docs/04`, ER, `docs/16`) espera al lote 5]** [LF] Aplicar "Cambios a docs al mergear" de `plan.md` y numerar D178 y D207–D213 (la DN-1 de esta spec quedó unificada en D178, con la precisión D207) en `docs/05` (mirando el último
   número). — cubre: Principio I
 
 ---
