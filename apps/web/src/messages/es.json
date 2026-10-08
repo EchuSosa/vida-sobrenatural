@@ -690,6 +690,35 @@
     }
   },
   "avisos": {
+    "titulo": "Avisos",
+    "intro": "Las novedades de tu camino y los avisos de la iglesia.",
+    "sinLeer": "Sin leer",
+    "sinLeerAccesible": "{n, plural, one {# aviso sin leer} other {# avisos sin leer}}",
+    "marcarTodos": "Marcar todos como leídos",
+    "marcando": "Marcando…",
+    "marcadosTodos": "Listo, marcamos todos como leídos.",
+    "errorMarcar": "No pudimos marcar los avisos. Probá de nuevo en unos segundos.",
+    "reintentar": "Reintentar",
+    "codigoReferencia": "Código de referencia: {codigo}",
+    "vacio": "Acá vas a ver las novedades de tu camino y los avisos de la iglesia.",
+    "irAMiCamino": "Ir a Mi camino",
+    "volver": "Volver a Avisos",
+    "ver": "Ver",
+    "deLaIglesia": "Aviso de la iglesia",
+    "recibido": "Recibido el {fecha}",
+    "paginado": "Páginas de avisos",
+    "anterior": "Anterior",
+    "siguiente": "Siguiente",
+    "errorCarga": {
+      "titulo": "No pudimos cargar tus avisos",
+      "texto": "Puede ser un problema momentáneo. Probá de nuevo en unos segundos.",
+      "reintentar": "Reintentar",
+      "codigo": "Código de referencia: {codigo}"
+    },
+    "noEncontrado": {
+      "titulo": "No encontramos ese aviso",
+      "texto": "Puede que el enlace esté mal o que el aviso no sea tuyo."
+    },
     "eventos": {
       "discipulado": {
         "propuesta_nueva": {
@@ -834,7 +863,7 @@
         },
         "pago_rechazado": {
           "titulo": "No pudimos validar tu pago de {evento}",
-          "detalle": "Mirá el motivo en Mis eventos y volvé a cargarlo."
+          "detalle": "Mirá en Mis eventos qué pasó y volvé a cargarlo."
         },
         "modificado": {
           "titulo": "Cambió algo de {evento}",
