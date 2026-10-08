@@ -391,6 +391,17 @@
       "editar": "Editar"
     },
     "errorCampo": "Revisá este dato.",
+    "errores": {
+      "apellido": "Escribí tu apellido.",
+      "nombre": "Escribí tu nombre.",
+      "genero": "Elegí una opción en Género.",
+      "direccion": "Escribí tu dirección, por ejemplo: calle 7 n.º 1234.",
+      "sedeId": "Elegí la Sede a la que vas.",
+      "estadoCivil": "Elegí una opción en Estado civil.",
+      "profesion": "Elegí una opción en Profesión.",
+      "profesionDetalle": "Escribí a qué te dedicás.",
+      "congregaDesde": "Elegí el año en que empezaste a venir. Si es tu primer año, elegí \"Este año\"."
+    },
     "errorFechaNacimiento": "Completá el día, el mes y el año en que naciste. El año va con 4 números, por ejemplo 1965.",
     "elegirOpcion": "Elegí una opción",
     "soloNumeros": "Solo números",

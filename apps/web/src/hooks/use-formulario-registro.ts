@@ -131,25 +131,28 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
   // H-72: una regla por campo, reutilizada en el onBlur de cada uno y al
   // intentar avanzar de paso con algo sin completar — la misma pieza que
   // decide "¿está bien?" decide también qué mensaje mostrar.
-  const requerido: ValidacionCampo<string> = { esValido: (v) => v.trim() !== '', mensaje: t('errorCampo') };
+  // ajustes-ux #27: cada campo dice qué hacer ("Escribí tu apellido."), no
+  // un "Revisá este dato." igual para todos — en el resumen de arriba los
+  // tres enlaces se leían idénticos.
+  const requerido = (mensaje: string): ValidacionCampo<string> => ({ esValido: (v) => v.trim() !== '', mensaje });
   const validaciones = {
-    apellido: requerido,
-    nombre: requerido,
-    genero: requerido,
-    fechaNacimiento: { ...requerido, mensaje: t('errorFechaNacimiento') },
+    apellido: requerido(t('errores.apellido')),
+    nombre: requerido(t('errores.nombre')),
+    genero: requerido(t('errores.genero')),
+    fechaNacimiento: requerido(t('errorFechaNacimiento')),
     telefono: {
       esValido: (v: { codigoPais: string; numero: string }) => TELEFONO_REGEX.test(`${v.codigoPais} ${v.numero}`),
       mensaje: mensajeDeCampo('TELEFONO_INVALIDO', t('campos.numeroTelefono')),
     } satisfies ValidacionCampo<{ codigoPais: string; numero: string }>,
-    direccion: requerido,
-    sedeId: requerido,
-    estadoCivil: requerido,
-    profesion: requerido,
+    direccion: requerido(t('errores.direccion')),
+    sedeId: requerido(t('errores.sedeId')),
+    estadoCivil: requerido(t('errores.estadoCivil')),
+    profesion: requerido(t('errores.profesion')),
     profesionDetalle: {
       esValido: () => datos.profesion !== 'otro' || datos.profesionDetalle.trim() !== '',
-      mensaje: t('errorCampo'),
+      mensaje: t('errores.profesionDetalle'),
     } satisfies ValidacionCampo<string>,
-    congregaDesde: requerido,
+    congregaDesde: requerido(t('errores.congregaDesde')),
   };
 
   function pasoValido(numeroPaso: number): boolean {
