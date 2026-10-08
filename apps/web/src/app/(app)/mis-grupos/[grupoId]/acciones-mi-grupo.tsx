@@ -170,7 +170,7 @@ export function ProponerFinalizacion({ grupoId, nombre }: { grupoId: string; nom
     <ConfirmDestructiveDialog
       tono="neutro"
       trigger={
-        <Button type="button" size="xl" className="w-full text-base sm:w-fit" loading={enviando}>
+        <Button type="button" variant="outline" size="xl" className="w-full text-base sm:w-fit" loading={enviando}>
           <FlagTriangleRight aria-hidden />
           {t('detalle.proponerFinalizacion')}
         </Button>
