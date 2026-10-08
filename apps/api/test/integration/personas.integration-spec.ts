@@ -60,7 +60,7 @@ describe('POST /personas (integración, contra base de datos de test)', () => {
       sedeId,
       estadoCivil: 'soltero_a',
       profesion: 'arte_diseno',
-      tiempoCongregacion: 'menos_6_meses',
+      congregaDesde: 2020,
       consentimientoDatos: true,
       fotoUrl: 'https://lh3.googleusercontent.com/a/foto-de-test',
     };

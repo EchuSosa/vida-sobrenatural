@@ -22,7 +22,7 @@
 
 **Registro, alta y perfil:**
 - Registro con SSO, validación de edad y género, alta manual de menores (Flujo 2 y 7). El formulario de registro se divide en pasos cortos con indicador de progreso (D94). Teléfono con selector de país y profesión por categoría (D90).
-- **Alta de Personas adultas por el Admin o un Discipulador** (Flujo 12, D97), con email opcional. Con email de cualquier proveedor entra sola con código por email (D141); quien no tiene email queda sin acceso a la app, y el Admin puede crear solicitudes e inscripciones en su nombre.
+- **Alta de Personas adultas por el Admin** (Flujo 12, D97, D143), con email opcional y aviso de posible duplicado (D145). Con email de cualquier proveedor entra sola con código por email (D141); quien no tiene email queda sin acceso a la app, y el Admin puede crear solicitudes e inscripciones en su nombre.
 - Edición de perfil propio (datos de contacto, no fecha de nacimiento ni email) y gestión de Relaciones Familiares (Flujo 11).
 - Preferencia de tema: Claro / Oscuro / Sistema (D95).
 
@@ -55,20 +55,20 @@ Cada solicitud muestra, además de su estado, qué pasa después (ver `15-guia-u
 - Cancelación de inscripción por la propia Persona **o por el Admin** (ej. si avisan por otro canal), con promoción automática desde lista de espera (Flujo 8).
 
 **Notificaciones** (D47, D96, D100 — detalle en `16-sistemas-transversales.md`):
-- Tres canales: **Avisos** (historial in-app con leídas/no leídas), **push** (PWA) y **email** (solo avisos importantes, también para quien no usa la app).
+- Dos canales en esta tanda: **Avisos** (historial in-app con leídas/no leídas) y **email** (solo avisos importantes, también para quien no usa la app). **Push** (PWA) queda para la tanda siguiente (D149).
 - Manuales (Admin, a todos o a un segmento — Grupo o Ministerio específico), con opción de marcarlas como importantes.
 - Automáticas: contenido nuevo liberado, Solicitud/Postulación resuelta (incluye promoción desde lista de espera, pagos y activación de cuentas — importantes), recordatorio de Evento próximo (a quien ya se inscribió), recordatorio de inscripción pendiente (a todos, configurable por Evento) (Flujo 10).
 - El permiso de push se pide en contexto (nunca al abrir la app), con instrucciones para agregar la app a la pantalla de inicio en iPhone.
 
 **Back office / Admin:**
-- CRUD de catálogos (Sede, Curso, Ministerio, Célula) con soft delete (`activo`) y confirmación reforzada al desactivar registros con datos relacionados.
+- CRUD de catálogos (Sede, Curso, Ministerio, Célula) con soft delete (`activo`) y confirmación reforzada al desactivar registros con datos relacionados **activos** (D38, ej. un Curso con Grupos en curso).
 - Bandeja unificada de Solicitudes (Discipulado, Vida de Servicio, Bautismo, Postulaciones, Inscripciones a Evento, Pagos).
 - Alta de Personas adultas y acciones en su nombre (Flujo 12).
 - Vista de perfil unificada por Persona (roles, historial de Inscripciones/Postulaciones/Solicitudes, Relaciones Familiares), con foto de perfil de Google cuando exista (D87).
 - Listado de cumpleaños del mes.
 - Comentarios recibidos desde "Contanos qué te parece" (D102).
 - Gestión de la Palabra Profética (texto + link de YouTube) y CRUD de libros de Ediciones VS (D109).
-- Métricas básicas: cantidad de Personas activas, distribución por `tiempo_congregacion`, por Sede (el dashboard analítico completo queda en Fase 2).
+- Métricas básicas: cantidad de Personas activas, distribución por tiempo congregándose (calculado desde `congrega_desde`, D214), por Sede (el dashboard analítico completo queda en Fase 2).
 - Un solo Admin por ahora, pensado para escalar a más roles después.
 
 **Sistemas transversales** (detalle en `16-sistemas-transversales.md`):

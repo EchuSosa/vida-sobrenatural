@@ -117,5 +117,8 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'webkit', grep: /@webkit/, use: { ...devices['Desktop Safari'] } },
+    // Lote 0 global (spec 006, research #13; D150): los tests marcados
+    // `@celular` corren también en un celular (360–412 px, táctil).
+    { name: 'celular', grep: /@celular/, use: { ...devices['Pixel 7'] } },
   ],
 });

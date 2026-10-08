@@ -3,14 +3,15 @@ erDiagram
     SEDE ||--o{ GRUPO : "ubica"
     SEDE ||--o{ EVENTO : "organiza"
 
-    PERSONA |o--o{ PERSONA : "da de alta (Admin/Discipulador, opcional)"
+    PERSONA |o--o{ PERSONA : "da de alta (Admin, opcional - D143)"
 
     CURSO ||--o{ GRUPO : "instancia"
 
-    GRUPO |o--o| CRONOGRAMA : "tiene (opcional, para cursos con liberación programada)"
-    CRONOGRAMA ||--o{ ITEM_CRONOGRAMA : "compone"
+    GRUPO ||--o{ ITEM_CRONOGRAMA : "tiene su cronograma (opcional, liberacion programada - D161)"
     GRUPO ||--o{ CONTENIDO : "contiene (opcional)"
-    ITEM_CRONOGRAMA }o--|| CONTENIDO : "libera"
+    ITEM_CRONOGRAMA ||--o| CONTENIDO : "libera (uno por semana)"
+    CONTENIDO ||--o{ ARCHIVO_CONTENIDO : "adjunta (privados - D168)"
+    CONTENIDO ||--o{ ENLACE_CONTENIDO : "enlaza"
 
     GRUPO ||--o{ ENCUENTRO : "registra reuniones/sesiones (aplica a cualquier modalidad)"
 
@@ -29,11 +30,16 @@ erDiagram
 
     PERSONA ||--o{ SOLICITUD_BAUTISMO : "solicita"
     PERSONA ||--o{ SOLICITUD_DISCIPULADO : "solicita"
+    PERSONA ||--o{ SOLICITUD_VIDA_SERVICIO : "solicita"
+    GRUPO |o--o{ SOLICITUD_VIDA_SERVICIO : "edicion pedida (null = la proxima - D163)"
+    SOLICITUD_DISCIPULADO |o--o| INSCRIPCION : "origina (Vida Nueva)"
+    SOLICITUD_VIDA_SERVICIO |o--o| INSCRIPCION : "origina (Vida de Servicio)"
+    SOLICITUD_BAUTISMO |o--o| INSCRIPCION_EVENTO : "asignada a un Evento de bautismo - D181"
     PERSONA ||--o{ INSCRIPCION_EVENTO : "se inscribe"
     EVENTO ||--o{ INSCRIPCION_EVENTO : "recibe inscriptos"
-    INSCRIPCION_EVENTO ||--o| PAGO : "registra pago (si el evento tiene costo)"
+    INSCRIPCION_EVENTO ||--o{ PAGO : "registra pagos (si el evento tiene costo; uno pendiente a la vez)"
 
-    PERSONA ||--o{ SUSCRIPCION_NOTIFICACION : "tiene dispositivos suscriptos"
+    PERSONA ||--o{ SUSCRIPCION_NOTIFICACION : "tiene dispositivos suscriptos (tanda siguiente - D149)"
     PERSONA ||--o{ NOTIFICACION : "crea (si es manual, rol Admin)"
     PERSONA ||--o{ NOTIFICACION : "es el alcance de (opcional, ej. solicitud_actualizada)"
     GRUPO ||--o{ NOTIFICACION : "es el alcance de (opcional)"
@@ -46,8 +52,9 @@ erDiagram
 
     PERSONA ||--o{ RELACION_FAMILIAR : "tiene familiares vinculados"
 
-    PERSONA ||--o{ COMPLETITUD_MANUAL : "tiene cursos marcados completos manualmente"
-    CURSO ||--o{ COMPLETITUD_MANUAL : "es marcado completo para"
+    PERSONA ||--o{ DECLARACION_HISTORIAL : "declara Ya lo hice - D154"
+    PERSONA ||--o{ COMPLETITUD_MANUAL : "tiene etapas registradas por la iglesia - D153"
+    DECLARACION_HISTORIAL |o--o| COMPLETITUD_MANUAL : "al confirmarse crea"
 
     PERSONA |o--o{ COMENTARIO_APP : "envia (opcional, si tenia sesion)"
 
@@ -62,14 +69,17 @@ erDiagram
         string nombre
         string apellido
         string genero
-        string email "opcional si origen_alta=admin (D97)"
+        string email "opcional (D145), unico entre quienes lo tienen, normalizado"
+        string telefono_normalizado "solo digitos, aviso de duplicado - D145"
         string foto_url "opcional, URL de la foto de perfil de Google al registrarse (D87)"
         string telefono "input estructurado: codigo de pais + numero, ver D90"
         string direccion
         date fecha_nacimiento
         string sede_id FK
         string estado "activa o pendiente_tutor"
-        boolean apto_ministerio "activado manualmente por Admin"
+        string rol "roles acumulativos; apto_ministerio y miembro_ministerio son roles de estado (D159, D170)"
+        date bautismo_habilitado_en "opcional, D147"
+        string bautismo_habilitado_por FK "admin"
         string tutor_nombre "solo si es menor de edad"
         string tutor_apellido "solo si es menor de edad"
         string tutor_telefono "solo si es menor de edad"
@@ -77,7 +87,7 @@ erDiagram
         string estado_civil "soltero_a, casado_a, en_concubinato, viudo_a, divorciado_a, separado_a"
         string profesion "categoria predefinida, ver D90 (Otro incluye texto libre)"
         string profesion_detalle "opcional, solo si profesion=otro"
-        string tiempo_congregacion "menos_6_meses, 6_meses_1_anio, 1_3_anios, 3_5_anios, mas_5_anios"
+        int congrega_desde "anio en que empezo a venir - D214; el tiempo se calcula al mostrarlo"
         string idioma_preferido "es (default), pt o en - D84"
         string tema_preferido "claro (default), oscuro o sistema - D106"
         string origen_alta "autorregistro o admin - D97"
@@ -92,36 +102,53 @@ erDiagram
         string modalidad "liberacion_programada o seguimiento_por_encuentros"
         string categoria "ej. vida_nueva, vida_de_servicio"
         string prerequisito_categoria "opcional, ej. Vida de Servicio requiere categoria vida_nueva"
-        int cantidad_semanas
+        string descripcion "opcional - D212"
         boolean activo
+        date eliminado_en "D119"
+        string eliminado_por FK
     }
     GRUPO {
         string id
         string curso_id FK
         string sede_id FK
-        string nombre
+        string nombre "obligatorio en Vida de Servicio (edicion)"
         date fecha_inicio
-        date fecha_fin
+        boolean inscripcion_abierta "Vida de Servicio"
         string estado "en_curso o finalizado"
         boolean propuesta_finalizacion "true = el Lider propuso finalizar, falta confirmacion del Admin"
     }
-    CRONOGRAMA {
-        string id
-        string grupo_id FK
-    }
     ITEM_CRONOGRAMA {
         string id
-        string cronograma_id FK
-        int numero_semana
+        string grupo_id FK
+        int numero_semana "1..52"
         date fecha_liberacion
-        string contenido_id FK
+        date eliminado_en "borrado logico"
     }
     CONTENIDO {
         string id
         string grupo_id FK
+        string item_cronograma_id FK "unico"
         string titulo
-        string tipo "texto, archivo, video"
-        string url_o_archivo
+        string texto "opcional"
+        string cargado_por FK
+        date liberacion_avisada_en "el aviso sale una sola vez - D162"
+    }
+    ARCHIVO_CONTENIDO {
+        string id
+        string contenido_id FK
+        string ruta "area privada de StorageService"
+        string nombre_original
+        string mime_type "detectado por contenido"
+        int tamanio_bytes
+        string texto_alternativo "obligatorio si es imagen"
+        date eliminado_en
+    }
+    ENLACE_CONTENIDO {
+        string id
+        string contenido_id FK
+        string texto
+        string url "https"
+        date eliminado_en
     }
     INSCRIPCION {
         string id
@@ -129,6 +156,9 @@ erDiagram
         string grupo_id FK
         date fecha_inscripcion
         string estado "activa, completada, dada_de_baja, abandono"
+        string solicitud_id FK "Solicitud de Discipulado, o"
+        string solicitud_vida_servicio_id FK "Solicitud de Vida de Servicio (exactamente una)"
+        string baja_propuesta_tipo "dada_de_baja o abandono, solo Vida de Servicio - D158"
     }
     ASISTENCIA {
         string id
@@ -148,20 +178,30 @@ erDiagram
         string nombre
         string descripcion
         boolean activo
+        date eliminado_en "D119"
+        string eliminado_por FK
     }
     CELULA {
         string id
         string ministerio_id FK
         string nombre
         boolean activo
+        date eliminado_en "D119"
+        string eliminado_por FK
     }
     POSTULACION {
         string id
         string persona_id FK
         string ministerio_id FK
         string celula_id FK "opcional"
-        string estado "pendiente, aprobada, rechazada, inactiva"
+        string estado "pendiente, aprobada, rechazada, inactiva, retirada - D171"
         date fecha
+        string motivacion "opcional"
+        string disponibilidad "opcional"
+        string motivo_rechazo "interno - D176"
+        string motivo_inactivacion "cambio_de_ministerio o baja - D174"
+        string reemplazada_por FK "la aprobada que la reemplazo"
+        string motivo_baja "interno"
         string revisado_por FK "admin"
         string creado_por FK "null = la propia Persona"
     }
@@ -170,25 +210,52 @@ erDiagram
         string sede_id FK
         string nombre
         string slug "URL publica unica del evento - D82"
-        date fecha
+        datetime inicio "con hora - D189"
+        datetime fin "opcional"
+        string lugar "opcional, default la direccion de la Sede - D190"
+        string tipo "general o bautismo - D188"
         string descripcion
         string imagen_url "opcional, flyer del evento"
         string descripcion_imagen "obligatorio si hay imagen_url, texto alternativo - D83"
         string publico_objetivo "informativo, sin validacion del sistema"
         boolean requiere_inscripcion
         boolean requiere_aprobacion "solo aplica si requiere_inscripcion=true"
-        boolean activo "false = evento cancelado"
+        string estado "publicado o cancelado"
+        date eliminado_en "papelera - D119"
         int dias_anticipacion_recordatorio "opcional, null = no se envia recordatorio de inscripcion"
         int cupo "opcional, null = sin limite"
         boolean permite_lista_espera "solo aplica si cupo esta definido"
         float costo "opcional, null = evento gratuito"
+        string instrucciones_pago "obligatorio si hay costo - D191"
     }
     SOLICITUD_BAUTISMO {
         string id
         string persona_id FK
-        string estado "pendiente, aprobada, rechazada"
+        string estado "pendiente, aprobada, rechazada, retirada, realizada - D180"
         date fecha_solicitud
-        date fecha_deseada
+        string comentario "opcional, reemplaza fecha_deseada - D179"
+        string motivo_rechazo "solo el equipo - D185"
+        string inscripcion_evento_id FK "asignacion a un Evento de bautismo - D181"
+        date realizada_en
+        string revisado_por FK "admin"
+        string creado_por FK "null = la propia Persona"
+    }
+    SOLICITUD_VIDA_SERVICIO {
+        string id
+        string persona_id FK
+        string estado "pendiente, aprobada, rechazada, retirada"
+        string grupo_id FK "edicion pedida, null = la proxima"
+        string motivo_rechazo "solo Admin"
+        string revisado_por FK "admin"
+        string creado_por FK "null = la propia Persona"
+    }
+    DECLARACION_HISTORIAL {
+        string id
+        string persona_id FK
+        string etapa "vida_nueva, vida_de_servicio, ministerio, bautismo"
+        string estado "pendiente, confirmada, rechazada, retirada"
+        string comentario "opcional"
+        string motivo_rechazo "opcional, lo ve la Persona"
         string revisado_por FK "admin"
         string creado_por FK "null = la propia Persona"
     }
@@ -206,6 +273,8 @@ erDiagram
         string evento_id FK
         string estado "confirmada, pendiente, rechazada, lista_espera, cancelada"
         date fecha
+        date en_lista_desde "orden de la lista de espera"
+        string motivo_cancelacion "persona, admin o pago_rechazado - D192"
         string creado_por FK "null = la propia Persona"
     }
     PAGO {
@@ -213,9 +282,11 @@ erDiagram
         string inscripcion_evento_id FK
         float monto
         string medio_pago
-        string comprobante_url "archivo adjuntado por la Persona o el Admin"
+        string comprobante_ruta "area privada, solo duena y quien verifica - D195"
         string estado "pendiente_verificacion, verificado, rechazado"
         date fecha_pago
+        string motivo_rechazo "obligatorio si rechazado, lo ve la Persona"
+        string creado_por FK "null = la Persona; si es el Admin nace verificado"
         string verificado_por FK "admin"
     }
     ENCUENTRO {
@@ -236,11 +307,13 @@ erDiagram
         string id
         string tipo "manual o automatica"
         string prioridad "normal o importante - importante tambien va por email (D96)"
-        string titulo
-        string mensaje
+        string titulo "solo manual, max 80"
+        string mensaje "solo manual, max 1000, texto plano"
         string alcance "todos, grupo, ministerio, evento o persona"
         string alcance_id FK "segun el valor de alcance; null si alcance=todos"
-        string disparador "contenido_liberado, solicitud_actualizada, evento_proximo o recordatorio_inscripcion (solo automatica)"
+        string evento "solo automatica: nombre del CATALOGO_AVISOS; el disparador se deriva de ahi (D198)"
+        json params "solo automatica: ids y datos no personales"
+        string clave_idempotencia "opcional, unica"
         string entidad_relacionada_tipo "grupo, solicitud, postulacion, inscripcion_evento, etc (solo automatica)"
         string entidad_relacionada_id "id de la entidad que origino la notificacion (solo automatica)"
         string creado_por FK "admin, null si es automatica"
@@ -253,7 +326,8 @@ erDiagram
         string canal "app, push o email - D100"
         string estado "pendiente, enviada o fallida"
         int intentos
-        string ultimo_error "opcional"
+        date proximo_intento_en "solo email - D204"
+        string ultimo_error "opcional, solo el tipo"
         date fecha_envio
         date leida_en "solo canal app, null = no leida"
     }
@@ -273,10 +347,14 @@ erDiagram
     COMPLETITUD_MANUAL {
         string id
         string persona_id FK
-        string curso_id FK
-        date fecha
-        string motivo "opcional, ej. hizo Vida Nueva en otra congregacion"
+        string etapa "vida_nueva, vida_de_servicio, ministerio, bautismo - D153"
+        string origen "declaracion o admin"
+        string declaracion_id FK "solo si origen=declaracion"
+        string nota "opcional, ej. hizo Vida Nueva en otra congregacion"
         string registrado_por FK "admin"
+        date registrada_en
+        date anulada_en "borrado logico; una vigente por Persona y etapa"
+        string anulada_por FK
     }
     VIDEO_YOUTUBE {
         string id
@@ -293,8 +371,13 @@ erDiagram
         string texto
         boolean acepta_contacto
         string pagina_origen
+        string contacto_email "solo sin sesion y con acepta_contacto"
+        string contacto_telefono "solo sin sesion y con acepta_contacto"
         string datos_tecnicos "navegador, ultimo requestId"
-        boolean revisado
+        string app "web o backoffice"
+        string origen_huella "HMAC de la IP, nunca la IP - D211"
+        date revisado_en
+        string revisado_por FK "admin"
         date fecha
     }
     PALABRA_PROFETICA {

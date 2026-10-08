@@ -72,7 +72,7 @@ export class Escenario {
         sedeId: this.sedeId,
         estadoCivil: 'soltero_a',
         profesion: 'otro',
-        tiempoCongregacion: 'menos_6_meses',
+        congregaDesde: 2020,
         estado: 'activa',
         consentimientoDatos: true,
         rol: opciones.rol ?? ['miembro_registrado'],

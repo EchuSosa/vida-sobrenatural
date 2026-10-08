@@ -64,7 +64,7 @@ async function crearPersonaPendienteTutor(email: string): Promise<void> {
       estadoCivil: 'soltero_a',
       profesion: 'otro',
       profesionDetalle: 'Estudiante',
-      tiempoCongregacion: 'menos_6_meses',
+      congregaDesde: 2020,
       consentimientoDatos: false,
     }),
   });

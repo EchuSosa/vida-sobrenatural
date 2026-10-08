@@ -6,7 +6,7 @@ Temas identificados pero no resueltos todavía — a definir en próximas sesion
 
 - Falta el **texto real de "En qué creemos"** (declaración de fe/valores) — no se encontró en el material investigado hasta ahora. Hay que pedirlo directamente (a un pastor, o revisar "Nosotros" → "Sistema de Trabajo" del sitio anterior con más detalle). No se inventa (D98). Ver `12-contenido-bienvenida.md`.
 - Faltan **fotos reales** (templo, equipo pastoral, gente) para reemplazar los placeholders — depende del banco de material de la iglesia o de la diseñadora.
-- **Completar el inventario de contenido** (criterio en D98): `12-contenido-bienvenida.md` ya cubre Bienvenida, culto, Palabra Profética, Liderazgo y redes. Falta: preguntas frecuentes de Primeros pasos, descripción de cada Ministerio, y marcar qué textos son reales y cuáles provisorios. Además, alinear ese documento con la navegación nueva (D91, D92): la sección "¿Cómo sigue el proceso?" pasa a vivir en **Primeros pasos**, y los botones deben seguir la guía de UX (D94).
+- **Completar el inventario de contenido** (criterio en D98): `12-contenido-bienvenida.md` ya cubre Bienvenida, culto, Palabra Profética, Liderazgo y redes. Falta: preguntas frecuentes de Primeros pasos, el texto real de Bautismo para Mi camino (hay uno provisorio, D98), y marcar qué textos son reales y cuáles provisorios. Además, alinear ese documento con la navegación nueva (D91, D92): la sección "¿Cómo sigue el proceso?" pasa a vivir en **Primeros pasos**, y los botones deben seguir la guía de UX (D94).
 - **Guion de la demo** para la presentación a los pastores, apoyado en los escenarios del seed (D99).
 
 ## Técnicas
@@ -21,7 +21,7 @@ Temas identificados pero no resueltos todavía — a definir en próximas sesion
 - **Backups de la base de datos** y prueba de restauración.
 - **Sostenibilidad:** quién mantiene la app después de presentarla, quién paga hosting, dominio y servicios (email, Sentry si se supera el plan gratuito), y cómo se capacita al Admin (manual de uso breve). Es un tema para conversar con la iglesia al presentar el proyecto.
 
-(El monitoreo de errores ya quedó resuelto para el MVP con Sentry, D101.)
+(La descripción de cada Ministerio ya no es contenido pendiente del documento: el seed de demo trae textos provisorios marcados (D98) y el real lo carga el Admin desde Catálogos (spec 009). El monitoreo de errores ya quedó resuelto para el MVP con Sentry, D101.)
 
 ---
 

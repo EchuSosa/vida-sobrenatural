@@ -1,0 +1,6 @@
+import type { ContextoSeedDemo } from './contexto.js';
+
+/** spec 009 — su parte del seed demo (D120). Lote 0 global: vacía. */
+export async function sembrarDemo009(ctx: ContextoSeedDemo): Promise<void> {
+  void ctx;
+}

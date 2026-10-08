@@ -97,6 +97,17 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
     permiso: 'mi_disponibilidad.ver',
   },
   { href: '/mis-grupos', labelKey: 'misGrupos', icon: UsersRound, permiso: 'mis_grupos.ver' },
+  // Lote 0 global (specs/IMPLEMENTACION.md): cada spec agrega SUS rutas recién
+  // cuando existe la página — el smoke de axe recorre esta lista entera, así
+  // que una ruta sin página rompe los e2e. Los permisos ya están en
+  // CATALOGO_PERMISOS. Cada sesión escribe solo en su bloque, en este orden:
+  //   spec 006 — /personas/nueva (personas.alta, enMenu: false) y BORRA
+  //              /mis-discipulados, /mi-disponibilidad y /mis-grupos (D142, lote C).
+  //   spec 008 — /grupos/servicio/[id] (grupos.ver, enMenu: false).
+  //   spec 009 — /ministerios, /ministerios/[id], /ministerios/papelera (ministerios.ver / .papelera.ver, enMenu: false: se entra por Catálogos).
+  //   spec 011 — /eventos/[id], /eventos/nuevo, /eventos/papelera (enMenu: false; /eventos ya está).
+  //   spec 012 — /notificaciones/nueva (notificaciones.enviar, enMenu: false; /notificaciones ya está).
+  //   spec 013 — /comentarios[/[id]] (comentarios.ver), /metricas y /cumpleanos (inicio.ver), /cursos[/[id]] y /cursos/papelera.
 ];
 
 function rolesEfectivos(permiso: Permiso | 'cualquier-sesion'): RolDeCargo[] | 'cualquier-sesion' {

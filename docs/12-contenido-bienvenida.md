@@ -39,6 +39,8 @@
 3. **Vida de Servicio** — un curso de 9 encuentros para seguir profundizando, en grupo.
 4. **Ministerio** — el momento de servir activamente en un área de la iglesia, con un equipo.
 
+**Bautismo** (solo en Mi camino, no es una etapa numerada de Primeros pasos) — *texto provisorio, D98, hasta que lo revise Echu o lo pase la iglesia:* "Un paso público de fe: contar que decidiste seguir a Jesús. Lo podés pedir cuando empezás Vida Nueva."
+
 > No hace falta que hagas nada de esto ya mismo. Por ahora, lo único que necesitás es conocer tu Sede y, si querés, registrarte.
 
 ---

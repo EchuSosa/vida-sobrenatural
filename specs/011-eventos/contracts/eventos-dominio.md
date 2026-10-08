@@ -41,8 +41,8 @@ export type SucesoEvento =
 | `pago_registrado` | FR-030 | `admin` | ninguno (bandeja + pendientes del Inicio) |
 | `pago_verificado` | FR-033 | `persona` | `solicitud_actualizada`, **importante** (`docs/16`) |
 | `pago_rechazado` | FR-035 | `persona` | `solicitud_actualizada`, **importante**; lleva a Mis eventos |
-| `evento_modificado` | FR-050 | `inscriptos_evento` | **decisión nueva DN-6**: normal |
-| `evento_cancelado` | FR-040 | `inscriptos_evento` | **decisión nueva DN-6**: importante |
+| `evento_modificado` | FR-050 | `inscriptos_evento` | **decisión nueva D193**: normal |
+| `evento_cancelado` | FR-040 | `inscriptos_evento` | **decisión nueva D193**: importante |
 
 `entidad_relacionada` (D59) para la 012: la Inscripción (`inscripcionId`) → lleva a `/mis-eventos`;
 los de Evento → `/eventos/{slug}`.

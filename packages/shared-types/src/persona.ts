@@ -17,15 +17,77 @@ export type EstadoCivil =
   | 'divorciado_a'
   | 'separado_a';
 
-// Nombres tal como los expone el cliente de Prisma (apps/api/src/generated/prisma/enums.ts);
-// el valor "canónico" sin el prefijo `de_` (ej. "6_meses_a_1_anio") es solo el
-// almacenamiento físico en Postgres vía @map, invisible para la app.
-export type TiempoCongregacion =
-  | 'menos_6_meses'
-  | 'de_6_meses_a_1_anio'
-  | 'de_1_a_3_anios'
-  | 'de_3_a_5_anios'
-  | 'mas_5_anios';
+/**
+ * D214: se guarda el AÑO en que la Persona empezó a venir a la iglesia
+ * (`Persona.congregaDesde`), no un rango — el tiempo se calcula al mostrarlo,
+ * así las métricas quedan al día solas. Reemplaza al viejo `TiempoCongregacion`.
+ */
+export const ANIO_MINIMO_CONGREGA_DESDE = 1900;
+
+/** Cuántos años atrás ofrece la lista del registro (la primera opción es "Este año"). */
+export const ANIOS_OFRECIDOS_CONGREGA_DESDE = 80;
+
+/**
+ * Los años que ofrece la pregunta "¿En qué año empezaste a venir a la
+ * iglesia?" — del actual hacia atrás. El primero se muestra como "Este año".
+ * Única fuente para el registro (web) y el alta por el Admin (backoffice).
+ */
+export function opcionesAnioCongregaDesde(anioActual: number, cantidad = ANIOS_OFRECIDOS_CONGREGA_DESDE): number[] {
+  return Array.from({ length: cantidad }, (_, i) => anioActual - i);
+}
+
+/** ¿Es un año aceptable para `congregaDesde`? Entero, desde 1900 y nunca en el futuro. */
+export function congregaDesdeValido(valor: unknown, anioActual: number): valor is number {
+  return Number.isInteger(valor) && (valor as number) >= ANIO_MINIMO_CONGREGA_DESDE && (valor as number) <= anioActual;
+}
+
+/** Años enteros que lleva viniendo (0 = empezó este año). Nunca negativo. */
+export function aniosCongregando(congregaDesde: number, anioActual: number): number {
+  return Math.max(0, anioActual - congregaDesde);
+}
+
+/** Rangos para agrupar en métricas (D214): se calculan, nunca se guardan. */
+export type RangoCongregacion = 'este_anio' | 'de_1_a_2_anios' | 'de_3_a_5_anios' | 'mas_de_5_anios';
+
+export const ORDEN_RANGO_CONGREGACION: readonly RangoCongregacion[] = [
+  'este_anio',
+  'de_1_a_2_anios',
+  'de_3_a_5_anios',
+  'mas_de_5_anios',
+];
+
+export function rangoCongregacion(congregaDesde: number, anioActual: number): RangoCongregacion {
+  const anios = aniosCongregando(congregaDesde, anioActual);
+  if (anios === 0) return 'este_anio';
+  if (anios <= 2) return 'de_1_a_2_anios';
+  if (anios <= 5) return 'de_3_a_5_anios';
+  return 'mas_de_5_anios';
+}
+
+/**
+ * spec 006 (research #7, D145): forma comparable de un teléfono para el aviso
+ * de posible duplicado — solo dígitos, y sin el 9 de celular de Argentina
+ * (`+54 9 221 …` y `+54 221 …` son el mismo número). La base tiene la MISMA
+ * regla en SQL (trigger de `personas.telefonoNormalizado`, migración
+ * lote_0_global); un test de integración compara las dos sobre el seed
+ * (Principio XI: copia con test que falla si diverge).
+ */
+export function normalizarTelefono(telefono: string): string {
+  return telefono.replace(/[^0-9]/g, '').replace(/^549/, '54');
+}
+
+/**
+ * spec 006 (research #7): nombre o apellido comparable — sin tildes, en
+ * minúsculas y con los espacios colapsados ("José  Pérez" ≡ "jose perez").
+ */
+export function normalizarNombre(nombre: string): string {
+  return nombre
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 export type EstadoPersona = 'activa' | 'pendiente_tutor';
 
@@ -108,7 +170,8 @@ export interface RegistroPersonaInput {
   profesion: Profesion;
   /** Obligatorio cuando profesion = 'otro'. */
   profesionDetalle?: string;
-  tiempoCongregacion: TiempoCongregacion;
+  /** D214: año en que empezó a venir a la iglesia. */
+  congregaDesde: number;
   consentimientoDatos: boolean;
   /** Foto de perfil de Google (picture) — no editable por ahora. */
   fotoUrl?: string;
@@ -135,7 +198,8 @@ export interface PersonaPerfil {
   id: string;
   nombre: string;
   apellido: string;
-  email: string;
+  /** D145: una Persona dada de alta por el Admin puede no tener email. */
+  email: string | null;
   fotoUrl: string | null;
   sedeId: string;
   estado: EstadoPersona;
@@ -198,7 +262,8 @@ export interface BusquedaPersona {
   id: string;
   nombre: string;
   apellido: string;
-  email: string;
+  /** D145: null = sin acceso a la app. */
+  email: string | null;
   telefono: string;
   rol: string[];
 }
@@ -213,7 +278,8 @@ export interface PersonaListado {
   id: string;
   nombre: string;
   apellido: string;
-  email: string;
+  /** D145: null = sin acceso a la app. */
+  email: string | null;
   telefono: string;
   rol: string[];
   /**
@@ -223,4 +289,82 @@ export interface PersonaListado {
    * los que tiene: así sigue valiendo después de otorgarle uno en el modal.
    */
   quitar: Record<RolDeCargo, ResultadoQuitarRol>;
+}
+
+/**
+ * spec 006 (FR-031, D145): los datos personales del Flujo 2, paso 4 — los
+ * mismos para el registro y para el alta por el Admin. Las validaciones de
+ * campo viven en `registro.ts` (una sola vez para los dos).
+ */
+export interface DatosPersonales {
+  apellido: string;
+  nombre: string;
+  genero: Genero;
+  /** YYYY-MM-DD */
+  fechaNacimiento: string;
+  telefono: string;
+  direccion: string;
+  sedeId: string;
+  estadoCivil: EstadoCivil;
+  profesion: Profesion;
+  profesionDetalle?: string;
+  /** D214 */
+  congregaDesde: number;
+}
+
+/** Body de POST /personas/alta (spec 006, contracts/personas-alta-api.md). */
+export interface DatosAltaPersona extends DatosPersonales {
+  email?: string | null;
+  consentimiento: true;
+  /** Reintento después de un 409 POSIBLE_DUPLICADO ("Es otra persona, crear igual"). */
+  confirmarPosibleDuplicado?: boolean;
+}
+
+/** Por qué dos Personas pueden ser la misma (aviso, no bloqueo — D145). */
+export type MotivoPosibleDuplicado = 'telefono' | 'nombre_apellido_fecha';
+
+/** Cada coincidencia del 409 POSIBLE_DUPLICADO. */
+export interface CoincidenciaDuplicado {
+  id: string;
+  nombre: string;
+  apellido: string;
+  fechaNacimiento: string;
+  telefono: string;
+  activa: boolean;
+  porque: MotivoPosibleDuplicado[];
+}
+
+/** Lo que `sonPosiblesDuplicados` necesita de cada Persona. */
+export type DatosParaDuplicado = Pick<DatosPersonales, 'nombre' | 'apellido' | 'fechaNacimiento' | 'telefono'>;
+
+/**
+ * spec 006 (FR-035, research #7): ¿por qué `a` y `b` podrían ser la misma
+ * Persona? Mismo teléfono normalizado, o mismo nombre + apellido normalizados
+ * y misma fecha de nacimiento. Lista vacía = no se parecen. Pura (la API la
+ * aplica sobre los candidatos que trae por índice).
+ */
+export function sonPosiblesDuplicados(a: DatosParaDuplicado, b: DatosParaDuplicado): MotivoPosibleDuplicado[] {
+  const motivos: MotivoPosibleDuplicado[] = [];
+  if (normalizarTelefono(a.telefono) === normalizarTelefono(b.telefono)) motivos.push('telefono');
+  if (
+    normalizarNombre(a.nombre) === normalizarNombre(b.nombre) &&
+    normalizarNombre(a.apellido) === normalizarNombre(b.apellido) &&
+    a.fechaNacimiento.slice(0, 10) === b.fechaNacimiento.slice(0, 10)
+  ) {
+    motivos.push('nombre_apellido_fecha');
+  }
+  return motivos;
+}
+
+/**
+ * spec 013 (research #14, D133): ¿es menor de edad (< 18) en `hoy`
+ * (YYYY-MM-DD, fecha civil de Argentina)? Pura, para que la API y el backoffice
+ * no la reimplementen.
+ */
+export function esMenorDeEdad(fechaNacimiento: string, hoy: string): boolean {
+  const [an, mn, dn] = fechaNacimiento.slice(0, 10).split('-').map(Number);
+  const [ah, mh, dh] = hoy.slice(0, 10).split('-').map(Number);
+  let edad = ah - an;
+  if (mh < mn || (mh === mn && dh < dn)) edad -= 1;
+  return edad < EDAD_MINIMA_ROL_DE_CARGO;
 }

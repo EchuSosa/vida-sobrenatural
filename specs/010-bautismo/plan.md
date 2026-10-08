@@ -173,37 +173,36 @@ Discipulado (`/solicitudes/[id]`); la bandeja enlaza a uno u otro según `tipo`.
 - **Cierre (secuencial):** e2e del flujo completo (pedir → aceptar → asignar → confirmar), seed-demo,
   checklists de pantalla, las tres suites.
 
-## Decisiones nuevas (se numeran al mergear)
+## Decisiones nuevas (numeradas en `docs/05-decisiones.md`: D179–D187; la DN-8 quedó unificada en D178 y precisada en D186)
 
-Ninguna se escribe en `docs/05-decisiones.md` desde esta rama (trabajo en paralelo). Al mergear, se
-les asigna el número siguiente al último usado.
+Numeradas en el lote 0 global (`lote-0-global`), con su porqué en `docs/05-decisiones.md`.
 
-- **DN-1 — La Solicitud de Bautismo no pide fecha deseada.** Pide un texto opcional ("¿Querés
+- **D179 — La Solicitud de Bautismo no pide fecha deseada.** Pide un texto opcional ("¿Querés
   contarnos algo?"). *Por qué:* con D147 la fecha la fija la iglesia como Evento; preguntarla promete
   algo que no depende de la Persona. Corrige `docs/04` y el ER (Pregunta 3).
-- **DN-2 — Estado `realizada` y confirmación de bautismos.** Pasado un Evento de bautismo, el Admin
+- **D180 — Estado `realizada` y confirmación de bautismos.** Pasado un Evento de bautismo, el Admin
   confirma quiénes se bautizaron (todos tildados por defecto); los destildados vuelven a esperar
   fecha. *Por qué:* sin esto la app solo sabe que alguien "tenía fecha", y Mi camino y las métricas
   (`docs/08`) necesitan el hecho (Pregunta 1).
-- **DN-3 — La asignación a un Evento de bautismo es una Inscripción a Evento confirmada creada por
+- **D181 — La asignación a un Evento de bautismo es una Inscripción a Evento confirmada creada por
   el Admin, referenciada desde la Solicitud.** La fecha, hora y lugar se leen del Evento. *Por qué:*
   es lo que D147 llama "reusar lo que ya existe": el recordatorio y "Mis eventos" funcionan sin caso
   especial, y no hay una segunda copia de la fecha (research #1).
-- **DN-4 — El Evento de bautismo no tiene inscripción propia, QR, cupo ni costo, y su página pública
+- **D182 — El Evento de bautismo no tiene inscripción propia, QR, cupo ni costo, y su página pública
   no muestra quiénes se bautizan.** *Por qué:* la lista la arma el Admin con los aceptados (D147), y
   los nombres son dato sensible (D5). El Evento sí aparece en la cartelera (Pregunta 4).
-- **DN-5 — La Persona puede retirar su pedido mientras esté abierto (también con fecha) y decir "No
+- **D183 — La Persona puede retirar su pedido mientras esté abierto (también con fecha) y decir "No
   puedo ese día".** Diálogos neutros (D151). *Por qué:* la alternativa es faltar sin avisar o
   escribir por WhatsApp; deja al Admin la lista de "Esperando fecha" al día.
-- **DN-6 — Edad para pedir el bautismo sola/o: 12 años**, con constante propia; menores de 12, el
+- **D184 — Edad para pedir el bautismo sola/o: 12 años**, con constante propia; menores de 12, el
   Admin en su nombre. *Por qué:* misma frontera que Vida Nueva (004, FR-044), fácil de explicar
   (Pregunta 2).
-- **DN-7 — El motivo de rechazo lo ve solo el equipo.** La Persona ve un texto fijo amable y puede
+- **D185 — El motivo de rechazo lo ve solo el equipo.** La Persona ve un texto fijo amable y puede
   volver a pedir. *Por qué:* un rechazo de bautismo se conversa (Pregunta 5).
-- **DN-8 — La bandeja unificada de Solicitudes lee una vista SQL con la forma base de cada tipo.**
+- **D178 — La bandeja unificada de Solicitudes lee una vista SQL con la forma base de cada tipo.**
   *Por qué:* paginar, buscar y ordenar varias tablas en la API sin el motor genérico que D31 descartó
   (research #4).
-- **DN-9 — Solo el Admin pide el bautismo en nombre de otra Persona, sin habilitarla antes.** *Por
+- **D187 — Solo el Admin pide el bautismo en nombre de otra Persona, sin habilitarla antes.** *Por
   qué:* D143 deja al Discipulador solo Vida Nueva en nombre de otros; y el Admin que crea el pedido
   ya decide la excepción de D147.
 
@@ -221,7 +220,7 @@ les asigna el número siguiente al último usado.
 - `docs/14-navegacion.md`: la bandeja de Solicitudes muestra el filtro por tipo; el detalle de un
   Evento de bautismo tiene la sección "Personas a bautizar".
 - `docs/15-guia-ux-ui.md`: glosario — "aceptada" para `aprobada` en Bautismo; "No puedo ese día".
-- `docs/05-decisiones.md`: DN-1 a DN-9 con su número.
+- `docs/05-decisiones.md`: D179–D187 (la DN-8 de esta spec quedó unificada en D178, con la precisión D186) con su número.
 
 ## Preguntas para Echu
 

@@ -247,12 +247,11 @@ y B comparten `camino/consultas.ts`, que deja el lote 0; A agrega `estadoDeEtapa
 separados que deja el lote 0). El e2e "declarar → confirmar → Mi camino actualizado" cruza A y B:
 va al final.
 
-## Decisiones nuevas (se numeran al mergear)
+## Decisiones nuevas (numeradas en `docs/05-decisiones.md`: D153–D157)
 
-No se editó `docs/05-decisiones.md` (lo editan todas las sesiones en paralelo). Estas cinco
-decisiones se le agregan al mergear, con el número que siga:
+Numeradas en el lote 0 global (`lote-0-global`), con su porqué en `docs/05-decisiones.md`:
 
-1. **La Completitud Manual se registra por etapa del camino, no por Curso.** Hay un valor
+1. **D153** — **La Completitud Manual se registra por etapa del camino, no por Curso.** Hay un valor
    `EtapaCamino` (`vida_nueva`, `vida_de_servicio`, `ministerio`, `bautismo`) y tanto la
    Declaración de Historial como la Completitud Manual lo usan como clave. Para las etapas que son
    Cursos, la etapa corresponde a `Curso.categoria` (Vida Nueva individual y grupal cuentan igual,
@@ -262,7 +261,7 @@ decisiones se le agregan al mergear, con el número que siga:
    la Persona hizo en otra iglesia, donde la distinción no existe. Enmienda la redacción de
    `docs/04` ("marcó a una Persona como si hubiera completado un Curso") en la forma, no en el
    fondo: sigue siendo la vía de excepción para destrabar prerrequisitos.
-2. **"Ya lo hice" crea una Declaración de Historial con la forma común de las Solicitudes, y
+2. **D154** — **"Ya lo hice" crea una Declaración de Historial con la forma común de las Solicitudes, y
    confirmarla crea la Completitud Manual; son dos entidades, no una con estado.** **Por qué:** la
    declaración es lo que la Persona *dice* (puede retirarse, rechazarse y volver a pedirse, con
    historial); la Completitud es lo que el sistema *cuenta* para los prerrequisitos (FR-016). Si
@@ -271,7 +270,7 @@ decisiones se le agregan al mergear, con el número que siga:
    declaración) tendrían que fingir una declaración. Con la forma común (`personaId`, `estado`,
    `creadoPorId`, `revisadoPorId`, fecha) la declaración entra a la bandeja unificada sin un caso
    especial, que es para lo que D31 mantuvo esa forma.
-3. **Una única consulta "¿completó esta etapa?" en la API (`completoEtapa` (`apps/api/src/camino/consultas.ts`)), que
+3. **D155** — **Una única consulta "¿completó esta etapa?" en la API (`completoEtapa` (`apps/api/src/camino/consultas.ts`)), que
    cada spec de etapa extiende con su fuente "por el sistema", y una única regla de habilitación
    por etapa en `shared-types` (`reglaDeEtapa`).** **Por qué:** `docs/04` dice que el prerrequisito
    se chequea "por ambos caminos" — si cada spec (Vida de Servicio, Ministerio, Bautismo) escribe
@@ -279,7 +278,7 @@ decisiones se le agregan al mergear, con el número que siga:
    excepción que nadie prueba en el camino feliz. La regla pura vive en `shared-types` porque Mi
    camino la necesita para el texto ("se habilita cuando completes Vida Nueva") y la API para
    rechazar, y no pueden discrepar (D132 aplicado a reglas de negocio, Principio XI).
-4. **Lo del Discipulador en la web app va dentro de Mi camino, con un selector "Mi camino · Mis
+4. **D156** — **Lo del Discipulador en la web app va dentro de Mi camino, con un selector "Mi camino · Mis
    discipulados"; las cinco pestañas no cambian.** Mi disponibilidad se abre desde Mis
    discipulados; el Inicio muestra un aviso cuando hay pendientes; la pestaña Mi camino queda
    marcada en las tres rutas. **Por qué:** `docs/14` fija cinco pestañas y una sexta solo para
@@ -287,7 +286,7 @@ decisiones se le agregan al mergear, con el número que siga:
    es parte de ese mismo proceso (es la etapa Red de `docs/12`); Perfil es configuración personal
    y "Más" son páginas públicas (H-37). El selector escala: la spec de Vida de Servicio suma "Mis
    grupos" del Líder de curso en el mismo lugar. Pendiente de confirmación de Echu (pregunta 1).
-5. **El backoffice no tiene pantallas personales.** Con D142, `mis-discipulados`,
+5. **D157** — **El backoffice no tiene pantallas personales.** Con D142, `mis-discipulados`,
    `mi-disponibilidad` y el cascarón de `mis-grupos` salen del backoffice; sus rutas redirigen a la
    web app, y quien no tiene ningún ítem aterriza en una pantalla terminal "Lo tuyo está en la
    app" (nunca un error ni un bucle, H-134). La URL de la web app la recibe el backoffice por

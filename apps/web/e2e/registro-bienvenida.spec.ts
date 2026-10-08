@@ -56,7 +56,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Estado civil').selectOption('soltero_a');
       await page.getByLabel('Profesión').selectOption('otro');
       await page.getByLabel('¿Cuál?').fill('Apicultora');
-      await page.getByLabel('Tiempo congregándote').selectOption('menos_6_meses');
+      await page.getByLabel('¿En qué año empezaste a venir a la iglesia?').selectOption('2020');
       await page.getByRole('button', { name: 'Siguiente' }).click();
 
       // Paso 4 — Resumen: verifica que lo cargado en los pasos anteriores no

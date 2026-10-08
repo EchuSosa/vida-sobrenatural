@@ -55,7 +55,7 @@ describe('Disponibilidad del Discipulador (integración, Historia 4)', () => {
         estadoCivil: 'casado_a',
         profesion: 'otro',
         profesionDetalle: 'Docente',
-        tiempoCongregacion: 'mas_5_anios',
+        congregaDesde: 2020,
         estado: 'activa',
         consentimientoDatos: true,
         rol,

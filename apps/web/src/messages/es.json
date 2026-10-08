@@ -26,6 +26,85 @@
     "BAJA_YA_PROPUESTA": "Ya se pidió la baja de esta Persona: falta que el Admin la confirme.",
     "REASIGNACION_AL_MISMO_DISCIPULADOR": "Esa persona ya es quien acompaña este discipulado: elegí a otra.",
     "REASIGNACION_YA_PROPUESTA": "Ya hay un cambio de Discipulador propuesto. Retiralo antes de proponer otro.",
+    "DECLARACION_YA_PENDIENTE": "Ya le avisaste a la iglesia que hiciste esta etapa: el equipo lo está revisando.",
+    "ETAPA_YA_COMPLETADA": "Esta etapa ya figura como hecha, así que no hace falta registrarla de nuevo.",
+    "ETAPA_EN_CURSO": "Esta etapa está en marcha (hay un pedido abierto o un grupo en curso). Cuando termine, va a figurar como hecha.",
+    "DECLARACION_NO_PENDIENTE": "Esta declaración ya cambió: alguien la resolvió o se retiró. Actualizamos la pantalla.",
+    "COMPLETITUD_NO_VIGENTE": "Ese registro ya estaba anulado. Actualizamos la pantalla.",
+    "HISTORIAL_VIDA_NUEVA_EN_REVISION": "Ya avisaste que hiciste Vida Nueva y el equipo lo está revisando: no hace falta pedirla.",
+    "VIDA_NUEVA_COMPLETADA_POR_HISTORIAL": "Vida Nueva ya figura como hecha (registrada por la iglesia), así que no hace falta pedirla.",
+    "POSIBLE_DUPLICADO": "Parece que esta persona ya está cargada. Revisá las coincidencias: si es otra persona, podés crearla igual.",
+    "EMAIL_YA_CARGADO": "Esta persona ya tiene un email cargado. Si hay que cambiarlo, editá sus datos.",
+    "CODIGO_INCORRECTO": "Ese código no es el que te mandamos. Revisalo y escribilo de nuevo.",
+    "CODIGO_SIN_INTENTOS": "Ese código ya no sirve porque se probó demasiadas veces. Pedí uno nuevo.",
+    "CODIGO_VENCIDO": "Ese código venció o ya se usó. Pedí uno nuevo.",
+    "DEMASIADOS_PEDIDOS": "Hiciste muchos pedidos seguidos. Esperá un rato y probá de nuevo.",
+    "ENVIO_EMAIL_FALLIDO": "No pudimos mandarte el email. Probá de nuevo en unos minutos.",
+    "VIDA_SERVICIO_PRERREQUISITO_NO_CUMPLIDO": "Para anotarte en Vida de Servicio primero tenés que terminar Vida Nueva. Si ya la hiciste en otro lado, contalo con \"Ya lo hice\".",
+    "SOLICITUD_VIDA_SERVICIO_YA_PENDIENTE": "Ya tenés un pedido de Vida de Servicio en revisión. Podés retirarlo si querés cambiarlo.",
+    "VIDA_SERVICIO_EN_CURSO_O_COMPLETADA": "Ya estás haciendo Vida de Servicio o ya la terminaste.",
+    "CONTENIDO_NO_DISPONIBLE": "Este material todavía no está disponible para vos. Vas a poder verlo el día que se libere.",
+    "GRUPO_NO_ENCONTRADO": "No encontramos ese grupo. Volvé al listado y elegilo de nuevo.",
+    "GRUPO_NO_EN_CURSO": "Este grupo ya terminó, así que no se puede cambiar.",
+    "SEMANA_NO_ENCONTRADA": "No encontramos esa semana en el cronograma. Volvé al grupo y elegila de nuevo.",
+    "SEMANA_LIBERADA_NO_EDITABLE": "Esa semana ya se liberó, así que su fecha no se puede cambiar.",
+    "SEMANA_CON_MATERIAL": "Esa semana ya tiene material cargado, así que no se puede quitar.",
+    "ULTIMO_LIDER": "Es el único Líder de esta edición: sumá a otro antes de sacarlo.",
+    "YA_ES_LIDER": "Esa persona ya es Líder de esta edición.",
+    "INSCRIPCION_NO_ACTIVA": "Esta inscripción ya no está activa. Actualizamos la pantalla.",
+    "FINALIZACION_ANTES_DE_TIEMPO": "Todavía no llegó la última semana del cronograma: vas a poder proponer el cierre desde esa fecha.",
+    "BAJAS_PROPUESTAS_SIN_RESOLVER": "Antes de cerrar la edición, resolvé las bajas que están propuestas.",
+    "LIDER_TIENE_GRUPOS_ACTIVOS": "Esta persona lidera ediciones de Vida de Servicio en curso. Sacala de esas ediciones antes de quitarle el rol de Líder de curso.",
+    "MINISTERIO_NO_DISPONIBLE": "Ese Ministerio no está disponible ahora. Elegí otro o consultá con el equipo.",
+    "MINISTERIO_INACTIVO": "El Ministerio está inactivo: reactivalo antes de reactivar esta Célula.",
+    "MINISTERIO_TIENE_DATOS_RELACIONADOS": "No se puede eliminar: tiene postulaciones o células. Inactivalo en su lugar.",
+    "CELULA_TIENE_DATOS_RELACIONADOS": "No se puede eliminar: tiene postulaciones. Inactivala en su lugar.",
+    "CONFIRMACION_NOMBRE_REQUERIDA": "Para confirmar, escribí el nombre exacto del registro.",
+    "POSTULACION_NO_APROBADA": "Solo se puede dar de baja a alguien que forma parte del Ministerio. Actualizamos la pantalla.",
+    "NO_APTA_PARA_MINISTERIO": "Para postularte a un Ministerio primero tenés que terminar Vida de Servicio.",
+    "YA_ES_MIEMBRO_DEL_MINISTERIO": "Ya estás sirviendo en este Ministerio.",
+    "POSTULACION_YA_PENDIENTE": "Ya tenés una postulación en revisión. Podés retirarla si querés cambiarla.",
+    "POSTULACION_NO_PENDIENTE": "Esta postulación ya cambió: alguien la resolvió o se retiró. Actualizamos la pantalla.",
+    "POSTULACION_REQUIERE_CONFIRMAR_CAMBIO": "Esta persona ya pertenece a otro Ministerio. Confirmá el cambio para aprobar.",
+    "BAUTISMO_NO_HABILITADO": "Vas a poder pedir el bautismo cuando empieces Vida Nueva. Si tenés dudas, hablá con el equipo.",
+    "EDAD_INSUFICIENTE_PARA_PEDIR_BAUTISMO_SOLO": "Este pedido lo hace tu mamá, tu papá o tu tutor hablando con el equipo.",
+    "SOLICITUD_BAUTISMO_YA_ABIERTA": "Ya hay un pedido de bautismo abierto. Revisalo en Mi camino.",
+    "PERSONA_YA_BAUTIZADA": "Esta persona ya figura como bautizada.",
+    "SOLICITUD_BAUTISMO_YA_CAMBIO": "Este pedido ya cambió mientras lo mirabas. Actualizamos la pantalla.",
+    "EVENTO_NO_ES_DE_BAUTISMO": "Ese Evento no es de bautismo. Elegí un Evento de bautismo.",
+    "EVENTO_NO_DISPONIBLE_PARA_ASIGNAR": "Ese Evento ya pasó o está cancelado. Elegí una fecha próxima.",
+    "EVENTO_TODAVIA_NO_OCURRIO": "Vas a poder confirmar quiénes se bautizaron después de la fecha del Evento.",
+    "FLYER_TIPO_INVALIDO": "El flyer tiene que ser una imagen JPG, PNG o WebP.",
+    "FLYER_TAMANO_EXCEDIDO": "El flyer pesa más de 5 MB: probá con un archivo más liviano.",
+    "FLYER_DIMENSION_INSUFICIENTE": "La imagen es demasiado chica para un flyer (el lado corto tiene que tener al menos 600 px).",
+    "CUPO_MENOR_A_OCUPADOS": "El cupo no puede ser menor que la cantidad de lugares ya ocupados.",
+    "LISTA_ESPERA_CON_PERSONAS": "No se puede apagar la lista de espera mientras haya personas en ella.",
+    "EVENTO_CON_INSCRIPCIONES": "Este Evento ya tiene inscripciones, así que eso no se puede cambiar. Podés cancelarlo.",
+    "EVENTO_CON_PAGOS": "Este Evento ya tiene pagos registrados, así que el costo no se puede cambiar.",
+    "EVENTO_CANCELADO": "Este Evento está cancelado.",
+    "EVENTO_NO_CANCELADO": "Este Evento no está cancelado. Actualizamos la pantalla.",
+    "EVENTO_YA_PASO": "Este Evento ya pasó, así que no se puede reactivar.",
+    "CONFIG_BAUTISMO_INVALIDA": "Un Evento de bautismo no tiene costo, aprobación, lista de espera ni recordatorio. Revisá esos campos.",
+    "CUPO_LLENO": "No quedan lugares para este Evento.",
+    "EVENTO_NO_ADMITE_INSCRIPCION": "Este Evento no necesita inscripción: podés ir directamente.",
+    "EVENTO_YA_EMPEZO": "Este Evento ya empezó, así que las inscripciones están cerradas.",
+    "EVENTO_SOLO_INSCRIBE_ADMIN": "A este Evento te suma el equipo. Seguí tu pedido desde Mi camino.",
+    "INSCRIPCION_EVENTO_YA_ABIERTA": "Ya estás anotado/a a este Evento. Lo ves en Mis eventos.",
+    "PERSONA_NO_ACTIVA": "Esta persona no está activa en el sistema, así que no se puede anotar.",
+    "INSCRIPCION_NO_PENDIENTE": "Esta inscripción ya se resolvió. Actualizamos la pantalla.",
+    "INSCRIPCION_NO_ABIERTA": "Esta inscripción ya estaba cancelada o rechazada. Actualizamos la pantalla.",
+    "COMPROBANTE_TIPO_INVALIDO": "El comprobante tiene que ser una foto (JPG, PNG o WebP) o un PDF.",
+    "COMPROBANTE_TAMANO_EXCEDIDO": "El comprobante pesa más de 5 MB: probá con una foto más liviana.",
+    "EVENTO_SIN_COSTO": "Este Evento no tiene costo, así que no hace falta pagar.",
+    "INSCRIPCION_NO_CONFIRMADA": "Vas a poder pagar cuando tu lugar esté confirmado.",
+    "PAGO_PENDIENTE_EXISTENTE": "Ya hay un comprobante en revisión para esta inscripción. Esperá a que el equipo lo revise.",
+    "PAGO_NO_PENDIENTE": "Este pago ya se revisó. Actualizamos la pantalla.",
+    "NOTIFICACION_SIN_DESTINATARIOS": "Ese grupo no tiene personas activas a quienes mandarles el aviso. Elegí otro.",
+    "ALCANCE_NO_DISPONIBLE": "Ese grupo o ministerio ya no está disponible. Elegí otro.",
+    "CURSO_INACTIVO": "Este Curso está inactivo y no admite Grupos nuevos. Reactivalo desde Catálogos o elegí otro.",
+    "CURSO_TIENE_GRUPOS": "No se puede eliminar: tiene Grupos. Inactivalo en su lugar.",
+    "CURSO_NO_RECONOCIDO": "Esa combinación de Curso no existe en el sistema.",
+    "CURSO_YA_EXISTE": "Ese Curso ya existe. Si está en la papelera, restauralo.",
     "campos": {
       "FRANJAS_REQUERIDAS": "Cargá al menos un horario.",
       "FRANJAS_INVALIDO": "Revisá los horarios: cada uno necesita un día, una hora de inicio y una de fin.",
@@ -33,7 +112,60 @@
       "FRANJA_MUY_CORTA": "Cada horario tiene que durar al menos 1 hora, así puede coincidir con el de otra persona. Por ejemplo, de 19:00 a 20:00.",
       "FRANJA_REPETIDA": "Ese horario ya está en la lista. Elegí otro día u otras horas.",
       "FRANJA_SUPERPUESTA": "Ese horario se pisa con otro del mismo día que ya está en la lista. Cambiá las horas, o quitá el otro y cargá uno solo que cubra los dos.",
-      "DIA_SEMANA_INVALIDO": "Elegí un día de la semana de la lista."
+      "DIA_SEMANA_INVALIDO": "Elegí un día de la semana de la lista.",
+      "ALTA_MENOR_DE_EDAD": "Desde acá solo se dan de alta personas mayores de 18. Para un menor, el tutor tiene que hablar con el equipo.",
+      "COMENTARIO_DEMASIADO_LARGO": "Escribí hasta 500 caracteres.",
+      "NOTA_DEMASIADO_LARGA": "Escribí hasta 500 caracteres.",
+      "CONGREGADESDE_INVALIDO": "Elegí el año en que empezaste a venir a la iglesia.",
+      "EMAIL_INVALIDO": "Escribí un email válido, por ejemplo nombre@ejemplo.com.",
+      "CODIGO_INVALIDO": "Escribí los 6 números del código que te mandamos.",
+      "EDICION_NO_DISPONIBLE": "Esa edición ya no tiene la inscripción abierta. Elegí otra.",
+      "EDICION_YA_CURSADA": "Esta persona ya estuvo en esa edición. Elegí otra.",
+      "EDICION_REQUERIDA": "Elegí una edición.",
+      "NOMBRE_REQUERIDO": "Escribí un nombre.",
+      "NOMBRE_DEMASIADO_LARGO": "El nombre es demasiado largo: acortalo.",
+      "SEMANAS_FUERA_DE_RANGO": "Elegí entre 1 y 52 semanas.",
+      "FECHAS_NO_CRECIENTES": "Cada semana tiene que ser después de la anterior: revisá las fechas.",
+      "PRIMERA_SEMANA_ANTES_DEL_INICIO": "La primera semana no puede ser antes de la fecha de inicio.",
+      "LIDERES_REQUERIDOS": "Elegí al menos un Líder.",
+      "PERSONA_SIN_ROL_LIDER": "Esa persona no tiene el rol de Líder de curso. Pedile al Admin que se lo dé.",
+      "TITULO_REQUERIDO": "Escribí un título.",
+      "TITULO_DEMASIADO_LARGO": "El título es demasiado largo: acortalo.",
+      "TEXTO_DEMASIADO_LARGO": "El texto es demasiado largo: acortalo.",
+      "MATERIAL_VACIO": "Agregá un texto, un archivo o un enlace.",
+      "ARCHIVO_TIPO_NO_ADMITIDO": "Subí un PDF o una imagen (JPG, PNG o WebP).",
+      "ARCHIVO_DEMASIADO_GRANDE": "El archivo pesa más de 15 MB: probá con uno más liviano.",
+      "DEMASIADOS_ARCHIVOS": "Podés subir hasta 5 archivos por semana.",
+      "TEXTO_ALTERNATIVO_REQUERIDO": "Describí la imagen para quien no la puede ver.",
+      "ENLACE_URL_INVALIDA": "Pegá un enlace completo que empiece con https://.",
+      "ENLACE_TEXTO_REQUERIDO": "Escribí qué se va a leer en el enlace.",
+      "DEMASIADOS_ENLACES": "Podés agregar hasta 10 enlaces por semana.",
+      "FECHA_ANTERIOR_AL_INICIO": "La fecha no puede ser antes del inicio de la edición.",
+      "INSCRIPCION_AJENA": "Esa persona no está en esta edición.",
+      "MINISTERIO_NOMBRE_DUPLICADO": "Ya hay un Ministerio con ese nombre.",
+      "CELULA_NOMBRE_DUPLICADO": "Ya hay una Célula con ese nombre en este Ministerio.",
+      "CELULA_NO_DISPONIBLE": "Esa Célula ya no está disponible. Elegí otra o \"No tengo preferencia\".",
+      "SOLICITUD_NO_ASIGNADA_A_ESTE_EVENTO": "Esa persona no está asignada a este Evento.",
+      "INICIO_REQUERIDO": "Elegí la fecha y la hora de inicio.",
+      "FIN_ANTERIOR_AL_INICIO": "El fin tiene que ser después del inicio.",
+      "CUPO_INVALIDO": "El cupo tiene que ser un número mayor que cero.",
+      "COSTO_INVALIDO": "El costo tiene que ser un monto mayor que cero.",
+      "INSTRUCCIONES_PAGO_REQUERIDAS": "Contá cómo se paga (por ejemplo, el alias o el CBU).",
+      "DESCRIPCION_IMAGEN_REQUERIDA": "Describí el flyer para quien no lo puede ver.",
+      "DIAS_RECORDATORIO_FUERA_DE_RANGO": "Elegí entre 1 y 60 días.",
+      "APROBACION_SIN_INSCRIPCION": "La aprobación solo aplica si el Evento tiene inscripción.",
+      "LISTA_ESPERA_SIN_CUPO": "La lista de espera solo aplica si el Evento tiene cupo.",
+      "MONTO_INVALIDO": "El monto tiene que ser mayor que cero.",
+      "MEDIO_INVALIDO": "Elegí cómo pagaste.",
+      "FECHA_PAGO_FUTURA": "La fecha del pago no puede ser futura.",
+      "COMPROBANTE_REQUERIDO": "Subí el comprobante.",
+      "MOTIVO_REQUERIDO": "Escribí el motivo: la persona lo va a leer.",
+      "MENSAJE_REQUERIDO": "Escribí el mensaje.",
+      "MENSAJE_DEMASIADO_LARGO": "Escribí un mensaje de hasta 1000 caracteres.",
+      "ALCANCE_REQUERIDO": "Elegí a quién le llega.",
+      "ALCANCE_ID_REQUERIDO": "Elegí el grupo o el ministerio.",
+      "TEXTO_INVALIDO": "Escribí tu comentario (hasta 2000 caracteres).",
+      "CONTACTO_INVALIDO": "Para que te contactemos, dejanos un email o un teléfono."
     }
   },
   "nav": {
@@ -74,7 +206,8 @@
     "tarjetaVisitanosTitulo": "Visitanos",
     "tarjetaVisitanosDescripcion": "Dirección, horarios y contacto de Vida Sobrenatural.",
     "tarjetaVisitanosAlt": "Congregación con manos levantadas frente al escenario",
-    "heroAlt": "Congregación de Vida Sobrenatural durante un culto, vista desde atrás"
+    "heroAlt": "Congregación de Vida Sobrenatural durante un culto, vista desde atrás",
+    "pendientesDiscipulador": {}
   },
   "primerosPasos": {
     "cabeceraAlt": "Voluntarias del equipo de bienvenida sonriendo",
@@ -238,7 +371,7 @@
       "estadoCivil": "Estado civil",
       "profesion": "Profesión",
       "profesionDetalle": "¿Cuál?",
-      "tiempoCongregacion": "Tiempo congregándote",
+      "congregaDesde": "¿En qué año empezaste a venir a la iglesia?",
       "consentimiento": "Doy mi consentimiento para el almacenamiento de mis datos personales."
     },
     "botones": {
@@ -266,12 +399,8 @@
         "divorciado_a": "Divorciado/a",
         "separado_a": "Separado/a"
       },
-      "tiempoCongregacion": {
-        "menos_6_meses": "Menos de 6 meses",
-        "de_6_meses_a_1_anio": "De 6 meses a 1 año",
-        "de_1_a_3_anios": "De 1 a 3 años",
-        "de_3_a_5_anios": "De 3 a 5 años",
-        "mas_5_anios": "Más de 5 años"
+      "congregaDesde": {
+        "esteAnio": "Este año ({anio})"
       },
       "profesion": {
         "salud": "Salud",
@@ -362,7 +491,11 @@
     "errorCargaTitulo": "No pudimos mostrar tu camino",
     "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
     "reintentar": "Reintentar",
-    "resumenErrores": "Revisá esto antes de seguir:"
+    "resumenErrores": "Revisá esto antes de seguir:",
+    "estados": {},
+    "selector": {},
+    "ministerio": {},
+    "bautismo": {}
   },
   "franjas": {
     "dias": [
@@ -411,5 +544,190 @@
     "entrar": "Entrar",
     "entrando": "Entrando…",
     "rapidos": "Cuentas de la revisión manual"
-  }
+  },
+  "etapas": {
+    "vida_nueva": "Vida Nueva",
+    "vida_de_servicio": "Vida de Servicio",
+    "ministerio": "Ministerio",
+    "bautismo": "Bautismo"
+  },
+  "avisos": {
+    "eventos": {
+      "discipulado": {
+        "propuesta_nueva": {
+          "titulo": "Tenés una propuesta nueva para discipular",
+          "detalle": "Mirá los datos de la persona y respondé si podés acompañarla."
+        },
+        "propuesta_aceptada": {
+          "titulo": "¡Ya tenés quien te acompañe en Vida Nueva!",
+          "detalle": "Tu discipulador o discipuladora se va a comunicar con vos. En Mi camino ves sus datos."
+        },
+        "solicitud_rechazada": {
+          "titulo": "Tu pedido de Vida Nueva no siguió adelante",
+          "detalle": "Si tenés dudas, hablá con alguien del equipo de la iglesia."
+        },
+        "finalizacion_confirmada": {
+          "titulo": "¡Terminaste Vida Nueva!",
+          "detalle": "Felicitaciones por este paso. En Mi camino ves lo que sigue."
+        },
+        "baja_confirmada": {
+          "titulo": "Tu discipulado de Vida Nueva terminó",
+          "detalle": "Cuando quieras, podés volver a pedirlo desde Mi camino."
+        }
+      },
+      "persona": {
+        "cuenta_activada": {
+          "titulo": "Tu cuenta ya está activa",
+          "detalle": "Ya podés usar la app con todo lo que tiene."
+        }
+      },
+      "historial": {
+        "declaracion_confirmada": {
+          "titulo": "Confirmamos lo que nos contaste",
+          "detalle": "Esa etapa ya figura como hecha en Mi camino."
+        },
+        "declaracion_rechazada": {
+          "titulo": "No pudimos confirmar lo que nos contaste",
+          "detalle": "En Mi camino ves el detalle. Si querés, hablá con alguien del equipo."
+        },
+        "completitud_registrada": {
+          "titulo": "Registramos una etapa como hecha",
+          "detalle": "La iglesia marcó una etapa de tu camino como completa. Miralo en Mi camino."
+        }
+      },
+      "vida_servicio": {
+        "inscripcion_aprobada": {
+          "titulo": "¡Ya estás en Vida de Servicio!",
+          "detalle": "Te sumamos a una edición. En Mi camino ves el cronograma."
+        },
+        "inscripcion_rechazada": {
+          "titulo": "Tu pedido de Vida de Servicio no siguió adelante",
+          "detalle": "Si tenés dudas, hablá con alguien del equipo de la iglesia."
+        },
+        "contenido_liberado": {
+          "titulo": "Hay material nuevo de Vida de Servicio",
+          "detalle": "Ya podés ver el material de la semana {semana}."
+        },
+        "lider_asignado": {
+          "titulo": "Te sumaron como líder de una edición",
+          "detalle": "Ya podés ver tu grupo en Mis grupos."
+        },
+        "baja_rechazada": {
+          "titulo": "La baja que propusiste no se hizo",
+          "detalle": "La persona sigue en el grupo. Mirá el detalle en Mis grupos."
+        },
+        "inscripcion_dada_de_baja": {
+          "titulo": "Saliste de tu edición de Vida de Servicio",
+          "detalle": "Cuando quieras, podés volver a pedirlo desde Mi camino."
+        },
+        "finalizacion_rechazada": {
+          "titulo": "La edición todavía no se cerró",
+          "detalle": "Mirá el detalle en Mis grupos."
+        },
+        "completada": {
+          "titulo": "¡Terminaste Vida de Servicio!",
+          "detalle": "Felicitaciones. Ya podés sumarte a un ministerio desde Mi camino."
+        }
+      },
+      "ministerio": {
+        "postulacion_aprobada": {
+          "titulo": "¡Ya sos parte de {ministerio}!",
+          "detalle": "Alguien del ministerio se va a comunicar con vos."
+        },
+        "postulacion_rechazada": {
+          "titulo": "Tu postulación no siguió adelante",
+          "detalle": "Si tenés dudas, hablá con alguien del equipo de la iglesia."
+        },
+        "miembro_dado_de_baja": {
+          "titulo": "Ya no figurás en un ministerio",
+          "detalle": "Si tenés dudas, hablá con alguien del equipo de la iglesia."
+        }
+      },
+      "bautismo": {
+        "solicitud_aceptada": {
+          "titulo": "¡Aceptamos tu pedido de bautismo!",
+          "detalle": "Te vamos a avisar la fecha apenas esté."
+        },
+        "solicitud_rechazada": {
+          "titulo": "Tu pedido de bautismo no siguió adelante",
+          "detalle": "Si tenés dudas, hablá con alguien del equipo de la iglesia."
+        },
+        "fecha_asignada": {
+          "titulo": "Ya tenés fecha para tu bautismo",
+          "detalle": "Es el {fecha}. En Mi camino ves todos los datos."
+        },
+        "fecha_quitada": {
+          "titulo": "Cambió la fecha de tu bautismo",
+          "detalle": "Te vamos a avisar la nueva fecha apenas esté."
+        },
+        "evento_cancelado": {
+          "titulo": "Se suspendió el bautismo al que ibas",
+          "detalle": "Tu pedido sigue en pie: te vamos a avisar la nueva fecha."
+        },
+        "realizado": {
+          "titulo": "¡Te bautizaste!",
+          "detalle": "Qué alegría compartir este paso con vos."
+        }
+      },
+      "evento": {
+        "inscripcion_creada_por_admin": {
+          "titulo": "Te anotaron en {evento}",
+          "detalle": "Mirá el estado de tu inscripción en Mis eventos."
+        },
+        "inscripcion_confirmada": {
+          "titulo": "Tu lugar en {evento} está confirmado",
+          "detalle": "Te esperamos. Los datos están en Mis eventos."
+        },
+        "inscripcion_rechazada": {
+          "titulo": "Tu inscripción a {evento} no siguió adelante",
+          "detalle": "Si tenés dudas, hablá con alguien del equipo de la iglesia."
+        },
+        "inscripcion_cancelada_por_admin": {
+          "titulo": "Se canceló tu inscripción a {evento}",
+          "detalle": "Si tenés dudas, hablá con alguien del equipo de la iglesia."
+        },
+        "lista_espera_promovida": {
+          "titulo": "¡Se liberó un lugar en {evento}!",
+          "detalle": "Ya no estás en lista de espera. Mirá lo que sigue en Mis eventos."
+        },
+        "pago_verificado": {
+          "titulo": "Recibimos tu pago de {evento}",
+          "detalle": "Está todo en orden."
+        },
+        "pago_rechazado": {
+          "titulo": "No pudimos validar tu pago de {evento}",
+          "detalle": "Mirá el motivo en Mis eventos y volvé a cargarlo."
+        },
+        "modificado": {
+          "titulo": "Cambió algo de {evento}",
+          "detalle": "Revisá los datos nuevos antes de ir."
+        },
+        "cancelado": {
+          "titulo": "Se canceló {evento}",
+          "detalle": "Lamentamos el cambio. Mirá el detalle en Mis eventos."
+        },
+        "proximo": {
+          "titulo": "{evento} es muy pronto",
+          "detalle": "Te esperamos. Los datos están en Mis eventos."
+        },
+        "recordatorio_inscripcion": {
+          "titulo": "Quedan {dias} días para anotarte en {evento}",
+          "detalle": "Si querés ir, anotate desde la cartelera."
+        }
+      }
+    }
+  },
+  "ingreso": {},
+  "misDiscipulados": {},
+  "miDisponibilidad": {},
+  "vidaDeServicio": {},
+  "misGrupos": {},
+  "ministerios": {},
+  "bautismo": {},
+  "eventos": {
+    "publico": {},
+    "inscripcion": {}
+  },
+  "misEventos": {},
+  "comentarios": {}
 }

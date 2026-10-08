@@ -127,3 +127,23 @@ export {
   AlertDialogTrigger,
 } from './components/ui/alert-dialog';
 export { Toaster } from './components/ui/sonner';
+
+// Lote 0 global (specs/IMPLEMENTACION.md): cada spec exporta sus componentes
+// nuevos SOLO en su bloque, para que las sesiones en paralelo no choquen.
+// --- spec 006 (CardEtapa, PedirEnNombreDe) ---
+
+// --- spec 007 (FormularioIngresoCodigo, BotonIngresarGoogle) ---
+
+// --- spec 008 (EstadoSemana) ---
+
+// --- spec 009 (AvisoEstado) ---
+
+// --- spec 010 ---
+
+// --- spec 011 (EstadoInscripcionBadge, CampoArchivo) ---
+
+// --- spec 012 ---
+
+// --- spec 013 (AvatarPersona, BarraProporcion, FormularioComentario) ---
+
+// --- ajustes-ux (D150, D151) ---

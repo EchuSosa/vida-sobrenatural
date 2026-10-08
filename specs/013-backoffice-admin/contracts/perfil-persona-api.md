@@ -11,7 +11,7 @@ interface PerfilPersona {
   profesion: Profesion; profesionDetalle: string | null;
   telefono: string; direccion: string; email: string | null;
   sede: { id: string; nombre: string; activa: boolean };
-  tiempoCongregacion: TiempoCongregacion;
+  congregaDesde: number;           // año (D214); la pantalla muestra "desde 2019 (hace 7 años)"
   estado: EstadoPersona; activo: boolean;           // activo = false → "Dada de baja"
   usaLaApp: boolean;                                 // tiene email vinculable (D97, D145)
   origenAlta: OrigenAlta; altaPor: PersonaBreve | null;

@@ -118,8 +118,8 @@ se escribe a mano con `--create-only`).
   TipoSolicitud, number>>`, `BANDEJA_PAGINA = 20`.
 - `perfil-persona.ts`: `PerfilPersona`, `RelacionFamiliarVista`, `GrupoEnPerfil`, `RelacionDesde`,
   `relacionDesde(tipo, lado)`, `INVERSO_RELACION` (movido desde la API), `iniciales(nombre, apellido)`.
-- `metricas.ts`: `Metricas = { personasActivas; porTiempoCongregacion: {valor, cantidad}[]; porSede: {sedeId,
-  nombre, activa, cantidad}[] }`, `ORDEN_TIEMPO_CONGREGACION`.
+- `metricas.ts`: `Metricas = { personasActivas; porTiempoCongregacion: {valor: RangoCongregacion, cantidad}[]; porSede: {sedeId,
+  nombre, activa, cantidad}[] }`, `RangoCongregacion`, `ORDEN_RANGO_CONGREGACION` y `rangoCongregacion()` los deja el lote 0 en `persona.ts` (D214).
 - `cumpleanos.ts`: `Cumpleanero`, `proximoCumpleanos(fechaNacimiento, hoy)`, `esCumpleanosEn(fecha, mes, dia,
   anio)`, `CUMPLEANOS_DIAS_SEMANA = 7`, `CUMPLEANOS_PAGINA = 50`.
 - `comentario.ts`: `TipoComentario`, `ComentarioNuevo`, `ComentarioResumen`, `ComentarioDetalle`,

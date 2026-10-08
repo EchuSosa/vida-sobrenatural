@@ -61,6 +61,62 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
     },
   },
   {
+    // Lote 0 global (specs 006–013): lo que cuelga de una Persona de e2e, de
+    // un Evento/Ministerio de e2e o de una Sede de e2e, en orden de FK. Cada
+    // spec que cree entidades nuevas con el prefijo `e2e-` las agrega en ESTE
+    // bloque (o en uno propio arriba de 'discipulado'), nunca en un script aparte.
+    nombre: 'specs 006–013 (de Personas, Eventos, Ministerios y Sedes de e2e)',
+    borrar: async () => {
+      const idsE2E = (
+        await prisma.persona.findMany({ where: { email: { startsWith: 'e2e-' } }, select: { id: true } })
+      ).map((p) => p.id);
+      const eventoIds = (
+        await prisma.evento.findMany({
+          where: { OR: [{ nombre: { startsWith: 'e2e-' } }, { sede: { nombre: { startsWith: 'e2e-' } } }] },
+          select: { id: true },
+        })
+      ).map((e) => e.id);
+      const ministerioIds = (
+        await prisma.ministerio.findMany({ where: { nombre: { startsWith: 'e2e-' } }, select: { id: true } })
+      ).map((m) => m.id);
+
+      let total = 0;
+      const sumar = (c: { count: number }) => (total += c.count);
+      // 012 — avisos: entregas primero (de la Persona o de un aviso que creó una de e2e).
+      sumar(
+        await prisma.entregaNotificacion.deleteMany({
+          where: { OR: [{ personaId: { in: idsE2E } }, { notificacion: { creadoPorId: { in: idsE2E } } }] },
+        }),
+      );
+      sumar(await prisma.notificacion.deleteMany({ where: { creadoPorId: { in: idsE2E } } }));
+      // 010 — referencia a InscripcionEvento: antes que ella.
+      sumar(await prisma.solicitudBautismo.deleteMany({ where: { personaId: { in: idsE2E } } }));
+      // 011 — Pago → InscripcionEvento → Evento.
+      const inscripcionWhere = { OR: [{ personaId: { in: idsE2E } }, { eventoId: { in: eventoIds } }] };
+      await prisma.solicitudBautismo.updateMany({ where: { inscripcionEvento: inscripcionWhere }, data: { inscripcionEventoId: null } });
+      sumar(await prisma.pago.deleteMany({ where: { inscripcionEvento: inscripcionWhere } }));
+      sumar(await prisma.inscripcionEvento.deleteMany({ where: inscripcionWhere }));
+      if (eventoIds.length) sumar(await prisma.evento.deleteMany({ where: { id: { in: eventoIds } } }));
+      // 009 — Postulación → Célula → Ministerio.
+      sumar(await prisma.postulacion.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { ministerioId: { in: ministerioIds } }] } }));
+      sumar(await prisma.celula.deleteMany({ where: { ministerioId: { in: ministerioIds } } }));
+      sumar(await prisma.ministerio.deleteMany({ where: { id: { in: ministerioIds } } }));
+      // 006 — Completitud (puede apuntar a una Declaración) → Declaración.
+      sumar(await prisma.completitudManual.deleteMany({ where: { personaId: { in: idsE2E } } }));
+      sumar(await prisma.declaracionHistorial.deleteMany({ where: { personaId: { in: idsE2E } } }));
+      // 013 — Comentarios de la app (de una Persona de e2e, o anónimos con texto de e2e).
+      sumar(
+        await prisma.comentarioApp.updateMany({ where: { revisadoPorId: { in: idsE2E } }, data: { revisadoPorId: null } }),
+      );
+      sumar(
+        await prisma.comentarioApp.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { texto: { startsWith: 'e2e-' } }] } }),
+      );
+      // 007 — códigos de ingreso pedidos con un email de e2e.
+      sumar(await prisma.codigoIngreso.deleteMany({ where: { email: { startsWith: 'e2e-' } } }));
+      return total;
+    },
+  },
+  {
     // specs/004-vida-nueva-discipulado (T010): todo lo que cuelga de una
     // Persona de e2e (como discípula o como Discipuladora), en orden de FK.
     // Los Grupos no tienen prefijo propio: se los ubica por sus Inscripciones,
@@ -87,6 +143,15 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
       if (grupoIds.length) sumar(await prisma.encuentro.deleteMany({ where: { grupoId: { in: grupoIds } } }));
       sumar(await prisma.liderazgo.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { grupoId: { in: grupoIds } }] } }));
       sumar(await prisma.inscripcion.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { grupoId: { in: grupoIds } }] } }));
+      // spec 008 (lote 0 global): la Solicitud de Vida de Servicio y el cronograma
+      // de las ediciones, antes de borrar el Grupo.
+      sumar(await prisma.solicitudVidaServicio.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { grupoId: { in: grupoIds } }] } }));
+      if (grupoIds.length) {
+        sumar(await prisma.archivoContenido.deleteMany({ where: { contenido: { grupoId: { in: grupoIds } } } }));
+        sumar(await prisma.enlaceContenido.deleteMany({ where: { contenido: { grupoId: { in: grupoIds } } } }));
+        sumar(await prisma.contenido.deleteMany({ where: { grupoId: { in: grupoIds } } }));
+        sumar(await prisma.itemCronograma.deleteMany({ where: { grupoId: { in: grupoIds } } }));
+      }
       sumar(
         await prisma.propuestaDiscipulado.deleteMany({
           where: { OR: [{ discipuladorId: { in: idsE2E } }, { solicitudId: { in: solicitudIds } }, { grupoId: { in: grupoIds } }] },

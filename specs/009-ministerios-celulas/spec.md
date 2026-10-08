@@ -297,6 +297,8 @@ Un Visitante que entra a Primeros pasos › Ministerios ve los Ministerios activ
 
 ## Preguntas para Echu
 
+> **Respondidas por Echu el 2026-10-07: se adoptan las recomendaciones de cada pregunta** (numeradas en `docs/05-decisiones.md`, D153–D213).
+
 Ninguna bloquea: cada una tiene una recomendación ya especificada arriba. Si Echu elige otra opción, cambia el requisito citado.
 
 1. **¿Cómo entra al sistema alguien que ya sirve en un Ministerio desde antes de la app?** Recomendación: sin trámite especial — declara Vida de Servicio con "Ya lo hice" (D144), el Admin lo confirma, y después se postula a su Ministerio y el Admin la aprueba (o el Admin la postula en su nombre, Historia 5). Alternativa: un "Ya sirvo en un Ministerio" en la card que crea la membresía directo al confirmarlo el Admin (agrega un tipo más de declaración).

@@ -171,7 +171,7 @@ describe('DELETE /sedes/:id (integración) — D119, eliminar es distinto de ina
         estadoCivil: 'soltero_a',
         profesion: 'otro',
         profesionDetalle: 'Apicultora',
-        tiempoCongregacion: 'menos_6_meses',
+        congregaDesde: 2020,
         estado: 'activa',
       },
     });

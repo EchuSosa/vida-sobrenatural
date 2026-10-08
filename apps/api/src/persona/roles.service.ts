@@ -12,6 +12,7 @@ import { calcularEdad } from './calcular-edad.js';
 import { CambioDeRolService } from '../cambio-de-rol/cambio-de-rol.service.js';
 import {
   discipuladosActivosDe,
+  gruposServicioActivosDe,
   propuestasPendientesDe,
 } from '../discipulado/discipulados-activos.js';
 
@@ -34,6 +35,11 @@ const RECHAZOS_DE_QUITAR: Record<
     estado: 409,
     detalle:
       'Esta Persona es el Admin sembrado de la instalación: su rol de Admin no se puede quitar desde el backoffice.',
+  },
+  LIDER_TIENE_GRUPOS_ACTIVOS: {
+    estado: 409,
+    detalle:
+      'Esta Persona lidera ediciones de Vida de Servicio en curso: sacala de esas ediciones antes de quitarle el rol de Líder de curso.',
   },
   ADMIN_NO_PUEDE_AUTO_REVOCARSE: {
     estado: 409,
@@ -143,6 +149,8 @@ export class RolesService {
               propuestasPendientesDe(tx, personaId),
             ])
           : [[], []];
+      // spec 008 (D167): lo mismo para `lider_curso` y sus ediciones en curso.
+      const gruposServicioActivos = rol === 'lider_curso' ? await gruposServicioActivosDe(tx, personaId) : [];
 
       // T062 (D132): la MISMA función con la que la pantalla decide si ofrece
       // "Quitar" — no tres guardas escritas acá y otras tres allá. Evaluada con
@@ -152,7 +160,7 @@ export class RolesService {
       // `puedeQuitarRol` (shared-types).
       const evaluacion = puedeQuitarRol(
         rol,
-        { ...persona, discipuladosActivos, propuestasPendientes },
+        { ...persona, discipuladosActivos, propuestasPendientes, gruposServicioActivos },
         realizadoPorId,
       );
       if (!evaluacion.puede) {
@@ -162,7 +170,9 @@ export class RolesService {
         const extensiones =
           evaluacion.motivo === 'DISCIPULADOR_TIENE_DISCIPULADOS_ACTIVOS'
             ? { discipulados: evaluacion.discipulados, propuestas: evaluacion.propuestas }
-            : undefined;
+            : evaluacion.motivo === 'LIDER_TIENE_GRUPOS_ACTIVOS'
+              ? { grupos: evaluacion.grupos }
+              : undefined;
         throw new AppException(evaluacion.motivo, estado, detalle, undefined, extensiones);
       }
 

@@ -3,7 +3,7 @@ import type { DetalleMiDiscipulado, EncuentroDelDiscipulador, MiDiscipulado } fr
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
-import { comoFechaCivil, exigirLiderazgoVigente } from './consultas.js';
+import { capitulosDe, comoFechaCivil, exigirLiderazgoVigente } from './consultas.js';
 import { contactoDe } from './validaciones.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
@@ -62,7 +62,7 @@ export const SELECT_ENCUENTRO_DEL_DISCIPULADOR = {
 type EncuentroLeido = {
   id: string;
   fecha: Date;
-  capitulos: string;
+  capitulos: string | null;
   notas: string | null;
   updatedAt: Date;
   asistencias: Array<{ presente: boolean; inscripcion: { personaId: string } }>;
@@ -72,7 +72,7 @@ export function aEncuentroDelDiscipulador(e: EncuentroLeido): EncuentroDelDiscip
   return {
     id: e.id,
     fecha: comoFechaCivil(e.fecha),
-    capitulos: e.capitulos,
+    capitulos: capitulosDe(e.capitulos),
     notas: e.notas,
     asistencias: e.asistencias.map((a) => ({ personaId: a.inscripcion.personaId, presente: a.presente })),
     updatedAt: e.updatedAt.toISOString(),

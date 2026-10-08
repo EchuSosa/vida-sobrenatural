@@ -651,6 +651,8 @@ y Líderes, sin ningún botón de gestión.
 
 ## Preguntas para Echu
 
+> **Respondidas por Echu el 2026-10-07: se adoptan las recomendaciones de cada pregunta** (numeradas en `docs/05-decisiones.md`, D153–D213).
+
 1. **¿El Líder da de baja directo, o propone y el Admin confirma?** El Flujo 4 dice que el Líder "puede
    ejecutar"; `docs/03` dice que "propone". **Recomendación**: propone y el Admin confirma (como Vida
    Nueva), porque una baja le cierra a la Persona el paso a Ministerio; el Admin además puede aplicarla

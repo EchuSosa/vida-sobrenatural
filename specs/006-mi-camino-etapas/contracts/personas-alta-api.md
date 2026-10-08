@@ -13,7 +13,7 @@ Cuerpo `DatosAltaPersona` (`data-model.md`):
   "apellido": "Gómez", "nombre": "Rosa", "genero": "femenino",
   "fechaNacimiento": "1948-03-12", "telefono": "+54 9 221 555 0101",
   "direccion": "Calle 7 1234", "sedeId": "…", "estadoCivil": "viudo_a",
-  "profesion": "jubilado_a", "tiempoCongregacion": "mas_de_5_anios",
+  "profesion": "jubilado_a", "congregaDesde": 2012,
   "email": null, "consentimiento": true, "confirmarPosibleDuplicado": false
 }
 ```

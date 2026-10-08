@@ -9,12 +9,22 @@ Resumen práctico de los prerrequisitos de los quickstarts. Para el detalle de c
 Los archivos `apps/api/.env`, `apps/web/.env.local` y `apps/backoffice/.env.local` ya tienen las
 variables necesarias (base de datos, secretos, credenciales de Google, URLs de la API).
 
+**Lote 0 global (specs 006–013), variables nuevas** — copialas de los `.env*.example` si tu
+archivo es anterior:
+
+- `apps/api/.env`: `SMTP_HOST="localhost"`, `SMTP_PORT=1025`, `EMAIL_REMITENTE`,
+  `CODIGO_INGRESO_SECRET`, `WEB_URL="http://localhost:3001"`, `TAREAS_PROGRAMADAS="true"`.
+  **Sin `SMTP_HOST` la API no arranca** (D140). `apps/api/.env.test` y `.env.e2e` también las
+  llevan (con `TAREAS_PROGRAMADAS="false"`).
+- `apps/backoffice/.env.local`: `NEXT_PUBLIC_WEB_APP_URL="http://localhost:3001"` (enlaces y QR a
+  la web app).
+
 ## Cada vez que vas a probar
 
 Desde la raíz del repo:
 
 ```bash
-docker compose up -d                                    # base de datos
+docker compose up -d                                    # base de datos y Mailpit (emails en http://localhost:8025)
 pnpm --filter api run db:migrate                        # migraciones al día
 SEED_ADMIN_EMAIL=estersosaa@gmail.com pnpm --filter api run db:seed   # mínimo + tu rol admin
 ```

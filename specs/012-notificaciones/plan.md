@@ -193,40 +193,40 @@ donde la navegación ya las puso (`docs/14`).
 - **Procesos programados duplicados** con más de una instancia de la API → idempotencia por clave y
   `SKIP LOCKED` (FR-014, FR-023).
 
-## Decisiones nuevas (se numeran al mergear)
+## Decisiones nuevas (numeradas en `docs/05-decisiones.md`: D197–D206)
 
-1. **Los avisos se emiten dentro de la transacción del cambio de dominio; el mail sale después.**
+1. **D197** — **Los avisos se emiten dentro de la transacción del cambio de dominio; el mail sale después.**
    Enmienda el contrato de eventos de la 004 ("después del commit"). *Por qué*: con persistencia,
    emitir después del commit puede dejar un cambio confirmado sin aviso; adentro de la transacción
    pasan o no pasan juntos, y el envío lento sigue afuera (research #1).
-2. **La Notificación automática guarda el nombre del evento del catálogo (`evento`) y sus
+2. **D198** — **La Notificación automática guarda el nombre del evento del catálogo (`evento`) y sus
    parámetros (`params`: ids y datos no personales); el `disparador` de `docs/04` se deriva del
    catálogo y no se guarda; `titulo` y `mensaje` existen solo en las manuales.** *Por qué*: el texto
    se arma en el idioma de cada destinatario (D84) y no puede contener datos personales; guardar
    texto lo congela (research #3).
-3. **Nuevo disparador `proceso_actualizado` (prioridad normal)** para cambios del proceso que la
+3. **D199** — **Nuevo disparador `proceso_actualizado` (prioridad normal)** para cambios del proceso que la
    Persona no pidió (finalización o baja confirmadas, Vida de Servicio completada) y para avisos a
    quien tiene que actuar (propuesta al Discipulador). *Por qué*: los eventos de la 004 no entraban
    en ninguno de los cuatro de D49/`docs/04` (research #12).
-4. **Toda Persona destinataria recibe el aviso en la app, tenga o no acceso hoy; el mail solo si es
+4. **D200** — **Toda Persona destinataria recibe el aviso en la app, tenga o no acceso hoy; el mail solo si es
    importante y tiene email.** Precisa Flujo 10 paso 10. *Por qué*: no cuesta nada y queda en su
    historial el día que entre con su email (D145, spec 007).
-5. **Los eventos dirigidos al Admin no generan avisos en esta tanda**; siguen en Pendientes del
+5. **D201** — **Los eventos dirigidos al Admin no generan avisos en esta tanda**; siguen en Pendientes del
    backoffice. *Por qué*: el Admin trabaja en el backoffice (D142) y ya ve ahí lo que espera su
    acción (Pregunta 2).
-6. **Recordatorios de Eventos: `evento_proximo` el día anterior, a la mañana; `recordatorio_inscripcion`
+6. **D202** — **Recordatorios de Eventos: `evento_proximo` el día anterior, a la mañana; `recordatorio_inscripcion`
    solo a quienes no tienen inscripción vigente.** Resuelve la diferencia entre Flujo 8 y Flujo 10.
    *Por qué*: recordar que se anote a quien ya se anotó confunde (Preguntas 3 y 4).
-7. **Avisos manuales: texto plano (título ≤ 80, mensaje ≤ 1000), sin enlaces clickeables, sin
+7. **D203** — **Avisos manuales: texto plano (título ≤ 80, mensaje ≤ 1000), sin enlaces clickeables, sin
    edición ni retiro una vez enviados.** *Por qué*: lo enviado ya llegó y salió por mail; un enlace
    en un aviso es una vía de phishing; los límites mantienen el mail legible.
-8. **Los mails de avisos se reintentan hasta 5 veces (1 min, 10 min, 1 h, 6 h) y los que no salen se
+8. **D204** — **Los mails de avisos se reintentan hasta 5 veces (1 min, 10 min, 1 h, 6 h) y los que no salen se
    muestran al Admin con el nombre de la Persona.** *Por qué*: los importantes son transaccionales
    (D96); si no llegan, alguien tiene que avisar por otro medio.
-9. **Un único módulo de tareas programadas (`@nestjs/schedule`), con cada tarea invocable a mano.**
+9. **D205** — **Un único módulo de tareas programadas (`@nestjs/schedule`), con cada tarea invocable a mano.**
    *Por qué*: `docs/10` ya lo prevé para tres usos (recordatorios, YouTube, entregas); que estén
    juntas evita dos crons distintos y hace testeable cada tarea (research #7).
-10. **Abrir un aviso es un enlace real (`/avisos/{id}/ir`) que marca leído y redirige.** *Por qué*:
+10. **D206** — **Abrir un aviso es un enlace real (`/avisos/{id}/ir`) que marca leído y redirige.** *Por qué*:
     `docs/14`/`docs/15` piden enlaces reales; funciona sin JS y con lector de pantalla (research #9).
 
 ## Cambios a docs al mergear
@@ -234,17 +234,17 @@ donde la navegación ya las puso (`docs/14`).
 - **`docs/04-dominio-entidades.md`** — Notificación: `evento` + `params` en lugar de un
   `disparador` guardado (derivado del catálogo); `titulo`/`mensaje` solo manuales; disparador
   `proceso_actualizado`; clave de idempotencia. Entrega: `proximo_intento_en`; `push` reservado
-  (D149). Decisiones nuevas 2, 3.
+  (D149). D198, D199.
 - **`docs/diagrama-er.mermaid`** — mismos cambios en `NOTIFICACION` y `ENTREGA_NOTIFICACION`.
 - **`docs/16-sistemas-transversales.md` §1** — emisión dentro de la transacción; reintentos
   concretos; mails no enviados visibles al Admin; eventos al Admin sin aviso; push para la tanda
-  siguiente (D149). Decisiones 1, 5, 8.
+  siguiente (D149). D197, D201, D204.
 - **`docs/07-flujos-casos-de-uso.md` Flujo 10** — paso 7 (antelación), paso 8 (solo quienes no se
-  anotaron), paso 10 (todas reciben el aviso en la app). Decisiones 4, 6.
+  anotaron), paso 10 (todas reciben el aviso en la app). D200, D202.
 - **`docs/15-guia-ux-ui.md`** — glosario: "Aviso".
 - **`docs/10-stack-tecnico.md`** — módulo único de tareas programadas; variable `WEB_URL` en la API.
 - **`specs/004-vida-nueva-discipulado/contracts/eventos.md`** — nota de que lo reemplaza
-  `specs/012-notificaciones/contracts/emision.md` (decisión 1).
+  `specs/012-notificaciones/contracts/emision.md` (D197).
 - **`specs/revision-manual/COMO-ARRANCAR.md`** — `WEB_URL`, `TAREAS_PROGRAMADAS`, `tareas:correr`.
 
 ## Complexity Tracking

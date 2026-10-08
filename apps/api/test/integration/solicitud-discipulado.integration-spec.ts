@@ -42,7 +42,7 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
         estadoCivil: 'soltero_a',
         profesion: 'otro',
         profesionDetalle: 'Test',
-        tiempoCongregacion: 'menos_6_meses',
+        congregaDesde: 2020,
         estado: 'activa',
         consentimientoDatos: true,
         rol,

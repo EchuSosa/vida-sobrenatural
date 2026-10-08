@@ -184,38 +184,38 @@ resuelven conservando las dos partes.
   muestran solo lo que existe) y el bloque de cumpleaños de 4. El Lote 7 cuelga del perfil (2).
 - **Lote final**: seed-demo, axe de todas las rutas, Pastor solo lectura, tres suites.
 
-## Decisiones nuevas (se numeran al mergear)
+## Decisiones nuevas (numeradas en `docs/05-decisiones.md`: D178, D207–D213; la DN-1 quedó unificada en D178 y precisada en D207)
 
-- **DN-1 — La bandeja unificada lee de una vista SQL, la resolución sigue por tipo.** `solicitudes_bandeja` (`UNION
+- **D178 — La bandeja unificada lee de una vista SQL, la resolución sigue por tipo.** `solicitudes_bandeja` (`UNION
   ALL` con la forma base de `docs/04`) pagina, ordena y busca en la base; cada tipo hidrata sus filas y conserva su
   detalle y su resolución. Cada spec de tipo suma su rama con una migración que recrea la vista desde un único archivo
   versionado. *Porqué*: `docs/15` exige paginar/buscar/ordenar en la API, y con seis tablas solo una fuente única lo
   permite sin copiar estado (Principio XI) ni rehacer el modelo de la 004 (D31: forma común, no tabla común).
-- **DN-2 — "Abierta" = espera una acción del Admin, declarado por tipo en un solo lugar.** El filtro por defecto de
+- **D208 — "Abierta" = espera una acción del Admin, declarado por tipo en un solo lugar.** El filtro por defecto de
   la bandeja y los conteos del Inicio usan "abiertas", no estados crudos; `lista_espera`, `cancelada`, `inactiva` y
   `retirada` son resueltas; una Inscripción a Evento confirmada con pago pendiente no es abierta, su Pago sí (D148).
   *Porqué*: los estados difieren por tipo; lo que el Admin necesita saber es qué espera su respuesta.
-- **DN-3 — El perfil de Persona es una pantalla de secciones independientes que cada spec extiende.** Cada sección
+- **D209 — El perfil de Persona es una pantalla de secciones independientes que cada spec extiende.** Cada sección
   carga y falla sola; las specs de tipo registran la suya. El Pastor lo ve completo, contacto incluido (D64); nadie ve
   notas de Encuentros (D134). *Porqué*: D61 con cuatro estados por bloque y sin acoplar todas las specs a un DTO.
-- **DN-4 — Métricas y cumpleaños se calculan al momento; "Persona activa" es `estado = activa` y `activo = true`.**
+- **D210 — Métricas y cumpleaños se calculan al momento; "Persona activa" es `estado = activa` y `activo = true`.**
   Incluye menores activados y Personas sin app (Flujo 12, paso 5). El tiempo de congregación se muestra como fue
   declarado. *Porqué*: volumen chico; una tabla de agregados es estado copiado (Principio XI).
-- **DN-5 — "Contanos qué te parece": límite por origen 5/h sin sesión y 20/h con sesión, contacto solo si lo acepta.**
+- **D211 — "Contanos qué te parece": límite por origen 5/h sin sesión y 20/h con sesión, contacto solo si lo acepta.**
   Sin sesión y con contacto aceptado se pide email o teléfono; con sesión se usan los del perfil. La IP nunca se
   guarda en claro (huella HMAC, mismo mecanismo que la 007). El email a la desarrolladora va a una dirección
   configurable y su falla no impide guardar. *Porqué*: `docs/16` pide rate limiting y datos técnicos mínimos sin datos
   sensibles; reusar la 007 evita infraestructura nueva.
-- **DN-6 — Los Cursos los fija el código; el Admin edita nombre y descripción, inactiva y elimina.** Categoría, tipo y
+- **D212 — Los Cursos los fija el código; el Admin edita nombre y descripción, inactiva y elimina.** Categoría, tipo y
   modalidad no se editan; el alta solo ofrece combinaciones reconocidas sin registro. Un Curso inactivo no admite
   Grupos nuevos (`CURSO_INACTIVO`), los existentes siguen. *Porqué*: cada combinación tiene comportamiento propio
   (D24, D44); un Curso inventado no lo usaría ningún flujo (Principio IV).
-- **DN-7 — Catálogos agrupa Sedes y Cursos (y luego Ministerios y Células); dejan de ser ítems del menú.** *Porqué*:
+- **D213 — Catálogos agrupa Sedes y Cursos (y luego Ministerios y Células); dejan de ser ítems del menú.** *Porqué*:
   `docs/14` §3 ya lo dice; con cuatro catálogos, el menú lateral del Admin crecería sin orden.
 
 ## Cambios a docs al mergear
 
-- `docs/05-decisiones.md`: DN-1 a DN-7 con su número (mirar el último usado, D89/D103).
+- `docs/05-decisiones.md`: D178 y D207–D213 (la DN-1 de esta spec quedó unificada en D178, con la precisión D207) con su número (mirar el último usado, D89/D103).
 - `docs/04-dominio-entidades.md`: Comentario de la app suma `contacto_email`/`contacto_telefono` (solo sin sesión),
   `app`, `revisado_por`/`revisado_en` (en vez del booleano `revisado`); Curso suma `descripcion`. Mencionar la vista
   de la bandeja en el "Patrón común de Solicitudes".
@@ -223,7 +223,7 @@ resuelven conservando las dos partes.
   `eliminado_por`.
 - `docs/14-navegacion.md` §3: Inicio enlaza a Cumpleaños y Comentarios (no son ítems de menú); Sedes y Cursos viven
   bajo Catálogos; Palabra Profética, Libros y Pendientes de tutor siguen como ítems propios.
-- `docs/16-sistemas-transversales.md` §3: los límites concretos de "Contanos qué te parece" (DN-5) y la página
+- `docs/16-sistemas-transversales.md` §3: los límites concretos de "Contanos qué te parece" (D211) y la página
   `/contanos`.
 - `docs/15-guia-ux-ui.md`: glosario — "Abiertas/Resueltas" para la bandeja; patrón de "bloques independientes" del
   Inicio.

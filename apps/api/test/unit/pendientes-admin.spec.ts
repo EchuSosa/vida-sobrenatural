@@ -1,5 +1,6 @@
 import { DIAS_PROPUESTA_SIN_RESPUESTA } from '@vida-sobrenatural/shared-types';
 import { ENLACES_PENDIENTES, PendientesAdminService } from '../../src/discipulado/pendientes-admin.service.js';
+import { RegistroPendientesAdmin } from '../../src/bandeja/registro-pendientes.js';
 import { comoPrisma, prismaFalso } from './discipulado-tx-falso.js';
 
 /** specs/004, T054f (FR-048): los cuatro contadores de la tarjeta de Pendientes. */
@@ -27,7 +28,20 @@ describe('PendientesAdminService', () => {
       propuestasSinRespuesta: { cantidad: 4, enlace: ENLACES_PENDIENTES.propuestasSinRespuesta },
       finalizacionesPropuestas: { cantidad: 2, enlace: ENLACES_PENDIENTES.finalizacionesPropuestas },
       bajasPropuestas: { cantidad: 1, enlace: ENLACES_PENDIENTES.bajasPropuestas },
+      extra: [],
     });
+  });
+
+  it('suma las filas registradas por otras specs, solo las que tienen algo (lote 0 global)', async () => {
+    const { prisma } = armar();
+    const registro = new RegistroPendientesAdmin();
+    registro.registrar({ clave: 'bautismo_sin_fecha', enlace: '/solicitudes?tipo=bautismo', contar: async () => 3 });
+    registro.registrar({ clave: 'pagos_por_verificar', enlace: '/solicitudes?tipo=pago', contar: async () => 0 });
+    const servicio = new PendientesAdminService(comoPrisma(prisma), registro);
+    const { extra } = await servicio.pendientes(AHORA);
+    expect(extra).toEqual([{ clave: 'bautismo_sin_fecha', cantidad: 3, enlace: '/solicitudes?tipo=bautismo' }]);
+    expect(() => registro.registrar({ clave: 'bautismo_sin_fecha', enlace: '/', contar: async () => 1 })).toThrow();
+    expect(() => registro.registrar({ clave: 'con.punto', enlace: '/', contar: async () => 1 })).toThrow();
   });
 
   it(`"sin respuesta" = pendientes propuestas hace más de ${DIAS_PROPUESTA_SIN_RESPUESTA} días`, async () => {

@@ -504,6 +504,8 @@ a "esperando fecha".
 
 ## Preguntas para Echu
 
+> **Respondidas por Echu el 2026-10-07: se adoptan las recomendaciones de cada pregunta** (numeradas en `docs/05-decisiones.md`, D153–D213).
+
 1. **¿El Admin confirma después del Evento quiénes se bautizaron?** Sin esto la app solo sabe que
    alguien "tenía fecha". **Recomiendo sí**: después de la fecha, el Evento muestra "Confirmar
    bautismos" con todos tildados; el Admin destilda a quien faltó (vuelve a esperar fecha). Es un

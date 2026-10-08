@@ -61,7 +61,7 @@ describe('GET/PATCH /personas/me (integración, Historia 5)', () => {
         estadoCivil: 'soltero_a',
         profesion: 'otro',
         profesionDetalle: 'Apicultora',
-        tiempoCongregacion: 'menos_6_meses',
+        congregaDesde: 2020,
         estado: 'activa',
         consentimientoDatos: true,
         rol: ['miembro_registrado'],

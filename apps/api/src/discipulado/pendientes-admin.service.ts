@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { DIAS_PROPUESTA_SIN_RESPUESTA, type PendientesAdmin } from '@vida-sobrenatural/shared-types';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { RegistroPendientesAdmin } from '../bandeja/registro-pendientes.js';
 
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
@@ -23,7 +24,11 @@ export const ENLACES_PENDIENTES = {
  */
 @Injectable()
 export class PendientesAdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    // Lote 0 global: las filas de las specs 006–011. Opcional para los tests unitarios de la 004.
+    @Optional() private readonly registro?: RegistroPendientesAdmin,
+  ) {}
 
   async pendientes(ahora: Date = new Date()): Promise<PendientesAdmin> {
     const limiteSinRespuesta = new Date(ahora.getTime() - DIAS_PROPUESTA_SIN_RESPUESTA * MS_POR_DIA);
@@ -34,11 +39,13 @@ export class PendientesAdminService {
       this.prisma.inscripcion.count({ where: { estado: 'activa', bajaPropuestaEn: { not: null }, grupo: { estado: 'en_curso' } } }),
     ]);
     const declinadas = await this.solicitudesConUltimaDeclinada(pendientes.map((s) => s.id));
+    const extra = (await this.registro?.lineas(ahora)) ?? [];
     return {
       propuestasDeclinadas: { cantidad: declinadas, enlace: ENLACES_PENDIENTES.propuestasDeclinadas },
       propuestasSinRespuesta: { cantidad: sinRespuesta, enlace: ENLACES_PENDIENTES.propuestasSinRespuesta },
       finalizacionesPropuestas: { cantidad: finalizaciones, enlace: ENLACES_PENDIENTES.finalizacionesPropuestas },
       bajasPropuestas: { cantidad: bajas, enlace: ENLACES_PENDIENTES.bajasPropuestas },
+      extra,
     };
   }
 

@@ -33,6 +33,8 @@ export async function TarjetaPendientes({ apiToken }: { apiToken: string }) {
         },
         { clave: 'finalizacionesPropuestas', icono: CircleCheckBig, ...pendientes.finalizacionesPropuestas, texto: t('finalizacionesPropuestas', { cantidad: pendientes.finalizacionesPropuestas.cantidad }) },
         { clave: 'bajasPropuestas', icono: UserRoundX, ...pendientes.bajasPropuestas, texto: t('bajasPropuestas', { cantidad: pendientes.bajasPropuestas.cantidad }) },
+        // Lote 0 global: las filas de las specs 006–011 (`PendientesAdmin.extra`).
+        ...pendientes.extra.map((linea) => ({ ...linea, icono: Inbox, texto: t(`extra.${linea.clave}`, { cantidad: linea.cantidad }) })),
       ].filter((f) => f.cantidad > 0)
     : [];
 

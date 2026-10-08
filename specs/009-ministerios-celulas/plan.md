@@ -148,34 +148,34 @@ apps/backoffice/src/
 | Otras specs que sumen tipos a la bandeja (008, Bautismo, Eventos) | Comparten `apps/api/src/bandeja/` y el filtro por tipo. | La primera en mergear crea `bandeja/` y el filtro; las demás rebasan y solo agregan su fuente y su valor de `TipoSolicitud`. |
 | D150 (tamaños en celular) | `Button` de 44 px y letra de 16 px en `apps/web`. | Se usa el `Button` vigente; hereda el cambio cuando llegue. |
 
-## Decisiones nuevas (se numeran al mergear)
+## Decisiones nuevas (numeradas en `docs/05-decisiones.md`: D169–D178)
 
-1. **El flag "Apto para Ministerio" no se pide ni se activa a mano: lo escribe el sistema (D40); D28 y
+1. **D169** — **El flag "Apto para Ministerio" no se pide ni se activa a mano: lo escribe el sistema (D40); D28 y
    los pasos 1 a 3 del Flujo 5 quedan superados.** *Por qué*: D40 es posterior y ya está en docs/02 y
    docs/03; mantener los dos caminos duplica la regla y deja a la Persona sin saber cuál aplica.
-2. **La membresía en un Ministerio es la Postulación `aprobada`; no hay entidad de miembros.** El rol
+2. **D170** — **La membresía en un Ministerio es la Postulación `aprobada`; no hay entidad de miembros.** El rol
    `miembro_ministerio` se otorga al aprobar la primera y no se quita (roles acumulativos, FR-019 de la
    005). *Por qué*: una sola fuente del dato (D19 ya lo modela así; mismo razonamiento que D137).
-3. **La Postulación suma el estado `retirada`**: la Persona puede retirar una pendiente, con
+3. **D171** — **La Postulación suma el estado `retirada`**: la Persona puede retirar una pendiente, con
    confirmación neutra (D151). *Por qué*: consistencia con la Solicitud de Discipulado (004) y, con D60
    (una sola pendiente), sin retiro la Persona queda trabada hasta que el Admin la "rechace".
-4. **"Una sola vez por Ministerio" (docs/04) significa: nunca dos abiertas ni postularse adonde ya está.**
+4. **D172** — **"Una sola vez por Ministerio" (docs/04) significa: nunca dos abiertas ni postularse adonde ya está.**
    Después de rechazo, retiro o baja se crea una Postulación nueva (D29). *Por qué*: concilia docs/04 con
    D29 sin perder historial.
-5. **La advertencia de cambio de Ministerio la exige la API** (`confirmarCambio`), no solo la interfaz.
+5. **D173** — **La advertencia de cambio de Ministerio la exige la API** (`confirmarCambio`), no solo la interfaz.
    *Por qué*: cierra la carrera entre abrir el detalle y aprobar.
-6. **El Admin puede dar de baja a alguien de su Ministerio** (Postulación → `inactiva` con motivo
+6. **D174** — **El Admin puede dar de baja a alguien de su Ministerio** (Postulación → `inactiva` con motivo
    `baja`); la Persona no tiene un "dejar de servir" propio (Pregunta 2). *Por qué*: los docs no traen
    cómo se deja un Ministerio, y sin esto la lista de miembros y el alcance de D48 solo crecen.
-7. **La Célula es una preferencia opcional** ("No tengo preferencia"), y el Admin no la cambia al aprobar
+7. **D175** — **La Célula es una preferencia opcional** ("No tengo preferencia"), y el Admin no la cambia al aprobar
    (D30) (Pregunta 3).
-8. **Los motivos de rechazo y de baja son internos**: los ve el Admin, no la Persona ni el Pastor
+8. **D176** — **Los motivos de rechazo y de baja son internos**: los ve el Admin, no la Persona ni el Pastor
    (Pregunta 5). *Por qué*: docs/15 pide un mensaje amable y a quién consultar; una nota interna escrita
    en apuro, mostrada tal cual, es lo contrario.
-9. **Inactivar un Ministerio o una Célula no toca las membresías**; impide postularse y aprobar
+9. **D177** — **Inactivar un Ministerio o una Célula no toca las membresías**; impide postularse y aprobar
    pendientes a ellos hasta reactivar. Eliminar exige que no tenga ninguna Postulación (D119). *Por qué*:
    inactivar es reversible (D117) y no puede borrar la historia de nadie.
-10. **La bandeja de Solicitudes se arma con "fuentes" por tipo y pagina en SQL (`UNION ALL`)**; el filtro
+10. **D178** — **La bandeja de Solicitudes se arma con "fuentes" por tipo y pagina en SQL (`UNION ALL`)**; el filtro
     por tipo se muestra desde que hay dos tipos. *Por qué*: precisa la clarificación de la 004 ("genérica
     en el listado, específica en la resolución") ahora que llega el segundo tipo, sin romper H-101.
 
@@ -183,11 +183,11 @@ apps/backoffice/src/
 
 - `docs/05-decisiones.md`: las 10 decisiones de arriba, con número (mirar el último usado, D89/D103).
 - `docs/07-flujos-casos-de-uso.md`, Flujo 5: reemplazar los pasos 1 a 3 por "el flag lo activa el
-  sistema al completar Vida de Servicio (D40) o por Completitud Manual"; sumar retirar (decisión 3), la
-  baja por el Admin (decisión 6) y el filtro por tipo de la bandeja.
+  sistema al completar Vida de Servicio (D40) o por Completitud Manual"; sumar retirar (D171), la
+  baja por el Admin (D174) y el filtro por tipo de la bandeja.
 - `docs/04-dominio-entidades.md`, Postulación: estados `pendiente / aprobada / rechazada / inactiva /
-  retirada`; precisar la regla "una vez por Ministerio" (decisión 4) y que la membresía es la aprobada
-  (decisión 2). Ministerio/Célula: sumar `eliminado_en`/`eliminado_por` (ya lo dice D119).
+  retirada`; precisar la regla "una vez por Ministerio" (D172) y que la membresía es la aprobada
+  (D170). Ministerio/Célula: sumar `eliminado_en`/`eliminado_por` (ya lo dice D119).
 - `docs/diagrama-er.mermaid`: `apto_ministerio` deja de decir "activado manualmente por Admin";
   POSTULACION suma `motivacion`, `disponibilidad`, `motivo_rechazo`, `motivo_inactivacion`,
   `reemplazada_por`, `motivo_baja`; MINISTERIO y CELULA suman `eliminado_en`/`eliminado_por`.

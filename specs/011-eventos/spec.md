@@ -641,6 +641,8 @@ pública no ofrece "Anotarme" ni muestra nombres, y que la API rechaza una auto-
 
 ## Preguntas para Echu
 
+> **Respondidas por Echu el 2026-10-07: se adoptan las recomendaciones de cada pregunta** (numeradas en `docs/05-decisiones.md`, D153–D213).
+
 Cada una ya tiene una respuesta adoptada en la spec (la recomendación); si Echu decide otra cosa,
 se ajusta antes de implementar.
 

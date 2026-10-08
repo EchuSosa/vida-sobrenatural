@@ -144,7 +144,7 @@ export async function registrarPersonaDeTest(page: Page, email: string) {
   await page.getByLabel('Estado civil').selectOption('soltero_a');
   await page.getByLabel('Profesión').selectOption('otro');
   await page.getByLabel('¿Cuál?').fill('Apicultora');
-  await page.getByLabel('Tiempo congregándote').selectOption('menos_6_meses');
+  await page.getByLabel('¿En qué año empezaste a venir a la iglesia?').selectOption('2020');
   await page.getByRole('button', { name: 'Siguiente' }).click();
 
   await page.getByRole('checkbox').check();
@@ -179,4 +179,19 @@ export async function usarTemaOscuro(page: Page, email: string) {
 export async function esperarTema(page: Page, tema: 'claro' | 'oscuro') {
   if (tema === 'oscuro') await expect(page.locator('html')).toHaveClass(/dark/);
   else await expect(page.locator('html')).not.toHaveClass(/dark/);
+}
+
+/**
+ * Lote 0 global (spec 006, research #13; D150): ninguna pantalla de la web app
+ * se desplaza de costado en un celular. Fija el ancho y compara el ancho del
+ * documento con el de la ventana.
+ */
+export async function sinScrollHorizontal(page: Page, ancho = 375) {
+  const alto = page.viewportSize()?.height ?? 800;
+  await page.setViewportSize({ width: ancho, height: alto });
+  const { documento, ventana } = await page.evaluate(() => ({
+    documento: document.documentElement.scrollWidth,
+    ventana: window.innerWidth,
+  }));
+  expect(documento).toBeLessThanOrEqual(ventana);
 }

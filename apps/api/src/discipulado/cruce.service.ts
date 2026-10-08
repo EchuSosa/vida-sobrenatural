@@ -118,7 +118,7 @@ export class CruceService {
     const [nombres, franjasSolicitud, personaMax] = await Promise.all([
       nombresDe(db, [...new Set(inscripciones.map((i) => i.personaId))]),
       db.franjaSolicitud.findMany({
-        where: { solicitudId: { in: [...new Set(inscripciones.map((i) => i.solicitudId))] } },
+        where: { solicitudId: { in: [...new Set(inscripciones.map((i) => i.solicitudId).filter((id): id is string => id !== null))] } },
         select: { solicitudId: true, diaSemana: true, inicio: true, fin: true },
       }),
       db.persona.findMany({ where: { id: { in: ids } }, select: { id: true, maxPersonasPorGrupo: true } }),
@@ -136,7 +136,7 @@ export class CruceService {
       const g = porGrupo.get(i.grupoId) ?? { personas: [], franjasMiembros: [] };
       const n = nombres.get(i.personaId);
       if (n) g.personas.push(`${n.nombre} ${n.apellido}`);
-      for (const f of franjasPorSolicitud.get(i.solicitudId) ?? []) g.franjasMiembros.push(f);
+      for (const f of (i.solicitudId !== null && franjasPorSolicitud.get(i.solicitudId)) || []) g.franjasMiembros.push(f);
       porGrupo.set(i.grupoId, g);
     }
 

@@ -1,4 +1,4 @@
-import type { DiscipuladoActivo, PropuestaPendiente } from '@vida-sobrenatural/shared-types';
+import type { DiscipuladoActivo, GrupoServicioActivo, PropuestaPendiente } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 
@@ -18,12 +18,34 @@ type Db = PrismaService | Prisma.TransactionClient;
 /** Un Grupo que la Persona lidera hoy, con el nombre de una de sus Personas (para el mensaje de rechazo). */
 export async function discipuladosActivosDe(db: Db, personaId: string): Promise<DiscipuladoActivo[]> {
   const liderazgos = await db.liderazgo.findMany({
-    where: { personaId, hasta: null, grupo: { estado: 'en_curso' } },
+    where: { personaId, hasta: null, grupo: { estado: 'en_curso', curso: { categoria: 'vida_nueva' } } },
     select: { grupoId: true },
   });
   const grupoIds = liderazgos.map((l) => l.grupoId);
   if (grupoIds.length === 0) return [];
   return nombrarGruposPorInscripta(db, grupoIds);
+}
+
+/**
+ * spec 008 (D167, FR-040): las ediciones de Vida de Servicio EN CURSO que la
+ * Persona lidera hoy — Liderazgo vigente en un Grupo `en_curso` de categoría
+ * `vida_de_servicio`. Bloquean quitarle `lider_curso`. Mismo criterio de D137
+ * (calculado en el momento, con la fila de la Persona bloqueada al escribir).
+ */
+export async function gruposServicioActivosDe(db: Db, personaId: string): Promise<GrupoServicioActivo[]> {
+  return (await gruposServicioActivosDeVarias(db, [personaId])).get(personaId) ?? [];
+}
+
+export async function gruposServicioActivosDeVarias(db: Db, personaIds: string[]): Promise<Map<string, GrupoServicioActivo[]>> {
+  const mapa = new Map<string, GrupoServicioActivo[]>(personaIds.map((id) => [id, []]));
+  if (personaIds.length === 0) return mapa;
+  const liderazgos = await db.liderazgo.findMany({
+    where: { personaId: { in: personaIds }, hasta: null, grupo: { estado: 'en_curso', curso: { categoria: 'vida_de_servicio' } } },
+    select: { personaId: true, grupoId: true, grupo: { select: { nombre: true } } },
+    orderBy: { desde: 'asc' },
+  });
+  for (const l of liderazgos) mapa.get(l.personaId)?.push({ grupoId: l.grupoId, nombre: l.grupo.nombre });
+  return mapa;
 }
 
 /** Las propuestas pendientes de esta Persona como Discipulador (FR-043). */
@@ -36,7 +58,7 @@ export async function discipuladosActivosDeVarias(db: Db, personaIds: string[]):
   const mapa = new Map<string, DiscipuladoActivo[]>(personaIds.map((id) => [id, []]));
   if (personaIds.length === 0) return mapa;
   const liderazgos = await db.liderazgo.findMany({
-    where: { personaId: { in: personaIds }, hasta: null, grupo: { estado: 'en_curso' } },
+    where: { personaId: { in: personaIds }, hasta: null, grupo: { estado: 'en_curso', curso: { categoria: 'vida_nueva' } } },
     select: { personaId: true, grupoId: true },
   });
   if (liderazgos.length === 0) return mapa;

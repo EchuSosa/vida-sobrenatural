@@ -19,6 +19,12 @@ type Db = PrismaService | Prisma.TransactionClient;
  * aceptar (propuestas), que la re-exige con la fila bloqueada.
  */
 export async function cursaOCompletoVidaNueva(db: Db, personaId: string): Promise<boolean> {
+  // spec 006 (D155): la parte "completó" es la misma regla que
+  // `completoPorSistema(…, 'vida_nueva')` (camino/consultas.ts): Inscripción
+  // `completada` en un Curso de Vida Nueva. Va en UNA consulta con la de
+  // "cursa"; el filtro por categoría evita que una Inscripción de Vida de
+  // Servicio (spec 008) cuente como Vida Nueva. El historial previo lo
+  // rechaza el pedido por su lado, con sus propios códigos (spec 006 lote B).
   const inscripcion = await db.inscripcion.findFirst({
     where: { personaId, estado: { in: ['activa', 'completada'] }, grupo: { curso: { categoria: 'vida_nueva' } } },
     select: { id: true },
@@ -47,11 +53,14 @@ export async function nombresDe(db: Db, ids: string[]): Promise<Map<string, { id
   return new Map(personas.map((p) => [p.id, p]));
 }
 
-export async function franjasDeSolicitudes(db: Db, solicitudIds: string[]): Promise<Map<string, Franja[]>> {
+export async function franjasDeSolicitudes(db: Db, solicitudIds: readonly (string | null)[]): Promise<Map<string, Franja[]>> {
   const mapa = new Map<string, Franja[]>();
-  if (solicitudIds.length === 0) return mapa;
+  // spec 008: `Inscripcion.solicitudId` es opcional (una Inscripción de Vida de
+  // Servicio nace de otra Solicitud); las de Vida Nueva siempre lo tienen.
+  const ids = [...new Set(solicitudIds.filter((id): id is string => id !== null))];
+  if (ids.length === 0) return mapa;
   const filas = await db.franjaSolicitud.findMany({
-    where: { solicitudId: { in: [...new Set(solicitudIds)] } },
+    where: { solicitudId: { in: ids } },
     select: { solicitudId: true, diaSemana: true, inicio: true, fin: true },
     orderBy: [{ diaSemana: 'asc' }, { inicio: 'asc' }],
   });
@@ -91,6 +100,19 @@ export async function estaDisponible(
  * Única (Principio XI): la usan el cruce, la disponibilidad, Grupos y Mis
  * discipulados. No confundir con el día civil de un INSTANTE (shared-types).
  */
+export function franjasDe(mapa: Map<string, Franja[]>, solicitudId: string | null): Franja[] {
+  return (solicitudId !== null && mapa.get(solicitudId)) || [];
+}
+
+/**
+ * spec 008: `Encuentro.capitulos` es opcional en la base (los Encuentros de
+ * asistencia de Vida de Servicio no tienen); en Vida Nueva siempre está — lo
+ * exige su servicio al registrar.
+ */
+export function capitulosDe(capitulos: string | null): string {
+  return capitulos ?? '';
+}
+
 export function comoFechaCivil(fecha: Date): string {
   return fecha.toISOString().slice(0, 10);
 }

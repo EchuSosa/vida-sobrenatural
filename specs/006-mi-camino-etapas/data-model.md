@@ -28,7 +28,7 @@ enum OrigenCompletitud {
 ```
 
 `EtapaCamino` es independiente de `CategoriaCurso` (que hoy solo tiene `vida_nueva`): Bautismo y
-Ministerio no son Cursos (Decisión nueva 1). La correspondencia etapa → categoría para las etapas
+Ministerio no son Cursos (D153). La correspondencia etapa → categoría para las etapas
 que son cursos vive en `CaminoService` (`vida_nueva` → `CategoriaCurso.vida_nueva`; la de
 `vida_de_servicio` la agrega su spec cuando exista la categoría).
 
@@ -249,7 +249,7 @@ y la card muestra el texto de la 004 (FR-044) en vez del botón.
 export interface DatosPersonales {          // los del Flujo 2, paso 4
   apellido: string; nombre: string; genero: Genero; fechaNacimiento: string;
   telefono: string; direccion: string; sedeId: string; estadoCivil: EstadoCivil;
-  profesion: Profesion; profesionDetalle?: string; tiempoCongregacion: TiempoCongregacion;
+  profesion: Profesion; profesionDetalle?: string; congregaDesde: number; // año, D214
 }
 export interface DatosAltaPersona extends DatosPersonales {
   email?: string | null;

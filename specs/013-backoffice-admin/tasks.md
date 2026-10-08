@@ -32,80 +32,80 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 
 ## Lote 0 — Compartido (secuencial, bloquea todos los demás)
 
-- [ ] T000 [L0] **Compuerta**: no arrancar `/speckit-implement` sin las respuestas de Echu a las cinco "Preguntas para
+- [x] T000 **[Lote 0 global: preguntas respondidas (7/10); la Pregunta 3 cambió a D214 (`congregaDesde`)]** [L0] **Compuerta**: no arrancar `/speckit-implement` sin las respuestas de Echu a las cinco "Preguntas para
   Echu" de la spec (Principio I). Si alguna respuesta difiere de la recomendación aplicada, actualizar spec, plan y
   tasks antes de seguir (ej. si la Pregunta 1 dice que "Contanos" va en otra spec, se saca el Lote 5). — cubre:
   Principio I
 
-- [ ] T001 [L0] Verificar `main` actualizado, que `.specify/feature.json` apunta a `specs/013-backoffice-admin`, y qué
+- [x] T001 **[Lote 0 global: D178 y D207–D213 numeradas; las siete ramas de la vista ya están (D178)]** [L0] Verificar `main` actualizado, que `.specify/feature.json` apunta a `specs/013-backoffice-admin`, y qué
   specs de 006–011 ya están mergeadas: anotar en el PR de implementación qué ramas de la vista y qué secciones del
   perfil se conectan en esta corrida (plan.md → Dependencias). Mirar el último número de `docs/05` antes de numerar
-  DN-1..DN-7 (D89, D103). — cubre: plan
-- [ ] T002 [L0] `packages/shared-types/src/bandeja.ts`: `TipoSolicitud` (movido desde `discipulado.ts`, que lo
+  D178 y D207–D213 (la DN-1 de esta spec quedó unificada en D178, con la precisión D207) (D89, D103). — cubre: plan
+- [x] T002 **[Lote 0 global: con los siete tipos; `discipulado.ts` lo importa de `bandeja.ts`]** [L0] `packages/shared-types/src/bandeja.ts`: `TipoSolicitud` (movido desde `discipulado.ts`, que lo
   reexporta), `TIPOS_SOLICITUD`, `ESTADOS_POR_TIPO`, `ESTADOS_ABIERTOS`, `esAbierta`, `FiltroAbiertas`, `OrdenBandeja`
   (`espera|fecha|persona`), `SolicitudBandeja`, `ConteoAbiertas`, `BANDEJA_PAGINA = 20` (`contracts/bandeja-api.md`).
   Exportar desde `index.ts`. — cubre: FR-001–FR-003, FR-007
-- [ ] T003 [P] [L0] Unit `apps/api/test/unit/es-abierta.spec.ts`: para `discipulado`, `pendiente` y `propuesta` →
+- [x] T003 **[Lote 0 global: en `lote-0-global.spec.ts` (abiertas de cada tipo ⊂ sus estados, D186, D196); los casos por estado de discipulado → lote 1]** [P] [L0] Unit `apps/api/test/unit/es-abierta.spec.ts`: para `discipulado`, `pendiente` y `propuesta` →
   abierta; `aprobada`, `rechazada`, `retirada` → resuelta; un estado desconocido → error de tipo/`false`. — cubre: FR-003
-- [ ] T004 [L0] `packages/shared-types/src/perfil-persona.ts`: `PerfilPersona`, `RelacionFamiliarVista`,
+- [ ] T004 **[Lote 0 global: `iniciales` hecho; `PerfilPersona` y demás, y mover `INVERSO_RELACION` → lote 2]** [L0] `packages/shared-types/src/perfil-persona.ts`: `PerfilPersona`, `RelacionFamiliarVista`,
   `RelacionDesde`, `GrupoEnPerfil`, `relacionDesde(tipo, lado)`, `INVERSO_RELACION` **movido** desde
   `apps/api/src/persona/persona.service.ts` (que pasa a importarlo), `iniciales(nombre, apellido)`. — cubre: FR-011,
   FR-014, research #6
-- [ ] T005 [P] [L0] Unit `apps/api/test/unit/relacion-desde.spec.ts`: cada tipo desde los dos lados (`tutor` →
+- [ ] T005 **[Lote 0 global: → lote 2]** [P] [L0] Unit `apps/api/test/unit/relacion-desde.spec.ts`: cada tipo desde los dos lados (`tutor` →
   "tutor de"/"a cargo de", `hijo_a` ↔ `padre_madre`, `conyuge` y `hermano_a` simétricas); `iniciales` con tildes,
   apellidos compuestos y nombre vacío. Y que el test existente de duplicado espejo de `persona.service` siga verde. —
   cubre: FR-014, H2.5
-- [ ] T006 [P] [L0] `packages/shared-types/src/cumpleanos.ts`: `Cumpleanero`, `proximoCumpleanos(fechaNacimiento,
+- [ ] T006 **[Lote 0 global: constantes hechas; `Cumpleanero` y `proximoCumpleanos` → lote 4]** [P] [L0] `packages/shared-types/src/cumpleanos.ts`: `Cumpleanero`, `proximoCumpleanos(fechaNacimiento,
   hoy)` → `{ fecha, dia, cumple, esHoy }`, `CUMPLEANOS_DIAS_SEMANA = 7`, `CUMPLEANOS_PAGINA = 50`; reusa
   `hoyEnArgentina` (no otra implementación). — cubre: FR-030–FR-033
-- [ ] T007 [P] [L0] Unit `apps/api/test/unit/proximo-cumpleanos.spec.ts`: hoy es el cumpleaños (`esHoy`, `cumple`
+- [ ] T007 **[Lote 0 global: → lote 4]** [P] [L0] Unit `apps/api/test/unit/proximo-cumpleanos.spec.ts`: hoy es el cumpleaños (`esHoy`, `cumple`
   correcto); mañana; 29/2 en año bisiesto (29) y no bisiesto (28); 31/12 con hoy 28/12 (cruza año); `hoy` calculado a
   las 02:30 UTC del día 7 da el 6 en Argentina. — cubre: H4.1, H4.2, H4.3, FR-032, FR-033
-- [ ] T008 [P] [L0] `packages/shared-types/src/metricas.ts` (`Metricas`, `ORDEN_TIEMPO_CONGREGACION`),
+- [x] T008 **[Lote 0 global: `Metricas`, constantes de comentarios y `CURSOS_RECONOCIDOS` (con Vida de Servicio) hechos; `CursoListado`/`CursoDetalle` y los tipos de comentarios → lotes 5 y 6]** [P] [L0] `packages/shared-types/src/metricas.ts` (`Metricas`; `RangoCongregacion`/`ORDEN_RANGO_CONGREGACION`/`rangoCongregacion` ya en `persona.ts`, D214),
   `comentario.ts` (tipos de `contracts/comentarios-api.md`, `COMENTARIO_TEXTO_MAX = 2000`,
   `COMENTARIOS_POR_HORA_SIN_SESION = 5`, `COMENTARIOS_POR_HORA_CON_SESION = 20`), `curso.ts` (`CursoListado`,
   `CursoDetalle`, `CURSOS_RECONOCIDOS` con las dos combinaciones de Vida Nueva, `CURSO_DESCRIPCION_MAX = 500`). —
   cubre: FR-022–FR-024, FR-041, FR-043, FR-052, FR-056
-- [ ] T009 [L0] `permisos.ts`: `comentarios.ver` [admin, pastor], `comentarios.gestionar` [admin], `cursos.gestionar`
+- [x] T009 **[Lote 0 global: hecho, test en `lote-0-global.spec.ts`]** [L0] `permisos.ts`: `comentarios.ver` [admin, pastor], `comentarios.gestionar` [admin], `cursos.gestionar`
   [admin], `cursos.papelera.ver` [admin], `personas.editar` [admin]. `error-code.ts`: `CURSO_INACTIVO`,
   `CURSO_TIENE_GRUPOS`, `CURSO_NO_RECONOCIDO`, `CURSO_YA_EXISTE` (y `DEMASIADOS_PEDIDOS` si la 007 no lo trajo
   todavía — una sola definición). Los códigos de campo nuevos (`TEXTO_INVALIDO`, `CONTACTO_INVALIDO`) no van al
   catálogo. Extender el test existente del catálogo de permisos para que el
   Pastor no tenga ningún `.gestionar`/`.editar` nuevo. — cubre: FR-061, SC-008
-- [ ] T010 [L0] Prisma (`data-model.md`): `ComentarioApp` + `TipoComentario` + `AppOrigen` (o el de la 007),
+- [x] T010 **[Lote 0 global: en la migración única `20261008120000_lote_0_global` (CHECK, índice `personas_mes_nacimiento_idx` y la vista con las siete ramas)]** [L0] Prisma (`data-model.md`): `ComentarioApp` + `TipoComentario` + `AppOrigen` (o el de la 007),
   `Curso.descripcion/eliminadoEn/eliminadoPor`; migración con los CHECK de §1. Migración aparte `--create-only` con el
   índice de expresión de cumpleaños (§4) y la vista `solicitudes_bandeja` desde
   `apps/api/prisma/vistas/solicitudes_bandeja.sql` con la rama de Discipulado (§3). Comentario en `schema.prisma` junto a
   `fechaNacimiento` y en el modelo `SolicitudDiscipulado` apuntando a la vista. — cubre: FR-001, FR-025, FR-030,
   FR-040–FR-047, FR-051–FR-056
-- [ ] T011 [L0] Integración `apps/api/test/integration/bandeja-vista.integration-spec.ts` (**test de coherencia**,
+- [ ] T011 **[Lote 0 global: coherencia sobre las filas existentes en `lote-0-global.integration-spec.ts`; el test exhaustivo (un registro por tipo y estado) → lote 1]** [L0] Integración `apps/api/test/integration/bandeja-vista.integration-spec.ts` (**test de coherencia**,
   research #3): por cada tipo de `TIPOS_SOLICITUD` y cada estado de `ESTADOS_POR_TIPO`, insertar un registro y verificar
   que la vista lo devuelve con `abierta === esAbierta(tipo, estado)` y `esperaDesde` correcto (Discipulado con propuesta
   vigente → `propuestaEn`). — cubre: FR-003, FR-007, SC-002
-- [ ] T012 [P] [L0] `packages/ui`: `AvatarPersona` (foto con `alt="Foto de <nombre>"`, `onError` → iniciales; iniciales
+- [ ] T012 **[Lote 0 global: → lote 2 (`AvatarPersona`) y lote 3 (`BarraProporcion`)]** [P] [L0] `packages/ui`: `AvatarPersona` (foto con `alt="Foto de <nombre>"`, `onError` → iniciales; iniciales
   sobre `--secondary`/`--secondary-foreground` con contraste medido en los dos temas, D118, `docs/17`), `BarraProporcion`
   (barra horizontal `aria-hidden`, ancho %, token `--primary`, sin animación con `prefers-reduced-motion`). Exportar. —
   cubre: FR-011, FR-018, FR-023, H2.1
-- [ ] T013 [P] [L0] `packages/ui`: `FormularioComentario` (research #11) — tipo (radio con texto), texto con contador,
+- [ ] T013 **[Lote 0 global: → lote 5]** [P] [L0] `packages/ui`: `FormularioComentario` (research #11) — tipo (radio con texto), texto con contador,
   "Pueden contactarme" que, sin sesión, despliega email/teléfono (`CampoTelefono`), errores por campo con
   `ResumenErrores`, `useEnvio`; recibe `enviar(datos)`, `conSesion`, `paginaOrigen`; estado de confirmación con "qué
   pasa después"; le pasa `navigator.userAgent` a `resumirNavegador` y toma `ultimoRequestId()` (T017). Va en
   `packages/ui/src/components/`. Sin conectar a ninguna app todavía. — cubre: FR-041, FR-042, FR-045
-- [ ] T014 [L0] `apps/backoffice/src/config/nav.ts`: rutas nuevas (`/personas/[id]`, `/personas/[id]/editar`,
+- [ ] T014 **[Lote 0 global: → cada lote, en el bloque de la 013 en `nav.ts` (una ruta sin página rompe el smoke de axe)]** [L0] `apps/backoffice/src/config/nav.ts`: rutas nuevas (`/personas/[id]`, `/personas/[id]/editar`,
   `/cumpleanos`, `/comentarios`, `/comentarios/[id]`, `/cursos`, `/cursos/[id]`, `/cursos/papelera`) con su permiso y
   `enMenu: false`; `/sedes` pasa a `enMenu: false`; `aria-current` en Catálogos para `/sedes*` y `/cursos*` (research
   #13). `apps/backoffice/src/config/solicitudes.ts`: `RUTA_DETALLE_SOLICITUD` e `ICONO_TIPO_SOLICITUD` con
   `discipulado`. Ajustar `axe-todas-las-rutas.spec.ts` y `enlaces-alcanzables.ts` para que recorran las rutas nuevas
   con ids del seed de e2e. — cubre: FR-006, FR-060
-- [ ] T015 [L0] Mensajes: namespaces vacíos con las claves base en `apps/backoffice/src/messages/es.json` (`bandeja`,
+- [x] T015 **[Lote 0 global: namespaces vacíos creados]** [L0] Mensajes: namespaces vacíos con las claves base en `apps/backoffice/src/messages/es.json` (`bandeja`,
   `perfil`, `inicio`, `metricas`, `cumpleanos`, `comentarios`, `cursos`, `catalogos`) y `apps/web/src/messages/es.json`
   (`comentarios`), incluidos tipos y estados de Discipulado para la bandeja. — cubre: FR-064
 
-- [ ] T016 [L0] `PersonaBreve` suma `fotoUrl: string | null` (`discipulado.ts`); sumar `fotoUrl` a
+- [ ] T016 **[Lote 0 global: `PersonaBreve.fotoUrl` opcional ya está; los `select` → lote 1]** [L0] `PersonaBreve` suma `fotoUrl: string | null` (`discipulado.ts`); sumar `fotoUrl` a
   `PERSONA_LISTADO_SELECT` y a los `select` que arman `PersonaBreve` en la API (resúmenes de Solicitudes, Grupos);
   `PersonaListado` también. Actualizar en el mismo commit los tests que comparan objetos exactos. — cubre: FR-018,
   FR-011
-- [ ] T017 [L0] `packages/shared-types`: `resumirNavegador(userAgent)` en `comentario.ts` y `ultimoRequestId()` en
+- [ ] T017 **[Lote 0 global: → lote 5]** [L0] `packages/shared-types`: `resumirNavegador(userAgent)` en `comentario.ts` y `ultimoRequestId()` en
   `api-client.ts` (`apiFetch` recuerda en memoria el `requestId` del último Problem Details). Unit
   `apps/api/test/unit/resumir-navegador.spec.ts` (Chrome Android, Safari iOS, Firefox escritorio, cadena vacía, user
   agent desconocido → "Otro") y `ultimo-request-id.spec.ts` (se actualiza con cada error, no con respuestas OK). —
@@ -200,20 +200,20 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
 ## Lote 3 — Inicio y métricas (Historia 3, P2)
 
 - [ ] T040 [L3] API `apps/api/src/inicio/`: `GET /inicio/metricas` (`inicio.ver`) con las tres consultas de research #7;
-  los cinco rangos siempre presentes; Sedes no eliminadas con `activa`. — cubre: FR-022–FR-025
+  los cuatro rangos de D214 siempre presentes, calculados desde `congregaDesde` con `rangoCongregacion`; Sedes no eliminadas con `activa`. — cubre: FR-022–FR-025
 - [ ] T041 [L3] Integración `metricas.integration-spec.ts`: H3.1 (120 activas, 8 pendientes de tutor y 3 con
-  `activo = false` → 120; incluye un menor activado y una Persona sin email), H3.2 (rangos en orden, uno en 0), H3.3
+  `activo = false` → 120; incluye un menor activado y una Persona sin email), H3.2 (los cuatro rangos de D214 en orden, uno en 0, con `congregaDesde` sembrado para cada rango), H3.3
   (Sede inactiva presente con `activa: false`; Sede eliminada ausente), H3.4 (base sin Personas activas → todo 0, sin
   error), Pastor 200, Discipulador 403. Cotejar contra `COUNT` directo. — cubre: H3.1–H3.4, SC-005
 - [ ] T042 [L3] Backoffice `app/page.tsx` + `app/inicio/`: cuatro bloques independientes (`BloquePendientes`,
   `BloqueMetricas`, `BloqueCumpleanos`, `BloqueComentarios`), cada uno con `Suspense`, esqueleto, vacío y error con
   "Reintentar" que no tumba a los otros. Pendientes: `conteo-abiertas` por tipo con enlace a
   `/solicitudes?tipo=X`, la `TarjetaPendientes` existente y la cantidad de Pendientes de tutor. Métricas: número grande
-  de Personas activas; tabla de rangos y de Sedes con cantidad y porcentaje en texto + `BarraProporcion`; ayuda "Es el
-  tiempo que cada Persona declaró al registrarse" (A6). Los bloques de cumpleaños y comentarios se conectan en los
+  de Personas activas; tabla de rangos y de Sedes con cantidad y porcentaje en texto + `BarraProporcion`; ayuda "Contado desde el año
+  en que cada Persona empezó a venir" (A6, D214). Los bloques de cumpleaños y comentarios se conectan en los
   lotes 4 y 5 (si no están, el bloque no se muestra). El cálculo de porcentajes con total 0 devuelve 0 sin dividir. Migrar a next-intl el h1 y los textos fijos. Pastor igual, sin
   acciones. `@celular`. — cubre: FR-020–FR-024, FR-064, H3.5, H3.6
-- [ ] T043 [L3] E2E `apps/backoffice/e2e/inicio.spec.ts`: H3.2 (cinco rangos con número y % visibles como texto), H3.4
+- [ ] T043 [L3] E2E `apps/backoffice/e2e/inicio.spec.ts`: H3.2 (cuatro rangos con número y % visibles como texto), H3.4
   (con `page.route` sobre `GET /inicio/metricas` devolviendo `personasActivas: 0` y todo en 0: estado vacío, sin
   "NaN"), H3.5 (con `page.route` sobre `GET /solicitudes/conteo-abiertas` devolviendo `{discipulado: 5, bautismo: 2}`:
   "5 de Discipulado · 2 de Bautismo", cada uno enlaza a `/solicitudes?tipo=…`; con todo en 0, el mensaje), H3.6 (interceptar `GET /inicio/metricas` con 500: el bloque muestra error y
@@ -363,7 +363,7 @@ Formato: `- [ ] T### [P] [Lote] Descripción — cubre: …`. `[P]` = paraleliza
   (script simple con 50 pedidos, resultado en el PR). — cubre: SC-004
 - [ ] T094 [LF] Las tres suites en verde (`pnpm --filter api run test`, `pnpm --filter api run test:e2e`, e2e de
   `apps/web` y `apps/backoffice`) y pasada de `quickstart.md`. — cubre: Constitución (Governance)
-- [ ] T095 [LF] Aplicar "Cambios a docs al mergear" de `plan.md` y numerar DN-1..DN-7 en `docs/05` (mirando el último
+- [ ] T095 [LF] Aplicar "Cambios a docs al mergear" de `plan.md` y numerar D178 y D207–D213 (la DN-1 de esta spec quedó unificada en D178, con la precisión D207) en `docs/05` (mirando el último
   número). — cubre: Principio I
 
 ---

@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import type { Genero, EstadoCivil, Profesion, TiempoCongregacion } from '@vida-sobrenatural/shared-types';
+import { anioEnArgentina, opcionesAnioCongregaDesde, type Genero, type EstadoCivil, type Profesion } from '@vida-sobrenatural/shared-types';
 
 /**
  * Las listas predefinidas se guardan como claves estables (los mismos
@@ -25,13 +25,13 @@ export function useOpcionesRegistro() {
     { value: 'separado_a', label: t('estadoCivil.separado_a') },
   ];
 
-  const tiempoCongregacion: { value: TiempoCongregacion; label: string }[] = [
-    { value: 'menos_6_meses', label: t('tiempoCongregacion.menos_6_meses') },
-    { value: 'de_6_meses_a_1_anio', label: t('tiempoCongregacion.de_6_meses_a_1_anio') },
-    { value: 'de_1_a_3_anios', label: t('tiempoCongregacion.de_1_a_3_anios') },
-    { value: 'de_3_a_5_anios', label: t('tiempoCongregacion.de_3_a_5_anios') },
-    { value: 'mas_5_anios', label: t('tiempoCongregacion.mas_5_anios') },
-  ];
+  // D214: se guarda el AÑO en que empezó a venir (el tiempo se calcula al
+  // mostrarlo). El primero es el año actual, con el texto "Este año".
+  const anioActual = anioEnArgentina();
+  const congregaDesde: { value: string; label: string }[] = opcionesAnioCongregaDesde(anioActual).map((anio) => ({
+    value: String(anio),
+    label: anio === anioActual ? t('congregaDesde.esteAnio', { anio }) : String(anio),
+  }));
 
   const profesion: { value: Profesion; label: string }[] = [
     { value: 'salud', label: t('profesion.salud') },
@@ -52,5 +52,5 @@ export function useOpcionesRegistro() {
     { value: 'otro', label: t('profesion.otro') },
   ];
 
-  return { genero, estadoCivil, tiempoCongregacion, profesion };
+  return { genero, estadoCivil, congregaDesde, profesion };
 }
