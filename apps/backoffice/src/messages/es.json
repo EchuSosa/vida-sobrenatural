@@ -1820,6 +1820,26 @@
     "noEncontradaTexto": "Puede que el enlace esté mal escrito o que ya no exista.",
     "irAPersonas": "Ir a Personas",
     "errorCargaTitulo": "No pudimos cargar el perfil",
-    "errorCarga": "Podés reintentar en unos segundos. Código de referencia:"
+    "errorCarga": "Podés reintentar en unos segundos. Código de referencia:",
+    "editarDatos": "Editar datos"
+  },
+  "personasEditar": {
+    "miga": "Editar datos",
+    "titulo": "Editar los datos de {nombre}",
+    "descripcion": "Corregí lo que haga falta y guardá. Los datos que no toques quedan como están.",
+    "ayudaFechaNacimiento": "Si la cambiás, revisá que sea la correcta: de ella sale la edad que ve todo el equipo.",
+    "sedeInactiva": "{nombre} (ya no está activa)",
+    "guardar": "Guardar cambios",
+    "cancelar": "Cancelar",
+    "guardado": "Guardamos los cambios",
+    "sinCambios": "No cambiaste ningún dato. Si querés corregir algo, cambialo y volvé a guardar.",
+    "menorConRolDeCargo": "Con esa fecha sería menor de edad, y tiene un rol de cargo (por ejemplo, Discipulador). Primero quitale el rol desde su perfil y después corregí la fecha.",
+    "emailDuplicado": "Ese email ya lo usa otra Persona. Revisá si está bien escrito o dejalo vacío.",
+    "dniDuplicado": "Ya hay otra Persona con este DNI: {nombre}. Revisá si está bien escrito; si es la misma persona, mirá su perfil.",
+    "errorGenerico": "No pudimos guardar los cambios. Probá de nuevo en unos segundos.",
+    "errorCargaTitulo": "No pudimos abrir los datos para editar",
+    "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
+    "reintentar": "Reintentar",
+    "irAPersonas": "Ir a Personas"
   }
 }

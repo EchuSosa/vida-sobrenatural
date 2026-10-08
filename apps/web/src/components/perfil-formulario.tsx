@@ -20,6 +20,7 @@ import {
   MensajeErrorCampo,
   useEnvio,
   useValidacionCampos,
+  separarTelefono,
   type ValidacionCampo,
 } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from '../hooks/use-opciones-registro';
@@ -30,11 +31,6 @@ export interface PerfilEditable {
   estadoCivil: EstadoCivil;
   profesion: Profesion;
   profesionDetalle: string | null;
-}
-
-function separarTelefono(telefono: string) {
-  const match = telefono.match(/^(\+\d{1,4})\s*(.*)$/);
-  return { codigoPais: match?.[1] ?? '+54', numero: (match?.[2] ?? '').replace(/\s+/g, '') };
 }
 
 /**
