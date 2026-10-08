@@ -97,6 +97,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto(`/solicitudes?q=${apellido}`);
       await expect(page.getByRole('row').filter({ hasText: apellido })).toHaveCount(1);
 
+      // El select reacciona recién hidratado: esperar a que la página termine de cargar.
+      await page.waitForLoadState('networkidle');
       await page.getByLabel('Mostrar').selectOption('resueltas');
       await expect(page).toHaveURL(/filtro=resueltas/);
       await expect(page).not.toHaveURL(/pagina=/);
@@ -148,6 +150,7 @@ test('H1.8: paginado de a 20 en la URL, "?pagina=99" va a la última y cambiar e
   await expect(page).toHaveURL(/pagina=2/);
   await expect(page.getByRole('row').filter({ hasText: apellido })).toHaveCount(1);
 
+  await page.waitForLoadState('networkidle');
   await page.getByLabel('Mostrar').selectOption('todas');
   await expect(page).toHaveURL(/filtro=todas/);
   await expect(page).not.toHaveURL(/pagina=/);
