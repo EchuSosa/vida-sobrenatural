@@ -1,4 +1,4 @@
-import type { EventoDetalle } from '@vida-sobrenatural/shared-types';
+import { diaCivilEnArgentina, type EventoDetalle } from '@vida-sobrenatural/shared-types';
 import { apiComo, EMAIL_ADMIN } from './helpers';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333';
@@ -43,7 +43,8 @@ export async function subirComprobantePorApi(email: string, inscripcionId: strin
   const datos = new FormData();
   datos.append('monto', '15000');
   datos.append('medio', 'transferencia');
-  datos.append('fechaPago', new Date().toISOString().slice(0, 10));
+  // El día civil en Argentina, como valida la API (`FECHA_PAGO_FUTURA`): con el día UTC, entre las 00 y las 03 UTC era mañana.
+  datos.append('fechaPago', diaCivilEnArgentina(new Date()));
   datos.append('comprobante', new Blob([Buffer.from('%PDF-1.4\n%%EOF')], { type: 'application/pdf' }), 'comprobante.pdf');
   const r = await fetch(`${API_BASE_URL}/inscripciones-evento/${inscripcionId}/pagos`, {
     method: 'POST',
