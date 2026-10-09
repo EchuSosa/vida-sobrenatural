@@ -85,4 +85,27 @@ describe('Verificación de Pagos (integración)', () => {
     expect(bandeja.body.items.map((s: { id: string }) => s.id)).toContain(pago);
     expect((await http().get('/pagos').set('Authorization', `Bearer ${await tokenDe(await esc.persona('pst', { rol: ['pastor'] }), ['pastor'])}`)).status).toBe(403);
   });
+
+  it('D216: el Pastor no ve las filas pago en la bandeja ni en el conteo; el Admin sí', async () => {
+    const pago = await esc.pago(await esc.inscripcion((await conCosto()).id, await esc.persona('d216')));
+    const pastor = await tokenDe(await esc.persona('pst216', { rol: ['pastor'] }), ['pastor']);
+    const apellido = encodeURIComponent(`Eventos${esc.sufijo}`);
+    const bandeja = (token: string, query = '') =>
+      http().get(`/solicitudes?filtro=todas&take=100&buscar=${apellido}${query}`).set('Authorization', `Bearer ${token}`);
+    const conteo = (token: string) => http().get('/solicitudes/conteo-abiertas').set('Authorization', `Bearer ${token}`);
+
+    const ids = (r: request.Response) => r.body.items.map((s: { id: string }) => s.id);
+    expect(ids(await bandeja(admin))).toContain(pago);
+    expect(ids(await bandeja(admin, '&tipo=pago'))).toContain(pago);
+    expect((await conteo(admin)).body.pago).toBeGreaterThanOrEqual(1);
+
+    const delPastor = await bandeja(pastor);
+    expect(delPastor.status).toBe(200);
+    expect(delPastor.body.items.some((s: { tipo: string }) => s.tipo === 'pago')).toBe(false);
+    expect(await bandeja(pastor, '&tipo=pago').then((r) => r.body)).toEqual({ items: [], total: 0 });
+    const conteoPastor = await conteo(pastor);
+    expect(conteoPastor.status).toBe(200);
+    expect(conteoPastor.body).not.toHaveProperty('pago');
+    expect(conteoPastor.body).toHaveProperty('inscripcion_evento');
+  });
 });

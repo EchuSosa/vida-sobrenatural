@@ -7,6 +7,7 @@ import { NotificacionesService } from '../../src/notificaciones/notificaciones.s
 import { levantarApp, tokenDe } from './discipulado-fixtures.js';
 import { registrarAvisos } from './camino-fixtures.js';
 import { EscenarioVS } from './vida-de-servicio-fixtures.js';
+import { ESPERA_CANDADO_CURSOS } from './candado-cursos.js';
 
 /**
  * spec 008, T031 (FR-014 a FR-018; Historia 3, escenarios 1 a 6; SC-002): el
@@ -43,7 +44,7 @@ describe('Vida de Servicio — revisar los pedidos (spec 008, T031)', () => {
     adminId = await vs.persona('admin', { rol: ADMIN });
     pastorId = await vs.persona('pastor', { rol: PASTOR });
     lider = await vs.lider('lider');
-  });
+  }, ESPERA_CANDADO_CURSOS);
 
   afterAll(async () => {
     avisos.restaurar();

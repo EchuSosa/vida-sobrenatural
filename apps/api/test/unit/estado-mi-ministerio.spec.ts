@@ -19,6 +19,7 @@ function postulacion(
     estado: 'pendiente',
     motivoInactivacion: null,
     requiereFormacion: false,
+    enParalelo: false,
     ministerio: { id: 'm1', nombre: 'Bienvenida', activo: true },
     celula: null,
     createdAt: dia(1),
@@ -90,6 +91,7 @@ describe('estadoMiMinisterio (contracts/postulaciones-api.md, precedencia)', () 
         ministerio: { id: 'm1', nombre: 'Bienvenida' },
         celula: { id: 'c1', nombre: 'Voces' },
         requiereFormacion: true,
+        enParalelo: false,
         createdAt: dia(1).toISOString(),
       },
     });
@@ -108,6 +110,7 @@ describe('estadoMiMinisterio (contracts/postulaciones-api.md, precedencia)', () 
         ministerio: { id: 'm1', nombre: 'Bienvenida', activo: true },
         celula: { id: 'c1', nombre: 'Seguridad', activo: true },
         desde: dia(3).toISOString(),
+        enParalelo: false,
       },
       pendiente: null,
     });
@@ -120,6 +123,35 @@ describe('estadoMiMinisterio (contracts/postulaciones-api.md, precedencia)', () 
         postulacionId: otra.id,
         ministerio: { nombre: 'Adoración' },
       },
+    });
+  });
+
+  it('D217: con la membresía de un Ministerio y una en paralelo ("Discipulados Vida Nueva"), la card muestra la del Ministerio; con solo la en paralelo, esa', () => {
+    const discipulados = postulacion({
+      estado: 'aprobada',
+      enParalelo: true,
+      revisadaEn: dia(5),
+      ministerio: { id: 'm2', nombre: 'Enseñanza', activo: true },
+      celula: { id: 'c2', nombre: 'Discipulados Vida Nueva', activo: true },
+    });
+    const adoracion = postulacion({
+      estado: 'aprobada',
+      revisadaEn: dia(3),
+      ministerio: { id: 'm3', nombre: 'Adoración', activo: true },
+    });
+    expect(estadoMiMinisterio(APTA, [discipulados, adoracion])).toMatchObject({
+      estado: 'miembro',
+      membresia: { postulacionId: adoracion.id, ministerio: { id: 'm3' } },
+    });
+    expect(estadoMiMinisterio(APTA, [discipulados])).toMatchObject({
+      estado: 'miembro',
+      membresia: { postulacionId: discipulados.id, ministerio: { id: 'm2' }, enParalelo: true },
+    });
+    // Miembro de Adoración con una pendiente a Discipulados: la pendiente avisa que es en paralelo.
+    const pendienteDisc = postulacion({ enParalelo: true, ministerio: { id: 'm2', nombre: 'Enseñanza', activo: true } });
+    expect(estadoMiMinisterio(APTA, [adoracion, pendienteDisc])).toMatchObject({
+      membresia: { enParalelo: false },
+      pendiente: { postulacionId: pendienteDisc.id, enParalelo: true },
     });
   });
 

@@ -106,6 +106,7 @@ export class PostulacionAdminService {
         motivacion: true,
         disponibilidad: true,
         requiereFormacion: true,
+        enParalelo: true,
         creadoPorId: true,
         revisadoPorId: true,
         revisadaEn: true,
@@ -143,6 +144,7 @@ export class PostulacionAdminService {
         where: {
           personaId: p.personaId,
           estado: 'aprobada',
+          enParalelo: p.enParalelo, // D217: lo que el cambio reemplazaría
           id: { not: p.id },
         },
         select: { ministerio: { select: { id: true, nombre: true } } },
@@ -231,8 +233,14 @@ export class PostulacionAdminService {
                 },
               })
             : Promise.resolve(null),
+          // D217: solo la aprobada del mismo carril se reemplaza; "Discipulados
+          // Vida Nueva" (en paralelo) no saca a nadie de su Ministerio.
           tx.postulacion.findFirst({
-            where: { personaId: p.personaId, estado: 'aprobada' },
+            where: {
+              personaId: p.personaId,
+              estado: 'aprobada',
+              enParalelo: p.enParalelo,
+            },
             select: {
               id: true,
               ministerio: { select: { id: true, nombre: true } },
@@ -442,8 +450,10 @@ export class PostulacionAdminService {
         'No existe una Persona con ese id.',
       );
     const [actual, pendiente, historial] = await Promise.all([
+      // D217: la membresía es la del Ministerio; la en paralelo queda en el historial.
       this.prisma.postulacion.findFirst({
         where: { personaId, estado: 'aprobada' },
+        orderBy: { enParalelo: 'asc' },
         select: {
           id: true,
           revisadaEn: true,
@@ -499,6 +509,7 @@ async function bloquearPendiente(tx: Prisma.TransactionClient, id: string) {
       estado: true,
       ministerioId: true,
       celulaId: true,
+      enParalelo: true,
     },
   });
   if (p.estado !== 'pendiente') {

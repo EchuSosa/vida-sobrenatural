@@ -71,11 +71,21 @@ export type EstadoDeclaracionVisible =
   | { estado: 'en_revision'; declaracionId: string; desde: string }
   | { estado: 'no_confirmada'; motivo: string | null; en: string };
 
+/**
+ * Ajustes 2 (PR #18, Pregunta 5): lo que una etapa sabe de sí misma y la 006
+ * no — hoy, que la Persona tiene un pedido PROPIO de esa etapa en revisión
+ * (una postulación a un Ministerio pendiente). La API lo junta en
+ * `HechosCamino.propios` y `estadoDeEtapa` lo lleva al encabezado de la card.
+ */
+export type EstadoPropioEtapa = { estado: 'solicitud_en_revision'; desde: string };
+
 /** FR-002: lo que ve la card. */
 export type EstadoEtapa =
   | { etapa: EtapaCamino; estado: 'proximamente'; puedeDeclarar: boolean; declaracion?: EstadoDeclaracionVisible }
   | { etapa: EtapaCamino; estado: 'bloqueada'; requisito: Requisito; puedeDeclarar: boolean; declaracion?: EstadoDeclaracionVisible }
   | { etapa: EtapaCamino; estado: 'disponible'; puedeDeclarar: boolean; declaracion?: EstadoDeclaracionVisible }
+  /** Su pedido propio de la etapa está en revisión (ver `EstadoPropioEtapa`): el encabezado dice "En revisión". */
+  | { etapa: EtapaCamino; estado: 'solicitud_en_revision'; desde: string; puedeDeclarar: boolean; declaracion?: EstadoDeclaracionVisible }
   | { etapa: EtapaCamino; estado: 'en_curso' }
   | { etapa: EtapaCamino; estado: 'completada'; como: ComoSeCompleto }
   | { etapa: EtapaCamino; estado: 'en_revision'; declaracionId: string; desde: string };
@@ -111,6 +121,8 @@ export interface HechosCamino {
   ultimaDeclaracion: Partial<
     Record<EtapaCamino, { id: string; estado: EstadoDeclaracion; fecha: string; motivo: string | null }>
   >;
+  /** El estado propio de cada etapa, si lo informa (Ajustes 2). */
+  propios?: Partial<Record<EtapaCamino, EstadoPropioEtapa>>;
 }
 
 /**
@@ -151,6 +163,9 @@ export function estadoDeEtapa(etapa: EtapaCamino, hechos: HechosCamino): EstadoE
 
   const comun = { puedeDeclarar: puedeDeclarar(etapa, hechos), ...(declaracionVisible(etapa, hechos) ? { declaracion: declaracionVisible(etapa, hechos) } : {}) };
   if (!ETAPAS_CONSTRUIDAS.includes(etapa)) return { etapa, estado: 'proximamente', ...comun };
+  // Ajustes 2: si la etapa informa su propio pedido en revisión, el encabezado lo dice (no "La podés empezar").
+  const propio = hechos.propios?.[etapa];
+  if (propio?.estado === 'solicitud_en_revision') return { etapa, estado: 'solicitud_en_revision', desde: propio.desde, ...comun };
   if (!reglaDeEtapa(etapa, hechos.completas, etapasEnCurso(hechos))) {
     return { etapa, estado: 'bloqueada', requisito: requisitoDeEtapa(etapa), ...comun };
   }

@@ -73,6 +73,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(page.getByText('Recibimos tu postulación. Te avisamos cuando el equipo la revise.')).toBeVisible();
       await expect(cardMinisterio(page)).toContainText('Tu postulación está en revisión');
       await expect(cardMinisterio(page)).toContainText(`${MINISTERIOS_009.bienvenida} (Seguridad)`);
+      // Ajustes 2 (PR #18, P5): el encabezado de la card también lo dice (texto + ícono, D81), no "La podés empezar".
+      await expect(cardMinisterio(page).getByText('En revisión', { exact: true })).toBeVisible();
+      await expect(cardMinisterio(page).getByText('La podés empezar', { exact: true })).toHaveCount(0);
       testInfo.annotations.push({ type: 'SC-001', description: `postulación completa en ${Math.round((Date.now() - inicio) / 1000)} s` });
       await sinViolaciones(page, tema);
 
@@ -83,6 +86,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.getByRole('button', { name: 'Sí, retirarla' }).click();
       await expect(cardMinisterio(page).getByRole('link', { name: 'Elegí un Ministerio' })).toBeVisible();
       await expect(cardMinisterio(page)).toContainText('Retiraste tu postulación');
+      await expect(cardMinisterio(page).getByText('En revisión', { exact: true })).toHaveCount(0);
     });
 
     test('no apta: la card explica qué falta y la lista se ve sin formulario @celular', async ({ page, baseURL }) => {

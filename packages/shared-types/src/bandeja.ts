@@ -1,4 +1,5 @@
 import type { PersonaBreve } from './discipulado.js';
+import { tienePermiso, type Permiso } from './permisos.js';
 
 /**
  * Bandeja unificada de Solicitudes (D178, D207, D208) —
@@ -52,6 +53,23 @@ export const ESTADOS_ABIERTOS: { readonly [T in TipoSolicitud]: readonly string[
 
 export function esAbierta(tipo: TipoSolicitud, estado: string): boolean {
   return ESTADOS_ABIERTOS[tipo].includes(estado);
+}
+
+/**
+ * D216: los tipos que, además de `solicitudes.ver`, piden un permiso propio
+ * para verse en la bandeja. Verificar pagos es tarea del Admin: el Pastor no
+ * ve las filas `pago` (ni en la lista, ni en el conteo, ni en el filtro).
+ */
+export const PERMISO_EXTRA_POR_TIPO: { readonly [T in TipoSolicitud]?: Permiso } = {
+  pago: 'pagos.verificar',
+};
+
+/** Los tipos de `tipos` que estos roles pueden ver en la bandeja (D216). */
+export function tiposVisiblesEnBandeja<T extends TipoSolicitud>(roles: readonly string[], tipos: readonly T[]): T[] {
+  return tipos.filter((tipo) => {
+    const permiso = PERMISO_EXTRA_POR_TIPO[tipo];
+    return permiso === undefined || tienePermiso(roles, permiso);
+  });
 }
 
 export function esTipoSolicitud(valor: string): valor is TipoSolicitud {

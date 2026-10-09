@@ -8,6 +8,7 @@ import { estadoPrerrequisito } from '../../src/vida-de-servicio/prerrequisito.js
 import { levantarApp, tokenDe } from './discipulado-fixtures.js';
 import { nacidoHace, registrarAvisos } from './camino-fixtures.js';
 import { EscenarioVS } from './vida-de-servicio-fixtures.js';
+import { ESPERA_CANDADO_CURSOS } from './candado-cursos.js';
 
 /**
  * spec 008, T012 + T026 (FR-008 a FR-013; Historia 2, escenarios 1 a 8): el
@@ -38,7 +39,7 @@ describe('Vida de Servicio — pedir la inscripción (spec 008, T012/T026)', () 
     await vs.preparar();
     adminId = await vs.persona('admin', { rol: ADMIN });
     discId = await vs.persona('disc', { rol: DISC });
-  });
+  }, ESPERA_CANDADO_CURSOS);
 
   afterAll(async () => {
     avisos.restaurar();

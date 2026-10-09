@@ -466,6 +466,50 @@ describe('Postulaciones del Admin (spec 009, T026/T049/T053)', () => {
     ).toBe(400);
   });
 
+  it('D217: "Discipulados Vida Nueva" se sirve en paralelo — aprobarla no pide confirmar ni saca a la Persona de su Ministerio, y un cambio de Ministerio no la toca', async () => {
+    const id = await persona('paralelo');
+    const servicio = await pendiente(id, bienvenida.id);
+    expect((await admin('post', `/postulaciones/${servicio}/aprobar`, {})).status).toBe(200);
+
+    const disc = await pendiente(id, ensenanza.id, ensenanza.celulas['Discipulados Vida Nueva']);
+    expect(await prisma.postulacion.findUniqueOrThrow({ where: { id: disc }, select: { enParalelo: true } })).toEqual({ enParalelo: true });
+    expect((await admin('get', `/postulaciones/${disc}`)).body).toMatchObject({ ministerioActual: null });
+    const aprobada = await admin('post', `/postulaciones/${disc}/aprobar`, {});
+    expect([aprobada.status, aprobada.body.estado]).toEqual([200, 'aprobada']);
+    const estados = async () =>
+      Object.fromEntries(
+        (await prisma.postulacion.findMany({ where: { personaId: id }, select: { id: true, estado: true } })).map((p) => [p.id, p.estado]),
+      );
+    expect(await estados()).toEqual({ [servicio]: 'aprobada', [disc]: 'aprobada' });
+    // Mi camino y el Perfil muestran la membresía del Ministerio.
+    expect((await como(id, APTA, 'get', '/ministerios/me')).body).toMatchObject({
+      estado: 'miembro',
+      membresia: { postulacionId: servicio },
+    });
+    expect(((await admin('get', `/personas/${id}/ministerio`)).body as MinisterioDePersona).actual).toMatchObject({ postulacionId: servicio });
+    // Ya sirve en Enseñanza: no se vuelve a postular ahí.
+    const otra = await como(id, APTA, 'post', `/ministerios/${ensenanza.id}/postulaciones/me`, { celulaId: ensenanza.celulas['Discipulados Vida Nueva'] });
+    expect(otra.body.code).toBe('YA_ES_MIEMBRO_DEL_MINISTERIO');
+
+    // Cambiar de Ministerio reemplaza el del carril principal, nunca el en paralelo.
+    const nuevo = await mins.ministerio('Hospitalidad');
+    const cambio = await pendiente(id, nuevo.id);
+    expect((await admin('get', `/postulaciones/${cambio}`)).body.ministerioActual).toEqual({ id: bienvenida.id, nombre: bienvenida.nombre });
+    expect((await admin('post', `/postulaciones/${cambio}/aprobar`, {})).body.code).toBe('POSTULACION_REQUIERE_CONFIRMAR_CAMBIO');
+    expect((await admin('post', `/postulaciones/${cambio}/aprobar`, { confirmarCambio: true })).status).toBe(200);
+    expect(await estados()).toEqual({ [servicio]: 'inactiva', [disc]: 'aprobada', [cambio]: 'aprobada' });
+
+    // La base sigue garantizando una sola membresía por carril.
+    await expect(
+      prisma.postulacion.create({ data: { personaId: id, ministerioId: bienvenida.id, estado: 'aprobada', revisadaEn: new Date() } }),
+    ).rejects.toThrow();
+    await expect(
+      prisma.postulacion.create({
+        data: { personaId: id, ministerioId: ensenanza.id, estado: 'aprobada', revisadaEn: new Date(), enParalelo: true },
+      }),
+    ).rejects.toThrow();
+  });
+
   it('bandeja y Pendientes del Inicio (FR-015, FR-041): la fila trae Ministerio, Célula y la marca de formación; el contador cuenta las pendientes', async () => {
     const id = await persona('bandeja');
     const pid = await pendiente(

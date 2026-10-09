@@ -15,7 +15,7 @@ import { calcularEdad } from '../persona/calcular-edad.js';
 import { errorDeValidacion } from '../discipulado/validaciones.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { SolicitudDiscipuladoService } from '../solicitud-discipulado/solicitud-discipulado.service.js';
-import { bloquearPersona, completoEtapa, etapasCompletas, ultimasDeclaraciones, vidaNuevaEnMarcha } from './consultas.js';
+import { bloquearPersona, completoEtapa, estadosPropios, etapasCompletas, ultimasDeclaraciones, vidaNuevaEnMarcha } from './consultas.js';
 
 /**
  * spec 006, Historias 1 y 2 — lado de la Persona (contracts/camino-api.md):
@@ -44,12 +44,13 @@ export class CaminoService {
     });
     if (!persona) throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
 
-    const [vidaNueva, completas, ultimaDeclaracion] = await Promise.all([
+    const [vidaNueva, completas, ultimaDeclaracion, propios] = await Promise.all([
       this.solicitudes.estadoPropio(personaId),
       etapasCompletas(this.prisma, personaId),
       ultimasDeclaraciones(this.prisma, personaId),
+      estadosPropios(this.prisma, personaId),
     ]);
-    const hechos: HechosCamino = { edad: calcularEdad(persona.fechaNacimiento), vidaNueva, completas, ultimaDeclaracion };
+    const hechos: HechosCamino = { edad: calcularEdad(persona.fechaNacimiento), vidaNueva, completas, ultimaDeclaracion, propios };
 
     return {
       etapas: ETAPAS_CAMINO.map((etapa) => estadoDeEtapa(etapa, hechos)),
