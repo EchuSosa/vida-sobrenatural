@@ -278,12 +278,13 @@ export function SedesCliente({
       />
 
       <Sheet open={modalAbierto} onOpenChange={setModalAbierto}>
-        <SheetContent side="right" etiquetaCerrar={tc('cerrarPanel')}>
+        {/* D218: con el campo de WhatsApp el formulario ya no entra en una pantalla baja: el panel scrollea. */}
+        <SheetContent side="right" etiquetaCerrar={tc('cerrarPanel')} className="overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Crear Sede</SheetTitle>
             <SheetDescription>Se agrega activa; podés editarla después desde su detalle.</SheetDescription>
           </SheetHeader>
-          <div className="px-4">
+          <div className="px-4 pb-4">
             <FormularioSede
               valoresIniciales={VALORES_SEDE_VACIOS}
               onGuardar={crearSede}
