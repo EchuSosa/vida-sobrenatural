@@ -127,6 +127,7 @@ jobs:
           CODIGO_INGRESO_SECRET="test-codigo"
           WEB_URL="http://localhost:3001"
           TAREAS_PROGRAMADAS="false"
+          GEOCODIFICADOR="falso"
           EOF
 
       - name: Build de shared-types
@@ -203,6 +204,7 @@ jobs:
           CODIGO_INGRESO_SECRET="e2e-codigo"
           WEB_URL="http://localhost:3001"
           TAREAS_PROGRAMADAS="false"
+          GEOCODIFICADOR="falso"
           EOF
 
       - name: Build de shared-types

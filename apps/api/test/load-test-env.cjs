@@ -12,3 +12,7 @@ const { verificarDestinoDeTest } = require('../../../scripts/destino-de-test.cjs
 
 cargarEntornoDeTest();
 verificarDestinoDeTest(process.env.STORAGE_DIR, 'STORAGE_DIR');
+
+// spec 014 (D222): la integración nunca sale a la red a ubicar direcciones —
+// usa el geocodificador falso aunque `.env.test` no lo diga.
+process.env.GEOCODIFICADOR = 'falso';

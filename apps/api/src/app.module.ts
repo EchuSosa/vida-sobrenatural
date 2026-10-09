@@ -24,6 +24,7 @@ import { TareasProgramadasModule } from './tareas-programadas/tareas-programadas
 import { InicioModule } from './inicio/inicio.module.js';
 import { ComentarioModule } from './comentario/comentario.module.js';
 import { CursoModule } from './curso/curso.module.js';
+import { GrupoExtensionModule } from './grupo-extension/grupo-extension.module.js';
 
 @Module({
   imports: [PrismaModule, AuthModule, SedeModule, PersonaModule, CambioDeRolModule, PalabraProfeticaModule, LibroModule, DiscipuladoModule, SolicitudDiscipuladoModule, DisponibilidadModule,
@@ -32,6 +33,8 @@ import { CursoModule } from './curso/curso.module.js';
     // …y uno por spec, cada uno dueño de su carpeta.
     CaminoModule, CodigoIngresoModule, VidaDeServicioModule, MinisterioModule, BautismoModule, EventoModule,
     TareasProgramadasModule, InicioModule, ComentarioModule, CursoModule,
+    // spec 014 (después del lote 0: registra su propio módulo).
+    GrupoExtensionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
