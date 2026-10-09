@@ -6,12 +6,11 @@ import { CATALOGO_AVISOS, NOMBRES_EVENTOS_AVISO, type SpecDelAviso } from '@vida
 /**
  * spec 012, lote F (specs/IMPLEMENTACION.md §4: "verificar, al cierre, que
  * cada evento del catálogo tenga quien lo emita") — cada evento aparece como
- * `nombre: '<evento>'` en algún archivo de `apps/api/src`. Las specs que
- * todavía no están en `main` se listan aparte: cuando entren con sus
- * emisiones, el test sigue pasando; si una entra SIN emitir, el test de la
- * lista de abajo lo marca al sacarla.
+ * `nombre: '<evento>'` en algún archivo de `apps/api/src`. Desde que entraron
+ * la 008 y la 010, todas las specs del catálogo están en `main`: la lista de
+ * pendientes queda vacía (una spec nueva que llegue sin emitir, se anota acá).
  */
-const SPECS_TODAVIA_NO_EN_MAIN: readonly SpecDelAviso[] = ['010'];
+const SPECS_TODAVIA_NO_EN_MAIN: readonly SpecDelAviso[] = [];
 
 const src = resolve(dirname(fileURLToPath(import.meta.url)), '../../src');
 function archivos(dir: string): string[] {
