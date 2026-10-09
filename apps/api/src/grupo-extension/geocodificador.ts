@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import type { Coordenadas } from '@vida-sobrenatural/shared-types';
+import { distanciaKm, type Coordenadas } from '@vida-sobrenatural/shared-types';
 
 /**
  * spec 014, D222 (research #1): convertir una dirección en coordenadas.
@@ -51,22 +51,53 @@ function coordenadasValidas(lat: number, lon: number): Coordenadas | null {
   return { latitud: lat, longitud: lon };
 }
 
-/** apis.datos.gob.ar/georef/api/direcciones (con provincia y departamento como pista). */
+/** Quita "nro", "n°", etc.: Georef entiende "64 820", "64 e/ 11 y 12" y "64 y 11" tal como se escriben en La Plata. */
+export function limpiarParaGeoref(texto: string): string {
+  return ` ${texto.trim().replace(/\s+/g, ' ')} `
+    .replace(/\s(nro\.?|n°|nº|n\.|num\.?|número|numero)\s*/gi, ' ')
+    .replace(/,?\s*la plata\s*$/i, '')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+/** El centro del casco de La Plata: desempata cuando una calle numerada existe en varias localidades del partido. */
+function centroDeReferencia(): Coordenadas {
+  const [lat, lon] = (process.env.GEOCODIFICADOR_CENTRO ?? '-34.9214,-57.9545').split(',').map(Number);
+  return { latitud: lat, longitud: lon };
+}
+
+/**
+ * apis.datos.gob.ar/georef/api/direcciones, con provincia y departamento como
+ * pista. En el partido de La Plata una misma calle numerada existe en varias
+ * localidades (la 7 del casco es "Avenida 7"; hay una "Calle 7" en Villa
+ * Elisa): se piden varios candidatos, también como avenida, y gana el más
+ * cercano al centro de referencia (`GEOCODIFICADOR_CENTRO`).
+ */
 export class GeorefGeocodificador implements Geocodificador {
   constructor(
     private readonly provincia = process.env.GEOCODIFICADOR_PROVINCIA ?? 'Buenos Aires',
     private readonly departamento = process.env.GEOCODIFICADOR_DEPARTAMENTO ?? 'La Plata',
+    private readonly centro: Coordenadas = centroDeReferencia(),
   ) {}
 
   async ubicar(consulta: string): Promise<Coordenadas | null> {
-    const params = new URLSearchParams({ direccion: normalizarDireccionLaPlata(consulta), provincia: this.provincia, max: '1' });
-    if (this.departamento) params.set('departamento', this.departamento);
-    const datos = (await getJson(`https://apis.datos.gob.ar/georef/api/direcciones?${params}`)) as {
-      direcciones?: Array<{ ubicacion?: { lat?: number | null; lon?: number | null } }>;
-    };
-    const u = datos.direcciones?.[0]?.ubicacion;
-    if (!u || u.lat == null || u.lon == null) return null;
-    return coordenadasValidas(u.lat, u.lon);
+    const texto = limpiarParaGeoref(consulta);
+    const variantes = /^\d/.test(texto) ? [texto, `avenida ${texto}`] : [texto];
+    const candidatos: Coordenadas[] = [];
+    for (const direccion of variantes) {
+      const params = new URLSearchParams({ direccion, provincia: this.provincia, max: '10' });
+      if (this.departamento) params.set('departamento', this.departamento);
+      const datos = (await getJson(`https://apis.datos.gob.ar/georef/api/direcciones?${params}`)) as {
+        direcciones?: Array<{ ubicacion?: { lat?: number | null; lon?: number | null } }>;
+      };
+      for (const d of datos.direcciones ?? []) {
+        const u = d.ubicacion;
+        const c = u && u.lat != null && u.lon != null ? coordenadasValidas(u.lat, u.lon) : null;
+        if (c) candidatos.push(c);
+      }
+    }
+    if (candidatos.length === 0) return null;
+    return candidatos.reduce((mejor, c) => (distanciaKm(c, this.centro) < distanciaKm(mejor, this.centro) ? c : mejor));
   }
 }
 

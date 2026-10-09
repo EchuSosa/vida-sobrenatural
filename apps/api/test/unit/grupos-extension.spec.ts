@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals';
 import {
   consultasDeGeocodificacion,
   direccionDelGrupo,
@@ -19,6 +18,7 @@ import {
   GeocodificadorFalso,
   GeorefGeocodificador,
   NominatimGeocodificador,
+  limpiarParaGeoref,
   normalizarDireccionLaPlata,
   ubicarPrimera,
 } from '../../src/grupo-extension/geocodificador.js';
@@ -76,8 +76,8 @@ describe('Grupos de Extensión — reglas', () => {
     expect(direccionDelGrupo(lugar)).toBe('64 nro 820 e/ 11 y 12');
     expect(direccionDelGrupo({ ...lugar, numero: null })).toBe('64 e/ 11 y 12');
     expect(direccionDelGrupo({ ...lugar, enLaIglesia: true, direccionSede: 'Calle 7 1200' })).toBe('Calle 7 1200');
-    expect(consultasDeGeocodificacion(lugar)).toEqual(['calle 64 820', 'calle 64 y calle 11', 'calle 64 y calle 12']);
-    expect(consultasDeGeocodificacion({ ...lugar, calle: 'Diagonal 74', numero: null })).toEqual(['Diagonal 74 y calle 11', 'Diagonal 74 y calle 12']);
+    expect(consultasDeGeocodificacion(lugar)).toEqual(['64 820', '64 e/ 11 y 12', '64 y 11']);
+    expect(consultasDeGeocodificacion({ ...lugar, calle: 'Diagonal 74', numero: null })).toEqual(['Diagonal 74 e/ 11 y 12', 'Diagonal 74 y 11']);
     expect(enlaceComoLlegar('64 nro 820 e/ 11 y 12')).toBe(
       'https://www.google.com/maps/search/?api=1&query=64%20nro%20820%20e%2F%2011%20y%2012%2C%20La%20Plata%2C%20Buenos%20Aires',
     );
@@ -136,13 +136,27 @@ describe('Geocodificador (D222)', () => {
     expect(normalizarDireccionLaPlata('Diagonal 74 1500')).toBe('Diagonal 74 1500');
   });
 
-  it('Georef: consulta con provincia y departamento y devuelve las coordenadas', async () => {
-    const fn = responder({ direcciones: [{ ubicacion: { lat: -34.92, lon: -57.95 } }] });
-    await expect(new GeorefGeocodificador('Buenos Aires', 'La Plata').ubicar('7 nro 1200')).resolves.toEqual({ latitud: -34.92, longitud: -57.95 });
-    const url = String(fn.mock.calls[0][0 as never]);
-    expect(url).toContain('apis.datos.gob.ar/georef/api/direcciones');
-    expect(url).toContain('direccion=calle+7+1200');
-    expect(url).toContain('departamento=La+Plata');
+  it('Georef: manda el texto como se escribe en La Plata, también como avenida, y gana el candidato más cercano al centro', async () => {
+    const fn = jest.fn(async (url: string) => ({
+      ok: true,
+      status: 200,
+      json: async () =>
+        url.includes('avenida')
+          ? { direcciones: [{ ubicacion: { lat: -34.9185, lon: -57.9448 } }] } // Avenida 7 del casco
+          : { direcciones: [{ ubicacion: { lat: -34.8534, lon: -58.0836 } }] }, // Calle 7 de Villa Elisa
+    }));
+    globalThis.fetch = fn as unknown as typeof fetch;
+    await expect(new GeorefGeocodificador('Buenos Aires', 'La Plata', { latitud: -34.9214, longitud: -57.9545 }).ubicar('7 nro 1200, La Plata')).resolves.toEqual({ latitud: -34.9185, longitud: -57.9448 });
+    const urls = fn.mock.calls.map((c) => String(c[0]));
+    expect(urls[0]).toContain('apis.datos.gob.ar/georef/api/direcciones');
+    expect(urls[0]).toContain('direccion=7+1200&');
+    expect(urls[0]).toContain('departamento=La+Plata');
+    expect(urls[1]).toContain('direccion=avenida+7+1200&');
+  });
+
+  it('limpia la dirección para Georef sin cambiar cómo se escribe', () => {
+    expect(limpiarParaGeoref('64 nro 820')).toBe('64 820');
+    expect(limpiarParaGeoref('64 e/ 11 y 12, La Plata')).toBe('64 e/ 11 y 12');
   });
 
   it('Georef sin resultado → null; coordenadas fuera de Argentina → null', async () => {

@@ -111,11 +111,6 @@ export interface LugarGrupo {
   direccionSede: string | null;
 }
 
-/** Una calle de La Plata escrita como número ("64") se lee "calle 64"; un nombre queda igual. */
-function conCalle(calle: string): string {
-  return /^\d+\s*(bis)?$/i.test(calle.trim()) ? `calle ${calle.trim()}` : calle.trim();
-}
-
 /** "64 nro 820 e/ 11 y 12", "64 e/ 11 y 12", o la dirección de la Sede. */
 export function direccionDelGrupo(l: LugarGrupo): string {
   if (l.enLaIglesia) return l.direccionSede ?? '';
@@ -126,17 +121,20 @@ export function direccionDelGrupo(l: LugarGrupo): string {
 }
 
 /**
- * D222: las consultas para ubicar el lugar, de la más precisa a la menos:
- * calle y número; si no hay número, la esquina con la primera entre calle.
+ * D222: las consultas para ubicar el lugar, de la más precisa a la menos,
+ * escritas como en La Plata (Georef las entiende así, research #1): calle y
+ * número; si no hay número, calle entre calles; y por último la esquina.
  */
 export function consultasDeGeocodificacion(l: LugarGrupo): string[] {
   if (l.enLaIglesia) return l.direccionSede ? [l.direccionSede] : [];
   const calle = (l.calle ?? '').trim();
   if (!calle) return [];
+  const e1 = l.entreCalle1?.trim();
+  const e2 = l.entreCalle2?.trim();
   const consultas: string[] = [];
-  if (l.numero?.trim()) consultas.push(`${conCalle(calle)} ${l.numero.trim()}`);
-  if (l.entreCalle1?.trim()) consultas.push(`${conCalle(calle)} y ${conCalle(l.entreCalle1)}`);
-  if (l.entreCalle2?.trim()) consultas.push(`${conCalle(calle)} y ${conCalle(l.entreCalle2)}`);
+  if (l.numero?.trim()) consultas.push(`${calle} ${l.numero.trim()}`);
+  if (e1 && e2) consultas.push(`${calle} e/ ${e1} y ${e2}`);
+  if (e1) consultas.push(`${calle} y ${e1}`);
   return consultas;
 }
 
@@ -252,7 +250,8 @@ export interface GrupoExtensionDetalle {
   ubicado: boolean;
   activo: boolean;
   genero: GeneroGrupoExtension | null;
-  lideres: PersonaContactoGex[];
+  /** Con su género: el formulario muestra el género del Grupo que resulta (D221). */
+  lideres: Array<PersonaContactoGex & { genero: Genero }>;
   integrantes: IntegranteGex[];
   pendientes: SolicitudGexParaLider[];
 }

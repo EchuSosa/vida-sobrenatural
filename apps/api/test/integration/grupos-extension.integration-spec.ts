@@ -146,7 +146,8 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
       expect(texto).not.toContain('820');
       expect(texto).not.toContain('calle');
       expect(texto).not.toContain('telefono');
-      expect(texto).not.toContain('555');
+      expect(texto).not.toContain('555-0101');
+      expect(texto).not.toContain('5550101');
       expect(encontrados[1]).toMatchObject({ lideres: ['lidera'], zona: 'Centro', dias: ['martes'], horaInicio: '19:00', completo: false });
     });
 

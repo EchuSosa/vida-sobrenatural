@@ -96,7 +96,7 @@ export class GruposExtensionService {
       ubicado: g.latitud !== null,
       activo: g.activo,
       genero: generoDe(g),
-      lideres: g.lideres.map((l) => contactoDe(l.persona)),
+      lideres: g.lideres.map((l) => ({ ...contactoDe(l.persona), genero: l.persona.genero })),
       ...(await pendientesEIntegrantes(this.prisma, g.id)),
     };
   }
