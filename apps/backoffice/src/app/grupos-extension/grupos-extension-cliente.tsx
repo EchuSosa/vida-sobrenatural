@@ -7,7 +7,7 @@ import { CircleAlert, Plus } from 'lucide-react';
 import type { GrupoExtensionResumen } from '@vida-sobrenatural/shared-types';
 import { Button, ButtonLink, EstadoActivoBadge, TablaDatos, textoHorario, type ColumnaTabla } from '@vida-sobrenatural/ui';
 
-/** spec 014 (D220): la lista de Grupos de Extensión, con su género calculado, cupo y pedidos esperando (texto + ícono, D81). */
+/** spec 014 (D221): la lista de Grupos de Extensión, con su género calculado, cupo y pedidos esperando (texto + ícono, D81). */
 export function GruposExtensionCliente({ grupos, filtro, puedeGestionar }: { grupos: GrupoExtensionResumen[]; filtro: 'activos' | 'todos'; puedeGestionar: boolean }) {
   const t = useTranslations('gruposExtension');
   const router = useRouter();

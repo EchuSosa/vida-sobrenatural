@@ -48,11 +48,11 @@ export interface InicialGrupo {
 const CLASE_SELECT = 'h-10 w-full rounded-md border border-input bg-transparent px-2 text-sm aria-invalid:border-destructive dark:bg-input/30 sm:w-fit';
 
 /**
- * spec 014 (D220–D222): crear o editar un Grupo de Extensión. Valida con las
+ * spec 014 (D221–D223): crear o editar un Grupo de Extensión. Valida con las
  * mismas reglas que la API (`validarDatosGrupo`), por campo, con resumen y
  * foco (H-50); el envío está protegido de la reentrada (H-57). El género no se
- * carga: se muestra el que sale de los líderes elegidos (D221). Si la
- * dirección no se pudo ubicar, se guarda igual y se avisa (D222).
+ * carga: se muestra el que sale de los líderes elegidos (D222). Si la
+ * dirección no se pudo ubicar, se guarda igual y se avisa (D223).
  */
 export function FormularioGrupoExtension({ inicial, sedes, apiToken }: { inicial: InicialGrupo; sedes: Array<{ id: string; nombre: string }>; apiToken: string }) {
   const t = useTranslations('gruposExtension.form');

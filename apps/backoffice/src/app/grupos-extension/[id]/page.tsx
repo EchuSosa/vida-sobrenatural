@@ -8,7 +8,7 @@ import { requerirPermiso, tienePermisoSesion } from '../../../auth';
 import { AgregarIntegrante, BotonActivoGrupo, ResolverPedido, QuitarIntegrante } from './acciones';
 
 /**
- * spec 014 (D220, D226): el detalle de un Grupo de Extensión — datos, líderes,
+ * spec 014 (D221, D227): el detalle de un Grupo de Extensión — datos, líderes,
  * pedidos esperando e integrantes, con su contacto. El Admin acepta o
  * rechaza pedidos, agrega o quita personas, edita e inactiva; el Pastor solo ve.
  */

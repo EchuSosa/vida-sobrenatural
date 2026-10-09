@@ -8,7 +8,7 @@ const ICONO = 'text-primary';
 const ICONO_NEUTRO = 'text-muted-foreground';
 
 /**
- * spec 014 (D223): la card "Mi grupo de extensión" de Mi camino, aparte de las
+ * spec 014 (D224): la card "Mi grupo de extensión" de Mi camino, aparte de las
  * cuatro etapas. Dice en qué está la persona (sin grupo, pedido en espera,
  * integrante), con texto + ícono (D81), y lleva a `/mi-camino/grupo-extension`.
  * Si la API falla, lo atrapa el `error.tsx` de Mi camino.

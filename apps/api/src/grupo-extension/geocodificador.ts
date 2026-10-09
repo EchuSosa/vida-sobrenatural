@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { distanciaKm, type Coordenadas } from '@vida-sobrenatural/shared-types';
 
 /**
- * spec 014, D222 (research #1): convertir una dirección en coordenadas.
+ * spec 014, D223 (research #1): convertir una dirección en coordenadas.
  *
  * Una interfaz y tres implementaciones: Georef (servicio oficial argentino,
  * entiende calles numeradas y esquinas), Nominatim (OpenStreetMap, de
@@ -10,7 +10,7 @@ import { distanciaKm, type Coordenadas } from '@vida-sobrenatural/shared-types';
  * para tests y CI (sin red). `GEOCODIFICADOR=falso` (o `NODE_ENV=test`) elige
  * la falsa.
  *
- * PRIVACIDAD (D223): la consulta puede ser la dirección de la casa de una
+ * PRIVACIDAD (D224): la consulta puede ser la dirección de la casa de una
  * persona. Nada de acá la loguea: solo se registra qué servicio respondió y
  * si encontró algo.
  */
@@ -140,7 +140,7 @@ export class CadenaGeocodificadores implements Geocodificador {
           return resultado;
         }
       } catch (error) {
-        // Sin la consulta (D223): solo qué servicio falló y por qué.
+        // Sin la consulta (D224): solo qué servicio falló y por qué.
         this.logger.warn({ servicio: nombre, error: error instanceof Error ? error.message : 'desconocido' });
       }
     }
@@ -195,7 +195,7 @@ export async function ubicarPrimera(geo: Geocodificador, consultas: readonly str
       const resultado = await geo.ubicar(consulta);
       if (resultado) return resultado;
     } catch {
-      // Al guardar un Grupo, que el servicio no responda es lo mismo que no encontrarla (D222).
+      // Al guardar un Grupo, que el servicio no responda es lo mismo que no encontrarla (D223).
     }
   }
   return null;

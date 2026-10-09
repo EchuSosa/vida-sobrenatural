@@ -62,7 +62,7 @@ CREATE OR REPLACE VIEW "solicitudes_bandeja" AS
     FROM "pagos" g
     JOIN "inscripciones_evento" ie ON ie."id" = g."inscripcionEventoId"
   UNION ALL
-  -- 014: Solicitud para sumarse a un Grupo de Extensión (D224, D226). La
+  -- 014: Solicitud para sumarse a un Grupo de Extensión (D225, D227). La
   -- `aceptada` es la pertenencia: no espera nada del Admin.
   SELECT 'grupo_extension', x."id", x."personaId", x."estado"::text,
          (x."estado" = 'pendiente'),

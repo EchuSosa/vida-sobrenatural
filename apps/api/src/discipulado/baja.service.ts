@@ -58,7 +58,7 @@ export class BajaService {
           data: { estado: 'finalizado', motivoCierre: 'abandonado', cerradoEn: ahora, cerradoPorId: adminId },
           select: { id: true },
         });
-        await retirarReasignacionPendiente(tx, grupoId);
+        await retirarReasignacionPendiente(tx, grupoId, this.notificaciones);
       }
       await this.notificaciones.emitir(tx, {
         nombre: 'discipulado.baja_confirmada',

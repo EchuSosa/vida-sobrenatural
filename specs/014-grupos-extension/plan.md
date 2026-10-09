@@ -4,7 +4,7 @@
 
 ## Summary
 
-Grupos de Extensión entra al MVP (D219). El Admin carga los Grupos en el backoffice (lugar "En la
+Grupos de Extensión entra al MVP (D220). El Admin carga los Grupos en el backoffice (lugar "En la
 iglesia" o dirección al estilo de La Plata, geocodificada al guardar por un `Geocodificador`
 configurable: Georef → Nominatim). La persona, desde la card "Mi grupo de extensión" de Mi camino,
 busca por dirección o ubicación (que no se guarda) y ve los Grupos de su género y edad ordenados por
@@ -28,7 +28,7 @@ compatibles, sin PostGIS.
 
 | Principio | Cómo se cumple | Estado |
 |---|---|---|
-| I. Spec-First | Decisiones de Echu (D219–D227) + Assumptions + Preguntas para Echu. | ✅ |
+| I. Spec-First | Decisiones de Echu (D220–D228) + Assumptions + Preguntas para Echu. | ✅ |
 | II. Terminología | Grupo de Extensión, Líder de extensión, Solicitud (patrón común de docs/04). | ✅ |
 | III. Soft delete | Grupo con `activo`; Solicitudes nunca se borran (estados terminales). Líderes: fila con `hasta`. | ✅ |
 | IV. Simplicidad | Sin PostGIS ni mapa embebido; distancia en memoria; sin tabla de miembros. | ✅ |
@@ -74,11 +74,11 @@ apps/backoffice/src/app/solicitudes/grupo-extension/[id]/
 5. Backoffice › `/grupos-extension/nuevo` y `/grupos-extension/[id]` (formulario + detalle con integrantes y pedidos).
 6. Backoffice › `/solicitudes/grupo-extension/[id]` (detalle desde la bandeja).
 
-## Decisiones nuevas (D219–D227 en `docs/05-decisiones.md`)
+## Decisiones nuevas (D220–D228 en `docs/05-decisiones.md`)
 
-D219 GEX al MVP y el flujo; D220 Grupo y lugar; D221 género calculado; D222 geocodificación;
-D223 búsqueda y privacidad; D224 pedido y pertenencia; D225 el líder en la web; D226 Admin destraba y
-bandeja; D227 avisos.
+D220 GEX al MVP y el flujo; D221 Grupo y lugar; D222 género calculado; D223 geocodificación;
+D224 búsqueda y privacidad; D225 pedido y pertenencia; D226 el líder en la web; D227 Admin destraba y
+bandeja; D228 avisos.
 
 ## Cambios a docs
 

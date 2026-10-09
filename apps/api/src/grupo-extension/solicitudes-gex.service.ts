@@ -37,7 +37,7 @@ import {
 
 } from './consultas.js';
 
-/** Quién resuelve un pedido: un líder del Grupo (web app, D225) o el Admin (backoffice, D226). */
+/** Quién resuelve un pedido: un líder del Grupo (web app, D226) o el Admin (backoffice, D227). */
 export type ActorGex = { tipo: 'lider'; personaId: string } | { tipo: 'admin'; personaId: string };
 
 export interface BusquedaGex {
@@ -49,8 +49,8 @@ export interface BusquedaGex {
 
 /**
  * spec 014 — el pedido para sumarse a un Grupo de Extensión, de punta a punta
- * (D223–D227): buscar, pedir, retirar, aceptar, rechazar, agregar y quitar.
- * La pertenencia ES la Solicitud `aceptada` (D224). Cada cambio que avisa
+ * (D224–D228): buscar, pedir, retirar, aceptar, rechazar, agregar y quitar.
+ * La pertenencia ES la Solicitud `aceptada` (D225). Cada cambio que avisa
  * emite DENTRO de su transacción (D197) y empuja los mails después.
  */
 @Injectable()
@@ -124,7 +124,7 @@ export class SolicitudesGexService {
   }
 
   /**
-   * POST /grupos-extension/buscar (D223). La dirección o la ubicación de la
+   * POST /grupos-extension/buscar (D224). La dirección o la ubicación de la
    * persona se usa en memoria para calcular distancias y se descarta: no se
    * guarda ni se loguea (FR-006). La respuesta no trae la dirección exacta ni
    * el contacto de nadie (FR-007).
@@ -178,7 +178,7 @@ export class SolicitudesGexService {
     return coordenadas;
   }
 
-  /** POST /grupos-extension/:id/solicitudes/me (D224): un pedido pendiente; avisa a cada líder. */
+  /** POST /grupos-extension/:id/solicitudes/me (D225): un pedido pendiente; avisa a cada líder. */
   async pedir(personaId: string, grupoId: string): Promise<{ id: string }> {
     const resultado = await this.prisma.$transaction(async (tx) => {
       await bloquearPersona(tx, personaId);
@@ -218,7 +218,7 @@ export class SolicitudesGexService {
     return { id: solicitudId };
   }
 
-  // --- Líder (web app, D225) ---
+  // --- Líder (web app, D226) ---
 
   /** GET /grupos-extension/liderados: los Grupos activos que lidera, con pedidos e integrantes y su contacto. */
   async liderados(personaId: string): Promise<GrupoLiderado[]> {
@@ -291,7 +291,7 @@ export class SolicitudesGexService {
     return { id: solicitudId };
   }
 
-  // --- Admin (D226) ---
+  // --- Admin (D227) ---
 
   /** POST /grupos-extension/:id/integrantes: el Admin suma a una Persona directamente (sin chequeo de género/edad: es su criterio). */
   async agregar(grupoId: string, personaId: string, adminId: string): Promise<{ id: string }> {
@@ -350,7 +350,7 @@ export class SolicitudesGexService {
     return { id: solicitudId };
   }
 
-  /** GET /solicitudes-grupo-extension/:id (bandeja, D226). */
+  /** GET /solicitudes-grupo-extension/:id (bandeja, D227). */
   async detalle(solicitudId: string): Promise<SolicitudGrupoExtensionDetalle> {
     const s = await this.prisma.solicitudGrupoExtension.findUnique({
       where: { id: solicitudId },

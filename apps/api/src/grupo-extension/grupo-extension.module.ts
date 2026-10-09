@@ -10,10 +10,10 @@ import { SolicitudesGexService } from './solicitudes-gex.service.js';
 import { FuenteGrupoExtension } from './fuente-bandeja.js';
 
 /**
- * spec 014 — Grupos de Extensión (D219–D227). El controller de la persona va
+ * spec 014 — Grupos de Extensión (D220–D228). El controller de la persona va
  * PRIMERO: `/grupos-extension/me`, `/buscar` y `/liderados` tienen que
  * ganarle a `/grupos-extension/:id`. El geocodificador es un provider
- * (`GEOCODIFICADOR`) para que los tests lo reemplacen (D222).
+ * (`GEOCODIFICADOR`) para que los tests lo reemplacen (D223).
  */
 @Module({
   controllers: [GruposPersonaController, GruposAdminController],

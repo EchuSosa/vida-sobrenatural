@@ -10,7 +10,7 @@
 WhatsApp (la persona le escribe al Admin su edad, género y zona; el Admin le manda un listado; la
 persona elige y el Admin le avisa a la líder, que la contacta). El Admin es solo intermediario y es
 un cuello de botella: la app lo automatiza. Decisiones de Echu (1 a 7 del pedido) ya tomadas; quedan
-en `docs/05-decisiones.md` como D219–D227.
+en `docs/05-decisiones.md` como D220–D228.
 
 **Fuentes**: `docs/08-roadmap-producto.md` (sección Grupos de Extensión, relato del 8/10/2026),
 `docs/04-dominio-entidades.md` (patrón común de Solicitudes), `docs/15-guia-ux-ui.md`,

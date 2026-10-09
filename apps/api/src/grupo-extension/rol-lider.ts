@@ -4,7 +4,7 @@ import { AppException } from '../common/errors/app-exception.js';
 import { registrarCambioDeRol } from '../cambio-de-rol/registrar-cambio-de-rol.js';
 
 /**
- * spec 014, D225: el rol `lider_extension` lo da y lo quita el sistema al
+ * spec 014, D226: el rol `lider_extension` lo da y lo quita el sistema al
  * asignar líderes desde el backoffice — siempre con su CambioDeRol (FR-022 de
  * la 005), en la misma transacción, y nunca a un menor (D133: la garantía
  * está acá, venga el pedido por donde venga).

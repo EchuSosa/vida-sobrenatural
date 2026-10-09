@@ -8,7 +8,7 @@ import { EMAILS_014, GRUPOS_014, entrarConTema, prepararSinGrupo } from './helpe
  * la persona busca por dirección y ve solo los grupos de su género y edad por
  * cercanía (sin dirección exacta), pide sumarse, la líder lo ve en "Mi grupo"
  * con "Escribir por WhatsApp" y acepta, y la persona ve su grupo con la
- * dirección y "Cómo llegar". Corre con el geocodificador falso (D222), que
+ * dirección y "Cómo llegar". Corre con el geocodificador falso (D223), que
  * ubica "7 nro 1200" en el centro.
  */
 
@@ -59,7 +59,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       expect(deE2e).toContain(GRUPOS_014.lejos);
       expect(deE2e).not.toContain(GRUPOS_014.varones);
       expect(deE2e.indexOf(GRUPOS_014.cerca)).toBeLessThan(deE2e.indexOf(GRUPOS_014.lejos));
-      // D223: zona y distancia, nunca la dirección exacta.
+      // D224: zona y distancia, nunca la dirección exacta.
       const tarjeta = resultados.getByRole('article', { name: GRUPOS_014.cerca });
       await expect(tarjeta).toContainText('Zona: Centro');
       await expect(tarjeta).toContainText(/A \d+,\d km/);

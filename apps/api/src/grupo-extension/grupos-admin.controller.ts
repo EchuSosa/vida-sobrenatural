@@ -10,7 +10,7 @@ import { SolicitudesGexService } from './solicitudes-gex.service.js';
 import { AgregarIntegranteDto, DatosGrupoExtensionDto, RechazarSolicitudGexDto } from './dto/grupo-extension.dto.js';
 
 /**
- * spec 014 (D220–D222, D226; contracts/api.md): Backoffice › Grupos de
+ * spec 014 (D221–D223, D227; contracts/api.md): Backoffice › Grupos de
  * extensión. El Pastor ve (`grupos_extension.ver`), el Admin gestiona. Quien
  * actúa queda registrado: sin Persona en la sesión no se hace (H-140).
  * Va DESPUÉS del controller de la persona: `/grupos-extension/me` y
@@ -78,7 +78,7 @@ export class GruposAdminController {
 
   @Post('grupos-extension/:id/integrantes')
   @RequierePermiso('grupos_extension.gestionar')
-  @ApiCreatedResponse({ description: 'spec 014, D226: suma a una Persona directamente.' })
+  @ApiCreatedResponse({ description: 'spec 014, D227: suma a una Persona directamente.' })
   agregar(@Param('id') id: string, @Body() dto: AgregarIntegranteDto, @Req() request: AuthenticatedRequest) {
     return this.solicitudes.agregar(id, dto.personaId, personaDeSesion(request));
   }

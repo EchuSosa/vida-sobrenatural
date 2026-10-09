@@ -13,6 +13,8 @@ export const DATOS_EJEMPLO: { [N in NombreEventoAviso]: DatosDe<N> } = {
   'discipulado.baja_confirmada': { grupoId: 'gru-1', inscripcionId: 'ins-1' },
   'discipulado.propuesta_declinada': { propuestaId: 'pro-1' },
   'discipulado.propuesta_retirada': { propuestaId: 'pro-1', retiradaPor: 'admin' },
+  'discipulado.reasignacion_retirada': { propuestaId: 'pro-1', grupoId: 'gru-1' },
+  'discipulado.propuesta_nueva_retirada': { propuestaId: 'pro-1', solicitudId: 'sol-1' },
   'discipulado.finalizacion_propuesta': { grupoId: 'gru-1' },
   'discipulado.baja_propuesta': { grupoId: 'gru-1', inscripcionId: 'ins-1' },
   'persona.cuenta_activada': { personaId: 'per-1' },
@@ -90,7 +92,7 @@ export const IMPORTANTES_DOCS_16: readonly NombreEventoAviso[] = [
   'discipulado.propuesta_nueva',
   // Cancelación de un Evento (D193)
   'evento.cancelado',
-  // spec 014 (D227): el pedido al líder y la respuesta a la persona
+  // spec 014 (D228): el pedido al líder y la respuesta a la persona
   'grupo_extension.solicitud_nueva',
   'grupo_extension.solicitud_aceptada',
   'grupo_extension.solicitud_rechazada',

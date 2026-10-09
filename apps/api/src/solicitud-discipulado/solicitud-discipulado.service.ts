@@ -383,8 +383,14 @@ export class SolicitudDiscipuladoService {
     });
   }
 
-  private emitirRetirada(tx: Tx, propuestaId: string, retiradaPor: 'admin' | 'persona') {
-    return this.notificaciones.emitir(tx, { nombre: 'discipulado.propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId, retiradaPor } });
+  /** Al Admin (solo log, D201) y al Discipulador que la tenía: ya no hace falta que la responda (D219). */
+  private async emitirRetirada(tx: Tx, propuesta: PropuestaRetirada, retiradaPor: 'admin' | 'persona') {
+    await this.notificaciones.emitir(tx, { nombre: 'discipulado.propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId: propuesta.id, retiradaPor } });
+    await this.notificaciones.emitir(tx, {
+      nombre: 'discipulado.propuesta_nueva_retirada',
+      a: { tipo: 'discipulador', personaId: propuesta.discipuladorId },
+      datos: { propuestaId: propuesta.id, solicitudId: propuesta.solicitudId },
+    });
   }
 }
 
@@ -446,18 +452,24 @@ async function bloquearAbiertaDe(tx: Tx, personaId: string): Promise<SolicitudBl
   return filas[0];
 }
 
-/** Si hay una Propuesta `pendiente` de la Solicitud, la pasa a `retirada`. Devuelve su id, o null. */
-async function retirarPropuestaPendiente(tx: Tx, solicitudId: string, retiradaPor: 'admin' | 'persona'): Promise<string | null> {
+interface PropuestaRetirada {
+  id: string;
+  solicitudId: string;
+  discipuladorId: string;
+}
+
+/** Si hay una Propuesta `pendiente` de la Solicitud, la pasa a `retirada`. La devuelve, o null. */
+async function retirarPropuestaPendiente(tx: Tx, solicitudId: string, retiradaPor: 'admin' | 'persona'): Promise<PropuestaRetirada | null> {
   const pendiente = await tx.propuestaDiscipulado.findFirst({
     where: { solicitudId, estado: 'pendiente' },
-    select: { id: true },
+    select: { id: true, discipuladorId: true },
   });
   if (!pendiente) return null;
   await tx.propuestaDiscipulado.update({
     where: { id: pendiente.id },
     data: { estado: 'retirada', retiradaPor, respondidaEn: new Date() },
   });
-  return pendiente.id;
+  return { id: pendiente.id, solicitudId, discipuladorId: pendiente.discipuladorId };
 }
 
 async function nombresDe(db: PrismaService, ids: Array<string | null>): Promise<Map<string, PersonaBreve>> {

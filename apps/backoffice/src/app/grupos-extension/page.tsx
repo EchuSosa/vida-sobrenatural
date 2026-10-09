@@ -3,7 +3,7 @@ import { requerirPermiso, tienePermisoSesion } from '../../auth';
 import { GruposExtensionCliente } from './grupos-extension-cliente';
 
 /**
- * spec 014 (D220): Backoffice › Grupos de extensión. Server Component:
+ * spec 014 (D221): Backoffice › Grupos de extensión. Server Component:
  * `loading.tsx`/`error.tsx` dan cargando y error; el filtro activos/todos va en
  * la URL. El Pastor ve sin acciones (D142).
  */

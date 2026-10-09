@@ -24,7 +24,7 @@
 | creadoPorId | text | |
 | createdAt / updatedAt | | |
 
-El género no se guarda: se calcula de los líderes vigentes (D221).
+El género no se guarda: se calcula de los líderes vigentes (D222).
 
 ## LiderGrupoExtension (`lideres_grupo_extension`)
 

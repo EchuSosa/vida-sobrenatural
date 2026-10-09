@@ -37,9 +37,9 @@ export interface PersonaElegibleGex {
 }
 
 /**
- * spec 014, D220–D222, D225: los Grupos de Extensión desde el backoffice.
+ * spec 014, D221–D223, D226: los Grupos de Extensión desde el backoffice.
  * La dirección se ubica ANTES de abrir la transacción (es una llamada de red);
- * si no se ubica, el Grupo se guarda igual, sin coordenadas (D222).
+ * si no se ubica, el Grupo se guarda igual, sin coordenadas (D223).
  */
 @Injectable()
 export class GruposExtensionService {
@@ -205,7 +205,7 @@ export class GruposExtensionService {
 
   // --- Internos ---
 
-  /** D220 + D133: las reglas del formulario (shared-types) y las que miran la base, todas por campo (H-50). */
+  /** D221 + D133: las reglas del formulario (shared-types) y las que miran la base, todas por campo (H-50). */
   private async validar(d: DatosGrupoExtension): Promise<DatosGrupoExtension> {
     // El DTO solo declara qué campos existen: los tipos se revisan acá, y un tipo
     // equivocado cae en el mismo error de campo que un valor inválido.

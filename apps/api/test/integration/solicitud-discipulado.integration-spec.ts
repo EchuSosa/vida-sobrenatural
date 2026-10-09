@@ -228,6 +228,12 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
 
     const retiro = await api.post(`/discipulado/solicitudes/${solicitud.id}/retirar-propuesta`).set('Authorization', `Bearer ${admin}`);
     expect(retiro.status).toBe(200);
+    // D219: al Discipulador le llega que ya no hace falta responder (in-app, sin mail).
+    const avisos = await prisma.entregaNotificacion.findMany({
+      where: { personaId: ids.disc, notificacion: { evento: 'discipulado.propuesta_nueva_retirada', params: { path: ['solicitudId'], equals: solicitud.id } } },
+      select: { canal: true, notificacion: { select: { prioridad: true, params: true } } },
+    });
+    expect(avisos).toEqual([{ canal: 'app', notificacion: { prioridad: 'normal', params: { propuestaId: propuesta.body.propuestaId, solicitudId: solicitud.id } } }]);
     const rechazo = await api.post(`/discipulado/solicitudes/${solicitud.id}/rechazar`).set('Authorization', `Bearer ${admin}`);
     expect(rechazo.status).toBe(200);
     expect(await prisma.solicitudDiscipulado.findUniqueOrThrow({ where: { id: solicitud.id }, select: { estado: true } })).toEqual({ estado: 'rechazada' });

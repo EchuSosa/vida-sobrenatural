@@ -8,7 +8,7 @@ import { Undo2 } from 'lucide-react';
 import { ApiError, apiFetch } from '@vida-sobrenatural/shared-types';
 import { Button, ConfirmDestructiveDialog, useEnvio } from '@vida-sobrenatural/ui';
 
-/** spec 014 (D224): retirar el propio pedido. Reversible → confirmación neutra (D151). */
+/** spec 014 (D225): retirar el propio pedido. Reversible → confirmación neutra (D151). */
 export function RetirarPedidoGex({ solicitudId, grupo }: { solicitudId: string; grupo: string }) {
   const t = useTranslations('grupoExtension.pendiente');
   const te = useTranslations('errors');

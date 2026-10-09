@@ -106,8 +106,8 @@ export type Permiso =
   | 'cursos.gestionar'
   | 'cursos.papelera.ver'
   | 'personas.editar'
-  // spec 014 (D219–D227): Grupos de Extensión. `lider_extension` lo da y lo
-  // quita el sistema al asignar líderes (D225); no está en ROLES_DE_CARGO.
+  // spec 014 (D220–D228): Grupos de Extensión. `lider_extension` lo da y lo
+  // quita el sistema al asignar líderes (D226); no está en ROLES_DE_CARGO.
   | 'grupos_extension.ver'
   | 'grupos_extension.gestionar'
   | 'mi_grupo_extension.ver'

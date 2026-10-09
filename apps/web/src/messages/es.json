@@ -808,6 +808,14 @@
         "baja_confirmada": {
           "titulo": "Tu discipulado de Vida Nueva terminó",
           "detalle": "Cuando quieras, podés volver a pedirlo desde Mi camino."
+        },
+        "reasignacion_retirada": {
+          "titulo": "Ya no hace falta que respondas la propuesta",
+          "detalle": "El equipo de la iglesia retiró la propuesta para acompañar un discipulado. No tenés que hacer nada."
+        },
+        "propuesta_nueva_retirada": {
+          "titulo": "Ya no hace falta que respondas la propuesta",
+          "detalle": "La propuesta para acompañar a una persona en Vida Nueva quedó sin efecto. No tenés que hacer nada."
         }
       },
       "persona": {

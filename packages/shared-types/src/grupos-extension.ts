@@ -1,7 +1,7 @@
 import type { Genero } from './persona.js';
 
 /**
- * spec 014 — Grupos de Extensión (D219–D227). Tipos de respuesta, límites y
+ * spec 014 — Grupos de Extensión (D220–D228). Tipos de respuesta, límites y
  * reglas puras que usan la API, la web app y el backoffice (Principio XI).
  */
 
@@ -11,7 +11,7 @@ export type DiaSemana = (typeof DIAS_SEMANA)[number];
 export const ESTADOS_SOLICITUD_GRUPO_EXTENSION = ['pendiente', 'aceptada', 'rechazada', 'retirada', 'finalizada'] as const;
 export type EstadoSolicitudGrupoExtension = (typeof ESTADOS_SOLICITUD_GRUPO_EXTENSION)[number];
 
-/** D221: el género del Grupo sale de sus líderes. */
+/** D222: el género del Grupo sale de sus líderes. */
 export type GeneroGrupoExtension = 'femenino' | 'masculino' | 'mixto';
 
 export const NOMBRE_GRUPO_EXTENSION_MAX = 80;
@@ -19,10 +19,10 @@ export const TEXTO_LUGAR_MAX = 80;
 export const MENSAJE_RECHAZO_GRUPO_EXTENSION_MAX = 500;
 export const DIRECCION_BUSQUEDA_MAX = 200;
 export const EDAD_GRUPO_MAX = 120;
-/** D220: la hora de inicio va en pasos de 15 minutos. */
+/** D221: la hora de inicio va en pasos de 15 minutos. */
 export const PASO_MINUTOS_HORA_GRUPO = 15;
 
-/** D221: todas mujeres → mujeres; todos varones → varones; de los dos → mixto. Sin líderes: null. */
+/** D222: todas mujeres → mujeres; todos varones → varones; de los dos → mixto. Sin líderes: null. */
 export function generoDelGrupo(generosLideres: readonly Genero[]): GeneroGrupoExtension | null {
   if (generosLideres.length === 0) return null;
   const hayF = generosLideres.includes('femenino');
@@ -47,7 +47,7 @@ export interface CondicionesGrupo {
 }
 
 /**
- * D223: ¿este Grupo le corresponde a esta persona? Por género (el suyo o
+ * D224: ¿este Grupo le corresponde a esta persona? Por género (el suyo o
  * mixto) y por edad (sin límite = cualquier edad). Un Grupo sin líderes
  * (género null) no le corresponde a nadie.
  */
@@ -100,7 +100,7 @@ export function ordenarDias(dias: readonly DiaSemana[]): DiaSemana[] {
   return DIAS_SEMANA.filter((d) => dias.includes(d));
 }
 
-/** D220: el lugar escrito al estilo de La Plata. */
+/** D221: el lugar escrito al estilo de La Plata. */
 export interface LugarGrupo {
   enLaIglesia: boolean;
   calle: string | null;
@@ -121,7 +121,7 @@ export function direccionDelGrupo(l: LugarGrupo): string {
 }
 
 /**
- * D222: las consultas para ubicar el lugar, de la más precisa a la menos,
+ * D223: las consultas para ubicar el lugar, de la más precisa a la menos,
  * escritas como en La Plata (Georef las entiende así, research #1): calle y
  * número; si no hay número, calle entre calles; y por último la esquina.
  */
@@ -156,7 +156,7 @@ export interface PersonaContactoGex {
   whatsapp: string | null;
 }
 
-/** Lo que ve la persona en la búsqueda: NUNCA la dirección exacta ni el contacto (D223). */
+/** Lo que ve la persona en la búsqueda: NUNCA la dirección exacta ni el contacto (D224). */
 export interface GrupoExtensionEncontrado {
   id: string;
   nombre: string;
@@ -250,7 +250,7 @@ export interface GrupoExtensionDetalle {
   ubicado: boolean;
   activo: boolean;
   genero: GeneroGrupoExtension | null;
-  /** Con su género: el formulario muestra el género del Grupo que resulta (D221). */
+  /** Con su género: el formulario muestra el género del Grupo que resulta (D222). */
   lideres: Array<PersonaContactoGex & { genero: Genero }>;
   integrantes: IntegranteGex[];
   pendientes: SolicitudGexParaLider[];
@@ -276,7 +276,7 @@ export interface DatosGrupoExtension {
 
 export interface ResultadoGuardarGrupo {
   id: string;
-  /** false: la dirección no se pudo ubicar y el Grupo queda sin distancia (D222). */
+  /** false: la dirección no se pudo ubicar y el Grupo queda sin distancia (D223). */
   ubicado: boolean;
 }
 
@@ -304,7 +304,7 @@ export interface ErrorCampoGex {
 }
 
 /**
- * D220: las reglas del formulario del Admin, una sola vez para la API (que
+ * D221: las reglas del formulario del Admin, una sola vez para la API (que
  * es la garantía) y el backoffice (que las muestra por campo, H-50). Los
  * códigos se traducen con `errors.campos.<CODE>`.
  */

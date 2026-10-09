@@ -34,7 +34,7 @@ async function bootstrap() {
           'req.body.apellido',
           'req.body.nombre',
           'req.body.dni', // D215
-          // spec 014 (D223): la ubicación de quien busca un Grupo de Extensión.
+          // spec 014 (D224): la ubicación de quien busca un Grupo de Extensión.
           'req.body.latitud',
           'req.body.longitud',
         ],

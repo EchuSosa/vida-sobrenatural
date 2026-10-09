@@ -138,7 +138,7 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/eventos/[id]', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver', enMenu: false },
   { href: '/eventos/papelera', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.papelera.ver', enMenu: false },
   { href: '/solicitudes/inscripcion-evento/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'eventos.ver', enMenu: false },
-  // --- spec 014 (Grupos de Extensión, D220/D226) ---
+  // --- spec 014 (Grupos de Extensión, D221/D227) ---
   { href: '/grupos-extension', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.ver' },
   { href: '/grupos-extension/nuevo', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.gestionar', enMenu: false },
   { href: '/grupos-extension/[id]', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.ver', enMenu: false },

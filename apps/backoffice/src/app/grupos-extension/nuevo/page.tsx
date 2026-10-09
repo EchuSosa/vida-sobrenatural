@@ -5,7 +5,7 @@ import { MigaDePan } from '@vida-sobrenatural/ui';
 import { requerirPermiso } from '../../../auth';
 import { FormularioGrupoExtension } from '../formulario';
 
-/** spec 014 (D220): crear un Grupo de Extensión (solo Admin). */
+/** spec 014 (D221): crear un Grupo de Extensión (solo Admin). */
 export default async function NuevoGrupoExtensionPage() {
   const session = await requerirPermiso('grupos_extension.gestionar');
   const t = await getTranslations('gruposExtension');

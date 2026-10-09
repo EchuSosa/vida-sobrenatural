@@ -26,7 +26,7 @@ export function EnlaceWhatsappPedido({ whatsapp, nombre, texto }: { whatsapp: st
 }
 
 /**
- * spec 014 (D225): "Aceptar" y "No es para este grupo" (con mensaje opcional)
+ * spec 014 (D226): "Aceptar" y "No es para este grupo" (con mensaje opcional)
  * de un pedido. Envíos protegidos de la reentrada (H-57); al terminar,
  * `router.refresh()` mueve a la persona a integrantes o la saca de la lista.
  */

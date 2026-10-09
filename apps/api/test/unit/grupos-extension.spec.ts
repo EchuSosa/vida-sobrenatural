@@ -23,9 +23,9 @@ import {
   ubicarPrimera,
 } from '../../src/grupo-extension/geocodificador.js';
 
-/** spec 014 — reglas puras de Grupos de Extensión (D220–D223) y el geocodificador (D222). */
+/** spec 014 — reglas puras de Grupos de Extensión (D221–D224) y el geocodificador (D223). */
 describe('Grupos de Extensión — reglas', () => {
-  it('D221: el género sale de los líderes', () => {
+  it('D222: el género sale de los líderes', () => {
     expect(generoDelGrupo(['femenino'])).toBe('femenino');
     expect(generoDelGrupo(['masculino', 'masculino'])).toBe('masculino');
     expect(generoDelGrupo(['femenino', 'masculino'])).toBe('mixto');
@@ -37,7 +37,7 @@ describe('Grupos de Extensión — reglas', () => {
     expect(edadEn('1990-10-09', '2026-10-09')).toBe(36);
   });
 
-  it('D223: compatibilidad por género y edad', () => {
+  it('D224: compatibilidad por género y edad', () => {
     const mujer30 = { genero: 'femenino' as const, edad: 30 };
     expect(esCompatible({ genero: 'femenino', edadMinima: null, edadMaxima: null }, mujer30)).toBe(true);
     expect(esCompatible({ genero: 'mixto', edadMinima: null, edadMaxima: null }, mujer30)).toBe(true);
@@ -64,14 +64,14 @@ describe('Grupos de Extensión — reglas', () => {
     expect(orden.map((g) => g.nombre)).toEqual(['A', 'B', 'C']);
   });
 
-  it('D220: hora en pasos de 15 minutos y días en orden', () => {
+  it('D221: hora en pasos de 15 minutos y días en orden', () => {
     expect(esHoraDeGrupoValida('18:30')).toBe(true);
     expect(esHoraDeGrupoValida('18:10')).toBe(false);
     expect(esHoraDeGrupoValida('24:00')).toBe(false);
     expect(ordenarDias(['sabado', 'lunes', 'lunes'])).toEqual(['lunes', 'sabado']);
   });
 
-  it('D220: la dirección al estilo de La Plata y sus consultas', () => {
+  it('D221: la dirección al estilo de La Plata y sus consultas', () => {
     const lugar = { enLaIglesia: false, calle: '64', numero: '820', entreCalle1: '11', entreCalle2: '12', direccionSede: null };
     expect(direccionDelGrupo(lugar)).toBe('64 nro 820 e/ 11 y 12');
     expect(direccionDelGrupo({ ...lugar, numero: null })).toBe('64 e/ 11 y 12');
@@ -83,7 +83,7 @@ describe('Grupos de Extensión — reglas', () => {
     );
   });
 
-  it('D220: validación del formulario, por campo', () => {
+  it('D221: validación del formulario, por campo', () => {
     const base: DatosGrupoExtension = {
       nombre: 'Mujeres de Tolosa',
       lideres: ['p1'],
@@ -116,7 +116,7 @@ describe('Grupos de Extensión — reglas', () => {
   });
 });
 
-describe('Geocodificador (D222)', () => {
+describe('Geocodificador (D223)', () => {
   const fetchOriginal = globalThis.fetch;
   afterEach(() => {
     globalThis.fetch = fetchOriginal;

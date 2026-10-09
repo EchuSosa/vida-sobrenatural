@@ -1328,7 +1328,7 @@ model ComentarioApp {
   @@map("comentarios_app")
 }
 
-// --- spec 014: Grupos de Extensión (D219–D227) ---
+// --- spec 014: Grupos de Extensión (D220–D228) ---
 
 enum DiaSemana {
   lunes
@@ -1342,16 +1342,16 @@ enum DiaSemana {
 
 enum EstadoSolicitudGrupoExtension {
   pendiente
-  aceptada   // ES la pertenencia (D224, mismo criterio que D170)
+  aceptada   // ES la pertenencia (D225, mismo criterio que D170)
   rechazada
   retirada
   finalizada // la quitó el Admin
 }
 
-// D220: el lugar es "En la iglesia" (la dirección de la Sede) o una dirección
-// al estilo de La Plata. Las coordenadas se calculan al guardar (D222) y pueden
+// D221: el lugar es "En la iglesia" (la dirección de la Sede) o una dirección
+// al estilo de La Plata. Las coordenadas se calculan al guardar (D223) y pueden
 // faltar (el Grupo queda sin distancia). El género NO se guarda: sale de los
-// líderes vigentes (D221). CHECK de forma en la migración `grupos_extension`.
+// líderes vigentes (D222). CHECK de forma en la migración `grupos_extension`.
 model GrupoExtension {
   id           String      @id @default(uuid())
   nombre       String
@@ -1368,7 +1368,7 @@ model GrupoExtension {
   numero       String?
   entreCalle1  String?
   entreCalle2  String?
-  // Barrio o zona: lo único del lugar que ve quien todavía no es integrante (D223).
+  // Barrio o zona: lo único del lugar que ve quien todavía no es integrante (D224).
   zona         String?
   latitud      Float?
   longitud     Float?
@@ -1399,7 +1399,7 @@ model LiderGrupoExtension {
   @@map("lideres_grupo_extension")
 }
 
-// D224: el pedido para sumarse. Una `pendiente` y una `aceptada` por Persona
+// D225: el pedido para sumarse. Una `pendiente` y una `aceptada` por Persona
 // como máximo (índices únicos parciales en SQL).
 model SolicitudGrupoExtension {
   id              String                        @id @default(uuid())

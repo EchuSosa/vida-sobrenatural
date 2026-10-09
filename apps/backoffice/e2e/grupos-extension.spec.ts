@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 import { test, expect, auditar, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
 
 /**
- * spec 014 (D220–D222, D226): Backoffice › Grupos de extensión, con axe en
+ * spec 014 (D221–D223, D227): Backoffice › Grupos de extensión, con axe en
  * claro y oscuro. El Admin crea un Grupo "En la iglesia" eligiendo al líder,
  * ve que el género sale del líder, agrega a una persona directamente, la
  * quita e inactiva el Grupo; el Pastor ve sin acciones. Las Personas
@@ -59,7 +59,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(datos).toContainText('Leo E2E Gex');
       await sinViolaciones(page);
 
-      // Agregar directo (D226) y quitar (confirmación neutra, D151).
+      // Agregar directo (D227) y quitar (confirmación neutra, D151).
       await page.getByLabel('Buscar por nombre, apellido o email').fill('Sumi E2E');
       await page.getByRole('button', { name: 'Buscar', exact: true }).click();
       await page.getByRole('button', { name: 'Agregar a Sumi E2E Gex al grupo' }).click();

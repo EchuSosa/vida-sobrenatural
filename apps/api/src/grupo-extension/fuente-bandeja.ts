@@ -3,7 +3,7 @@ import type { FuenteSolicitudes } from '../bandeja/fuente-solicitudes.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { nombresDe } from '../discipulado/consultas.js';
 
-/** spec 014, D226 (specs/IMPLEMENTACION.md §2.3): las filas `grupo_extension` de la bandeja, con el Grupo en `extra`. */
+/** spec 014, D227 (specs/IMPLEMENTACION.md §2.3): las filas `grupo_extension` de la bandeja, con el Grupo en `extra`. */
 export class FuenteGrupoExtension implements FuenteSolicitudes {
   readonly tipo = 'grupo_extension' as const;
 

@@ -37,5 +37,5 @@ punta a punta con tests antes que los extras (congelamiento: sábado 10/10, 12 h
 - [x] T021 Seed demo `prisma/seed-demo/014-grupos-extension.ts` (8 Grupos ficticios, líder de demo, uno completo, un pedido pendiente) y fixtures `scripts/sembrar-e2e/014-grupos-extension.ts`; `limpiar-e2e.ts`.
 - [x] T022 e2e web: persona busca, pide, líder acepta, persona ve su grupo (axe claro/oscuro, `@celular`).
 - [x] T023 e2e backoffice: Admin crea un Grupo "En la iglesia", agrega y quita (axe claro/oscuro); el smoke de axe recorre las rutas nuevas de `nav.ts`.
-- [x] T024 Docs: `05-decisiones.md` (D219–D227), `04`, `08`, `02`, `03`, `23` (módulo GEX + tabla resumen), `COMO-ARRANCAR.md`.
+- [x] T024 Docs: `05-decisiones.md` (D220–D228), `04`, `08`, `02`, `03`, `23` (módulo GEX + tabla resumen), `COMO-ARRANCAR.md`.
 - [ ] T025 Las tres suites en verde (CI) y PR con Preguntas para Echu. (Local: unit 816 ✔, integración 528 ✔, e2e de GEX web y backoffice ✔ contra un entorno local sin reset; la corrida completa con `prisma migrate reset` la hace el CI.)

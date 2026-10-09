@@ -56,7 +56,7 @@
 - La inscripción de un niño la hace **el padre/madre/tutor**, que ya es una Persona registrada en el sistema — a diferencia del caso de un adolescente que eventualmente loguea solo (Flujo 7), acá el niño probablemente **nunca inicia sesión**, y el vínculo con el tutor debería ser una relación real a una Persona existente (no solo texto libre como `tutor_nombre`/`tutor_telefono`). El patrón de "Persona sin acceso a la app" (D97) puede reutilizarse.
 - Requiere una sesión de diseño propia (roles, entidades, flujos) antes de especificarse — queda anotado como pendiente para cuando se aborde esta fase.
 
-**Grupos de Extensión (grupos pequeños/hogareños):** ✅ **adelantado al MVP** (D219, 9/10/2026, spec 014 — `specs/014-grupos-extension/`). Lo que se decidió está en D220–D227; lo que quedó para después:
+**Grupos de Extensión (grupos pequeños/hogareños):** ✅ **adelantado al MVP** (D220, 9/10/2026, spec 014 — `specs/014-grupos-extension/`). Lo que se decidió está en D221–D228; lo que quedó para después:
 - Mapa embebido (hoy: lista por distancia y "Cómo llegar").
 - Que la persona pueda salir sola de su Grupo (hoy le pide al líder o al Admin).
 - Asistencia o encuentros de los Grupos de Extensión.

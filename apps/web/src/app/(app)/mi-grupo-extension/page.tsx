@@ -9,7 +9,7 @@ import { AccionesPedidoGex, EnlaceWhatsappPedido } from './acciones-pedido';
 const ENLACE = 'flex min-h-11 w-fit items-center gap-2 font-medium text-primary underline underline-offset-2 break-all';
 
 /**
- * spec 014 (D225): "Mi grupo" del líder de un Grupo de Extensión, en la web app
+ * spec 014 (D226): "Mi grupo" del líder de un Grupo de Extensión, en la web app
  * (como el Discipulador, D142), pensada a 360 px. La API decide qué Grupos
  * lidera mirando la base (no el rol del JWT, que puede estar viejo): sin
  * Grupos, el vacío lo explica. Cargando y error: `loading.tsx` y `error.tsx`.

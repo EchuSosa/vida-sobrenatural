@@ -8,7 +8,7 @@ import { requerirPermiso, tienePermisoSesion } from '../../../../auth';
 import { ResolverPedido } from '../../../grupos-extension/[id]/acciones';
 
 /**
- * spec 014 (D226): el detalle de un pedido para sumarse a un Grupo de
+ * spec 014 (D227): el detalle de un pedido para sumarse a un Grupo de
  * Extensión, desde la bandeja. El Admin lo acepta o dice "No es para este
  * grupo"; el Pastor lo ve sin acciones.
  */

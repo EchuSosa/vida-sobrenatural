@@ -20,7 +20,7 @@ export const TIPOS_SOLICITUD = [
   'bautismo', // 010
   'inscripcion_evento', // 011
   'pago', // 011
-  'grupo_extension', // 014 (D226)
+  'grupo_extension', // 014 (D227)
 ] as const;
 
 export type TipoSolicitud = (typeof TIPOS_SOLICITUD)[number];

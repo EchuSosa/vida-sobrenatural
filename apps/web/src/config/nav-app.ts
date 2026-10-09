@@ -48,6 +48,6 @@ export const SUBNAV_MI_CAMINO: ItemSubnavMiCamino[] = [
   { href: '/mis-discipulados', labelKey: 'misDiscipulados', permiso: 'mis_discipulados.ver' },
   // spec 008 (T014, D142): las ediciones de Vida de Servicio del Líder de curso.
   { href: '/mis-grupos', labelKey: 'misGrupos', permiso: 'mis_grupos.ver' },
-  // spec 014 (D225): el líder de un Grupo de Extensión.
+  // spec 014 (D226): el líder de un Grupo de Extensión.
   { href: '/mi-grupo-extension', labelKey: 'miGrupoExtension', permiso: 'mi_grupo_extension.ver' },
 ];

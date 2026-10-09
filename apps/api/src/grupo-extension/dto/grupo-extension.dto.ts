@@ -26,7 +26,7 @@ export class DatosGrupoExtensionDto implements DatosGrupoExtension {
   @ApiPropertyOptional({ nullable: true, description: 'Barrio o zona: lo único del lugar que se muestra antes de sumarse.' }) @Allow() zona!: string | null;
 }
 
-/** POST /grupos-extension/buscar — la dirección NO se guarda ni se loguea (D223). */
+/** POST /grupos-extension/buscar — la dirección NO se guarda ni se loguea (D224). */
 export class BuscarGruposDto {
   @ApiPropertyOptional() @Allow() direccion?: string | null;
   @ApiPropertyOptional() @Allow() latitud?: number | null;

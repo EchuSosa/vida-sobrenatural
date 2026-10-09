@@ -18,7 +18,7 @@ const ICONO_NEUTRO = 'text-muted-foreground';
 const ENLACE = 'flex min-h-11 w-fit items-center gap-2 font-medium text-primary underline underline-offset-2';
 
 /**
- * spec 014 (D223–D225): "Mi grupo de extensión" de la persona, pensada a 360 px.
+ * spec 014 (D224–D226): "Mi grupo de extensión" de la persona, pensada a 360 px.
  * Según `GET /grupos-extension/me`: integrante (dirección exacta, horario,
  * líderes con contacto y "Cómo llegar"), pedido en espera (con "Retirar"), o
  * "Encontrá tu grupo". Cargando y error: `loading.tsx` y `error.tsx`; el

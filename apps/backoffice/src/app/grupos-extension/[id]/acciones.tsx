@@ -8,7 +8,7 @@ import { ApiError, MENSAJE_RECHAZO_GRUPO_EXTENSION_MAX, apiFetch, erroresPorCamp
 import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, useEnvio } from '@vida-sobrenatural/ui';
 import { BuscarPersonaGex } from '../buscar-persona';
 
-/** Llama a la API y avisa el resultado; siempre refresca la pantalla (D226). */
+/** Llama a la API y avisa el resultado; siempre refresca la pantalla (D227). */
 function useAccionGex() {
   const t = useTranslations('gruposExtension');
   const te = useTranslations('errors');

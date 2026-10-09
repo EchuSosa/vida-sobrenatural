@@ -7,7 +7,7 @@ import { Escenario, levantarApp, tokenDe } from './discipulado-fixtures.js';
 
 /**
  * spec 014 — Grupos de Extensión de punta a punta contra la base de test, con
- * el geocodificador falso (sin red, D222). Cubre los criterios ⭐ del manual:
+ * el geocodificador falso (sin red, D223). Cubre los criterios ⭐ del manual:
  * la persona busca y ve solo lo suyo por cercanía y sin dirección exacta, pide
  * sumarse, el líder recibe el aviso y acepta, y la persona ve su grupo; más
  * permisos, cupo, retiro, rechazo, alta y baja por el Admin, inactivar,
@@ -92,7 +92,7 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
   const estado = async (token: string) => (await http().get('/grupos-extension/me').set('Authorization', `Bearer ${token}`)).body as EstadoMiGrupoExtension;
   const delGrupo = (ids: string[]) => (g: { id: string }) => ids.includes(g.id);
 
-  describe('Admin (D220–D222, D225)', () => {
+  describe('Admin (D221–D223, D226)', () => {
     it('crea con la dirección ubicada, o sin ubicar, y el género sale de los líderes', async () => {
       const cerca = (await http().get(`/grupos-extension/${cercaId}`).set('Authorization', `Bearer ${tokenAdmin}`)).body;
       expect(cerca).toMatchObject({ ubicado: true, genero: 'femenino', direccion: '64 nro 820 e/ 11 y 12', zona: 'Centro' });
@@ -133,7 +133,7 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
     });
   });
 
-  describe('Persona: buscar (D223)', () => {
+  describe('Persona: buscar (D224)', () => {
     it('⭐ ve solo los de su género y edad, por cercanía, sin dirección exacta ni contacto', async () => {
       const { token } = await personaNueva('buscadora');
       const r = await buscar(token, { direccion: '7 nro 1200' });
@@ -181,7 +181,7 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
     });
   });
 
-  describe('⭐ pedir → el líder acepta → la persona ve su grupo (D224, D225, D227)', () => {
+  describe('⭐ pedir → el líder acepta → la persona ve su grupo (D225, D226, D228)', () => {
     it('de punta a punta', async () => {
       const { id, token } = await personaNueva('flor');
       const pedido = await pedir(token, cercaId);
@@ -193,7 +193,7 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
       const pendiente = await estado(token);
       expect(pendiente).toMatchObject({ estado: 'pendiente', solicitudId, grupo: { id: cercaId, lideres: ['lidera'] } });
 
-      // El aviso al líder (D227), sin datos personales en los params.
+      // El aviso al líder (D228), sin datos personales en los params.
       const aviso = await prisma.entregaNotificacion.findFirst({
         where: { personaId: lideraId, canal: 'app', notificacion: { evento: 'grupo_extension.solicitud_nueva', entidadId: solicitudId } },
         select: { notificacion: { select: { params: true } } },
@@ -263,7 +263,7 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
     });
   });
 
-  describe('Cupo, Admin destraba, inactivar (D226, FR-012, FR-015)', () => {
+  describe('Cupo, Admin destraba, inactivar (D227, FR-012, FR-015)', () => {
     let chicoId: string;
 
     it('un Grupo lleno aparece "Completo" y no se puede pedir ni agregar', async () => {

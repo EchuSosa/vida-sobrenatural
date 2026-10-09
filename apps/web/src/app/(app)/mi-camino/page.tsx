@@ -222,7 +222,7 @@ export default async function MiCaminoPage() {
         );
       })}
 
-      {/* spec 014 (D223): aparte de las cuatro etapas. */}
+      {/* spec 014 (D224): aparte de las cuatro etapas. */}
       <TarjetaGrupoExtension apiToken={apiToken} />
     </div>
   );

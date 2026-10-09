@@ -1,4 +1,4 @@
--- spec 014 — Grupos de Extensión (D219–D227). Migración propia: la del lote 0
+-- spec 014 — Grupos de Extensión (D220–D228). Migración propia: la del lote 0
 -- no se edita (specs/IMPLEMENTACION.md §2.1).
 
 -- CreateEnum
@@ -99,7 +99,7 @@ ALTER TABLE "solicitudes_grupo_extension" ADD CONSTRAINT "solicitudes_grupo_exte
 
 -- --- Lo que Prisma no modela (data-model.md) ---
 
--- D220: forma del Grupo.
+-- D221: forma del Grupo.
 ALTER TABLE "grupos_extension"
   ADD CONSTRAINT "grupos_extension_nombre_largo" CHECK (char_length(btrim("nombre")) BETWEEN 1 AND 80),
   ADD CONSTRAINT "grupos_extension_dias" CHECK (cardinality("dias") >= 1),
@@ -118,7 +118,7 @@ ALTER TABLE "grupos_extension"
 CREATE UNIQUE INDEX "lideres_grupo_extension_vigente"
   ON "lideres_grupo_extension" ("grupoId", "personaId") WHERE "hasta" IS NULL;
 
--- D224: una pendiente y una aceptada (la pertenencia) por Persona.
+-- D225: una pendiente y una aceptada (la pertenencia) por Persona.
 CREATE UNIQUE INDEX "solicitudes_grupo_extension_una_pendiente"
   ON "solicitudes_grupo_extension" ("personaId") WHERE "estado" = 'pendiente';
 CREATE UNIQUE INDEX "solicitudes_grupo_extension_una_aceptada"
@@ -196,7 +196,7 @@ CREATE OR REPLACE VIEW "solicitudes_bandeja" AS
     FROM "pagos" g
     JOIN "inscripciones_evento" ie ON ie."id" = g."inscripcionEventoId"
   UNION ALL
-  -- 014: Solicitud para sumarse a un Grupo de Extensión (D224, D226). La
+  -- 014: Solicitud para sumarse a un Grupo de Extensión (D225, D227). La
   -- `aceptada` es la pertenencia: no espera nada del Admin.
   SELECT 'grupo_extension', x."id", x."personaId", x."estado"::text,
          (x."estado" = 'pendiente'),

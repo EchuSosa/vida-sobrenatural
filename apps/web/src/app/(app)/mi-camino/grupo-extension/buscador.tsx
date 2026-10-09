@@ -21,7 +21,7 @@ import { Button, ConfirmDestructiveDialog, EstadoVacio, Input, MensajeErrorCampo
 type Origen = { direccion: string } | { latitud: number; longitud: number };
 
 /**
- * spec 014 (D223): "Encontrá tu grupo". La dirección (o la ubicación del
+ * spec 014 (D224): "Encontrá tu grupo". La dirección (o la ubicación del
  * navegador) viaja solo en el POST de la búsqueda y no se guarda en ningún
  * lado: tampoco acá, más allá del campo. Errores por campo con resumen y foco
  * (H-50); envíos protegidos de la reentrada (H-57). Resultados: nombre,
