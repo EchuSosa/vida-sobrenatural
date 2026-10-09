@@ -83,7 +83,11 @@ export function CardMinisterioCliente({ estadoInicial }: { estadoInicial: Estado
             <AvisoEstado role="note" icono={<CirclePause className={ICONO_NEUTRO} />} titulo={t('celulaPausada', { celula: membresia.celula.nombre })} />
           )}
           {pendiente ? (
-            <Pendiente pendiente={pendiente} fecha={fecha} onCambio={setEstado} actual={membresia.ministerio.nombre} />
+            <Pendiente pendiente={pendiente} fecha={fecha} onCambio={setEstado} actual={
+                // D217: una postulación en paralelo ("Discipulados Vida Nueva") no deja el Ministerio actual, ni al revés.
+                pendiente.enParalelo === membresia.enParalelo ? membresia.ministerio.nombre : undefined
+              }
+            />
           ) : (
             <ButtonLink render={<Link href="/mi-camino/ministerios" />} variant="ghost" size="xl" className="w-full text-base sm:w-fit">
               <ArrowRightLeft aria-hidden />

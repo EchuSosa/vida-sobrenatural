@@ -5,6 +5,7 @@ import { cronogramaPropuesto, hoyEnArgentina, sumarDias, type EstadoMiVidaDeServ
 import type { PrismaService } from '../../src/prisma/prisma.service.js';
 import { levantarApp, tokenDe } from './discipulado-fixtures.js';
 import { EscenarioVS } from './vida-de-servicio-fixtures.js';
+import { ESPERA_CANDADO_CURSOS } from './candado-cursos.js';
 
 /**
  * spec 008, T045 (FR-021, FR-025, FR-031, FR-034; Historia 5, escenarios 1 a
@@ -44,7 +45,7 @@ describe('Vida de Servicio — seguir mi Vida de Servicio (spec 008, T045/T065)'
     await vs.preparar();
     lider = await vs.lider('lider');
     adminId = await vs.persona('admin', { rol: ADMIN });
-  });
+  }, ESPERA_CANDADO_CURSOS);
 
   afterAll(async () => {
     await vs.limpiar();

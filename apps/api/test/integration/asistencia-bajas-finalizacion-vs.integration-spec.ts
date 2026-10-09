@@ -7,6 +7,7 @@ import { NotificacionesService } from '../../src/notificaciones/notificaciones.s
 import { levantarApp, tokenDe } from './discipulado-fixtures.js';
 import { registrarAvisos } from './camino-fixtures.js';
 import { EscenarioVS } from './vida-de-servicio-fixtures.js';
+import { ESPERA_CANDADO_CURSOS } from './candado-cursos.js';
 
 /**
  * spec 008, T051 + T057 + T064 (Historias 6, 7 y 8; FR-027 a FR-037; SC-005):
@@ -59,7 +60,7 @@ describe('Vida de Servicio — asistencia, bajas y finalización (spec 008, T051
     lider1 = await vs.lider('lider1');
     lider2 = await vs.lider('lider2');
     adminId = await vs.persona('admin', { rol: ADMIN });
-  });
+  }, ESPERA_CANDADO_CURSOS);
 
   afterAll(async () => {
     avisos.restaurar();

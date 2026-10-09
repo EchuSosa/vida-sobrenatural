@@ -87,6 +87,8 @@ export interface MembresiaVista {
   ministerio: { id: string; nombre: string; activo: boolean };
   celula: { id: string; nombre: string; activo: boolean } | null;
   desde: string;
+  /** D217: un área que se sirve en paralelo ("Discipulados Vida Nueva"). */
+  enParalelo: boolean;
 }
 
 export interface PendienteVista {
@@ -95,6 +97,8 @@ export interface PendienteVista {
   celula: { id: string; nombre: string } | null;
   /** docs/22: "Este ministerio requiere capacitación o audición: el equipo te va a contactar". */
   requiereFormacion: boolean;
+  /** D217: a un área que se sirve en paralelo — si se aprueba, no reemplaza la membresía. */
+  enParalelo: boolean;
   createdAt: string;
 }
 

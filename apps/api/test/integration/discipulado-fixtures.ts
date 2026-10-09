@@ -5,6 +5,7 @@ import type { Server } from 'node:http';
 import type { Franja } from '@vida-sobrenatural/shared-types';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import type { Prisma } from '../../src/generated/prisma/client.js';
 import { configurarApp } from '../../src/configurar-app.js';
 
 /**
@@ -48,11 +49,7 @@ export class Escenario {
       data: { nombre: `Sede discipulado integ ${this.sufijo}`, direccion: 'Dirección', horarios: 'Horario', activo: true },
     });
     this.sedeId = sede.id;
-    const curso = await this.prisma.curso.upsert({
-      where: { categoria_tipo: { categoria: 'vida_nueva', tipo: 'individual' } },
-      update: {},
-      create: { nombre: 'Vida Nueva', categoria: 'vida_nueva', tipo: 'individual', modalidad: 'seguimiento_por_encuentros' },
-    });
+    const curso = await cursoDelCatalogo(this.prisma, { nombre: 'Vida Nueva', categoria: 'vida_nueva', tipo: 'individual', modalidad: 'seguimiento_por_encuentros' });
     this.cursoId = curso.id;
   }
 
@@ -144,5 +141,24 @@ export class Escenario {
     await p.cambioDeRol.deleteMany({ where: { personaId: { in: ids } } });
     await p.persona.deleteMany({ where: { id: { in: ids } } });
     if (this.sedeId) await p.sede.delete({ where: { id: this.sedeId } });
+  }
+}
+
+/**
+ * El Curso del catálogo (global, uno por categoría y tipo), creándolo si falta.
+ * Varios archivos lo preparan a la vez: el `upsert` de Prisma no es atómico y
+ * el segundo que llega choca con `cursos_categoria_tipo_key` (P2002); en ese
+ * caso el Curso ya existe y se lee.
+ */
+export async function cursoDelCatalogo(
+  prisma: PrismaService,
+  datos: Prisma.CursoUncheckedCreateInput & { categoria: 'vida_nueva' | 'vida_de_servicio'; tipo: 'individual' | 'grupal' },
+): Promise<{ id: string }> {
+  const where = { categoria_tipo: { categoria: datos.categoria, tipo: datos.tipo } };
+  try {
+    return await prisma.curso.upsert({ where, update: {}, create: datos, select: { id: true } });
+  } catch (error) {
+    if ((error as { code?: string }).code !== 'P2002') throw error;
+    return prisma.curso.findUniqueOrThrow({ where, select: { id: true } });
   }
 }

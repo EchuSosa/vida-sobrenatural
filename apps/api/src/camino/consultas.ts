@@ -107,3 +107,14 @@ export async function ultimasDeclaraciones(db: Db, personaId: string): Promise<H
   }
   return ultima;
 }
+
+/**
+ * Ajustes 2 (PR #18, Pregunta 5): el estado PROPIO de cada etapa que lo
+ * informa, para el encabezado de su card (`EstadoPropioEtapa`). Hoy:
+ * Ministerio, con una Postulación `pendiente` (spec 009). Una etapa nueva que
+ * quiera informar el suyo suma su consulta acá.
+ */
+export async function estadosPropios(db: Db, personaId: string): Promise<NonNullable<HechosCamino['propios']>> {
+  const postulacion = await db.postulacion.findFirst({ where: { personaId, estado: 'pendiente' }, select: { createdAt: true } });
+  return postulacion ? { ministerio: { estado: 'solicitud_en_revision', desde: postulacion.createdAt.toISOString() } } : {};
+}

@@ -56,7 +56,16 @@ export async function crearPostulacion(
           404,
           'No existe una Persona con ese id.',
         );
-      const [persona, ministerio, celula, aprobada, pendiente] =
+      // D217: un área que ofrece el rol discipulador se sirve en paralelo — su
+      // membresía no choca con la del otro Ministerio (cada carril, la suya).
+      const celula = celulaId
+        ? await tx.celula.findFirst({
+            where: { id: celulaId, eliminadoEn: null },
+            select: { ministerioId: true, activo: true, ofreceRolDiscipulador: true },
+          })
+        : undefined;
+      const enParalelo = celula?.ofreceRolDiscipulador ?? false;
+      const [persona, ministerio, aprobada, pendiente] =
         await Promise.all([
           tx.persona.findUniqueOrThrow({
             where: { id: personaId },
@@ -66,14 +75,8 @@ export async function crearPostulacion(
             where: { id: ministerioId, eliminadoEn: null },
             select: { id: true, activo: true, requiereFormacion: true },
           }),
-          celulaId
-            ? tx.celula.findFirst({
-                where: { id: celulaId, eliminadoEn: null },
-                select: { ministerioId: true, activo: true },
-              })
-            : Promise.resolve(undefined),
           tx.postulacion.findFirst({
-            where: { personaId, estado: 'aprobada' },
+            where: { personaId, estado: 'aprobada', enParalelo },
             select: { ministerioId: true },
           }),
           tx.postulacion.findFirst({
@@ -104,6 +107,7 @@ export async function crearPostulacion(
           disponibilidad,
           creadoPorId,
           requiereFormacion: ministerio!.requiereFormacion,
+          enParalelo,
         },
         select: { id: true },
       });

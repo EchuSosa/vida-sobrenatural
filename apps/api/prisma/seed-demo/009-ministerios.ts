@@ -434,8 +434,9 @@ export async function sembrarDemo009(ctx: ContextoSeedDemo): Promise<void> {
     const nueva = await prisma.postulacion.create({
       data: {
         personaId: cambio.id,
-        ministerioId: ensenanza.id,
-        celulaId: ensenanza.celulas['Discipulados Vida Nueva'],
+        // D217: "Discipulados Vida Nueva" se sirve en paralelo, no es un cambio.
+        ministerioId: adoracion.id,
+        celulaId: adoracion.celulas['Sonido'],
         estado: 'aprobada',
         requiereFormacion: true,
         revisadoPorId: revisor(cambio.id),
@@ -457,6 +458,20 @@ export async function sembrarDemo009(ctx: ContextoSeedDemo): Promise<void> {
         inactivadaEn: hace(20),
         inactivadaPorId: revisor(cambio.id),
         createdAt: hace(210),
+      },
+    });
+    // D217: además sirve en "Discipulados Vida Nueva", en paralelo con Adoración.
+    await prisma.postulacion.create({
+      data: {
+        personaId: cambio.id,
+        ministerioId: ensenanza.id,
+        celulaId: ensenanza.celulas['Discipulados Vida Nueva'],
+        estado: 'aprobada',
+        enParalelo: true,
+        requiereFormacion: true,
+        revisadoPorId: revisor(cambio.id),
+        revisadaEn: hace(10),
+        createdAt: hace(12),
       },
     });
   }

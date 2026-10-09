@@ -249,6 +249,18 @@ describe('Postulaciones de la Persona (spec 009, T018/T033)', () => {
     ); // SC-004: la retirada sigue ahí
   });
 
+  it('Ajustes 2: con una postulación en revisión, la etapa Ministerio de Mi camino dice "en revisión" desde cuándo; al retirarla, deja de decirlo', async () => {
+    const id = await persona('camino-revision');
+    const etapa = async () =>
+      ((await como(id, 'get', '/camino/me')).body as CaminoDeLaPersona).etapas.find((e) => e.etapa === 'ministerio');
+    expect((await etapa())?.estado).not.toBe('solicitud_en_revision');
+    await postular(id, bienvenida.id);
+    const p = await prisma.postulacion.findFirstOrThrow({ where: { personaId: id } });
+    expect(await etapa()).toMatchObject({ estado: 'solicitud_en_revision', desde: p.createdAt.toISOString() });
+    await como(id, 'post', `/postulaciones/me/${p.id}/retirar`);
+    expect((await etapa())?.estado).not.toBe('solicitud_en_revision');
+  });
+
   it('miembro: no se postula al suyo (409) y sí a otro; la card dice miembro con la pendiente; el detalle cuenta la situación', async () => {
     const id = await persona('miembro');
     await prisma.postulacion.create({

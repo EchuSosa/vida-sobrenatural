@@ -17,6 +17,7 @@ import { ContenidoService } from '../../src/vida-de-servicio/contenido.service.j
 import { levantarApp, tokenDe } from './discipulado-fixtures.js';
 import { registrarAvisos } from './camino-fixtures.js';
 import { EscenarioVS } from './vida-de-servicio-fixtures.js';
+import { ESPERA_CANDADO_CURSOS } from './candado-cursos.js';
 
 const PDF = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(200, 0x20), Buffer.from('\n%%EOF')]);
 const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8ffff3f0005fe02fea7d6a4f00000000049454e44ae426082', 'hex');
@@ -74,7 +75,7 @@ describe('Vida de Servicio — Mis grupos y el material (spec 008, T040/T073)', 
     lider1 = await vs.lider('lider1');
     lider2 = await vs.lider('lider2');
     adminId = await vs.persona('admin', { rol: ADMIN });
-  });
+  }, ESPERA_CANDADO_CURSOS);
 
   afterAll(async () => {
     avisos.restaurar();

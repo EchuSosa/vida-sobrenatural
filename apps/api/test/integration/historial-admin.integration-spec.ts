@@ -228,11 +228,11 @@ describe('Historial previo del Admin (spec 006, T036/T038)', () => {
     const id = await esc.persona('bandeja');
     const { id: decl } = await declaracion(id, 'vida_de_servicio');
     const bandeja = app.get(BandejaService);
-    const pagina = await bandeja.listar({ filtro: 'abiertas', tipo: 'historial', personaId: id, orden: 'fecha', dir: 'asc', skip: 0, take: 20 });
+    const pagina = await bandeja.listar({ roles: ['admin'], filtro: 'abiertas', tipo: 'historial', personaId: id, orden: 'fecha', dir: 'asc', skip: 0, take: 20 });
     expect(pagina.items).toEqual([
       expect.objectContaining({ tipo: 'historial', id: decl, persona: expect.objectContaining({ id }), estado: 'pendiente', abierta: true, creadoPor: null, extra: { etapa: 'vida_de_servicio' } }),
     ]);
-    expect((await bandeja.conteoAbiertas()).historial).toBeGreaterThanOrEqual(1);
+    expect((await bandeja.conteoAbiertas(['admin'])).historial).toBeGreaterThanOrEqual(1);
     const lineas = await app.get(RegistroPendientesAdmin).lineas(new Date());
     expect(lineas.find((l) => l.clave === 'historial_declaraciones')).toMatchObject({ enlace: '/solicitudes?tipo=historial', cantidad: expect.any(Number) });
   });

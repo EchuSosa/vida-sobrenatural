@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import type { ConteoAbiertas, FiltroAbiertas, OrdenBandeja, Pagina, SolicitudBandeja, TipoSolicitud } from '@vida-sobrenatural/shared-types';
+import { tiposVisiblesEnBandeja, type ConteoAbiertas, FiltroAbiertas, OrdenBandeja, Pagina, SolicitudBandeja, TipoSolicitud } from '@vida-sobrenatural/shared-types';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RegistroFuentesSolicitudes } from './registro-fuentes.js';
 
 export interface FiltrosBandeja {
+  /** Los roles de quien pide: deciden qué tipos ve (D216). */
+  roles: readonly string[];
   filtro: FiltroAbiertas;
   tipo?: TipoSolicitud;
   /** Estados del `tipo` elegido; si vienen, reemplazan a `filtro`. */
@@ -29,8 +31,13 @@ export class BandejaService {
     private readonly registro: RegistroFuentesSolicitudes,
   ) {}
 
-  async conteoAbiertas(): Promise<ConteoAbiertas> {
-    const conectados = this.registro.conectados();
+  /** Los tipos conectados que estos roles pueden ver (D216: `pago` pide `pagos.verificar`). */
+  private visibles(roles: readonly string[]): TipoSolicitud[] {
+    return tiposVisiblesEnBandeja(roles, this.registro.conectados());
+  }
+
+  async conteoAbiertas(roles: readonly string[]): Promise<ConteoAbiertas> {
+    const conectados = this.visibles(roles);
     if (conectados.length === 0) return {};
     const filas = await this.prisma.$queryRaw<{ tipo: TipoSolicitud; cantidad: number }[]>`
       SELECT "tipo", COUNT(*)::int AS "cantidad"
@@ -43,7 +50,8 @@ export class BandejaService {
   }
 
   async listar(f: FiltrosBandeja): Promise<Pagina<SolicitudBandeja>> {
-    const conectados = f.tipo ? [f.tipo].filter((t) => this.registro.fuente(t)) : this.registro.conectados();
+    const visibles = this.visibles(f.roles);
+    const conectados = f.tipo ? visibles.filter((t) => t === f.tipo) : visibles;
     if (conectados.length === 0) return { items: [], total: 0 };
 
     const condiciones: Prisma.Sql[] = [Prisma.sql`b."tipo" IN (${Prisma.join(conectados)})`];
