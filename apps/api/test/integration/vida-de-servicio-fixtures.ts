@@ -1,6 +1,7 @@
 import { cronogramaPropuesto, hoyEnArgentina, sumarDias } from '@vida-sobrenatural/shared-types';
 import type { PrismaService } from '../../src/prisma/prisma.service.js';
 import { Escenario, MARTES_19_A_21 } from './discipulado-fixtures.js';
+import { tomarCandadoCursos } from './candado-cursos.js';
 
 /**
  * spec 008 — el escenario de los tests de integración de Vida de Servicio,
@@ -14,6 +15,7 @@ export class EscenarioVS {
   readonly esc: Escenario;
   cursoVsId = '';
   private cursoVnGrupalId = '';
+  private soltarCandado: (() => Promise<void>) | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -27,6 +29,8 @@ export class EscenarioVS {
   }
 
   async preparar(): Promise<void> {
+    // Comparte "Vida Nueva grupal" con el test de Cursos (013): ver candado-cursos.ts.
+    this.soltarCandado = await tomarCandadoCursos('compartido');
     await this.esc.preparar();
     const vs = await this.prisma.curso.upsert({
       where: { categoria_tipo: { categoria: 'vida_de_servicio', tipo: 'grupal' } },
@@ -132,5 +136,7 @@ export class EscenarioVS {
     await p.entregaNotificacion.deleteMany({ where: { OR: [{ personaId: { in: personas } }, { notificacionId: { in: notificaciones } }] } });
     await p.notificacion.deleteMany({ where: { OR: [{ id: { in: notificaciones } }, { alcanceId: { in: grupos } }] } });
     await this.esc.limpiar();
+    await this.soltarCandado?.();
+    this.soltarCandado = null;
   }
 }

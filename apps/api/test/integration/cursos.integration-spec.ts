@@ -5,12 +5,15 @@ import type { CursoDetalle, CursoListado } from '@vida-sobrenatural/shared-types
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { CursoService } from '../../src/curso/curso.service.js';
 import { Escenario, levantarApp, tokenDe } from './discipulado-fixtures.js';
+import { ESPERA_CANDADO_CURSOS, tomarCandadoCursos } from './candado-cursos.js';
 
 /**
  * spec 013, T073 (Historia 6): el catálogo de Cursos contra la base real. Se
- * trabaja SOLO con "Vida Nueva grupal" (`vida_nueva`/`grupal`), que ningún
- * otro spec usa: el Curso individual lo comparten los tests del discipulado
- * que corren en paralelo. Al terminar se borra de verdad.
+ * trabaja SOLO con "Vida Nueva grupal" (`vida_nueva`/`grupal`): el Curso
+ * individual lo comparten los tests del discipulado que corren en paralelo.
+ * "Vida Nueva grupal" también la usa el `EscenarioVS` de la 008, así que este
+ * archivo toma el candado exclusivo de `candado-cursos.ts`. Al terminar se
+ * borra de verdad.
  */
 describe('Cursos (integración, spec 013 T073)', () => {
   let app: INestApplication<Server>;
@@ -19,6 +22,7 @@ describe('Cursos (integración, spec 013 T073)', () => {
   let admin: string;
   let pastor: string;
   let cursoId = '';
+  let soltarCandado: () => Promise<void> = async () => {};
 
   const api = () => request(app.getHttpServer());
   const como = (token: string) => ({
@@ -36,18 +40,21 @@ describe('Cursos (integración, spec 013 T073)', () => {
   }
 
   beforeAll(async () => {
+    // Exclusivo: los Escenarios de Vida de Servicio (008) también usan "Vida Nueva grupal".
+    soltarCandado = await tomarCandadoCursos('exclusivo');
     ({ app, prisma } = await levantarApp());
     escenario = new Escenario(prisma, `cursos${Date.now()}`);
     await escenario.preparar();
     admin = await tokenDe(await escenario.persona('admin', { rol: ['miembro_registrado', 'admin'] }), ['miembro_registrado', 'admin']);
     pastor = await tokenDe(await escenario.persona('pastor', { rol: ['miembro_registrado', 'pastor'] }), ['miembro_registrado', 'pastor']);
     await borrarGrupal();
-  });
+  }, ESPERA_CANDADO_CURSOS);
 
   afterAll(async () => {
     await borrarGrupal();
     await escenario.limpiar();
     await app.close();
+    await soltarCandado();
   });
 
   it('FR-056: alta de una combinación reconocida; repetida → 409; no reconocida → 400', async () => {

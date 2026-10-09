@@ -9,6 +9,7 @@ import { discipuladosActivosDe } from '../../src/discipulado/discipulados-activo
 import { levantarApp, tokenDe } from './discipulado-fixtures.js';
 import { registrarAvisos } from './camino-fixtures.js';
 import { EscenarioVS } from './vida-de-servicio-fixtures.js';
+import { ESPERA_CANDADO_CURSOS } from './candado-cursos.js';
 
 /**
  * spec 008, T018 + T068 + T061/T067 (FR-002 a FR-007, FR-038 a FR-040;
@@ -44,7 +45,7 @@ describe('Vida de Servicio — ediciones del Admin (spec 008, T018/T068)', () =>
     pastorId = await vs.persona('pastor', { rol: PASTOR });
     lider1 = await vs.lider('lider1');
     lider2 = await vs.lider('lider2');
-  });
+  }, ESPERA_CANDADO_CURSOS);
 
   afterAll(async () => {
     avisos.restaurar();
