@@ -81,7 +81,9 @@ test('"Marcar todos como leídos" saca el contador y confirma (US1-4) @celular',
   expect(await sinLeerDe(id)).toBe(0);
 });
 
-test('si "Marcar todos" falla: mensaje con "Reintentar" y código, y el contador no cambia (US1-7) @celular', async ({ page, baseURL }) => {
+test('si "Marcar todos" falla: mensaje con "Reintentar" y código, y el contador no cambia (US1-7) @celular', async ({ page, baseURL, permitirErrorDeConsola }) => {
+  // El 500 lo simula el test: el navegador lo anota en la consola.
+  permitirErrorDeConsola(/the server responded with a status of 500/);
   const { id } = await personaConSesion(page, baseURL!, 'error');
   await sembrarAvisos(id, [{}, {}]);
   await page.route('**/avisos/leer-todos', (ruta) =>
