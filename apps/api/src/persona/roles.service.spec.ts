@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { hoyEnArgentina } from '@vida-sobrenatural/shared-types';
 import { RolesService } from './roles.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CambioDeRolService } from '../cambio-de-rol/cambio-de-rol.service.js';
@@ -6,10 +7,14 @@ import { AppException } from '../common/errors/app-exception.js';
 
 const ADULTA = new Date('1985-06-15');
 
+/**
+ * Cumple `anios` justo hoy, con "hoy" en Argentina: es el día que usa
+ * `otorgarRol` (`esMenorDeEdad(…, hoyEnArgentina())`). Con el día de UTC,
+ * entre las 21 y las 24 de Argentina el cumpleaños caía "mañana".
+ */
 function haceAnios(anios: number): Date {
-  const fecha = new Date();
-  fecha.setUTCFullYear(fecha.getUTCFullYear() - anios);
-  return fecha;
+  const [anio, mes, dia] = hoyEnArgentina().split('-').map(Number);
+  return new Date(Date.UTC(anio - anios, mes - 1, dia));
 }
 
 /**
