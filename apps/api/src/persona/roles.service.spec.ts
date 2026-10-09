@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { hoyEnArgentina } from '@vida-sobrenatural/shared-types';
 import { RolesService } from './roles.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CambioDeRolService } from '../cambio-de-rol/cambio-de-rol.service.js';
@@ -6,10 +7,14 @@ import { AppException } from '../common/errors/app-exception.js';
 
 const ADULTA = new Date('1985-06-15');
 
+/**
+ * Nacida hace `anios` años contados desde HOY EN ARGENTINA, el mismo día civil
+ * que usa `RolesService` (`hoyEnArgentina`). Con la hora UTC, entre las 00 y
+ * las 03 UTC el "hoy" de la cuenta era el día siguiente y el test fallaba.
+ */
 function haceAnios(anios: number): Date {
-  const fecha = new Date();
-  fecha.setUTCFullYear(fecha.getUTCFullYear() - anios);
-  return fecha;
+  const [anio, mes, dia] = hoyEnArgentina().split('-').map(Number);
+  return new Date(Date.UTC(anio - anios, mes - 1, dia));
 }
 
 /**
