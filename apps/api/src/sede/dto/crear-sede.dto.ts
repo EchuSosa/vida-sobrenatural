@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Matches, Validate, ValidateIf } from 'class-validator';
 import { HORARIOS_SEDE_REGEX, TELEFONO_REGEX } from '@vida-sobrenatural/shared-types';
+import { WhatsappArgentino } from './whatsapp-argentino.js';
 
 /** Body de POST /sedes — Historia 3, FR-010. */
 export class CrearSedeDto {
@@ -35,4 +36,11 @@ export class CrearSedeDto {
   @IsOptional()
   @IsString()
   descripcionBienvenida?: string;
+
+  @ApiPropertyOptional({ description: 'D218: celular argentino, como lo escriba el Admin; se guarda normalizado (549…). Vacío = sin WhatsApp.' })
+  @IsOptional()
+  @IsString()
+  @ValidateIf((_objeto, valor) => valor !== '')
+  @Validate(WhatsappArgentino)
+  whatsappSecretaria?: string;
 }

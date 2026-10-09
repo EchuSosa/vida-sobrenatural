@@ -88,9 +88,10 @@ export interface CaminoDeLaPersona {
   /**
    * T041: a quién escribirle si una declaración no se confirmó — el contacto de
    * la Sede de la Persona (`Sede.contactoTelefono`, el mismo de Visitanos).
-   * `telefono: null` → la card dice "acercate a la Sede".
+   * `telefono: null` → la card dice "acercate a la Sede". `whatsapp` (D218):
+   * el WhatsApp de Secretaría normalizado (`549…`), o null si no está cargado.
    */
-  sede: { nombre: string; telefono: string | null } | null;
+  sede: { nombre: string; telefono: string | null; whatsapp: string | null } | null;
 }
 
 /** `POST /camino/me/declaraciones` (201). */

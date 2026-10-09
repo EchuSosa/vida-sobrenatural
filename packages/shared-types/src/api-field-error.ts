@@ -43,6 +43,9 @@ const COPIA_POR_CODIGO: Record<string, string> = {
   CONTACTOTELEFONO_INVALIDO: 'Ingresá un teléfono con código de área, por ejemplo 221 555 1234.',
   TUTORTELEFONO_INVALIDO: 'Ingresá un teléfono con código de área, por ejemplo 221 555 1234.',
   HORARIOS_INVALIDO: 'Usá un formato como "Domingos 10:30 hs" o "Domingos 10 hs y Martes 19 hs".',
+  // D218
+  WHATSAPPSECRETARIA_INVALIDO:
+    'Escribí un celular argentino con la característica, sin el 0 ni el 15. Por ejemplo: 221 555 0101.',
   CONTACTOEMAIL_INVALIDO: 'Ingresá un email válido, por ejemplo nombre@ejemplo.com.',
   FECHANACIMIENTO_INVALIDO: 'Ingresá una fecha válida.',
   // specs/003-contenido-institucional, FR-011: no es un código derivado de

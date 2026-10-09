@@ -256,7 +256,8 @@
     "email": "Email:",
     "comoLlegar": "Cómo llegar",
     "llamar": "Llamar",
-    "escribirEmail": "Escribir un email"
+    "escribirEmail": "Escribir un email",
+    "escribirWhatsapp": "Escribir por WhatsApp"
   },
   "nosotros": {
     "titulo": "Nosotros",
@@ -559,6 +560,7 @@
       "noConfirmadaMotivo": "Lo que nos dijo el equipo: «{motivo}»",
       "noConfirmadaTelefono": "Escribinos o llamanos al {telefono}",
       "noConfirmadaSinTelefono": "Acercate a la Sede {sede} y lo charlamos.",
+      "noConfirmadaWhatsapp": "Escribinos por WhatsApp",
       "vidaNuevaPuedePedir": "Pedila con los días y horarios que podés, y buscamos a alguien que te acompañe.",
       "vidaNuevaBaja": "Si querés retomar, podés volver a pedirla cuando quieras.",
       "vidaNuevaBuscando": "Recibimos tu pedido. Podés ver o cambiar tus horarios.",

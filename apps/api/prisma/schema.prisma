@@ -28,6 +28,9 @@ model Sede {
   contactoEmail         String?
   horarios              String
   descripcionBienvenida String?
+  // D218: celular argentino normalizado para wa.me (549 + 10 dígitos), opcional.
+  // La API lo normaliza (`normalizarWhatsappArgentino`) y un CHECK lo asegura.
+  whatsappSecretaria    String?
   activo                Boolean @default(true)
 
   // D119 (revisión manual ronda 6, H-67/H-69): Inactivar y Eliminar son dos

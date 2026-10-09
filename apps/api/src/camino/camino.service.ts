@@ -40,7 +40,7 @@ export class CaminoService {
   async estadoDeEtapas(personaId: string): Promise<CaminoDeLaPersona> {
     const persona = await this.prisma.persona.findUnique({
       where: { id: personaId },
-      select: { fechaNacimiento: true, sede: { select: { nombre: true, contactoTelefono: true } } },
+      select: { fechaNacimiento: true, sede: { select: { nombre: true, contactoTelefono: true, whatsappSecretaria: true } } },
     });
     if (!persona) throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
 
@@ -54,7 +54,13 @@ export class CaminoService {
     return {
       etapas: ETAPAS_CAMINO.map((etapa) => estadoDeEtapa(etapa, hechos)),
       vidaNueva,
-      sede: persona.sede ? { nombre: persona.sede.nombre, telefono: persona.sede.contactoTelefono?.trim() || null } : null,
+      sede: persona.sede
+        ? {
+            nombre: persona.sede.nombre,
+            telefono: persona.sede.contactoTelefono?.trim() || null,
+            whatsapp: persona.sede.whatsappSecretaria,
+          }
+        : null,
     };
   }
 

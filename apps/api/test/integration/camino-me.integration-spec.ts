@@ -52,7 +52,10 @@ describe('GET /camino/me (spec 006, T025)', () => {
 
   it('Persona sin nada: cuatro etapas en orden, Vida Nueva disponible, las demás según ETAPAS_CONSTRUIDAS, y la Sede para el contacto', async () => {
     const id = await esc.persona('nada');
-    await prisma.sede.update({ where: { id: esc.sedeId }, data: { contactoTelefono: '+54 221 555-0000' } });
+    await prisma.sede.update({
+      where: { id: esc.sedeId },
+      data: { contactoTelefono: '+54 221 555-0000', whatsappSecretaria: '5492215550101' },
+    });
     const c = await camino(id);
     expect(c.etapas.map((e) => e.etapa)).toEqual(ETAPAS_CAMINO);
     expect(etapa(c, 'vida_nueva')).toEqual({ etapa: 'vida_nueva', estado: 'disponible', puedeDeclarar: true });
@@ -61,7 +64,12 @@ describe('GET /camino/me (spec 006, T025)', () => {
       expect(otra).toMatchObject({ puedeDeclarar: true });
     }
     expect(c.vidaNueva).toEqual({ estado: 'puede_pedir' });
-    expect(c.sede).toEqual({ nombre: expect.stringContaining('Sede discipulado integ'), telefono: '+54 221 555-0000' });
+    // D218: también el WhatsApp de Secretaría, para el botón de la card.
+    expect(c.sede).toEqual({
+      nombre: expect.stringContaining('Sede discipulado integ'),
+      telefono: '+54 221 555-0000',
+      whatsapp: '5492215550101',
+    });
 
     // `vidaNueva` es exactamente lo de GET /discipulado/me (FR-005).
     const vn = await request(app.getHttpServer())
@@ -70,8 +78,8 @@ describe('GET /camino/me (spec 006, T025)', () => {
       .expect(200);
     expect(c.vidaNueva).toEqual(vn.body);
 
-    await prisma.sede.update({ where: { id: esc.sedeId }, data: { contactoTelefono: null } });
-    expect((await camino(id)).sede?.telefono).toBeNull();
+    await prisma.sede.update({ where: { id: esc.sedeId }, data: { contactoTelefono: null, whatsappSecretaria: null } });
+    expect((await camino(id)).sede).toMatchObject({ telefono: null, whatsapp: null });
   });
 
   it('con pedido abierto (buscando) → Vida Nueva en curso, sin "Ya lo hice"', async () => {

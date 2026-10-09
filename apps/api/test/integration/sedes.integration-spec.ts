@@ -325,3 +325,96 @@ describe('POST /sedes (integración) — al menos un dato de contacto (H-104)', 
     if (response.body.id) idsSedeParaLimpiar.push(response.body.id);
   });
 });
+
+describe('WhatsApp de Secretaría de la Sede (integración) — D218', () => {
+  let app: INestApplication<Server>;
+  let prisma: PrismaService;
+  let sedeId: string;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    app = moduleFixture.createNestApplication();
+    configurarApp(app);
+    await app.init();
+    prisma = moduleFixture.get(PrismaService);
+    const sede = await prisma.sede.create({
+      data: {
+        nombre: `Sede integ whatsapp ${Date.now()}`,
+        direccion: 'Dirección',
+        horarios: 'Domingos 10 hs',
+        contactoEmail: 'sede-integ@example.com',
+        activo: false,
+      },
+    });
+    sedeId = sede.id;
+  });
+
+  afterAll(async () => {
+    if (sedeId) await prisma.sede.delete({ where: { id: sedeId } }).catch(() => undefined);
+    await app.close();
+  });
+
+  it('lo guarda normalizado para wa.me, escriba como lo escriba el Admin, y lo devuelve en el GET', async () => {
+    const token = await mintAdminToken();
+    const response = await request(app.getHttpServer())
+      .patch(`/sedes/${sedeId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ whatsappSecretaria: '0221 15 555-0101' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.whatsappSecretaria).toBe('5492215550101');
+    const enBase = await prisma.sede.findUniqueOrThrow({ where: { id: sedeId } });
+    expect(enBase.whatsappSecretaria).toBe('5492215550101');
+
+    const detalle = await request(app.getHttpServer()).get(`/sedes/${sedeId}`);
+    expect(detalle.body.whatsappSecretaria).toBe('5492215550101');
+  });
+
+  it('responde 400 con el error en el campo si no es un celular argentino', async () => {
+    const token = await mintAdminToken();
+    const response = await request(app.getHttpServer())
+      .patch(`/sedes/${sedeId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ whatsappSecretaria: '123' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toEqual([{ campo: 'whatsappSecretaria', code: 'WHATSAPPSECRETARIA_INVALIDO' }]);
+  });
+
+  it('vacío lo borra, y sin el campo en el PATCH queda como estaba', async () => {
+    const token = await mintAdminToken();
+    await prisma.sede.update({ where: { id: sedeId }, data: { whatsappSecretaria: '5492215550101' } });
+
+    const sinCampo = await request(app.getHttpServer())
+      .patch(`/sedes/${sedeId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ direccion: 'Otra dirección' });
+    expect(sinCampo.body.whatsappSecretaria).toBe('5492215550101');
+
+    const vacio = await request(app.getHttpServer())
+      .patch(`/sedes/${sedeId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ whatsappSecretaria: '' });
+    expect(vacio.status).toBe(200);
+    expect(vacio.body.whatsappSecretaria).toBeNull();
+  });
+
+  it('se puede cargar al crear la Sede', async () => {
+    const token = await mintAdminToken();
+    const response = await request(app.getHttpServer())
+      .post('/sedes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        nombre: `Sede integ whatsapp alta ${Date.now()}`,
+        direccion: 'Dirección',
+        horarios: 'Domingos 10 hs',
+        contactoEmail: 'alta@example.com',
+        whatsappSecretaria: '+54 9 11 4555-0101',
+      });
+    expect(response.status).toBe(201);
+    expect(response.body.whatsappSecretaria).toBe('5491145550101');
+    await prisma.sede.delete({ where: { id: response.body.id } });
+  });
+});

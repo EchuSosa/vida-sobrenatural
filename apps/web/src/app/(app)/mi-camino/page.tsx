@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { CalendarClock, CircleAlert, CircleCheck, Clock, Hourglass, Lock, Search, Sparkles, UserRound } from 'lucide-react';
+import { CalendarClock, CircleAlert, CircleCheck, Clock, Hourglass, Lock, MessageCircle, Search, Sparkles, UserRound } from 'lucide-react';
 import {
   apiFetch,
+  enlaceWhatsapp,
   formatearDiaEnArgentina,
   type CaminoDeLaPersona,
   type EstadoEtapa,
@@ -157,6 +158,18 @@ export default async function MiCaminoPage() {
             </a>
           ) : (
             sede && <p className="text-muted-foreground">{t('estados.noConfirmadaSinTelefono', { sede: sede.nombre })}</p>
+          )}
+          {/* D218: si la Sede cargó el WhatsApp de Secretaría, también por ahí (texto + ícono, D81). */}
+          {sede?.whatsapp && (
+            <a
+              href={enlaceWhatsapp(sede.whatsapp)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-fit items-center gap-1.5 font-medium text-primary underline underline-offset-2"
+            >
+              <MessageCircle aria-hidden className="size-4 shrink-0" />
+              {t('estados.noConfirmadaWhatsapp')}
+            </a>
           )}
         </div>
       </div>

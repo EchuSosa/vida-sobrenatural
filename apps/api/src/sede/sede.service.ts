@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import type { CrearSedeDto } from './dto/crear-sede.dto.js';
 import type { ActualizarSedeDto } from './dto/actualizar-sede.dto.js';
+import { whatsappParaGuardar } from './dto/whatsapp-argentino.js';
 
 const SEDE_SELECT = {
   id: true,
@@ -12,6 +13,7 @@ const SEDE_SELECT = {
   contactoEmail: true,
   horarios: true,
   descripcionBienvenida: true,
+  whatsappSecretaria: true,
   // H-51/D117: el backoffice necesita saber cuáles están inactivas para
   // mostrar el estado (texto + ícono) en el listado — no es un dato
   // sensible, así que se agrega al select público en vez de duplicar uno
@@ -31,6 +33,7 @@ type SedeConCount = {
   contactoEmail: string | null;
   horarios: string;
   descripcionBienvenida: string | null;
+  whatsappSecretaria: string | null;
   activo: boolean;
   eliminadoEn: Date | null;
   _count: { personas: number };
@@ -92,8 +95,9 @@ export class SedeService {
     this.validarAlMenosUnContacto(dto);
     await this.validarNombreUnicoEntreActivas(dto.nombre);
 
+    const { whatsappSecretaria, ...datos } = dto;
     const sede = await this.prisma.sede.create({
-      data: { ...dto, activo: true },
+      data: { ...datos, whatsappSecretaria: whatsappParaGuardar(whatsappSecretaria), activo: true },
       select: SEDE_SELECT,
     });
     return paraRespuesta(sede);
@@ -139,9 +143,10 @@ export class SedeService {
       await this.validarNombreUnicoEntreActivas(dto.nombre ?? existente.nombre, id);
     }
 
+    const { whatsappSecretaria, ...datos } = dto;
     const sede = await this.prisma.sede.update({
       where: { id },
-      data: dto,
+      data: { ...datos, whatsappSecretaria: whatsappParaGuardar(whatsappSecretaria) },
       select: SEDE_SELECT,
     });
     return paraRespuesta(sede);

@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import type { useTranslations } from 'next-intl';
-import type { Sede } from '@vida-sobrenatural/shared-types';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { enlaceWhatsapp, type Sede } from '@vida-sobrenatural/shared-types';
+import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { ButtonLink, HeroConFoto } from '@vida-sobrenatural/ui';
 import { ChurchJsonLd } from '../../../components/church-json-ld';
 import { FOTOS_HEROE } from '@/assets/images/fotos-heroe';
@@ -57,6 +57,19 @@ function SedeCard({ sede, t }: { sede: Sede; t: ReturnType<typeof useTranslation
           <MapPin aria-hidden />
           {t('comoLlegar')}
         </ButtonLink>
+        {/* D218: solo si la Sede cargó el WhatsApp de Secretaría; texto + ícono (D81). */}
+        {sede.whatsappSecretaria && (
+          <ButtonLink
+            href={enlaceWhatsapp(sede.whatsappSecretaria)}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="outline"
+            size="xl"
+          >
+            <MessageCircle aria-hidden />
+            {t('escribirWhatsapp')}
+          </ButtonLink>
+        )}
         {sede.contactoTelefono && (
           <ButtonLink href={`tel:${sede.contactoTelefono.replace(/[^+\d]/g, '')}`} variant="outline" size="xl">
             <Phone aria-hidden />

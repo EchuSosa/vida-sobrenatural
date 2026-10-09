@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { type Sede, type ErrorDeCampo, HORARIOS_SEDE_REGEX, TELEFONO_REGEX, mensajeDeCampo } from '@vida-sobrenatural/shared-types';
+import {
+  type Sede,
+  type ErrorDeCampo,
+  HORARIOS_SEDE_REGEX,
+  TELEFONO_REGEX,
+  formatearWhatsappArgentino,
+  mensajeDeCampo,
+  normalizarWhatsappArgentino,
+} from '@vida-sobrenatural/shared-types';
 import { Button, CampoTelefono, Input, ResumenErrores, MensajeErrorCampo, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
 
 export interface ValoresSede {
@@ -12,6 +20,8 @@ export interface ValoresSede {
   numero: string;
   contactoEmail: string;
   descripcionBienvenida: string;
+  /** D218: como lo escribe el Admin; vacío = sin WhatsApp. */
+  whatsappSecretaria: string;
 }
 
 export const VALORES_SEDE_VACIOS: ValoresSede = {
@@ -22,6 +32,7 @@ export const VALORES_SEDE_VACIOS: ValoresSede = {
   numero: '',
   contactoEmail: '',
   descripcionBienvenida: '',
+  whatsappSecretaria: '',
 };
 
 /** H-52: valores iniciales del formulario de edición a partir de una Sede ya cargada. */
@@ -35,6 +46,7 @@ export function sedeAValoresFormulario(sede: Sede): ValoresSede {
     numero: (match?.[2] ?? '').replace(/\s+/g, ''),
     contactoEmail: sede.contactoEmail ?? '',
     descripcionBienvenida: sede.descripcionBienvenida ?? '',
+    whatsappSecretaria: sede.whatsappSecretaria ? formatearWhatsappArgentino(sede.whatsappSecretaria) : '',
   };
 }
 
@@ -47,6 +59,8 @@ export function datosSedeParaEnviar(valores: ValoresSede) {
     contactoTelefono: valores.numero ? `${valores.codigoPais} ${valores.numero}` : undefined,
     contactoEmail: valores.contactoEmail || undefined,
     descripcionBienvenida: valores.descripcionBienvenida || undefined,
+    // D218: vacío se manda igual — en la edición es lo que borra el WhatsApp.
+    whatsappSecretaria: valores.whatsappSecretaria.trim(),
   };
 }
 
@@ -63,6 +77,7 @@ const ETIQUETAS_CAMPO: Record<string, string> = {
   contactoTelefono: 'Teléfono de contacto',
   contactoEmail: 'Email de contacto',
   descripcionBienvenida: 'Descripción para la Bienvenida',
+  whatsappSecretaria: 'WhatsApp de Secretaría',
 };
 
 const MENSAJE_REQUERIDO = 'Revisá este dato.';
@@ -130,6 +145,11 @@ export function FormularioSede({
         v.numero.trim() === '' || TELEFONO_REGEX.test(`${v.codigoPais} ${v.numero}`),
       mensaje: mensajeDeCampo('CONTACTOTELEFONO_INVALIDO', ETIQUETAS_CAMPO.contactoTelefono),
     } satisfies ValidacionCampo<{ codigoPais: string; numero: string }>,
+    // D218: opcional; si se carga, un celular argentino (la API lo normaliza).
+    whatsappSecretaria: {
+      esValido: (v: string) => v.trim() === '' || normalizarWhatsappArgentino(v) !== null,
+      mensaje: mensajeDeCampo('WHATSAPPSECRETARIA_INVALIDO', ETIQUETAS_CAMPO.whatsappSecretaria),
+    } satisfies ValidacionCampo<string>,
   };
 
   function actualizar<K extends keyof ValoresSede>(campo: K, valor: ValoresSede[K]) {
@@ -247,6 +267,37 @@ export function FormularioSede({
           }}
         />
         <MensajeErrorCampo id="campo-contactoEmail-error" mensaje={validacion.mensajes.contactoEmail} />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor="campo-whatsappSecretaria" className="text-sm font-medium">
+          WhatsApp de Secretaría (opcional)
+        </label>
+        <p id="campo-whatsappSecretaria-ayuda" className="text-sm text-muted-foreground">
+          Un celular, con la característica y sin el 0 ni el 15. Por ejemplo: 221 555 0101. Si lo cargás,
+          Visitanos muestra el botón &quot;Escribir por WhatsApp&quot;.
+        </p>
+        <Input
+          id="campo-whatsappSecretaria"
+          type="tel"
+          inputMode="tel"
+          autoComplete="off"
+          aria-invalid={Boolean(validacion.mensajes.whatsappSecretaria)}
+          aria-describedby={
+            validacion.mensajes.whatsappSecretaria
+              ? 'campo-whatsappSecretaria-ayuda campo-whatsappSecretaria-error'
+              : 'campo-whatsappSecretaria-ayuda'
+          }
+          value={valores.whatsappSecretaria}
+          disabled={soloLectura}
+          onChange={(e) => {
+            actualizar('whatsappSecretaria', e.target.value);
+            validacion.limpiar('whatsappSecretaria');
+          }}
+          onBlur={() =>
+            validacion.revalidar('whatsappSecretaria', valores.whatsappSecretaria, validaciones.whatsappSecretaria)
+          }
+        />
+        <MensajeErrorCampo id="campo-whatsappSecretaria-error" mensaje={validacion.mensajes.whatsappSecretaria} />
       </div>
       <textarea
         id="campo-descripcionBienvenida"

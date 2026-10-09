@@ -493,3 +493,35 @@ test('la papelera de Sedes es solo del Admin: un Pastor y otro rol reciben 404',
     await expect(page.getByRole('table')).toHaveCount(0);
   }
 });
+
+// D218: WhatsApp de Secretaría, opcional, en el detalle de la Sede.
+test('cargar el WhatsApp de Secretaría en una Sede: valida el celular, lo guarda y lo muestra prolijo', async ({ page }) => {
+  const nombreSede = `e2e-sede-whatsapp-${Date.now()}`;
+  await loguearseComoAdminE2E(page);
+  await page.goto('/sedes');
+  await page.waitForLoadState('networkidle');
+  await crearSedePorModal(page, nombreSede);
+  await abrirDetalleDesdeFila(page, filaSede(page, nombreSede));
+  await expect(page.getByRole('heading', { name: nombreSede })).toBeVisible();
+
+  const whatsapp = page.getByLabel('WhatsApp de Secretaría (opcional)');
+  await whatsapp.fill('123');
+  await whatsapp.blur();
+  await expect(page.locator('#campo-whatsappSecretaria-error')).toHaveText(
+    'Escribí un celular argentino con la característica, sin el 0 ni el 15. Por ejemplo: 221 555 0101.',
+  );
+
+  await whatsapp.fill('0221 15 555-0101');
+  await page.getByRole('button', { name: 'Guardar cambios' }).click();
+  await expect(page.getByText('Cambios guardados.')).toBeVisible();
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByLabel('WhatsApp de Secretaría (opcional)')).toHaveValue('+54 9 221 555-0101');
+
+  await page.getByRole('button', { name: 'Desactivar' }).click();
+  await page
+    .getByRole('alertdialog', { name: `¿Desactivar la Sede ${nombreSede}?` })
+    .getByRole('button', { name: 'Sí, desactivar' })
+    .click();
+  await expect(page.getByText('Sede desactivada.')).toBeVisible();
+});
