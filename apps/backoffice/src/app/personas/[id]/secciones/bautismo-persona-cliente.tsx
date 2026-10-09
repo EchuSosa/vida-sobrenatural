@@ -23,7 +23,7 @@ import { Button, CampoTalleRemera, ConfirmDestructiveDialog, DialogoTextoOpciona
  * spec 010, T049 y T050 — la parte interactiva de la sección Bautismo del
  * Perfil. Habilitar y quitar la habilitación son reversibles (diálogos
  * neutros, D151); pedir en su nombre pide el talle de remera (obligatorio,
- * D220) y el comentario opcional, con el error por campo de la pieza compartida (H-50).
+ * D229) y el comentario opcional, con el error por campo de la pieza compartida (H-50).
  */
 export function BautismoPersonaCliente({
   personaId,

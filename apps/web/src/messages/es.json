@@ -180,9 +180,29 @@
       "FECHA_INVALIDA": "Escribí una fecha válida, por ejemplo 28/10/2026.",
       "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última.",
       "TALLE_REQUERIDO": "Elegí un talle de remera de la lista.",
-      "TALLE_INVALIDO": "Ese talle no está en la lista: elegí uno entre XS y XXXL."
+      "TALLE_INVALIDO": "Ese talle no está en la lista: elegí uno entre XS y XXXL.",
+      "DIAS_REQUERIDOS": "Elegí al menos un día de reunión.",
+      "HORA_INVALIDA": "Elegí la hora de inicio (en pasos de 15 minutos, por ejemplo 18:30).",
+      "EDAD_INVALIDA": "Escribí una edad entre 0 y 120, o dejalo vacío para no poner límite.",
+      "EDADES_INVERTIDAS": "La edad máxima tiene que ser igual o mayor que la mínima.",
+      "CALLE_REQUERIDA": "Escribí la calle donde se reúne el grupo (por ejemplo, 64), o marcá \"En la iglesia\".",
+      "ZONA_REQUERIDA": "Escribí el barrio o la zona (por ejemplo, Tolosa): es lo que ven quienes buscan grupo.",
+      "ENTRE_CALLES_INCOMPLETAS": "Completá las dos entre calles, o dejá las dos vacías.",
+      "LIDER_MENOR_DE_EDAD": "Una persona menor de 18 años no puede liderar un grupo. Elegí a otra persona.",
+      "LIDER_NO_DISPONIBLE": "Alguna de las personas elegidas ya no está activa. Elegila de nuevo de la lista.",
+      "DIRECCION_REQUERIDA": "Escribí tu dirección (calle y número, o calle y entre calles), o tocá \"Usar mi ubicación\"."
     },
-    "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta."
+    "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
+    "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
+    "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
+    "GRUPO_EXTENSION_YA_INTEGRANTE": "Esta persona ya forma parte de un grupo de extensión. Para cambiarla, primero hay que quitarla del grupo actual.",
+    "GRUPO_EXTENSION_PEDIDO_PENDIENTE": "Ya hay un pedido para sumarse a un grupo esperando respuesta. Retiralo antes de pedir otro.",
+    "GRUPO_EXTENSION_NO_COMPATIBLE": "Este grupo es para otro género o para otra edad. Buscá entre los grupos que te mostramos.",
+    "GRUPO_EXTENSION_SOLICITUD_NO_PENDIENTE": "Este pedido ya fue respondido. Actualizá la página para ver cómo quedó.",
+    "GRUPO_EXTENSION_NO_INTEGRANTE": "Esta persona ya no forma parte del grupo. Actualizá la página.",
+    "GRUPO_EXTENSION_CON_INTEGRANTES": "El grupo tiene integrantes o pedidos esperando respuesta. Quitá a los integrantes y respondé los pedidos antes de inactivarlo.",
+    "DIRECCION_NO_UBICADA": "No encontramos esa dirección. Escribí la calle y el número (por ejemplo, \"7 nro 1200\"), o la calle y entre qué calles.",
+    "UBICACION_NO_DISPONIBLE": "No pudimos ubicar tu dirección en este momento. Probá con \"Usar mi ubicación\" o intentá de nuevo en unos minutos."
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -602,7 +622,8 @@
       "etiqueta": "Secciones de Mi camino",
       "miCamino": "Mi camino",
       "misDiscipulados": "Mis discipulados",
-      "misGrupos": "Mis grupos"
+      "misGrupos": "Mis grupos",
+      "miGrupoExtension": "Mi grupo"
     },
     "ministerio": {
       "noAptaTitulo": "Primero, Vida de Servicio",
@@ -792,6 +813,14 @@
         "baja_confirmada": {
           "titulo": "Tu discipulado de Vida Nueva terminó",
           "detalle": "Cuando quieras, podés volver a pedirlo desde Mi camino."
+        },
+        "reasignacion_retirada": {
+          "titulo": "Ya no hace falta que respondas la propuesta",
+          "detalle": "El equipo de la iglesia retiró la propuesta para acompañar un discipulado. No tenés que hacer nada."
+        },
+        "propuesta_nueva_retirada": {
+          "titulo": "Ya no hace falta que respondas la propuesta",
+          "detalle": "La propuesta para acompañar a una persona en Vida Nueva quedó sin efecto. No tenés que hacer nada."
         }
       },
       "persona": {
@@ -932,6 +961,24 @@
         "recordatorio_inscripcion": {
           "titulo": "Quedan {dias} días para anotarte en {evento}",
           "detalle": "Si querés ir, anotate desde la cartelera."
+        }
+      },
+      "grupo_extension": {
+        "solicitud_nueva": {
+          "titulo": "Tenés un pedido nuevo para {grupo}",
+          "detalle": "Alguien quiere sumarse a tu grupo. Entrá a Mi grupo para ver quién es y escribirle."
+        },
+        "solicitud_aceptada": {
+          "titulo": "Ya formás parte del grupo {grupo}",
+          "detalle": "En Mi camino tenés la dirección, los días y el horario, y cómo llegar."
+        },
+        "solicitud_rechazada": {
+          "titulo": "Sobre tu pedido para {grupo}",
+          "detalle": "Esta vez no era el grupo indicado. Podés elegir otro grupo desde Mi camino: hay lugar para vos."
+        },
+        "agregada_por_admin": {
+          "titulo": "Te sumaron al grupo {grupo}",
+          "detalle": "En Mi camino tenés la dirección, los días y el horario, y cómo llegar."
         }
       }
     }
@@ -1732,5 +1779,148 @@
     "guardado": "Guardamos tus cambios.",
     "errorGuardar": "No pudimos guardar tus cambios. Probá de nuevo en un rato.",
     "ayudaTelefono": "Con la característica, sin el 0 ni el 15."
+  },
+  "grupoExtension": {
+    "dias": {
+      "lunes": "lunes",
+      "martes": "martes",
+      "miercoles": "miércoles",
+      "jueves": "jueves",
+      "viernes": "viernes",
+      "sabado": "sábado",
+      "domingo": "domingo"
+    },
+    "y": "y",
+    "horario": "{dias} a las {hora} hs",
+    "card": {
+      "titulo": "Mi grupo de extensión",
+      "descripcion": "Un grupo chico que se reúne en una casa o en la iglesia, cerca tuyo, para compartir la semana y crecer juntos. Va aparte de las etapas: podés sumarte cuando quieras.",
+      "sinGrupoTitulo": "Todavía no tenés grupo",
+      "sinGrupoTexto": "Buscá uno cerca de tu casa, en los días que te quedan cómodos.",
+      "buscar": "Encontrá tu grupo",
+      "pendienteTitulo": "Pediste sumarte a {grupo}",
+      "pendienteTexto": "Le avisamos a {lideres}. Te va a escribir para contarte más.",
+      "verPedido": "Ver mi pedido",
+      "integranteTitulo": "Formás parte de {grupo}",
+      "verGrupo": "Ver mi grupo y cómo llegar",
+      "rechazadaTitulo": "Tu pedido para {grupo} no siguió adelante",
+      "rechazadaTexto": "Esta vez no era el grupo indicado. Podés elegir otro: hay lugar para vos.",
+      "finalizadaTitulo": "Ya no figurás en {grupo}",
+      "finalizadaTexto": "Si fue un error, hablá con alguien del equipo. Podés elegir otro grupo cuando quieras.",
+      "liderEnlace": "Ir a Mi grupo (lo que lidero)"
+    },
+    "pagina": {
+      "titulo": "Mi grupo de extensión",
+      "intro": "Los grupos de extensión se reúnen una vez por semana en una casa o en la iglesia. Elegí uno cerca tuyo y quien lo lidera te va a escribir.",
+      "volver": "Volver a Mi camino",
+      "errorCargaTitulo": "No pudimos cargar tu grupo",
+      "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, contale al equipo este código:",
+      "reintentar": "Reintentar",
+      "liderEnlace": "Ir a Mi grupo (lo que lidero)"
+    },
+    "buscar": {
+      "titulo": "Encontrá tu grupo",
+      "ayuda": "Te mostramos los grupos que son para vos (por tu edad y tu género), del más cercano al más lejano. Tu dirección no se guarda: la usamos solo para calcular la distancia.",
+      "direccionEtiqueta": "Tu dirección",
+      "direccionAyuda": "Calle y número, o calle y entre calles. Por ejemplo: 7 nro 1200, o 64 e/ 11 y 12.",
+      "buscar": "Buscar grupos",
+      "usarUbicacion": "Usar mi ubicación",
+      "ubicacionNoDisponible": "No pudimos usar tu ubicación. Escribí tu dirección y tocá \"Buscar grupos\".",
+      "diasEtiqueta": "¿Qué días podés? (opcional)",
+      "diasAyuda": "Si no marcás ninguno, te mostramos todos los días.",
+      "resumenErrores": "Revisá esto para buscar:",
+      "resultadosTitulo": "Grupos para vos",
+      "resultadosCantidad": "{cantidad, plural, one {Encontramos # grupo} other {Encontramos # grupos}}, del más cercano al más lejano.",
+      "vacio": "No encontramos grupos para vos con esos días. Probá marcando otros días, o sin marcar ninguno.",
+      "vacioSinFiltro": "Todavía no hay grupos para vos. Hablá con alguien del equipo de la iglesia: te ayudamos a encontrar uno.",
+      "distancia": "A {km} km",
+      "sinDistancia": "Distancia sin calcular",
+      "enLaIglesia": "En la iglesia",
+      "zona": "Zona: {zona}",
+      "lidera": "Lo lidera {lideres}",
+      "mixto": "Para todos",
+      "completo": "Completo: no quedan lugares",
+      "quieroSumarme": "Quiero sumarme",
+      "sumarmeAria": "Quiero sumarme a {grupo}",
+      "confirmarTitulo": "¿Te sumás a {grupo}?",
+      "confirmarDescripcion": "Le vamos a avisar a quien lo lidera y te va a escribir. Le vamos a pasar tu nombre, tu teléfono y tu email.",
+      "confirmarSi": "Sí, quiero sumarme",
+      "confirmarNo": "Seguir mirando",
+      "enviado": "¡Listo! Le avisamos a quien lidera el grupo.",
+      "errorGenerico": "No pudimos completar el pedido. Probá de nuevo en un momento."
+    },
+    "pendiente": {
+      "titulo": "Pediste sumarte a {grupo}",
+      "texto": "Le avisamos a {lideres} el {fecha}. Te va a escribir para contarte más.",
+      "retirar": "Retirar el pedido",
+      "retirarTitulo": "¿Retirás tu pedido para {grupo}?",
+      "retirarDescripcion": "Vas a poder elegir otro grupo enseguida.",
+      "retirarConfirmar": "Sí, retirar el pedido",
+      "retirarMantener": "Mantener el pedido",
+      "retirado": "Retiraste tu pedido. Ya podés elegir otro grupo.",
+      "errorGenerico": "No pudimos retirar el pedido. Probá de nuevo en un momento."
+    },
+    "integrante": {
+      "titulo": "Formás parte de {grupo}",
+      "desde": "Desde el {fecha}",
+      "cuando": "Cuándo",
+      "donde": "Dónde",
+      "enLaIglesia": "En la iglesia ({sede})",
+      "zona": "Zona: {zona}",
+      "comoLlegar": "Cómo llegar",
+      "comoLlegarAria": "Cómo llegar a {grupo} (abre el mapa)",
+      "lideres": "Quién lo lidera",
+      "llamar": "Llamar a {nombre}",
+      "whatsapp": "Escribir por WhatsApp a {nombre}",
+      "saludoWhatsapp": "Hola {nombre}, soy {yo}, del grupo {grupo}."
+    },
+    "ultima": {
+      "rechazadaTitulo": "Tu pedido para {grupo} no siguió adelante",
+      "rechazadaTexto": "Esta vez no era el grupo indicado. Podés elegir otro: hay lugar para vos.",
+      "mensaje": "Mensaje de quien lidera el grupo: \"{mensaje}\"",
+      "finalizadaTitulo": "Ya no figurás en {grupo}",
+      "finalizadaTexto": "Si fue un error, hablá con alguien del equipo. Podés elegir otro grupo cuando quieras.",
+      "retiradaTitulo": "Retiraste tu pedido para {grupo}"
+    }
+  },
+  "miGrupoExtension": {
+    "titulo": "Mi grupo",
+    "intro": "Los grupos de extensión que liderás: quién pidió sumarse y quiénes ya forman parte.",
+    "vacio": "Todavía no liderás ningún grupo de extensión. Si te asignaron uno hace poco, cerrá sesión y volvé a entrar.",
+    "errorCargaTitulo": "No pudimos cargar tu grupo",
+    "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, contale al equipo este código:",
+    "reintentar": "Reintentar",
+    "lugar": "Dónde: {direccion}",
+    "cupo": "{integrantes} de {cupo} lugares ocupados",
+    "sinCupo": "{integrantes, plural, one {# integrante} other {# integrantes}}",
+    "pedidosTitulo": "Quieren sumarse",
+    "pedidosVacio": "No hay pedidos esperando.",
+    "integrantesTitulo": "Integrantes",
+    "integrantesVacio": "Todavía no hay integrantes.",
+    "edad": "{edad} años",
+    "esperaDesde": "Pidió sumarse el {fecha}",
+    "desde": "Desde el {fecha}",
+    "llamar": "Llamar a {nombre}",
+    "email": "Escribir un mail a {nombre}",
+    "whatsapp": "Escribir por WhatsApp",
+    "whatsappAria": "Escribir por WhatsApp a {nombre}",
+    "saludoWhatsapp": "Hola {nombre}, soy {yo}, del grupo de extensión {grupo} de Vida Sobrenatural. Vi que querés sumarte, ¡qué bueno!",
+    "sinTelefono": "No dejó teléfono",
+    "aceptar": "Aceptar",
+    "aceptarAria": "Aceptar a {nombre}",
+    "aceptado": "¡Listo! {nombre} ya forma parte del grupo y le avisamos.",
+    "rechazar": "No es para este grupo",
+    "rechazarAria": "{nombre}: no es para este grupo",
+    "rechazarTitulo": "¿Este grupo no es para {nombre}?",
+    "rechazarDescripcion": "Le vamos a avisar con amabilidad y va a poder elegir otro grupo.",
+    "rechazarMensajeEtiqueta": "Mensaje para {nombre} (opcional)",
+    "rechazarMensajeAyuda": "Por ejemplo, otro grupo que le quede mejor. Hasta 500 caracteres.",
+    "rechazarConfirmar": "Avisarle",
+    "rechazarCancelar": "Volver",
+    "rechazado": "Le avisamos a {nombre}.",
+    "errorGenerico": "No pudimos completar la acción. Probá de nuevo en un momento.",
+    "contador": "{cantidad} de {maximo} caracteres",
+    "demasiadoLargo": "El mensaje puede tener hasta {maximo} caracteres. Acortalo un poco.",
+    "resumenErrores": "Revisá esto:"
   }
 }

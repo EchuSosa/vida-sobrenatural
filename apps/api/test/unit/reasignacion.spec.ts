@@ -76,6 +76,16 @@ describe('ReasignacionService.retirar', () => {
     await servicio.retirar('g-1');
     expect(prisma.propuestaDiscipulado.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'prop-r' }, data: { estado: 'retirada', retiradaPor: 'admin' } }));
   });
+
+  it('le avisa al Discipulador que tenía la propuesta que ya no hace falta responderla (D219)', async () => {
+    const { servicio, emitir } = armar({ pendiente: true });
+    await servicio.retirar('g-1');
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), {
+      nombre: 'discipulado.reasignacion_retirada',
+      a: { tipo: 'discipulador', personaId: 'otro' },
+      datos: { propuestaId: 'prop-r', grupoId: 'g-1' },
+    });
+  });
 });
 
 describe('interseccionDeFranjas (research #14)', () => {

@@ -18,10 +18,10 @@ export const EDAD_MINIMA_PEDIR_BAUTISMO_SOLO = 12;
 /** `POST /bautismo/eventos/:id/asignar`: de a cuántas por llamada. */
 export const ASIGNAR_BAUTISMO_MAX = 100;
 
-// ─── Talle de remera (D220) ─────────────────────────────────────────────────
+// ─── Talle de remera (D229) ─────────────────────────────────────────────────
 
 /**
- * D220: la iglesia regala la remera con la que se bautiza la Persona; el
+ * D229: la iglesia regala la remera con la que se bautiza la Persona; el
  * talle se elige al pedir (la Persona, o el Admin en su nombre) y el Admin
  * lo puede corregir desde el detalle. En este orden se muestran el selector y
  * el resumen de talles del Evento.
@@ -39,7 +39,7 @@ export function errorTalleRemera(valor: unknown): 'TALLE_REQUERIDO' | 'TALLE_INV
   return esTalleRemera(valor) ? null : 'TALLE_INVALIDO';
 }
 
-/** Cuántas remeras de cada talle (los pedidos de antes de D220 cuentan como `sinDato`). */
+/** Cuántas remeras de cada talle (los pedidos de antes de D229 cuentan como `sinDato`). */
 export interface ResumenTalles {
   /** Solo los talles con al menos una, en el orden de `TALLES_REMERA`. */
   talles: Array<{ talle: TalleRemera; cantidad: number }>;
@@ -163,7 +163,7 @@ export interface SolicitudBautismoDetalle {
   estado: EstadoSolicitudBautismo;
   persona: PersonaBreve & { edad: number; sinAccesoALaApp: boolean };
   comentario: string | null;
-  /** D220: `null` en los pedidos de antes del ajuste ("Sin dato"). */
+  /** D229: `null` en los pedidos de antes del ajuste ("Sin dato"). */
   talleRemera: TalleRemera | null;
   createdAt: string;
   creadoPor: PersonaBreve | null;
@@ -185,7 +185,7 @@ export interface FilaAsignada {
   estado: 'aprobada' | 'realizada';
   asignadaEn: string;
   realizadaEn: string | null;
-  /** D220. */
+  /** D229. */
   talleRemera: TalleRemera | null;
 }
 
@@ -201,7 +201,7 @@ export interface SeccionBautismoEventoDatos {
   evento: EventoDeBautismoResumen & { cancelado: boolean; yaEmpezo: boolean };
   asignadas: Pagina<FilaAsignada>;
   esperandoFecha: Pagina<FilaEsperando>;
-  /** D220: los talles de TODAS las asignadas (no solo la página), para comprar las remeras. */
+  /** D229: los talles de TODAS las asignadas (no solo la página), para comprar las remeras. */
   talles: ResumenTalles;
   /** FR-027: el Evento ya empezó y quedan asignadas sin confirmar. */
   puedeConfirmar: boolean;

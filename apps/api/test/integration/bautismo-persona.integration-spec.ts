@@ -106,7 +106,7 @@ describe('Bautismo — la Persona (integración)', () => {
       expect(res.body.errors).toEqual([{ campo: 'comentario', code: 'COMENTARIO_DEMASIADO_LARGO' }]);
     });
 
-    it('D220: sin talle → 400 TALLE_REQUERIDO; un talle que no existe → TALLE_INVALIDO; nada se crea', async () => {
+    it('D229: sin talle → 400 TALLE_REQUERIDO; un talle que no existe → TALLE_INVALIDO; nada se crea', async () => {
       const id = await esc.persona('sin-talle');
       const token = await como(id);
       const sin = await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({});

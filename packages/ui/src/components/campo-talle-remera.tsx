@@ -21,7 +21,7 @@ export interface CampoTalleRemeraProps {
 }
 
 /**
- * D220: "¿Qué talle de remera usás?" — un `<select>` nativo (el más
+ * D229: "¿Qué talle de remera usás?" — un `<select>` nativo (el más
  * accesible en el celular y con lector de pantalla), con la letra de 16 px y
  * los 44 px de alto de D150, y su error debajo con la pieza de H-50. Una sola
  * pieza para la web (Mi camino) y el backoffice (en nombre de, y corregir el

@@ -39,6 +39,26 @@ pnpm --filter backoffice dev    # backoffice → http://localhost:3002
 
 Se prueba entrando a **http://localhost:3001**.
 
+### Probar desde el celular u otra compu (misma red wifi)
+
+En vez de las tres terminales, una sola:
+
+```bash
+pnpm dev:red
+```
+
+Detecta la IP de esta compu en el wifi, levanta la API, la web app y el backoffice con esa IP y
+muestra las direcciones para abrir desde el celular u otra compu (por ejemplo
+`http://192.168.0.15:3001`). Si elige mal la IP: `IP=192.168.0.15 pnpm dev:red`.
+
+- Los `.env` no se tocan; en esta compu sigue andando `localhost`.
+- **Google no funciona desde la IP** (solo acepta las direcciones registradas): entrá con
+  `/dev/entrar` o con el código por email (los mails llegan a Mailpit, `http://<IP>:8025`).
+- Si el celular no abre la página: que esté en el mismo wifi (no en datos) y que el firewall de la
+  Mac deje entrar conexiones a `node` (Ajustes del Sistema › Red › Firewall).
+- Sugerencia para probar roles a la vez: Admin y Pastor en perfiles distintos de Chrome en la
+  compu; la Persona y el Discipulador en el celular.
+
 > El seed es idempotente: se puede correr las veces que haga falta. `SEED_ADMIN_EMAIL` con tu email
 > real de Google es lo que te da el rol `admin` para entrar al backoffice (H-12).
 
@@ -136,8 +156,24 @@ postulaciones, inscripciones y pagos), cumpleaños de la semana y las métricas.
 | Bautismo pedido / con fecha | `demo-bautismo-revision@example.com` / `demo-bautismo-fecha-1@example.com` | |
 | Tutora y menor | `demo-tutora-silvina@example.com` / `demo-menor-tomas@example.com` | Silvina y Tomás Ledesma (14) |
 | Menor sin tutor (no entra) | `demo-pendiente-tutor@example.com` | Para activarlo desde Pendientes tutor |
+| Líder de Grupo de Extensión | `demo-gex-lider@example.com` | Carolina Benítez: lidera "Mujeres del centro" (martes 19 hs) y tiene el pedido de Sofía esperando (spec 014) |
 
 La lista completa, con qué probar con cada una, está en el manual (`docs/23`, sección 2.2).
+
+#### Grupos de Extensión (spec 014)
+
+El seed demo deja ocho Grupos **ficticios** de La Plata (nombres y direcciones inventados) con
+coordenadas ya cargadas: de mujeres, de varones, mixtos, uno "En la iglesia", uno completo
+("Mujeres de Gonnet") y uno con edad mínima. Para la demo: Florencia (`demo-nueva@…`) entra a Mi
+camino → "Mi grupo de extensión" → "Encontrá tu grupo", busca con `7 nro 1200`, pide sumarse a
+"Mujeres del centro", y la líder de demo lo acepta desde Mi camino → "Mi grupo" (casos GEX del
+manual).
+
+Al **buscar** (y al guardar un Grupo nuevo), la API convierte la dirección en coordenadas con
+Georef (`apis.datos.gob.ar`) y, si no encuentra, Nominatim (OpenStreetMap): **necesita internet**.
+Sin red, poné `GEOCODIFICADOR="falso"` en `apps/api/.env`: el geocodificador falso solo reconoce
+las direcciones de prueba (por ejemplo `7 nro 1200`, `64 nro 820`, `528 1500`). Los tests y el CI
+siempre usan el falso. La dirección de quien busca no se guarda en ningún lado.
 
 ## Cosas útiles durante las pruebas
 

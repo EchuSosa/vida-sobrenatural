@@ -322,7 +322,7 @@ export function DetalleBautismoCliente({
 }
 
 /**
- * D220: el talle de la remera que regala la iglesia. "Sin dato" en los
+ * D229: el talle de la remera que regala la iglesia. "Sin dato" en los
  * pedidos de antes del ajuste. El Admin lo corrige (o lo carga) en cualquier
  * estado; el error va por campo con el resumen arriba (H-50) y el guardado
  * protegido de la reentrada (H-57).

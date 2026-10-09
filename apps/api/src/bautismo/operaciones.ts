@@ -19,7 +19,7 @@ export function normalizarComentarioBautismo(comentario: string | undefined | nu
 }
 
 /**
- * FR-001/FR-022 + D220: los datos de un pedido nuevo (la Persona o en su
+ * FR-001/FR-022 + D229: los datos de un pedido nuevo (la Persona o en su
  * nombre). Junta los errores de los dos campos en una sola respuesta, para
  * que el formulario los marque a la vez (H-50).
  */

@@ -14,14 +14,14 @@ export class PedirBautismoDto {
   @IsString()
   comentario?: string;
 
-  // D220: obligatorio, pero lo valida el servicio para responder con código
+  // D229: obligatorio, pero lo valida el servicio para responder con código
   // propio por campo (TALLE_REQUERIDO, TALLE_INVALIDO), no el genérico del pipe.
   @ApiPropertyOptional({ enum: TALLES_REMERA, description: 'Obligatorio (TALLE_REQUERIDO / TALLE_INVALIDO).' })
   @IsOptional()
   talleRemera?: unknown;
 }
 
-/** D220: el Admin corrige el talle desde el detalle del pedido. */
+/** D229: el Admin corrige el talle desde el detalle del pedido. */
 export class CambiarTalleBautismoDto {
   @ApiProperty({ enum: TALLES_REMERA, description: 'TALLE_REQUERIDO / TALLE_INVALIDO.' })
   @IsOptional()

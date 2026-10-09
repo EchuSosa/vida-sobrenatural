@@ -20,6 +20,12 @@ const nextConfig: NextConfig = {
   // distDir propio la segunda instancia se niega a arrancar aunque el
   // puerto sea distinto.
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
+  // `pnpm dev:red` (scripts/dev-red.mjs): para probar desde el celular u otra
+  // compu en la misma red, Next 16 solo sirve sus recursos de desarrollo a los
+  // orígenes permitidos. Fuera de ese comando la variable no existe y no cambia nada.
+  ...(process.env.DEV_ORIGENES_PERMITIDOS
+    ? { allowedDevOrigins: process.env.DEV_ORIGENES_PERMITIDOS.split(",") }
+    : {}),
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {

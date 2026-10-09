@@ -128,7 +128,7 @@ export class BautismoAdminService {
   }
 
   /**
-   * PUT /bautismo/solicitudes/:id/talle (D220): el Admin corrige el talle, o
+   * PUT /bautismo/solicitudes/:id/talle (D229): el Admin corrige el talle, o
    * lo carga en un pedido de antes del ajuste. En cualquier estado: la remera
    * se compra aparte del ciclo del pedido. No avisa a nadie.
    */
@@ -185,7 +185,7 @@ export class BautismoAdminService {
       }),
       this.prisma.solicitudBautismo.count({ where: whereEsperando }),
       this.prisma.solicitudBautismo.count({ where: { estado: 'aprobada', inscripcionEvento: { eventoId } } }),
-      // D220: el resumen cuenta TODAS las asignadas, no solo la página.
+      // D229: el resumen cuenta TODAS las asignadas, no solo la página.
       this.prisma.solicitudBautismo.groupBy({ by: ['talleRemera'], where: whereAsignadas, _count: { _all: true } }),
     ]);
     const yaEmpezo = evento.inicio <= ahora;

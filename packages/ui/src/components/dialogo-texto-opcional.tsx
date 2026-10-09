@@ -16,7 +16,7 @@ import { useEnvio } from '../hooks/use-envio';
 import { useValidacionCampos } from '../hooks/use-validacion-campos';
 import { cn } from '../lib/utils';
 
-/** Lo que recibe un `children` función: el estado de error de los campos extra (D220). */
+/** Lo que recibe un `children` función: el estado de error de los campos extra (D229). */
 export interface CamposExtraDialogo {
   mensajes: Record<string, string>;
   limpiar: (campo: string) => void;
@@ -31,10 +31,10 @@ export interface DialogoTextoOpcionalProps {
   /**
    * Lo que va arriba del texto (ej. un selector de etapa). Como función,
    * recibe los errores por campo para mostrar los de un campo extra
-   * obligatorio (ej. el talle de remera, D220).
+   * obligatorio (ej. el talle de remera, D229).
    */
   children?: ReactNode | ((extra: CamposExtraDialogo) => ReactNode);
-  /** D220: valida los campos extra antes de enviar; `{ campo: mensaje }` de los que fallan. */
+  /** D229: valida los campos extra antes de enviar; `{ campo: mensaje }` de los que fallan. */
   validar?: () => Record<string, string>;
   /** Al cerrarse (enviado o cancelado): para limpiar el estado de los campos extra. */
   alCerrar?: () => void;

@@ -3,11 +3,11 @@ import { normalizarPedidoBautismo } from '../../src/bautismo/operaciones.js';
 import { AppException } from '../../src/common/errors/app-exception.js';
 
 /**
- * D220: el talle de remera del pedido de bautismo — la regla del campo (la
+ * D229: el talle de remera del pedido de bautismo — la regla del campo (la
  * misma que usan la API y los formularios), el resumen para comprar las
  * remeras y la validación del pedido con los dos campos juntos.
  */
-describe('talle de remera (D220)', () => {
+describe('talle de remera (D229)', () => {
   it('los siete talles, en orden de menor a mayor', () => {
     expect(TALLES_REMERA).toEqual(['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']);
   });

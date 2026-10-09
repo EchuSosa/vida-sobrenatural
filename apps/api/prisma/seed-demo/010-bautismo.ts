@@ -16,7 +16,7 @@ const en = (dias: number, hora = 18) => {
  * Vida Nueva, un pedido creado en nombre de una Persona sin acceso a la app,
  * un Evento de bautismo próximo con tres asignadas y uno pasado ya
  * confirmado. Los pedidos tienen talles de remera variados y uno "Sin dato"
- * (como los de antes de D220), para ver el resumen de talles del Evento. La
+ * (como los de antes de D229), para ver el resumen de talles del Evento. La
  * descripción del Evento lleva la charla pre-bautismo y qué traer. Nombres
  * largos con tildes y apellidos compuestos, para ver que la card y la sección del Evento no desbordan a 360 px. Emails `demo-`;
  * idempotente (si ya hay pedidos de bautismo de demo, no hace nada).
@@ -96,7 +96,7 @@ export async function sembrarDemo010(ctx: ContextoSeedDemo): Promise<void> {
         personaId,
         estado,
         comentario: datos.comentario ?? null,
-        // D220: `null` = como un pedido de antes del ajuste ("Sin dato").
+        // D229: `null` = como un pedido de antes del ajuste ("Sin dato").
         talleRemera: datos.talle === undefined ? 'M' : datos.talle,
         creadoPorId: datos.creadoPor ? admin!.id : null,
         createdAt: creada,

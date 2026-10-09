@@ -1,4 +1,4 @@
--- D220: talle de la remera que regala la iglesia en el pedido de bautismo.
+-- D229: talle de la remera que regala la iglesia en el pedido de bautismo.
 -- Nullable a propósito: los pedidos existentes quedan sin talle ("Sin dato");
 -- desde ahora la API lo exige al pedir (TALLE_REQUERIDO).
 -- CreateEnum

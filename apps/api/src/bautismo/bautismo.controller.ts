@@ -45,7 +45,7 @@ export class BautismoController {
 
   @Put('solicitudes/:id/talle')
   @RequierePermiso('solicitudes.aprobar')
-  @ApiOkResponse({ description: 'D220: corrige el talle de remera (en cualquier estado). 400 VALIDACION TALLE_REQUERIDO / TALLE_INVALIDO; 404 NO_ENCONTRADO.' })
+  @ApiOkResponse({ description: 'D229: corrige el talle de remera (en cualquier estado). 400 VALIDACION TALLE_REQUERIDO / TALLE_INVALIDO; 404 NO_ENCONTRADO.' })
   cambiarTalle(@Param('id') id: string, @Body() dto: CambiarTalleBautismoDto) {
     return this.service.cambiarTalle(id, dto.talleRemera);
   }

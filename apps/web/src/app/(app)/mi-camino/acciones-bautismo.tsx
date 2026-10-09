@@ -12,7 +12,7 @@ import { Button, CampoTalleRemera, ConfirmDestructiveDialog, DialogoTextoOpciona
 /**
  * spec 010, T020 y T043 (FR-001, FR-020, FR-020a, D151, H-50, H-57): las
  * acciones de la card de Bautismo. Pedir abre un paso de confirmación con el
- * talle de remera obligatorio (D220) y el campo opcional "¿Querés contarnos
+ * talle de remera obligatorio (D229) y el campo opcional "¿Querés contarnos
  * algo?" (errores por campo con la pieza compartida); retirar y "No puedo ese día" son reversibles, así que sus
  * diálogos son neutros. Al terminar, `router.refresh()` vuelve a pedir el
  * estado y la card cambia sin recargar la página.

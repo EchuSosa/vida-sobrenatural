@@ -111,7 +111,7 @@ export function SeccionBautismoEventoCliente({
       <div className="flex flex-col gap-3">
         <h3 className="text-lg font-semibold">{t('asignadasTitulo', { cantidad: asignadas.total })}</h3>
         {talles.total > 0 && (
-          // D220: para comprar las remeras. Cuenta todas las asignadas, no solo esta página.
+          // D229: para comprar las remeras. Cuenta todas las asignadas, no solo esta página.
           <p data-testid="resumen-talles" className="flex flex-wrap items-center gap-2">
             <Shirt aria-hidden className="size-4 shrink-0 text-muted-foreground" />
             <span className="font-medium">{t('tallesTitulo')}</span>

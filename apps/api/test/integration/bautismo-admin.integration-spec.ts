@@ -64,7 +64,7 @@ describe('Bautismo — el Admin (integración)', () => {
       expect((await http().get(`/bautismo/solicitudes/${s3.id}`).set('Authorization', admin)).body.vidaNueva.estado).toBe('completada');
     });
 
-    it('D220: el detalle trae el talle (null = "Sin dato" en los de antes); el Admin lo corrige; el Pastor no', async () => {
+    it('D229: el detalle trae el talle (null = "Sin dato" en los de antes); el Admin lo corrige; el Pastor no', async () => {
       const s = await esc.solicitud(await esc.persona('talle-detalle'));
       const antes = await http().get(`/bautismo/solicitudes/${s.id}`).set('Authorization', admin);
       expect(antes.body.talleRemera).toBeNull();
@@ -251,7 +251,7 @@ describe('Bautismo — el Admin (integración)', () => {
       expect((await http().get(`/bautismo/eventos/${general.id}`).set('Authorization', admin)).status).toBe(404);
     });
 
-    it('D220: la sección del Evento resume los talles de TODAS las asignadas (no solo la página), con "Sin dato"', async () => {
+    it('D229: la sección del Evento resume los talles de TODAS las asignadas (no solo la página), con "Sin dato"', async () => {
       const ev = await esc.eventoBautismo();
       const talles = ['M', 'S', 'M', null, 'XXL'] as const;
       for (const [i, talle] of talles.entries()) {

@@ -53,6 +53,9 @@ export type EventoAviso =
   | { nombre: 'discipulado.baja_confirmada'; a: DePersona; datos: { grupoId: string; inscripcionId: string } }
   | { nombre: 'discipulado.propuesta_declinada'; a: Admin; datos: { propuestaId: string; solicitudId?: string; grupoId?: string } }
   | { nombre: 'discipulado.propuesta_retirada'; a: Admin; datos: { propuestaId: string; retiradaPor: 'admin' | 'persona' } }
+  // D219: al Discipulador que tenía la propuesta, cuando se retira antes de que responda.
+  | { nombre: 'discipulado.reasignacion_retirada'; a: { tipo: 'discipulador'; personaId: string }; datos: { propuestaId: string; grupoId: string } }
+  | { nombre: 'discipulado.propuesta_nueva_retirada'; a: { tipo: 'discipulador'; personaId: string }; datos: { propuestaId: string; solicitudId: string } }
   | { nombre: 'discipulado.finalizacion_propuesta'; a: Admin; datos: { grupoId: string } }
   | { nombre: 'discipulado.baja_propuesta'; a: Admin; datos: { grupoId: string; inscripcionId: string } }
   // --- 001 / Flujo 7 / Flujo 12 — activación de cuenta ---
@@ -100,7 +103,12 @@ export type EventoAviso =
   | { nombre: 'evento.modificado'; a: { tipo: 'evento_inscriptos'; eventoId: string }; datos: { eventoId: string; evento: string; slug: string } }
   | { nombre: 'evento.cancelado'; a: { tipo: 'evento_inscriptos'; eventoId: string }; datos: { eventoId: string; evento: string; slug: string } }
   | { nombre: 'evento.proximo'; a: { tipo: 'evento_confirmados'; eventoId: string }; datos: { eventoId: string; evento: string } }
-  | { nombre: 'evento.recordatorio_inscripcion'; a: { tipo: 'todas_sin_inscripcion'; eventoId: string }; datos: { eventoId: string; evento: string; slug: string; dias: number } };
+  | { nombre: 'evento.recordatorio_inscripcion'; a: { tipo: 'todas_sin_inscripcion'; eventoId: string }; datos: { eventoId: string; evento: string; slug: string; dias: number } }
+  // --- 014 — Grupos de Extensión (D228). Al líder, uno por líder vigente (`persona`). ---
+  | { nombre: 'grupo_extension.solicitud_nueva'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
+  | { nombre: 'grupo_extension.solicitud_aceptada'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
+  | { nombre: 'grupo_extension.solicitud_rechazada'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
+  | { nombre: 'grupo_extension.agregada_por_admin'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } };
 
 export type NombreEventoAviso = EventoAviso['nombre'];
 
@@ -108,7 +116,7 @@ export type NombreEventoAviso = EventoAviso['nombre'];
 export type DatosDe<N extends NombreEventoAviso> = Extract<EventoAviso, { nombre: N }>['datos'];
 
 /** La spec que es dueña del hecho (para el test del catálogo y para saber quién lo conecta). */
-export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | 'flujo-12';
+export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | '014' | 'flujo-12';
 
 export interface EntradaCatalogo<N extends NombreEventoAviso> {
   spec: SpecDelAviso;
@@ -127,6 +135,9 @@ export interface EntradaCatalogo<N extends NombreEventoAviso> {
 
 const MI_CAMINO = '/mi-camino';
 const MIS_EVENTOS = '/mis-eventos';
+/** spec 014: la card de la persona y la pantalla del líder. */
+const MI_GRUPO_EXTENSION = '/mi-camino/grupo-extension';
+const LIDER_GRUPO_EXTENSION = '/mi-grupo-extension';
 const sinClave = () => null;
 
 export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } = {
@@ -162,6 +173,20 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
   'discipulado.propuesta_retirada': {
     spec: '004', destinatario: 'admin', disparador: null, prioridad: 'normal',
     entidad: { tipo: 'propuesta_discipulado', id: (d) => d.propuestaId }, destino: () => MI_CAMINO, clave: sinClave,
+  },
+  // D219 (Pregunta 1 del PR #29): retirar una propuesta le avisa al
+  // Discipulador que la tenía, para que no la busque ni la responda. Normal
+  // (sin mail): no le pide nada. La de reasignación también sale cuando la
+  // retira el cierre del Grupo; la `nueva`, cuando la retira el Admin o la
+  // Persona (al editar sus horarios o retirar su pedido). El texto no dice
+  // quién ni por qué, ni nombra a la Persona (FR-013).
+  'discipulado.reasignacion_retirada': {
+    spec: '004', destinatario: 'discipulador', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'propuesta_discipulado', id: (d) => d.propuestaId }, destino: () => '/mis-discipulados', clave: sinClave,
+  },
+  'discipulado.propuesta_nueva_retirada': {
+    spec: '004', destinatario: 'discipulador', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'propuesta_discipulado', id: (d) => d.propuestaId }, destino: () => '/mis-discipulados', clave: sinClave,
   },
   'discipulado.finalizacion_propuesta': {
     spec: '004', destinatario: 'admin', disparador: null, prioridad: 'normal',
@@ -349,6 +374,23 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
     spec: '011', destinatario: 'todas_sin_inscripcion', disparador: 'recordatorio_inscripcion', prioridad: 'normal',
     entidad: { tipo: 'evento', id: (d) => d.eventoId }, destino: (d) => `/eventos/${d.slug}`,
     clave: (d) => `evento.recordatorio_inscripcion:${d.eventoId}`,
+  },
+  // 014 — D228: sin el nombre de la persona (FR-013 de la 012): el líder lo ve al abrir el pedido.
+  'grupo_extension.solicitud_nueva': {
+    spec: '014', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
+    entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => LIDER_GRUPO_EXTENSION, clave: sinClave,
+  },
+  'grupo_extension.solicitud_aceptada': {
+    spec: '014', destinatario: 'persona', disparador: 'solicitud_actualizada', prioridad: 'importante',
+    entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => MI_GRUPO_EXTENSION, clave: sinClave,
+  },
+  'grupo_extension.solicitud_rechazada': {
+    spec: '014', destinatario: 'persona', disparador: 'solicitud_actualizada', prioridad: 'importante',
+    entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => MI_GRUPO_EXTENSION, clave: sinClave,
+  },
+  'grupo_extension.agregada_por_admin': {
+    spec: '014', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
+    entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => MI_GRUPO_EXTENSION, clave: sinClave,
   },
 };
 

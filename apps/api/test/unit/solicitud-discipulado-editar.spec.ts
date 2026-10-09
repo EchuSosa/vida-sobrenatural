@@ -37,6 +37,11 @@ describe('SolicitudDiscipuladoService — editar y retirar el pedido propio (T01
       expect(p.respondidaEn).toBeInstanceOf(Date);
       expect(s.estado).toBe('pendiente');
       expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId: p.id, retiradaPor: 'persona' } });
+      expect(emitir).toHaveBeenCalledWith(expect.anything(), {
+        nombre: 'discipulado.propuesta_nueva_retirada',
+        a: { tipo: 'discipulador', personaId: 'disc-1' },
+        datos: { propuestaId: p.id, solicitudId: s.id },
+      });
     });
 
     it('sin franjas → error de campo y no toca nada', async () => {

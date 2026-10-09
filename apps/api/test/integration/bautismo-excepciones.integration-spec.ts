@@ -80,7 +80,7 @@ describe('Bautismo — excepciones del Admin (integración)', () => {
       expect(bandeja.body.items[0]).toMatchObject({ id: fila.id, creadoPor: { id: adminId } });
     });
 
-    it('D220: sin talle → 400 TALLE_REQUERIDO en talleRemera y nada se crea', async () => {
+    it('D229: sin talle → 400 TALLE_REQUERIDO en talleRemera y nada se crea', async () => {
       const id = await esc.persona('en-nombre-sin-talle');
       const res = await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: id });
       expect(res.status).toBe(400);

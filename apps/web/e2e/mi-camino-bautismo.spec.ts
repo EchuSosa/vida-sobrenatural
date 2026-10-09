@@ -60,7 +60,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       expect((await pedir.boundingBox())!.height).toBeGreaterThanOrEqual(44); // D150
       await sinScrollHorizontal(page);
 
-      // H-50: sin talle (D220) y con 501 caracteres → mensaje bajo cada campo y resumen arriba.
+      // H-50: sin talle (D229) y con 501 caracteres → mensaje bajo cada campo y resumen arriba.
       await pedir.click();
       const dialogo = page.getByRole('alertdialog');
       await expect(dialogo).toContainText('¿Querés pedir tu bautismo?');
