@@ -1,12 +1,14 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, crearPersona, loguearseComoAdminE2E } from './helpers';
-import { ANIO_FUTURO, crearEventoPorApi } from './helpers-011';
+import { test, expect, auditar, crearPersona, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
+import { ANIO_FUTURO, anotarEnNombre, crearEventoPorApi } from './helpers-011';
 
 /**
  * spec 011, ampliación 2026-10-09 (FR-060 a FR-063, D220) — destinatarios del
  * Evento desde el backoffice, con axe en claro y oscuro: el Admin elige
  * "Mujeres" desde 15 años (con el error por campo si la máxima es menor), el
  * detalle lo explica, y anotar a un varón pide confirmación y lo marca.
+ * Preguntas propias (FR-064 a FR-068, D221, D222): el Admin las arma en el
+ * formulario, ve las respuestas y el resumen; el Pastor no ve la sensible.
  */
 async function completarFecha(page: Page, grupo: string, dia: string, mes: string, anio: string) {
   const fecha = page.getByRole('group', { name: grupo });
@@ -70,6 +72,87 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText(`Tomás Dest${sufijo} quedó anotada`, { exact: false })).toBeVisible();
       await seccion.getByRole('link', { name: /Confirmadas/ }).click();
       await expect(seccion.getByRole('row').filter({ hasText: 'Tomás' }).getByText('Anotada aunque no está entre los destinatarios')).toBeVisible();
+      expect((await auditar(page)).violations).toEqual([]);
+    });
+  });
+
+  test.describe(`Preguntas — modo ${colorScheme}`, () => {
+    test.use({ colorScheme });
+
+    test('el Admin agrega preguntas al Evento, con error por campo y dato sensible', async ({ page }) => {
+      const evento = await crearEventoPorApi({ nombre: `e2e-evento-preg-${colorScheme}-${Date.now()}` });
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/eventos/${evento.id}`);
+      await page.waitForLoadState('networkidle');
+      await page.getByRole('button', { name: 'Editar' }).click();
+
+      await page.getByRole('button', { name: 'Agregar una pregunta' }).click();
+      await page.getByRole('button', { name: 'Agregar una pregunta' }).click();
+      const preguntas = page.getByTestId('pregunta-evento');
+      await expect(preguntas).toHaveCount(2);
+      // La segunda, "Una opción" sin opciones: no guarda y lo marca en el campo (H-50).
+      await preguntas.nth(0).getByLabel('Pregunta', { exact: true }).fill('¿Sos celíaca?');
+      await preguntas.nth(0).getByLabel('Hay que responderla para anotarse').check();
+      await preguntas.nth(0).getByLabel('Dato sensible (salud o alimentación)').check();
+      await expect(preguntas.nth(0).getByText('Solo lo ve el equipo que organiza; se borra 30 días después del evento.')).toBeVisible();
+      await preguntas.nth(1).getByLabel('Pregunta', { exact: true }).fill('¿Participaste alguna vez de una jornada de sanidad?');
+      await preguntas.nth(1).getByLabel('Tipo de respuesta').selectOption({ label: 'Una opción de una lista' });
+      await page.getByRole('button', { name: 'Guardar cambios' }).click();
+      const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
+      await expect(resumen).toBeFocused();
+      await expect(resumen.getByRole('link', { name: /Escribí entre 2 y 10 opciones distintas/ })).toBeVisible();
+      expect((await auditar(page)).violations).toEqual([]);
+
+      await preguntas.nth(1).getByLabel('Opciones').fill('Sí, hace mucho\nNo, nunca');
+      await page.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(page.getByText('Cambios guardados.')).toBeVisible();
+      // Sin inscriptas todavía, el resumen cuenta cero.
+      await expect(page.getByTestId('resumen-preguntas')).toContainText('¿Sos celíaca?');
+      await expect(page.getByTestId('resumen-preguntas')).toContainText('Sí: 0 · No: 0');
+      expect((await auditar(page)).violations).toEqual([]);
+    });
+
+    test('la lista muestra respuestas, resumen y lo que la app ya sabe; el Pastor no ve la sensible', async ({ page }) => {
+      test.setTimeout(120_000);
+      const sufijo = `${colorScheme}-${Date.now()}`;
+      const evento = await crearEventoPorApi({
+        nombre: `e2e-evento-resumen-${sufijo}`,
+        preguntas: [
+          { texto: '¿Sos celíaca?', tipo: 'si_no', obligatoria: true, sensible: true },
+          { texto: '¿Participaste alguna vez de una jornada de sanidad?', tipo: 'opcion', opciones: ['Sí, hace mucho', 'No, nunca'], obligatoria: false, sensible: false },
+        ],
+      });
+      const [celiaca, jornada] = evento.preguntas;
+      const respuestas: Array<[string, string, string]> = [
+        ['Ana', 'si', 'No, nunca'],
+        ['Bea', 'no', 'No, nunca'],
+        ['Caro', 'no', 'Sí, hace mucho'],
+      ];
+      for (const [nombre, c, j] of respuestas) {
+        const p = await crearPersona(`e2e-resumen-${nombre}-${sufijo}@example.com`, { nombre, apellido: `Resumen${sufijo}` });
+        await anotarEnNombre(evento.id, p.id, { respuestas: [{ preguntaId: celiaca.id, valor: c }, { preguntaId: jornada.id, valor: j }] });
+      }
+
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/eventos/${evento.id}?estado=confirmada`);
+      await page.waitForLoadState('networkidle');
+      const resumen = page.getByTestId('resumen-preguntas');
+      await expect(resumen).toContainText('¿Sos celíaca?');
+      await expect(resumen).toContainText('Dato sensible');
+      await expect(resumen).toContainText('Sí: 1 · No: 2');
+      await expect(resumen).toContainText('Sí, hace mucho: 1 · No, nunca: 2');
+      const fila = page.locator('#inscriptos').getByRole('row').filter({ hasText: 'Ana' });
+      await expect(fila).toContainText('¿Sos celíaca?');
+      await expect(fila).toContainText(/\d+ años/);
+      await expect(fila).toContainText('Tel.');
+      expect((await auditar(page)).violations).toEqual([]);
+
+      await loguearseComoPastorE2E(page);
+      await page.goto(`/eventos/${evento.id}?estado=confirmada`);
+      await page.waitForLoadState('networkidle');
+      await expect(page.getByTestId('resumen-preguntas')).toContainText('¿Participaste alguna vez de una jornada de sanidad?');
+      await expect(page.getByTestId('resumen-preguntas')).not.toContainText('¿Sos celíaca?');
+      await expect(page.locator('#inscriptos').getByRole('row').filter({ hasText: 'Ana' })).not.toContainText('¿Sos celíaca?');
       expect((await auditar(page)).violations).toEqual([]);
     });
   });

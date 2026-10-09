@@ -9,13 +9,26 @@ import { Info } from 'lucide-react';
 import {
   apiFetch,
   argumentosTextoDestinatarios,
+  campoDeRespuesta,
+  validarRespuestas,
   formatearInicioEvento,
   formatearMoneda,
   type EventoPublico,
   type MiInscripcionEnEvento,
   type MiInscripcionEvento,
 } from '@vida-sobrenatural/shared-types';
-import { Button, ButtonLink, EstadoInscripcionBadge, Skeleton, mensajeDeError, useEnvio } from '@vida-sobrenatural/ui';
+import {
+  Button,
+  ButtonLink,
+  CamposPreguntasEvento,
+  EstadoInscripcionBadge,
+  ResumenErrores,
+  Skeleton,
+  mensajeDeError,
+  mensajesDeCampo,
+  useEnvio,
+  useValidacionCampos,
+} from '@vida-sobrenatural/ui';
 
 /**
  * spec 011, T052 (research #10) — la isla de la página del Evento que depende
@@ -71,18 +84,32 @@ export function AccionInscripcion({ evento }: { evento: EventoPublico }) {
     if (confirmando) tituloConfirmar.current?.focus();
   }, [confirmando]);
 
+  // FR-065 (ampliación 2026-10-09): las preguntas del Evento se responden en el mismo paso.
+  const [respuestas, setRespuestas] = useState<Record<string, string>>({});
+  const validacion = useValidacionCampos();
+  const mensajeDeCampo = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errores.generico'));
+
   const anotarme = useEnvio(async () => {
     setError(null);
+    const enviadas = Object.entries(respuestas).map(([preguntaId, valor]) => ({ preguntaId, valor }));
+    const locales = validarRespuestas(evento.preguntas, enviadas).errores;
+    if (locales.length > 0) {
+      validacion.reemplazar(Object.fromEntries(locales.map((e) => [e.campo, mensajeDeCampo(e.code)])));
+      return;
+    }
     try {
       const creada = await apiFetch<MiInscripcionEvento>(`/eventos/${evento.id}/inscripciones/me`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ respuestas: enviadas }),
       });
       setResultado(creada);
       setConfirmando(false);
       void cargar();
     } catch (e) {
-      setError(mensajeDeError(e, te, t));
+      const campos = mensajesDeCampo(e, te, t);
+      if (campos) validacion.reemplazar(campos);
+      else setError(mensajeDeError(e, te, t));
       void cargar();
     }
   });
@@ -133,6 +160,7 @@ export function AccionInscripcion({ evento }: { evento: EventoPublico }) {
           <div role="status" className="flex flex-col gap-3">
             {(resultado ?? estado?.inscripcion) && <EstadoYQueSigue inscripcion={(resultado ?? estado!.inscripcion)!} cuando={cuando} />}
           </div>
+          {tieneAbierta(resultado ?? estado?.inscripcion ?? null) && estado && estado.respuestas.length > 0 && <MisRespuestas respuestas={estado.respuestas} />}
 
           {error && (
             <p role="alert" className="rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-base text-foreground">
@@ -150,12 +178,29 @@ export function AccionInscripcion({ evento }: { evento: EventoPublico }) {
                 <h3 ref={tituloConfirmar} tabIndex={-1} className="text-lg font-semibold outline-none">
                   {t('confirmarTitulo', { nombre: evento.nombre })}
                 </h3>
+                <ResumenErrores errores={validacion.resumen} foco={validacion.foco} titulo={t('revisaRespuestas')} />
                 <ul className="flex flex-col gap-1 text-base">
                   <li>{t('confirmarCuando', { cuando })}</li>
                   <li>{t('confirmarDonde', { lugar: evento.lugar })}</li>
                   {evento.costo && <li>{t('confirmarCosto', { costo: formatearMoneda(Number(evento.costo), locale) })}</li>}
                   {lista ? <li>{t('confirmarLista')}</li> : evento.requiereAprobacion && <li>{t('confirmarAprobacion')}</li>}
                 </ul>
+                {evento.preguntas.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-base font-semibold">{t('preguntasTitulo')}</p>
+                    <CamposPreguntasEvento
+                      tactil
+                      preguntas={evento.preguntas}
+                      valores={respuestas}
+                      onCambiar={(id, valor) => {
+                        setRespuestas((a) => ({ ...a, [id]: valor }));
+                        validacion.limpiar(campoDeRespuesta(id));
+                      }}
+                      errores={validacion.mensajes}
+                      etiquetas={{ si: t('si'), no: t('no'), opcional: t('opcional'), sensible: t('sensible') }}
+                    />
+                  </div>
+                )}
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Button size="xl" className="text-base" loading={anotarme.enviando} loadingText={t('anotando')} onClick={() => void anotarme.ejecutar()}>
                     {t('confirmarSi')}
@@ -198,6 +243,24 @@ function NoCorresponde({ evento }: { evento: EventoPublico }) {
         <p className="font-semibold">{tp('destinatarios', argumentosTextoDestinatarios(evento.destinatarios))}</p>
         <p>{t('noCorresponde')}</p>
       </div>
+    </div>
+  );
+}
+
+/** FR-068: la propia Persona ve lo que respondió (también lo sensible). */
+function MisRespuestas({ respuestas }: { respuestas: MiInscripcionEnEvento['respuestas'] }) {
+  const t = useTranslations('eventos.inscripcion');
+  return (
+    <div className="flex flex-col gap-2 rounded-md bg-secondary p-4">
+      <h3 className="text-lg font-semibold">{t('tusRespuestas')}</h3>
+      <dl className="flex flex-col gap-2 text-base">
+        {respuestas.map((r) => (
+          <div key={r.preguntaId} className="flex flex-col">
+            <dt className="font-medium">{r.pregunta}</dt>
+            <dd>{r.tipo === 'si_no' ? t(r.valor === 'si' ? 'si' : 'no') : r.valor}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

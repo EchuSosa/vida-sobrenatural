@@ -216,7 +216,17 @@
       "OTORGARROLDISCIPULADOR_INVALIDO": "Esta área no ofrece el rol de Discipulador.",
       "EDAD_INVALIDA": "Escribí una edad entre 0 y 120 años, o dejala vacía.",
       "EDAD_MAXIMA_MENOR_A_MINIMA": "La edad máxima no puede ser menor que la mínima.",
-      "DESTINATARIOS_GENERO_INVALIDO": "Elegí para quién es: todas las personas, mujeres o varones."
+      "DESTINATARIOS_GENERO_INVALIDO": "Elegí para quién es: todas las personas, mujeres o varones.",
+      "PREGUNTAS_DEMASIADAS": "Puede haber hasta 10 preguntas: quitá alguna.",
+      "PREGUNTA_TEXTO_REQUERIDO": "Escribí la pregunta.",
+      "PREGUNTA_TEXTO_DEMASIADO_LARGO": "La pregunta puede tener hasta 200 caracteres.",
+      "PREGUNTA_TIPO_INVALIDO": "Elegí el tipo de respuesta.",
+      "PREGUNTA_OPCIONES_INVALIDAS": "Escribí entre 2 y 10 opciones distintas, una por renglón, de hasta 100 caracteres.",
+      "PREGUNTAS_SIN_INSCRIPCION": "Las preguntas se responden al anotarse: marcá \"La gente tiene que anotarse\" o quitalas.",
+      "PREGUNTA_CON_RESPUESTAS": "Esta pregunta ya tiene respuestas: no se puede quitar, cambiar de tipo, sacarle opciones ni dejar de ser dato sensible.",
+      "RESPUESTA_REQUERIDA": "Respondé esta pregunta.",
+      "RESPUESTA_INVALIDA": "Elegí una de las opciones de la lista.",
+      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres."
     },
     "EVENTO_NO_CORRESPONDE": "La Persona no está entre los destinatarios del Evento (género o edad).",
     "PREGUNTA_CON_RESPUESTAS": "Esa pregunta ya tiene respuestas: no se puede borrar ni cambiar de tipo."
@@ -1532,7 +1542,32 @@
         },
         "edadMinima": "Edad mínima",
         "edadMaxima": "Edad máxima",
-        "edadesAyuda": "En años cumplidos el día del Evento. Vacío = sin límite."
+        "edadesAyuda": "En años cumplidos el día del Evento. Vacío = sin límite.",
+        "preguntas": {
+          "titulo": "Preguntas para la inscripción",
+          "ayuda": "Lo que la app no sabe de cada persona y necesitás para organizar (por ejemplo, si es celíaca). Se responden en el mismo paso de anotarse. Nombre, edad, teléfono, Ministerio y quién la acompaña ya los ves en la lista de inscriptos: no hace falta preguntarlos.",
+          "vacio": "Este Evento no tiene preguntas.",
+          "numero": "Pregunta {n}",
+          "subir": "Subir la pregunta {n}",
+          "bajar": "Bajar la pregunta {n}",
+          "quitar": "Quitar",
+          "conRespuestas": "{cantidad, plural, one {Ya la respondió # persona} other {Ya la respondieron # personas}}: no se puede quitar ni cambiar de tipo.",
+          "avisoTexto": "{cantidad, plural, one {La persona que ya respondió vio} other {Las # personas que ya respondieron vieron}} el texto anterior.",
+          "texto": "Pregunta",
+          "tipo": "Tipo de respuesta",
+          "tipos": {
+            "si_no": "Sí / No",
+            "opcion": "Una opción de una lista",
+            "texto": "Texto corto (hasta 200 caracteres)"
+          },
+          "opciones": "Opciones",
+          "opcionesAyuda": "Una por renglón, entre 2 y 10, de hasta {max} caracteres cada una.",
+          "obligatoria": "Hay que responderla para anotarse",
+          "sensible": "Dato sensible (salud o alimentación)",
+          "sensibleAyuda": "Solo lo ve el equipo que organiza; se borra 30 días después del evento.",
+          "agregar": "Agregar una pregunta",
+          "lleno": "Llegaste al máximo de {max} preguntas."
+        }
       },
       "nuevo": {
         "titulo": "Crear un Evento",
@@ -1665,7 +1700,8 @@
         "pago": "Pago",
         "fecha": "Anotada",
         "acciones": "Acciones",
-        "seleccionar": "Elegir"
+        "seleccionar": "Elegir",
+        "respuestas": "Respuestas"
       },
       "seleccionar": "Elegir a {nombre}",
       "vacio": "No hay inscripciones en este estado.",
@@ -1710,7 +1746,25 @@
       "fueraDeDestinatarios": "Anotada aunque no está entre los destinatarios",
       "noCorrespondeTitulo": "{nombre} no está entre los destinatarios",
       "noCorrespondeTexto": "{destinatarios} ¿La anotás igual? Hacelo solo si es una excepción acordada.",
-      "anotarIgual": "Sí, anotarla igual"
+      "anotarIgual": "Sí, anotarla igual",
+      "resumenPreguntas": "Respuestas a las preguntas",
+      "resumenPreguntasAyuda": "Cuenta las inscripciones abiertas (confirmadas, por aprobar y en lista de espera).",
+      "respondieron": "{cantidad, plural, one {Respondió # persona} other {Respondieron # personas}}",
+      "sinPreguntasVisibles": "No hay respuestas para mostrar.",
+      "sensible": "Dato sensible",
+      "si": "Sí",
+      "no": "No",
+      "opcional": "(opcional)",
+      "sensibleAyuda": "Solo lo ve el equipo que organiza; se borra 30 días después del evento.",
+      "sinRespuestas": "Sin respuestas",
+      "edad": "{edad} años",
+      "telefono": "Tel. {telefono}",
+      "ministerio": "Sirve en {ministerios}",
+      "referente": "La acompaña {nombre}",
+      "grupoExtension": "Grupo de extensión: {nombre}",
+      "preguntasTitulo": "Sus respuestas a las preguntas del Evento",
+      "errorResumen": "No pudimos cargar el resumen de respuestas. Recargá la página para intentar de nuevo.",
+      "sensibleSr": "Dato sensible: "
     },
     "pagos": {
       "titulo": "Pago de {nombre}",

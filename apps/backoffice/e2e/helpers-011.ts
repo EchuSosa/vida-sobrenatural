@@ -56,6 +56,10 @@ export async function subirComprobantePorApi(email: string, inscripcionId: strin
 }
 
 /** El Admin de e2e anota a una Persona a un Evento. */
-export async function anotarEnNombre(eventoId: string, personaId: string): Promise<{ id: string; estado: string }> {
-  return apiComo(EMAIL_ADMIN, 'POST', `/eventos/${eventoId}/inscripciones`, { personaId });
+export async function anotarEnNombre(
+  eventoId: string,
+  personaId: string,
+  extra: { respuestas?: Array<{ preguntaId: string; valor: string }>; forzar?: boolean } = {},
+): Promise<{ id: string; estado: string }> {
+  return apiComo(EMAIL_ADMIN, 'POST', `/eventos/${eventoId}/inscripciones`, { personaId, ...extra });
 }

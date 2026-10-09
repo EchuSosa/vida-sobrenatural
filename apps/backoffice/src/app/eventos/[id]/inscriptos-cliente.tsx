@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { TriangleAlert, UserRound } from 'lucide-react';
+import { Lock, TriangleAlert, UserRound } from 'lucide-react';
 import {
   ApiError,
   apiFetch,
   argumentosTextoDestinatarios,
+  campoDeRespuesta,
+  validarRespuestas,
   COMPROBANTE_TAMANO_MAXIMO_BYTES,
   diaCivilEnArgentina,
   formatearFechaHora,
@@ -34,6 +36,7 @@ import {
   ButtonLink,
   CampoArchivo,
   CampoFecha,
+  CamposPreguntasEvento,
   ConfirmDestructiveDialog,
   EstadoInscripcionBadge,
   Input,
@@ -148,6 +151,7 @@ export function InscriptosCliente({
           {!i.persona.tieneAcceso && <span className="text-xs text-muted-foreground">{t('sinAcceso')}</span>}
           {i.creadoPor && <span className="text-xs text-muted-foreground">{t('anotadaPor', { nombre: `${i.creadoPor.nombre} ${i.creadoPor.apellido}` })}</span>}
           {i.promovidaSinVer && <span className="text-xs font-medium">{t('subioDeLista')}</span>}
+          <DatosDeLaPersona inscripcion={i} />
           {i.fueraDeDestinatarios && (
             <span className="flex items-center gap-1 text-xs font-medium">
               <TriangleAlert aria-hidden="true" className="size-3.5" />
@@ -176,6 +180,9 @@ export function InscriptosCliente({
           </span>
         ),
     },
+    ...(evento.preguntas.length > 0
+      ? [{ id: 'respuestas', encabezado: t('columnas.respuestas'), celda: (i: InscripcionEventoResumen) => <RespuestasDeFila inscripcion={i} /> }]
+      : []),
     { id: 'fecha', encabezado: t('columnas.fecha'), className: 'hidden lg:table-cell', celda: (i) => formatearFechaHora(i.createdAt, locale) },
   ];
 
@@ -251,6 +258,49 @@ export function InscriptosCliente({
       {rechazando && <RechazarInscripcion inscripcion={rechazando} onCerrar={() => setRechazando(null)} onRechazar={(motivo) => accion(`/inscripciones-evento/${rechazando.id}/rechazar`, t('rechazada'), { motivo })} />}
       {pagoDe && <RegistrarPago inscripcion={pagoDe} costo={evento.costo} apiToken={apiToken} onCerrar={() => setPagoDe(null)} />}
     </div>
+  );
+}
+
+/** FR-070 — lo que la app ya sabe de la Persona (edad al día del Evento, teléfono, Ministerio, quién la acompaña). */
+function DatosDeLaPersona({ inscripcion }: { inscripcion: InscripcionEventoResumen }) {
+  const t = useTranslations('eventos.inscriptos');
+  const d = inscripcion.datosPersona;
+  return (
+    <span className="flex flex-col text-xs text-muted-foreground">
+      <span>
+        {t('edad', { edad: d.edad })}
+        {d.telefono && ` · ${t('telefono', { telefono: d.telefono })}`}
+      </span>
+      {d.ministerios.length > 0 && <span>{t('ministerio', { ministerios: d.ministerios.join(', ') })}</span>}
+      {d.referente && <span>{t('referente', { nombre: d.referente })}</span>}
+      {d.grupoExtension && (
+        <span>{t('grupoExtension', { nombre: d.grupoExtension.lider ? `${d.grupoExtension.nombre} (${d.grupoExtension.lider})` : d.grupoExtension.nombre })}</span>
+      )}
+    </span>
+  );
+}
+
+/** FR-067, FR-068 — las respuestas de la fila; las sensibles (solo para quien gestiona) con texto + ícono. */
+function RespuestasDeFila({ inscripcion }: { inscripcion: InscripcionEventoResumen }) {
+  const t = useTranslations('eventos.inscriptos');
+  if (inscripcion.respuestas.length === 0) return <span className="text-sm text-muted-foreground">{t('sinRespuestas')}</span>;
+  return (
+    <dl className="flex flex-col gap-1 text-sm">
+      {inscripcion.respuestas.map((r) => (
+        <div key={r.preguntaId}>
+          <dt className="flex items-center gap-1 text-xs text-muted-foreground">
+            {r.sensible && (
+              <>
+                <Lock aria-hidden="true" className="size-3" />
+                <span className="sr-only">{t('sensibleSr')}</span>
+              </>
+            )}
+            {r.pregunta}
+          </dt>
+          <dd>{r.tipo === 'si_no' ? t(r.valor === 'si' ? 'si' : 'no') : r.valor}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -451,6 +501,9 @@ function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: 
   const [error, setError] = useState<string | null>(null);
   // FR-062: la API respondió EVENTO_NO_CORRESPONDE; se pide confirmación para anotarla igual.
   const [noCorresponde, setNoCorresponde] = useState(false);
+  // FR-065: las preguntas del Evento, respondidas en su nombre.
+  const [respuestas, setRespuestas] = useState<Record<string, string>>({});
+  const validacion = useValidacionCampos();
 
   useEffect(() => {
     if (q.trim().length < 2) return;
@@ -469,21 +522,31 @@ function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: 
   const anotar = useEnvio(async () => {
     if (!elegida) return;
     setError(null);
+    const enviadas = Object.entries(respuestas).map(([preguntaId, valor]) => ({ preguntaId, valor }));
+    const locales = validarRespuestas(evento.preguntas, enviadas).errores;
+    if (locales.length > 0) {
+      validacion.reemplazar(Object.fromEntries(locales.map((x) => [x.campo, te.has(`campos.${x.code}`) ? te(`campos.${x.code}`) : t('errores.generico')])));
+      return;
+    }
     try {
       const r = await apiFetch<InscripcionEventoResumen>(`/eventos/${evento.id}/inscripciones`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ personaId: elegida.id, ...(noCorresponde ? { forzar: true } : {}) }),
+        body: JSON.stringify({ personaId: elegida.id, respuestas: enviadas, ...(noCorresponde ? { forzar: true } : {}) }),
       });
       toast(t('anotada', { nombre: `${elegida.nombre} ${elegida.apellido}`, estado: t(`estadoFila.${r.estado}`, { posicion: r.posicionEnLista ?? 0 }) }));
       setAbierto(false);
       setElegida(null);
       setNoCorresponde(false);
+      setRespuestas({});
+      validacion.reset();
       setQ('');
       setResultados(null);
       router.refresh();
     } catch (e) {
+      const campos = mensajesDeCampo(e, te, t);
       if (e instanceof ApiError && e.code === 'EVENTO_NO_CORRESPONDE' && !noCorresponde) setNoCorresponde(true);
+      else if (campos) validacion.reemplazar(campos);
       else setError(mensajeDeError(e, te, t));
     }
   });
@@ -517,6 +580,22 @@ function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: 
                   <UserRound className="size-4" aria-hidden="true" />
                   {t('estasAnotando', { nombre: `${elegida.nombre} ${elegida.apellido}` })}
                 </p>
+                {evento.preguntas.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <ResumenErrores errores={validacion.resumen} foco={validacion.foco} />
+                    <p className="text-sm font-semibold">{t('preguntasTitulo')}</p>
+                    <CamposPreguntasEvento
+                      preguntas={evento.preguntas}
+                      valores={respuestas}
+                      onCambiar={(id, valor) => {
+                        setRespuestas((a) => ({ ...a, [id]: valor }));
+                        validacion.limpiar(campoDeRespuesta(id));
+                      }}
+                      errores={validacion.mensajes}
+                      etiquetas={{ si: t('si'), no: t('no'), opcional: t('opcional'), sensible: t('sensibleAyuda') }}
+                    />
+                  </div>
+                )}
                 {noCorresponde && (
                   <div role="alert" className="flex items-start gap-2 rounded-md border border-border p-3 text-sm" data-testid="anotar-no-corresponde">
                     <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />

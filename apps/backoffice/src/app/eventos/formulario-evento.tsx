@@ -7,6 +7,7 @@ import {
   EDAD_DESTINATARIO_MAX,
   GENEROS_DESTINATARIO,
   instanteEnArgentina,
+  validarPreguntas,
   partesEnArgentina,
   type DatosEvento,
   type EventoDetalle,
@@ -24,6 +25,7 @@ import {
   useEnvio,
   useValidacionCampos,
 } from '@vida-sobrenatural/ui';
+import { EditorPreguntas, preguntasEnEdicion, preguntasParaEnviar, type PreguntaEnEdicion } from './editor-preguntas';
 
 export interface SedeOpcion {
   id: string;
@@ -53,6 +55,7 @@ export interface ValoresEvento {
   destinatariosGenero: GeneroDestinatario;
   edadMinima: string;
   edadMaxima: string;
+  preguntas: PreguntaEnEdicion[];
 }
 
 export function valoresVacios(sedeId = ''): ValoresEvento {
@@ -79,6 +82,7 @@ export function valoresVacios(sedeId = ''): ValoresEvento {
     destinatariosGenero: 'todas',
     edadMinima: '',
     edadMaxima: '',
+    preguntas: [],
   };
 }
 
@@ -108,6 +112,7 @@ export function valoresDeEvento(e: EventoDetalle): ValoresEvento {
     destinatariosGenero: e.destinatarios.genero,
     edadMinima: e.destinatarios.edadMinima === null ? '' : String(e.destinatarios.edadMinima),
     edadMaxima: e.destinatarios.edadMaxima === null ? '' : String(e.destinatarios.edadMaxima),
+    preguntas: preguntasEnEdicion(e.preguntas),
   };
 }
 
@@ -137,11 +142,13 @@ export function datosParaEnviar(v: ValoresEvento): DatosEvento {
     destinatariosGenero: bautismo ? 'todas' : v.destinatariosGenero,
     edadMinima: !bautismo && v.edadMinima.trim() !== '' ? Number(v.edadMinima) : null,
     edadMaxima: !bautismo && v.edadMaxima.trim() !== '' ? Number(v.edadMaxima) : null,
+    // FR-064: las preguntas solo con inscripción y fuera del bautismo (si no, se mandan vacías).
+    preguntas: !bautismo && inscripcion ? preguntasParaEnviar(v.preguntas) : [],
   };
 }
 
 /** Las validaciones que se pueden hacer sin ir al servidor (H-72: al salir del campo y al enviar). */
-function erroresLocales(v: ValoresEvento, t: (clave: string) => string): Record<string, string> {
+function erroresLocales(v: ValoresEvento, t: (clave: string) => string, tc: (clave: string) => string): Record<string, string> {
   const e: Record<string, string> = {};
   if (v.nombre.trim() === '') e.nombre = t('requerido.nombre');
   if (!v.sedeId) e.sedeId = t('requerido.sede');
@@ -158,6 +165,9 @@ function erroresLocales(v: ValoresEvento, t: (clave: string) => string): Record<
   if (v.tipo !== 'bautismo' && inscripcion && v.diasRecordatorio.trim() !== '') {
     const dias = Number(v.diasRecordatorio);
     if (!(Number.isInteger(dias) && dias >= 1 && dias <= DIAS_RECORDATORIO_MAX)) e.diasAnticipacionRecordatorio = t('requerido.diasRecordatorio');
+  }
+  if (v.tipo !== 'bautismo' && inscripcion) {
+    for (const error of validarPreguntas(preguntasParaEnviar(v.preguntas))) e[error.campo] = tc(`campos.${error.code}`);
   }
   if (v.tipo !== 'bautismo') {
     const edad = (x: string) => x.trim() === '' || (Number.isInteger(Number(x)) && Number(x) >= 0 && Number(x) <= EDAD_DESTINATARIO_MAX);
@@ -216,14 +226,14 @@ export function FormularioEvento({
   }
 
   function revisar(clave: string) {
-    const mensaje = erroresLocales(v, t)[clave];
+    const mensaje = erroresLocales(v, t, te)[clave];
     if (mensaje) validacion.revalidar(clave, v, { esValido: () => false, mensaje });
     else validacion.limpiar(clave);
   }
 
   const { enviando, ejecutar } = useEnvio(async () => {
     setErrorGeneral(null);
-    const locales = erroresLocales(v, t);
+    const locales = erroresLocales(v, t, te);
     if (Object.keys(locales).length > 0) {
       validacion.reemplazar(locales);
       return;
@@ -526,6 +536,15 @@ export function FormularioEvento({
           </>
         )}
       </fieldset>
+
+      {inscripcion && !bautismo && (
+        <EditorPreguntas
+          preguntas={v.preguntas}
+          onCambiar={(preguntas) => setV((a) => ({ ...a, preguntas }))}
+          mensajes={m}
+          onLimpiar={(campo) => validacion.limpiar(campo)}
+        />
+      )}
 
       {inscripcion && !bautismo && (
         <fieldset className="flex flex-col gap-4">

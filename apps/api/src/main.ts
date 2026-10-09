@@ -34,6 +34,8 @@ async function bootstrap() {
           'req.body.apellido',
           'req.body.nombre',
           'req.body.dni', // D215
+          'req.body.respuestas', // D222: respuestas a las preguntas de un Evento (pueden ser de salud)
+          'req.body.preguntas',
         ],
         censor: '[redactado]',
       },

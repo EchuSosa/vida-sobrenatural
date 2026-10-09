@@ -160,6 +160,8 @@ export { AvisoEstado, type AvisoEstadoProps } from './components/aviso-estado';
 // --- spec 011 (EstadoInscripcionBadge, CampoArchivo) ---
 export { CampoArchivo, type CampoArchivoProps } from './components/campo-archivo';
 export { EstadoInscripcionBadge, type EstadoInscripcionBadgeProps, type EstadoParaBadge } from './components/estado-inscripcion-badge';
+// Ampliación 2026-10-09: responder las preguntas propias de un Evento (FR-065).
+export { CamposPreguntasEvento, type CamposPreguntasEventoProps, type EtiquetasCamposPreguntas } from './components/campos-preguntas-evento';
 // spec 013 lote 5: "Contanos qué te parece".
 export {
   FormularioComentario,

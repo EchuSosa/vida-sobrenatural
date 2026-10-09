@@ -1,11 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { ESTADOS_INSCRIPCION_ABIERTA, correspondeAlEvento, estadoInscripcionDeEvento, type MiInscripcionEnEvento, type MiInscripcionEvento } from '@vida-sobrenatural/shared-types';
+import {
+  ESTADOS_INSCRIPCION_ABIERTA,
+  correspondeAlEvento,
+  estadoInscripcionDeEvento,
+  type MiInscripcionEnEvento,
+  type MiInscripcionEvento,
+  type RespuestaPregunta,
+} from '@vida-sobrenatural/shared-types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { conBloqueoDeEvento, contarOcupados, decidirEstadoInicial } from './motor-cupo.js';
 import { aMisInscripciones, INSCRIPCION_SELECT } from './mis-inscripciones.js';
 import { destinatariosDe } from './representacion.js';
+import { guardarRespuestas, respuestasDeInscripciones, validarRespuestasDelEvento } from './preguntas-evento.js';
 
 /**
  * spec 011, lote B (US3) — la propia Persona se anota (FR-015 a FR-017,
@@ -46,17 +54,19 @@ export class InscripcionPropiaService {
       abierta ??
       (await this.prisma.inscripcionEvento.findFirst({ where: { eventoId, personaId }, orderBy: { createdAt: 'desc' }, select: INSCRIPCION_SELECT }));
     const [inscripcion] = fila ? await aMisInscripciones(this.prisma, [fila]) : [null];
+    // FR-068: la propia Persona ve todas sus respuestas, también las sensibles.
+    const respuestas = fila ? ((await respuestasDeInscripciones(this.prisma, [fila.id], true)).get(fila.id) ?? []) : [];
     return {
       inscripcion,
       lugaresDisponibles: evento.cupo === null ? null : Math.max(0, evento.cupo - ocupados),
       estadoInscripcion: estadoInscripcionDeEvento(evento, ocupados),
       corresponde: persona !== null && correspondeAlEvento(persona, destinatariosDe(evento), evento.inicio),
-      respuestas: [],
+      respuestas,
     };
   }
 
   /** POST /eventos/:id/inscripciones/me — FR-015, con el cupo serializado por el bloqueo del Evento (FR-016). */
-  async anotarme(eventoId: string, personaId: string): Promise<MiInscripcionEvento> {
+  async anotarme(eventoId: string, personaId: string, respuestas?: RespuestaPregunta[]): Promise<MiInscripcionEvento> {
     try {
       return await conBloqueoDeEvento(this.prisma, eventoId, async (tx) => {
         const evento = await tx.evento.findFirst({
@@ -91,11 +101,14 @@ export class InscripcionPropiaService {
         const yaAbierta = await tx.inscripcionEvento.count({ where: { eventoId, personaId, estado: { in: [...ESTADOS_INSCRIPCION_ABIERTA] } } });
         if (yaAbierta > 0) throw new AppException('INSCRIPCION_EVENTO_YA_ABIERTA', 409, 'Ya estás anotada a este Evento.');
 
+        // FR-065: las respuestas en el mismo paso; con errores, no se crea nada.
+        await validarRespuestasDelEvento(tx, eventoId, respuestas);
         const estado = decidirEstadoInicial(evento, await contarOcupados(tx, eventoId));
         const creada = await tx.inscripcionEvento.create({
           data: { eventoId, personaId, estado, enListaDesde: estado === 'lista_espera' ? new Date() : null },
           select: INSCRIPCION_SELECT,
         });
+        await guardarRespuestas(tx, eventoId, creada.id, respuestas);
         if (estado === 'pendiente') {
           await this.notificaciones.emitir(tx, {
             nombre: 'evento.inscripcion_pendiente',

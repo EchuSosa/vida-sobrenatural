@@ -1,7 +1,15 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { apiFetch, type EstadoInscripcionEvento, type EventoDetalle, type InscripcionEventoResumen, type Pagina } from '@vida-sobrenatural/shared-types';
+import {
+  apiFetch,
+  type EstadoInscripcionEvento,
+  type EventoDetalle,
+  type InscripcionEventoResumen,
+  type Pagina,
+  type ResumenPreguntaEvento,
+} from '@vida-sobrenatural/shared-types';
 import { InscriptosCliente } from './inscriptos-cliente';
+import { ResumenPreguntas } from './resumen-preguntas';
 
 const ESTADOS: EstadoInscripcionEvento[] = ['pendiente', 'confirmada', 'lista_espera', 'rechazada', 'cancelada'];
 
@@ -33,9 +41,14 @@ export async function InscriptosEvento({
   const pestanas = ESTADOS.filter((e) => e !== 'pendiente' || evento.requiereAprobacion || evento.pendientes > 0).filter(
     (e) => e !== 'lista_espera' || evento.permiteListaEspera || evento.enEspera > 0,
   );
-  const lista = await apiFetch<Pagina<InscripcionEventoResumen>>(`/eventos/${evento.id}/inscripciones?estado=${estado}&take=100`, {
-    headers: { Authorization: `Bearer ${apiToken}` },
-  });
+  const auth = { headers: { Authorization: `Bearer ${apiToken}` } };
+  const [lista, resumen] = await Promise.all([
+    apiFetch<Pagina<InscripcionEventoResumen>>(`/eventos/${evento.id}/inscripciones?estado=${estado}&take=100`, auth),
+    // FR-067: el resumen por pregunta; si falla, la lista se muestra igual con el error en su lugar.
+    evento.preguntas.length > 0
+      ? apiFetch<ResumenPreguntaEvento[]>(`/eventos/${evento.id}/preguntas/resumen`, auth).catch(() => null)
+      : Promise.resolve([] as ResumenPreguntaEvento[]),
+  ]);
   const conteo: Partial<Record<EstadoInscripcionEvento, number>> = {
     pendiente: evento.pendientes,
     confirmada: evento.ocupados - evento.pendientes,
@@ -47,6 +60,7 @@ export async function InscriptosEvento({
       <h2 id="titulo-inscriptos" className="text-xl font-semibold">
         {t('titulo')}
       </h2>
+      <ResumenPreguntas resumen={resumen} />
       <nav aria-label={t('pestanas')} className="flex flex-wrap gap-1 border-b border-border">
         {pestanas.map((e) => (
           <Link

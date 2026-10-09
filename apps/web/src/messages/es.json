@@ -178,7 +178,10 @@
       "MOTIVO_DEMASIADO_LARGO": "El motivo puede tener hasta 500 caracteres: acortalo un poco.",
       "INSCRIPCION_DE_OTRO_GRUPO": "La lista de personas cambió: recargá la página y volvé a marcar la asistencia.",
       "FECHA_INVALIDA": "Escribí una fecha válida, por ejemplo 28/10/2026.",
-      "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última."
+      "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última.",
+      "RESPUESTA_REQUERIDA": "Respondé esta pregunta para poder anotarte.",
+      "RESPUESTA_INVALIDA": "Elegí una de las opciones de la lista.",
+      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "EVENTO_NO_CORRESPONDE": "Este evento es para otro público: no podés anotarte.",
@@ -1590,7 +1593,14 @@
       "errores": {
         "generico": "No pudimos anotarte. Probá de nuevo en unos segundos."
       },
-      "noCorresponde": "Por eso no podés anotarte desde acá. Si creés que hay un error, escribile al equipo de la iglesia."
+      "noCorresponde": "Por eso no podés anotarte desde acá. Si creés que hay un error, escribile al equipo de la iglesia.",
+      "preguntasTitulo": "Antes de anotarte, respondé estas preguntas:",
+      "revisaRespuestas": "Revisá estas respuestas:",
+      "si": "Sí",
+      "no": "No",
+      "opcional": "(opcional)",
+      "sensible": "Solo lo ve el equipo que organiza; se borra 30 días después del evento.",
+      "tusRespuestas": "Tus respuestas"
     }
   },
   "misEventos": {

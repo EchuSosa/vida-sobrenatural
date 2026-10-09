@@ -16,6 +16,8 @@ import { InscriptosController } from './inscriptos.controller.js';
 import { InscriptosService } from './inscriptos.service.js';
 import { EventosConsultasService } from './eventos-consultas.service.js';
 import { FuenteBandejaInscripcionEvento, FuenteBandejaPago } from './fuentes-bandeja.js';
+import { BorradoRespuestasSensiblesService } from './borrado-respuestas-sensibles.service.js';
+import { TareaBorrarRespuestasSensibles } from './tarea-borrar-respuestas-sensibles.js';
 
 /**
  * spec 011 — Eventos, inscripciones y pagos. Al cancelar un Evento llama,
@@ -27,7 +29,7 @@ import { FuenteBandejaInscripcionEvento, FuenteBandejaPago } from './fuentes-ban
 @Module({
   imports: [BautismoModule, StorageModule],
   controllers: [EventosPublicosController, InscripcionPropiaController, PagosController, InscriptosController, EventosGestionController],
-  providers: [EventosPublicosService, EventosGestionService, InscripcionPropiaService, MisEventosService, LimitePedidosGuard, PagosPersonaService, PagosAdminService, InscriptosService, EventosConsultasService, FuenteBandejaInscripcionEvento, FuenteBandejaPago],
-  exports: [EventosGestionService, EventosConsultasService, InscriptosService],
+  providers: [EventosPublicosService, EventosGestionService, InscripcionPropiaService, MisEventosService, LimitePedidosGuard, PagosPersonaService, PagosAdminService, InscriptosService, EventosConsultasService, FuenteBandejaInscripcionEvento, FuenteBandejaPago, BorradoRespuestasSensiblesService, TareaBorrarRespuestasSensibles],
+  exports: [EventosGestionService, EventosConsultasService, InscriptosService, BorradoRespuestasSensiblesService],
 })
 export class EventoModule {}
