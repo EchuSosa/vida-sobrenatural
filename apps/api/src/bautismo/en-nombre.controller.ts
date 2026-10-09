@@ -30,9 +30,9 @@ export class BautismoEnNombreController {
 
   @Post('bautismo/solicitudes')
   @RequierePermiso('bautismo.crear_en_nombre')
-  @ApiCreatedResponse({ description: 'spec 010, FR-022: pedido en nombre de una Persona activa. 409 SOLICITUD_BAUTISMO_YA_ABIERTA, PERSONA_YA_BAUTIZADA; 404 NO_ENCONTRADO.' })
+  @ApiCreatedResponse({ description: 'spec 010, FR-022: pedido en nombre de una Persona activa. 409 SOLICITUD_BAUTISMO_YA_ABIERTA, PERSONA_YA_BAUTIZADA; 404 NO_ENCONTRADO; 400 VALIDACION (talleRemera obligatorio, D220).' })
   crear(@Body() dto: CrearEnNombreBautismoDto, @Req() request: AuthenticatedRequest) {
-    return this.service.crearEnNombre(dto.personaId, dto.comentario, personaDeSesion(request));
+    return this.service.crearEnNombre(dto.personaId, dto.comentario, personaDeSesion(request), dto.talleRemera);
   }
 
   @Put('personas/:id/habilitacion-bautismo')

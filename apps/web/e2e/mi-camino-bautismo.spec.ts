@@ -60,17 +60,24 @@ for (const tema of ['claro', 'oscuro'] as const) {
       expect((await pedir.boundingBox())!.height).toBeGreaterThanOrEqual(44); // D150
       await sinScrollHorizontal(page);
 
-      // H-50: 501 caracteres → mensaje bajo el campo y resumen arriba.
+      // H-50: sin talle (D220) y con 501 caracteres → mensaje bajo cada campo y resumen arriba.
       await pedir.click();
       const dialogo = page.getByRole('alertdialog');
       await expect(dialogo).toContainText('¿Querés pedir tu bautismo?');
+      const talle = dialogo.getByLabel('¿Qué talle de remera usás?');
+      await expect(talle).toBeVisible();
+      expect((await talle.boundingBox())!.height).toBeGreaterThanOrEqual(44); // D150
       await dialogo.getByLabel('¿Querés contarnos algo? (opcional)').fill('a'.repeat(501));
       await dialogo.getByRole('button', { name: 'Sí, pedir mi bautismo' }).click();
       await expect(dialogo.getByText('Revisá esto antes de seguir:')).toBeVisible();
+      await expect(dialogo.getByRole('link', { name: 'Elegí un talle de remera de la lista.' })).toBeVisible();
+      await expect(talle).toHaveAttribute('aria-invalid', 'true');
       await expect(dialogo.getByLabel('¿Querés contarnos algo? (opcional)')).toHaveAttribute('aria-invalid', 'true');
       await sinViolaciones(page, tema);
 
       // SC-001: corrige y confirma (doble clic = un solo pedido, H-57); la card cambia sin recargar.
+      await talle.selectOption('L');
+      await expect(talle).not.toHaveAttribute('aria-invalid', 'true');
       await dialogo.getByLabel('¿Querés contarnos algo? (opcional)').fill('Me gustaría con mi hermana');
       await dialogo.getByRole('button', { name: 'Sí, pedir mi bautismo' }).dblclick();
       await expect(card(page)).toContainText('Recibimos tu pedido');

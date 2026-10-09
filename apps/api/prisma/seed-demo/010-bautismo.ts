@@ -1,3 +1,4 @@
+import type { TalleRemera } from '@vida-sobrenatural/shared-types';
 import type { ContextoSeedDemo } from './contexto.js';
 
 const DIA = 86_400_000;
@@ -14,8 +15,10 @@ const en = (dias: number, hora = 18) => {
  * pasada sin confirmar, bautizada, rechazada, retirada), una habilitada sin
  * Vida Nueva, un pedido creado en nombre de una Persona sin acceso a la app,
  * un Evento de bautismo próximo con tres asignadas y uno pasado ya
- * confirmado. Nombres largos con tildes y apellidos compuestos, para ver que
- * la card y la sección del Evento no desbordan a 360 px. Emails `demo-`;
+ * confirmado. Los pedidos tienen talles de remera variados y uno "Sin dato"
+ * (como los de antes de D220), para ver el resumen de talles del Evento. La
+ * descripción del Evento lleva la charla pre-bautismo y qué traer. Nombres
+ * largos con tildes y apellidos compuestos, para ver que la card y la sección del Evento no desbordan a 360 px. Emails `demo-`;
  * idempotente (si ya hay pedidos de bautismo de demo, no hace nada).
  */
 export async function sembrarDemo010(ctx: ContextoSeedDemo): Promise<void> {
@@ -66,7 +69,10 @@ export async function sembrarDemo010(ctx: ContextoSeedDemo): Promise<void> {
         sedeId: sedes.laPlata,
         nombre,
         slug,
-        descripcion: 'Un domingo para celebrar juntos a quienes deciden bautizarse. Traé ropa para cambiarte y una toalla.',
+        descripcion:
+          'Un domingo para celebrar juntos a quienes deciden bautizarse.\n\n' +
+          'Ese mismo día, a las 9, es la charla pre-bautismo, en el mismo lugar.\n\n' +
+          'Qué traer: una muda de ropa, un toallón y ojotas o crocs. La remera te la regala la iglesia.',
         tipo: 'bautismo',
         inicio,
         fin: new Date(inicio.getTime() + 2 * 3_600_000),
@@ -79,7 +85,7 @@ export async function sembrarDemo010(ctx: ContextoSeedDemo): Promise<void> {
     return creado.id;
   }
 
-  async function solicitud(personaId: string, datos: { estado?: 'pendiente' | 'aprobada' | 'rechazada' | 'retirada' | 'realizada'; comentario?: string; motivo?: string; dias?: number; creadoPor?: boolean; eventoId?: string; realizadaEn?: Date }) {
+  async function solicitud(personaId: string, datos: { estado?: 'pendiente' | 'aprobada' | 'rechazada' | 'retirada' | 'realizada'; comentario?: string; motivo?: string; dias?: number; creadoPor?: boolean; eventoId?: string; realizadaEn?: Date; talle?: TalleRemera | null }) {
     const estado = datos.estado ?? 'pendiente';
     const creada = new Date(Date.now() - (datos.dias ?? 3) * DIA);
     const inscripcion = datos.eventoId
@@ -90,6 +96,8 @@ export async function sembrarDemo010(ctx: ContextoSeedDemo): Promise<void> {
         personaId,
         estado,
         comentario: datos.comentario ?? null,
+        // D220: `null` = como un pedido de antes del ajuste ("Sin dato").
+        talleRemera: datos.talle === undefined ? 'M' : datos.talle,
         creadoPorId: datos.creadoPor ? admin!.id : null,
         createdAt: creada,
         ...(estado !== 'pendiente' && estado !== 'retirada' ? { revisadoPorId: admin!.id, revisadaEn: new Date(creada.getTime() + DIA) } : {}),
@@ -105,21 +113,21 @@ export async function sembrarDemo010(ctx: ContextoSeedDemo): Promise<void> {
   const pasadoSinConfirmar = await evento('demo-bautismo-hace-unos-dias', 'Bautismos de primavera', en(-4, 11), null);
   const pasadoConfirmado = await evento('demo-bautismo-agosto', 'Bautismos de agosto', en(-60, 11), null);
 
-  await solicitud(await persona('revision', 'María de los Ángeles', 'Fernández Etcheverry'), { comentario: 'Me gustaría bautizarme junto a mi hija, que también está haciendo Vida Nueva.', dias: 2 });
-  await solicitud(await persona('revision-2', 'Juan Ignacio', 'Pérez'), { dias: 9 });
-  await solicitud(await persona('espera', 'Ana Sofía', 'Gómez Ruiz Díaz'), { estado: 'aprobada', dias: 21 });
-  await solicitud(await persona('espera-2', 'Agustín', 'Iturralde'), { estado: 'aprobada', dias: 12 });
-  for (const [clave, nombre, apellido] of [
-    ['fecha-1', 'Lucía Belén', 'Martínez de la Fuente'],
-    ['fecha-2', 'Ezequiel', 'Núñez'],
-    ['fecha-3', 'Florencia Abigail', 'Quiroga Saavedra'],
+  await solicitud(await persona('revision', 'María de los Ángeles', 'Fernández Etcheverry'), { comentario: 'Me gustaría bautizarme junto a mi hija, que también está haciendo Vida Nueva.', dias: 2, talle: 'L' });
+  await solicitud(await persona('revision-2', 'Juan Ignacio', 'Pérez'), { dias: 9, talle: 'XL' });
+  await solicitud(await persona('espera', 'Ana Sofía', 'Gómez Ruiz Díaz'), { estado: 'aprobada', dias: 21, talle: 'S' });
+  await solicitud(await persona('espera-2', 'Agustín', 'Iturralde'), { estado: 'aprobada', dias: 12, talle: 'XXL' });
+  for (const [clave, nombre, apellido, talle] of [
+    ['fecha-1', 'Lucía Belén', 'Martínez de la Fuente', 'S'],
+    ['fecha-2', 'Ezequiel', 'Núñez', 'L'],
+    ['fecha-3', 'Florencia Abigail', 'Quiroga Saavedra', null],
   ] as const) {
-    await solicitud(await persona(clave, nombre, apellido), { estado: 'aprobada', dias: 30, eventoId: proximo });
+    await solicitud(await persona(clave, nombre, apellido), { estado: 'aprobada', dias: 30, eventoId: proximo, talle });
   }
-  await solicitud(await persona('confirmando', 'Ramón Esteban', 'Olmedo'), { estado: 'aprobada', dias: 40, eventoId: pasadoSinConfirmar });
+  await solicitud(await persona('confirmando', 'Ramón Esteban', 'Olmedo'), { estado: 'aprobada', dias: 40, eventoId: pasadoSinConfirmar, talle: 'XXXL' });
   for (const clave of ['bautizada-1', 'bautizada-2']) {
     const id = await persona(clave, clave === 'bautizada-1' ? 'Valentina' : 'Gonzalo Martín', clave === 'bautizada-1' ? 'Sánchez Lorenzo' : 'Ávalos');
-    await solicitud(id, { estado: 'realizada', dias: 90, eventoId: pasadoConfirmado, realizadaEn: en(-60, 11) });
+    await solicitud(id, { estado: 'realizada', dias: 90, eventoId: pasadoConfirmado, realizadaEn: en(-60, 11), talle: clave === 'bautizada-1' ? 'XS' : 'M' });
   }
   await solicitud(await persona('rechazada', 'Camila', 'Benítez'), { estado: 'rechazada', motivo: 'Prefiere esperar a terminar Vida Nueva; lo charlamos con su Discipuladora.', dias: 15 });
   await solicitud(await persona('retirada', 'Federico', 'Luna Arrieta'), { estado: 'retirada', dias: 25 });

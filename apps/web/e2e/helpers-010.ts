@@ -29,7 +29,7 @@ export async function crearEventoDeBautismo(baseURL: string, lugar = 'Club Unive
 /** El Admin pide el bautismo en nombre de la Persona y lo acepta, con o sin fecha. Devuelve la Solicitud. */
 export async function pedirYAceptar(baseURL: string, email: string, eventoId?: string): Promise<string> {
   const personaId = await personaIdDe(baseURL, email);
-  const { id } = await comoAdmin(baseURL, 'POST', '/bautismo/solicitudes', { personaId });
+  const { id } = await comoAdmin(baseURL, 'POST', '/bautismo/solicitudes', { personaId, talleRemera: 'M' });
   await comoAdmin(baseURL, 'POST', `/bautismo/solicitudes/${id}/aceptar`, eventoId ? { eventoId } : {});
   return id as string;
 }

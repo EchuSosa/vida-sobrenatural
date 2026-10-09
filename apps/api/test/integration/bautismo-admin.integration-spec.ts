@@ -64,6 +64,23 @@ describe('Bautismo — el Admin (integración)', () => {
       expect((await http().get(`/bautismo/solicitudes/${s3.id}`).set('Authorization', admin)).body.vidaNueva.estado).toBe('completada');
     });
 
+    it('D220: el detalle trae el talle (null = "Sin dato" en los de antes); el Admin lo corrige; el Pastor no', async () => {
+      const s = await esc.solicitud(await esc.persona('talle-detalle'));
+      const antes = await http().get(`/bautismo/solicitudes/${s.id}`).set('Authorization', admin);
+      expect(antes.body.talleRemera).toBeNull();
+      const res = await http().put(`/bautismo/solicitudes/${s.id}/talle`).set('Authorization', admin).send({ talleRemera: 'XL' });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({ id: s.id, estado: 'pendiente', talleRemera: 'XL' });
+      const malo = await http().put(`/bautismo/solicitudes/${s.id}/talle`).set('Authorization', admin).send({ talleRemera: 'grande' });
+      expect(malo.status).toBe(400);
+      expect(malo.body.errors).toEqual([{ campo: 'talleRemera', code: 'TALLE_INVALIDO' }]);
+      const vacio = await http().put(`/bautismo/solicitudes/${s.id}/talle`).set('Authorization', admin).send({});
+      expect(vacio.body.errors).toEqual([{ campo: 'talleRemera', code: 'TALLE_REQUERIDO' }]);
+      expect((await http().put(`/bautismo/solicitudes/${s.id}/talle`).set('Authorization', pastor).send({ talleRemera: 'S' })).status).toBe(403);
+      expect((await http().put('/bautismo/solicitudes/no-existe/talle').set('Authorization', admin).send({ talleRemera: 'S' })).status).toBe(404);
+      expect((await prisma.solicitudBautismo.findUniqueOrThrow({ where: { id: s.id } })).talleRemera).toBe('XL');
+    });
+
     it('aceptar → aprobada con quién y cuándo, un aviso, y la Persona ve esperando_fecha', async () => {
       const id = await esc.persona('acepta');
       const s = await esc.solicitud(id);
@@ -234,6 +251,31 @@ describe('Bautismo — el Admin (integración)', () => {
       expect((await http().get(`/bautismo/eventos/${general.id}`).set('Authorization', admin)).status).toBe(404);
     });
 
+    it('D220: la sección del Evento resume los talles de TODAS las asignadas (no solo la página), con "Sin dato"', async () => {
+      const ev = await esc.eventoBautismo();
+      const talles = ['M', 'S', 'M', null, 'XXL'] as const;
+      for (const [i, talle] of talles.entries()) {
+        const { id } = await esc.asignada(await esc.persona(`talles-${i}`), ev.id);
+        await prisma.solicitudBautismo.update({ where: { id }, data: { talleRemera: talle } });
+      }
+      // Una esperando fecha no cuenta: la remera es de las que van a ESTE Evento.
+      const otra = await esc.solicitud(await esc.persona('talles-espera'), 'aprobada');
+      await prisma.solicitudBautismo.update({ where: { id: otra.id }, data: { talleRemera: 'L' } });
+      const res = await http().get(`/bautismo/eventos/${ev.id}?takeAsignadas=2`).set('Authorization', pastor);
+      expect(res.status).toBe(200);
+      expect(res.body.asignadas.items).toHaveLength(2);
+      expect(res.body.talles).toEqual({
+        talles: [
+          { talle: 'S', cantidad: 1 },
+          { talle: 'M', cantidad: 2 },
+          { talle: 'XXL', cantidad: 1 },
+        ],
+        sinDato: 1,
+        total: 5,
+      });
+      expect(res.body.asignadas.items[0]).toHaveProperty('talleRemera');
+    });
+
     it('GET /bautismo/eventos: solo próximos de bautismo publicados', async () => {
       const futuro = await esc.eventoBautismo();
       const pasado = await esc.eventoBautismo({ inicio: AYER() });
@@ -304,7 +346,7 @@ describe('Bautismo — el Admin (integración)', () => {
       expect(otra.body).toEqual({ realizadas: 0, devueltasAEspera: 0 });
       expect(await nombresDeAvisos(a.id)).toEqual(['bautismo.realizado']);
       expect((await http().get(`/bautismo/eventos/${ev.id}`).set('Authorization', admin)).body.puedeConfirmar).toBe(false);
-      const pide = await http().post('/bautismo/solicitudes/me').set('Authorization', await de(personas[0])).send({});
+      const pide = await http().post('/bautismo/solicitudes/me').set('Authorization', await de(personas[0])).send({ talleRemera: 'M' });
       expect(pide.body.code).toBe('PERSONA_YA_BAUTIZADA');
     });
 

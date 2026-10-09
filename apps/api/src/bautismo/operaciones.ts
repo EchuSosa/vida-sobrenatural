@@ -1,4 +1,4 @@
-import { COMENTARIO_BAUTISMO_MAX } from '@vida-sobrenatural/shared-types';
+import { COMENTARIO_BAUTISMO_MAX, errorTalleRemera, type TalleRemera } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { errorDeValidacion } from '../discipulado/validaciones.js';
@@ -16,6 +16,25 @@ export function normalizarComentarioBautismo(comentario: string | undefined | nu
   const limpio = comentario?.trim() ?? '';
   if (limpio.length > COMENTARIO_BAUTISMO_MAX) throw errorDeValidacion([{ campo: 'comentario', code: 'COMENTARIO_DEMASIADO_LARGO' }]);
   return limpio === '' ? null : limpio;
+}
+
+/**
+ * FR-001/FR-022 + D220: los datos de un pedido nuevo (la Persona o en su
+ * nombre). Junta los errores de los dos campos en una sola respuesta, para
+ * que el formulario los marque a la vez (H-50).
+ */
+export function normalizarPedidoBautismo(comentario: string | undefined | null, talle: unknown): { comentario: string | null; talleRemera: TalleRemera } {
+  const errores: Array<{ campo: string; code: string }> = [];
+  const codigoTalle = errorTalleRemera(talle);
+  if (codigoTalle) errores.push({ campo: 'talleRemera', code: codigoTalle });
+  let limpio: string | null = null;
+  try {
+    limpio = normalizarComentarioBautismo(comentario);
+  } catch {
+    errores.unshift({ campo: 'comentario', code: 'COMENTARIO_DEMASIADO_LARGO' });
+  }
+  if (errores.length > 0) throw errorDeValidacion(errores);
+  return { comentario: limpio, talleRemera: talle as TalleRemera };
 }
 
 export function yaCambio(): AppException {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -10,17 +11,19 @@ import {
   COMENTARIO_BAUTISMO_MAX,
   apiFetch,
   erroresPorCampo,
+  errorTalleRemera,
   formatearFechaCorta,
   formatearInicioEvento,
   type BautismoDePersona,
+  type TalleRemera,
 } from '@vida-sobrenatural/shared-types';
-import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, CampoTalleRemera, ConfirmDestructiveDialog, DialogoTextoOpcional, useEnvio } from '@vida-sobrenatural/ui';
 
 /**
  * spec 010, T049 y T050 — la parte interactiva de la sección Bautismo del
  * Perfil. Habilitar y quitar la habilitación son reversibles (diálogos
- * neutros, D151); pedir en su nombre pide solo el comentario opcional, con
- * el error por campo de la pieza compartida (H-50).
+ * neutros, D151); pedir en su nombre pide el talle de remera (obligatorio,
+ * D220) y el comentario opcional, con el error por campo de la pieza compartida (H-50).
  */
 export function BautismoPersonaCliente({
   personaId,
@@ -38,6 +41,7 @@ export function BautismoPersonaCliente({
   const t = useTranslations('personas.bautismo');
   const te = useTranslations('errors');
   const locale = useLocale();
+  const [talle, setTalle] = useState<TalleRemera | ''>('');
   const router = useRouter();
   const fecha = (iso: string) => formatearFechaCorta(iso, locale);
 
@@ -141,21 +145,42 @@ export function BautismoPersonaCliente({
               tituloResumen={t('resumenErrores')}
               textoEnviar={t('pedirEnNombreEnviar')}
               textoVolver={t('volver')}
+              validar={(): Record<string, string> => {
+                const code = errorTalleRemera(talle);
+                return code ? { talleRemera: te(`campos.${code}`) } : {};
+              }}
+              alCerrar={() => setTalle('')}
               onEnviar={async (comentario) => {
                 try {
                   await apiFetch('/bautismo/solicitudes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
-                    body: JSON.stringify({ personaId, comentario: comentario ?? undefined }),
+                    body: JSON.stringify({ personaId, comentario: comentario ?? undefined, talleRemera: talle }),
                   });
                   toast.success(t('pedidoCreado'));
                 } catch (error) {
-                  if (erroresPorCampo(error)) return { errorCampo: te('campos.COMENTARIO_DEMASIADO_LARGO') };
+                  const campos = erroresPorCampo(error);
+                  if (campos) return { errores: Object.fromEntries(campos.map(({ campo, code }) => [campo, te(`campos.${code}`)])) };
                   toast.error(mensajeDeError(error));
                 }
                 router.refresh();
               }}
-            />
+            >
+              {({ mensajes, limpiar, enviando }) => (
+                <CampoTalleRemera
+                  valor={talle}
+                  onCambiar={(valor) => {
+                    setTalle(valor);
+                    limpiar('talleRemera');
+                  }}
+                  etiqueta={t('talleEtiqueta')}
+                  placeholder={t('tallePlaceholder')}
+                  ayuda={t('talleAyuda')}
+                  error={mensajes.talleRemera}
+                  disabled={enviando}
+                />
+              )}
+            </DialogoTextoOpcional>
           )}
         </div>
       )}

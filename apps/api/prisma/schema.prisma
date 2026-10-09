@@ -1038,6 +1038,17 @@ enum EstadoSolicitudBautismo {
   realizada // el Admin confirmó que se bautizó (D180)
 }
 
+// D220: en el orden de `TALLES_REMERA` (shared-types).
+enum TalleRemera {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+  XXXL
+}
+
 model SolicitudBautismo {
   id                  String                  @id @default(uuid())
   personaId           String
@@ -1045,6 +1056,9 @@ model SolicitudBautismo {
   estado              EstadoSolicitudBautismo @default(pendiente)
   // ≤ 500. Reemplaza la fecha deseada (D179).
   comentario          String?
+  // D220: el talle de la remera que regala la iglesia. Obligatorio al pedir;
+  // null solo en los pedidos de antes del ajuste ("Sin dato").
+  talleRemera         TalleRemera?
   // null = la pidió la propia Persona (D97).
   creadoPorId         String?
   revisadoPorId       String?

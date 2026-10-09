@@ -49,7 +49,7 @@ describe('Bautismo — excepciones del Admin (integración)', () => {
     it('deshabilitar con una Solicitud abierta → la Solicitud sigue; sin ella y sin Vida Nueva → no_habilitada', async () => {
       const id = await esc.persona('deshabilitar', { vidaNueva: 'ninguna' });
       await http().put(`/personas/${id}/habilitacion-bautismo`).set('Authorization', admin);
-      await http().post('/bautismo/solicitudes/me').set('Authorization', await de(id)).send({});
+      await http().post('/bautismo/solicitudes/me').set('Authorization', await de(id)).send({ talleRemera: 'M' });
       const res = await http().delete(`/personas/${id}/habilitacion-bautismo`).set('Authorization', admin);
       expect(res.status).toBe(200);
       expect(res.body.habilitacion).toBeNull();
@@ -63,26 +63,34 @@ describe('Bautismo — excepciones del Admin (integración)', () => {
       const id = await esc.persona('perm-hab', { vidaNueva: 'ninguna' });
       expect((await http().put(`/personas/${id}/habilitacion-bautismo`).set('Authorization', pastor)).status).toBe(403);
       expect((await http().put(`/personas/${id}/habilitacion-bautismo`).set('Authorization', discipulador)).status).toBe(403);
-      expect((await http().post('/bautismo/solicitudes').set('Authorization', discipulador).send({ personaId: id })).status).toBe(403);
-      expect((await http().post('/bautismo/solicitudes').set('Authorization', pastor).send({ personaId: id })).status).toBe(403);
+      expect((await http().post('/bautismo/solicitudes').set('Authorization', discipulador).send({ personaId: id, talleRemera: 'S' })).status).toBe(403);
+      expect((await http().post('/bautismo/solicitudes').set('Authorization', pastor).send({ personaId: id, talleRemera: 'S' })).status).toBe(403);
     });
   });
 
   describe('pedir en nombre de (FR-022)', () => {
     it('de un menor de 11 sin Vida Nueva → 201 con creadoPorId, sin aviso; aparece en la bandeja con "creada por"', async () => {
       const id = await esc.persona('menor', { edad: 10, vidaNueva: 'ninguna' });
-      const res = await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: id, comentario: 'Lo pidió su mamá' });
+      const res = await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: id, talleRemera: 'S', comentario: 'Lo pidió su mamá' });
       expect(res.status).toBe(201);
       const fila = await prisma.solicitudBautismo.findUniqueOrThrow({ where: { id: res.body.id } });
-      expect(fila).toMatchObject({ estado: 'pendiente', creadoPorId: adminId, comentario: 'Lo pidió su mamá' });
+      expect(fila).toMatchObject({ estado: 'pendiente', creadoPorId: adminId, comentario: 'Lo pidió su mamá', talleRemera: 'S' });
       expect(await esc.avisos(fila.id)).toEqual([]);
       const bandeja = await http().get(`/solicitudes?tipo=bautismo&persona=${id}`).set('Authorization', admin);
       expect(bandeja.body.items[0]).toMatchObject({ id: fila.id, creadoPor: { id: adminId } });
     });
 
+    it('D220: sin talle → 400 TALLE_REQUERIDO en talleRemera y nada se crea', async () => {
+      const id = await esc.persona('en-nombre-sin-talle');
+      const res = await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: id });
+      expect(res.status).toBe(400);
+      expect(res.body.errors).toEqual([{ campo: 'talleRemera', code: 'TALLE_REQUERIDO' }]);
+      expect(await prisma.solicitudBautismo.count({ where: { personaId: id } })).toBe(0);
+    });
+
     it('de alguien sin acceso a la app → 201, y si después entra ve su card en revisión', async () => {
       const id = await esc.persona('sin-app', { sinEmail: true });
-      const res = await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: id });
+      const res = await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: id, talleRemera: 'S' });
       expect(res.status).toBe(201);
       expect((await http().get('/bautismo/me').set('Authorization', await de(id))).body.estado).toBe('en_revision');
       expect((await http().get(`/bautismo/solicitudes/${res.body.id}`).set('Authorization', admin)).body.persona.sinAccesoALaApp).toBe(true);
@@ -91,11 +99,11 @@ describe('Bautismo — excepciones del Admin (integración)', () => {
     it('con una abierta → 409 SOLICITUD_BAUTISMO_YA_ABIERTA; bautizada → 409 PERSONA_YA_BAUTIZADA; inexistente → 404', async () => {
       const abierta = await esc.persona('en-nombre-abierta');
       await esc.solicitud(abierta);
-      expect((await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: abierta })).body.code).toBe('SOLICITUD_BAUTISMO_YA_ABIERTA');
+      expect((await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: abierta, talleRemera: 'S' })).body.code).toBe('SOLICITUD_BAUTISMO_YA_ABIERTA');
       const bautizada = await esc.persona('en-nombre-bautizada');
       await prisma.completitudManual.create({ data: { personaId: bautizada, etapa: 'bautismo', origen: 'admin', registradaPorId: adminId } });
-      expect((await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: bautizada })).body.code).toBe('PERSONA_YA_BAUTIZADA');
-      expect((await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: 'no-existe' })).status).toBe(404);
+      expect((await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: bautizada, talleRemera: 'S' })).body.code).toBe('PERSONA_YA_BAUTIZADA');
+      expect((await http().post('/bautismo/solicitudes').set('Authorization', admin).send({ personaId: 'no-existe', talleRemera: 'S' })).status).toBe(404);
     });
   });
 

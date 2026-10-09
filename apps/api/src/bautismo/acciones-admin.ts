@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import {
   ASIGNAR_BAUTISMO_MAX,
   MOTIVO_RECHAZO_BAUTISMO_MAX,
+  errorTalleRemera,
+  resumirTalles,
   sinAccesoALaApp,
   type AsignacionResultado,
   type ConfirmacionBautismosResultado,
@@ -10,6 +12,7 @@ import {
   type FilaEsperando,
   type SeccionBautismoEventoDatos,
   type SolicitudBautismoDetalle,
+  type TalleRemera,
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -45,6 +48,7 @@ export class BautismoAdminService {
         id: true,
         estado: true,
         comentario: true,
+        talleRemera: true,
         createdAt: true,
         creadoPorId: true,
         revisadoPorId: true,
@@ -69,6 +73,7 @@ export class BautismoAdminService {
       estado: s.estado,
       persona: { id: p.id, nombre: p.nombre, apellido: p.apellido, fotoUrl: p.fotoUrl, edad: calcularEdad(p.fechaNacimiento), sinAccesoALaApp: sinAccesoALaApp(p) },
       comentario: s.comentario,
+      talleRemera: s.talleRemera,
       createdAt: s.createdAt.toISOString(),
       creadoPor: breve(s.creadoPorId),
       revisadoPor: breve(s.revisadoPorId),
@@ -122,6 +127,19 @@ export class BautismoAdminService {
     return this.detalle(id);
   }
 
+  /**
+   * PUT /bautismo/solicitudes/:id/talle (D220): el Admin corrige el talle, o
+   * lo carga en un pedido de antes del ajuste. En cualquier estado: la remera
+   * se compra aparte del ciclo del pedido. No avisa a nadie.
+   */
+  async cambiarTalle(id: string, talle: unknown): Promise<SolicitudBautismoDetalle> {
+    const code = errorTalleRemera(talle);
+    if (code) throw errorDeValidacion([{ campo: 'talleRemera', code }]);
+    const { count } = await this.prisma.solicitudBautismo.updateMany({ where: { id }, data: { talleRemera: talle as TalleRemera } });
+    if (count === 0) throw new AppException('NO_ENCONTRADO', 404, 'No existe esa Solicitud de Bautismo.');
+    return this.detalle(id);
+  }
+
   /** GET /bautismo/eventos (FR-012, escenario 3.5): próximos Eventos de bautismo publicados, por fecha. */
   async eventosProximos(): Promise<EventoDeBautismoResumen[]> {
     const eventos = await this.prisma.evento.findMany({
@@ -149,13 +167,13 @@ export class BautismoAdminService {
     const ahora = new Date();
     const whereAsignadas: Prisma.SolicitudBautismoWhereInput = { estado: { in: ['aprobada', 'realizada'] }, inscripcionEvento: { eventoId } };
     const whereEsperando: Prisma.SolicitudBautismoWhereInput = { estado: 'aprobada', inscripcionEventoId: null };
-    const [asignadas, totalAsignadas, esperando, totalEsperando, sinConfirmar] = await Promise.all([
+    const [asignadas, totalAsignadas, esperando, totalEsperando, sinConfirmar, porTalle] = await Promise.all([
       this.prisma.solicitudBautismo.findMany({
         where: whereAsignadas,
         orderBy: [{ persona: { apellido: 'asc' } }, { persona: { nombre: 'asc' } }, { id: 'asc' }],
         skip: p.skipAsignadas,
         take: p.takeAsignadas,
-        select: { id: true, estado: true, realizadaEn: true, persona: { select: PERSONA_BREVE }, inscripcionEvento: { select: { createdAt: true } } },
+        select: { id: true, estado: true, realizadaEn: true, talleRemera: true, persona: { select: PERSONA_BREVE }, inscripcionEvento: { select: { createdAt: true } } },
       }),
       this.prisma.solicitudBautismo.count({ where: whereAsignadas }),
       this.prisma.solicitudBautismo.findMany({
@@ -167,6 +185,8 @@ export class BautismoAdminService {
       }),
       this.prisma.solicitudBautismo.count({ where: whereEsperando }),
       this.prisma.solicitudBautismo.count({ where: { estado: 'aprobada', inscripcionEvento: { eventoId } } }),
+      // D220: el resumen cuenta TODAS las asignadas, no solo la página.
+      this.prisma.solicitudBautismo.groupBy({ by: ['talleRemera'], where: whereAsignadas, _count: { _all: true } }),
     ]);
     const yaEmpezo = evento.inicio <= ahora;
     return {
@@ -180,6 +200,7 @@ export class BautismoAdminService {
             estado: s.estado as 'aprobada' | 'realizada',
             asignadaEn: (s.inscripcionEvento?.createdAt ?? new Date(0)).toISOString(),
             realizadaEn: s.realizadaEn?.toISOString() ?? null,
+            talleRemera: s.talleRemera,
           }),
         ),
       },
@@ -187,6 +208,7 @@ export class BautismoAdminService {
         total: totalEsperando,
         items: esperando.map((s): FilaEsperando => ({ solicitudId: s.id, persona: s.persona, aceptadaEn: (s.revisadaEn ?? s.createdAt).toISOString() })),
       },
+      talles: resumirTalles(porTalle.flatMap((g) => Array<TalleRemera | null>(g._count._all).fill(g.talleRemera))),
       puedeConfirmar: yaEmpezo && evento.estado === 'publicado' && sinConfirmar > 0,
     };
   }

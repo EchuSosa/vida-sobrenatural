@@ -178,7 +178,9 @@
       "MOTIVO_DEMASIADO_LARGO": "El motivo puede tener hasta 500 caracteres: acortalo un poco.",
       "INSCRIPCION_DE_OTRO_GRUPO": "La lista de personas cambió: recargá la página y volvé a marcar la asistencia.",
       "FECHA_INVALIDA": "Escribí una fecha válida, por ejemplo 28/10/2026.",
-      "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última."
+      "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última.",
+      "TALLE_REQUERIDO": "Elegí un talle de remera de la lista.",
+      "TALLE_INVALIDO": "Ese talle no está en la lista: elegí uno entre XS y XXXL."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta."
   },
@@ -643,6 +645,9 @@
       "pedir": "Quiero bautizarme",
       "pedirTitulo": "¿Querés pedir tu bautismo?",
       "pedirDescripcion": "Le avisamos al equipo de la iglesia. Cuando lo revise, vas a ver acá en qué está.",
+      "talleEtiqueta": "¿Qué talle de remera usás?",
+      "tallePlaceholder": "Elegí un talle",
+      "talleAyuda": "La iglesia te regala la remera con la que te bautizás.",
       "comentarioEtiqueta": "¿Querés contarnos algo? (opcional)",
       "comentarioAyuda": "Por ejemplo, si te gustaría bautizarte junto a alguien de tu familia.",
       "comentarioContador": "{cantidad} de {maximo} caracteres",

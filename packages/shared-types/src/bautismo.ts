@@ -18,6 +18,49 @@ export const EDAD_MINIMA_PEDIR_BAUTISMO_SOLO = 12;
 /** `POST /bautismo/eventos/:id/asignar`: de a cuántas por llamada. */
 export const ASIGNAR_BAUTISMO_MAX = 100;
 
+// ─── Talle de remera (D220) ─────────────────────────────────────────────────
+
+/**
+ * D220: la iglesia regala la remera con la que se bautiza la Persona; el
+ * talle se elige al pedir (la Persona, o el Admin en su nombre) y el Admin
+ * lo puede corregir desde el detalle. En este orden se muestran el selector y
+ * el resumen de talles del Evento.
+ */
+export const TALLES_REMERA = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as const;
+export type TalleRemera = (typeof TALLES_REMERA)[number];
+
+export function esTalleRemera(valor: unknown): valor is TalleRemera {
+  return typeof valor === 'string' && (TALLES_REMERA as readonly string[]).includes(valor);
+}
+
+/** El código de error del campo `talleRemera`, o `null` si es válido. Vacío = requerido. */
+export function errorTalleRemera(valor: unknown): 'TALLE_REQUERIDO' | 'TALLE_INVALIDO' | null {
+  if (valor === undefined || valor === null || (typeof valor === 'string' && valor.trim() === '')) return 'TALLE_REQUERIDO';
+  return esTalleRemera(valor) ? null : 'TALLE_INVALIDO';
+}
+
+/** Cuántas remeras de cada talle (los pedidos de antes de D220 cuentan como `sinDato`). */
+export interface ResumenTalles {
+  /** Solo los talles con al menos una, en el orden de `TALLES_REMERA`. */
+  talles: Array<{ talle: TalleRemera; cantidad: number }>;
+  sinDato: number;
+  total: number;
+}
+
+export function resumirTalles(talles: ReadonlyArray<TalleRemera | null>): ResumenTalles {
+  const cuenta = new Map<TalleRemera, number>();
+  let sinDato = 0;
+  for (const t of talles) {
+    if (t === null || !esTalleRemera(t)) sinDato += 1;
+    else cuenta.set(t, (cuenta.get(t) ?? 0) + 1);
+  }
+  return {
+    talles: TALLES_REMERA.filter((t) => cuenta.has(t)).map((talle) => ({ talle, cantidad: cuenta.get(talle)! })),
+    sinDato,
+    total: talles.length,
+  };
+}
+
 /** FR-002/FR-007: la situación de Vida Nueva que importa para el bautismo (D147). */
 export type VidaNuevaParaBautismo = 'en_curso' | 'completada' | 'ninguna';
 
@@ -120,6 +163,8 @@ export interface SolicitudBautismoDetalle {
   estado: EstadoSolicitudBautismo;
   persona: PersonaBreve & { edad: number; sinAccesoALaApp: boolean };
   comentario: string | null;
+  /** D220: `null` en los pedidos de antes del ajuste ("Sin dato"). */
+  talleRemera: TalleRemera | null;
   createdAt: string;
   creadoPor: PersonaBreve | null;
   revisadoPor: PersonaBreve | null;
@@ -140,6 +185,8 @@ export interface FilaAsignada {
   estado: 'aprobada' | 'realizada';
   asignadaEn: string;
   realizadaEn: string | null;
+  /** D220. */
+  talleRemera: TalleRemera | null;
 }
 
 /** Una Solicitud aceptada sin fecha (la más antigua primero, FR-033). */
@@ -154,6 +201,8 @@ export interface SeccionBautismoEventoDatos {
   evento: EventoDeBautismoResumen & { cancelado: boolean; yaEmpezo: boolean };
   asignadas: Pagina<FilaAsignada>;
   esperandoFecha: Pagina<FilaEsperando>;
+  /** D220: los talles de TODAS las asignadas (no solo la página), para comprar las remeras. */
+  talles: ResumenTalles;
   /** FR-027: el Evento ya empezó y quedan asignadas sin confirmar. */
   puedeConfirmar: boolean;
 }

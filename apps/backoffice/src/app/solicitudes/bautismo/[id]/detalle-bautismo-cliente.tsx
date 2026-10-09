@@ -5,18 +5,29 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CalendarPlus, CalendarX, CircleCheck, CircleX } from 'lucide-react';
+import { CalendarPlus, CalendarX, CircleCheck, CircleX, Save } from 'lucide-react';
 import {
   ApiError,
   MOTIVO_RECHAZO_BAUTISMO_MAX,
   apiFetch,
   erroresPorCampo,
+  errorTalleRemera,
   formatearFechaHora,
   formatearInicioEvento,
   type EventoDeBautismoResumen,
   type SolicitudBautismoDetalle,
+  type TalleRemera,
 } from '@vida-sobrenatural/shared-types';
-import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, MigaDePan, useEnvio } from '@vida-sobrenatural/ui';
+import {
+  Button,
+  CampoTalleRemera,
+  ConfirmDestructiveDialog,
+  DialogoTextoOpcional,
+  MigaDePan,
+  ResumenErrores,
+  useEnvio,
+  useValidacionCampos,
+} from '@vida-sobrenatural/ui';
 
 const CLASE_CAMPO = 'h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm dark:bg-input/30 sm:w-auto sm:min-w-80';
 
@@ -183,6 +194,8 @@ export function DetalleBautismoCliente({
         <p className={solicitud.comentario ? 'whitespace-pre-line break-words' : 'text-muted-foreground'}>{solicitud.comentario ?? t('sinComentario')}</p>
       </section>
 
+      <TalleDeRemera solicitud={solicitud} apiToken={apiToken} puedeEditar={puedeResolver} />
+
       <section aria-labelledby="situacion-titulo" className="flex flex-col gap-2">
         <h2 id="situacion-titulo" className="text-lg font-semibold">
           {t('situacionTitulo')}
@@ -305,5 +318,85 @@ export function DetalleBautismoCliente({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * D220: el talle de la remera que regala la iglesia. "Sin dato" en los
+ * pedidos de antes del ajuste. El Admin lo corrige (o lo carga) en cualquier
+ * estado; el error va por campo con el resumen arriba (H-50) y el guardado
+ * protegido de la reentrada (H-57).
+ */
+function TalleDeRemera({ solicitud, apiToken, puedeEditar }: { solicitud: SolicitudBautismoDetalle; apiToken: string; puedeEditar: boolean }) {
+  const t = useTranslations('solicitudes.bautismo');
+  const te = useTranslations('errors');
+  const router = useRouter();
+  const [talle, setTalle] = useState<TalleRemera | ''>(solicitud.talleRemera ?? '');
+  const validacion = useValidacionCampos();
+
+  const { enviando, ejecutar: guardar } = useEnvio(async () => {
+    const code = errorTalleRemera(talle);
+    if (code) {
+      validacion.reemplazar({ talleRemera: te(`campos.${code}`) });
+      return;
+    }
+    try {
+      await apiFetch(`/bautismo/solicitudes/${solicitud.id}/talle`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
+        body: JSON.stringify({ talleRemera: talle }),
+      });
+      toast.success(t('talleGuardado', { talle }));
+    } catch (error) {
+      const campos = erroresPorCampo(error);
+      if (campos) {
+        validacion.reemplazar(Object.fromEntries(campos.map(({ campo, code: c }) => [campo, te(`campos.${c}`)])));
+        return;
+      }
+      const c = error instanceof ApiError ? error.code : null;
+      toast.error(c && te.has(c) ? te(c) : t('errorGenerico'));
+    }
+    router.refresh();
+  });
+
+  return (
+    <section aria-labelledby="talle-titulo" className="flex flex-col gap-2">
+      <h2 id="talle-titulo" className="text-lg font-semibold">
+        {t('talleTitulo')}
+      </h2>
+      <p data-testid="talle-remera" className={solicitud.talleRemera ? 'font-medium' : 'text-muted-foreground'}>
+        {solicitud.talleRemera ?? t('sinDato')}
+      </p>
+      {puedeEditar && (
+        <form
+          noValidate
+          className="flex flex-col gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void guardar();
+          }}
+        >
+          <ResumenErrores errores={validacion.resumen} foco={validacion.foco} titulo={t('resumenErrores')} />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+            <CampoTalleRemera
+              className="sm:w-60"
+              valor={talle}
+              onCambiar={(valor) => {
+                setTalle(valor);
+                validacion.limpiar('talleRemera');
+              }}
+              etiqueta={solicitud.talleRemera ? t('talleCambiar') : t('talleCargar')}
+              placeholder={t('tallePlaceholder')}
+              error={validacion.mensajes.talleRemera}
+              disabled={enviando}
+            />
+            <Button type="submit" variant="outline" className="h-11 sm:mt-8" loading={enviando}>
+              <Save aria-hidden />
+              {t('talleGuardar')}
+            </Button>
+          </div>
+        </form>
+      )}
+    </section>
   );
 }

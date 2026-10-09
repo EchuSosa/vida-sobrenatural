@@ -16,13 +16,28 @@ import { useEnvio } from '../hooks/use-envio';
 import { useValidacionCampos } from '../hooks/use-validacion-campos';
 import { cn } from '../lib/utils';
 
+/** Lo que recibe un `children` función: el estado de error de los campos extra (D220). */
+export interface CamposExtraDialogo {
+  mensajes: Record<string, string>;
+  limpiar: (campo: string) => void;
+  enviando: boolean;
+}
+
 export interface DialogoTextoOpcionalProps {
   /** El botón que lo abre. */
   trigger: ReactElement;
   titulo: string;
   descripcion?: string;
-  /** Lo que va arriba del texto (ej. un selector de etapa). */
-  children?: ReactNode;
+  /**
+   * Lo que va arriba del texto (ej. un selector de etapa). Como función,
+   * recibe los errores por campo para mostrar los de un campo extra
+   * obligatorio (ej. el talle de remera, D220).
+   */
+  children?: ReactNode | ((extra: CamposExtraDialogo) => ReactNode);
+  /** D220: valida los campos extra antes de enviar; `{ campo: mensaje }` de los que fallan. */
+  validar?: () => Record<string, string>;
+  /** Al cerrarse (enviado o cancelado): para limpiar el estado de los campos extra. */
+  alCerrar?: () => void;
   /** El `name` del campo: arma `campo-<campo>` para el resumen de errores (H-50). */
   campo: string;
   etiqueta: string;
@@ -37,9 +52,11 @@ export interface DialogoTextoOpcionalProps {
   tono?: 'neutro' | 'destructivo';
   /**
    * Recibe el texto sin espacios de más (`null` si quedó vacío). Si devuelve
-   * `{ errorCampo }`, lo muestra en el campo y no cierra; si no, cierra.
+   * `{ errorCampo }`, lo muestra en el campo y no cierra; con `{ errores }`
+   * (por campo, ej. los `{campo, code}` de la API), los muestra todos y no
+   * cierra; si no, cierra.
    */
-  onEnviar: (texto: string | null) => Promise<{ errorCampo?: string } | void>;
+  onEnviar: (texto: string | null) => Promise<{ errorCampo?: string; errores?: Record<string, string> } | void>;
 }
 
 /**
@@ -55,6 +72,8 @@ export function DialogoTextoOpcional({
   titulo,
   descripcion,
   children,
+  validar,
+  alCerrar,
   campo,
   etiqueta,
   ayuda,
@@ -78,17 +97,20 @@ export function DialogoTextoOpcional({
     if (!abrir) {
       setTexto('');
       validacion.reset();
+      alCerrar?.();
     }
   }
 
   const { enviando, ejecutar } = useEnvio(async () => {
-    if (largo > max) {
-      validacion.reemplazar({ [campo]: mensajeDemasiadoLargo });
+    const errores = { ...(validar?.() ?? {}), ...(largo > max ? { [campo]: mensajeDemasiadoLargo } : {}) };
+    if (Object.keys(errores).length > 0) {
+      validacion.reemplazar(errores);
       return;
     }
     const resultado = await onEnviar(texto.trim() === '' ? null : texto.trim());
-    if (resultado?.errorCampo) {
-      validacion.reemplazar({ [campo]: resultado.errorCampo });
+    const delServidor = { ...(resultado?.errores ?? {}), ...(resultado?.errorCampo ? { [campo]: resultado.errorCampo } : {}) };
+    if (Object.keys(delServidor).length > 0) {
+      validacion.reemplazar(delServidor);
       return;
     }
     cambiarAbierto(false);
@@ -111,7 +133,7 @@ export function DialogoTextoOpcional({
             {descripcion && <AlertDialogDescription>{descripcion}</AlertDialogDescription>}
           </AlertDialogHeader>
           <ResumenErrores errores={validacion.resumen} foco={validacion.foco} titulo={tituloResumen} />
-          {children}
+          {typeof children === 'function' ? children({ mensajes: validacion.mensajes, limpiar: validacion.limpiar, enviando }) : children}
           <div className="flex flex-col gap-2">
             <label htmlFor={idCampo} className="text-base font-medium">
               {etiqueta}
