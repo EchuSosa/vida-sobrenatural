@@ -176,7 +176,9 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
 
   it('la bandeja lista las abiertas por defecto, y el Pastor ve el detalle sin historial', async () => {
     const admin = await mintToken({ email: 'x', personaId: ids.pastor, estado: 'activa', rol: ['admin'] });
-    const bandeja = await request(app.getHttpServer()).get('/solicitudes?take=100').set('Authorization', `Bearer ${admin}`);
+    // Acotada a las Personas de este archivo (apellido "Integración"): sin `buscar`, otro archivo que
+    // corre en paralelo puede resolver una fila entre la página y la hidratación y llega `abierta: false`.
+    const bandeja = await request(app.getHttpServer()).get('/solicitudes?take=100&buscar=Integraci').set('Authorization', `Bearer ${admin}`);
     expect(bandeja.status).toBe(200);
     const deBeto = bandeja.body.items.find((s: { persona: { id: string } }) => s.persona.id === ids.beto);
     expect(deBeto).toMatchObject({ estado: 'pendiente', tipo: 'discipulado', creadoPor: { id: ids.disc } });
