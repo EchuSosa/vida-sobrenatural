@@ -29,11 +29,11 @@ describe('Bautismo — la Persona (integración)', () => {
   describe('pedir (FR-001 a FR-005)', () => {
     it('con Vida Nueva en curso → 201 en_revision, fila pendiente creada por ella misma, sin aviso', async () => {
       const id = await esc.persona('vn-en-curso');
-      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ comentario: '  Quiero hacerlo en familia ' });
+      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ comentario: '  Quiero hacerlo en familia ', talleRemera: 'L' });
       expect(res.status).toBe(201);
       expect(res.body).toMatchObject({ estado: 'en_revision' });
       const fila = await prisma.solicitudBautismo.findFirstOrThrow({ where: { personaId: id } });
-      expect(fila).toMatchObject({ estado: 'pendiente', creadoPorId: null, comentario: 'Quiero hacerlo en familia' });
+      expect(fila).toMatchObject({ estado: 'pendiente', creadoPorId: null, comentario: 'Quiero hacerlo en familia', talleRemera: 'L' });
       expect(await esc.avisos(fila.id)).toEqual([]);
       const me = await http().get('/bautismo/me').set('Authorization', await como(id));
       expect(me.body).toEqual({ estado: 'en_revision', solicitudId: fila.id, desde: fila.createdAt.toISOString() });
@@ -41,14 +41,14 @@ describe('Bautismo — la Persona (integración)', () => {
 
     it('con Vida Nueva completada → 201', async () => {
       const id = await esc.persona('vn-completada', { vidaNueva: 'completada' });
-      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({});
+      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ talleRemera: 'M' });
       expect(res.status).toBe(201);
     });
 
     it('con Vida Nueva registrada por historial (D144) → 201', async () => {
       const id = await esc.persona('vn-historial', { vidaNueva: 'ninguna' });
       await prisma.completitudManual.create({ data: { personaId: id, etapa: 'vida_nueva', origen: 'admin', registradaPorId: id } });
-      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({});
+      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ talleRemera: 'M' });
       expect(res.status).toBe(201);
     });
 
@@ -56,7 +56,7 @@ describe('Bautismo — la Persona (integración)', () => {
       const id = await esc.persona('sin-vn', { vidaNueva: 'ninguna' });
       const me = await http().get('/bautismo/me').set('Authorization', await como(id));
       expect(me.body).toEqual({ estado: 'no_habilitada' });
-      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({});
+      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ talleRemera: 'M' });
       expect(res.status).toBe(409);
       expect(res.body.code).toBe('BAUTISMO_NO_HABILITADO');
       expect(await prisma.solicitudBautismo.count({ where: { personaId: id } })).toBe(0);
@@ -65,25 +65,25 @@ describe('Bautismo — la Persona (integración)', () => {
     it('habilitada sin Vida Nueva → 201', async () => {
       const id = await esc.persona('habilitada', { vidaNueva: 'ninguna' });
       await prisma.persona.update({ where: { id }, data: { bautismoHabilitadoEn: new Date(), bautismoHabilitadoPorId: id } });
-      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({});
+      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ talleRemera: 'M' });
       expect(res.status).toBe(201);
     });
 
     it('11 años → 409 EDAD_INSUFICIENTE_PARA_PEDIR_BAUTISMO_SOLO (la card: lo_pide_su_tutor); 12 → 201', async () => {
       const menor = await esc.persona('once', { edad: 11 });
       expect((await http().get('/bautismo/me').set('Authorization', await como(menor))).body).toEqual({ estado: 'lo_pide_su_tutor' });
-      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(menor)).send({});
+      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(menor)).send({ talleRemera: 'M' });
       expect(res.body.code).toBe('EDAD_INSUFICIENTE_PARA_PEDIR_BAUTISMO_SOLO');
       const doce = await esc.persona('doce', { edad: 12 });
-      expect((await http().post('/bautismo/solicitudes/me').set('Authorization', await como(doce)).send({})).status).toBe(201);
+      expect((await http().post('/bautismo/solicitudes/me').set('Authorization', await como(doce)).send({ talleRemera: 'M' })).status).toBe(201);
     });
 
     it('dos pedidos a la vez → uno 201 y otro 409 SOLICITUD_BAUTISMO_YA_ABIERTA, una sola fila (FR-004)', async () => {
       const id = await esc.persona('doble');
       const token = await como(id);
       const [a, b] = await Promise.all([
-        http().post('/bautismo/solicitudes/me').set('Authorization', token).send({}),
-        http().post('/bautismo/solicitudes/me').set('Authorization', token).send({}),
+        http().post('/bautismo/solicitudes/me').set('Authorization', token).send({ talleRemera: 'M' }),
+        http().post('/bautismo/solicitudes/me').set('Authorization', token).send({ talleRemera: 'M' }),
       ]);
       expect([a.status, b.status].sort((x, y) => x - y)).toEqual([201, 409]);
       expect([a.body.code, b.body.code]).toContain('SOLICITUD_BAUTISMO_YA_ABIERTA');
@@ -95,15 +95,33 @@ describe('Bautismo — la Persona (integración)', () => {
       const fecha = new Date('2025-11-15T21:00:00.000Z');
       await prisma.solicitudBautismo.create({ data: { personaId: id, estado: 'realizada', realizadaEn: fecha } });
       expect((await http().get('/bautismo/me').set('Authorization', await como(id))).body).toEqual({ estado: 'bautizada', en: fecha.toISOString() });
-      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({});
+      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ talleRemera: 'M' });
       expect(res.body.code).toBe('PERSONA_YA_BAUTIZADA');
     });
 
     it('comentario de 501 caracteres → 400 VALIDACION en comentario', async () => {
       const id = await esc.persona('largo');
-      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ comentario: 'a'.repeat(501) });
+      const res = await http().post('/bautismo/solicitudes/me').set('Authorization', await como(id)).send({ comentario: 'a'.repeat(501), talleRemera: 'M' });
       expect(res.status).toBe(400);
       expect(res.body.errors).toEqual([{ campo: 'comentario', code: 'COMENTARIO_DEMASIADO_LARGO' }]);
+    });
+
+    it('D229: sin talle → 400 TALLE_REQUERIDO; un talle que no existe → TALLE_INVALIDO; nada se crea', async () => {
+      const id = await esc.persona('sin-talle');
+      const token = await como(id);
+      const sin = await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({});
+      expect(sin.status).toBe(400);
+      expect(sin.body).toMatchObject({ code: 'VALIDACION', errors: [{ campo: 'talleRemera', code: 'TALLE_REQUERIDO' }] });
+      const vacio = await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({ talleRemera: '' });
+      expect(vacio.body.errors).toEqual([{ campo: 'talleRemera', code: 'TALLE_REQUERIDO' }]);
+      const malo = await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({ talleRemera: 'XXXXL' });
+      expect(malo.body.errors).toEqual([{ campo: 'talleRemera', code: 'TALLE_INVALIDO' }]);
+      const dos = await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({ comentario: 'a'.repeat(501) });
+      expect(dos.body.errors).toEqual([
+        { campo: 'comentario', code: 'COMENTARIO_DEMASIADO_LARGO' },
+        { campo: 'talleRemera', code: 'TALLE_REQUERIDO' },
+      ]);
+      expect(await prisma.solicitudBautismo.count({ where: { personaId: id } })).toBe(0);
     });
 
     it('rechazada antes: la card ofrece pedir de nuevo con "ultimo: rechazada" y nunca el motivo', async () => {
@@ -119,7 +137,7 @@ describe('Bautismo — la Persona (integración)', () => {
     it('retirar una pendiente → retirada, card puede_pedir { ultimo: retirada }, y puede volver a pedir', async () => {
       const id = await esc.persona('retira');
       const token = await como(id);
-      await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({});
+      await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({ talleRemera: 'M' });
       const res = await http().post('/bautismo/solicitudes/me/retirar').set('Authorization', token);
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ estado: 'puede_pedir', ultimo: 'retirada' });
@@ -127,7 +145,7 @@ describe('Bautismo — la Persona (integración)', () => {
       expect(fila.estado).toBe('retirada');
       expect(fila.retiradaEn).not.toBeNull();
       expect(await esc.avisos(fila.id)).toEqual([]);
-      expect((await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({})).status).toBe(201);
+      expect((await http().post('/bautismo/solicitudes/me').set('Authorization', token).send({ talleRemera: 'M' })).status).toBe(201);
     });
 
     it('retirar con fecha → sale del Evento (inscripción cancelada por la Persona, FK null)', async () => {

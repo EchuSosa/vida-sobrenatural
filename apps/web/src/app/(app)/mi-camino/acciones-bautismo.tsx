@@ -1,18 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { CalendarX, Droplets, Undo2 } from 'lucide-react';
-import { ApiError, COMENTARIO_BAUTISMO_MAX, apiFetch, erroresPorCampo } from '@vida-sobrenatural/shared-types';
-import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, useEnvio } from '@vida-sobrenatural/ui';
+import { ApiError, COMENTARIO_BAUTISMO_MAX, apiFetch, erroresPorCampo, errorTalleRemera, type TalleRemera } from '@vida-sobrenatural/shared-types';
+import { Button, CampoTalleRemera, ConfirmDestructiveDialog, DialogoTextoOpcional, useEnvio } from '@vida-sobrenatural/ui';
 
 /**
  * spec 010, T020 y T043 (FR-001, FR-020, FR-020a, D151, H-50, H-57): las
  * acciones de la card de Bautismo. Pedir abre un paso de confirmación con el
- * campo opcional "¿Querés contarnos algo?" (errores por campo con la pieza
- * compartida); retirar y "No puedo ese día" son reversibles, así que sus
+ * talle de remera obligatorio (D229) y el campo opcional "¿Querés contarnos
+ * algo?" (errores por campo con la pieza compartida); retirar y "No puedo ese día" son reversibles, así que sus
  * diálogos son neutros. Al terminar, `router.refresh()` vuelve a pedir el
  * estado y la card cambia sin recargar la página.
  */
@@ -43,6 +44,8 @@ export function PedirBautismo() {
   const router = useRouter();
   const llamar = useLlamar();
   const mensajeDeError = useMensajeDeError();
+  const [talle, setTalle] = useState<TalleRemera | ''>('');
+  const errorDeTalle = (code: string | null) => (code ? te(`campos.${code}`) : null);
 
   return (
     <DialogoTextoOpcional
@@ -63,17 +66,38 @@ export function PedirBautismo() {
       tituloResumen={t('resumenErrores')}
       textoEnviar={t('pedirEnviar')}
       textoVolver={t('pedirVolver')}
+      validar={(): Record<string, string> => {
+        const error = errorDeTalle(errorTalleRemera(talle));
+        return error ? { talleRemera: error } : {};
+      }}
+      alCerrar={() => setTalle('')}
       onEnviar={async (comentario) => {
         try {
-          await llamar('/bautismo/solicitudes/me', { comentario: comentario ?? undefined });
+          await llamar('/bautismo/solicitudes/me', { comentario: comentario ?? undefined, talleRemera: talle });
           toast.success(t('pedidoEnviado'));
         } catch (error) {
-          if (erroresPorCampo(error)) return { errorCampo: te('campos.COMENTARIO_DEMASIADO_LARGO') };
+          const campos = erroresPorCampo(error);
+          if (campos) return { errores: Object.fromEntries(campos.map(({ campo, code }) => [campo, te(`campos.${code}`)])) };
           toast.error(mensajeDeError(error));
         }
         router.refresh();
       }}
-    />
+    >
+      {({ mensajes, limpiar, enviando }) => (
+        <CampoTalleRemera
+          valor={talle}
+          onCambiar={(valor) => {
+            setTalle(valor);
+            limpiar('talleRemera');
+          }}
+          etiqueta={t('talleEtiqueta')}
+          placeholder={t('tallePlaceholder')}
+          ayuda={t('talleAyuda')}
+          error={mensajes.talleRemera}
+          disabled={enviando}
+        />
+      )}
+    </DialogoTextoOpcional>
   );
 }
 

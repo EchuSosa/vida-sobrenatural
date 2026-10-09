@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { bloquearPersona } from '../camino/consultas.js';
 import { bloquearSolicitudes, hechosDe } from './estado-bautismo.js';
-import { SOLICITUD_TX_SELECT, esViolacionDeUnicidad, normalizarComentarioBautismo, sacarDeEvento, yaAbierta, yaCambio } from './operaciones.js';
+import { SOLICITUD_TX_SELECT, esViolacionDeUnicidad, normalizarPedidoBautismo, sacarDeEvento, yaAbierta, yaCambio } from './operaciones.js';
 
 const MENSAJE: Record<MotivoNoPuedePedirBautismo, string> = {
   PERSONA_YA_BAUTIZADA: 'Ya figurás como bautizada.',
@@ -37,15 +37,15 @@ export class BautismoPersonaService {
    * la card decide qué mostrar. Dos pedidos a la vez chocan además con el
    * índice parcial (FR-004).
    */
-  async pedir(personaId: string, comentarioCrudo: string | undefined): Promise<EstadoCardBautismo> {
-    const comentario = normalizarComentarioBautismo(comentarioCrudo);
+  async pedir(personaId: string, comentarioCrudo: string | undefined, talleCrudo?: unknown): Promise<EstadoCardBautismo> {
+    const { comentario, talleRemera } = normalizarPedidoBautismo(comentarioCrudo, talleCrudo);
     try {
       await this.prisma.$transaction(async (tx) => {
         if (!(await bloquearPersona(tx, personaId))) throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
         const hechos = await hechosDe(tx, personaId);
         const motivo = hechos && motivoNoPuedePedir(hechos);
         if (motivo) throw new AppException(motivo, 409, MENSAJE[motivo]);
-        await tx.solicitudBautismo.create({ data: { personaId, comentario }, select: { id: true } });
+        await tx.solicitudBautismo.create({ data: { personaId, comentario, talleRemera }, select: { id: true } });
       });
     } catch (error) {
       if (esViolacionDeUnicidad(error)) throw yaAbierta();

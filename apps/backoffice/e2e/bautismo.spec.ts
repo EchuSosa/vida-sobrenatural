@@ -34,6 +34,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(`Bautismo de Lucia ${a.apellido}`);
       await expect(page.getByText('Quiere bautizarse con su familia')).toBeVisible();
       await expect(page.getByText('el pedido lo creó el equipo en su nombre')).toBeVisible();
+      // D229: el talle que se eligió al pedir; el Admin lo corrige desde acá.
+      await expect(page.getByTestId('talle-remera')).toHaveText('L');
+      await page.getByLabel('Cambiar el talle').selectOption('XL');
+      await page.getByRole('button', { name: 'Guardar talle' }).click();
+      await expect(page.getByTestId('talle-remera')).toHaveText('XL');
       await sinViolaciones(page);
       await page.getByRole('button', { name: 'Aceptar', exact: true }).click();
       await sinViolaciones(page);
@@ -81,12 +86,15 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(seccion.getByRole('status')).toContainText('Se sumaron 2 personas');
       await expect(seccion.getByRole('link', { name: `Julieta ${uno.apellido}` })).toBeVisible();
       expect((await estadoDeBautismo(uno.email)).estado).toBe('con_fecha');
+      // D229: el resumen de talles para comprar las remeras (las dos pidieron L).
+      await expect(seccion.getByTestId('resumen-talles')).toHaveText(/Remeras:\s*L: 2$/);
       await sinViolaciones(page);
 
       await seccion.getByRole('button', { name: `Quitar Ramiro ${dos.apellido}` }).click();
       await page.getByRole('button', { name: 'Sí, quitar' }).click();
       await expect(seccion.getByRole('checkbox', { name: new RegExp(`Ramiro ${dos.apellido}`) })).toBeVisible();
       expect((await estadoDeBautismo(dos.email)).estado).toBe('esperando_fecha');
+      await expect(seccion.getByTestId('resumen-talles')).toHaveText(/Remeras:\s*L: 1$/);
     });
 
     test('Perfil: habilitar el bautismo y pedirlo en nombre de alguien', async ({ page }) => {
@@ -103,7 +111,14 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect((await estadoDeBautismo(persona.email)).estado).toBe('puede_pedir');
 
       await seccion.getByRole('button', { name: 'Pedir el bautismo en su nombre' }).click();
-      await page.getByRole('button', { name: 'Sí, pedirlo' }).click();
+      // D229: el talle es obligatorio — sin elegirlo, error en el campo y resumen arriba (H-50).
+      const dialogo = page.getByRole('alertdialog');
+      await dialogo.getByRole('button', { name: 'Sí, pedirlo' }).click();
+      await expect(dialogo.getByRole('link', { name: 'Elegí un talle de remera de la lista.' })).toBeVisible();
+      await expect(dialogo.getByLabel('¿Qué talle de remera usa?')).toHaveAttribute('aria-invalid', 'true');
+      await sinViolaciones(page);
+      await dialogo.getByLabel('¿Qué talle de remera usa?').selectOption('S');
+      await dialogo.getByRole('button', { name: 'Sí, pedirlo' }).click();
       await expect(seccion.getByRole('link', { name: 'Tiene un pedido de bautismo por revisar' })).toBeVisible();
       await sinViolaciones(page);
     });
