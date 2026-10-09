@@ -1905,6 +1905,9 @@
     "rechazarConfirmar": "Avisarle",
     "rechazarCancelar": "Volver",
     "rechazado": "Le avisamos a {nombre}.",
-    "errorGenerico": "No pudimos completar la acción. Probá de nuevo en un momento."
+    "errorGenerico": "No pudimos completar la acción. Probá de nuevo en un momento.",
+    "contador": "{cantidad} de {maximo} caracteres",
+    "demasiadoLargo": "El mensaje puede tener hasta {maximo} caracteres. Acortalo un poco.",
+    "resumenErrores": "Revisá esto:"
   }
 }

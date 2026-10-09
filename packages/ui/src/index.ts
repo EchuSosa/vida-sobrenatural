@@ -177,3 +177,6 @@ export { AvatarPersona, type AvatarPersonaProps } from './components/avatar-pers
 export { BarraProporcion, type BarraProporcionProps } from './components/barra-proporcion';
 
 // --- ajustes-ux (D150, D151) ---
+
+// --- spec 014 (Grupos de Extensión) ---
+export { textoDias, textoHorario, textoNombres } from './lib/textos-grupo-extension';

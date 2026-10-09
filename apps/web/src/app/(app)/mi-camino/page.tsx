@@ -18,6 +18,7 @@ import { AccionesMinisterio } from './tarjeta-ministerio';
 import { AccionesBautismo } from './tarjeta-bautismo';
 import type { PropsAccionesEtapa } from './acciones-etapa';
 import { SelectorMiCamino } from './selector-mi-camino';
+import { TarjetaGrupoExtension } from './tarjeta-grupo-extension';
 
 /**
  * spec 006, Historia 1 y la parte de la Persona de la Historia 2 (T031, T041):
@@ -220,6 +221,9 @@ export default async function MiCaminoPage() {
           </CardEtapa>
         );
       })}
+
+      {/* spec 014 (D223): aparte de las cuatro etapas. */}
+      <TarjetaGrupoExtension apiToken={apiToken} />
     </div>
   );
 }
