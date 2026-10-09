@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { hoyEnArgentina } from '@vida-sobrenatural/shared-types';
 import { RolesService } from './roles.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CambioDeRolService } from '../cambio-de-rol/cambio-de-rol.service.js';
@@ -6,10 +7,15 @@ import { AppException } from '../common/errors/app-exception.js';
 
 const ADULTA = new Date('1985-06-15');
 
+/**
+ * Hace `anios` años, contados desde la fecha civil de HOY en Argentina — la
+ * misma que usa `otorgarRol` (`esMenorDeEdad` + `hoyEnArgentina`). Con la
+ * fecha UTC, entre las 21 y las 24 hs de Argentina "cumple 18 hoy" caía al
+ * día siguiente y el test fallaba según la hora.
+ */
 function haceAnios(anios: number): Date {
-  const fecha = new Date();
-  fecha.setUTCFullYear(fecha.getUTCFullYear() - anios);
-  return fecha;
+  const [anio, mes, dia] = hoyEnArgentina().split('-').map(Number);
+  return new Date(Date.UTC(anio - anios, mes - 1, dia));
 }
 
 /**
@@ -134,7 +140,7 @@ describe('RolesService (specs/005, Historia 2)', () => {
       expect(update).not.toHaveBeenCalled();
     });
 
-    it('acepta a quien cumple 18 justo hoy — mismo criterio que calcularEdad', async () => {
+    it('acepta a quien cumple 18 justo hoy (fecha civil de Argentina, como esMenorDeEdad)', async () => {
       const { service } = await crearServicio({ id: 'p1', rol: [], fechaNacimiento: haceAnios(18), adminSembrado: false });
 
       await expect(service.otorgarRol('p1', 'pastor', 'admin-1')).resolves.toEqual({ id: 'p1', rol: ['pastor'] });
