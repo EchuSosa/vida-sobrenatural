@@ -1,4 +1,3 @@
-import { hoyEnArgentina } from '@vida-sobrenatural/shared-types';
 import type { INestApplication } from '@nestjs/common';
 import type { Server } from 'node:http';
 import request from 'supertest';
