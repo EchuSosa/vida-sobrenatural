@@ -31,10 +31,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByLabel('Sede').selectOption({ index: 1 });
       await completarFecha(page, 'Fecha de inicio', '14', 'Noviembre', ANIO_FUTURO);
       await page.getByLabel('Descripción').fill('Jornada de sanidad. Salida 8 hs, regreso 20 hs.');
+      await page.getByLabel('La gente tiene que anotarse').check();
       await page.getByLabel('Mujeres', { exact: true }).check();
       await page.getByLabel(/^Edad mínima/).fill('15');
       await page.getByLabel(/^Edad máxima/).fill('12');
-      await page.getByLabel('La gente tiene que anotarse').check();
+      // Al salir del campo aparece su error y la página se corre: se envía después (H-72).
+      await page.getByLabel(/^Edad máxima/).blur();
       await page.getByRole('button', { name: 'Crear el Evento' }).click();
       const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
       await expect(resumen).toBeFocused();
@@ -49,7 +51,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect((await auditar(page)).violations).toEqual([]);
     });
 
-    test('anotar a un varón a un Evento para mujeres pide confirmación y lo marca', async ({ page }) => {
+    test('anotar a un varón a un Evento para mujeres pide confirmación y lo marca', async ({ page, permitirErrorDeConsola }) => {
+      // El primer "Anotar" responde 409 EVENTO_NO_CORRESPONDE a propósito (es lo que dispara la confirmación).
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 409/);
       const sufijo = `${colorScheme}-${Date.now()}`;
       const evento = await crearEventoPorApi({ nombre: `e2e-evento-dest-anotar-${sufijo}`, destinatariosGenero: 'mujeres', edadMinima: 15 });
       await crearPersona(`e2e-dest-varon-${sufijo}@example.com`, { nombre: 'Tomás', apellido: `Dest${sufijo}`, genero: 'masculino' });
