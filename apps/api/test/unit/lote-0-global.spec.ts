@@ -158,7 +158,7 @@ describe('Catálogo de avisos (spec 012, D197–D206)', () => {
 
   it('cada nombre empieza con el prefijo de su dominio', () => {
     for (const nombre of NOMBRES_EVENTOS_AVISO) {
-      expect(nombre).toMatch(/^(discipulado|persona|historial|vida_servicio|ministerio|bautismo|evento)\.[a-z_]+$/);
+      expect(nombre).toMatch(/^(discipulado|persona|historial|vida_servicio|ministerio|bautismo|evento|grupo_extension)\.[a-z_]+$/);
     }
   });
 });

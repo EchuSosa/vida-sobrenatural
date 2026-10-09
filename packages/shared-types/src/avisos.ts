@@ -100,7 +100,12 @@ export type EventoAviso =
   | { nombre: 'evento.modificado'; a: { tipo: 'evento_inscriptos'; eventoId: string }; datos: { eventoId: string; evento: string; slug: string } }
   | { nombre: 'evento.cancelado'; a: { tipo: 'evento_inscriptos'; eventoId: string }; datos: { eventoId: string; evento: string; slug: string } }
   | { nombre: 'evento.proximo'; a: { tipo: 'evento_confirmados'; eventoId: string }; datos: { eventoId: string; evento: string } }
-  | { nombre: 'evento.recordatorio_inscripcion'; a: { tipo: 'todas_sin_inscripcion'; eventoId: string }; datos: { eventoId: string; evento: string; slug: string; dias: number } };
+  | { nombre: 'evento.recordatorio_inscripcion'; a: { tipo: 'todas_sin_inscripcion'; eventoId: string }; datos: { eventoId: string; evento: string; slug: string; dias: number } }
+  // --- 014 — Grupos de Extensión (D227). Al líder, uno por líder vigente (`persona`). ---
+  | { nombre: 'grupo_extension.solicitud_nueva'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
+  | { nombre: 'grupo_extension.solicitud_aceptada'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
+  | { nombre: 'grupo_extension.solicitud_rechazada'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
+  | { nombre: 'grupo_extension.agregada_por_admin'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } };
 
 export type NombreEventoAviso = EventoAviso['nombre'];
 
@@ -108,7 +113,7 @@ export type NombreEventoAviso = EventoAviso['nombre'];
 export type DatosDe<N extends NombreEventoAviso> = Extract<EventoAviso, { nombre: N }>['datos'];
 
 /** La spec que es dueña del hecho (para el test del catálogo y para saber quién lo conecta). */
-export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | 'flujo-12';
+export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | '014' | 'flujo-12';
 
 export interface EntradaCatalogo<N extends NombreEventoAviso> {
   spec: SpecDelAviso;
@@ -127,6 +132,9 @@ export interface EntradaCatalogo<N extends NombreEventoAviso> {
 
 const MI_CAMINO = '/mi-camino';
 const MIS_EVENTOS = '/mis-eventos';
+/** spec 014: la card de la persona y la pantalla del líder. */
+const MI_GRUPO_EXTENSION = '/mi-camino/grupo-extension';
+const LIDER_GRUPO_EXTENSION = '/mi-grupo-extension';
 const sinClave = () => null;
 
 export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } = {
@@ -349,6 +357,23 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
     spec: '011', destinatario: 'todas_sin_inscripcion', disparador: 'recordatorio_inscripcion', prioridad: 'normal',
     entidad: { tipo: 'evento', id: (d) => d.eventoId }, destino: (d) => `/eventos/${d.slug}`,
     clave: (d) => `evento.recordatorio_inscripcion:${d.eventoId}`,
+  },
+  // 014 — D227: sin el nombre de la persona (FR-013 de la 012): el líder lo ve al abrir el pedido.
+  'grupo_extension.solicitud_nueva': {
+    spec: '014', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
+    entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => LIDER_GRUPO_EXTENSION, clave: sinClave,
+  },
+  'grupo_extension.solicitud_aceptada': {
+    spec: '014', destinatario: 'persona', disparador: 'solicitud_actualizada', prioridad: 'importante',
+    entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => MI_GRUPO_EXTENSION, clave: sinClave,
+  },
+  'grupo_extension.solicitud_rechazada': {
+    spec: '014', destinatario: 'persona', disparador: 'solicitud_actualizada', prioridad: 'importante',
+    entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => MI_GRUPO_EXTENSION, clave: sinClave,
+  },
+  'grupo_extension.agregada_por_admin': {
+    spec: '014', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
+    entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => MI_GRUPO_EXTENSION, clave: sinClave,
   },
 };
 

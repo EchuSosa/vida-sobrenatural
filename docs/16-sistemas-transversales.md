@@ -20,6 +20,7 @@
 - Activación de una cuenta creada por el Admin (menor o adulto).
 - Una propuesta de discipulado nuevo para el Discipulador (D201).
 - La cancelación de un Evento, para sus inscriptos (D193).
+- Grupos de Extensión (D227): el pedido nuevo para cada líder del Grupo, y la aceptación, el "no es para este grupo" o el alta directa por el Admin para la persona.
 - Notificaciones manuales que el Admin marque explícitamente como importantes (opción al crearlas, con advertencia de usarla con moderación).
 
 Todo lo demás (contenido liberado, recordatorios de eventos, cambios del proceso como una finalización confirmada — disparador `proceso_actualizado`, D199 —, cambios de fecha o lugar de un Evento) va solo por Avisos (y push cuando exista). **Los eventos dirigidos al Admin no generan avisos en esta tanda**: el Admin los ve en Pendientes del backoffice (D201). La lista completa de avisos automáticos es un catálogo único en el código (`CATALOGO_AVISOS`, `packages/shared-types/src/avisos.ts`, D198).

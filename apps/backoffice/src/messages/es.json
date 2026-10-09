@@ -213,8 +213,28 @@
       "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última.",
       "SEDE_INACTIVA": "Elegí una Sede activa.",
       "LINEA_PUBLICA_DEMASIADO_LARGA": "La línea pública puede tener hasta 140 caracteres: acortala.",
-      "OTORGARROLDISCIPULADOR_INVALIDO": "Esta área no ofrece el rol de Discipulador."
-    }
+      "OTORGARROLDISCIPULADOR_INVALIDO": "Esta área no ofrece el rol de Discipulador.",
+      "DIAS_REQUERIDOS": "Elegí al menos un día de reunión.",
+      "HORA_INVALIDA": "Elegí la hora de inicio (en pasos de 15 minutos, por ejemplo 18:30).",
+      "EDAD_INVALIDA": "Escribí una edad entre 0 y 120, o dejalo vacío para no poner límite.",
+      "EDADES_INVERTIDAS": "La edad máxima tiene que ser igual o mayor que la mínima.",
+      "CALLE_REQUERIDA": "Escribí la calle donde se reúne el grupo (por ejemplo, 64), o marcá \"En la iglesia\".",
+      "ZONA_REQUERIDA": "Escribí el barrio o la zona (por ejemplo, Tolosa): es lo que ven quienes buscan grupo.",
+      "ENTRE_CALLES_INCOMPLETAS": "Completá las dos entre calles, o dejá las dos vacías.",
+      "LIDER_MENOR_DE_EDAD": "Una persona menor de 18 años no puede liderar un grupo. Elegí a otra persona.",
+      "LIDER_NO_DISPONIBLE": "Alguna de las personas elegidas ya no está activa. Elegila de nuevo de la lista.",
+      "DIRECCION_REQUERIDA": "Escribí tu dirección (calle y número, o calle y entre calles), o tocá \"Usar mi ubicación\"."
+    },
+    "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
+    "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
+    "GRUPO_EXTENSION_YA_INTEGRANTE": "Esta persona ya forma parte de un grupo de extensión. Para cambiarla, primero hay que quitarla del grupo actual.",
+    "GRUPO_EXTENSION_PEDIDO_PENDIENTE": "Ya hay un pedido para sumarse a un grupo esperando respuesta. Retiralo antes de pedir otro.",
+    "GRUPO_EXTENSION_NO_COMPATIBLE": "Este grupo es para otro género o para otra edad. Buscá entre los grupos que te mostramos.",
+    "GRUPO_EXTENSION_SOLICITUD_NO_PENDIENTE": "Este pedido ya fue respondido. Actualizá la página para ver cómo quedó.",
+    "GRUPO_EXTENSION_NO_INTEGRANTE": "Esta persona ya no forma parte del grupo. Actualizá la página.",
+    "GRUPO_EXTENSION_CON_INTEGRANTES": "El grupo tiene integrantes o pedidos esperando respuesta. Quitá a los integrantes y respondé los pedidos antes de inactivarlo.",
+    "DIRECCION_NO_UBICADA": "No encontramos esa dirección. Escribí la calle y el número (por ejemplo, \"7 nro 1200\"), o la calle y entre qué calles.",
+    "UBICACION_NO_DISPONIBLE": "No pudimos ubicar tu dirección en este momento. Probá con \"Usar mi ubicación\" o intentá de nuevo en unos minutos."
   },
   "nav": {
     "saltarAlContenido": "Saltar al contenido",
@@ -1954,7 +1974,8 @@
       "postulacion": "Postulación a un Ministerio",
       "bautismo": "Bautismo",
       "inscripcion_evento": "Inscripción a un Evento",
-      "pago": "Pago de un Evento"
+      "pago": "Pago de un Evento",
+      "grupo_extension": "Grupo de extensión"
     },
     "estados": {
       "discipulado": {
@@ -2001,6 +2022,13 @@
         "pendiente_verificacion": "Para verificar",
         "verificado": "Verificado",
         "rechazado": "Rechazado"
+      },
+      "grupo_extension": {
+        "pendiente": "Esperando respuesta",
+        "aceptada": "Integrante",
+        "rechazada": "No era para ese grupo",
+        "retirada": "Retirado",
+        "finalizada": "Ya no está en el grupo"
       }
     }
   },

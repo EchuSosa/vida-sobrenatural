@@ -9,7 +9,7 @@ import type { DiscipuladoActivo, PropuestaPendiente } from './discipulado.js';
  * sitios existentes y se agregan los nuevos — T001 lo deja vacío, T009
  * agrega los permisos `.ver` de las rutas ya existentes del backoffice.
  */
-export type RolDeCargo = 'admin' | 'pastor' | 'discipulador' | 'lider_curso';
+export type RolDeCargo = 'admin' | 'pastor' | 'discipulador' | 'lider_curso' | 'lider_extension';
 
 /**
  * Roles de ESTADO del proceso (D131, FR-019): los escribe el sistema como
@@ -105,7 +105,13 @@ export type Permiso =
   | 'comentarios.gestionar'
   | 'cursos.gestionar'
   | 'cursos.papelera.ver'
-  | 'personas.editar';
+  | 'personas.editar'
+  // spec 014 (D219–D227): Grupos de Extensión. `lider_extension` lo da y lo
+  // quita el sistema al asignar líderes (D225); no está en ROLES_DE_CARGO.
+  | 'grupos_extension.ver'
+  | 'grupos_extension.gestionar'
+  | 'mi_grupo_extension.ver'
+  | 'mi_grupo_extension.gestionar';
 
 export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'inicio.ver': ['admin', 'pastor'],
@@ -171,6 +177,11 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'cursos.gestionar': ['admin'],
   'cursos.papelera.ver': ['admin'],
   'personas.editar': ['admin'],
+  // spec 014 — el Pastor ve, no gestiona (D142).
+  'grupos_extension.ver': ['admin', 'pastor'],
+  'grupos_extension.gestionar': ['admin'],
+  'mi_grupo_extension.ver': ['lider_extension'],
+  'mi_grupo_extension.gestionar': ['lider_extension'],
 };
 
 /**
