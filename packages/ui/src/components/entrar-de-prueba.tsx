@@ -14,13 +14,22 @@ import { Button } from './ui/button';
  * que excluye producción. Cada app decide qué hace `onEntrar` (el proveedor
  * `test-login` de Auth.js y a dónde va después). Todo texto por prop (D84).
  */
-/** Las cuentas de la revisión manual de la 004 (`specs/revision-manual/COMO-ARRANCAR.md`). */
+/**
+ * Las personas de demo de `docs/23-manual-de-pruebas.md` (las siembra
+ * `db:seed-demo`, ver `specs/revision-manual/COMO-ARRANCAR.md`): una por rol y
+ * por etapa del camino. Sin el seed demo, entrar con una arranca su registro.
+ */
 export const EMAILS_DE_PRUEBA = [
-  'demo-vn-persona@example.com',
-  'demo-vn-persona-2@example.com',
-  'demo-vn-disc-1@example.com',
-  'demo-vn-disc-2@example.com',
-  'demo-vn-menor@example.com',
+  'demo-admin@example.com',
+  'demo-pastor@example.com',
+  'demo-disc-laura@example.com',
+  'demo-disc-jorge@example.com',
+  'demo-vs-lider-1@example.com',
+  'demo-nueva@example.com',
+  'demo-vn-pendiente@example.com',
+  'demo-vn-en-curso@example.com',
+  'demo-apta@example.com',
+  'demo-tutora-silvina@example.com',
 ] as const;
 
 export interface EtiquetasEntrarDePrueba {

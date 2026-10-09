@@ -70,26 +70,74 @@ Para probar como otra Persona sin Google, alcanza con su email: el código llega
 
 - **Mandar un aviso** desde el backoffice: Notificaciones → "Enviar un aviso" (solo Admin).
 
-### Datos de demostración (D120, opcional)
+### Datos de demostración (D120) — los que usa el manual de pruebas
 
 `db:seed` (arriba) es el mínimo para que la app arranque y para los tests — rápido, sin volumen.
-Para ver las pantallas del backoffice con algo parecido a datos reales (listas largas, nombres
-verosímiles, casos límite), corré **encima** ese segundo seed:
+Para recorrer la app con datos (y para seguir [`docs/23-manual-de-pruebas.md`](../../docs/23-manual-de-pruebas.md)),
+corré **encima** ese segundo seed:
 
 ```bash
 pnpm --filter api run db:seed-demo
 ```
 
-Agrega (sin tocar lo que ya puso `db:seed`): ~200 Personas con nombres argentinos verosímiles,
-repartidas entre tres Sedes (agrega Buenos Aires y Rosario, además de La Plata); una Sede inactiva
-(Rosario) y una eliminada/papelera (Córdoba); dos menores `pendiente_tutor` — uno con un tutor
-encontrable por búsqueda (`demo-tutor-encontrable@example.com`, apellido "Zabala Quintero", que
-comparte con el menor) y otro sin tutor registrado, para cargar a mano; y datos hostiles a
-propósito, cada uno en su propia Persona (nombre larguísimo, apellido compuesto, tildes y ñ, sin
-teléfono, dirección de dos renglones, texto largo en `profesionDetalle`).
+**Conviene cargarlo sobre una base nueva**, para que la historia quede completa y en orden
+(sobre una base con datos viejos agrega lo que falta, pero no reacomoda lo que ya estaba):
 
-Todos los emails llevan el prefijo `demo-` (no `e2e-`: `db:limpiar-e2e` no los toca) y es
-idempotente — se puede correr las veces que haga falta sin duplicar nada.
+```bash
+docker compose down -v && docker compose up -d
+pnpm --filter api exec prisma migrate deploy
+SEED_ADMIN_EMAIL=estersosaa@gmail.com pnpm --filter api run db:seed
+pnpm --filter api run db:seed-demo
+```
+
+Es idempotente: correrlo dos veces no duplica nada. Todas las personas son **ficticias** y sus
+emails empiezan con `demo-` y terminan en `@example.com` (`db:limpiar-e2e` no las toca).
+
+Qué deja, para que ninguna pantalla quede vacía:
+
+- **Una historia completa** (`prisma/seed-demo/historia-demo.ts`): un Admin y un Pastor de demo;
+  cuatro Discipuladores con agenda y distinta carga (Laura sin nadie y con una propuesta esperando,
+  Marcela con un grupo lleno de dos, Jorge con tres en curso y uno terminado, Pablo de vacaciones);
+  la bandeja de Vida Nueva en cada estado (pendiente, con una propuesta declinada, propuesta sin
+  respuesta hace 5 días, aprobada, rechazada y retirada); grupos con encuentros y un pedido de dar
+  por terminado; un menor de 14 con su tutora; una persona sin email cargada por el Admin con su
+  pedido de Vida Nueva; y comentarios de "Contanos qué te parece" sin revisar y revisados.
+- **Lo de cada spec** (`prisma/seed-demo/<spec>.ts`): ~200 personas en tres Sedes (una inactiva y
+  una en la papelera), personas en cada estado de Mi camino y del "Ya lo hice", ediciones de Vida
+  de Servicio (en curso con la inscripción abierta, y terminada), postulaciones a Ministerios en
+  cada estado (una pendiente a uno que requiere formación), pedidos de bautismo en cada estado con
+  tres Eventos de bautismo (próximo, pasado sin confirmar y pasado), Eventos con inscriptos, uno
+  lleno con lista de espera y un campamento con pagos para verificar, avisos leídos y sin leer
+  (sobre todo para el Admin de demo), cumpleaños hoy y mañana, menores pendientes de tutor y datos
+  "hostiles" (nombres larguísimos, tildes, sin teléfono…).
+
+El Inicio del backoffice muestra números en todos los bloques: lo que espera respuesta por tipo,
+los pendientes (propuesta declinada, sin respuesta, discipulado para terminar, bajas, bautismos,
+postulaciones, inscripciones y pagos), cumpleaños de la semana y las métricas.
+
+#### Con quién entrar por `/dev/entrar` para cada rol
+
+| Rol | Email | Quién es |
+|---|---|---|
+| Admin | `demo-admin@example.com` | Mónica Cabrera (backoffice y app) |
+| Pastor | `demo-pastor@example.com` | Roberto Medina (backoffice, solo lectura) |
+| Discipuladora | `demo-disc-laura@example.com` | Laura Gómez: martes y jueves, una propuesta esperando |
+| Discipuladora | `demo-disc-marcela@example.com` | Marcela Ruiz: grupo de dos con encuentros |
+| Discipulador | `demo-disc-jorge@example.com` | Jorge Acosta: tres en curso (uno es menor), un pedido de terminar |
+| Discipulador | `demo-disc-pablo@example.com` | Pablo Herrera: de vacaciones, no aparece en el cruce |
+| Líder de curso | `demo-vs-lider-1@example.com` | Lidera la edición de Vida de Servicio en curso |
+| Miembro recién registrada | `demo-nueva@example.com` | Florencia Arias: no empezó nada |
+| Miembro con Vida Nueva pedida | `demo-vn-pendiente@example.com` | Sofía Molina |
+| Miembro haciendo Vida Nueva | `demo-vn-en-curso@example.com` | Agustina Paz, con Marcela |
+| Miembro que terminó Vida Nueva | `demo-vn-terminada@example.com` | Emanuel Ortiz: puede pedir Vida de Servicio |
+| Miembro haciendo Vida de Servicio | `demo-vs-activa-1@example.com` | |
+| Miembro apta para un Ministerio | `demo-apta@example.com` | |
+| Miembro de un Ministerio | `demo-miembro@example.com` | |
+| Bautismo pedido / con fecha | `demo-bautismo-revision@example.com` / `demo-bautismo-fecha-1@example.com` | |
+| Tutora y menor | `demo-tutora-silvina@example.com` / `demo-menor-tomas@example.com` | Silvina y Tomás Ledesma (14) |
+| Menor sin tutor (no entra) | `demo-pendiente-tutor@example.com` | Para activarlo desde Pendientes tutor |
+
+La lista completa, con qué probar con cada una, está en el manual (`docs/23`, sección 2.2).
 
 ## Cosas útiles durante las pruebas
 
@@ -230,11 +278,10 @@ producción, `/dev/entrar` es un 404.
   de ingreso en cualquier dirección, y debajo del botón de Google aparece el mismo formulario. Con
   una sesión abierta, `/dev/entrar` sirve para cambiar de persona sin cerrar sesión.
 
-Botones rápidos (las cuentas de la revisión manual de la 004): `demo-vn-persona@example.com`,
-`demo-vn-persona-2@example.com`, `demo-vn-disc-1@example.com`, `demo-vn-disc-2@example.com`,
-`demo-vn-menor@example.com`. No están sembradas: la primera vez que entrás con una, la registrás
-en la app (y le das el rol con el comando de arriba si hace falta). También sirve cualquier email
-del seed (`demo-activa@example.com`, …) o uno nuevo.
+Botones rápidos: las personas de demo de la tabla de arriba (Admin, Pastor, Laura, Jorge, la
+Líder de curso, Florencia, Sofía, Agustina, la apta para Ministerio y la tutora). Existen si
+corriste `db:seed-demo`; si no, entrar con una arranca su registro. También sirve cualquier email
+del seed o uno nuevo (para probar el registro desde cero).
 
 El rol se lee al entrar: si le cambiaste el rol en la base, volvé a entrar por `/dev/entrar`.
 

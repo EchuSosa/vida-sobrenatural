@@ -61,6 +61,10 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.getByRole('alertdialog').getByRole('radio', { name: new RegExp(edicion) }).check();
       await page.getByRole('alertdialog').getByRole('button', { name: 'Enviar mi pedido' }).click();
       await expect(card(page)).toContainText('Recibimos tu pedido');
+      // Al volver a Mi camino, el encabezado dice "En revisión", no "La podés empezar".
+      await page.goto('/mi-camino');
+      await expect(card(page).getByText('En revisión', { exact: true })).toBeVisible();
+      await expect(card(page).getByText('La podés empezar', { exact: true })).toHaveCount(0);
     });
 
     test('sin Vida Nueva: ve qué le falta, el enlace a Vida Nueva y ningún botón para pedir (SC-001) @celular', async ({ page }) => {

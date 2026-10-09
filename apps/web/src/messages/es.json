@@ -256,7 +256,8 @@
     "email": "Email:",
     "comoLlegar": "Cómo llegar",
     "llamar": "Llamar",
-    "escribirEmail": "Escribir un email"
+    "escribirEmail": "Escribir un email",
+    "escribirWhatsapp": "Escribir por WhatsApp"
   },
   "nosotros": {
     "titulo": "Nosotros",
@@ -556,11 +557,18 @@
       "revisionTexto": "La iglesia lo está revisando desde el {fecha}. Cuando lo confirme, lo vas a ver acá.",
       "solicitudRevisionTitulo": "En revisión",
       "solicitudRevisionTexto": "Lo pediste el {fecha}. El equipo lo está revisando y te contamos acá cómo sigue.",
+      "aceptadaTitulo": "Pedido aceptado",
+      "aceptadaTexto": "Te avisamos cuando haya fecha.",
+      "conFechaTitulo": "Ya tenés fecha",
+      "conFechaTexto": "Es el {fecha}.",
+      "confirmandoTitulo": "Estamos confirmando",
+      "confirmandoTexto": "Fue el {fecha}. En unos días lo vas a ver acá como hecho.",
       "noConfirmadaTitulo": "No pudimos confirmarlo",
       "noConfirmadaTexto": "Escribinos y lo vemos juntos. Si querés, podés volver a contarnos con \"Ya lo hice\".",
       "noConfirmadaMotivo": "Lo que nos dijo el equipo: «{motivo}»",
       "noConfirmadaTelefono": "Escribinos o llamanos al {telefono}",
       "noConfirmadaSinTelefono": "Acercate a la Sede {sede} y lo charlamos.",
+      "noConfirmadaWhatsapp": "Escribinos por WhatsApp",
       "vidaNuevaPuedePedir": "Pedila con los días y horarios que podés, y buscamos a alguien que te acompañe.",
       "vidaNuevaBaja": "Si querés retomar, podés volver a pedirla cuando quieras.",
       "vidaNuevaBuscando": "Recibimos tu pedido. Podés ver o cambiar tus horarios.",
@@ -717,7 +725,7 @@
     "email": "Email",
     "entrar": "Entrar",
     "entrando": "Entrando…",
-    "rapidos": "Cuentas de la revisión manual"
+    "rapidos": "Personas de demo (las del manual de pruebas)"
   },
   "etapas": {
     "vida_nueva": "Vida Nueva",

@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { CalendarClock, CircleAlert, CircleCheck, Clock, Hourglass, Lock, Search, Sparkles, UserRound } from 'lucide-react';
+import { CalendarCheck, CalendarClock, CircleAlert, CircleCheck, Clock, Hourglass, Lock, MessageCircle, Search, Sparkles, UserRound } from 'lucide-react';
 import {
   apiFetch,
+  enlaceWhatsapp,
   formatearDiaEnArgentina,
   type CaminoDeLaPersona,
   type EstadoEtapa,
@@ -99,6 +100,18 @@ export default async function MiCaminoPage() {
           estado: { icono: <Hourglass className={ICONO} />, texto: t('estados.solicitudRevisionTitulo'), detalle: t('estados.solicitudRevisionTexto', { fecha: fecha(estado.desde) }) },
         };
 
+      case 'solicitud_aceptada': {
+        // Final: el pedido propio fue aceptado (hoy, el bautismo) — sin fecha, con fecha, o la fecha ya pasó.
+        if (!estado.fecha) {
+          return { estado: { icono: <CircleCheck className={ICONO} />, texto: t('estados.aceptadaTitulo'), detalle: t('estados.aceptadaTexto') } };
+        }
+        return {
+          estado: estado.yaPaso
+            ? { icono: <Hourglass className={ICONO} />, texto: t('estados.confirmandoTitulo'), detalle: t('estados.confirmandoTexto', { fecha: fecha(estado.fecha) }) }
+            : { icono: <CalendarCheck className={ICONO} />, texto: t('estados.conFechaTitulo'), detalle: t('estados.conFechaTexto', { fecha: fecha(estado.fecha) }) },
+        };
+      }
+
       case 'en_curso':
         if (estado.etapa === 'vida_nueva' && vn.estado === 'buscando') {
           return {
@@ -164,6 +177,18 @@ export default async function MiCaminoPage() {
             </a>
           ) : (
             sede && <p className="text-muted-foreground">{t('estados.noConfirmadaSinTelefono', { sede: sede.nombre })}</p>
+          )}
+          {/* D218: si la Sede cargó el WhatsApp de Secretaría, también por ahí (texto + ícono, D81). */}
+          {sede?.whatsapp && (
+            <a
+              href={enlaceWhatsapp(sede.whatsapp)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-fit items-center gap-1.5 font-medium text-primary underline underline-offset-2"
+            >
+              <MessageCircle aria-hidden className="size-4 shrink-0" />
+              {t('estados.noConfirmadaWhatsapp')}
+            </a>
           )}
         </div>
       </div>

@@ -15,7 +15,8 @@ import { calcularEdad } from '../persona/calcular-edad.js';
 import { errorDeValidacion } from '../discipulado/validaciones.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { SolicitudDiscipuladoService } from '../solicitud-discipulado/solicitud-discipulado.service.js';
-import { bloquearPersona, completoEtapa, estadosPropios, etapasCompletas, ultimasDeclaraciones, vidaNuevaEnMarcha } from './consultas.js';
+import { bloquearPersona, completoEtapa, etapasCompletas, ultimasDeclaraciones, vidaNuevaEnMarcha } from './consultas.js';
+import { estadosPropios } from './estados-propios.js';
 
 /**
  * spec 006, Historias 1 y 2 — lado de la Persona (contracts/camino-api.md):
@@ -40,7 +41,7 @@ export class CaminoService {
   async estadoDeEtapas(personaId: string): Promise<CaminoDeLaPersona> {
     const persona = await this.prisma.persona.findUnique({
       where: { id: personaId },
-      select: { fechaNacimiento: true, sede: { select: { nombre: true, contactoTelefono: true } } },
+      select: { fechaNacimiento: true, sede: { select: { nombre: true, contactoTelefono: true, whatsappSecretaria: true } } },
     });
     if (!persona) throw new AppException('NO_ENCONTRADO', 404, 'Esta sesión todavía no tiene una Persona asociada.');
 
@@ -55,7 +56,13 @@ export class CaminoService {
     return {
       etapas: ETAPAS_CAMINO.map((etapa) => estadoDeEtapa(etapa, hechos)),
       vidaNueva,
-      sede: persona.sede ? { nombre: persona.sede.nombre, telefono: persona.sede.contactoTelefono?.trim() || null } : null,
+      sede: persona.sede
+        ? {
+            nombre: persona.sede.nombre,
+            telefono: persona.sede.contactoTelefono?.trim() || null,
+            whatsapp: persona.sede.whatsappSecretaria,
+          }
+        : null,
     };
   }
 
@@ -87,6 +94,11 @@ export class CaminoService {
         if (pendiente) throw yaPendiente();
         if (etapa === 'vida_nueva' && (await vidaNuevaEnMarcha(tx, personaId))) {
           throw new AppException('ETAPA_EN_CURSO', 409, 'Vida Nueva está en marcha (hay un pedido abierto o un Grupo en curso).');
+        }
+        // Final: la misma regla que la card (`puedeDeclarar`) — con la etapa en curso o el bautismo aceptado, no.
+        const propio = (await estadosPropios(tx, personaId))[etapa]?.estado;
+        if (propio === 'en_curso' || propio === 'aceptada') {
+          throw new AppException('ETAPA_EN_CURSO', 409, 'Esta etapa está en marcha.');
         }
 
         const creada = await tx.declaracionHistorial.create({

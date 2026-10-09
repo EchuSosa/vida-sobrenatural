@@ -16,10 +16,11 @@ test('entra con un email escrito y cae en /registro (sin registro todavía)', as
   await expect(page.getByText('Paso 1 de 4')).toBeVisible();
 });
 
-test('los botones rápidos entran con las cuentas de la revisión manual', async ({ page }) => {
+test('los botones rápidos entran con las personas de demo del manual', async ({ page }) => {
   await page.goto('/dev/entrar');
-  await page.getByRole('button', { name: 'demo-vn-persona@example.com' }).click();
+  // Sin el seed demo (la base de e2e no lo tiene) la persona no existe: arranca su registro.
+  await page.getByRole('button', { name: 'demo-nueva@example.com' }).click();
   await expect(page).toHaveURL(/\/registro$/);
   const sesion = await (await page.request.get('/api/auth/session')).json();
-  expect(sesion.user.email).toBe('demo-vn-persona@example.com');
+  expect(sesion.user.email).toBe('demo-nueva@example.com');
 });

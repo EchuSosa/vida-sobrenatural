@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Matches, Validate, ValidateIf } from 'class-validator';
 import { HORARIOS_SEDE_REGEX, TELEFONO_REGEX } from '@vida-sobrenatural/shared-types';
+import { WhatsappArgentino } from './whatsapp-argentino.js';
 
 /** Body de PATCH /sedes/:id — cualquier subconjunto, más el toggle de soft delete. */
 export class ActualizarSedeDto {
@@ -35,6 +36,13 @@ export class ActualizarSedeDto {
   @IsOptional()
   @IsString()
   descripcionBienvenida?: string;
+
+  @ApiPropertyOptional({ description: 'D218: celular argentino, como lo escriba el Admin; se guarda normalizado (549…). Vacío = sin WhatsApp.' })
+  @IsOptional()
+  @IsString()
+  @ValidateIf((_objeto, valor) => valor !== '')
+  @Validate(WhatsappArgentino)
+  whatsappSecretaria?: string;
 
   @ApiPropertyOptional({ description: 'Soft delete (Principio III) — nunca hay DELETE físico.' })
   @IsOptional()

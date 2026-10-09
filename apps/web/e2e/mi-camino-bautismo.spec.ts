@@ -47,13 +47,16 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(card(page)).toContainText('Lo vas a poder pedir cuando empieces Vida Nueva');
       await expect(card(page).getByRole('link', { name: 'Ver Vida Nueva' })).toBeVisible();
       await expect(card(page).getByRole('button', { name: 'Quiero bautizarme' })).toHaveCount(0);
+      await expect(card(page).getByText('Todavía no se habilita', { exact: true })).toBeVisible();
       await sinViolaciones(page, tema);
 
-      // FR-021 (por API) → puede_pedir.
+      // FR-021 (por API) → puede_pedir. El encabezado lo dice también (no "Todavía no se habilita").
       await habilitarBautismo(BASE, email);
       await abrirMiCamino(page);
       const pedir = card(page).getByRole('button', { name: 'Quiero bautizarme' });
       await expect(pedir).toBeVisible();
+      await expect(card(page).getByText('La podés empezar', { exact: true })).toBeVisible();
+      await expect(card(page).getByText('Todavía no se habilita', { exact: true })).toHaveCount(0);
       expect((await pedir.boundingBox())!.height).toBeGreaterThanOrEqual(44); // D150
       await sinScrollHorizontal(page);
 
@@ -73,9 +76,10 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(card(page)).toContainText('Recibimos tu pedido');
       expect((await estadoBautismo(BASE, email)).estado).toBe('en_revision');
 
-      // Recargar mantiene el estado y no ofrece pedir otra vez.
+      // Recargar mantiene el estado y no ofrece pedir otra vez; el encabezado dice "En revisión".
       await abrirMiCamino(page);
       await expect(card(page)).toContainText('Recibimos tu pedido');
+      await expect(card(page).getByText('En revisión', { exact: true })).toBeVisible();
       await expect(card(page).getByRole('button', { name: 'Quiero bautizarme' })).toHaveCount(0);
       await sinViolaciones(page, tema);
 
@@ -100,6 +104,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await abrirMiCamino(page);
 
       await expect(card(page)).toContainText('Ya tenés fecha para tu bautismo');
+      // El encabezado refleja la fecha y, con la etapa en marcha, no ofrece "Ya lo hice".
+      await expect(card(page).getByText('Ya tenés fecha', { exact: true })).toBeVisible();
+      await expect(card(page).getByRole('button', { name: 'Ya lo hice' })).toHaveCount(0);
       await expect(card(page)).toContainText('Club Universitario, calle 4 y 51');
       await expect(card(page).getByRole('link', { name: `Ver ${evento.nombre}` })).toHaveAttribute('href', `/eventos/${evento.slug}`);
       await sinViolaciones(page, tema);
