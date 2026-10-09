@@ -12,7 +12,7 @@ import { EN_UN_MES, EscenarioEventos, levantarApp, tokenDe } from './eventos-fix
 const DIA = 86_400_000;
 
 /**
- * spec 011, ampliación 2026-10-09 — FR-064 a FR-069 (D230, D231): preguntas
+ * spec 011, ampliación 2026-10-09 — FR-064 a FR-069 (D231, D232): preguntas
  * propias del Evento, respuestas en el mismo paso de anotarse, quién ve las
  * sensibles, el resumen por pregunta, lo que no se puede cambiar con
  * respuestas y el borrado a los 30 días.
@@ -122,7 +122,7 @@ describe('Preguntas propias de un Evento (integración)', () => {
       { preguntaId: jornada.id, pregunta: '¿Participaste alguna vez de una jornada de sanidad?', tipo: 'opcion', sensible: false, valor: 'No, nunca' },
       { preguntaId: texto.id, pregunta: '¿Algo que quieras contarnos?', tipo: 'texto', sensible: false, valor: 'Vengo con mi hermana' },
     ]);
-    // Las respuestas viven solo en la Inscripción, nunca en el perfil (D231).
+    // Las respuestas viven solo en la Inscripción, nunca en el perfil (D232).
     const persona = await prisma.persona.findUniqueOrThrow({ where: { id: p.id } });
     expect(JSON.stringify(persona)).not.toContain('Vengo con mi hermana');
   });

@@ -5,7 +5,7 @@ import type { PrismaService } from '../../src/prisma/prisma.service.js';
 import { EN_UN_MES, EscenarioEventos, levantarApp, tokenDe } from './eventos-fixtures.js';
 
 /**
- * spec 011, ampliación 2026-10-09 — FR-060 a FR-063 (D229): destinatarios con
+ * spec 011, ampliación 2026-10-09 — FR-060 a FR-063 (D230): destinatarios con
  * efecto. Mujeres desde 15 años: una de 20 se anota; un varón y una de 14, no
  * (tampoco a la lista de espera); el Admin puede forzar con `forzar: true`.
  */

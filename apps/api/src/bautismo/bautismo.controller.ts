@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import { PermisosGuard } from '../auth/permisos.guard.js';
@@ -6,7 +6,7 @@ import { RequierePermiso } from '../auth/permisos.decorator.js';
 import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
 import { personaDeSesion } from '../discipulado/sesion.js';
 import { BautismoAdminService } from './acciones-admin.js';
-import { AceptarBautismoDto, AsignarBautismoDto, ConfirmarBautismosDto, RechazarBautismoDto, SeccionEventoQueryDto } from './dto/bautismo.dto.js';
+import { AceptarBautismoDto, AsignarBautismoDto, CambiarTalleBautismoDto, ConfirmarBautismosDto, RechazarBautismoDto, SeccionEventoQueryDto } from './dto/bautismo.dto.js';
 
 /**
  * spec 010, lote B — el Admin y el Pastor. Leer: `solicitudes.ver` (Admin y
@@ -41,6 +41,13 @@ export class BautismoController {
   @ApiOkResponse({ description: 'spec 010, FR-009: rechaza con motivo opcional (solo lo ve el equipo). 409 SOLICITUD_BAUTISMO_YA_CAMBIO.' })
   rechazar(@Param('id') id: string, @Body() dto: RechazarBautismoDto, @Req() request: AuthenticatedRequest) {
     return this.service.rechazar(id, personaDeSesion(request), dto.motivo);
+  }
+
+  @Put('solicitudes/:id/talle')
+  @RequierePermiso('solicitudes.aprobar')
+  @ApiOkResponse({ description: 'D229: corrige el talle de remera (en cualquier estado). 400 VALIDACION TALLE_REQUERIDO / TALLE_INVALIDO; 404 NO_ENCONTRADO.' })
+  cambiarTalle(@Param('id') id: string, @Body() dto: CambiarTalleBautismoDto) {
+    return this.service.cambiarTalle(id, dto.talleRemera);
   }
 
   @Post('solicitudes/:id/quitar-de-evento')

@@ -6,7 +6,7 @@ import { bloquearPersona } from '../camino/consultas.js';
 import { nombresDe } from '../discipulado/consultas.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
 import { aEventoResumen, estaBautizada, solicitudAbiertaDe, vidaNuevaDe } from './estado-bautismo.js';
-import { esViolacionDeUnicidad, normalizarComentarioBautismo, yaAbierta, yaBautizada } from './operaciones.js';
+import { esViolacionDeUnicidad, normalizarPedidoBautismo, yaAbierta, yaBautizada } from './operaciones.js';
 
 /**
  * spec 010, lote C (Historia 5; D97, D147): las excepciones del Admin —
@@ -75,8 +75,8 @@ export class BautismoExcepcionesService {
    * activa, de cualquier edad y sin la regla de Vida Nueva; sí una sola
    * abierta (FR-004) y no si ya está bautizada (FR-005). Queda quién la creó.
    */
-  async crearEnNombre(personaId: string, comentarioCrudo: string | undefined, actorId: string): Promise<{ id: string }> {
-    const comentario = normalizarComentarioBautismo(comentarioCrudo);
+  async crearEnNombre(personaId: string, comentarioCrudo: string | undefined, actorId: string, talleCrudo?: unknown): Promise<{ id: string }> {
+    const { comentario, talleRemera } = normalizarPedidoBautismo(comentarioCrudo, talleCrudo);
     try {
       return await this.prisma.$transaction(async (tx) => {
         if (!(await bloquearPersona(tx, personaId))) throw noEncontrada();
@@ -84,7 +84,7 @@ export class BautismoExcepcionesService {
         if (persona.estado !== 'activa') throw noEncontrada();
         if ((await estaBautizada(tx, personaId)).si) throw yaBautizada();
         if (await solicitudAbiertaDe(tx, personaId)) throw yaAbierta();
-        return tx.solicitudBautismo.create({ data: { personaId, comentario, creadoPorId: actorId }, select: { id: true } });
+        return tx.solicitudBautismo.create({ data: { personaId, comentario, talleRemera, creadoPorId: actorId }, select: { id: true } });
       });
     } catch (error) {
       if (esViolacionDeUnicidad(error)) throw yaAbierta();

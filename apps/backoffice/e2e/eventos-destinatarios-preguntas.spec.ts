@@ -3,11 +3,11 @@ import { test, expect, apiComo, auditar, crearPersona, EMAIL_ADMIN, loguearseCom
 import { ANIO_FUTURO, anotarEnNombre, crearEventoPorApi } from './helpers-011';
 
 /**
- * spec 011, ampliación 2026-10-09 (FR-060 a FR-063, D229) — destinatarios del
+ * spec 011, ampliación 2026-10-09 (FR-060 a FR-063, D230) — destinatarios del
  * Evento desde el backoffice, con axe en claro y oscuro: el Admin elige
  * "Mujeres" desde 15 años (con el error por campo si la máxima es menor), el
  * detalle lo explica, y anotar a un varón pide confirmación y lo marca.
- * Preguntas propias (FR-064 a FR-068, D230, D231): el Admin las arma en el
+ * Preguntas propias (FR-064 a FR-068, D231, D232): el Admin las arma en el
  * formulario, ve las respuestas y el resumen; el Pastor no ve la sensible.
  */
 async function completarFecha(page: Page, grupo: string, dia: string, mes: string, anio: string) {

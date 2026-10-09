@@ -1044,6 +1044,17 @@ enum EstadoSolicitudBautismo {
   realizada // el Admin confirmó que se bautizó (D180)
 }
 
+// D229: en el orden de `TALLES_REMERA` (shared-types).
+enum TalleRemera {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+  XXXL
+}
+
 model SolicitudBautismo {
   id                  String                  @id @default(uuid())
   personaId           String
@@ -1051,6 +1062,9 @@ model SolicitudBautismo {
   estado              EstadoSolicitudBautismo @default(pendiente)
   // ≤ 500. Reemplaza la fecha deseada (D179).
   comentario          String?
+  // D229: el talle de la remera que regala la iglesia. Obligatorio al pedir;
+  // null solo en los pedidos de antes del ajuste ("Sin dato").
+  talleRemera         TalleRemera?
   // null = la pidió la propia Persona (D97).
   creadoPorId         String?
   revisadoPorId       String?
@@ -1132,12 +1146,12 @@ model Evento {
   costo                        Decimal?     @db.Decimal(10, 2)
   instruccionesPago            String?
   diasAnticipacionRecordatorio Int?
-  // Ampliación 2026-10-09 (FR-060, D229): destinatarios con efecto. Edades en
+  // Ampliación 2026-10-09 (FR-060, D230): destinatarios con efecto. Edades en
   // años cumplidos al día del Evento; null = sin límite.
   destinatariosGenero          GeneroDestinatario @default(todas)
   edadMinima                   Int?
   edadMaxima                   Int?
-  // FR-069 (D231): cuándo se borraron las respuestas sensibles (idempotencia).
+  // FR-069 (D232): cuándo se borraron las respuestas sensibles (idempotencia).
   respuestasSensiblesBorradasEn DateTime?
   estado                       EstadoEvento @default(publicado)
   canceladoEn                  DateTime?
@@ -1191,7 +1205,7 @@ model InscripcionEvento {
   @@map("inscripciones_evento")
 }
 
-// --- spec 011, ampliación 2026-10-09: preguntas propias del Evento (D230, D231) ---
+// --- spec 011, ampliación 2026-10-09: preguntas propias del Evento (D231, D232) ---
 
 enum GeneroDestinatario {
   todas
@@ -1227,7 +1241,7 @@ model PreguntaEvento {
   @@map("preguntas_evento")
 }
 
-// Las respuestas viven SOLO en la Inscripción a ese Evento, nunca en el perfil (D231).
+// Las respuestas viven SOLO en la Inscripción a ese Evento, nunca en el perfil (D232).
 model RespuestaPreguntaEvento {
   id            String            @id @default(uuid())
   inscripcionId String

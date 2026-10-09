@@ -1,6 +1,6 @@
 import { correspondeAlEvento, edadCumplidaEn, tieneRestriccionDeDestinatarios, type DestinatariosEvento } from '@vida-sobrenatural/shared-types';
 
-/** spec 011, ampliación 2026-10-09 — FR-060, FR-061 (D229): quién está entre los destinatarios. */
+/** spec 011, ampliación 2026-10-09 — FR-060, FR-061 (D230): quién está entre los destinatarios. */
 const mujeresDesde15: DestinatariosEvento = { genero: 'mujeres', edadMinima: 15, edadMaxima: null };
 // 14/11/2026 a las 10 de Argentina.
 const INICIO = '2026-11-14T13:00:00.000Z';

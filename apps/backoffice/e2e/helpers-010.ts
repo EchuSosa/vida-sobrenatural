@@ -9,7 +9,7 @@ import { crearEventoPorApi } from './helpers-011';
 export async function personaConPedido(sufijo: string, nombre: string, aceptar = false): Promise<PersonaDeTest & { solicitudId: string; apellido: string }> {
   const apellido = `Bautismo${sufijo}`;
   const persona = await crearPersona(`e2e-bautismo-${nombre.toLowerCase()}-${sufijo}@example.com`, { nombre, apellido });
-  const { id } = await apiComo<{ id: string }>(EMAIL_ADMIN, 'POST', '/bautismo/solicitudes', { personaId: persona.id, comentario: 'Quiere bautizarse con su familia' });
+  const { id } = await apiComo<{ id: string }>(EMAIL_ADMIN, 'POST', '/bautismo/solicitudes', { personaId: persona.id, comentario: 'Quiere bautizarse con su familia', talleRemera: 'L' });
   if (aceptar) await apiComo(EMAIL_ADMIN, 'POST', `/bautismo/solicitudes/${id}/aceptar`, {});
   return { ...persona, solicitudId: id, apellido };
 }

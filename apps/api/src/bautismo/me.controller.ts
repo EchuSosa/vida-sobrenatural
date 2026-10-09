@@ -26,9 +26,9 @@ export class BautismoMeController {
   }
 
   @Post('solicitudes/me')
-  @ApiCreatedResponse({ description: 'spec 010, FR-001 a FR-005: pedir. 409 BAUTISMO_NO_HABILITADO, EDAD_INSUFICIENTE_PARA_PEDIR_BAUTISMO_SOLO, SOLICITUD_BAUTISMO_YA_ABIERTA, PERSONA_YA_BAUTIZADA; 400 VALIDACION (comentario > 500).' })
+  @ApiCreatedResponse({ description: 'spec 010, FR-001 a FR-005: pedir. 409 BAUTISMO_NO_HABILITADO, EDAD_INSUFICIENTE_PARA_PEDIR_BAUTISMO_SOLO, SOLICITUD_BAUTISMO_YA_ABIERTA, PERSONA_YA_BAUTIZADA; 400 VALIDACION (comentario > 500; talleRemera: TALLE_REQUERIDO, TALLE_INVALIDO — D229).' })
   pedir(@Body() dto: PedirBautismoDto, @Req() request: AuthenticatedRequest) {
-    return this.service.pedir(personaActivaDeSesion(request), dto.comentario);
+    return this.service.pedir(personaActivaDeSesion(request), dto.comentario, dto.talleRemera);
   }
 
   @Post('solicitudes/me/retirar')

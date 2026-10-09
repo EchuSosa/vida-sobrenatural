@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CalendarX, CircleCheck, Hourglass, UserPlus } from 'lucide-react';
+import { CalendarX, CircleCheck, Hourglass, Shirt, UserPlus } from 'lucide-react';
 import {
   ApiError,
   apiFetch,
@@ -41,7 +41,7 @@ export function SeccionBautismoEventoCliente({
   const te = useTranslations('errors');
   const locale = useLocale();
   const router = useRouter();
-  const { evento, asignadas, esperandoFecha, puedeConfirmar } = datos;
+  const { evento, asignadas, esperandoFecha, puedeConfirmar, talles } = datos;
   const [elegidas, setElegidas] = useState<Set<string>>(new Set());
   const porConfirmar = asignadas.items.filter((a) => a.estado === 'aprobada');
   const [noBautizadas, setNoBautizadas] = useState<Set<string>>(new Set());
@@ -110,6 +110,19 @@ export function SeccionBautismoEventoCliente({
       {/* Personas a bautizar */}
       <div className="flex flex-col gap-3">
         <h3 className="text-lg font-semibold">{t('asignadasTitulo', { cantidad: asignadas.total })}</h3>
+        {talles.total > 0 && (
+          // D229: para comprar las remeras. Cuenta todas las asignadas, no solo esta página.
+          <p data-testid="resumen-talles" className="flex flex-wrap items-center gap-2">
+            <Shirt aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+            <span className="font-medium">{t('tallesTitulo')}</span>
+            <span>
+              {[
+                ...talles.talles.map(({ talle, cantidad }) => t('talleCantidad', { talle, cantidad })),
+                ...(talles.sinDato > 0 ? [t('talleSinDato', { cantidad: talles.sinDato })] : []),
+              ].join(' · ')}
+            </span>
+          </p>
+        )}
         {asignadas.items.length === 0 ? (
           <EstadoVacio mensaje={puedeAsignar ? t('asignadasVacioConAccion') : t('asignadasVacio')} />
         ) : puedeConfirmar && puedeGestionar ? (
@@ -175,7 +188,9 @@ export function SeccionBautismoEventoCliente({
                   <Link href={`/solicitudes/bautismo/${a.solicitudId}`} className="underline underline-offset-2">
                     {nombre(a.persona)}
                   </Link>
-                  <span className="text-sm text-muted-foreground">· {a.estado === 'realizada' ? t('seBautizo') : t('aBautizar')}</span>
+                  <span className="text-sm text-muted-foreground">
+                    · {a.estado === 'realizada' ? t('seBautizo') : t('aBautizar')} · {t('talleDe', { talle: a.talleRemera ?? t('sinDato') })}
+                  </span>
                 </span>
                 {puedeAsignar && a.estado === 'aprobada' && (
                   <ConfirmDestructiveDialog

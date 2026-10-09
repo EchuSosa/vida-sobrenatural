@@ -80,7 +80,7 @@ export interface EventoPublico {
   instruccionesPago: string | null;
   estado: EstadoEvento;
   estadoInscripcion: EstadoInscripcionDeEvento;
-  /** Ampliación 2026-10-09 (FR-060): para quién es, con efecto (D229). */
+  /** Ampliación 2026-10-09 (FR-060): para quién es, con efecto (D230). */
   destinatarios: DestinatariosEvento;
   /** Ampliación 2026-10-09 (FR-064): las preguntas que se responden al anotarse, en orden. */
   preguntas: PreguntaEvento[];
@@ -325,7 +325,7 @@ export const APROBAR_LOTE_MAX = 50;
 export const MOTIVO_RECHAZO_INSCRIPCION_MAX = 500;
 
 // ---------------------------------------------------------------------------
-// Ampliación 2026-10-09 (specs/011-eventos/ampliacion-2026-10-09.md, D229–D232):
+// Ampliación 2026-10-09 (specs/011-eventos/ampliacion-2026-10-09.md, D230–D233):
 // destinatarios con efecto y preguntas propias del Evento.
 // ---------------------------------------------------------------------------
 
@@ -403,7 +403,7 @@ export const PREGUNTA_OPCION_MAX = 100;
 export const RESPUESTA_TEXTO_MAX = 200;
 /** Valores guardados de una pregunta Sí/No. */
 export const VALORES_SI_NO = ['si', 'no'] as const;
-/** FR-069 — días después del fin del Evento en que se borran las respuestas sensibles (D231). */
+/** FR-069 — días después del fin del Evento en que se borran las respuestas sensibles (D232). */
 export const DIAS_BORRADO_RESPUESTAS_SENSIBLES = 30;
 
 export interface PreguntaEvento {

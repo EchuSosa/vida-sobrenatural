@@ -2,8 +2,8 @@
 
 **Spec base**: [`spec.md`](./spec.md) (no se rehace: esto suma FR-060 a FR-075).
 **Aprobada por**: Echu, 2026-10-09. **Rama**: `eventos-destinatarios-preguntas`.
-**Decisiones**: D229 (destinatarios con efecto), D230 (preguntas propias), D231 (respuestas sensibles),
-D232 (lo que la app ya sabe en la lista de inscriptos). Si al mergear `main` alguno choca, se renumera.
+**Decisiones**: D230 (destinatarios con efecto), D231 (preguntas propias), D232 (respuestas sensibles),
+D233 (lo que la app ya sabe en la lista de inscriptos). Si al mergear `main` alguno choca, se renumera.
 
 ## Motivo
 
@@ -62,7 +62,7 @@ su líder (spec 014). Así la Admin no lo pregunta.
 
 ## Requirements
 
-### Destinatarios (D229)
+### Destinatarios (D230)
 
 - **FR-060**: El Evento tiene `destinatariosGenero` (`todas` | `mujeres` | `varones`, por defecto
   `todas`) y `edadMinima` / `edadMaxima` opcionales (enteros 0–120, la máxima ≥ la mínima), en años
@@ -86,7 +86,7 @@ su líder (spec 014). Así la Admin no lo pregunta.
   el Admin decide con "Dar de baja", que ya avisa a la Persona. Respondido por Echu el 2026-10-09
   (Pregunta 1).
 
-### Preguntas propias (D230)
+### Preguntas propias (D231)
 
 - **FR-064**: En el formulario del Evento, "Preguntas para la inscripción": hasta **10**, en orden; cada
   una con texto (hasta 200), tipo (**Sí/No**, **Una opción** con 2 a 10 opciones de hasta 100
@@ -105,7 +105,7 @@ su líder (spec 014). Así la Admin no lo pregunta.
   valor ("¿Sos celíaca? Sí: 3 · No: 25"); Texto corto, cuántas respondieron. La 011 no tiene
   exportación a CSV: no se agrega.
 
-### Datos sensibles (D231)
+### Datos sensibles (D232)
 
 - **FR-068**: Las respuestas viven **solo** en la Inscripción a ese Evento (`RespuestaPreguntaEvento`),
   nunca en el perfil. Las de preguntas sensibles las ven **solo** quien tiene `eventos.gestionar`
@@ -117,7 +117,7 @@ su líder (spec 014). Así la Admin no lo pregunta.
   sensibles de los Eventos cuyo fin (o inicio, si no tiene fin) fue hace más de **30 días**, y marca el
   Evento (`respuestasSensiblesBorradasEn`). Idempotente; con test de integración.
 
-### Lo que la app ya sabe (D232)
+### Lo que la app ya sabe (D233)
 
 - **FR-070**: Cada fila de la lista de inscriptos trae `datosPersona`: edad (al día del Evento),
   teléfono, Ministerios donde sirve (Postulaciones aprobadas), referente (Discipulador o Líder del Grupo
@@ -174,7 +174,7 @@ Migración propia `20261009135610_eventos_destinatarios_preguntas` (con CHECK de
 - [X] T210 Seed demo: "Jornada de sanidad · Mujeres" con 8 inscriptas y "Noche de jóvenes" (15 a 30).
   Los e2e crean sus datos por la API (no hacen falta fixtures nuevos; `limpiar-e2e` borra las
   respuestas en cascada con la Inscripción).
-- [X] T211 Manual (DEMO-17, DEMO-18, EVE-20 a EVE-28) y decisiones D229–D232.
+- [X] T211 Manual (DEMO-17, DEMO-18, EVE-20 a EVE-28) y decisiones D230–D233.
 - [X] T212 Checklist de `docs/15` por pantalla tocada (abajo).
 
 ### Checklist de `docs/15` (D114)

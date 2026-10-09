@@ -172,6 +172,11 @@ se pisan.
 
 ---
 
+### Ajuste D229 — talle de remera (2026-10-09)
+
+- [x] T068 Talle de remera en el pedido (D229): `SolicitudBautismo.talleRemera` (enum `TalleRemera`, nullable, migración `talle_remera_bautismo`); obligatorio al pedir (Persona y en nombre de) con `TALLE_REQUERIDO`/`TALLE_INVALIDO` por campo; `PUT /bautismo/solicitudes/:id/talle`; resumen de talles en `GET /bautismo/eventos/:eventoId`. Tests: `test/unit/talle-remera.spec.ts` y los tres `bautismo-*.integration-spec.ts`.
+- [x] T069 Pantallas tocadas por D229 — checklist de `docs/15-guia-ux-ui.md` (cuatro estados, H-50, H-57, D81, D150, tokens, next-intl, axe claro/oscuro en los e2e): el diálogo "Quiero bautizarme" de Mi camino (`CampoTalleRemera`, 44 px), el diálogo "Pedir el bautismo en su nombre" del Perfil, el talle en el detalle del pedido y el resumen de talles en la sección Bautismo del Evento. E2E: `apps/web/e2e/mi-camino-bautismo.spec.ts` y `apps/backoffice/e2e/bautismo.spec.ts`.
+
 ## Dependencies & Execution Order
 
 - **Setup (T001)** → **Foundational (T002–T017, lote 0)** → abren los lotes A, B y C en paralelo.

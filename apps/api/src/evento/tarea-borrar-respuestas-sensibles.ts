@@ -3,7 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { BorradoRespuestasSensiblesService } from './borrado-respuestas-sensibles.service.js';
 
 /**
- * spec 011, ampliación 2026-10-09 (FR-069, D231) — todos los días a las 3 de
+ * spec 011, ampliación 2026-10-09 (FR-069, D232) — todos los días a las 3 de
  * Argentina. Con `TAREAS_PROGRAMADAS=false` no corre sola (tests); a mano:
  * `pnpm --filter api run tareas:correr respuestas-sensibles`.
  */

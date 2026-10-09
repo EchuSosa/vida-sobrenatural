@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
-import { ASIGNAR_BAUTISMO_MAX } from '@vida-sobrenatural/shared-types';
+import { ASIGNAR_BAUTISMO_MAX, TALLES_REMERA } from '@vida-sobrenatural/shared-types';
 
 /**
  * spec 010 (contracts/bautismo-api.md). Solo la FORMA; los largos con código
@@ -13,6 +13,19 @@ export class PedirBautismoDto {
   @IsOptional()
   @IsString()
   comentario?: string;
+
+  // D229: obligatorio, pero lo valida el servicio para responder con código
+  // propio por campo (TALLE_REQUERIDO, TALLE_INVALIDO), no el genérico del pipe.
+  @ApiPropertyOptional({ enum: TALLES_REMERA, description: 'Obligatorio (TALLE_REQUERIDO / TALLE_INVALIDO).' })
+  @IsOptional()
+  talleRemera?: unknown;
+}
+
+/** D229: el Admin corrige el talle desde el detalle del pedido. */
+export class CambiarTalleBautismoDto {
+  @ApiProperty({ enum: TALLES_REMERA, description: 'TALLE_REQUERIDO / TALLE_INVALIDO.' })
+  @IsOptional()
+  talleRemera?: unknown;
 }
 
 export class CrearEnNombreBautismoDto extends PedirBautismoDto {

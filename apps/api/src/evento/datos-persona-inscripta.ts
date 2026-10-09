@@ -1,7 +1,7 @@
 import type { Prisma } from '../generated/prisma/client.js';
 
 /**
- * spec 011, ampliación 2026-10-09 (FR-070, D232) — lo que la app ya sabe de
+ * spec 011, ampliación 2026-10-09 (FR-070, D233) — lo que la app ya sabe de
  * cada inscripta, para que el Admin no lo pregunte en el formulario: los
  * Ministerios donde sirve (Postulaciones aprobadas, D170) y quién la acompaña
  * (Discipulador o Líder del Grupo más reciente: el activo si hay, si no el
