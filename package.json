@@ -4,6 +4,7 @@
   "packageManager": "pnpm@12.5.1",
   "scripts": {
     "dev": "turbo run dev",
+    "dev:red": "node scripts/dev-red.mjs",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
