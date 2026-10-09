@@ -19,16 +19,27 @@ export function exigirEnCurso(grupo: GrupoBloqueado): void {
  * Al cerrarse un Grupo (por completado o porque se fue la última Persona), una
  * reasignación que estaba propuesta ya no tiene sobre qué aplicarse: se retira
  * como si la hubiera retirado el Admin, en la misma transacción. Si no, el
- * Discipulador la seguiría viendo para aceptar algo que va a fallar.
+ * Discipulador la seguiría viendo para aceptar algo que va a fallar. Y se le
+ * avisa que ya no hace falta responderla (D219).
  */
-export async function retirarReasignacionPendiente(tx: Tx, grupoId: string): Promise<string | null> {
+export async function retirarReasignacionPendiente(tx: Tx, grupoId: string, notificaciones: NotificacionesService): Promise<string | null> {
   const pendiente = await tx.propuestaDiscipulado.findFirst({
     where: { grupoId, tipo: 'reasignacion', estado: 'pendiente' },
-    select: { id: true },
+    select: { id: true, discipuladorId: true },
   });
   if (!pendiente) return null;
   await tx.propuestaDiscipulado.update({ where: { id: pendiente.id }, data: { estado: 'retirada', retiradaPor: 'admin' }, select: { id: true } });
+  await avisarReasignacionRetirada(tx, notificaciones, pendiente.id, pendiente.discipuladorId, grupoId);
   return pendiente.id;
+}
+
+/** D219: al Discipulador propuesto para una reasignación que se retiró, "ya no hace falta que respondas". */
+export function avisarReasignacionRetirada(tx: Tx, notificaciones: NotificacionesService, propuestaId: string, discipuladorId: string, grupoId: string) {
+  return notificaciones.emitir(tx, {
+    nombre: 'discipulado.reasignacion_retirada',
+    a: { tipo: 'discipulador', personaId: discipuladorId },
+    datos: { propuestaId, grupoId },
+  });
 }
 
 /**
@@ -76,7 +87,7 @@ export class FinalizacionService {
         data: { estado: 'finalizado', motivoCierre: 'completado', cerradoEn: ahora, cerradoPorId: adminId },
         select: { id: true },
       });
-      await retirarReasignacionPendiente(tx, grupoId);
+      await retirarReasignacionPendiente(tx, grupoId, this.notificaciones);
       for (const i of activas) {
         await this.notificaciones.emitir(tx, {
           nombre: 'discipulado.finalizacion_confirmada',

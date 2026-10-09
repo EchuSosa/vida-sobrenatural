@@ -107,6 +107,12 @@ describe('SolicitudDiscipuladoService — retirar la propuesta y rechazar (T023)
     expect(p).toMatchObject({ estado: 'retirada', retiradaPor: 'admin' });
     expect(s.estado).toBe('pendiente');
     expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId: p.id, retiradaPor: 'admin' } });
+    // D219: al Discipulador que tenía la propuesta le llega que ya no hace falta responderla.
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), {
+      nombre: 'discipulado.propuesta_nueva_retirada',
+      a: { tipo: 'discipulador', personaId: 'disc-1' },
+      datos: { propuestaId: p.id, solicitudId: s.id },
+    });
   });
 
   it('retirar sobre una pendiente → SOLICITUD_NO_PROPUESTA', async () => {
