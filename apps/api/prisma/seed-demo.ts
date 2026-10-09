@@ -33,6 +33,9 @@ import { sembrarDemo010 } from './seed-demo/010-bautismo.js';
 import { sembrarDemo011 } from './seed-demo/011-eventos.js';
 import { sembrarDemo012 } from './seed-demo/012-avisos.js';
 import { sembrarDemo013 } from './seed-demo/013-backoffice.js';
+// Datos de demo unificados para el manual de pruebas (docs/23): el elenco va
+// primero (las otras partes usan "el primer Admin"), la historia al final.
+import { sembrarElencoDemo, sembrarHistoriaDemo } from './seed-demo/historia-demo.js';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -464,6 +467,8 @@ async function crearLibrosHostiles() {
 
 async function main() {
   const sedes = await crearSedesDemo();
+  const ctxElenco = { prisma, sedes: { laPlata: sedes.laPlata.id, buenosAires: sedes.buenosAires.id, rosario: sedes.rosario.id } };
+  await sembrarElencoDemo(ctxElenco);
   await crearPersonasVolumenDemo({
     laPlata: sedes.laPlata.id,
     buenosAires: sedes.buenosAires.id,
@@ -482,6 +487,7 @@ async function main() {
   await sembrarDemo011(ctx);
   await sembrarDemo012(ctx);
   await sembrarDemo013(ctx);
+  await sembrarHistoriaDemo(ctx);
 }
 
 main()

@@ -98,7 +98,7 @@ persona, volvés a `/dev/entrar` y escribís otro email.
 
 | Para probar como… | Email | Quién es |
 |---|---|---|
-| **Admin** | `demo-admin@example.com` | Graciela Benítez, administra la app |
+| **Admin** | `demo-admin@example.com` | Mónica Cabrera, administra la app |
 | **Pastor** | `demo-pastor@example.com` | Roberto Medina, ve todo sin poder cambiar |
 | **Discipuladora** (poca carga) | `demo-disc-laura@example.com` | Laura Gómez: martes y jueves a la tarde, sin nadie a cargo, con una propuesta esperando |
 | **Discipuladora** (media carga) | `demo-disc-marcela@example.com` | Marcela Ruiz: martes a la noche y sábado a la mañana, acompaña a dos personas |
@@ -107,19 +107,21 @@ persona, volvés a `/dev/entrar` y escribís otro email.
 | **Líder de curso** | `demo-vs-lider-1@example.com` | Da una edición de Vida de Servicio |
 | Recién registrada | `demo-nueva@example.com` | Florencia Arias: se registró y todavía no empezó nada |
 | Pidió Vida Nueva | `demo-vn-pendiente@example.com` | Sofía Molina: espera que le asignen Discipulador |
-| Propuesta a Laura | `demo-vn-propuesta@example.com` | Camila Ferreyra: el Admin se la propuso a Laura |
+| Propuesta a Laura | `demo-vn-propuesta@example.com` | Julieta Ferreyra: el Admin se la propuso a Laura |
 | Haciendo Vida Nueva | `demo-vn-en-curso@example.com` | Agustina Paz: la acompaña Marcela |
-| Terminó Vida Nueva | `demo-vs-apta-1@example.com` | Puede anotarse en Vida de Servicio |
+| Terminó Vida Nueva | `demo-vn-terminada@example.com` | Emanuel Ortiz: puede anotarse en Vida de Servicio |
 | Haciendo Vida de Servicio | `demo-vs-activa-1@example.com` | Está en la edición del Líder |
 | Puede elegir Ministerio | `demo-apta@example.com` | Terminó Vida de Servicio |
 | Sirve en un Ministerio | `demo-miembro@example.com` | Ya está en un Ministerio |
 | Postulación en revisión | `demo-ministerio-pendiente@example.com` | Se postuló y espera respuesta |
 | Pidió el bautismo | `demo-bautismo-revision@example.com` | Su pedido está en revisión |
-| Bautismo con fecha | `demo-bautismo-confirmando@example.com` | Ya tiene fecha asignada |
+| Bautismo con fecha | `demo-bautismo-fecha-1@example.com` | Ya tiene fecha asignada |
 | Tutora de un menor | `demo-tutora-silvina@example.com` | Silvina Ledesma, tutora de Tomás (14 años) |
+| Menor con tutora | `demo-menor-tomas@example.com` | Tomás Ledesma: hace Vida Nueva con Jorge |
+| Haciendo Vida Nueva con Jorge | `demo-vn-matias@example.com`, `demo-vn-lucas@example.com` | Matías Vera y Lucas Godoy (Jorge ya pidió dar por terminado el de Lucas) |
 | Menor sin tutor | `demo-pendiente-tutor@example.com` | No puede entrar hasta que el Admin lo active |
 
-Además hay una persona **sin email** (Ramón Quiroga), cargada por el Admin: no puede entrar a la
+Además hay una persona **sin email** (Héctor Ríos), cargada por el Admin: no puede entrar a la
 app, pero se la ve en el backoffice.
 
 Para **una persona nueva**, inventá un email que no exista, por ejemplo
@@ -165,10 +167,10 @@ usá `prueba-demo-2@…`).
 | DEMO-03 | ⭐ | Persona de DEMO-01 | Igual que DEMO-02 | 1. En la tarjeta de Vida Nueva tocá "Quiero empezar Vida Nueva".<br>2. En "¿Qué días y horarios podés?" elegí **Martes**, desde **19:00** hasta **21:00**, y tocá "Agregar franja".<br>3. Tocá "Quiero empezar Vida Nueva". | Aparece el mensaje "Recibimos tu pedido de Vida Nueva." y la pantalla cambia a "Estamos buscando a tu Discipulador", con tus horarios y los botones "Editar horarios" y "Retirar el pedido". | |
 | DEMO-04 | ⭐ | Persona de DEMO-01 | Pidió Vida Nueva | 1. Volvé a "Mi camino". | La tarjeta de Vida Nueva dice "Estamos buscando a tu Discipulador" y ofrece "Ver mi pedido". **No** ofrece "Ya lo hice". | |
 | DEMO-05 | ⭐ | Admin (compu) | Datos de demo cargados | 1. Abrí `localhost:3002/dev/entrar` y entrá con `demo-admin@example.com`.<br>2. Mirá la página de Inicio. | Se ven cuatro bloques con números (ninguno vacío): **"Esperan una respuesta"** (una línea por tipo, por ejemplo "N de Vida Nueva"), **"Pendientes"**, **"Cumpleaños de esta semana"** (al menos una persona que cumple hoy) y **"Cómo está la iglesia"** (personas activas, desde cuándo vienen, por Sede). | |
-| DEMO-06 | ⭐ | Admin | Igual | 1. En "Esperan una respuesta", tocá la línea de Vida Nueva (o andá a "Solicitudes" y en "Tipo" elegí "Vida Nueva"). | Aparece la lista con la persona de DEMO-01 en estado "Pendiente", con "Desde hoy" en la columna Espera y "La Persona" en "La cargó". También están Sofía Molina y Ramón Quiroga. | |
+| DEMO-06 | ⭐ | Admin | Igual | 1. En "Esperan una respuesta", tocá la línea de Vida Nueva (o andá a "Solicitudes" y en "Tipo" elegí "Vida Nueva"). | Aparece la lista con la persona de DEMO-01 en estado "Pendiente", con "Desde hoy" en la columna Espera y "La Persona" en "La cargó". También están Sofía Molina y Héctor Ríos. | |
 | DEMO-07 | ⭐ | Admin | Igual | 1. Tocá "Ver" en la fila de la persona de DEMO-01. | Se ve "Vida Nueva de …", sus horarios (martes 19 a 21) y el bloque **"Quién puede en sus horarios"**. Laura Gómez y/o Marcela Ruiz aparecen ahí, y una tiene la marca **"★ Sugerido"** (la que tiene menos carga: Laura). Jorge Acosta aparece abajo, en "No coinciden con sus horarios o con las reglas", con los motivos (entre ellos "Otro género"). Pablo Herrera (de vacaciones) no aparece como disponible. | |
 | DEMO-08 | ⭐ | Admin | Igual | 1. Tocá "Elegir" junto a **Laura Gómez**.<br>2. Tocá "Proponer a Laura…" y confirmá con "Sí, proponer…". | Aparece "Le propusimos el discipulado a Laura…". La solicitud pasa a "Propuesta a Laura…, hace 0 días" y dice que espera su respuesta. | |
-| DEMO-09 | ⭐ | Discipuladora Laura (celular) | Propuesta de DEMO-08 | 1. En otra ventana (incógnito), entrá a `localhost:3001/dev/entrar` con `demo-disc-laura@example.com`.<br>2. Andá a "Mis discipulados" (arriba de Mi camino está el selector "Mi camino · Mis discipulados").<br>3. En "Propuestas para vos", buscá a la persona de DEMO-01. | La tarjeta muestra nombre y edad, "Horarios en común con tu agenda" y "Coincide en horario y género". **No** se ve el teléfono de la persona todavía. También está la propuesta de Camila Ferreyra. | |
+| DEMO-09 | ⭐ | Discipuladora Laura (celular) | Propuesta de DEMO-08 | 1. En otra ventana (incógnito), entrá a `localhost:3001/dev/entrar` con `demo-disc-laura@example.com`.<br>2. Andá a "Mis discipulados" (arriba de Mi camino está el selector "Mi camino · Mis discipulados").<br>3. En "Propuestas para vos", buscá a la persona de DEMO-01. | La tarjeta muestra nombre y edad, "Horarios en común con tu agenda" y "Coincide en horario y género". **No** se ve el teléfono de la persona todavía. También está la propuesta de Julieta Ferreyra. | |
 | DEMO-10 | ⭐ | Laura | Igual | 1. Tocá "Aceptar a …" y confirmá con "Sí, acepto". | Aparece "Aceptaste. Ya podés ver los datos de contacto de …". La persona pasa a "Tus discipulados", con su teléfono y el botón para ver el discipulado. | |
 | DEMO-11 | ⭐ | Persona de DEMO-01 (celular) | Laura aceptó | 1. Volvé a la ventana de la persona y abrí "Mi camino". | Vida Nueva dice "Estás haciendo Vida Nueva" / "Tu Discipulador es Laura…". En "Ver mi discipulado" están el teléfono de Laura y los botones "Escribirle por WhatsApp" y "Llamar". La tarjeta de **Bautismo** ahora dice "Podés pedir tu bautismo". | |
 | DEMO-12 | ⭐ | Persona de DEMO-01 | Igual | 1. En la tarjeta de Bautismo tocá "Quiero bautizarme".<br>2. Escribí algo en "¿Querés contarnos algo?" (opcional) y tocá "Sí, pedir mi bautismo". | Aparece "Listo: recibimos tu pedido." La tarjeta muestra "Recibimos tu pedido" y "Retirar el pedido". | |
@@ -203,10 +205,10 @@ usá `prueba-demo-2@…`).
 | ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
 |---|---|---|---|---|---|---|
 | VN-02 | P1 | Pidió Vida Nueva | `demo-vn-pendiente@example.com` con su pedido | 1. Tocá "Retirar el pedido" → "Sí, retirar el pedido". | Aparece "Retiraste tu pedido." y vuelve el formulario con "Retiraste tu pedido anterior. Podés volver a pedirlo cuando quieras." En la bandeja del Admin, el pedido figura "Retirada por la Persona". | |
-| VN-03 | P1 | Discipuladora Laura → Admin | Propuesta de Camila Ferreyra a Laura | 1. Entrá a la app como Laura → Mis discipulados.<br>2. En la propuesta de Camila tocá "Declinar", escribí un motivo y "Sí, declinar".<br>3. En el backoffice abrí la solicitud de Camila. | Laura ve "Declinaste la propuesta. El equipo ya lo sabe." En el backoffice la solicitud volvió a "Pendiente", reaparece "Quién puede en sus horarios", y en "Historial de propuestas" figura "Laura Gómez — La declinó" con el motivo. En Inicio, "Pendientes" cuenta una propuesta declinada. | |
+| VN-03 | P1 | Discipuladora Laura → Admin | Propuesta de Julieta Ferreyra a Laura | 1. Entrá a la app como Laura → Mis discipulados.<br>2. En la propuesta de Julieta tocá "Declinar", escribí un motivo y "Sí, declinar".<br>3. En el backoffice abrí la solicitud de Julieta. | Laura ve "Declinaste la propuesta. El equipo ya lo sabe." En el backoffice la solicitud volvió a "Pendiente", reaparece "Quién puede en sus horarios", y en "Historial de propuestas" figura "Laura Gómez — La declinó" con el motivo. En Inicio, "Pendientes" cuenta una propuesta declinada. | |
 | VN-04 | P1 | Admin | Una solicitud en "Propuesta a …" (por ejemplo, la de DEMO-08 antes de que Laura acepte, o una nueva) | 1. Abrí la solicitud.<br>2. Tocá "Retirar la propuesta" → "Sí, retirar la propuesta". | Aparece "Retiraste la propuesta. La Solicitud volvió a pendiente." La propuesta desaparece de "Propuestas para vos" de esa Discipuladora. | |
 | VN-05 | P1 | Admin | Sofía Molina con pedido pendiente | 1. Abrí la solicitud de Sofía.<br>2. Tocá "Rechazar la Solicitud" → "Sí, rechazar la Solicitud".<br>3. Entrá a la app como Sofía y abrí Vida Nueva. | Backoffice: "Rechazaste la Solicitud." App: "Esta vez tu pedido no pudo avanzar. Si querés saber por qué, hablá con el equipo de tu sede…" y vuelve el formulario para pedir de nuevo. | |
-| VN-06 | P1 | Admin | Ramón Quiroga (sin email) existe | 1. En Solicitudes tocá "Pedir Vida Nueva en nombre de…".<br>2. Buscá un adulto sin email (por ejemplo la persona de DEMO-13), elegí un horario y confirmá. | Aparece "Cargamos el pedido de Vida Nueva de …". En la bandeja la fila dice, en "La cargó", el nombre del Admin (no "La Persona"). | |
+| VN-06 | P1 | Admin | Héctor Ríos (sin email) existe | 1. En Solicitudes tocá "Pedir Vida Nueva en nombre de…".<br>2. Buscá un adulto sin email (por ejemplo la persona de DEMO-13), elegí un horario y confirmá. | Aparece "Cargamos el pedido de Vida Nueva de …". En la bandeja la fila dice, en "La cargó", el nombre del Admin (no "La Persona"). | |
 
 ### 4.4. Discipulador (DIS)
 
@@ -237,7 +239,7 @@ usá `prueba-demo-2@…`).
 
 | ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
 |---|---|---|---|---|---|---|
-| VS-01 | P1 | Terminó Vida Nueva | `demo-vs-apta-1@example.com` | 1. Mi camino → tarjeta Vida de Servicio → "Quiero anotarme".<br>2. Elegí la edición (si hay una sola ya viene elegida) y tocá "Enviar mi pedido". | Aparece "Recibimos tu pedido." y la tarjeta dice "Recibimos tu pedido", con "Retirar mi pedido". | |
+| VS-01 | P1 | Terminó Vida Nueva | `demo-vn-terminada@example.com` | 1. Mi camino → tarjeta Vida de Servicio → "Quiero anotarme".<br>2. Elegí la edición (si hay una sola ya viene elegida) y tocá "Enviar mi pedido". | Aparece "Recibimos tu pedido." y la tarjeta dice "Recibimos tu pedido", con "Retirar mi pedido". | |
 | VS-02 | P1 | Admin | Después de VS-01 | 1. Solicitudes → tipo "Vida de Servicio" → abrí el pedido.<br>2. "Aprobar inscripción" → elegí la edición → "Aprobar". | "Listo: … quedó inscripta." En la app, la tarjeta dice "Estás haciendo Vida de Servicio" con "Ver el material y mi asistencia". | |
 | VS-03 | P1 | Líder de curso (celular) | `demo-vs-lider-1@example.com` | 1. Abrí "Mis grupos" y entrá a tu edición.<br>2. En una semana sin material, tocá "Cargar el material de la semana N".<br>3. Escribí un título y un texto, y tocá "Guardar material". | "Guardamos el material de la semana N." La semana aparece como cargada. | |
 | VS-04 | P1 | Líder de curso | Igual | 1. En la edición tocá "Tomar asistencia".<br>2. Tocá a una persona para que quede "No vino" y "Guardar asistencia". | "Guardamos la asistencia del …". En "Inscriptos", esa persona suma una falta. | |
@@ -319,7 +321,7 @@ un recuadro arriba ("Revisá…") con enlace a cada campo. Anotá cualquier mens
 | CAM-13 | P2 | Admin | Perfil de una persona | 1. Sección Etapas → "Registrar como hecha" en Vida Nueva, con una nota → "Sí, registrar".<br>2. Después "Anular" → "Sí, anular". | La persona ve en Mi camino "Ya la hiciste · Registrado por la iglesia" y, al anular, vuelve como estaba. | |
 | CAM-14 | P2 | Haciendo Vida de Servicio | `demo-vs-activa-1@…` | 1. Mirá la tarjeta de Vida de Servicio. | El encabezado dice "La estás haciendo" (o "En curso"), coherente con lo de abajo; no ofrece "Ya lo hice". | |
 | CAM-15 | P2 | Pidió el bautismo | `demo-bautismo-revision@…` | 1. Mirá la tarjeta de Bautismo. | El encabezado no contradice lo de abajo ("Recibimos tu pedido"): dice que está en revisión, no "Podés pedir". | |
-| CAM-16 | P2 | Bautismo con fecha | `demo-bautismo-confirmando@…` | 1. Mirá la tarjeta de Bautismo. | El encabezado refleja que ya tiene fecha. | |
+| CAM-16 | P2 | Bautismo con fecha | `demo-bautismo-fecha-1@…` | 1. Mirá la tarjeta de Bautismo. | El encabezado refleja que ya tiene fecha. | |
 
 ### 5.3. Vida Nueva y Discipulador (VN, DIS)
 
@@ -349,7 +351,7 @@ un recuadro arriba ("Revisá…") con enlace a cada campo. Anotá cualquier mens
 | PER-13 | P2 | Admin | Persona sin email (DEMO-13) | 1. En Personas, "Agregar email" → un email que ya usa otra persona. | "Ya existe una cuenta registrada con este email." Con uno libre: "Listo: … ya puede entrar a la app con ese email." | |
 | PER-15 | P2 | Admin | Tu propio perfil | 1. "Cambiar roles" → quitarte Admin. | "No podés quitarte tu propio rol de Admin…". | |
 | MEN-10 | P2 | Admin | Pendientes tutor | 1. En un caso tocá "Cerrar el caso" → confirmar. | "Caso cerrado." y desaparece de la lista. | |
-| MEN-11 | P2 | Discipulador con un menor | Si hay un discipulado con un menor (Tomás) | 1. Abrí el discipulado. | Muestra "Es menor de edad: coordiná también con su tutor o tutora." y los datos de la tutora. | |
+| MEN-11 | P2 | Discipulador Jorge | Jorge acompaña a Tomás (14) | 1. Abrí el discipulado. | Muestra "Es menor de edad: coordiná también con su tutor o tutora." y los datos de la tutora. | |
 
 ### 5.5. Vida de Servicio, Ministerios y Bautismo (VS, MIN, BAU)
 
