@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsISO8601, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsISO8601, IsOptional, IsString } from 'class-validator';
+import type { DatosPreguntaEvento } from '@vida-sobrenatural/shared-types';
 
 /**
  * Body de `POST /eventos` y `PATCH /eventos/:id` (contracts/eventos-api.md).
@@ -25,4 +26,9 @@ export class DatosEventoDto {
   @ApiPropertyOptional({ description: 'Decimal como string ("15000.00")' }) @IsOptional() costo?: string | number | null;
   @ApiPropertyOptional() @IsOptional() @IsString() instruccionesPago?: string | null;
   @ApiPropertyOptional() @IsOptional() diasAnticipacionRecordatorio?: number | string | null;
+  // Ampliación 2026-10-09 (FR-060, FR-064). Las reglas las aplican `validarDestinatarios` y `validarPreguntas`.
+  @ApiPropertyOptional({ enum: ['todas', 'mujeres', 'varones'] }) @IsOptional() @IsString() destinatariosGenero?: string;
+  @ApiPropertyOptional() @IsOptional() edadMinima?: number | string | null;
+  @ApiPropertyOptional() @IsOptional() edadMaxima?: number | string | null;
+  @ApiPropertyOptional({ description: 'La lista completa de preguntas, en orden' }) @IsOptional() @IsArray() preguntas?: DatosPreguntaEvento[];
 }

@@ -1,3 +1,6 @@
+import type { ErrorDeCampo } from './api-field-error.js';
+import { diaCivilEnArgentina } from './formato.js';
+
 /**
  * spec 011 — Eventos. Lote 0 global: estados, límites y MIME. Los DTOs
  * (`EventoPublico`, `MiInscripcionEvento`, …) y las reglas puras
@@ -77,6 +80,10 @@ export interface EventoPublico {
   instruccionesPago: string | null;
   estado: EstadoEvento;
   estadoInscripcion: EstadoInscripcionDeEvento;
+  /** Ampliación 2026-10-09 (FR-060): para quién es, con efecto (D230). */
+  destinatarios: DestinatariosEvento;
+  /** Ampliación 2026-10-09 (FR-064): las preguntas que se responden al anotarse, en orden. */
+  preguntas: PreguntaEvento[];
 }
 
 /** Totales de un Evento para el backoffice (FR-009, FR-025). */
@@ -115,6 +122,8 @@ export interface EventoDetalle extends EventoPublico, TotalesEvento {
   createdAt: string;
   canceladoEn: string | null;
   eliminadoEn: string | null;
+  /** Con cuántas respuestas cuenta cada una (FR-066: con respuestas no se borra ni cambia de tipo). */
+  preguntas: PreguntaEventoGestion[];
 }
 
 /** Body de `POST /eventos` y `PATCH /eventos/:id` (contracts/eventos-api.md). */
@@ -134,6 +143,12 @@ export interface DatosEvento {
   costo?: string | null;
   instruccionesPago?: string | null;
   diasAnticipacionRecordatorio?: number | null;
+  /** FR-060 — si no viene, queda como estaba (alta: `todas`). */
+  destinatariosGenero?: GeneroDestinatario;
+  edadMinima?: number | null;
+  edadMaxima?: number | null;
+  /** FR-064 — la lista COMPLETA, en orden; si no viene, no se tocan. Con `id`, edita esa. */
+  preguntas?: DatosPreguntaEvento[];
 }
 
 export const EVENTO_NOMBRE_MIN = 3;
@@ -224,6 +239,10 @@ export interface MiInscripcionEnEvento {
   inscripcion: MiInscripcionEvento | null;
   lugaresDisponibles: number | null;
   estadoInscripcion: EstadoInscripcionDeEvento;
+  /** FR-061: si quien mira está entre los destinatarios (si no, no ve el botón). */
+  corresponde: boolean;
+  /** FR-068: sus propias respuestas (también las sensibles), de la Inscripción mostrada. */
+  respuestas: RespuestaEnInscripcion[];
 }
 
 export type CuandoMisInscripciones = 'proximas' | 'pasadas';
@@ -274,6 +293,18 @@ export interface InscripcionEventoResumen {
   revisadoPor: PersonaBreveEvento | null;
   motivoRechazo: string | null;
   motivoCancelacion: MotivoCancelacionInscripcion | null;
+  /** FR-062: el Admin la anotó aunque no estaba entre los destinatarios. */
+  fueraDeDestinatarios: boolean;
+  /**
+   * FR-062b: abierta, pero la Persona ya no está entre los destinatarios
+   * porque el Admin los cambió después de que se anotó. No se da de baja sola:
+   * el Admin decide (Echu, 2026-10-09).
+   */
+  yaNoCorresponde: boolean;
+  /** FR-067, FR-068: las respuestas; las sensibles solo para quien tiene `eventos.gestionar`. */
+  respuestas: RespuestaEnInscripcion[];
+  /** FR-070: lo que la app ya sabe de la Persona, para no preguntarlo. */
+  datosPersona: DatosPersonaInscripta;
 }
 
 /** Inscripción con su Evento, para el perfil de una Persona y para la 010 (FR-048). */
@@ -292,3 +323,222 @@ export interface ResultadoAprobarLote {
 
 export const APROBAR_LOTE_MAX = 50;
 export const MOTIVO_RECHAZO_INSCRIPCION_MAX = 500;
+
+// ---------------------------------------------------------------------------
+// Ampliación 2026-10-09 (specs/011-eventos/ampliacion-2026-10-09.md, D230–D233):
+// destinatarios con efecto y preguntas propias del Evento.
+// ---------------------------------------------------------------------------
+
+/** FR-060 — a quién está dirigido el Evento. */
+export type GeneroDestinatario = 'todas' | 'mujeres' | 'varones';
+export const GENEROS_DESTINATARIO: readonly GeneroDestinatario[] = ['todas', 'mujeres', 'varones'];
+export const EDAD_DESTINATARIO_MAX = 120;
+
+export interface DestinatariosEvento {
+  genero: GeneroDestinatario;
+  /** Años cumplidos a la fecha del Evento; null = sin límite. */
+  edadMinima: number | null;
+  edadMaxima: number | null;
+}
+
+/** ¿Tiene alguna restricción? (Sin restricción no se muestra nada nuevo.) */
+export function tieneRestriccionDeDestinatarios(d: DestinatariosEvento): boolean {
+  return d.genero !== 'todas' || d.edadMinima !== null || d.edadMaxima !== null;
+}
+
+/**
+ * Años cumplidos el día civil (Argentina) de `fecha`. `fechaNacimiento` es una
+ * fecha sin hora (YYYY-MM-DD o ISO a medianoche UTC, como la guarda la API).
+ */
+export function edadCumplidaEn(fechaNacimiento: string | Date, fecha: string | Date): number {
+  const nac = (typeof fechaNacimiento === 'string' ? fechaNacimiento : fechaNacimiento.toISOString()).slice(0, 10);
+  const dia = typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : diaCivilEnArgentina(fecha);
+  const [an, mn, dn] = nac.split('-').map(Number);
+  const [ah, mh, dh] = dia.split('-').map(Number);
+  let edad = ah - an;
+  if (mh < mn || (mh === mn && dh < dn)) edad -= 1;
+  return edad;
+}
+
+/**
+ * FR-061 — ¿la Persona está entre los destinatarios? Edad en años cumplidos
+ * al día del inicio del Evento. Una sola regla para la API y las dos apps.
+ */
+export function correspondeAlEvento(
+  persona: { genero: 'masculino' | 'femenino'; fechaNacimiento: string | Date },
+  destinatarios: DestinatariosEvento,
+  inicioEvento: string | Date,
+): boolean {
+  if (destinatarios.genero === 'mujeres' && persona.genero !== 'femenino') return false;
+  if (destinatarios.genero === 'varones' && persona.genero !== 'masculino') return false;
+  if (destinatarios.edadMinima === null && destinatarios.edadMaxima === null) return true;
+  const edad = edadCumplidaEn(persona.fechaNacimiento, inicioEvento);
+  if (destinatarios.edadMinima !== null && edad < destinatarios.edadMinima) return false;
+  if (destinatarios.edadMaxima !== null && edad > destinatarios.edadMaxima) return false;
+  return true;
+}
+
+/** FR-060 — reglas de campo de los destinatarios (con un código por campo, H-50). */
+export function validarDestinatarios(d: { genero: string; edadMinima: number | null; edadMaxima: number | null }): ErrorDeCampo[] {
+  const errores: ErrorDeCampo[] = [];
+  if (!GENEROS_DESTINATARIO.includes(d.genero as GeneroDestinatario)) errores.push({ campo: 'destinatariosGenero', code: 'DESTINATARIOS_GENERO_INVALIDO' });
+  const valida = (n: number | null) => n === null || (Number.isInteger(n) && n >= 0 && n <= EDAD_DESTINATARIO_MAX);
+  if (!valida(d.edadMinima)) errores.push({ campo: 'edadMinima', code: 'EDAD_INVALIDA' });
+  if (!valida(d.edadMaxima)) errores.push({ campo: 'edadMaxima', code: 'EDAD_INVALIDA' });
+  else if (valida(d.edadMinima) && d.edadMinima !== null && d.edadMaxima !== null && d.edadMaxima < d.edadMinima) {
+    errores.push({ campo: 'edadMaxima', code: 'EDADES_INVERTIDAS' });
+  }
+  return errores;
+}
+
+/** FR-064 — tipos de pregunta. */
+export type TipoPreguntaEvento = 'si_no' | 'opcion' | 'texto';
+export const TIPOS_PREGUNTA_EVENTO: readonly TipoPreguntaEvento[] = ['si_no', 'opcion', 'texto'];
+export const PREGUNTAS_EVENTO_MAX = 10;
+export const PREGUNTA_TEXTO_MAX = 200;
+export const PREGUNTA_OPCIONES_MIN = 2;
+export const PREGUNTA_OPCIONES_MAX = 10;
+export const PREGUNTA_OPCION_MAX = 100;
+/** FR-065 — "Texto corto". */
+export const RESPUESTA_TEXTO_MAX = 200;
+/** Valores guardados de una pregunta Sí/No. */
+export const VALORES_SI_NO = ['si', 'no'] as const;
+/** FR-069 — días después del fin del Evento en que se borran las respuestas sensibles (D232). */
+export const DIAS_BORRADO_RESPUESTAS_SENSIBLES = 30;
+
+export interface PreguntaEvento {
+  id: string;
+  texto: string;
+  tipo: TipoPreguntaEvento;
+  /** Solo en `opcion`; vacío en las demás. */
+  opciones: string[];
+  obligatoria: boolean;
+  /** "Dato sensible (salud o alimentación)" (FR-068). */
+  sensible: boolean;
+}
+
+export interface PreguntaEventoGestion extends PreguntaEvento {
+  respuestas: number;
+}
+
+/** Una pregunta en el body del Evento. Sin `id`, es nueva. */
+export interface DatosPreguntaEvento {
+  id?: string;
+  texto: string;
+  tipo: TipoPreguntaEvento;
+  opciones?: string[];
+  obligatoria: boolean;
+  sensible: boolean;
+}
+
+/** Body de la inscripción: una por pregunta respondida. */
+export interface RespuestaPregunta {
+  preguntaId: string;
+  valor: string;
+}
+
+export interface RespuestaEnInscripcion {
+  preguntaId: string;
+  pregunta: string;
+  tipo: TipoPreguntaEvento;
+  sensible: boolean;
+  valor: string;
+}
+
+/** FR-067 — resumen por pregunta (lista de inscriptos del backoffice). */
+export interface ResumenPreguntaEvento {
+  preguntaId: string;
+  texto: string;
+  tipo: TipoPreguntaEvento;
+  sensible: boolean;
+  /** Sí/No y Una opción: cuántas eligieron cada valor (en el orden de las opciones). */
+  conteos: Array<{ valor: string; cantidad: number }>;
+  /** Cuántas Inscripciones abiertas la respondieron. */
+  respondidas: number;
+}
+
+/** FR-070 — lo que la app ya sabe de cada inscripta. */
+export interface DatosPersonaInscripta {
+  edad: number;
+  telefono: string | null;
+  ministerios: string[];
+  /** Quien la acompaña en su Grupo (Discipulador o Líder) más reciente. */
+  referente: string | null;
+  /** Grupo de extensión y su líder: lo completa la spec 014 cuando esté en `main`. */
+  grupoExtension: { nombre: string; lider: string | null } | null;
+}
+
+/** El campo del error de una respuesta (H-50): `respuesta-<preguntaId>`. */
+export function campoDeRespuesta(preguntaId: string): string {
+  return `respuesta-${preguntaId}`;
+}
+
+/** El campo del error de una pregunta del formulario del Evento: `pregunta-<i>-<parte>`. */
+export function campoDePregunta(indice: number, parte: 'texto' | 'opciones' | 'tipo'): string {
+  return `pregunta-${indice}-${parte}`;
+}
+
+/**
+ * FR-064 — reglas de las preguntas del formulario del Evento (un código por
+ * campo). Las que dependen de las respuestas ya dadas (FR-066) las aplica la API.
+ */
+export function validarPreguntas(preguntas: readonly DatosPreguntaEvento[]): ErrorDeCampo[] {
+  const errores: ErrorDeCampo[] = [];
+  if (preguntas.length > PREGUNTAS_EVENTO_MAX) errores.push({ campo: 'preguntas', code: 'PREGUNTAS_DEMASIADAS' });
+  preguntas.forEach((p, i) => {
+    const texto = (p.texto ?? '').trim();
+    if (texto === '') errores.push({ campo: campoDePregunta(i, 'texto'), code: 'PREGUNTA_TEXTO_REQUERIDO' });
+    else if (texto.length > PREGUNTA_TEXTO_MAX) errores.push({ campo: campoDePregunta(i, 'texto'), code: 'PREGUNTA_TEXTO_DEMASIADO_LARGO' });
+    if (!TIPOS_PREGUNTA_EVENTO.includes(p.tipo)) errores.push({ campo: campoDePregunta(i, 'tipo'), code: 'PREGUNTA_TIPO_INVALIDO' });
+    if (p.tipo === 'opcion') {
+      const opciones = (p.opciones ?? []).map((o) => o.trim());
+      const distintas = new Set(opciones.map((o) => o.toLocaleLowerCase('es')));
+      if (
+        opciones.length < PREGUNTA_OPCIONES_MIN ||
+        opciones.length > PREGUNTA_OPCIONES_MAX ||
+        opciones.some((o) => o === '' || o.length > PREGUNTA_OPCION_MAX) ||
+        distintas.size !== opciones.length
+      ) {
+        errores.push({ campo: campoDePregunta(i, 'opciones'), code: 'PREGUNTA_OPCIONES_INVALIDAS' });
+      }
+    }
+  });
+  return errores;
+}
+
+/**
+ * FR-065 — valida las respuestas contra las preguntas del Evento. Devuelve
+ * los errores por campo y las respuestas normalizadas (solo las respondidas).
+ */
+export function validarRespuestas(
+  preguntas: readonly PreguntaEvento[],
+  respuestas: readonly RespuestaPregunta[] | undefined,
+): { errores: ErrorDeCampo[]; validas: RespuestaPregunta[] } {
+  const errores: ErrorDeCampo[] = [];
+  const validas: RespuestaPregunta[] = [];
+  const porId = new Map<string, string>();
+  for (const r of respuestas ?? []) {
+    if (r && typeof r.preguntaId === 'string' && typeof r.valor === 'string') porId.set(r.preguntaId, r.valor);
+  }
+  for (const p of preguntas) {
+    const campo = campoDeRespuesta(p.id);
+    const valor = (porId.get(p.id) ?? '').trim();
+    if (valor === '') {
+      if (p.obligatoria) errores.push({ campo, code: 'RESPUESTA_REQUERIDA' });
+      continue;
+    }
+    if (p.tipo === 'si_no' && !(VALORES_SI_NO as readonly string[]).includes(valor)) errores.push({ campo, code: 'RESPUESTA_INVALIDA' });
+    else if (p.tipo === 'opcion' && !p.opciones.includes(valor)) errores.push({ campo, code: 'RESPUESTA_INVALIDA' });
+    else if (p.tipo === 'texto' && valor.length > RESPUESTA_TEXTO_MAX) errores.push({ campo, code: 'RESPUESTA_DEMASIADO_LARGA' });
+    else validas.push({ preguntaId: p.id, valor });
+  }
+  return { errores, validas };
+}
+
+/**
+ * FR-063 — argumentos del texto "Este evento es para {genero}{ desde N años}{ hasta M años}"
+ * (ICU `select` en los dos `es.json`; "no" = sin ese tramo).
+ */
+export function argumentosTextoDestinatarios(d: DestinatariosEvento): { genero: GeneroDestinatario; desde: string; hasta: string } {
+  return { genero: d.genero, desde: d.edadMinima === null ? 'no' : String(d.edadMinima), hasta: d.edadMaxima === null ? 'no' : String(d.edadMaxima) };
+}

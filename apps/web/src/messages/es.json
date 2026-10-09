@@ -190,7 +190,10 @@
       "ENTRE_CALLES_INCOMPLETAS": "Completá las dos entre calles, o dejá las dos vacías.",
       "LIDER_MENOR_DE_EDAD": "Una persona menor de 18 años no puede liderar un grupo. Elegí a otra persona.",
       "LIDER_NO_DISPONIBLE": "Alguna de las personas elegidas ya no está activa. Elegila de nuevo de la lista.",
-      "DIRECCION_REQUERIDA": "Escribí tu dirección (calle y número, o calle y entre calles), o tocá \"Usar mi ubicación\"."
+      "DIRECCION_REQUERIDA": "Escribí tu dirección (calle y número, o calle y entre calles), o tocá \"Usar mi ubicación\".",
+      "RESPUESTA_REQUERIDA": "Respondé esta pregunta para poder anotarte.",
+      "RESPUESTA_INVALIDA": "Elegí una de las opciones de la lista.",
+      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
@@ -202,7 +205,9 @@
     "GRUPO_EXTENSION_NO_INTEGRANTE": "Esta persona ya no forma parte del grupo. Actualizá la página.",
     "GRUPO_EXTENSION_CON_INTEGRANTES": "El grupo tiene integrantes o pedidos esperando respuesta. Quitá a los integrantes y respondé los pedidos antes de inactivarlo.",
     "DIRECCION_NO_UBICADA": "No encontramos esa dirección. Escribí la calle y el número (por ejemplo, \"7 nro 1200\"), o la calle y entre qué calles.",
-    "UBICACION_NO_DISPONIBLE": "No pudimos ubicar tu dirección en este momento. Probá con \"Usar mi ubicación\" o intentá de nuevo en unos minutos."
+    "UBICACION_NO_DISPONIBLE": "No pudimos ubicar tu dirección en este momento. Probá con \"Usar mi ubicación\" o intentá de nuevo en unos minutos.",
+    "EVENTO_NO_CORRESPONDE": "Este evento es para otro público: no podés anotarte.",
+    "PREGUNTA_CON_RESPUESTAS": "Esa pregunta ya tiene respuestas."
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -1591,7 +1596,8 @@
       },
       "proximosTitulo": "Próximos eventos",
       "proximosVerTodos": "Ver todos los eventos",
-      "proximosVacio": "Por ahora no hay eventos próximos. Seguinos en las redes para enterarte."
+      "proximosVacio": "Por ahora no hay eventos próximos. Seguinos en las redes para enterarte.",
+      "destinatarios": "Este evento es para {genero, select, mujeres {mujeres} varones {varones} other {todas las personas}}{desde, select, no {} other { desde {desde} años}}{hasta, select, no {} other { hasta {hasta} años}}."
     },
     "inscripcion": {
       "titulo": "Inscripción",
@@ -1638,7 +1644,15 @@
       "errorCarga": "No pudimos ver tu inscripción. Recargá la página para intentar de nuevo.",
       "errores": {
         "generico": "No pudimos anotarte. Probá de nuevo en unos segundos."
-      }
+      },
+      "noCorresponde": "Por eso no podés anotarte desde acá. Si creés que hay un error, escribile al equipo de la iglesia.",
+      "preguntasTitulo": "Antes de anotarte, respondé estas preguntas:",
+      "revisaRespuestas": "Revisá estas respuestas:",
+      "si": "Sí",
+      "no": "No",
+      "opcional": "(opcional)",
+      "sensible": "Solo lo ve el equipo que organiza; se borra 30 días después del evento.",
+      "tusRespuestas": "Tus respuestas"
     }
   },
   "misEventos": {

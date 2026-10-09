@@ -28,14 +28,17 @@ export class EscenarioEventos {
     this.sedeId = sede.id;
   }
 
-  async persona(clave: string, opciones: { rol?: string[]; estado?: 'activa' | 'pendiente_tutor' } = {}): Promise<string> {
+  async persona(
+    clave: string,
+    opciones: { rol?: string[]; estado?: 'activa' | 'pendiente_tutor'; genero?: 'femenino' | 'masculino'; fechaNacimiento?: Date } = {},
+  ): Promise<string> {
     const persona = await this.prisma.persona.create({
       data: {
         email: `integ-ev-${clave}-${this.sufijo}@example.com`,
         nombre: clave,
         apellido: `Eventos${this.sufijo}`,
-        genero: 'femenino',
-        fechaNacimiento: new Date('1990-05-20'),
+        genero: opciones.genero ?? 'femenino',
+        fechaNacimiento: opciones.fechaNacimiento ?? new Date('1990-05-20'),
         telefono: '+5492211234567',
         direccion: 'Calle 1 y 50',
         sedeId: this.sedeId,

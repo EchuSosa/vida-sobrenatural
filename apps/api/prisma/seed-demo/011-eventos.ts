@@ -148,4 +148,97 @@ export async function sembrarDemo011(ctx: ContextoSeedDemo): Promise<void> {
     requiereInscripcion: true,
     sedeId: sedes.buenosAires,
   });
+
+  await sembrarJornadaDeSanidad(ctx, admin.id);
+}
+
+/**
+ * spec 011, ampliación 2026-10-09 (FR-071) — "Jornada de sanidad · Mujeres":
+ * paga, para mujeres desde 15 años, con cupo, salida y regreso en la
+ * descripción, y las dos preguntas del formulario de Google que reemplaza
+ * ("¿Sos celíaca?", sensible; "¿Participaste alguna vez…?"), con inscriptas
+ * del elenco del manual y sus respuestas. Florencia (`demo-nueva`) queda sin
+ * anotar para probar el caso ⭐. Más "Noche de jóvenes" (15 a 30 años, para
+ * todas las personas) para ver el límite de edad con Tomás (14).
+ */
+async function sembrarJornadaDeSanidad(ctx: ContextoSeedDemo, adminId: string): Promise<void> {
+  const { prisma, sedes } = ctx;
+  if (!(await prisma.evento.findUnique({ where: { slug: 'demo-noche-de-jovenes' }, select: { id: true } }))) {
+    await prisma.evento.create({
+      data: {
+        slug: 'demo-noche-de-jovenes',
+        nombre: 'Noche de jóvenes',
+        descripcion: 'Música, juegos y una palabra para jóvenes. Anotate para que calculemos la comida.',
+        inicio: en(9, 20),
+        fin: en(9, 23),
+        requiereInscripcion: true,
+        cupo: 60,
+        edadMinima: 15,
+        edadMaxima: 30,
+        sedeId: sedes.laPlata,
+        creadoPorId: adminId,
+      },
+    });
+  }
+
+  if (await prisma.evento.findUnique({ where: { slug: 'demo-jornada-de-sanidad-mujeres' }, select: { id: true } })) return;
+  const evento = await prisma.evento.create({
+    data: {
+      slug: 'demo-jornada-de-sanidad-mujeres',
+      nombre: 'Jornada de sanidad · Mujeres',
+      descripcion:
+        'Un día entero para mujeres, a partir de los 15 años, para buscar a Dios y recibir sanidad.\n\n' +
+        'Salida: sábado a las 8 desde la iglesia (Calle 13 N°1450).\nRegreso: a las 20, al mismo lugar.\n\n' +
+        'Incluye el traslado, el almuerzo y la merienda. Traé tu Biblia, un cuaderno y ropa cómoda.',
+      inicio: en(16, 8),
+      fin: en(16, 20),
+      lugar: 'Casa de retiros "El Remanso"\nCamino Centenario y 520, Gonnet',
+      publicoObjetivo: 'Mujeres de la iglesia y amigas que quieran venir',
+      requiereInscripcion: true,
+      cupo: 30,
+      permiteListaEspera: true,
+      costo: '35000.00',
+      instruccionesPago: 'Transferí al alias VIDA.SOBRENATURAL.LP (Banco Provincia) y subí el comprobante desde Mis eventos.\nTambién podés pagar en efectivo en la secretaría.',
+      destinatariosGenero: 'mujeres',
+      edadMinima: 15,
+      sedeId: sedes.laPlata,
+      creadoPorId: adminId,
+    },
+    select: { id: true },
+  });
+  const celiaca = await prisma.preguntaEvento.create({
+    data: { eventoId: evento.id, orden: 0, texto: '¿Sos celíaca?', tipo: 'si_no', obligatoria: true, sensible: true },
+  });
+  const antes = await prisma.preguntaEvento.create({
+    data: {
+      eventoId: evento.id,
+      orden: 1,
+      texto: '¿Participaste alguna vez de una jornada de sanidad?',
+      tipo: 'opcion',
+      opciones: ['Sí, hace mucho', 'No, nunca'],
+      obligatoria: false,
+    },
+  });
+
+  // [email, ¿celíaca?, ¿participó antes?, estado]
+  const inscriptas: Array<[string, 'si' | 'no', string | null, 'confirmada' | 'pendiente']> = [
+    ['demo-disc-laura@example.com', 'no', 'Sí, hace mucho', 'confirmada'],
+    ['demo-disc-marcela@example.com', 'si', 'Sí, hace mucho', 'confirmada'],
+    ['demo-vn-pendiente@example.com', 'no', 'No, nunca', 'confirmada'],
+    ['demo-vn-propuesta@example.com', 'no', 'No, nunca', 'confirmada'],
+    ['demo-vn-en-curso@example.com', 'si', 'No, nunca', 'confirmada'],
+    ['demo-vn-rocio@example.com', 'no', null, 'confirmada'],
+    ['demo-vn-rechazada@example.com', 'no', 'Sí, hace mucho', 'confirmada'],
+    ['demo-tutora-silvina@example.com', 'no', 'No, nunca', 'confirmada'],
+  ];
+  let anotadas = 0;
+  for (const [email, esCeliaca, participo, estado] of inscriptas) {
+    const persona = await prisma.persona.findUnique({ where: { email }, select: { id: true } });
+    if (!persona) continue;
+    const insc = await prisma.inscripcionEvento.create({ data: { eventoId: evento.id, personaId: persona.id, estado }, select: { id: true } });
+    await prisma.respuestaPreguntaEvento.create({ data: { inscripcionId: insc.id, preguntaId: celiaca.id, valor: esCeliaca } });
+    if (participo) await prisma.respuestaPreguntaEvento.create({ data: { inscripcionId: insc.id, preguntaId: antes.id, valor: participo } });
+    anotadas += 1;
+  }
+  console.log(`seed-demo 011: "Jornada de sanidad · Mujeres" con ${anotadas} inscriptas y sus respuestas.`);
 }

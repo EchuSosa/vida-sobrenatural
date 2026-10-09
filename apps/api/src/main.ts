@@ -37,6 +37,8 @@ async function bootstrap() {
           // spec 014 (D224): la ubicación de quien busca un Grupo de Extensión.
           'req.body.latitud',
           'req.body.longitud',
+          'req.body.respuestas', // D232: respuestas a las preguntas de un Evento (pueden ser de salud)
+          'req.body.preguntas',
         ],
         censor: '[redactado]',
       },

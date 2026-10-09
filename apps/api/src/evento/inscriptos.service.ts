@@ -3,13 +3,17 @@ import {
   APROBAR_LOTE_MAX,
   ESTADOS_INSCRIPCION_ABIERTA,
   MOTIVO_RECHAZO_INSCRIPCION_MAX,
+  correspondeAlEvento,
+  edadCumplidaEn,
   estadoPagoDeInscripcion,
   sinAccesoALaApp,
   type EstadoInscripcionEvento,
   type InscripcionDePersona,
   type InscripcionEventoResumen,
   type Pagina,
+  type RespuestaPregunta,
   type ResultadoAprobarLote,
+  type ResumenPreguntaEvento,
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -17,6 +21,9 @@ import { AppException } from '../common/errors/app-exception.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { conBloqueoDeEvento, contarOcupados, decidirEstadoInicial, liberaLugar, posicionEnLista, promoverDesdeLista } from './motor-cupo.js';
 import { esViolacionDeUnico } from './inscripcion-propia.service.js';
+import { destinatariosDe } from './representacion.js';
+import { loQueLaAppSabe } from './datos-persona-inscripta.js';
+import { guardarRespuestas, respuestasDeInscripciones, resumenDePreguntas, validarRespuestasDelEvento } from './preguntas-evento.js';
 
 const DIA_MS = 86_400_000;
 
@@ -32,8 +39,9 @@ const RESUMEN_SELECT = {
   revisadoPorId: true,
   motivoRechazo: true,
   motivoCancelacion: true,
-  persona: { select: { id: true, nombre: true, apellido: true, email: true } },
-  evento: { select: { costo: true } },
+  fueraDeDestinatarios: true,
+  persona: { select: { id: true, nombre: true, apellido: true, email: true, telefono: true, fechaNacimiento: true, genero: true } },
+  evento: { select: { costo: true, inicio: true, destinatariosGenero: true, edadMinima: true, edadMaxima: true } },
   pagos: { select: { id: true, estado: true, createdAt: true, motivoRechazo: true } },
 } as const satisfies Prisma.InscripcionEventoSelect;
 
@@ -56,7 +64,10 @@ export class InscriptosService {
   private readonly emitir = (tx: Prisma.TransactionClient, e: Parameters<NotificacionesService['emitir']>[1]) => this.notificaciones.emitir(tx, e);
 
   /** GET /eventos/:id/inscripciones — por estado; la lista de espera en su orden (FR-025). */
-  async listar(eventoId: string, f: { estado?: EstadoInscripcionEvento; buscar?: string; skip: number; take: number }): Promise<Pagina<InscripcionEventoResumen>> {
+  async listar(
+    eventoId: string,
+    f: { estado?: EstadoInscripcionEvento; buscar?: string; skip: number; take: number; verSensibles?: boolean },
+  ): Promise<Pagina<InscripcionEventoResumen>> {
     await this.eventoExistente(eventoId);
     const where: Prisma.InscripcionEventoWhereInput = { eventoId, ...(f.estado ? { estado: f.estado } : {}) };
     const buscar = f.buscar?.trim();
@@ -69,39 +80,69 @@ export class InscriptosService {
       this.prisma.inscripcionEvento.findMany({ where, orderBy, skip: f.skip, take: f.take, select: RESUMEN_SELECT }),
       this.prisma.inscripcionEvento.count({ where }),
     ]);
-    return { items: await this.aResumenes(this.prisma, filas), total };
+    return { items: await this.aResumenes(this.prisma, filas, f.verSensibles === true), total };
+  }
+
+  /** GET /eventos/:id/preguntas/resumen — FR-067, FR-068: sin las sensibles para quien no gestiona. */
+  async resumenPreguntas(eventoId: string, verSensibles: boolean): Promise<ResumenPreguntaEvento[]> {
+    await this.eventoExistente(eventoId);
+    return resumenDePreguntas(this.prisma, eventoId, verSensibles);
   }
 
   /** POST /eventos/:id/inscripciones — FR-027, FR-047: el Admin anota a una Persona; cupo, lista y aprobación igual que siempre. */
-  async inscribirEnNombre(eventoId: string, personaId: string | undefined, adminId: string): Promise<InscripcionEventoResumen> {
+  async inscribirEnNombre(
+    eventoId: string,
+    personaId: string | undefined,
+    adminId: string,
+    opciones: { forzar?: boolean; respuestas?: RespuestaPregunta[] } = {},
+  ): Promise<InscripcionEventoResumen> {
     if (!personaId) throw new AppException('VALIDACION', 400, 'Elegí a la Persona.', [{ campo: 'personaId', code: 'PERSONA_REQUERIDA' }]);
     try {
       return await conBloqueoDeEvento(this.prisma, eventoId, async (tx) => {
         const evento = await tx.evento.findFirst({
           where: { id: eventoId, eliminadoEn: null },
-          select: { nombre: true, tipo: true, estado: true, requiereInscripcion: true, requiereAprobacion: true, inicio: true, cupo: true, permiteListaEspera: true },
+          select: {
+            nombre: true,
+            tipo: true,
+            estado: true,
+            requiereInscripcion: true,
+            requiereAprobacion: true,
+            inicio: true,
+            cupo: true,
+            permiteListaEspera: true,
+            destinatariosGenero: true,
+            edadMinima: true,
+            edadMaxima: true,
+          },
         });
         if (!evento) throw new AppException('NO_ENCONTRADO', 404, 'Evento no encontrado.');
         if (evento.estado === 'cancelado') throw new AppException('EVENTO_CANCELADO', 409, 'El Evento está cancelado.');
         if (!evento.requiereInscripcion) throw new AppException('EVENTO_NO_ADMITE_INSCRIPCION', 409, 'Este Evento no necesita inscripción.');
         if (evento.inicio <= new Date()) throw new AppException('EVENTO_YA_EMPEZO', 409, 'El Evento ya empezó.');
-        const persona = await tx.persona.findUnique({ where: { id: personaId }, select: { estado: true } });
+        const persona = await tx.persona.findUnique({ where: { id: personaId }, select: { estado: true, genero: true, fechaNacimiento: true } });
         if (!persona) throw new AppException('NO_ENCONTRADO', 404, 'Persona no encontrada.');
         if (persona.estado !== 'activa') throw new AppException('PERSONA_NO_ACTIVA', 409, 'La Persona no está activa.');
+        // FR-062 (ampliación 2026-10-09): fuera de los destinatarios, solo con confirmación explícita del Admin.
+        const fueraDeDestinatarios = !correspondeAlEvento(persona, destinatariosDe(evento), evento.inicio);
+        if (fueraDeDestinatarios && opciones.forzar !== true) {
+          throw new AppException('EVENTO_NO_CORRESPONDE', 409, 'La Persona no está entre los destinatarios del Evento.');
+        }
         if ((await tx.inscripcionEvento.count({ where: { eventoId, personaId, estado: { in: [...ESTADOS_INSCRIPCION_ABIERTA] } } })) > 0) {
           throw new AppException('INSCRIPCION_EVENTO_YA_ABIERTA', 409, 'La Persona ya está anotada a este Evento.');
         }
+        await validarRespuestasDelEvento(tx, eventoId, opciones.respuestas);
         const estado = decidirEstadoInicial(evento, await contarOcupados(tx, eventoId));
         const creada = await tx.inscripcionEvento.create({
-          data: { eventoId, personaId, estado, creadoPorId: adminId, enListaDesde: estado === 'lista_espera' ? new Date() : null },
+          data: { eventoId, personaId, estado, creadoPorId: adminId, enListaDesde: estado === 'lista_espera' ? new Date() : null, fueraDeDestinatarios },
           select: RESUMEN_SELECT,
         });
+        await guardarRespuestas(tx, eventoId, creada.id, opciones.respuestas);
         await this.emitir(tx, {
           nombre: 'evento.inscripcion_creada_por_admin',
           a: { tipo: 'persona', personaId },
           datos: { inscripcionId: creada.id, eventoId, evento: evento.nombre, estado },
         });
-        const [resumen] = await this.aResumenes(tx, [creada]);
+        const [resumen] = await this.aResumenes(tx, [creada], true);
         return resumen;
       });
     } catch (e) {
@@ -182,10 +223,10 @@ export class InscriptosService {
   }
 
   /** GET /inscripciones-evento/:id — para que la bandeja lleve al Evento de la Inscripción. */
-  async una(id: string): Promise<InscripcionEventoResumen & { eventoId: string }> {
+  async una(id: string, verSensibles: boolean): Promise<InscripcionEventoResumen & { eventoId: string }> {
     const fila = await this.prisma.inscripcionEvento.findFirst({ where: { id, evento: { eliminadoEn: null } }, select: RESUMEN_SELECT });
     if (!fila) throw new AppException('NO_ENCONTRADO', 404, 'Inscripción no encontrada.');
-    const [resumen] = await this.aResumenes(this.prisma, [fila]);
+    const [resumen] = await this.aResumenes(this.prisma, [fila], verSensibles);
     return { ...resumen, eventoId: fila.eventoId };
   }
 
@@ -194,7 +235,7 @@ export class InscriptosService {
     const insc = await this.prisma.inscripcionEvento.findUnique({ where: { id }, select: { id: true } });
     if (!insc) throw new AppException('NO_ENCONTRADO', 404, 'Inscripción no encontrada.');
     const fila = await this.prisma.inscripcionEvento.update({ where: { id }, data: { promocionVistaEn: new Date() }, select: RESUMEN_SELECT });
-    const [resumen] = await this.aResumenes(this.prisma, [fila]);
+    const [resumen] = await this.aResumenes(this.prisma, [fila], true);
     return resumen;
   }
 
@@ -252,12 +293,19 @@ export class InscriptosService {
       });
       await fn(tx, insc);
       const fila = await tx.inscripcionEvento.findUniqueOrThrow({ where: { id }, select: RESUMEN_SELECT });
-      const [resumen] = await this.aResumenes(tx, [fila]);
+      const [resumen] = await this.aResumenes(tx, [fila], true);
       return resumen;
     });
   }
 
-  private async aResumenes(db: Prisma.TransactionClient, filas: Resumen[]): Promise<InscripcionEventoResumen[]> {
+  /**
+   * `verSensibles` (FR-068): solo quien tiene `eventos.gestionar`. Las acciones
+   * de gestión (aprobar, rechazar, dar de baja…) piden
+   * `inscripciones_evento.gestionar` (solo Admin), así que las devuelven completas.
+   */
+  private async aResumenes(db: Prisma.TransactionClient, filas: Resumen[], verSensibles: boolean): Promise<InscripcionEventoResumen[]> {
+    const respuestas = await respuestasDeInscripciones(db, filas.map((f) => f.id), verSensibles);
+    const sabido = await loQueLaAppSabe(db, filas.map((f) => f.persona.id));
     const ids = [...new Set(filas.flatMap((f) => [f.creadoPorId, f.revisadoPorId]).filter((x): x is string => Boolean(x)))];
     const personas = new Map(
       (await db.persona.findMany({ where: { id: { in: ids } }, select: { id: true, nombre: true, apellido: true } })).map((p) => [p.id, p]),
@@ -280,6 +328,20 @@ export class InscriptosService {
           revisadoPor: f.revisadoPorId ? (personas.get(f.revisadoPorId) ?? null) : null,
           motivoRechazo: f.motivoRechazo,
           motivoCancelacion: f.motivoCancelacion,
+          fueraDeDestinatarios: f.fueraDeDestinatarios,
+          // Pregunta 1 de Echu (2026-10-09): si el Admin cambió los destinatarios después, se marca; no se da de baja sola.
+          yaNoCorresponde:
+            !f.fueraDeDestinatarios &&
+            ESTADOS_INSCRIPCION_ABIERTA.includes(f.estado) &&
+            !correspondeAlEvento(f.persona, destinatariosDe(f.evento), f.evento.inicio),
+          respuestas: respuestas.get(f.id) ?? [],
+          datosPersona: {
+            edad: edadCumplidaEn(f.persona.fechaNacimiento, f.evento.inicio),
+            telefono: f.persona.telefono,
+            ministerios: sabido.get(f.persona.id)?.ministerios ?? [],
+            referente: sabido.get(f.persona.id)?.referente ?? null,
+            grupoExtension: sabido.get(f.persona.id)?.grupoExtension ?? null,
+          },
         };
       }),
     );

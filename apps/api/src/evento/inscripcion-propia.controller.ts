@@ -1,5 +1,6 @@
-import { Controller, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import type { RespuestaPregunta } from '@vida-sobrenatural/shared-types';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
 import { InscripcionPropiaService } from './inscripcion-propia.service.js';
@@ -30,9 +31,9 @@ export class InscripcionPropiaController {
 
   @Post('eventos/:id/inscripciones/me')
   @UseGuards(LimitePedidosGuard)
-  @ApiCreatedResponse({ description: 'FR-015 — anotarse: confirmada, pendiente o lista de espera; CUPO_LLENO si no hay lista.' })
-  anotarme(@Param('id') id: string, @Req() request: AuthenticatedRequest) {
-    return this.propia.anotarme(id, personaDeSesion(request));
+  @ApiCreatedResponse({ description: 'FR-015 — anotarse: confirmada, pendiente o lista de espera; CUPO_LLENO si no hay lista. Body opcional `respuestas` (FR-065).' })
+  anotarme(@Param('id') id: string, @Body('respuestas') respuestas: unknown, @Req() request: AuthenticatedRequest) {
+    return this.propia.anotarme(id, personaDeSesion(request), Array.isArray(respuestas) ? (respuestas as RespuestaPregunta[]) : undefined);
   }
 
   @Get('mis-inscripciones-evento')

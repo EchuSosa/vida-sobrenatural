@@ -150,6 +150,8 @@ const TITULOS: Record<ErrorCode, string> = {
   INSCRIPCION_NO_CONFIRMADA: 'La inscripción no está confirmada',
   PAGO_PENDIENTE_EXISTENTE: 'Ya hay un pago en revisión',
   PAGO_NO_PENDIENTE: 'El pago ya se revisó',
+  EVENTO_NO_CORRESPONDE: 'Este Evento es para otro público',
+  PREGUNTA_CON_RESPUESTAS: 'La pregunta ya tiene respuestas',
   NOTIFICACION_SIN_DESTINATARIOS: 'No hay destinatarios',
   ALCANCE_NO_DISPONIBLE: 'Destinatario no disponible',
   CURSO_INACTIVO: 'El Curso está inactivo',

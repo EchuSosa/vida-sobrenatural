@@ -3,12 +3,16 @@ import {
   EVENTO_DESCRIPCION_IMAGEN_MAX,
   FLYER_TAMANO_MAXIMO_BYTES,
   MIME_TIPOS_FLYER_PERMITIDOS,
+  type DatosPreguntaEvento,
+  type ErrorDeCampo,
   type EventoDetalle,
   type EventoResumen,
   type FiltroEventos,
+  type GeneroDestinatario,
   type Pagina,
   type TipoEvento,
   type TotalesEvento,
+  validarPreguntas,
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -21,7 +25,8 @@ import type { DatosEventoDto } from './dto/datos-evento.dto.js';
 import { conBloqueoDeEvento, contarOcupados, promoverDesdeLista } from './motor-cupo.js';
 import { slugDeEvento } from './slug.js';
 import { validarConfigEvento, type ConfigEvento } from './validacion-evento.js';
-import { aEventoPublico, EVENTO_SELECT, inicioDeHoyEnArgentina, totalesDeEventos } from './representacion.js';
+import { aEventoPublico, aPreguntaEvento, EVENTO_SELECT, inicioDeHoyEnArgentina, PREGUNTA_SELECT, totalesDeEventos } from './representacion.js';
+import { normalizarPreguntas, sincronizarPreguntas } from './preguntas-evento.js';
 
 export interface FiltrosListadoEventos {
   filtro: FiltroEventos;
@@ -117,15 +122,19 @@ export class EventosGestionService {
       select: { ...EVENTO_SELECT, creadoPorId: true, createdAt: true, canceladoEn: true, eliminadoEn: true },
     });
     if (!evento) throw new AppException('NO_ENCONTRADO', 404, 'Evento no encontrado.');
-    const [totales, inscripcionesTotal, pagosTotal, creadoPor] = await Promise.all([
+    const [totales, inscripcionesTotal, pagosTotal, creadoPor, respuestasPorPregunta] = await Promise.all([
       totalesDeEventos(db, [id]),
       db.inscripcionEvento.count({ where: { eventoId: id } }),
       db.pago.count({ where: { inscripcionEvento: { eventoId: id } } }),
       db.persona.findUnique({ where: { id: evento.creadoPorId }, select: { id: true, nombre: true, apellido: true } }),
+      db.respuestaPreguntaEvento.groupBy({ by: ['preguntaId'], where: { pregunta: { eventoId: id } }, _count: { _all: true } }),
     ]);
     const t = totales.get(id)!;
+    const cuantas = new Map(respuestasPorPregunta.map((r) => [r.preguntaId, r._count._all]));
+    const publico = aEventoPublico(evento, t.ocupados);
     return {
-      ...aEventoPublico(evento, t.ocupados),
+      ...publico,
+      preguntas: publico.preguntas.map((p) => ({ ...p, respuestas: cuantas.get(p.id) ?? 0 })),
       ...t,
       lugarPropio: evento.lugar,
       diasAnticipacionRecordatorio: evento.diasAnticipacionRecordatorio,
@@ -158,16 +167,25 @@ export class EventosGestionService {
       costo: null,
       instruccionesPago: null,
       diasAnticipacionRecordatorio: null,
+      destinatariosGenero: 'todas',
+      edadMinima: null,
+      edadMaxima: null,
     });
     const errores = validarConfigEvento(config);
+    const preguntas = dto.preguntas === undefined ? [] : normalizarPreguntas(dto.preguntas);
+    errores.push(...this.erroresDePreguntas(config, preguntas));
     const sedeValida = await this.sedeActiva(dto.sedeId);
     if (!sedeValida) errores.push({ campo: 'sedeId', code: 'SEDE_INVALIDA' });
     if (errores.length) throw new AppException('VALIDACION', 400, 'Revisá los datos del Evento.', errores);
 
     const slug = await slugDeEvento(config.nombre.trim(), async (s) => (await this.prisma.evento.count({ where: { slug: s } })) > 0);
-    const creado = await this.prisma.evento.create({
-      data: { ...this.paraGuardar(config), sedeId: dto.sedeId!, slug, creadoPorId: actor },
-      select: { id: true },
+    const creado = await this.prisma.$transaction(async (tx) => {
+      const evento = await tx.evento.create({
+        data: { ...this.paraGuardar(config), sedeId: dto.sedeId!, slug, creadoPorId: actor },
+        select: { id: true },
+      });
+      await sincronizarPreguntas(tx, evento.id, preguntas);
+      return evento;
     });
     return this.detalle(creado.id);
   }
@@ -192,9 +210,15 @@ export class EventosGestionService {
         costo: actual.costo === null ? null : Number(actual.costo),
         instruccionesPago: actual.instruccionesPago,
         diasAnticipacionRecordatorio: actual.diasAnticipacionRecordatorio,
+        destinatariosGenero: actual.destinatariosGenero,
+        edadMinima: actual.edadMinima,
+        edadMaxima: actual.edadMaxima,
       };
       const nueva = this.configDesde(dto, anterior);
       const errores = validarConfigEvento(nueva);
+      const preguntas = dto.preguntas === undefined ? undefined : normalizarPreguntas(dto.preguntas);
+      const preguntasResultantes = preguntas ?? (await tx.preguntaEvento.findMany({ where: { eventoId: id }, select: PREGUNTA_SELECT })).map(aPreguntaEvento);
+      errores.push(...this.erroresDePreguntas(nueva, preguntasResultantes, preguntas !== undefined));
       const sedeId = dto.sedeId ?? actual.sedeId;
       if (dto.sedeId !== undefined && dto.sedeId !== actual.sedeId && !(await this.sedeActiva(dto.sedeId, tx))) {
         errores.push({ campo: 'sedeId', code: 'SEDE_INVALIDA' });
@@ -237,6 +261,7 @@ export class EventosGestionService {
       }
 
       await tx.evento.update({ where: { id }, data: { ...this.paraGuardar(nueva), sedeId } });
+      if (preguntas !== undefined) await sincronizarPreguntas(tx, id, preguntas);
       await promoverDesdeLista(tx, id, (t, e) => this.notificaciones.emitir(t, e));
 
       const cambioCuandoODonde =
@@ -372,6 +397,17 @@ export class EventosGestionService {
     };
   }
 
+  /**
+   * FR-064 — la forma de las preguntas (si vienen en el cuerpo) y su relación
+   * con la configuración: solo con inscripción y nunca en un bautismo.
+   */
+  private erroresDePreguntas(c: ConfigEvento, preguntas: readonly DatosPreguntaEvento[], validarForma = true): ErrorDeCampo[] {
+    const errores = validarForma ? validarPreguntas(preguntas) : [];
+    if (preguntas.length > 0 && c.tipo === 'bautismo') errores.push({ campo: 'tipo', code: 'CONFIG_BAUTISMO_INVALIDA' });
+    else if (preguntas.length > 0 && !c.requiereInscripcion) errores.push({ campo: 'preguntas', code: 'PREGUNTAS_SIN_INSCRIPCION' });
+    return errores;
+  }
+
   private async sedeActiva(sedeId: string | undefined, db: Prisma.TransactionClient = this.prisma): Promise<boolean> {
     if (!sedeId) return false;
     return (await db.sede.count({ where: { id: sedeId, activo: true, eliminadoEn: null } })) > 0;
@@ -403,6 +439,9 @@ export class EventosGestionService {
       // Sin costo no hay instrucciones (CHECK de la base): se descartan.
       instruccionesPago: costo === null ? null : texto(dto.instruccionesPago, base.instruccionesPago),
       diasAnticipacionRecordatorio: numero(dto.diasAnticipacionRecordatorio, base.diasAnticipacionRecordatorio),
+      destinatariosGenero: (dto.destinatariosGenero ?? base.destinatariosGenero) as GeneroDestinatario,
+      edadMinima: numero(dto.edadMinima, base.edadMinima),
+      edadMaxima: numero(dto.edadMaxima, base.edadMaxima),
     };
   }
 
@@ -422,6 +461,9 @@ export class EventosGestionService {
       costo: c.costo === null ? null : c.costo.toFixed(2),
       instruccionesPago: c.instruccionesPago,
       diasAnticipacionRecordatorio: c.diasAnticipacionRecordatorio,
+      destinatariosGenero: c.destinatariosGenero,
+      edadMinima: c.edadMinima,
+      edadMaxima: c.edadMaxima,
     };
   }
 }

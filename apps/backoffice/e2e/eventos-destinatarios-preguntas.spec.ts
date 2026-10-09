@@ -1,0 +1,183 @@
+import type { Page } from '@playwright/test';
+import { test, expect, apiComo, auditar, crearPersona, EMAIL_ADMIN, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
+import { ANIO_FUTURO, anotarEnNombre, crearEventoPorApi } from './helpers-011';
+
+/**
+ * spec 011, ampliación 2026-10-09 (FR-060 a FR-063, D230) — destinatarios del
+ * Evento desde el backoffice, con axe en claro y oscuro: el Admin elige
+ * "Mujeres" desde 15 años (con el error por campo si la máxima es menor), el
+ * detalle lo explica, y anotar a un varón pide confirmación y lo marca.
+ * Preguntas propias (FR-064 a FR-068, D231, D232): el Admin las arma en el
+ * formulario, ve las respuestas y el resumen; el Pastor no ve la sensible.
+ */
+async function completarFecha(page: Page, grupo: string, dia: string, mes: string, anio: string) {
+  const fecha = page.getByRole('group', { name: grupo });
+  await fecha.getByLabel('Día').fill(dia);
+  await fecha.getByLabel('Mes').selectOption({ label: mes });
+  await fecha.getByLabel('Año').fill(anio);
+}
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`Destinatarios — modo ${colorScheme}`, () => {
+    test.use({ colorScheme });
+
+    test('crear un Evento para mujeres desde 15 años; edad máxima menor que la mínima se marca en el campo', async ({ page }) => {
+      const nombre = `e2e-evento-dest-${colorScheme}-${Date.now()}`;
+      await loguearseComoAdminE2E(page);
+      await page.goto('/eventos/nuevo');
+      await page.waitForLoadState('networkidle');
+
+      await page.getByLabel('Nombre', { exact: true }).fill(nombre);
+      await page.getByLabel('Sede').selectOption({ index: 1 });
+      await completarFecha(page, 'Fecha de inicio', '14', 'Noviembre', ANIO_FUTURO);
+      await page.getByLabel('Descripción').fill('Jornada de sanidad. Salida 8 hs, regreso 20 hs.');
+      await page.getByLabel('La gente tiene que anotarse').check();
+      await page.getByLabel('Mujeres', { exact: true }).check();
+      await page.getByLabel(/^Edad mínima/).fill('15');
+      await page.getByLabel(/^Edad máxima/).fill('12');
+      // Al salir del campo aparece su error y la página se corre: se envía después (H-72).
+      await page.getByLabel(/^Edad máxima/).blur();
+      await page.getByRole('button', { name: 'Crear el Evento' }).click();
+      const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
+      await expect(resumen).toBeFocused();
+      await expect(resumen.getByRole('link', { name: 'La edad máxima no puede ser menor que la mínima.' })).toBeVisible();
+      await expect(page.getByLabel(/^Edad máxima/)).toHaveAttribute('aria-invalid', 'true');
+      expect((await auditar(page)).violations).toEqual([]);
+
+      await page.getByLabel(/^Edad máxima/).fill('');
+      await page.getByRole('button', { name: 'Crear el Evento' }).click();
+      await page.waitForURL(/\/eventos\/[^/]+\?creado=1$/);
+      await expect(page.getByText('Este evento es para mujeres desde 15 años.')).toBeVisible();
+      expect((await auditar(page)).violations).toEqual([]);
+    });
+
+    test('anotar a un varón a un Evento para mujeres pide confirmación y lo marca', async ({ page, permitirErrorDeConsola }) => {
+      // El primer "Anotar" responde 409 EVENTO_NO_CORRESPONDE a propósito (es lo que dispara la confirmación).
+      permitirErrorDeConsola(/Failed to load resource: the server responded with a status of 409/);
+      const sufijo = `${colorScheme}-${Date.now()}`;
+      const evento = await crearEventoPorApi({ nombre: `e2e-evento-dest-anotar-${sufijo}`, destinatariosGenero: 'mujeres', edadMinima: 15 });
+      await crearPersona(`e2e-dest-varon-${sufijo}@example.com`, { nombre: 'Tomás', apellido: `Dest${sufijo}`, genero: 'masculino' });
+
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/eventos/${evento.id}`);
+      await page.waitForLoadState('networkidle');
+      const seccion = page.locator('#inscriptos');
+      await seccion.getByRole('button', { name: 'Anotar a una Persona' }).click();
+      const panel = page.getByRole('dialog');
+      await panel.getByLabel('Buscar por nombre').fill(`Dest${sufijo}`);
+      await panel.getByRole('button', { name: new RegExp(`Tomás Dest${sufijo}`) }).click();
+      await panel.getByRole('button', { name: 'Anotar', exact: true }).click();
+
+      const aviso = panel.getByTestId('anotar-no-corresponde');
+      await expect(aviso).toContainText(`Tomás Dest${sufijo} no está entre los destinatarios`);
+      await expect(aviso).toContainText('Este evento es para mujeres desde 15 años.');
+      expect((await auditar(page)).violations).toEqual([]);
+      await panel.getByRole('button', { name: 'Sí, anotarla igual' }).click();
+      await expect(page.getByText(`Tomás Dest${sufijo} quedó anotada`, { exact: false })).toBeVisible();
+      await seccion.getByRole('link', { name: /Confirmadas/ }).click();
+      await expect(seccion.getByRole('row').filter({ hasText: 'Tomás' }).getByText('Anotada aunque no está entre los destinatarios')).toBeVisible();
+      expect((await auditar(page)).violations).toEqual([]);
+    });
+  });
+
+  test.describe(`Destinatarios cambiados — modo ${colorScheme}`, () => {
+    test.use({ colorScheme });
+
+    test('si cambian los destinatarios, quien ya no cumple queda marcado y sigue anotado', async ({ page }) => {
+      const sufijo = `${colorScheme}-${Date.now()}`;
+      const evento = await crearEventoPorApi({ nombre: `e2e-evento-dest-cambio-${sufijo}` });
+      const varon = await crearPersona(`e2e-dest-cambio-${sufijo}@example.com`, { nombre: 'Julián', apellido: `Cambio${sufijo}`, genero: 'masculino' });
+      await anotarEnNombre(evento.id, varon.id);
+      await apiComo(EMAIL_ADMIN, 'PATCH', `/eventos/${evento.id}`, { destinatariosGenero: 'mujeres' });
+
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/eventos/${evento.id}?estado=confirmada`);
+      await page.waitForLoadState('networkidle');
+      const fila = page.locator('#inscriptos').getByRole('row').filter({ hasText: 'Julián' });
+      await expect(fila.getByText('Ya no está entre los destinatarios: si corresponde, dala de baja')).toBeVisible();
+      await expect(fila.getByRole('button', { name: 'Dar de baja' })).toBeVisible();
+      expect((await auditar(page)).violations).toEqual([]);
+    });
+  });
+
+  test.describe(`Preguntas — modo ${colorScheme}`, () => {
+    test.use({ colorScheme });
+
+    test('el Admin agrega preguntas al Evento, con error por campo y dato sensible', async ({ page }) => {
+      const evento = await crearEventoPorApi({ nombre: `e2e-evento-preg-${colorScheme}-${Date.now()}` });
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/eventos/${evento.id}`);
+      await page.waitForLoadState('networkidle');
+      await page.getByRole('button', { name: 'Editar' }).click();
+
+      await page.getByRole('button', { name: 'Agregar una pregunta' }).click();
+      await page.getByRole('button', { name: 'Agregar una pregunta' }).click();
+      const preguntas = page.getByTestId('pregunta-evento');
+      await expect(preguntas).toHaveCount(2);
+      // La segunda, "Una opción" sin opciones: no guarda y lo marca en el campo (H-50).
+      await preguntas.nth(0).getByLabel('Pregunta', { exact: true }).fill('¿Sos celíaca?');
+      await preguntas.nth(0).getByLabel('Hay que responderla para anotarse').check();
+      await preguntas.nth(0).getByLabel('Dato sensible (salud o alimentación)').check();
+      await expect(preguntas.nth(0).getByText('Solo lo ve el equipo que organiza; se borra 30 días después del evento.')).toBeVisible();
+      await preguntas.nth(1).getByLabel('Pregunta', { exact: true }).fill('¿Participaste alguna vez de una jornada de sanidad?');
+      await preguntas.nth(1).getByLabel('Tipo de respuesta').selectOption({ label: 'Una opción de una lista' });
+      await page.getByRole('button', { name: 'Guardar cambios' }).click();
+      const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
+      await expect(resumen).toBeFocused();
+      await expect(resumen.getByRole('link', { name: /Escribí entre 2 y 10 opciones distintas/ })).toBeVisible();
+      expect((await auditar(page)).violations).toEqual([]);
+
+      await preguntas.nth(1).getByLabel('Opciones').fill('Sí, hace mucho\nNo, nunca');
+      await page.getByRole('button', { name: 'Guardar cambios' }).click();
+      await expect(page.getByText('Cambios guardados.')).toBeVisible();
+      // Sin inscriptas todavía, el resumen cuenta cero.
+      await expect(page.getByTestId('resumen-preguntas')).toContainText('¿Sos celíaca?');
+      await expect(page.getByTestId('resumen-preguntas')).toContainText('Sí: 0 · No: 0');
+      expect((await auditar(page)).violations).toEqual([]);
+    });
+
+    test('la lista muestra respuestas, resumen y lo que la app ya sabe; el Pastor no ve la sensible', async ({ page }) => {
+      test.setTimeout(120_000);
+      const sufijo = `${colorScheme}-${Date.now()}`;
+      const evento = await crearEventoPorApi({
+        nombre: `e2e-evento-resumen-${sufijo}`,
+        preguntas: [
+          { texto: '¿Sos celíaca?', tipo: 'si_no', obligatoria: true, sensible: true },
+          { texto: '¿Participaste alguna vez de una jornada de sanidad?', tipo: 'opcion', opciones: ['Sí, hace mucho', 'No, nunca'], obligatoria: false, sensible: false },
+        ],
+      });
+      const [celiaca, jornada] = evento.preguntas;
+      const respuestas: Array<[string, string, string]> = [
+        ['Ana', 'si', 'No, nunca'],
+        ['Bea', 'no', 'No, nunca'],
+        ['Caro', 'no', 'Sí, hace mucho'],
+      ];
+      for (const [nombre, c, j] of respuestas) {
+        const p = await crearPersona(`e2e-resumen-${nombre}-${sufijo}@example.com`, { nombre, apellido: `Resumen${sufijo}` });
+        await anotarEnNombre(evento.id, p.id, { respuestas: [{ preguntaId: celiaca.id, valor: c }, { preguntaId: jornada.id, valor: j }] });
+      }
+
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/eventos/${evento.id}?estado=confirmada`);
+      await page.waitForLoadState('networkidle');
+      const resumen = page.getByTestId('resumen-preguntas');
+      await expect(resumen).toContainText('¿Sos celíaca?');
+      await expect(resumen).toContainText('Dato sensible');
+      await expect(resumen).toContainText('Sí: 1 · No: 2');
+      await expect(resumen).toContainText('Sí, hace mucho: 1 · No, nunca: 2');
+      const fila = page.locator('#inscriptos').getByRole('row').filter({ hasText: 'Ana' });
+      await expect(fila).toContainText('¿Sos celíaca?');
+      await expect(fila).toContainText(/\d+ años/);
+      await expect(fila).toContainText('Tel.');
+      expect((await auditar(page)).violations).toEqual([]);
+
+      await loguearseComoPastorE2E(page);
+      await page.goto(`/eventos/${evento.id}?estado=confirmada`);
+      await page.waitForLoadState('networkidle');
+      await expect(page.getByTestId('resumen-preguntas')).toContainText('¿Participaste alguna vez de una jornada de sanidad?');
+      await expect(page.getByTestId('resumen-preguntas')).not.toContainText('¿Sos celíaca?');
+      await expect(page.locator('#inscriptos').getByRole('row').filter({ hasText: 'Ana' })).not.toContainText('¿Sos celíaca?');
+      expect((await auditar(page)).violations).toEqual([]);
+    });
+  });
+}

@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Copy, Download, ExternalLink, Info, Pencil } from 'lucide-react';
+import { Copy, Download, ExternalLink, Info, Pencil, UsersRound } from 'lucide-react';
 import {
+  argumentosTextoDestinatarios,
+  tieneRestriccionDeDestinatarios,
   apiFetch,
   formatearInicioEvento,
   formatearMoneda,
@@ -161,10 +163,18 @@ export function DatosEvento({
                 <dd>{evento.lugar}</dd>
                 <dt className="font-medium">{t('detalle.sede')}</dt>
                 <dd>{evento.sede.nombre}</dd>
-                {evento.publicoObjetivo && (
+                {(evento.publicoObjetivo || tieneRestriccionDeDestinatarios(evento.destinatarios)) && (
                   <>
                     <dt className="font-medium">{t('detalle.para')}</dt>
-                    <dd>{evento.publicoObjetivo}</dd>
+                    <dd className="flex flex-col gap-1">
+                      {tieneRestriccionDeDestinatarios(evento.destinatarios) && (
+                        <span className="flex items-start gap-2">
+                          <UsersRound aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                          {t('detalle.destinatarios', argumentosTextoDestinatarios(evento.destinatarios))}
+                        </span>
+                      )}
+                      {evento.publicoObjetivo && <span>{evento.publicoObjetivo}</span>}
+                    </dd>
                   </>
                 )}
                 <dt className="font-medium">{t('detalle.inscripcion')}</dt>

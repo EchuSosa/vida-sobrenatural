@@ -2,7 +2,10 @@ import {
   diaCivilEnArgentina,
   estadoInscripcionDeEvento,
   instanteEnArgentina,
+  type DestinatariosEvento,
   type EventoPublico,
+  type GeneroDestinatario,
+  type PreguntaEvento,
   type TotalesEvento,
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
@@ -12,6 +15,20 @@ import type { Prisma } from '../generated/prisma/client.js';
  * función de armado para la página pública y el detalle del backoffice
  * (Principio XI). Nunca incluye inscriptos (FR-046).
  */
+/** Una pregunta propia del Evento, hacia afuera (ampliación 2026-10-09, FR-064). */
+export const PREGUNTA_SELECT = {
+  id: true,
+  texto: true,
+  tipo: true,
+  opciones: true,
+  obligatoria: true,
+  sensible: true,
+} as const satisfies Prisma.PreguntaEventoSelect;
+
+export function aPreguntaEvento(p: Prisma.PreguntaEventoGetPayload<{ select: typeof PREGUNTA_SELECT }>): PreguntaEvento {
+  return { id: p.id, texto: p.texto, tipo: p.tipo, opciones: p.tipo === 'opcion' ? p.opciones : [], obligatoria: p.obligatoria, sensible: p.sensible };
+}
+
 export const EVENTO_SELECT = {
   id: true,
   slug: true,
@@ -33,6 +50,10 @@ export const EVENTO_SELECT = {
   diasAnticipacionRecordatorio: true,
   estado: true,
   sede: { select: { id: true, nombre: true, direccion: true } },
+  destinatariosGenero: true,
+  edadMinima: true,
+  edadMaxima: true,
+  preguntas: { orderBy: { orden: 'asc' }, select: PREGUNTA_SELECT },
 } as const satisfies Prisma.EventoSelect;
 
 export type EventoLeido = Prisma.EventoGetPayload<{ select: typeof EVENTO_SELECT }>;
@@ -60,7 +81,14 @@ export function aEventoPublico(evento: EventoLeido, ocupados: number, ahora: Dat
     instruccionesPago: evento.instruccionesPago,
     estado: evento.estado,
     estadoInscripcion: estadoInscripcionDeEvento(evento, ocupados, ahora),
+    destinatarios: destinatariosDe(evento),
+    preguntas: evento.preguntas.map(aPreguntaEvento),
   };
+}
+
+/** FR-060 — los destinatarios del Evento como los usa `correspondeAlEvento`. */
+export function destinatariosDe(e: { destinatariosGenero: GeneroDestinatario; edadMinima: number | null; edadMaxima: number | null }): DestinatariosEvento {
+  return { genero: e.destinatariosGenero, edadMinima: e.edadMinima, edadMaxima: e.edadMaxima };
 }
 
 /** Hoy a las 00:00 en Argentina: "el inicio es hoy o posterior" (FR-001). */

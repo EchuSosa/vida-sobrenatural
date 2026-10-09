@@ -3,7 +3,14 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { formatearInicioEvento, formatearMoneda, type EventoPublico } from '@vida-sobrenatural/shared-types';
+import { UsersRound } from 'lucide-react';
+import {
+  argumentosTextoDestinatarios,
+  formatearInicioEvento,
+  formatearMoneda,
+  tieneRestriccionDeDestinatarios,
+  type EventoPublico,
+} from '@vida-sobrenatural/shared-types';
 import { ButtonLink, MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
 import { obtenerEventoPublico } from '../../../../components/eventos/api-eventos';
 import { EstadoEventoPublico, estadoPublico } from '../../../../components/eventos/estado-evento-publico';
@@ -108,10 +115,18 @@ export default async function EventoPage({ params }: { params: Promise<{ slug: s
               <span>{evento.lugar}</span>
               <span className="text-muted-foreground">{t('sede', { nombre: evento.sede.nombre })}</span>
             </dd>
-            {evento.publicoObjetivo && (
+            {(evento.publicoObjetivo || tieneRestriccionDeDestinatarios(evento.destinatarios)) && (
               <>
                 <dt className="font-semibold">{t('para')}</dt>
-                <dd>{evento.publicoObjetivo}</dd>
+                <dd className="flex flex-col gap-1">
+                  {tieneRestriccionDeDestinatarios(evento.destinatarios) && (
+                    <span className="flex items-start gap-2" data-testid="destinatarios-evento">
+                      <UsersRound aria-hidden="true" className="mt-1 size-4 shrink-0" />
+                      {t('destinatarios', argumentosTextoDestinatarios(evento.destinatarios))}
+                    </span>
+                  )}
+                  {evento.publicoObjetivo && <span>{evento.publicoObjetivo}</span>}
+                </dd>
               </>
             )}
             {evento.requiereInscripcion && evento.tipo !== 'bautismo' && (

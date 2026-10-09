@@ -26,14 +26,19 @@ export async function accionDeAdmin(baseURL: string, eventoId: string, accion: '
 }
 
 /** Una Persona mayor de edad y `activa`, registrada por la API (el test-login le da la cuenta). Devuelve su id. */
-export async function crearPersonaActiva(baseURL: string, email: string, nombre: string): Promise<string> {
+export async function crearPersonaActiva(
+  baseURL: string,
+  email: string,
+  nombre: string,
+  opciones: { genero?: 'femenino' | 'masculino'; fechaNacimiento?: string } = {},
+): Promise<string> {
   const token = await tokenDe(baseURL, email);
   const sedes: Array<{ id: string }> = await (await fetch(`${API()}/sedes`)).json();
   const persona = await api(token, 'POST', '/personas', {
     apellido: 'E2E',
     nombre,
-    genero: 'femenino',
-    fechaNacimiento: '1990-05-20',
+    genero: opciones.genero ?? 'femenino',
+    fechaNacimiento: opciones.fechaNacimiento ?? '1990-05-20',
     telefono: '+5492219000011',
     direccion: 'Calle 1 y 50',
     sedeId: sedes[0].id,

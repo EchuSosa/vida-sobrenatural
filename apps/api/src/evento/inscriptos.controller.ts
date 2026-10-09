@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import type { EstadoInscripcionEvento } from '@vida-sobrenatural/shared-types';
+import { tienePermiso, type EstadoInscripcionEvento, type RespuestaPregunta } from '@vida-sobrenatural/shared-types';
 import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import { PermisosGuard } from '../auth/permisos.guard.js';
 import { RequierePermiso } from '../auth/permisos.decorator.js';
@@ -22,19 +22,43 @@ export class InscriptosController {
   @Get('eventos/:id/inscripciones')
   @RequierePermiso('eventos.ver')
   @ApiOkResponse({ description: 'FR-025 — `Pagina<InscripcionEventoResumen>`; la lista de espera en su orden.' })
-  listar(@Param('id') id: string, @Query('estado') estado?: string, @Query('buscar') buscar?: string, @Query('skip') skip?: string, @Query('take') take?: string) {
+  listar(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+    @Query('estado') estado?: string,
+    @Query('buscar') buscar?: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
     return this.servicio.listar(id, {
       estado: ESTADOS.includes(estado as EstadoInscripcionEvento) ? (estado as EstadoInscripcionEvento) : undefined,
       buscar,
       ...paginacion(skip, take, 50),
+      verSensibles: tienePermiso(request.user.rol ?? [], 'eventos.gestionar'),
     });
+  }
+
+  @Get('eventos/:id/preguntas/resumen')
+  @RequierePermiso('eventos.ver')
+  @ApiOkResponse({ description: 'FR-067 — `ResumenPreguntaEvento[]`; las sensibles solo con `eventos.gestionar` (FR-068).' })
+  resumenPreguntas(@Param('id') id: string, @Req() request: AuthenticatedRequest) {
+    return this.servicio.resumenPreguntas(id, tienePermiso(request.user.rol ?? [], 'eventos.gestionar'));
   }
 
   @Post('eventos/:id/inscripciones')
   @RequierePermiso('inscripciones_evento.gestionar')
-  @ApiCreatedResponse({ description: 'FR-027, FR-047 — inscribir en nombre de una Persona.' })
-  inscribir(@Param('id') id: string, @Body('personaId') personaId: string | undefined, @Req() request: AuthenticatedRequest) {
-    return this.servicio.inscribirEnNombre(id, personaId, personaDeSesion(request));
+  @ApiCreatedResponse({ description: 'FR-027, FR-047 — inscribir en nombre de una Persona; `forzar: true` la anota aunque no esté entre los destinatarios (FR-062).' })
+  inscribir(
+    @Param('id') id: string,
+    @Body('personaId') personaId: string | undefined,
+    @Body('forzar') forzar: unknown,
+    @Body('respuestas') respuestas: unknown,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.servicio.inscribirEnNombre(id, personaId, personaDeSesion(request), {
+      forzar: forzar === true,
+      respuestas: Array.isArray(respuestas) ? (respuestas as RespuestaPregunta[]) : undefined,
+    });
   }
 
   @Post('eventos/:id/inscripciones/aprobar-lote')
@@ -48,8 +72,8 @@ export class InscriptosController {
   @Get('inscripciones-evento/:id')
   @RequierePermiso('eventos.ver')
   @ApiOkResponse({ description: 'Una Inscripción con su `eventoId` (la bandeja lleva al detalle del Evento).' })
-  una(@Param('id') id: string) {
-    return this.servicio.una(id);
+  una(@Param('id') id: string, @Req() request: AuthenticatedRequest) {
+    return this.servicio.una(id, tienePermiso(request.user.rol ?? [], 'eventos.gestionar'));
   }
 
   @Post('inscripciones-evento/:id/aprobar')

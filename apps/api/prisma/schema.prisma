@@ -1146,6 +1146,13 @@ model Evento {
   costo                        Decimal?     @db.Decimal(10, 2)
   instruccionesPago            String?
   diasAnticipacionRecordatorio Int?
+  // Ampliación 2026-10-09 (FR-060, D230): destinatarios con efecto. Edades en
+  // años cumplidos al día del Evento; null = sin límite.
+  destinatariosGenero          GeneroDestinatario @default(todas)
+  edadMinima                   Int?
+  edadMaxima                   Int?
+  // FR-069 (D232): cuándo se borraron las respuestas sensibles (idempotencia).
+  respuestasSensiblesBorradasEn DateTime?
   estado                       EstadoEvento @default(publicado)
   canceladoEn                  DateTime?
   canceladoPorId               String?
@@ -1156,6 +1163,7 @@ model Evento {
   updatedAt                    DateTime     @updatedAt
 
   inscripciones InscripcionEvento[]
+  preguntas     PreguntaEvento[]
 
   @@index([estado, inicio])
   @@index([sedeId])
@@ -1183,15 +1191,69 @@ model InscripcionEvento {
   canceladaEn       DateTime?
   canceladaPorId    String?
   motivoCancelacion MotivoCancelacionInscripcion?
+  // FR-062: el Admin la anotó con confirmación aunque no estaba entre los destinatarios.
+  fueraDeDestinatarios Boolean                    @default(false)
   updatedAt         DateTime                      @updatedAt
 
   pagos             Pago[]
+  respuestas        RespuestaPreguntaEvento[]
   solicitudBautismo SolicitudBautismo?
 
   @@index([eventoId, estado])
   @@index([personaId])
   @@index([eventoId, estado, enListaDesde])
   @@map("inscripciones_evento")
+}
+
+// --- spec 011, ampliación 2026-10-09: preguntas propias del Evento (D231, D232) ---
+
+enum GeneroDestinatario {
+  todas
+  mujeres
+  varones
+}
+
+enum TipoPreguntaEvento {
+  si_no
+  opcion
+  texto
+}
+
+model PreguntaEvento {
+  id          String             @id @default(uuid())
+  eventoId    String
+  evento      Evento             @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  orden       Int
+  texto       String
+  tipo        TipoPreguntaEvento
+  // Solo en `opcion`.
+  opciones    String[]
+  obligatoria Boolean            @default(false)
+  // "Dato sensible (salud o alimentación)": solo lo ve `eventos.gestionar` y la
+  // propia Persona; se borra 30 días después del Evento (FR-068, FR-069).
+  sensible    Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  respuestas RespuestaPreguntaEvento[]
+
+  @@index([eventoId, orden])
+  @@map("preguntas_evento")
+}
+
+// Las respuestas viven SOLO en la Inscripción a ese Evento, nunca en el perfil (D232).
+model RespuestaPreguntaEvento {
+  id            String            @id @default(uuid())
+  inscripcionId String
+  inscripcion   InscripcionEvento @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+  preguntaId    String
+  pregunta      PreguntaEvento    @relation(fields: [preguntaId], references: [id], onDelete: Cascade)
+  valor         String
+  createdAt     DateTime          @default(now())
+
+  @@unique([inscripcionId, preguntaId])
+  @@index([preguntaId])
+  @@map("respuestas_pregunta_evento")
 }
 
 model Pago {
