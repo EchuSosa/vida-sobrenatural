@@ -103,6 +103,16 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
       sumar(await prisma.pago.deleteMany({ where: { inscripcionEvento: inscripcionWhere } }));
       sumar(await prisma.inscripcionEvento.deleteMany({ where: inscripcionWhere }));
       if (eventoIds.length) sumar(await prisma.evento.deleteMany({ where: { id: { in: eventoIds } } }));
+      // 014 — Solicitud y Líder → Grupo de Extensión (los `e2e-…` y lo de Personas de e2e).
+      const grupoExtensionIds = (
+        await prisma.grupoExtension.findMany({
+          where: { OR: [{ nombre: { startsWith: 'e2e-' } }, { lideres: { some: { personaId: { in: idsE2E } } } }, { sede: { nombre: { startsWith: 'e2e-' } } }] },
+          select: { id: true },
+        })
+      ).map((g) => g.id);
+      sumar(await prisma.solicitudGrupoExtension.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { grupoId: { in: grupoExtensionIds } }] } }));
+      sumar(await prisma.liderGrupoExtension.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { grupoId: { in: grupoExtensionIds } }] } }));
+      sumar(await prisma.grupoExtension.deleteMany({ where: { id: { in: grupoExtensionIds } } }));
       // 009 — Postulación → Célula → Ministerio.
       sumar(await prisma.postulacion.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { ministerioId: { in: ministerioIds } }] } }));
       sumar(await prisma.celula.deleteMany({ where: { ministerioId: { in: ministerioIds } } }));
