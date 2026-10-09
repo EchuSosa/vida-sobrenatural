@@ -103,4 +103,18 @@ describe('Destinatarios de un Evento (integración)', () => {
     const normal = await http().post(`/eventos/${ev.id}/inscripciones`).set('Authorization', `Bearer ${admin}`).send({ personaId: mujer });
     expect(normal.body).toMatchObject({ estado: 'confirmada', fueraDeDestinatarios: false, datosPersona: { telefono: '+5492211234567' } });
   });
+
+  it('si el Admin cambia los destinatarios, las que ya no cumplen quedan marcadas y siguen anotadas (FR-062b)', async () => {
+    const ev = await esc.evento();
+    const varon = await esc.persona('varoncambio', { genero: 'masculino' });
+    const mujer = await esc.persona('mujercambio', { genero: 'femenino', fechaNacimiento: hace(30) });
+    const iVaron = await esc.inscripcion(ev.id, varon);
+    await esc.inscripcion(ev.id, mujer);
+    const editado = await http().patch(`/eventos/${ev.id}`).set('Authorization', `Bearer ${admin}`).send({ destinatariosGenero: 'mujeres' });
+    expect(editado.status).toBe(200);
+    const lista = await http().get(`/eventos/${ev.id}/inscripciones?estado=confirmada`).set('Authorization', `Bearer ${admin}`);
+    const porPersona = Object.fromEntries(lista.body.items.map((i: { persona: { id: string }; yaNoCorresponde: boolean }) => [i.persona.id, i.yaNoCorresponde]));
+    expect(porPersona).toEqual({ [varon]: true, [mujer]: false });
+    expect((await prisma.inscripcionEvento.findUniqueOrThrow({ where: { id: iVaron } })).estado).toBe('confirmada');
+  });
 });

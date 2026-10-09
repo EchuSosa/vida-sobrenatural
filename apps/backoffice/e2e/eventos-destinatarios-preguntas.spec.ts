@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, crearPersona, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
+import { test, expect, apiComo, auditar, crearPersona, EMAIL_ADMIN, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
 import { ANIO_FUTURO, anotarEnNombre, crearEventoPorApi } from './helpers-011';
 
 /**
@@ -72,6 +72,26 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText(`Tomás Dest${sufijo} quedó anotada`, { exact: false })).toBeVisible();
       await seccion.getByRole('link', { name: /Confirmadas/ }).click();
       await expect(seccion.getByRole('row').filter({ hasText: 'Tomás' }).getByText('Anotada aunque no está entre los destinatarios')).toBeVisible();
+      expect((await auditar(page)).violations).toEqual([]);
+    });
+  });
+
+  test.describe(`Destinatarios cambiados — modo ${colorScheme}`, () => {
+    test.use({ colorScheme });
+
+    test('si cambian los destinatarios, quien ya no cumple queda marcado y sigue anotado', async ({ page }) => {
+      const sufijo = `${colorScheme}-${Date.now()}`;
+      const evento = await crearEventoPorApi({ nombre: `e2e-evento-dest-cambio-${sufijo}` });
+      const varon = await crearPersona(`e2e-dest-cambio-${sufijo}@example.com`, { nombre: 'Julián', apellido: `Cambio${sufijo}`, genero: 'masculino' });
+      await anotarEnNombre(evento.id, varon.id);
+      await apiComo(EMAIL_ADMIN, 'PATCH', `/eventos/${evento.id}`, { destinatariosGenero: 'mujeres' });
+
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/eventos/${evento.id}?estado=confirmada`);
+      await page.waitForLoadState('networkidle');
+      const fila = page.locator('#inscriptos').getByRole('row').filter({ hasText: 'Julián' });
+      await expect(fila.getByText('Ya no está entre los destinatarios: si corresponde, dala de baja')).toBeVisible();
+      await expect(fila.getByRole('button', { name: 'Dar de baja' })).toBeVisible();
       expect((await auditar(page)).violations).toEqual([]);
     });
   });

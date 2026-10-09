@@ -152,6 +152,12 @@ export function InscriptosCliente({
           {i.creadoPor && <span className="text-xs text-muted-foreground">{t('anotadaPor', { nombre: `${i.creadoPor.nombre} ${i.creadoPor.apellido}` })}</span>}
           {i.promovidaSinVer && <span className="text-xs font-medium">{t('subioDeLista')}</span>}
           <DatosDeLaPersona inscripcion={i} />
+          {i.yaNoCorresponde && (
+            <span className="flex items-center gap-1 text-xs font-medium">
+              <TriangleAlert aria-hidden="true" className="size-3.5" />
+              {t('yaNoCorresponde')}
+            </span>
+          )}
           {i.fueraDeDestinatarios && (
             <span className="flex items-center gap-1 text-xs font-medium">
               <TriangleAlert aria-hidden="true" className="size-3.5" />

@@ -80,8 +80,11 @@ su líder cuando exista la spec 014. Así la Admin no lo pregunta.
   {mujeres|varones|todas las personas}{ desde N años}{ hasta M años}." con ícono, cuando hay alguna
   restricción. A quien no corresponde, en lugar del botón, el mismo texto y "Por eso no podés anotarte
   desde acá…". La cartelera sigue mostrando todos los Eventos.
-- Cambiar los destinatarios de un Evento con Inscripciones **no** da de baja a nadie (opción
-  conservadora): rige para las inscripciones nuevas. Pregunta para Echu en el PR.
+- **FR-062b**: Cambiar los destinatarios de un Evento con Inscripciones **no** da de baja a nadie:
+  rige para las inscripciones nuevas, y en la lista de inscriptos las abiertas que dejaron de cumplir
+  quedan marcadas "Ya no está entre los destinatarios: si corresponde, dala de baja" (`yaNoCorresponde`);
+  el Admin decide con "Dar de baja", que ya avisa a la Persona. Respondido por Echu el 2026-10-09
+  (Pregunta 1).
 
 ### Preguntas propias (D221)
 
@@ -182,9 +185,11 @@ Migración propia `20261009135610_eventos_destinatarios_preguntas` (con CHECK de
 | Backoffice — formulario del Evento (destinatarios y preguntas) | "Crear el Evento" / "Guardar cambios" | `loading.tsx` / `error.tsx` de la ruta; "Este Evento no tiene preguntas." | Igual que antes (`useEnvio`) | Errores por campo `pregunta-<i>-…`, `edadMaxima` | Avisos de "ya la respondieron" con ícono | Botones con nombre accesible para subir/bajar | axe en claro y oscuro (e2e) |
 | Backoffice — inscriptos (resumen, respuestas, datos) | "Anotar a una Persona" | `loading.tsx`; resumen con error propio si falla; "Sin respuestas"; vacío de la tabla | `useEnvio` | Confirmación "Sí, anotarla igual" con el porqué | Sensible con candado + texto; "Anotada aunque no está entre los destinatarios" con ícono | Tabla con encabezados; `dl` por respuesta | axe en claro y oscuro (e2e) |
 
-## Preguntas para Echu
+## Preguntas para Echu (respondidas el 2026-10-09)
 
-1. Si se cambian los destinatarios de un Evento que ya tiene inscriptas que dejan de cumplir, ¿se las da
-   de baja? Hoy **no** (quedan; rige para las nuevas).
-2. ¿El Pastor tiene que ver el **resumen** de una pregunta sensible (solo cantidades)? Hoy no lo ve.
-3. ¿Las preguntas no sensibles también se borran en algún momento? Hoy quedan con la Inscripción.
+1. Si se cambian los destinatarios con gente anotada que deja de cumplir: **se marcan en la lista y el
+   Admin decide** (FR-062b); no se dan de baja solas.
+2. El Pastor **no** ve el resumen de una pregunta sensible: por ahora no hace falta.
+3. Las respuestas no sensibles **quedan** con la Inscripción (lo dejó a criterio; son útiles y no
+   son datos de salud).
+4. "Referente" = quien la acompaña en su Grupo más reciente (Discipulador o Líder): está bien.

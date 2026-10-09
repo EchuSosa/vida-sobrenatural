@@ -40,8 +40,8 @@ const RESUMEN_SELECT = {
   motivoRechazo: true,
   motivoCancelacion: true,
   fueraDeDestinatarios: true,
-  persona: { select: { id: true, nombre: true, apellido: true, email: true, telefono: true, fechaNacimiento: true } },
-  evento: { select: { costo: true, inicio: true } },
+  persona: { select: { id: true, nombre: true, apellido: true, email: true, telefono: true, fechaNacimiento: true, genero: true } },
+  evento: { select: { costo: true, inicio: true, destinatariosGenero: true, edadMinima: true, edadMaxima: true } },
   pagos: { select: { id: true, estado: true, createdAt: true, motivoRechazo: true } },
 } as const satisfies Prisma.InscripcionEventoSelect;
 
@@ -329,6 +329,11 @@ export class InscriptosService {
           motivoRechazo: f.motivoRechazo,
           motivoCancelacion: f.motivoCancelacion,
           fueraDeDestinatarios: f.fueraDeDestinatarios,
+          // Pregunta 1 de Echu (2026-10-09): si el Admin cambió los destinatarios después, se marca; no se da de baja sola.
+          yaNoCorresponde:
+            !f.fueraDeDestinatarios &&
+            ESTADOS_INSCRIPCION_ABIERTA.includes(f.estado) &&
+            !correspondeAlEvento(f.persona, destinatariosDe(f.evento), f.evento.inicio),
           respuestas: respuestas.get(f.id) ?? [],
           datosPersona: {
             edad: edadCumplidaEn(f.persona.fechaNacimiento, f.evento.inicio),

@@ -295,6 +295,12 @@ export interface InscripcionEventoResumen {
   motivoCancelacion: MotivoCancelacionInscripcion | null;
   /** FR-062: el Admin la anotó aunque no estaba entre los destinatarios. */
   fueraDeDestinatarios: boolean;
+  /**
+   * FR-062b: abierta, pero la Persona ya no está entre los destinatarios
+   * porque el Admin los cambió después de que se anotó. No se da de baja sola:
+   * el Admin decide (Echu, 2026-10-09).
+   */
+  yaNoCorresponde: boolean;
   /** FR-067, FR-068: las respuestas; las sensibles solo para quien tiene `eventos.gestionar`. */
   respuestas: RespuestaEnInscripcion[];
   /** FR-070: lo que la app ya sabe de la Persona, para no preguntarlo. */

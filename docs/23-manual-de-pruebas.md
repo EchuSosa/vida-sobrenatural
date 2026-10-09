@@ -55,8 +55,8 @@ Cada app tiene **su propia sesión**: entrar en una no te hace entrar en la otra
 |---|---|---|
 | ⭐ **Demo** — el recorrido del domingo | 18 | 1 h 10 min |
 | **P1** — lo principal de cada módulo y los permisos | 50 | 3 h 20 min |
-| **P2** — validaciones, casos borde, celular y modo oscuro | 88 | 3 h 50 min |
-| **Total** | **156** | **unas 8 h 20 min** (día y medio con pausas) |
+| **P2** — validaciones, casos borde, celular y modo oscuro | 89 | 3 h 55 min |
+| **Total** | **157** | **unas 8 h 20 min** (día y medio con pausas) |
 
 **Orden sugerido:** primero todo el bloque ⭐ (si algo falla ahí, es lo más urgente), después P1,
 y si queda tiempo, P2.
@@ -398,6 +398,7 @@ un recuadro arriba ("Revisá…") con enlace a cada campo. Anotá cualquier mens
 | EVE-26 | P2 | Admin | "Jornada de sanidad · Mujeres" | 1. "Anotar a una Persona" → buscá a **Matías Vera** → elegilo.<br>2. Respondé "¿Sos celíaca?" y tocá "Anotar".<br>3. Tocá "Sí, anotarla igual". | En el paso 2 aparece, con un ícono de advertencia, "Matías Vera no está entre los destinatarios" y "Este evento es para mujeres desde 15 años. ¿La anotás igual? Hacelo solo si es una excepción acordada." Después queda anotado y su fila dice "Anotada aunque no está entre los destinatarios". | |
 | EVE-27 | P2 | Admin | Crear un Evento | 1. En "Para quién es" poné Edad mínima **30** y Edad máxima **18**.<br>2. "Crear el Evento". | No crea. "La edad máxima no puede ser menor que la mínima." arriba (con enlace) y debajo de "Edad máxima". | |
 | EVE-28 | P2 | Mujer (celular, modo oscuro) | Perfil → Tema oscuro | 1. Abrí "Jornada de sanidad · Mujeres" con una cuenta que todavía no esté anotada (por ejemplo `prueba-demo-1@example.com` de la demo) y tocá "Anotarme". | Las preguntas, los círculos para elegir, el candado de "dato sensible" y los mensajes de error se leen bien en oscuro; no hay que deslizar de costado. | |
+| EVE-29 | P2 | Admin | "Noche de jóvenes" (de 15 a 30 años) | 1. "Anotar a una Persona" → **Nicolás Peña** (22 años, cumple) → "Anotar".<br>2. "Editar" el Evento: en "Para quién es" elegí **Mujeres** y guardá.<br>3. Mirá la lista de inscriptos, pestaña Confirmadas. | Nicolás sigue anotado: no se dio de baja solo. Su fila dice, con un ícono de advertencia, **"Ya no está entre los destinatarios: si corresponde, dala de baja"**, y tiene el botón "Dar de baja". En el formulario, la ayuda de "Para quién es" avisa que esto pasa. | |
 
 ### 5.7. Avisos, comentarios, catálogos y otras pantallas (AVI, COM, CAT, PUB)
 

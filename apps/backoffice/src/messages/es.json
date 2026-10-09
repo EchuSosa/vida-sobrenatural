@@ -1533,7 +1533,7 @@
           "edadMaxima": "La edad máxima no puede ser menor que la mínima."
         },
         "seccionDestinatarios": "Para quién es",
-        "destinatariosAyuda": "Solo pueden anotarse (y pedir lugar en la lista de espera) las personas que cumplen. A las demás, la página del Evento les explica para quién es y no les muestra el botón.",
+        "destinatariosAyuda": "Solo pueden anotarse (y pedir lugar en la lista de espera) las personas que cumplen. A las demás, la página del Evento les explica para quién es y no les muestra el botón. Si lo cambiás cuando ya hay gente anotada, las que dejen de cumplir no se dan de baja solas: quedan marcadas en la lista de inscriptos.",
         "destinatariosGenero": "Género",
         "genero": {
           "todas": "Todas las personas",
@@ -1764,7 +1764,8 @@
       "grupoExtension": "Grupo de extensión: {nombre}",
       "preguntasTitulo": "Sus respuestas a las preguntas del Evento",
       "errorResumen": "No pudimos cargar el resumen de respuestas. Recargá la página para intentar de nuevo.",
-      "sensibleSr": "Dato sensible: "
+      "sensibleSr": "Dato sensible: ",
+      "yaNoCorresponde": "Ya no está entre los destinatarios: si corresponde, dala de baja"
     },
     "pagos": {
       "titulo": "Pago de {nombre}",
