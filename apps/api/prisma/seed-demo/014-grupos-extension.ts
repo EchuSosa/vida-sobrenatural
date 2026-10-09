@@ -52,6 +52,7 @@ const GRUPOS: GrupoDemo[] = [
     lideres: [LIDER_DEMO],
     dias: ['martes'],
     horaInicio: '19:00',
+    edadMinima: 18, // D234: grupo de adultos
     cupo: 12,
     calle: '7', numero: '1350', entre: ['58', '59'], zona: 'Centro',
     latitud: -34.9268, longitud: -57.9478,
@@ -62,6 +63,7 @@ const GRUPOS: GrupoDemo[] = [
     lideres: [{ email: 'demo-gex-silvia@example.com', nombre: 'Silvia', apellido: 'Quiroga', genero: 'femenino', edad: 55, telefono: '+54 9 221 640-0002' }],
     dias: ['jueves'],
     horaInicio: '18:30',
+    edadMinima: 18, // D234: grupo de adultos
     calle: '528', numero: '1650', entre: ['2', '3'], zona: 'Tolosa',
     latitud: -34.8952, longitud: -57.9702,
     integrantes: 4,
@@ -92,6 +94,7 @@ const GRUPOS: GrupoDemo[] = [
     lideres: [{ email: 'demo-gex-hernan@example.com', nombre: 'Hernán', apellido: 'Coronel', genero: 'masculino', edad: 50, telefono: '+54 9 221 640-0005' }],
     dias: ['lunes'],
     horaInicio: '19:00',
+    edadMinima: 18, // D234: grupo de adultos
     calle: '137', numero: '1840', entre: ['60', '61'], zona: 'Los Hornos',
     latitud: -34.9562, longitud: -57.9897,
     integrantes: 3,
@@ -101,6 +104,7 @@ const GRUPOS: GrupoDemo[] = [
     lideres: [{ email: 'demo-gex-leandro@example.com', nombre: 'Leandro', apellido: 'Maldonado', genero: 'masculino', edad: 39, telefono: '+54 9 221 640-0006' }],
     dias: ['miercoles', 'viernes'],
     horaInicio: '19:00',
+    edadMinima: 18, // D234: grupo de adultos
     calle: '50', numero: '920', entre: ['13', '14'], zona: 'Centro',
     latitud: -34.9151, longitud: -57.9612,
     integrantes: 2,
@@ -113,6 +117,7 @@ const GRUPOS: GrupoDemo[] = [
     ],
     dias: ['viernes'],
     horaInicio: '19:00',
+    edadMinima: 18, // D234: grupo de adultos
     calle: '13', numero: '420', entre: ['473', '474'], zona: 'City Bell',
     latitud: -34.8693, longitud: -58.0468,
     integrantes: 2,
