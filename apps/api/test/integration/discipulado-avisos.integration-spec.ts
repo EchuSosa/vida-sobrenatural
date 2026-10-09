@@ -83,13 +83,11 @@ describe('Avisos de la 004 y de la activación (integración)', () => {
     const disc = await esc.discipulador('disc2');
     const persona = await esc.persona('carla');
     const { propuestaId } = await esc.propuestaNueva(persona, disc, admin);
-    const antes = await prisma.notificacion.count();
     const tokenDisc = await tokenDe(disc, ['miembro_registrado', 'discipulador']);
     await http().post(`/discipulado/propuestas/${propuestaId}/declinar`).set('Authorization', `Bearer ${tokenDisc}`).send({ motivo: 'No puedo ese día' }).expect(200);
     expect(await prisma.notificacion.count({ where: { evento: 'discipulado.propuesta_declinada' } })).toBe(0);
     expect(await avisosDe(persona)).toEqual([]);
     expect(await avisosDe(admin)).toEqual([]);
-    expect(await prisma.notificacion.count()).toBeGreaterThanOrEqual(antes);
   });
 
   it('una transición que falla después de emitir no deja aviso (US2-4, FR-011)', async () => {
