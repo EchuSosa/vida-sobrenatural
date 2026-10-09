@@ -1,4 +1,5 @@
 import { Module, type OnModuleInit } from '@nestjs/common';
+import { BautismoModule } from '../bautismo/bautismo.module.js';
 import { SolicitudDiscipuladoModule } from '../solicitud-discipulado/solicitud-discipulado.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RegistroFuentesSolicitudes } from '../bandeja/registro-fuentes.js';
@@ -15,10 +16,11 @@ import { FuenteHistorial } from './fuente-bandeja.js';
  * que ya usan otras specs. Lote A: lo de la Persona (`camino.*`). Lote B: lo
  * del Admin (`historial-admin.*`), la fuente `historial` de la bandeja y su
  * fila en los Pendientes del Inicio (IMPLEMENTACION §2.3 y §2.4).
- * Importa SolicitudDiscipuladoModule por `estadoPropio` (FR-005).
+ * Importa SolicitudDiscipuladoModule por `estadoPropio` (FR-005) y
+ * BautismoModule por `retirarPorDeclaracion` (spec 010, H3).
  */
 @Module({
-  imports: [SolicitudDiscipuladoModule],
+  imports: [SolicitudDiscipuladoModule, BautismoModule],
   controllers: [CaminoController, HistorialAdminController],
   providers: [CaminoService, HistorialAdminService],
 })

@@ -19,7 +19,7 @@ export const ETAPAS_CAMINO: readonly EtapaCamino[] = ['vida_nueva', 'vida_de_ser
  * mismo commit que habilita su pedido; mientras tanto su card dice
  * "Próximamente".
  */
-export const ETAPAS_CONSTRUIDAS: readonly EtapaCamino[] = ['vida_nueva', 'vida_de_servicio', 'ministerio'];
+export const ETAPAS_CONSTRUIDAS: readonly EtapaCamino[] = ['vida_nueva', 'vida_de_servicio', 'ministerio', 'bautismo'];
 
 export type EstadoDeclaracion = 'pendiente' | 'confirmada' | 'rechazada' | 'retirada';
 

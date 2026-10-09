@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import type { Server } from 'node:http';
 import request from 'supertest';
-import { diaCivilEnArgentina } from '@vida-sobrenatural/shared-types';
+import { hoyEnArgentina } from '@vida-sobrenatural/shared-types';
 import type { PrismaService } from '../../src/prisma/prisma.service.js';
 import { AYER, EscenarioEventos, levantarApp, tokenDe } from './eventos-fixtures.js';
 
@@ -12,8 +12,8 @@ describe('Pago de la Persona (integración)', () => {
   let esc: EscenarioEventos;
   const http = () => request(app.getHttpServer());
   const PDF = Buffer.from('%PDF-1.4\n%%EOF');
-  // El día civil en Argentina, como valida la API (`FECHA_PAGO_FUTURA`): con el día UTC, entre las 00 y las 03 UTC "hoy" era mañana.
-  const hoy = () => diaCivilEnArgentina(new Date());
+  // La fecha civil de hoy en Argentina (con la UTC, entre las 21 y las 24 hs sería "mañana": FECHA_PAGO_FUTURA).
+  const hoy = () => hoyEnArgentina();
   const pagar = (inscripcionId: string, token: string, campos: Record<string, string> = {}, archivo: Buffer | null = PDF) => {
     let r = http().post(`/inscripciones-evento/${inscripcionId}/pagos`).set('Authorization', `Bearer ${token}`);
     for (const [k, v] of Object.entries({ monto: '1000', medio: 'transferencia', fechaPago: '2026-01-01', ...campos })) r = r.field(k, v);
