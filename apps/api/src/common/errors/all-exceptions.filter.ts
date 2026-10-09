@@ -158,6 +158,17 @@ const TITULOS: Record<ErrorCode, string> = {
   CURSO_TIENE_GRUPOS: 'No se puede eliminar: tiene Grupos',
   CURSO_NO_RECONOCIDO: 'Curso no reconocido',
   CURSO_YA_EXISTE: 'El Curso ya existe',
+  // spec 014
+  GRUPO_EXTENSION_NO_DISPONIBLE: 'Grupo de extensión no disponible',
+  GRUPO_EXTENSION_COMPLETO: 'Grupo de extensión completo',
+  GRUPO_EXTENSION_YA_INTEGRANTE: 'Ya forma parte de un grupo de extensión',
+  GRUPO_EXTENSION_PEDIDO_PENDIENTE: 'Ya hay un pedido pendiente',
+  GRUPO_EXTENSION_NO_COMPATIBLE: 'El grupo no corresponde por género o edad',
+  GRUPO_EXTENSION_SOLICITUD_NO_PENDIENTE: 'El pedido ya fue respondido',
+  GRUPO_EXTENSION_NO_INTEGRANTE: 'No forma parte del grupo',
+  GRUPO_EXTENSION_CON_INTEGRANTES: 'El grupo tiene integrantes o pedidos',
+  DIRECCION_NO_UBICADA: 'Dirección no encontrada',
+  UBICACION_NO_DISPONIBLE: 'Servicio de ubicación no disponible',
   ERROR_INTERNO: 'Error interno',
 };
 

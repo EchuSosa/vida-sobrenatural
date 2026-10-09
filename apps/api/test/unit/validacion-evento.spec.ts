@@ -63,7 +63,7 @@ describe('validarConfigEvento (FR-010, FR-045)', () => {
     expect(codigos({ destinatariosGenero: 'mujeres', edadMinima: 15, edadMaxima: null })).toEqual([]);
     expect(codigos({ edadMinima: -1 })).toEqual(['edadMinima:EDAD_INVALIDA']);
     expect(codigos({ edadMaxima: 121 })).toEqual(['edadMaxima:EDAD_INVALIDA']);
-    expect(codigos({ edadMinima: 30, edadMaxima: 18 })).toEqual(['edadMaxima:EDAD_MAXIMA_MENOR_A_MINIMA']);
+    expect(codigos({ edadMinima: 30, edadMaxima: 18 })).toEqual(['edadMaxima:EDADES_INVERTIDAS']);
     expect(codigos({ destinatariosGenero: 'otros' as never })).toEqual(['destinatariosGenero:DESTINATARIOS_GENERO_INVALIDO']);
     expect(
       codigos({ tipo: 'bautismo', requiereAprobacion: false, costo: null, instruccionesPago: null, permiteListaEspera: false, diasAnticipacionRecordatorio: null, destinatariosGenero: 'varones' }),

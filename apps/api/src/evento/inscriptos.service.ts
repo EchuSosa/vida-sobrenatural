@@ -340,8 +340,7 @@ export class InscriptosService {
             telefono: f.persona.telefono,
             ministerios: sabido.get(f.persona.id)?.ministerios ?? [],
             referente: sabido.get(f.persona.id)?.referente ?? null,
-            // FR-070: lo completa la spec 014 (grupos de extensión) cuando esté en `main`.
-            grupoExtension: null,
+            grupoExtension: sabido.get(f.persona.id)?.grupoExtension ?? null,
           },
         };
       }),

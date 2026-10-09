@@ -2,8 +2,8 @@
 
 **Spec base**: [`spec.md`](./spec.md) (no se rehace: esto suma FR-060 a FR-075).
 **Aprobada por**: Echu, 2026-10-09. **Rama**: `eventos-destinatarios-preguntas`.
-**Decisiones**: D220 (destinatarios con efecto), D221 (preguntas propias), D222 (respuestas sensibles),
-D223 (lo que la app ya sabe en la lista de inscriptos). Si al mergear `main` alguno choca, se renumera.
+**Decisiones**: D229 (destinatarios con efecto), D230 (preguntas propias), D231 (respuestas sensibles),
+D232 (lo que la app ya sabe en la lista de inscriptos). Si al mergear `main` alguno choca, se renumera.
 
 ## Motivo
 
@@ -58,16 +58,16 @@ sensible.
 
 En la lista de inscriptos del backoffice, por cada Persona: edad (al día del Evento), teléfono, su
 Ministerio, quién la acompaña (Discipulador o Líder de su Grupo más reciente) y su grupo de extensión con
-su líder cuando exista la spec 014. Así la Admin no lo pregunta.
+su líder (spec 014). Así la Admin no lo pregunta.
 
 ## Requirements
 
-### Destinatarios (D220)
+### Destinatarios (D229)
 
 - **FR-060**: El Evento tiene `destinatariosGenero` (`todas` | `mujeres` | `varones`, por defecto
   `todas`) y `edadMinima` / `edadMaxima` opcionales (enteros 0–120, la máxima ≥ la mínima), en años
   cumplidos **al día civil (Argentina) del inicio del Evento**. Errores por campo: `EDAD_INVALIDA`,
-  `EDAD_MAXIMA_MENOR_A_MINIMA`, `DESTINATARIOS_GENERO_INVALIDO`. Un Evento de bautismo es para todas
+  `EDADES_INVERTIDAS`, `DESTINATARIOS_GENERO_INVALIDO`. Un Evento de bautismo es para todas
   las personas (`CONFIG_BAUTISMO_INVALIDA`). `publicoObjetivo` sigue como texto libre para matices.
 - **FR-061**: Solo pueden anotarse (y anotarse en la lista de espera) las Personas que cumplen
   (`correspondeAlEvento`, en `packages/shared-types`, una sola regla para la API y las dos apps). La
@@ -86,7 +86,7 @@ su líder cuando exista la spec 014. Así la Admin no lo pregunta.
   el Admin decide con "Dar de baja", que ya avisa a la Persona. Respondido por Echu el 2026-10-09
   (Pregunta 1).
 
-### Preguntas propias (D221)
+### Preguntas propias (D230)
 
 - **FR-064**: En el formulario del Evento, "Preguntas para la inscripción": hasta **10**, en orden; cada
   una con texto (hasta 200), tipo (**Sí/No**, **Una opción** con 2 a 10 opciones de hasta 100
@@ -105,7 +105,7 @@ su líder cuando exista la spec 014. Así la Admin no lo pregunta.
   valor ("¿Sos celíaca? Sí: 3 · No: 25"); Texto corto, cuántas respondieron. La 011 no tiene
   exportación a CSV: no se agrega.
 
-### Datos sensibles (D222)
+### Datos sensibles (D231)
 
 - **FR-068**: Las respuestas viven **solo** en la Inscripción a ese Evento (`RespuestaPreguntaEvento`),
   nunca en el perfil. Las de preguntas sensibles las ven **solo** quien tiene `eventos.gestionar`
@@ -117,12 +117,12 @@ su líder cuando exista la spec 014. Así la Admin no lo pregunta.
   sensibles de los Eventos cuyo fin (o inicio, si no tiene fin) fue hace más de **30 días**, y marca el
   Evento (`respuestasSensiblesBorradasEn`). Idempotente; con test de integración.
 
-### Lo que la app ya sabe (D223)
+### Lo que la app ya sabe (D232)
 
 - **FR-070**: Cada fila de la lista de inscriptos trae `datosPersona`: edad (al día del Evento),
   teléfono, Ministerios donde sirve (Postulaciones aprobadas), referente (Discipulador o Líder del Grupo
-  más reciente en que está o estuvo) y `grupoExtension` (null hasta que la spec 014 esté en `main`: el
-  campo y su lugar en pantalla quedan preparados).
+  más reciente en que está o estuvo) y `grupoExtension`: su Grupo de Extensión (Solicitud `aceptada`
+  de la spec 014) con su(s) líder(es) vigente(s).
 
 ### Demo y manual
 
@@ -169,12 +169,12 @@ Migración propia `20261009135610_eventos_destinatarios_preguntas` (con CHECK de
   (`apps/backoffice/e2e/eventos-destinatarios-preguntas.spec.ts`).
 - [X] T208 Web: responder las preguntas al anotarse (`CamposPreguntasEvento` en `packages/ui`, con
   su test) y "Tus respuestas" + e2e (`apps/web/e2e/eventos-destinatarios-preguntas.spec.ts`).
-- [X] T209 Datos de la Persona en la lista (`datos-persona-inscripta.ts`, FR-070). El grupo de
-  extensión queda `null` y con su lugar en pantalla: la spec 014 no está en `main`.
+- [X] T209 Datos de la Persona en la lista (`datos-persona-inscripta.ts`, FR-070), con el grupo de
+  extensión y su líder desde que la spec 014 llegó a `main`.
 - [X] T210 Seed demo: "Jornada de sanidad · Mujeres" con 8 inscriptas y "Noche de jóvenes" (15 a 30).
   Los e2e crean sus datos por la API (no hacen falta fixtures nuevos; `limpiar-e2e` borra las
   respuestas en cascada con la Inscripción).
-- [X] T211 Manual (DEMO-17, DEMO-18, EVE-20 a EVE-28) y decisiones D220–D223.
+- [X] T211 Manual (DEMO-17, DEMO-18, EVE-20 a EVE-28) y decisiones D229–D232.
 - [X] T212 Checklist de `docs/15` por pantalla tocada (abajo).
 
 ### Checklist de `docs/15` (D114)

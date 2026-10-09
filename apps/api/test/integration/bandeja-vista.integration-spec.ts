@@ -25,6 +25,7 @@ describe('Vista solicitudes_bandeja — coherencia exhaustiva (spec 013 T011)', 
   let adminId: string;
   let ministerioId: string;
   let eventoId: string;
+  let grupoExtensionId: string;
   let apellido: string;
   /** Las Inscripciones `confirmada` que sostienen a cada Pago: también son filas de la vista. */
   let inscripcionesDePagos = 0;
@@ -58,6 +59,13 @@ describe('Vista solicitudes_bandeja — coherencia exhaustiva (spec 013 T011)', 
       })
     ).id;
 
+    grupoExtensionId = (
+      await prisma.grupoExtension.create({
+        data: { nombre: `Grupo ${sufijo}`, dias: ['lunes'], horaInicio: '19:00', enLaIglesia: true, sedeId: escenario.sedeId, creadoPorId: adminId },
+        select: { id: true },
+      })
+    ).id;
+
     let n = 0;
     for (const tipo of TIPOS_SOLICITUD) {
       for (const estado of ESTADOS_POR_TIPO[tipo]) {
@@ -72,6 +80,8 @@ describe('Vista solicitudes_bandeja — coherencia exhaustiva (spec 013 T011)', 
     const inscripciones = (await prisma.inscripcionEvento.findMany({ where: { eventoId }, select: { id: true } })).map((i) => i.id);
     await prisma.pago.deleteMany({ where: { inscripcionEventoId: { in: inscripciones } } });
     await prisma.solicitudBautismo.deleteMany({ where: { personaId: { in: personas } } });
+    await prisma.solicitudGrupoExtension.deleteMany({ where: { grupoId: grupoExtensionId } });
+    await prisma.grupoExtension.deleteMany({ where: { id: grupoExtensionId } });
     await prisma.inscripcionEvento.deleteMany({ where: { eventoId } });
     await prisma.evento.deleteMany({ where: { id: eventoId } });
     await prisma.postulacion.deleteMany({ where: { ministerioId } });
@@ -175,6 +185,18 @@ describe('Vista solicitudes_bandeja — coherencia exhaustiva (spec 013 T011)', 
           select: { id: true },
         });
         return fila(id);
+      }
+      case 'grupo_extension': {
+        // spec 014: lo mínimo que exige el CHECK de cada estado.
+        const data = {
+          ...base,
+          grupoId: grupoExtensionId,
+          estado: estado as never,
+          ...(estado === 'aceptada' || estado === 'rechazada' ? revisado : {}),
+          ...(estado === 'retirada' ? { retiradaEn: new Date() } : {}),
+          ...(estado === 'finalizada' ? { finalizadaEn: new Date() } : {}),
+        };
+        return fila((await prisma.solicitudGrupoExtension.create({ data, select: { id: true } })).id);
       }
     }
   }

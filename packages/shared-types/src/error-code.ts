@@ -176,7 +176,7 @@ export type ErrorCode =
   | 'INSCRIPCION_NO_CONFIRMADA'
   | 'PAGO_PENDIENTE_EXISTENTE' // FR-030
   | 'PAGO_NO_PENDIENTE'
-  // spec 011, ampliación 2026-10-09 (D220–D223)
+  // spec 011, ampliación 2026-10-09 (D229–D232)
   | 'EVENTO_NO_CORRESPONDE' // FR-061: no está entre los destinatarios
   | 'PREGUNTA_CON_RESPUESTAS' // FR-066: no se borra ni cambia de tipo
   // spec 012
@@ -187,6 +187,17 @@ export type ErrorCode =
   | 'CURSO_TIENE_GRUPOS' // D119
   | 'CURSO_NO_RECONOCIDO' // FR-056
   | 'CURSO_YA_EXISTE' // FR-056
+  // spec 014 — Grupos de Extensión
+  | 'GRUPO_EXTENSION_NO_DISPONIBLE'
+  | 'GRUPO_EXTENSION_COMPLETO'
+  | 'GRUPO_EXTENSION_YA_INTEGRANTE'
+  | 'GRUPO_EXTENSION_PEDIDO_PENDIENTE'
+  | 'GRUPO_EXTENSION_NO_COMPATIBLE'
+  | 'GRUPO_EXTENSION_SOLICITUD_NO_PENDIENTE'
+  | 'GRUPO_EXTENSION_NO_INTEGRANTE'
+  | 'GRUPO_EXTENSION_CON_INTEGRANTES'
+  | 'DIRECCION_NO_UBICADA'
+  | 'UBICACION_NO_DISPONIBLE'
   | 'ERROR_INTERNO';
 
 /** Forma de la respuesta de error de apps/api — Problem Details (RFC 9457). */

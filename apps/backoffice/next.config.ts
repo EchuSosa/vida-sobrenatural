@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
   // H-78/D124: ver el mismo comentario en apps/web/next.config.ts — distDir
   // propio para que el `next dev` de e2e no choque con el de desarrollo.
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
+  // `pnpm dev:red` (scripts/dev-red.mjs): para probar desde el celular u otra
+  // compu en la misma red, Next 16 solo sirve sus recursos de desarrollo a los
+  // orígenes permitidos. Fuera de ese comando la variable no existe y no cambia nada.
+  ...(process.env.DEV_ORIGENES_PERMITIDOS
+    ? { allowedDevOrigins: process.env.DEV_ORIGENES_PERMITIDOS.split(",") }
+    : {}),
   // spec 006, T061 (FR-025, D142): lo del Discipulador y del Líder de curso
   // vive en la web app. Los enlaces viejos del backoffice llevan allá,
   // conservando el id; si la sesión no tiene el permiso, la web app hace lo

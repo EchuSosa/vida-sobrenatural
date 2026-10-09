@@ -14,7 +14,7 @@ import { AppException } from '../common/errors/app-exception.js';
 import { aPreguntaEvento, PREGUNTA_SELECT } from './representacion.js';
 
 /**
- * spec 011, ampliación 2026-10-09 (FR-064 a FR-068, D221, D222) — las
+ * spec 011, ampliación 2026-10-09 (FR-064 a FR-068, D230, D231) — las
  * preguntas propias del Evento y sus respuestas. Las respuestas viven solo en
  * la Inscripción (`RespuestaPreguntaEvento`), nunca en el perfil, y nunca se
  * loguean ni viajan en avisos: los errores llevan el campo y el código, no el

@@ -45,6 +45,12 @@
 *Bautismo:*
 - Solicitud de Bautismo in-app, revisada por el Admin (Flujo 6).
 
+*Grupos de Extensión* (D220–D228, spec 014 — aparte de las etapas):
+- La Persona busca su Grupo desde Mi camino por su dirección o su ubicación (que no se guarda), ve los de su género y edad ordenados por cercanía, sin la dirección exacta, y pide sumarse.
+- El líder del Grupo recibe el aviso y acepta o no desde la web app ("Mi grupo"), con el contacto de la persona y WhatsApp.
+- Ya aceptada, la Persona ve la dirección exacta, el contacto del líder y "Cómo llegar".
+- El Admin carga los Grupos en el backoffice (lugar "En la iglesia" o dirección al estilo de La Plata, convertida en coordenadas al guardar) y puede aceptar pedidos, agregar o quitar personas; los pedidos entran a la bandeja.
+
 Cada solicitud muestra, además de su estado, qué pasa después (ver `15-guia-ux-ui.md`).
 
 **Eventos:**
@@ -62,7 +68,7 @@ Cada solicitud muestra, además de su estado, qué pasa después (ver `15-guia-u
 
 **Back office / Admin:**
 - CRUD de catálogos (Sede, Curso, Ministerio, Célula) con soft delete (`activo`) y confirmación reforzada al desactivar registros con datos relacionados **activos** (D38, ej. un Curso con Grupos en curso).
-- Bandeja unificada de Solicitudes (Discipulado, Vida de Servicio, Bautismo, Postulaciones, Inscripciones a Evento, Pagos).
+- Bandeja unificada de Solicitudes (Discipulado, Vida de Servicio, Bautismo, Postulaciones, Inscripciones a Evento, Pagos, Grupos de Extensión).
 - Alta de Personas adultas y acciones en su nombre (Flujo 12).
 - Vista de perfil unificada por Persona (roles, historial de Inscripciones/Postulaciones/Solicitudes, Relaciones Familiares), con foto de perfil de Google cuando exista (D87).
 - Listado de cumpleaños del mes.
@@ -91,7 +97,7 @@ Cada solicitud muestra, además de su estado, qué pasa después (ver `15-guia-u
 - No gestiona donaciones/diezmos de forma general — solo la sección estática de Ofrendas listada arriba (sin procesar pagos reales, salvo el caso puntual de Eventos con costo, que sí registra el pago).
 - No controla asistencia general a cultos — solo la asistencia a Vida de Servicio, que sí está en el MVP.
 - No es una app de mensajería (WhatsApp sigue existiendo en paralelo, ver `05-decisiones.md`).
-- Escuelita y Grupos de Extensión quedan en Fase 2 (ver `08-roadmap-producto.md`).
+- Escuelita queda en Fase 2 (ver `08-roadmap-producto.md`). Grupos de Extensión se adelantó al MVP (D220, spec 014).
 - Portugués e inglés quedan en Fase 2 (D84) — el MVP solo deja la base preparada.
 - Feed de Instagram y visualización de progreso en "Mi camino" quedan en Fase 2.
 - Preferencias de canal de notificación y subida de foto de perfil propia quedan en Fase 2. (El ingreso con código por email se adelantó al MVP, D141.)

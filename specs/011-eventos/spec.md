@@ -643,7 +643,7 @@ pública no ofrece "Anotarme" ni muestra nombres, y que la API rechaza una auto-
 
 Aprobada por Echu el 2026-10-09: destinatarios del Evento con efecto (género y edad) y preguntas
 propias de la inscripción, con sus FR (FR-060 a FR-072), tasks y tests en
-[`ampliacion-2026-10-09.md`](./ampliacion-2026-10-09.md) (D220–D223).
+[`ampliacion-2026-10-09.md`](./ampliacion-2026-10-09.md) (D229–D232).
 
 ## Preguntas para Echu
 

@@ -2,7 +2,7 @@ import { test, expect, auditar, esperarTema, loguearseComoTest, sinScrollHorizon
 import { crearEventoComoAdmin, crearPersonaActiva } from './helpers-011';
 
 /**
- * spec 011, ampliación 2026-10-09 (FR-060 a FR-063, D220) — un Evento "para
+ * spec 011, ampliación 2026-10-09 (FR-060 a FR-063, D229) — un Evento "para
  * mujeres desde 15 años": una mujer de 20 se anota respondiendo las preguntas
  * del Evento (FR-065, errores por campo); un varón ve para quién es y no ve el
  * botón. En celular y con axe en claro y oscuro.

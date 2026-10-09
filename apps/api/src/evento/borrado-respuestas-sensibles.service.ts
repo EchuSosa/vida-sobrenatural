@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 const DIA_MS = 86_400_000;
 
 /**
- * spec 011, ampliación 2026-10-09 (FR-069, D222) — borra las respuestas a
+ * spec 011, ampliación 2026-10-09 (FR-069, D231) — borra las respuestas a
  * preguntas marcadas como "dato sensible" de los Eventos que terminaron hace
  * más de 30 días (el fin, o el inicio si no tiene fin; también los
  * cancelados). Marca el Evento con `respuestasSensiblesBorradasEn` para no

@@ -14,6 +14,7 @@ import {
   Mic,
   BookOpen,
   MessageSquare,
+  House,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { CATALOGO_PERMISOS, type Permiso, type RolDeCargo } from '@vida-sobrenatural/shared-types';
@@ -137,6 +138,12 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/eventos/[id]', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver', enMenu: false },
   { href: '/eventos/papelera', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.papelera.ver', enMenu: false },
   { href: '/solicitudes/inscripcion-evento/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'eventos.ver', enMenu: false },
+  // --- spec 014 (Grupos de Extensión, D221/D227) ---
+  { href: '/grupos-extension', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.ver' },
+  { href: '/grupos-extension/nuevo', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.gestionar', enMenu: false },
+  { href: '/grupos-extension/[id]', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.ver', enMenu: false },
+  { href: '/grupos-extension/[id]/editar', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.gestionar', enMenu: false },
+  { href: '/solicitudes/grupo-extension/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   { href: '/solicitudes/pago/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'pagos.verificar', enMenu: false },
   // --- spec 012 ---
   { href: '/notificaciones/[id]', labelKey: 'notificaciones', icon: Bell, permiso: 'notificaciones.ver', enMenu: false },

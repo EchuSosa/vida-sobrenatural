@@ -47,6 +47,8 @@ model Sede {
   personas Persona[]
   // spec 011: una Sede con Eventos no se puede eliminar, solo inactivar (D119).
   eventos  Evento[]
+  // spec 014: los Grupos de Extensión que se reúnen "En la iglesia".
+  gruposExtension GrupoExtension[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -241,6 +243,10 @@ model Persona {
   notificacionesCreadas Notificacion[]       @relation("NotificacionesCreadas")
   comentarios           ComentarioApp[]      @relation("ComentariosDePersona")
   comentariosRevisados  ComentarioApp[]      @relation("ComentariosRevisados")
+
+  // spec 014: Grupos de Extensión.
+  liderazgosExtension   LiderGrupoExtension[]
+  solicitudesExtension  SolicitudGrupoExtension[]
 
   // H-42 (revisión manual, revisión de código): PostgreSQL no indexa las
   // claves foráneas por sí solo — `sedeId` lo necesita como FK.
@@ -1126,12 +1132,12 @@ model Evento {
   costo                        Decimal?     @db.Decimal(10, 2)
   instruccionesPago            String?
   diasAnticipacionRecordatorio Int?
-  // Ampliación 2026-10-09 (FR-060, D220): destinatarios con efecto. Edades en
+  // Ampliación 2026-10-09 (FR-060, D229): destinatarios con efecto. Edades en
   // años cumplidos al día del Evento; null = sin límite.
   destinatariosGenero          GeneroDestinatario @default(todas)
   edadMinima                   Int?
   edadMaxima                   Int?
-  // FR-069 (D222): cuándo se borraron las respuestas sensibles (idempotencia).
+  // FR-069 (D231): cuándo se borraron las respuestas sensibles (idempotencia).
   respuestasSensiblesBorradasEn DateTime?
   estado                       EstadoEvento @default(publicado)
   canceladoEn                  DateTime?
@@ -1185,7 +1191,7 @@ model InscripcionEvento {
   @@map("inscripciones_evento")
 }
 
-// --- spec 011, ampliación 2026-10-09: preguntas propias del Evento (D221, D222) ---
+// --- spec 011, ampliación 2026-10-09: preguntas propias del Evento (D230, D231) ---
 
 enum GeneroDestinatario {
   todas
@@ -1221,7 +1227,7 @@ model PreguntaEvento {
   @@map("preguntas_evento")
 }
 
-// Las respuestas viven SOLO en la Inscripción a ese Evento, nunca en el perfil (D222).
+// Las respuestas viven SOLO en la Inscripción a ese Evento, nunca en el perfil (D231).
 model RespuestaPreguntaEvento {
   id            String            @id @default(uuid())
   inscripcionId String
@@ -1382,4 +1388,101 @@ model ComentarioApp {
   @@index([personaId, createdAt])
   @@index([revisadoPorId])
   @@map("comentarios_app")
+}
+
+// --- spec 014: Grupos de Extensión (D220–D228) ---
+
+enum DiaSemana {
+  lunes
+  martes
+  miercoles
+  jueves
+  viernes
+  sabado
+  domingo
+}
+
+enum EstadoSolicitudGrupoExtension {
+  pendiente
+  aceptada   // ES la pertenencia (D225, mismo criterio que D170)
+  rechazada
+  retirada
+  finalizada // la quitó el Admin
+}
+
+// D221: el lugar es "En la iglesia" (la dirección de la Sede) o una dirección
+// al estilo de La Plata. Las coordenadas se calculan al guardar (D223) y pueden
+// faltar (el Grupo queda sin distancia). El género NO se guarda: sale de los
+// líderes vigentes (D222). CHECK de forma en la migración `grupos_extension`.
+model GrupoExtension {
+  id           String      @id @default(uuid())
+  nombre       String
+  dias         DiaSemana[]
+  // "HH:MM", en pasos de 15 minutos (CHECK).
+  horaInicio   String
+  cupo         Int?
+  edadMinima   Int?
+  edadMaxima   Int?
+  enLaIglesia  Boolean     @default(false)
+  sedeId       String?
+  sede         Sede?       @relation(fields: [sedeId], references: [id])
+  calle        String?
+  numero       String?
+  entreCalle1  String?
+  entreCalle2  String?
+  // Barrio o zona: lo único del lugar que ve quien todavía no es integrante (D224).
+  zona         String?
+  latitud      Float?
+  longitud     Float?
+  activo       Boolean     @default(true)
+  creadoPorId  String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  lideres     LiderGrupoExtension[]
+  solicitudes SolicitudGrupoExtension[]
+
+  @@index([activo])
+  @@map("grupos_extension")
+}
+
+// Un líder vigente tiene `hasta` en null (único parcial por Grupo y Persona).
+model LiderGrupoExtension {
+  id        String         @id @default(uuid())
+  grupoId   String
+  grupo     GrupoExtension @relation(fields: [grupoId], references: [id])
+  personaId String
+  persona   Persona        @relation(fields: [personaId], references: [id])
+  desde     DateTime       @default(now())
+  hasta     DateTime?
+
+  @@index([grupoId])
+  @@index([personaId])
+  @@map("lideres_grupo_extension")
+}
+
+// D225: el pedido para sumarse. Una `pendiente` y una `aceptada` por Persona
+// como máximo (índices únicos parciales en SQL).
+model SolicitudGrupoExtension {
+  id              String                        @id @default(uuid())
+  personaId       String
+  persona         Persona                       @relation(fields: [personaId], references: [id])
+  grupoId         String
+  grupo           GrupoExtension                @relation(fields: [grupoId], references: [id])
+  estado          EstadoSolicitudGrupoExtension @default(pendiente)
+  creadoPorId     String?
+  revisadoPorId   String?
+  revisadaEn      DateTime?
+  // Mensaje opcional del líder (o del Admin) al decir "No es para este grupo".
+  mensaje         String?
+  retiradaEn      DateTime?
+  finalizadaEn    DateTime?
+  finalizadaPorId String?
+  createdAt       DateTime                      @default(now())
+  updatedAt       DateTime                      @updatedAt
+
+  @@index([personaId])
+  @@index([grupoId, estado])
+  @@index([estado, createdAt])
+  @@map("solicitudes_grupo_extension")
 }

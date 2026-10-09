@@ -12,7 +12,7 @@ import { EN_UN_MES, EscenarioEventos, levantarApp, tokenDe } from './eventos-fix
 const DIA = 86_400_000;
 
 /**
- * spec 011, ampliación 2026-10-09 — FR-064 a FR-069 (D221, D222): preguntas
+ * spec 011, ampliación 2026-10-09 — FR-064 a FR-069 (D230, D231): preguntas
  * propias del Evento, respuestas en el mismo paso de anotarse, quién ve las
  * sensibles, el resumen por pregunta, lo que no se puede cambiar con
  * respuestas y el borrado a los 30 días.
@@ -122,7 +122,7 @@ describe('Preguntas propias de un Evento (integración)', () => {
       { preguntaId: jornada.id, pregunta: '¿Participaste alguna vez de una jornada de sanidad?', tipo: 'opcion', sensible: false, valor: 'No, nunca' },
       { preguntaId: texto.id, pregunta: '¿Algo que quieras contarnos?', tipo: 'texto', sensible: false, valor: 'Vengo con mi hermana' },
     ]);
-    // Las respuestas viven solo en la Inscripción, nunca en el perfil (D222).
+    // Las respuestas viven solo en la Inscripción, nunca en el perfil (D231).
     const persona = await prisma.persona.findUniqueOrThrow({ where: { id: p.id } });
     expect(JSON.stringify(persona)).not.toContain('Vengo con mi hermana');
   });
@@ -249,7 +249,7 @@ describe('Preguntas propias de un Evento (integración)', () => {
     expect((await prisma.evento.findUniqueOrThrow({ where: { id: viejo.ev.id } })).respuestasSensiblesBorradasEn).toEqual(marca);
   });
 
-  it('la lista trae lo que la app ya sabe: edad al día del Evento, teléfono, Ministerio y quien la acompaña (FR-070)', async () => {
+  it('la lista trae lo que la app ya sabe: edad al día del Evento, teléfono, Ministerio, quien la acompaña y su grupo de extensión (FR-070)', async () => {
     const ev = await crearJornada({ preguntas: [] });
     const persona = await esc.persona('sabida', { fechaNacimiento: new Date('2000-01-01') });
     const discipuladora = await esc.persona('laura');
@@ -261,6 +261,12 @@ describe('Preguntas propias de un Evento (integración)', () => {
     const grupo = await prisma.grupo.create({ data: { cursoId: curso.id, sedeId: esc.sedeId } });
     await prisma.liderazgo.create({ data: { personaId: discipuladora, grupoId: grupo.id } });
     await prisma.inscripcion.create({ data: { personaId: persona, grupoId: grupo.id, solicitudId: randomUUID() } });
+    // spec 014: su grupo de extensión es la Solicitud aceptada; el líder, el vigente.
+    const extension = await prisma.grupoExtension.create({
+      data: { nombre: `Tolosa ${esc.sufijo}`, dias: ['martes'], horaInicio: '19:30', enLaIglesia: true, sedeId: esc.sedeId, creadoPorId: discipuladora },
+    });
+    await prisma.liderGrupoExtension.create({ data: { grupoId: extension.id, personaId: discipuladora } });
+    await prisma.solicitudGrupoExtension.create({ data: { grupoId: extension.id, personaId: persona, estado: 'aceptada', revisadaEn: new Date() } });
     try {
       await esc.inscripcion(ev.id, persona);
       const lista = await comoAdmin(http().get(`/eventos/${ev.id}/inscripciones?estado=confirmada`));
@@ -269,9 +275,12 @@ describe('Preguntas propias de un Evento (integración)', () => {
         telefono: '+5492211234567',
         ministerios: [`Alabanza ${esc.sufijo}`],
         referente: `laura Eventos${esc.sufijo}`,
-        grupoExtension: null,
+        grupoExtension: { nombre: `Tolosa ${esc.sufijo}`, lider: `laura Eventos${esc.sufijo}` },
       });
     } finally {
+      await prisma.solicitudGrupoExtension.deleteMany({ where: { grupoId: extension.id } });
+      await prisma.liderGrupoExtension.deleteMany({ where: { grupoId: extension.id } });
+      await prisma.grupoExtension.delete({ where: { id: extension.id } });
       await prisma.inscripcion.deleteMany({ where: { grupoId: grupo.id } });
       await prisma.liderazgo.deleteMany({ where: { grupoId: grupo.id } });
       await prisma.grupo.delete({ where: { id: grupo.id } });

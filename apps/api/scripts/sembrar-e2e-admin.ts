@@ -10,6 +10,7 @@ import { sembrarE2e010 } from './sembrar-e2e/010-bautismo.js';
 import { sembrarE2e011 } from './sembrar-e2e/011-eventos.js';
 import { sembrarE2e012 } from './sembrar-e2e/012-avisos.js';
 import { sembrarE2e013 } from './sembrar-e2e/013-backoffice.js';
+import { sembrarE2e014 } from './sembrar-e2e/014-grupos-extension.js';
 
 /**
  * H-34 (revisión manual ronda 3): los e2e de `apps/backoffice` necesitan una
@@ -139,6 +140,7 @@ async function main() {
   await sembrarE2e011(ctx);
   await sembrarE2e012(ctx);
   await sembrarE2e013(ctx);
+  await sembrarE2e014(ctx);
 }
 
 main()

@@ -5,7 +5,7 @@ import type { PrismaService } from '../../src/prisma/prisma.service.js';
 import { EN_UN_MES, EscenarioEventos, levantarApp, tokenDe } from './eventos-fixtures.js';
 
 /**
- * spec 011, ampliación 2026-10-09 — FR-060 a FR-063 (D220): destinatarios con
+ * spec 011, ampliación 2026-10-09 — FR-060 a FR-063 (D229): destinatarios con
  * efecto. Mujeres desde 15 años: una de 20 se anota; un varón y una de 14, no
  * (tampoco a la lista de espera); el Admin puede forzar con `forzar: true`.
  */
@@ -54,7 +54,7 @@ describe('Destinatarios de un Evento (integración)', () => {
 
     const editado = await http().patch(`/eventos/${res.body.id}`).set('Authorization', `Bearer ${admin}`).send({ edadMaxima: 12 });
     expect(editado.status).toBe(400);
-    expect(editado.body.errors).toEqual([{ campo: 'edadMaxima', code: 'EDAD_MAXIMA_MENOR_A_MINIMA' }]);
+    expect(editado.body.errors).toEqual([{ campo: 'edadMaxima', code: 'EDADES_INVERTIDAS' }]);
   });
 
   it('una mujer de 20 se anota; un varón y una de 14 reciben EVENTO_NO_CORRESPONDE (FR-061)', async () => {

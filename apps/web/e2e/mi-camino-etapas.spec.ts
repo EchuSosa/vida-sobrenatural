@@ -44,7 +44,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
 
       // Orden (FR-001): los títulos de las regiones de la página, de arriba a abajo.
       const titulos = await page.getByRole('main').getByRole('heading', { level: 2 }).allTextContents();
-      expect(titulos).toEqual(ORDEN);
+      // spec 014 (D224): "Mi grupo de extensión" va después de las cuatro etapas, aparte.
+      expect(titulos).toEqual([...ORDEN, 'Mi grupo de extensión']);
 
       // Una sola fuente de texto con /primeros-pasos (FR-001).
       for (const [nombre, descripcion] of Object.entries(DESCRIPCIONES)) {
