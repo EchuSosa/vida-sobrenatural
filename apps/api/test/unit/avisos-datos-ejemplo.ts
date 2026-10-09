@@ -57,6 +57,10 @@ export const DATOS_EJEMPLO: { [N in NombreEventoAviso]: DatosDe<N> } = {
   'evento.cancelado': { eventoId: 'eve-1', evento: 'Retiro', slug: 'retiro' },
   'evento.proximo': { eventoId: 'eve-1', evento: 'Retiro' },
   'evento.recordatorio_inscripcion': { eventoId: 'eve-1', evento: 'Retiro', slug: 'retiro', dias: 3 },
+  'grupo_extension.solicitud_nueva': { solicitudId: 'sge-1', grupoId: 'gex-1', grupo: 'Mujeres de Tolosa' },
+  'grupo_extension.solicitud_aceptada': { solicitudId: 'sge-1', grupoId: 'gex-1', grupo: 'Mujeres de Tolosa' },
+  'grupo_extension.solicitud_rechazada': { solicitudId: 'sge-1', grupoId: 'gex-1', grupo: 'Mujeres de Tolosa' },
+  'grupo_extension.agregada_por_admin': { solicitudId: 'sge-1', grupoId: 'gex-1', grupo: 'Mujeres de Tolosa' },
 };
 
 /** Los importantes según `docs/16` §1 — lista fija a propósito (T004 e): cambiarla es una decisión. */
@@ -88,4 +92,9 @@ export const IMPORTANTES_DOCS_16: readonly NombreEventoAviso[] = [
   'discipulado.propuesta_nueva',
   // Cancelación de un Evento (D193)
   'evento.cancelado',
+  // spec 014 (D228): el pedido al líder y la respuesta a la persona
+  'grupo_extension.solicitud_nueva',
+  'grupo_extension.solicitud_aceptada',
+  'grupo_extension.solicitud_rechazada',
+  'grupo_extension.agregada_por_admin',
 ];

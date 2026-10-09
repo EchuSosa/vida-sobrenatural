@@ -60,4 +60,12 @@ CREATE OR REPLACE VIEW "solicitudes_bandeja" AS
          g."createdAt", g."createdAt",
          g."creadoPorId", g."verificadoPorId", g."revisadoEn"
     FROM "pagos" g
-    JOIN "inscripciones_evento" ie ON ie."id" = g."inscripcionEventoId";
+    JOIN "inscripciones_evento" ie ON ie."id" = g."inscripcionEventoId"
+  UNION ALL
+  -- 014: Solicitud para sumarse a un Grupo de Extensión (D225, D227). La
+  -- `aceptada` es la pertenencia: no espera nada del Admin.
+  SELECT 'grupo_extension', x."id", x."personaId", x."estado"::text,
+         (x."estado" = 'pendiente'),
+         x."createdAt", x."createdAt",
+         x."creadoPorId", x."revisadoPorId", x."revisadaEn"
+    FROM "solicitudes_grupo_extension" x;

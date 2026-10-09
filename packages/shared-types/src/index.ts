@@ -28,3 +28,5 @@ export * from './cumpleanos.js';
 export * from './metricas.js';
 export * from './perfil-persona.js';
 export * from './registro.js';
+// spec 014 (Grupos de Extensión), después del lote 0.
+export * from './grupos-extension.js';

@@ -37,6 +37,8 @@ columna vacía para anotar si salió bien o qué pasó.
 | **Pastor** | Ve todo el backoffice, pero **solo para mirar**: no puede cambiar nada (salvo la Palabra Profética). |
 | **Líder de curso** | Quien da Vida de Servicio: carga el material de cada semana y toma asistencia, desde el celular. |
 | **Tutor** | El adulto responsable de un menor de 18. Sin tutor, un menor no puede entrar a la app. |
+| **Grupo de Extensión** | Un grupo chico que se reúne una vez por semana en una casa o en la iglesia. Es de mujeres, de varones o mixto según quién lo lidere. La persona lo elige en la app por cercanía. |
+| **Líder de extensión** | Quien lidera un Grupo de Extensión: recibe los pedidos para sumarse y los responde desde "Mi grupo", en el celular. |
 
 ### Dos aplicaciones distintas
 
@@ -45,7 +47,7 @@ columna vacía para anotar si salió bien o qué pasó.
 | Dirección | <http://localhost:3001> | <http://localhost:3002> |
 | Dónde se usa | En el **celular** (también anda en la compu) | En la **computadora** |
 | Quién la usa | Todos: miembros, Discipuladores, Líderes de curso | Admin y Pastor |
-| Qué tiene | Mi camino, Eventos, Avisos, Perfil, Mis discipulados, Mis grupos | Inicio con números, Solicitudes (bandeja), Personas, Grupos, Eventos, Catálogos, Notificaciones |
+| Qué tiene | Mi camino (con "Mi grupo de extensión"), Eventos, Avisos, Perfil, Mis discipulados, Mis grupos, Mi grupo | Inicio con números, Solicitudes (bandeja), Personas, Grupos, Eventos, Catálogos, Notificaciones, Grupos de extensión |
 
 Cada app tiene **su propia sesión**: entrar en una no te hace entrar en la otra.
 
@@ -53,10 +55,10 @@ Cada app tiene **su propia sesión**: entrar en una no te hace entrar en la otra
 
 | Bloque | Casos | Tiempo estimado |
 |---|---|---|
-| ⭐ **Demo** — el recorrido del domingo | 16 | 1 h |
-| **P1** — lo principal de cada módulo y los permisos | 46 | 3 h |
-| **P2** — validaciones, casos borde, celular y modo oscuro | 83 | 3 h 30 min |
-| **Total** | **145** | **unas 7 h 30 min** (día y medio con pausas) |
+| ⭐ **Demo** — el recorrido del domingo | 20 | 1 h 15 min |
+| **P1** — lo principal de cada módulo y los permisos | 52 | 3 h 20 min |
+| **P2** — validaciones, casos borde, celular y modo oscuro | 88 | 3 h 45 min |
+| **Total** | **160** | **unas 8 h 20 min** (día y medio con pausas) |
 
 **Orden sugerido:** primero todo el bloque ⭐ (si algo falla ahí, es lo más urgente), después P1,
 y si queda tiempo, P2.
@@ -120,6 +122,7 @@ persona, volvés a `/dev/entrar` y escribís otro email.
 | Menor con tutora | `demo-menor-tomas@example.com` | Tomás Ledesma: hace Vida Nueva con Jorge |
 | Haciendo Vida Nueva con Jorge | `demo-vn-matias@example.com`, `demo-vn-lucas@example.com` | Matías Vera y Lucas Godoy (Jorge ya pidió dar por terminado el de Lucas) |
 | Menor sin tutor | `demo-pendiente-tutor@example.com` | No puede entrar hasta que el Admin lo active |
+| **Líder de un Grupo de Extensión** | `demo-gex-lider@example.com` | Carolina Benítez: lidera "Mujeres del centro" (martes 19 hs) y tiene el pedido de Sofía Molina esperando |
 
 Además hay una persona **sin email** (Héctor Ríos), cargada por el Admin: no puede entrar a la
 app, pero se la ve en el backoffice.
@@ -178,6 +181,20 @@ usá `prueba-demo-2@…`).
 | DEMO-14 | ⭐ | Admin | Igual | 1. Andá a "Eventos" → "Crear un Evento".<br>2. Nombre "Noche de bienvenida", Sede La Plata, tipo General, fecha dentro de una semana, hora 20:00, una descripción.<br>3. En "Inscripción" marcá "La gente tiene que anotarse" y poné **Cupo 20**.<br>4. Tocá "Crear el Evento". | Aparece "Evento creado. Ahora podés compartir el QR o subir el flyer." Se ven el bloque "QR y link para anotarse" con "Copiar link" y "Descargar QR (PNG)". En la lista figura "0 de 20". | |
 | DEMO-15 | ⭐ | Persona de DEMO-01 (celular) | Evento de DEMO-14 | 1. En la web app, tocá "Eventos" en la barra de abajo y abrí "Noche de bienvenida".<br>2. Tocá "Anotarme" y confirmá con "Sí, anotarme". | Ves "Quedan 20 lugares de 20" antes de anotarte; después, "¡Listo! Te esperamos el …". En el backoffice el Evento pasa a "1 de 20". | |
 | DEMO-16 | ⭐ | Puede elegir Ministerio → Admin | `demo-apta@example.com` | 1. En la web app entrá con `demo-apta@example.com`. En Mi camino, tarjeta Ministerio, tocá "Elegir un Ministerio".<br>2. Elegí un Ministerio, escribí "¿Por qué te gustaría servir acá?" y tocá "Postularme".<br>3. En el backoffice (Admin), andá a Solicitudes → tipo "Postulación a un Ministerio", abrí la de esta persona y tocá "Aprobar" → "Sí, aprobar". | En la app: "Recibimos tu postulación…", y la tarjeta Ministerio dice **"En revisión"** / "Tu postulación está en revisión". Después de aprobar, al recargar Mi camino: "Estás sirviendo en {Ministerio}". | |
+
+### 3.1. ⭐ Grupos de Extensión (GEX)
+
+La otra historia del domingo: alguien que quiere sumarse a un grupo chico cerca de su casa, sin
+escribirle al Admin. Hacé los casos en orden. Usá **dos ventanas** (una normal y una de incógnito)
+para tener a la persona y a la líder a la vez. Florencia (`demo-nueva@…`) tiene 27 años: tiene que
+ver solo los grupos de mujeres y los mixtos de su edad.
+
+| ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
+|---|---|---|---|---|---|---|
+| GEX-01 | ⭐ | Recién registrada (celular) | `demo-nueva@example.com`, sin grupo | 1. En la web app entrá con `demo-nueva@example.com` y abrí "Mi camino".<br>2. Bajá hasta la tarjeta **"Mi grupo de extensión"** (está aparte, después de Bautismo) y tocá "Encontrá tu grupo".<br>3. En "Tu dirección" escribí `7 nro 1200` y tocá "Buscar grupos". | La tarjeta dice "Todavía no tenés grupo". Aparece "Grupos para vos" con los grupos **ordenados del más cercano al más lejano** ("A 1,2 km"). Están "Mujeres del centro", "Jóvenes en la iglesia" (Para todos), "Mujeres de Tolosa" y "Matrimonios de City Bell". **No** aparecen los de varones, ni "Mujeres de Gonnet" (desde 30 años) ni "Mujeres de Villa Elvira" (desde 40). Cada uno dice quién lo lidera, días y horario y la **zona**; ninguno muestra la calle y el número. | |
+| GEX-02 | ⭐ | Igual | Igual | 1. En "Mujeres del centro" tocá "Quiero sumarme".<br>2. Leé el aviso y tocá "Sí, quiero sumarme". | Aparece "¡Listo! Le avisamos a quien lidera el grupo." La pantalla pasa a "Pediste sumarte a Mujeres del centro" / "Le avisamos a Carolina…", con el botón "Retirar el pedido". En Mi camino, la tarjeta dice lo mismo. | |
+| GEX-03 | ⭐ | Líder (celular, otra ventana) | Pedido de GEX-02 | 1. En incógnito entrá a la web app con `demo-gex-lider@example.com`.<br>2. Abrí "Avisos".<br>3. Andá a Mi camino → selector de arriba → **"Mi grupo"**. | En Avisos hay uno nuevo: "Tenés un pedido nuevo para Mujeres del centro". En "Mi grupo", bajo "Quieren sumarse", están **Florencia Arias · 27 años** y Sofía Molina, cada una con su teléfono, su email, "Escribir por WhatsApp" y los botones "Aceptar" y "No es para este grupo". Abajo, "Integrantes" con su contacto. | |
+| GEX-04 | ⭐ | Líder → Recién registrada | Igual | 1. Tocá "Escribir por WhatsApp" de Florencia (se abre WhatsApp con un saludo armado; volvé a la app).<br>2. Tocá "Aceptar" en Florencia.<br>3. Volvé a la ventana de Florencia y abrí "Mi camino". | Líder: "¡Listo! Florencia Arias ya forma parte del grupo…", y pasa a Integrantes. Florencia: en Avisos, "Ya formás parte del grupo Mujeres del centro". La tarjeta dice "Formás parte de Mujeres del centro" / "Martes a las 19:00 hs"; con "Ver mi grupo y cómo llegar" se ve la **dirección exacta** ("7 nro 1350 e/ 58 y 59"), la líder con "Llamar" y "Escribir por WhatsApp", y el botón **"Cómo llegar"**, que abre Google Maps en esa dirección. | |
 
 ---
 
@@ -288,6 +305,18 @@ usá `prueba-demo-2@…`).
 | ROL-04 | P1 | Discipuladora Laura | Laura en el **backoffice** | 1. Entrá a `localhost:3002/dev/entrar` con Laura. | Ve "Lo tuyo está en la app" con el botón "Ir a la app". No tiene menú. | |
 | ROL-05 | P1 | Recién registrada | Florencia en el backoffice (si ya le diste Discipulador en PER-04, usá otra, por ejemplo `demo-vn-pendiente@…`) | 1. Entrá a `localhost:3002/dev/entrar` con esa persona. | "Tu cuenta no tiene acceso al backoffice". | |
 | ROL-06 | P1 | Miembro común | `demo-vn-en-curso@example.com` en la app | 1. Escribí a mano `localhost:3001/mis-discipulados` y después `localhost:3001/mis-grupos`. | En los dos casos vuelve a Mi camino: no ve pantallas de Discipulador ni de Líder. | |
+
+
+### 4.13. Grupos de Extensión (GEX)
+
+| ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
+|---|---|---|---|---|---|---|
+| GEX-05 | P1 | Admin | Backoffice | 1. Andá a "Grupos de extensión" (menú) → "Crear un grupo".<br>2. Nombre "Grupo de prueba", en "Quién lo lidera" buscá `Hernán`, tocá "Elegir" en Hernán Coronel; marcá **jueves**, hora **18:30**.<br>3. Marcá "En la iglesia" y tocá "Crear el grupo". | Mientras elegís el líder aparece "Este grupo es para: Varones". Al crear, se abre el detalle con "Para: Varones", "Jueves a las 18:30 hs" y el lugar "En la iglesia (La Plata): …". En la lista figura con "0" integrantes. | |
+| GEX-06 | P1 | Admin | Backoffice | 1. "Crear un grupo" con nombre, la líder `Natalia` (Ibáñez), sábado 15:00.<br>2. Calle `64`, número `820`, entre `11` y `12`, zona `Centro`.<br>3. En "Quién lo lidera" sumá también a `Federico` (Ibáñez). Crear. | Con los dos líderes dice "Este grupo es para: Mixto". El detalle muestra "64 nro 820 e/ 11 y 12" y la zona. Si la dirección no se pudo ubicar en el mapa, avisa "No pudimos ubicar la dirección…" y el grupo queda igual, marcado "Sin ubicar en el mapa". | |
+| GEX-07 | P1 | Admin | "Mujeres de Gonnet" (completo, 4 de 4) | 1. Abrí el grupo.<br>2. Fijate en "Agregar a una persona".<br>3. Entrá a la app como `demo-vn-rocio@example.com` (36 años) y buscá con `15 nro 1100`. | Backoffice: dice "4 de 4" y **no** ofrece agregar. App: "Mujeres de Gonnet" aparece con **"Completo: no quedan lugares"**, sin botón "Quiero sumarme". | |
+| GEX-08 | P1 | Admin → persona | "Mujeres de Tolosa" | 1. En el detalle, en "Agregar a una persona" buscá `Valeria` y tocá "Agregar al grupo" en Valeria Domínguez.<br>2. Después tocá "Quitar del grupo" en ella → "Sí, quitar". | Al agregarla: "Agregamos a Valeria… y le avisamos" (en su app ve el aviso "Te sumaron al grupo Mujeres de Tolosa" y la tarjeta con el grupo). Al quitarla, deja de figurar y en su app la tarjeta dice "Ya no figurás en Mujeres de Tolosa". | |
+| GEX-09 | P1 | Admin | Pedido pendiente de Sofía (`demo-vn-pendiente@…`) | 1. Andá a Solicitudes → tipo **"Grupo de extensión"**.<br>2. Abrí el de Sofía. | Aparece en la bandeja con el tipo "Grupo de extensión", el grupo y su espera (pidió hace 2 días). El detalle muestra a Sofía (edad, teléfono, email), el grupo con sus lugares ocupados, y los botones "Aceptar" y "No es para este grupo". En el Inicio, "Pendientes" incluye la línea de pedidos de grupos de extensión. | |
+| GEX-10 | P1 | Pastor y miembro | `demo-pastor@…` en el backoffice; `demo-vn-en-curso@…` en la app | 1. Pastor: abrí "Grupos de extensión" y un grupo.<br>2. Miembro: escribí a mano `localhost:3001/mi-grupo-extension`. | Pastor: ve todo con "Podés ver los grupos, pero no cambiarlos.", sin "Crear un grupo", "Editar", "Aceptar" ni "Quitar". Miembro: "Todavía no liderás ningún grupo de extensión…" (no ve pedidos de nadie). | |
 
 ---
 
@@ -423,6 +452,17 @@ un recuadro arriba ("Revisá…") con enlace a cada campo. Anotá cualquier mens
 | UI-04 | P2 | Admin | Backoffice, menú de usuario | 1. Pasá a modo oscuro y recorré Inicio, Solicitudes, Personas y Eventos. | Todo se lee bien, incluso al pasar el mouse por encima de botones y enlaces. | |
 | UI-05 | P2 | Cualquiera | Las dos apps | 1. Fijate cómo se marcan estados ("Sin leer", "Pendiente", "En revisión") y enlaces. | Ningún estado se distingue **solo por el color**: siempre hay texto o ícono; los enlaces están subrayados. | |
 | UI-06 | P2 | Cualquiera | — | 1. Apagá la API a propósito y recargá Mi camino o el Inicio del backoffice. | Aparece un mensaje de error claro con "Reintentar"; no una pantalla en blanco. | |
+
+
+### 5.10. Grupos de Extensión (GEX)
+
+| ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
+|---|---|---|---|---|---|---|
+| GEX-11 | P2 | Miembro | "Encontrá tu grupo" | 1. Tocá "Buscar grupos" sin escribir nada.<br>2. Escribí `calle que no existe 99999` y buscá. | 1: arriba "Revisá esto para buscar:" con el foco ahí y, debajo del campo, "Escribí tu dirección…". 2: debajo del campo, "No encontramos esa dirección. Escribí la calle y el número…". | |
+| GEX-12 | P2 | Miembro (celular real) | "Encontrá tu grupo" | 1. Tocá "Usar mi ubicación" y aceptá el permiso.<br>2. Repetí negando el permiso. | 1: aparecen los grupos ordenados desde donde estás. 2: "No pudimos usar tu ubicación. Escribí tu dirección…". En ningún caso se guarda la dirección (no aparece en el perfil ni en el backoffice). | |
+| GEX-13 | P2 | Miembro | Igual | 1. Marcá solo **sábado** y buscá. | Solo aparecen grupos que se reúnen los sábados (por ejemplo "Jóvenes en la iglesia"). Si no hay ninguno, lo dice y sugiere probar con otros días. | |
+| GEX-14 | P2 | Líder | `demo-gex-lider@…` con el pedido de Sofía | 1. Tocá "No es para este grupo", escribí "Te conviene el de los jueves en Tolosa" y "Avisarle".<br>2. Entrá a la app como Sofía. | Sofía recibe el aviso "Sobre tu pedido para Mujeres del centro" y su tarjeta dice "Tu pedido para Mujeres del centro no siguió adelante" con "Encontrá tu grupo"; al entrar se ve el mensaje de la líder y el buscador para elegir otro. | |
+| GEX-15 | P2 | Admin | Grupo con integrantes | 1. Tocá "Inactivar el grupo" → "Sí, inactivar". | No se inactiva: "El grupo tiene integrantes o pedidos esperando respuesta. Quitá a los integrantes…". Con el grupo vacío sí se inactiva, deja de aparecer en la app y se puede "Reactivar". | |
 
 ---
 

@@ -206,6 +206,40 @@
           ],
           "boton": "Ver el evento"
         }
+      },
+      "grupo_extension": {
+        "solicitud_nueva": {
+          "asunto": "Tenés un pedido nuevo para tu grupo",
+          "titulo": "Tenés un pedido nuevo para {grupo}",
+          "parrafos": [
+            "Alguien quiere sumarse a tu grupo. Entrá a la app para ver quién es y escribirle."
+          ],
+          "boton": "Ver el pedido"
+        },
+        "solicitud_aceptada": {
+          "asunto": "Ya tenés tu grupo de extensión",
+          "titulo": "Ya formás parte del grupo {grupo}",
+          "parrafos": [
+            "En la app tenés la dirección, los días y el horario, y cómo llegar."
+          ],
+          "boton": "Ver mi grupo"
+        },
+        "solicitud_rechazada": {
+          "asunto": "Novedades sobre tu pedido",
+          "titulo": "Sobre tu pedido para {grupo}",
+          "parrafos": [
+            "Esta vez no era el grupo indicado. Podés elegir otro grupo desde la app: hay lugar para vos."
+          ],
+          "boton": "Elegir otro grupo"
+        },
+        "agregada_por_admin": {
+          "asunto": "Ya tenés tu grupo de extensión",
+          "titulo": "Te sumaron al grupo {grupo}",
+          "parrafos": [
+            "En la app tenés la dirección, los días y el horario, y cómo llegar."
+          ],
+          "boton": "Ver mi grupo"
+        }
       }
     },
     "manual": {

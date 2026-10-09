@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { CalendarCheck, Droplets, HandHelping, History, Receipt, Sprout, Users } from 'lucide-react';
+import { CalendarCheck, Droplets, HandHelping, History, House, Receipt, Sprout, Users } from 'lucide-react';
 import type { TipoSolicitud } from '@vida-sobrenatural/shared-types';
 
 /**
@@ -18,6 +18,7 @@ export const RUTA_DETALLE_SOLICITUD: { readonly [T in TipoSolicitud]: (id: strin
   bautismo: (id) => `/solicitudes/bautismo/${id}`, // 010, lote B
   inscripcion_evento: (id) => `/solicitudes/inscripcion-evento/${id}`, // 011, lote D
   pago: (id) => `/solicitudes/pago/${id}`, // 011, lote D
+  grupo_extension: (id) => `/solicitudes/grupo-extension/${id}`, // 014
 };
 
 /** Ícono decorativo de cada tipo: va siempre junto al texto del tipo (D81). */
@@ -29,4 +30,5 @@ export const ICONO_TIPO_SOLICITUD: { readonly [T in TipoSolicitud]: ComponentTyp
   bautismo: Droplets,
   inscripcion_evento: CalendarCheck,
   pago: Receipt,
+  grupo_extension: House,
 };
