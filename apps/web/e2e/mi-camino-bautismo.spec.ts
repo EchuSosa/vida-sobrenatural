@@ -66,7 +66,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(dialogo).toContainText('¿Querés pedir tu bautismo?');
       const talle = dialogo.getByLabel('¿Qué talle de remera usás?');
       await expect(talle).toBeVisible();
-      expect((await talle.boundingBox())!.height).toBeGreaterThanOrEqual(44); // D150
+      // D150. Con `poll`: el diálogo entra con una animación de escala, y medir a mitad de camino da ~42 px.
+      await expect.poll(async () => (await talle.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
       await dialogo.getByLabel('¿Querés contarnos algo? (opcional)').fill('a'.repeat(501));
       await dialogo.getByRole('button', { name: 'Sí, pedir mi bautismo' }).click();
       await expect(dialogo.getByText('Revisá esto antes de seguir:')).toBeVisible();
