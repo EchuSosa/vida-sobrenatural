@@ -4,7 +4,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { AuthError, CredentialsSignin } from 'next-auth';
 import { CODIGO_INGRESO_VIDA_MIN, destinoSeguro, normalizarEmail } from '@vida-sobrenatural/shared-types';
-import { pedirCodigoIngreso } from '@vida-sobrenatural/shared-types/auth-server';
+import { origenDeHeaders, pedirCodigoIngreso } from '@vida-sobrenatural/shared-types/auth-server';
 import type { ResultadoIngreso } from '@vida-sobrenatural/ui';
 import { signIn } from '../../../auth';
 import { COOKIE_EMAIL_INGRESO } from './cookie';
@@ -19,9 +19,7 @@ import { COOKIE_EMAIL_INGRESO } from './cookie';
  */
 
 async function origenCliente(): Promise<string> {
-  const h = await headers();
-  const reenviado = h.get('x-forwarded-for')?.split(',')[0]?.trim();
-  return reenviado || h.get('x-real-ip')?.trim() || 'desconocido';
+  return origenDeHeaders(await headers());
 }
 
 export async function pedirCodigo(emailCrudo: string): Promise<ResultadoIngreso> {

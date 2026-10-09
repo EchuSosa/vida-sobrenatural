@@ -7,6 +7,19 @@
     "siNoFuisteVos": "Si no fuiste vos, ignorá este mail: nadie puede entrar sin este código.",
     "firma": "Iglesia Vida Sobrenatural"
   },
+  "comentario": {
+    "asunto": "Nuevo comentario en la app ({tipo})",
+    "tipos": {
+      "problema": "problema",
+      "sugerencia": "sugerencia"
+    },
+    "intro": "Llegó un comentario nuevo desde \"Contanos qué te parece\".",
+    "datos": "Tipo: {tipo} · App: {app} · Pantalla: {pagina}",
+    "textoTitulo": "Lo que escribió:",
+    "verEnBackoffice": "Verlo en el backoffice",
+    "sinEnlace": "Lo ves en el backoffice, en Comentarios.",
+    "firma": "Vida Sobrenatural"
+  },
   "avisos": {
     "eventos": {
       "discipulado": {

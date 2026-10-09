@@ -241,6 +241,12 @@ Ninguno de los dos necesita secretos reales (nunca se usan contra Google real) �
 (`vidasobrenatural_test`/`vidasobrenatural_e2e`, D124) — `test/global-setup.cjs` y
 `scripts/e2e-base-datos.cjs` las crean y migran solas si no existen; no hace falta armarlas a mano.
 
+**Comentarios de la app (spec 013, "Contanos qué te parece"):** dos variables opcionales de
+`apps/api/.env` (están en `.env.example`). `EMAIL_COMENTARIOS_DESTINO` es la dirección a la que llega un
+email por cada comentario nuevo; vacía, no se manda nada y los comentarios se leen solo en el backoffice.
+`BACKOFFICE_URL` (en local, `http://localhost:3002`) arma el enlace al comentario dentro de ese email; sin
+ella, el email dice que se vea en Comentarios del backoffice.
+
 ## 8. Inicializar shadcn/ui (en `apps/web`, después replicar en `apps/backoffice`)
 
 ```bash

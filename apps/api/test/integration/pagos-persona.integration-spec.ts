@@ -1,3 +1,4 @@
+import { hoyEnArgentina } from '@vida-sobrenatural/shared-types';
 import type { INestApplication } from '@nestjs/common';
 import type { Server } from 'node:http';
 import request from 'supertest';
@@ -11,7 +12,8 @@ describe('Pago de la Persona (integración)', () => {
   let esc: EscenarioEventos;
   const http = () => request(app.getHttpServer());
   const PDF = Buffer.from('%PDF-1.4\n%%EOF');
-  const hoy = () => new Date().toISOString().slice(0, 10);
+  // La fecha civil de Argentina: entre las 21 y las 24 de allá, la de UTC ya es "mañana" y la API la rechaza por futura.
+  const hoy = () => hoyEnArgentina();
   const pagar = (inscripcionId: string, token: string, campos: Record<string, string> = {}, archivo: Buffer | null = PDF) => {
     let r = http().post(`/inscripciones-evento/${inscripcionId}/pagos`).set('Authorization', `Bearer ${token}`);
     for (const [k, v] of Object.entries({ monto: '1000', medio: 'transferencia', fechaPago: '2026-01-01', ...campos })) r = r.field(k, v);

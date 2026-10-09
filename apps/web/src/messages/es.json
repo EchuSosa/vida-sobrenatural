@@ -176,7 +176,9 @@
       "CAPITULOS_REQUERIDO": "Escribí qué capítulos vieron, por ejemplo \"1 y 2\" (hasta 200 caracteres).",
       "NOTAS_DEMASIADO_LARGAS": "Las notas pueden tener hasta 2000 caracteres: acortalas un poco.",
       "MOTIVO_DEMASIADO_LARGO": "El motivo puede tener hasta 500 caracteres: acortalo un poco.",
-      "INSCRIPCION_DE_OTRO_GRUPO": "La lista de personas cambió: recargá la página y volvé a marcar la asistencia."
+      "INSCRIPCION_DE_OTRO_GRUPO": "La lista de personas cambió: recargá la página y volvé a marcar la asistencia.",
+      "FECHA_INVALIDA": "Escribí una fecha válida, por ejemplo 28/10/2026.",
+      "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta."
   },
@@ -208,19 +210,6 @@
     "cerrarSesionDescripcion": "Para volver a entrar, vas a tener que ingresar de nuevo desde \"Ingresar\".",
     "cerrarSesionConfirmar": "Sí, cerrar sesión",
     "cerrarSesionVolver": "Volver"
-  },
-  "perfil": {
-    "titulo": "Perfil",
-    "entrasCon": "Entrás con",
-    "misDatos": "Mis datos",
-    "cuenta": "Tu cuenta",
-    "errorCarga": "No pudimos cargar tus datos. Puede ser un problema de conexión: probá de nuevo en un rato.",
-    "reintentar": "Reintentar",
-    "guardar": "Guardar cambios",
-    "guardando": "Guardando…",
-    "guardado": "Guardamos tus cambios.",
-    "errorGuardar": "No pudimos guardar tus cambios. Probá de nuevo en un rato.",
-    "ayudaTelefono": "Con la característica, sin el 0 ni el 15."
   },
   "inicio": {
     "tarjetaPrimerosPasosTitulo": "Primeros pasos",
@@ -363,8 +352,6 @@
     "comoConseguirTitulo": "Cómo conseguir los libros",
     "comoConseguirTexto": "Todos los libros de Ediciones VS están disponibles en librerías a través de Producciones Peniel, que distribuye en toda Argentina. También podés hacer pedidos por nuestras redes.",
     "facebookLabel": "Facebook de Ediciones VS",
-    "facebookNombre": "Facebook",
-    "instagramNombre": "Instagram",
     "instagramLabel": "Instagram de Ediciones VS",
     "facebookUrl": "https://facebook.com/ediciones.vs.lp",
     "instagramUrl": "https://instagram.com/edicionesvs",
@@ -375,16 +362,12 @@
     "errorTexto": "Puede ser algo pasajero — probá de nuevo en unos segundos.",
     "portadaAlt": "Portada de {titulo}",
     "portadaPendiente": "Portada pendiente",
-    "autorPor": "por {autor}"
+    "autorPor": "por {autor}",
+    "facebookNombre": "Facebook",
+    "instagramNombre": "Instagram"
   },
   "registro": {
     "tituloPagina": "Completá tus datos",
-    "listo": {
-      "titulo": "¡Listo, ya sos parte!",
-      "texto": "Tu registro se completó. En Mi camino vas a ver cómo sigue tu proceso en la iglesia y qué podés hacer ahora.",
-      "irAMiCamino": "Ir a mi camino",
-      "volverAPrimerosPasos": "Volver a Primeros pasos"
-    },
     "introPagina": "Entraste con tu cuenta ({email}). Faltan unos datos para terminar tu registro.",
     "cargando": "Cargando…",
     "tituloNoAutenticado": "Registrarme",
@@ -419,22 +402,6 @@
       "editar": "Editar"
     },
     "errorCampo": "Revisá este dato.",
-    "ayudas": {
-      "telefono": "Para que tu Discipulador pueda escribirte.",
-      "direccion": "Para saber de qué zona sos. No la compartimos.",
-      "congregaDesde": "Aunque sea aproximado. Si recién empezás, elegí \"Este año\"."
-    },
-    "errores": {
-      "apellido": "Escribí tu apellido.",
-      "nombre": "Escribí tu nombre.",
-      "genero": "Elegí una opción en Género.",
-      "direccion": "Escribí tu dirección, por ejemplo: calle 7 n.º 1234.",
-      "sedeId": "Elegí la Sede a la que vas.",
-      "estadoCivil": "Elegí una opción en Estado civil.",
-      "profesion": "Elegí una opción en Profesión.",
-      "profesionDetalle": "Escribí a qué te dedicás.",
-      "congregaDesde": "Elegí el año en que empezaste a venir. Si es tu primer año, elegí \"Este año\"."
-    },
     "errorFechaNacimiento": "Completá el día, el mes y el año en que naciste. El año va con 4 números, por ejemplo 1965.",
     "elegirOpcion": "Elegí una opción",
     "soloNumeros": "Solo números",
@@ -472,6 +439,28 @@
         "sin_ocupacion": "Sin ocupación",
         "otro": "Otro"
       }
+    },
+    "listo": {
+      "titulo": "¡Listo, ya sos parte!",
+      "texto": "Tu registro se completó. En Mi camino vas a ver cómo sigue tu proceso en la iglesia y qué podés hacer ahora.",
+      "irAMiCamino": "Ir a mi camino",
+      "volverAPrimerosPasos": "Volver a Primeros pasos"
+    },
+    "ayudas": {
+      "telefono": "Para que tu Discipulador pueda escribirte.",
+      "direccion": "Para saber de qué zona sos. No la compartimos.",
+      "congregaDesde": "Aunque sea aproximado. Si recién empezás, elegí \"Este año\"."
+    },
+    "errores": {
+      "apellido": "Escribí tu apellido.",
+      "nombre": "Escribí tu nombre.",
+      "genero": "Elegí una opción en Género.",
+      "direccion": "Escribí tu dirección, por ejemplo: calle 7 n.º 1234.",
+      "sedeId": "Elegí la Sede a la que vas.",
+      "estadoCivil": "Elegí una opción en Estado civil.",
+      "profesion": "Elegí una opción en Profesión.",
+      "profesionDetalle": "Escribí a qué te dedicás.",
+      "congregaDesde": "Elegí el año en que empezaste a venir. Si es tu primer año, elegí \"Este año\"."
     }
   },
   "footer": {
@@ -491,10 +480,10 @@
     "entidad": "Entidad",
     "cuit": "CUIT",
     "cuenta": "Cuenta",
-    "cuentaDetalle": "Cuenta en Pesos, Banco Santander",
     "copiar": "Copiar {campo}",
-    "copiarBoton": "Copiar",
-    "copiado": "{campo} copiado"
+    "copiado": "{campo} copiado",
+    "cuentaDetalle": "Cuenta en Pesos, Banco Santander",
+    "copiarBoton": "Copiar"
   },
   "comun": {
     "cerrarPanel": "Cerrar el panel"
@@ -533,12 +522,12 @@
       "enCursoTitulo": "Estás haciendo Vida Nueva",
       "enCursoDiscipulador": "Tu Discipulador es {nombre}.",
       "enCursoTelefono": "Su teléfono es {telefono}.",
-      "enCursoWhatsApp": "Escribirle por WhatsApp",
-      "enCursoLlamar": "Llamar",
       "enCursoDesde": "Empezaste el {fecha}.",
       "enCursoYAhora": "Tu Discipulador se va a comunicar con vos para combinar los encuentros. Si preferís, podés escribirle vos.",
       "finalizadoTitulo": "¡Terminaste Vida Nueva!",
-      "finalizadoTexto": "Lo terminaste el {fecha}. El próximo paso lo vas a ver acá apenas esté disponible; mientras tanto, podés hablar con el equipo de tu sede."
+      "finalizadoTexto": "Lo terminaste el {fecha}. El próximo paso lo vas a ver acá apenas esté disponible; mientras tanto, podés hablar con el equipo de tu sede.",
+      "enCursoWhatsApp": "Escribirle por WhatsApp",
+      "enCursoLlamar": "Llamar"
     },
     "errores": {
       "generico": "No pudimos guardar tu pedido. Probá de nuevo en unos segundos."
@@ -600,7 +589,8 @@
     "selector": {
       "etiqueta": "Secciones de Mi camino",
       "miCamino": "Mi camino",
-      "misDiscipulados": "Mis discipulados"
+      "misDiscipulados": "Mis discipulados",
+      "misGrupos": "Mis grupos"
     },
     "ministerio": {
       "noAptaTitulo": "Primero, Vida de Servicio",
@@ -1173,8 +1163,219 @@
       "reintentar": "Reintentar"
     }
   },
-  "vidaDeServicio": {},
-  "misGrupos": {},
+  "vidaDeServicio": {
+    "titulo": "Vida de Servicio",
+    "semana": "Semana {numero}",
+    "semanaConTitulo": "Semana {numero}: {titulo}",
+    "fechaLiberacion": "Se ve desde el {fecha}",
+    "estadosSemana": {
+      "liberada": "Disponible",
+      "proxima": "Próximamente",
+      "sin_material": "Todavía sin material",
+      "cargado_por_liberar": "Cargado, se ve el día de la fecha",
+      "vencida_sin_material": "Ya pasó la fecha y falta el material"
+    },
+    "card": {
+      "noCumpleSinVidaNueva": "Para anotarte primero tenés que hacer Vida Nueva.",
+      "noCumpleVidaNuevaEnCurso": "Estás haciendo Vida Nueva: cuando la termines, vas a poder anotarte acá.",
+      "noCumpleDeclaracionEnRevision": "La iglesia está revisando que ya hiciste Vida Nueva. Cuando lo confirme, vas a poder anotarte acá.",
+      "yaLoHiceVidaNueva": "Si ya hiciste Vida Nueva en otro momento, contanos con \"Ya lo hice\" en la card de Vida Nueva.",
+      "verVidaNueva": "Ver Vida Nueva",
+      "tutorTitulo": "Lo pide tu familia o la iglesia",
+      "tutorTexto": "Para anotarte en Vida de Servicio, pedíselo a quien te acompaña o a la iglesia.",
+      "puedePedirConEdiciones": "Hay {cantidad, plural, one {una edición abierta} other {# ediciones abiertas}}. Elegí la que te quede mejor.",
+      "puedePedirSinEdiciones": "Ahora no hay ninguna edición abierta. Si querés, dejá tu pedido y te anotamos en la próxima.",
+      "anteriorRechazada": "La última vez no pudimos sumarte. Si querés, podés volver a pedirlo.",
+      "anteriorBaja": "Dejaste la edición {nombre}. Podés seguir viendo el material que tenías y volver a anotarte cuando quieras.",
+      "verMaterialAnterior": "Ver el material que tenía",
+      "quieroAnotarme": "Quiero anotarme",
+      "pedirTitulo": "Anotarme en Vida de Servicio",
+      "pedirDescripcion": "Le avisamos a la iglesia. Cuando te confirme, te llega un aviso y vas a ver el material de cada semana acá.",
+      "edicionEtiqueta": "¿En qué edición?",
+      "edicionOpcion": "{nombre} · empieza el {fecha}",
+      "edicionOpcionSede": "{nombre} · {sede} · empieza el {fecha}",
+      "edicionDia": "El material sale los {dia}.",
+      "paraLaProxima": "Anotarme para la próxima edición",
+      "enviarPedido": "Enviar mi pedido",
+      "volver": "Volver",
+      "resumenErrores": "Revisá esto antes de seguir:",
+      "pedidoEnviado": "Recibimos tu pedido.",
+      "pendienteTitulo": "Recibimos tu pedido",
+      "pendienteConEdicion": "Pediste la edición {nombre}. La iglesia lo está revisando: cuando te confirme, te avisamos.",
+      "pendienteSinEdicion": "Te anotamos para la próxima edición. Cuando haya una, la iglesia te suma y te avisamos.",
+      "pendienteEnSuNombre": "Lo pidió la iglesia por vos.",
+      "retirar": "Retirar mi pedido",
+      "retirarTitulo": "¿Retirar tu pedido de Vida de Servicio?",
+      "retirarDescripcion": "La iglesia no lo va a revisar. Podés volver a pedirlo cuando quieras.",
+      "retirarConfirmar": "Sí, retirar",
+      "retirarMantener": "No, dejarlo",
+      "retirado": "Retiraste tu pedido.",
+      "enCursoTitulo": "Estás haciendo Vida de Servicio",
+      "enCursoTexto": "Edición {nombre}. {liberadas, plural, =0 {Todavía no hay material disponible.} one {Ya tenés una semana disponible.} other {Ya tenés # semanas disponibles.}}",
+      "verMiVidaDeServicio": "Ver el material y mi asistencia",
+      "completadaInscripcion": "Terminaste la edición {nombre}. Podés volver a ver el material cuando quieras.",
+      "siguientePaso": "Lo que sigue es servir en un Ministerio: pronto vas a poder elegir uno desde acá.",
+      "verMaterial": "Ver el material",
+      "errorGenerico": "No pudimos hacerlo. Probá de nuevo en un rato."
+    },
+    "detalle": {
+      "introEnCurso": "Edición {nombre}. Cada semana se habilita el día de su fecha.",
+      "introCompletada": "Terminaste la edición {nombre}.",
+      "introBaja": "Dejaste la edición {nombre}. Ves el material que estaba disponible hasta ese día.",
+      "semanasTitulo": "Semanas",
+      "asistenciaTitulo": "Mi asistencia",
+      "asistenciaResumen": "Viniste {presentes} de {encuentros} {encuentros, plural, one {encuentro} other {encuentros}}.",
+      "asistenciaSinEncuentros": "Todavía no se tomó asistencia.",
+      "faltasTitulo": "Días que faltaste",
+      "abrirSemana": "Abrir la semana {numero}",
+      "sinVidaDeServicio": "Todavía no estás en Vida de Servicio. Desde Mi camino podés anotarte.",
+      "volverAMiCamino": "Volver a Mi camino",
+      "errorCargaTitulo": "No pudimos cargar tu Vida de Servicio",
+      "errorCarga": "Probá de nuevo en un rato. Si sigue pasando, avisanos con este código:",
+      "reintentar": "Reintentar"
+    },
+    "contenido": {
+      "archivosTitulo": "Archivos",
+      "enlacesTitulo": "Enlaces",
+      "abrirArchivo": "Abrir {nombre} ({tamanio})",
+      "imagenSinTexto": "Imagen",
+      "noDisponibleTitulo": "Este material no está disponible",
+      "noDisponibleTexto": "Puede que todavía no sea su fecha o que ya no tengas acceso. Volvé a la lista de semanas.",
+      "volverASemanas": "Volver a las semanas"
+    },
+    "dias": {
+      "0": "domingos",
+      "1": "lunes",
+      "2": "martes",
+      "3": "miércoles",
+      "4": "jueves",
+      "5": "viernes",
+      "6": "sábados"
+    }
+  },
+  "misGrupos": {
+    "titulo": "Mis grupos",
+    "intro": "Las ediciones de Vida de Servicio que acompañás.",
+    "vacio": "Todavía no tenés ediciones a cargo. Cuando la iglesia te sume a una, la vas a ver acá.",
+    "enCurso": "En curso",
+    "finalizado": "Terminada",
+    "inscriptos": "{cantidad, plural, =0 {Sin inscriptos activos} one {# inscripto activo} other {# inscriptos activos}}",
+    "conAlerta": "{cantidad, plural, one {# con 2 faltas o más} other {# con 2 faltas o más}}",
+    "proximaSemana": "Próxima: semana {numero}, el {fecha}",
+    "proximaSinMaterial": "Todavía no cargaste el material.",
+    "proximaConMaterial": "El material ya está cargado.",
+    "vencidas": "{cantidad, plural, one {Una semana ya pasó sin material} other {# semanas ya pasaron sin material}}",
+    "abrir": "Abrir {nombre}",
+    "volverAMisGrupos": "Volver a Mis grupos",
+    "errorCargaTitulo": "No pudimos cargar tus grupos",
+    "errorCarga": "Probá de nuevo en un rato. Si sigue pasando, avisanos con este código:",
+    "reintentar": "Reintentar",
+    "errorGenerico": "No pudimos hacerlo. Probá de nuevo en un rato.",
+    "resumenErrores": "Revisá esto antes de seguir:",
+    "volver": "Volver",
+    "detalle": {
+      "sede": "Sede {sede} · empezó el {fecha}",
+      "lideres": "Líderes: {nombres}",
+      "terminada": "Esta edición ya terminó. Podés ver todo, pero no cambiar nada.",
+      "tomarAsistencia": "Tomar asistencia",
+      "cronogramaTitulo": "Semanas",
+      "semana": "Semana {numero}",
+      "fecha": "Se ve desde el {fecha}",
+      "cargarMaterial": "Cargar el material de la semana {numero}",
+      "editarMaterial": "Ver o editar la semana {numero}",
+      "verMaterial": "Ver la semana {numero}",
+      "inscriptosTitulo": "Inscriptos",
+      "sinInscriptos": "Todavía no hay nadie inscripto en esta edición.",
+      "faltas": "{cantidad, plural, =0 {Sin faltas} one {# falta} other {# faltas}}",
+      "alertaFaltas": "Faltó {cantidad} veces: conviene escribirle",
+      "llamar": "Llamar a {nombre} ({telefono})",
+      "estados": {
+        "activa": "Activa",
+        "completada": "Terminó",
+        "dada_de_baja": "Dada de baja",
+        "abandono": "Abandonó"
+      },
+      "bajaPropuesta": "Propusiste la baja ({tipo}) el {fecha}. La iglesia la está revisando.",
+      "bajaRechazada": "La iglesia no confirmó la baja el {fecha}.",
+      "bajaRechazadaMotivo": "La iglesia no confirmó la baja el {fecha}: «{motivo}»",
+      "tipos": {
+        "dada_de_baja": "dada de baja",
+        "abandono": "abandonó"
+      },
+      "proponerBaja": "Proponer baja de {nombre}",
+      "proponerBajaTitulo": "¿Proponer la baja de {nombre}?",
+      "proponerBajaDescripcion": "La iglesia la revisa. Mientras tanto, {nombre} sigue como siempre.",
+      "tipoEtiqueta": "¿Qué pasó?",
+      "tipoDadaDeBaja": "Dejó por un motivo (se mudó, cambió de horario, lo charló con vos)",
+      "tipoAbandono": "Dejó de venir sin avisar",
+      "comentarioEtiqueta": "Comentario para la iglesia (opcional)",
+      "comentarioAyuda": "Hasta 500 caracteres.",
+      "proponerBajaEnviar": "Proponer la baja",
+      "bajaPropuestaOk": "Listo: la iglesia va a revisar la baja de {nombre}.",
+      "finalizacionTitulo": "Cerrar la edición",
+      "finalizacionTodavia": "Vas a poder proponer cerrar la edición desde el {fecha}, la fecha de la última semana.",
+      "finalizacionPuede": "Si ya terminó la última semana, proponé cerrarla. La iglesia la confirma y quienes la terminaron quedan listos para servir en un Ministerio.",
+      "finalizacionPropuesta": "Propusiste cerrar la edición el {fecha}. La iglesia lo está revisando.",
+      "finalizacionRechazada": "La iglesia no confirmó el cierre el {fecha}.",
+      "finalizacionRechazadaMotivo": "La iglesia no confirmó el cierre el {fecha}: «{motivo}». Podés volver a proponerlo.",
+      "proponerFinalizacion": "Proponer cerrar la edición",
+      "proponerFinalizacionTitulo": "¿Proponer cerrar {nombre}?",
+      "proponerFinalizacionDescripcion": "La iglesia lo revisa y, cuando lo confirme, la edición queda terminada.",
+      "proponerFinalizacionEnviar": "Sí, proponer",
+      "finalizacionPropuestaOk": "Listo: la iglesia va a revisar el cierre."
+    },
+    "material": {
+      "titulo": "Semana {numero}",
+      "fecha": "Se ve desde el {fecha}",
+      "cargadoPor": "Lo cargó {nombre} el {fecha}.",
+      "editadoPor": "Lo editó por última vez {nombre} el {fecha}.",
+      "tituloEtiqueta": "Título",
+      "tituloAyuda": "Hasta 120 caracteres. Por ejemplo: \"El llamado a servir\".",
+      "textoEtiqueta": "Texto (opcional)",
+      "textoAyuda": "Podés pegar enlaces: se van a ver como enlaces. Hasta 10.000 caracteres.",
+      "archivosTitulo": "Archivos",
+      "archivosAyuda": "PDF o imágenes (JPG, PNG, WebP), hasta 15 MB cada uno y 5 por semana.",
+      "quitar": "Quitar {nombre}",
+      "seQuita": "Se quita al guardar: {nombre}",
+      "deshacerQuitar": "No quitar {nombre}",
+      "agregarArchivos": "Agregar archivos",
+      "nuevo": "Nuevo: {nombre} ({tamanio})",
+      "sacarNuevo": "Sacar {nombre}",
+      "altEtiqueta": "Qué muestra la imagen {nombre}",
+      "altAyuda": "Para quien no la puede ver. Por ejemplo: \"Esquema de los dones del capítulo 3\".",
+      "enlacesTitulo": "Enlaces (opcional)",
+      "enlaceTexto": "Texto del enlace {numero}",
+      "enlaceUrl": "Dirección del enlace {numero}",
+      "enlaceUrlAyuda": "Empieza con https://",
+      "agregarEnlace": "Agregar un enlace",
+      "quitarEnlace": "Quitar el enlace {numero}",
+      "guardar": "Guardar material",
+      "guardado": "Guardamos el material de la semana {numero}.",
+      "guardadoAviso": "Ya lo pueden ver quienes están inscriptos.",
+      "vistaPrevia": "Así lo ven los inscriptos",
+      "terminada": "Esta edición ya terminó: el material se puede ver pero no cambiar.",
+      "noEncontradaTitulo": "No encontramos esa semana",
+      "elegirArchivo": "Elegir un archivo",
+      "sinArchivoNuevo": "Elegí uno por vez: se suma a la lista."
+    },
+    "asistencia": {
+      "titulo": "Tomar asistencia",
+      "fechaEtiqueta": "Fecha",
+      "fechaAyuda": "Hoy, o un día anterior para corregir.",
+      "cambiarFecha": "Ver esa fecha",
+      "guardadaAntes": "Esta fecha ya tiene asistencia guardada: la podés corregir.",
+      "nuevaTodos": "Todos figuran presentes. Tocá a quien no vino.",
+      "presente": "Vino",
+      "ausente": "No vino",
+      "marcar": "{nombre}: {estado}",
+      "contador": "{presentes} {presentes, plural, one {presente} other {presentes}}, {ausentes} {ausentes, plural, one {ausente} other {ausentes}}",
+      "sinInscriptos": "No había nadie inscripto en esa fecha.",
+      "guardar": "Guardar asistencia",
+      "guardada": "Guardamos la asistencia del {fecha}.",
+      "faltasAlerta": "{cantidad} faltas"
+    },
+    "noEncontradoTitulo": "No encontramos esa edición"
+  },
   "ministerios": {
     "titulo": "Ministerios",
     "introduccion1": "Durante nuestro curso Vida de Servicio tenemos la posibilidad de comenzar a servir a otro nivel y desarrollar los dones y ministerios que nos fueron dados para bendición. Primeramente, en tu casa, en tu trabajo o lugar de estudio y luego también como parte de los equipos de nuestra congregación.",
@@ -1392,7 +1593,57 @@
       "errorFecha": "Completá el día, el mes y el año del pago."
     }
   },
-  "comentarios": {},
+  "comentarios": {
+    "formulario": {
+      "tipoLeyenda": "¿Qué nos querés contar?",
+      "tipos": {
+        "problema": {
+          "etiqueta": "Un problema",
+          "ayuda": "Algo no anda, no se entiende o no te deja seguir."
+        },
+        "sugerencia": {
+          "etiqueta": "Una sugerencia",
+          "ayuda": "Una idea para mejorar la app o algo que te gustaría que tenga."
+        }
+      },
+      "texto": "Contanos",
+      "ayudaTexto": "Con tus palabras: qué estabas haciendo y qué pasó, o qué te gustaría. Hasta 2000 caracteres.",
+      "contador": "{n} de {maximo} caracteres",
+      "aceptaContacto": "Pueden contactarme para preguntarme más",
+      "ayudaAceptaContactoConSesion": "Si te contactamos, usamos el email y el teléfono de tu perfil.",
+      "contactoLeyenda": "¿Cómo te contactamos?",
+      "ayudaContacto": "Dejanos un email o un teléfono (con uno alcanza).",
+      "contactoEmail": "Email (opcional)",
+      "contactoTelefono": "Teléfono (opcional)",
+      "codigoPais": "Código de país",
+      "enviar": "Enviar",
+      "enviando": "Enviando…",
+      "tituloResumen": "Revisá esto antes de enviar:",
+      "errores": {
+        "tipo": "Elegí si es un problema o una sugerencia.",
+        "texto": "Escribí qué nos querés contar, en hasta 2000 caracteres.",
+        "contacto": "Para que te contactemos, dejanos un email o un teléfono. Si preferís que no, desmarcá la casilla.",
+        "contactoEmail": "Escribí un email válido, por ejemplo nombre@ejemplo.com.",
+        "contactoTelefono": "Escribí el número con el código de área, solo con números. Ejemplo: 221 555 0101.",
+        "otro": "Revisá este dato."
+      },
+      "demasiados": "Mandaste varios comentarios seguidos. Probá de nuevo en {minutos, plural, one {un minuto} other {# minutos}}.",
+      "errorGeneral": "No pudimos enviar tu comentario. Probá de nuevo en unos minutos.",
+      "confirmacionTitulo": "¡Gracias! Lo vamos a leer.",
+      "confirmacionDetalle": "Cada comentario lo lee alguien del equipo. Si es un problema, lo revisamos para arreglarlo.",
+      "confirmacionDetalleContacto": "Cada comentario lo lee alguien del equipo. Si necesitamos saber más, te vamos a contactar.",
+      "otro": "Mandar otro comentario"
+    },
+    "abrir": "Contanos qué te parece",
+    "metaTitulo": "Contanos qué te parece",
+    "titulo": "Contanos qué te parece",
+    "descripcion": "¿Algo no anda o se te ocurre cómo mejorar la app? Leemos todo lo que nos mandan.",
+    "volver": "Volver a donde estabas",
+    "errorCargaTitulo": "No pudimos abrir el formulario",
+    "errorCarga": "Probá de nuevo en unos segundos.",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando el formulario"
+  },
   "inicioApp": {
     "saludo": "Hola, {nombre}",
     "pendientesDiscipulador": "{cantidad, plural, one {Tenés # cosa para revisar en tus discipulados} other {Tenés # cosas para revisar en tus discipulados}}",
@@ -1406,5 +1657,18 @@
     "errorTitulo": "No pudimos mostrar tu Inicio",
     "errorTexto": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
     "reintentar": "Reintentar"
+  },
+  "perfil": {
+    "titulo": "Perfil",
+    "entrasCon": "Entrás con",
+    "misDatos": "Mis datos",
+    "cuenta": "Tu cuenta",
+    "errorCarga": "No pudimos cargar tus datos. Puede ser un problema de conexión: probá de nuevo en un rato.",
+    "reintentar": "Reintentar",
+    "guardar": "Guardar cambios",
+    "guardando": "Guardando…",
+    "guardado": "Guardamos tus cambios.",
+    "errorGuardar": "No pudimos guardar tus cambios. Probá de nuevo en un rato.",
+    "ayudaTelefono": "Con la característica, sin el 0 ni el 15."
   }
 }

@@ -11,7 +11,7 @@ import { CATALOGO_AVISOS, NOMBRES_EVENTOS_AVISO, type SpecDelAviso } from '@vida
  * emisiones, el test sigue pasando; si una entra SIN emitir, el test de la
  * lista de abajo lo marca al sacarla.
  */
-const SPECS_TODAVIA_NO_EN_MAIN: readonly SpecDelAviso[] = ['008', '010'];
+const SPECS_TODAVIA_NO_EN_MAIN: readonly SpecDelAviso[] = ['010'];
 
 const src = resolve(dirname(fileURLToPath(import.meta.url)), '../../src');
 function archivos(dir: string): string[] {
