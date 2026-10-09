@@ -53,11 +53,16 @@ describe('FinalizacionService.confirmar', () => {
     expect(prisma.inscripcion.updateMany).not.toHaveBeenCalled();
   });
 
-  it('retira una reasignación que había quedado propuesta (el Grupo cerró)', async () => {
-    const { servicio, prisma } = armar({ estado: 'en_curso', propuestaFinalizacionEn: new Date() });
-    prisma.propuestaDiscipulado.findFirst.mockResolvedValue({ id: 'reasig' });
+  it('retira una reasignación que había quedado propuesta (el Grupo cerró) y le avisa a su Discipulador (D219)', async () => {
+    const { servicio, prisma, emitir } = armar({ estado: 'en_curso', propuestaFinalizacionEn: new Date() });
+    prisma.propuestaDiscipulado.findFirst.mockResolvedValue({ id: 'reasig', discipuladorId: 'propuesto' });
     await servicio.confirmar('g-1', 'admin-1');
     expect(prisma.propuestaDiscipulado.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'reasig' }, data: { estado: 'retirada', retiradaPor: 'admin' } }));
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), {
+      nombre: 'discipulado.reasignacion_retirada',
+      a: { tipo: 'discipulador', personaId: 'propuesto' },
+      datos: { propuestaId: 'reasig', grupoId: 'g-1' },
+    });
   });
 });
 

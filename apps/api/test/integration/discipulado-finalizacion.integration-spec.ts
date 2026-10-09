@@ -119,5 +119,12 @@ describe('Finalización y reasignación (integración)', () => {
     expect(detalle.body.reasignacionPropuesta).toBeNull();
     const deNuevo = await http().post(`/grupos/discipulados/${grupoId}/reasignar/retirar`).set('Authorization', `Bearer ${tokenAdmin}`);
     expect(deNuevo.body.code).toBe('PROPUESTA_NO_VIGENTE');
+
+    // D219: al Discipulador propuesto le llega un aviso in-app (normal: sin mail) de que ya no hace falta responder.
+    const avisos = await prisma.entregaNotificacion.findMany({
+      where: { personaId: nuevo, notificacion: { evento: 'discipulado.reasignacion_retirada' } },
+      select: { canal: true, notificacion: { select: { prioridad: true, params: true } } },
+    });
+    expect(avisos).toEqual([{ canal: 'app', notificacion: { prioridad: 'normal', params: { propuestaId: expect.any(String), grupoId } } }]);
   });
 });

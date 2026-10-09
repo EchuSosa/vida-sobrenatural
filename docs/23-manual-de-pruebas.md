@@ -55,8 +55,8 @@ Cada app tiene **su propia sesión**: entrar en una no te hace entrar en la otra
 |---|---|---|
 | ⭐ **Demo** — el recorrido del domingo | 18 | 1 h 10 min |
 | **P1** — lo principal de cada módulo y los permisos | 50 | 3 h 20 min |
-| **P2** — validaciones, casos borde, celular y modo oscuro | 87 | 3 h 50 min |
-| **Total** | **155** | **unas 8 h 20 min** (día y medio con pausas) |
+| **P2** — validaciones, casos borde, celular y modo oscuro | 88 | 3 h 50 min |
+| **Total** | **156** | **unas 8 h 20 min** (día y medio con pausas) |
 
 **Orden sugerido:** primero todo el bloque ⭐ (si algo falla ahí, es lo más urgente), después P1,
 y si queda tiempo, P2.
@@ -344,6 +344,7 @@ un recuadro arriba ("Revisá…") con enlace a cada campo. Anotá cualquier mens
 | DIS-13 | P2 | Discipuladora | Propuesta que el Admin retiró mientras la mirabas (VN-04 con la pantalla de la Discipuladora abierta) | 1. Tocá "Aceptar". | "Esa propuesta ya no está vigente: ya se respondió o se retiró. Actualizamos la pantalla." | |
 | DIS-14 | P2 | Admin | Reasignar: un discipulado en curso | 1. Grupos → abrí el de Agustina → "Cambiar de Discipulador" → elegí a Laura → "Sí, proponer". | "Propuesta enviada a Laura…". Hasta que acepte, sigue Marcela. | |
 | DIS-15 | P2 | Admin | Pedido de baja de un Discipulador | 1. En vez de confirmar, tocá "Rechazar la baja de …" con un motivo. | El Discipulador ve en "Para revisar": "El equipo no confirmó la baja de…" con el motivo. | |
+| DIS-16 | P2 | Admin y Laura | Después de DIS-14 (reasignación a Laura propuesta), con Mailpit abierto | 1. En el backoffice, en el discipulado de Agustina, tocá "Retirar la propuesta" → "Sí, retirar".<br>2. Entrá a la web app como `demo-disc-laura@example.com` y tocá "Avisos". | Laura tiene un aviso "Sin leer": "Ya no hace falta que respondas la propuesta". Al tocarlo la lleva a Mis discipulados, donde la propuesta ya no está. **No** le llega mail. Lo mismo pasa si el Admin retira una propuesta de Vida Nueva (VN-04). | |
 
 ### 5.4. Personas, menores y tutores (PER, MEN)
 
