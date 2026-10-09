@@ -186,7 +186,9 @@ export function AccionInscripcion({ evento }: { evento: EventoPublico }) {
                   {lista ? <li>{t('confirmarLista')}</li> : evento.requiereAprobacion && <li>{t('confirmarAprobacion')}</li>}
                 </ul>
                 {evento.preguntas.length > 0 && (
-                  <div className="flex flex-col gap-3">
+                  // Sobre `background`, no sobre el `secondary` del recuadro: el rojo de los errores
+                  // por campo da 4.0:1 sobre `secondary` en oscuro (H-56); sobre `background`, pasa.
+                  <div className="flex flex-col gap-3 rounded-md border border-border bg-background p-3">
                     <p className="text-base font-semibold">{t('preguntasTitulo')}</p>
                     <CamposPreguntasEvento
                       tactil
