@@ -1,3 +1,4 @@
+import { NotificacionesService } from '../../src/notificaciones/notificaciones.service.js';
 import { RolesDeEstadoService } from '../../src/persona/roles-de-estado.service.js';
 
 /**
@@ -16,4 +17,9 @@ export function conTransaccion<T extends Record<string, unknown>>(prismaMock: T)
 
 export function proveedorRolesDeEstado(otorgarRolDeEstado: jest.Mock = jest.fn().mockResolvedValue(undefined)) {
   return { provide: RolesDeEstadoService, useValue: { otorgarRolDeEstado } };
+}
+
+/** spec 012 (T036): `activar` emite `persona.cuenta_activada` dentro de su transacción. */
+export function proveedorNotificaciones(emitir: jest.Mock = jest.fn().mockResolvedValue({ hayEmails: false })) {
+  return { provide: NotificacionesService, useValue: { emitir, empujarEmails: jest.fn() } };
 }

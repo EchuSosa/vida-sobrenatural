@@ -1,5 +1,5 @@
 import type { PrismaService } from '../../src/prisma/prisma.service.js';
-import { EventosDiscipuladoService } from '../../src/discipulado/eventos.js';
+import type { NotificacionesService } from '../../src/notificaciones/notificaciones.service.js';
 
 /**
  * specs/004, lote B: un Prisma falso para los tests unitarios de las
@@ -69,10 +69,16 @@ export function comoPrisma(p: PrismaFalso): PrismaService {
   return p as unknown as PrismaService;
 }
 
+/**
+ * spec 012 (T029): el `NotificacionesService` de los tests unitarios. `emitir`
+ * anota `(tx, evento)` — el tx es lo que prueba que el aviso va DENTRO de la
+ * transacción (D197) — y `empujarEmails` no hace nada.
+ */
 export function eventosEspia() {
-  const eventos = new EventosDiscipuladoService();
-  const emitir = jest.spyOn(eventos, 'emitir').mockImplementation(() => undefined);
-  return { eventos, emitir };
+  const emitir = jest.fn().mockResolvedValue({ hayEmails: false });
+  const empujarEmails = jest.fn();
+  const eventos = { emitir, empujarEmails } as unknown as NotificacionesService;
+  return { eventos, emitir, empujarEmails };
 }
 
 export async function codigoDe(promesa: Promise<unknown>): Promise<string | undefined> {

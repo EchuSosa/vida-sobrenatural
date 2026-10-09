@@ -12,13 +12,28 @@ import { resolverDestinatarios } from './destinatarios.js';
  * transacción se deshace, no queda nada. El mail sale después (proceso de la
  * 012, lote C); `hayEmails` le sirve a quien llama para "empujarlo".
  *
- * Lote 0 global: el mecanismo completo, aunque los consumidores lleguen
- * después. La 004 todavía emite por `EventosDiscipuladoService` (solo log);
- * conectarla es el lote B de la 012.
+ * Después de confirmar, quien emitió un importante puede llamar a
+ * `empujarEmails()` para que el mail salga ya; si no lo hace, la tarea
+ * programada lo manda en la próxima vuelta (spec 012, lote C).
  */
 @Injectable()
 export class NotificacionesService {
   private readonly logger = new Logger('Avisos');
+  private envioEmails: (() => void) | null = null;
+
+  /** Lo registra `EnvioEmailsService` al arrancar (lote C): así este servicio no depende del envío. */
+  registrarEnvioEmails(empujar: () => void): void {
+    this.envioEmails = empujar;
+  }
+
+  /** Despierta el envío de mails pendientes, sin esperarlo ni propagar errores. Siempre DESPUÉS de confirmar. */
+  empujarEmails(): void {
+    try {
+      this.envioEmails?.();
+    } catch {
+      // El envío tiene su propio reintento: nunca rompe la acción que avisó.
+    }
+  }
 
   async emitir(tx: Prisma.TransactionClient, evento: EventoAviso): Promise<{ hayEmails: boolean }> {
     const entrada = entradaDe(evento.nombre);
@@ -62,13 +77,27 @@ export class NotificacionesService {
     if (destinatarios.length === 0) return { hayEmails: false };
 
     // 6. Una sentencia por canal: `app` para todos; `email` solo si es importante y tiene email (FR-017, D200).
+    return this.crearEntregas(tx, notificacionId, destinatarios, entrada.prioridad === 'importante');
+  }
+
+  /**
+   * Las Entregas de una Notificación, una sentencia por canal (la usan `emitir`
+   * y los avisos manuales del backoffice, Principio XI): `app` para todos,
+   * `email` `pendiente` solo si es importante y para quienes tienen email.
+   */
+  async crearEntregas(
+    tx: Prisma.TransactionClient,
+    notificacionId: string,
+    destinatarios: { id: string; tieneEmail: boolean }[],
+    importante: boolean,
+  ): Promise<{ hayEmails: boolean }> {
+    const ahora = new Date();
     await tx.entregaNotificacion.createMany({
-      data: destinatarios.map((d) => ({ notificacionId, personaId: d.id, canal: 'app' as const, estado: 'enviada' as const, enviadaEn: new Date() })),
+      data: destinatarios.map((d) => ({ notificacionId, personaId: d.id, canal: 'app' as const, estado: 'enviada' as const, enviadaEn: ahora })),
       skipDuplicates: true,
     });
-    const conEmail = entrada.prioridad === 'importante' ? destinatarios.filter((d) => d.tieneEmail) : [];
+    const conEmail = importante ? destinatarios.filter((d) => d.tieneEmail) : [];
     if (conEmail.length > 0) {
-      const ahora = new Date();
       await tx.entregaNotificacion.createMany({
         data: conEmail.map((d) => ({ notificacionId, personaId: d.id, canal: 'email' as const, estado: 'pendiente' as const, proximoIntentoEn: ahora })),
         skipDuplicates: true,

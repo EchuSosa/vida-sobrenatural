@@ -126,6 +126,10 @@ export class Escenario {
     const p = this.prisma;
     const grupos = (await p.inscripcion.findMany({ where: { personaId: { in: ids } }, select: { grupoId: true } })).map((i) => i.grupoId);
     const solicitudes = (await p.solicitudDiscipulado.findMany({ where: { personaId: { in: ids } }, select: { id: true } })).map((s) => s.id);
+    // spec 012: los avisos que emitieron las transiciones (FK a la Persona).
+    const avisos = (await p.entregaNotificacion.findMany({ where: { personaId: { in: ids } }, select: { notificacionId: true } })).map((e) => e.notificacionId);
+    await p.entregaNotificacion.deleteMany({ where: { OR: [{ personaId: { in: ids } }, { notificacionId: { in: avisos } }] } });
+    await p.notificacion.deleteMany({ where: { OR: [{ id: { in: avisos } }, { creadoPorId: { in: ids } }] } });
     await p.asistencia.deleteMany({ where: { encuentro: { grupoId: { in: grupos } } } });
     await p.encuentro.deleteMany({ where: { grupoId: { in: grupos } } });
     await p.liderazgo.deleteMany({ where: { OR: [{ personaId: { in: ids } }, { grupoId: { in: grupos } }] } });

@@ -18,6 +18,8 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import { calcularEdad, nacidosAntesDeParaEdad } from './calcular-edad.js';
 import { RolesDeEstadoService } from './roles-de-estado.service.js';
+import type { Prisma } from '../generated/prisma/client.js';
+import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import {
   discipuladosActivosDeVarias,
@@ -76,6 +78,7 @@ export class PersonaService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rolesDeEstado: RolesDeEstadoService,
+    private readonly notificaciones: NotificacionesService,
   ) {}
 
   /** GET /personas/by-email — uso interno, ver contracts/auth-integration.md. */
@@ -547,8 +550,9 @@ export class PersonaService {
           'miembro_registrado',
           tx,
         );
+        await this.avisarCuentaActivada(tx, persona.id);
         return actualizada;
-      });
+      }).then(this.empujando);
     }
 
     const tutor = await this.validarVinculoFamiliar(
@@ -599,9 +603,26 @@ export class PersonaService {
         'miembro_registrado',
         tx,
       );
+      await this.avisarCuentaActivada(tx, persona.id);
       return actualizada;
-    });
+    }).then(this.empujando);
   }
+
+  /**
+   * spec 012, T036 (FR-019, US2-7): el aviso importante de la activación, en
+   * la misma transacción y DESPUÉS de que la Persona quedó `activa` (si no,
+   * `resolverDestinatarios` la filtraría). La clave del catálogo evita el
+   * duplicado si se reintenta.
+   */
+  private avisarCuentaActivada(tx: Prisma.TransactionClient, personaId: string) {
+    return this.notificaciones.emitir(tx, { nombre: 'persona.cuenta_activada', a: { tipo: 'persona', personaId }, datos: { personaId } });
+  }
+
+  /** Después de confirmar: el mail del aviso sale ya (si no, lo manda la tarea programada). */
+  private readonly empujando = <T>(resultado: T): T => {
+    this.notificaciones.empujarEmails();
+    return resultado;
+  };
 
   /**
    * D112: valida antes de crear una Relación Familiar — ninguna Persona

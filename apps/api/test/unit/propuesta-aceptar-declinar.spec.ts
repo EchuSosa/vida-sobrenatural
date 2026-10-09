@@ -69,7 +69,7 @@ describe('PropuestasService.aceptar', () => {
     );
     expect(prisma.solicitudDiscipulado.update).toHaveBeenCalledWith(expect.objectContaining({ data: { estado: 'aprobada', grupoId: 'grupo-nuevo' } }));
     expect(prisma.propuestaDiscipulado.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ estado: 'aceptada' }) }));
-    expect(emitir).toHaveBeenCalledWith(expect.objectContaining({ nombre: 'propuesta_aceptada', a: { tipo: 'persona', personaId: 'persona-1' } }));
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ nombre: 'discipulado.propuesta_aceptada', a: { tipo: 'persona', personaId: 'persona-1' } }));
   });
 
   it('`nueva` con el Curso inactivo → CURSO_INACTIVO, sin Grupo ni Liderazgo y la Propuesta sigue pendiente (013 FR-054)', async () => {
@@ -150,7 +150,7 @@ describe('PropuestasService.declinar', () => {
       expect.objectContaining({ data: expect.objectContaining({ estado: 'declinada', motivoDeclinacion: 'No tengo ese horario' }) }),
     );
     expect(prisma.solicitudDiscipulado.update).toHaveBeenCalledWith(expect.objectContaining({ data: { estado: 'pendiente' } }));
-    expect(emitir).toHaveBeenCalledWith(expect.objectContaining({ nombre: 'propuesta_declinada', a: { tipo: 'admin' } }));
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ nombre: 'discipulado.propuesta_declinada', a: { tipo: 'admin' } }));
   });
 
   it('declinar una reasignación no toca ni la Solicitud ni el Grupo', async () => {

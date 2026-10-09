@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
-import { EventosDiscipuladoService } from './eventos.js';
+import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { bloquearGrupo, bloquearInscripcion } from './bloqueos.js';
 import { exigirLiderazgoVigente } from './consultas.js';
 import { exigirEnCurso, retirarReasignacionPendiente } from './finalizacion.service.js';
@@ -17,7 +17,7 @@ import { normalizarMotivo } from './validaciones.js';
 export class BajaService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventos: EventosDiscipuladoService,
+    private readonly notificaciones: NotificacionesService,
   ) {}
 
   async proponer(discipuladorId: string, grupoId: string, inscripcionId: string, motivo: string | undefined): Promise<void> {
@@ -38,12 +38,12 @@ export class BajaService {
         data: { bajaPropuestaEn: new Date(), bajaPropuestaPorId: discipuladorId, bajaPropuestaMotivo: motivoLimpio },
         select: { id: true },
       });
+      await this.notificaciones.emitir(tx, { nombre: 'discipulado.baja_propuesta', a: { tipo: 'admin' }, datos: { grupoId, inscripcionId } });
     });
-    this.eventos.emitir({ nombre: 'baja_propuesta', a: { tipo: 'admin' }, datos: { grupoId, inscripcionId } });
   }
 
   async confirmar(grupoId: string, inscripcionId: string, adminId: string): Promise<{ grupoCerrado: boolean }> {
-    const { personaId, grupoCerrado } = await this.prisma.$transaction(async (tx) => {
+    const { grupoCerrado } = await this.prisma.$transaction(async (tx) => {
       const grupo = await bloquearGrupo(tx, grupoId);
       const inscripcion = await bloquearInscripcion(tx, grupoId, inscripcionId);
       exigirEnCurso(grupo);
@@ -60,9 +60,13 @@ export class BajaService {
         });
         await retirarReasignacionPendiente(tx, grupoId);
       }
-      return { personaId: inscripcion.personaId, grupoCerrado: quedan === 0 };
+      await this.notificaciones.emitir(tx, {
+        nombre: 'discipulado.baja_confirmada',
+        a: { tipo: 'persona', personaId: inscripcion.personaId },
+        datos: { grupoId, inscripcionId },
+      });
+      return { grupoCerrado: quedan === 0 };
     });
-    this.eventos.emitir({ nombre: 'baja_confirmada', a: { tipo: 'persona', personaId }, datos: { grupoId, inscripcionId } });
     return { grupoCerrado };
   }
 

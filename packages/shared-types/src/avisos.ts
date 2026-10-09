@@ -408,3 +408,79 @@ export interface AvisoResumen {
 }
 
 export type AvisoDetalle = AvisoResumen & { mensaje: string | null };
+
+// --- Avisos manuales del backoffice (spec 012, lote D; contracts/notificaciones-api.md) ---
+
+export const NOTIFICACIONES_POR_PAGINA = 20;
+
+export type AlcanceManual = 'todos' | 'grupo' | 'ministerio';
+export const ALCANCES_MANUALES: readonly AlcanceManual[] = ['todos', 'grupo', 'ministerio'];
+
+export interface NotificacionManualResumen {
+  id: string;
+  titulo: string;
+  alcance: AlcanceManual;
+  /** Nombre del Grupo (con su Curso) o del Ministerio, para la tabla. */
+  alcanceNombre: string | null;
+  importante: boolean;
+  autor: { id: string; nombre: string; apellido: string };
+  fecha: string;
+  /** Entregas `app`. */
+  destinatarios: number;
+  /** Entregas `app` leídas. */
+  leidas: number;
+}
+
+export interface NotificacionManualDetalle extends NotificacionManualResumen {
+  mensaje: string;
+  emails: { enviados: number; pendientes: number; fallidos: number; personasFallidas: { id: string; nombre: string; apellido: string }[] } | null;
+}
+
+export interface NuevaNotificacionManual {
+  titulo: string;
+  mensaje: string;
+  alcance: AlcanceManual;
+  alcanceId?: string;
+  importante: boolean;
+}
+
+export interface ConteoDestinatarios {
+  personas: number;
+  conEmail: number;
+}
+
+export interface OpcionesAlcance {
+  grupos: { id: string; nombre: string; curso: string }[];
+  ministerios: { id: string; nombre: string }[];
+}
+
+export type MotivoMailFallido = 'SIN_EMAIL' | 'PERSONA_INACTIVA' | 'ENVIO_FALLIDO';
+
+export interface MailFallido {
+  entregaId: string;
+  persona: { id: string; nombre: string; apellido: string };
+  evento: NombreEventoAviso;
+  fecha: string;
+  motivo: MotivoMailFallido;
+}
+
+/**
+ * FR-027, FR-034 — las reglas de campo de un aviso manual, con el texto ya
+ * recortado. Pura: la usan la API (la barrera real) y el diálogo del
+ * backoffice (para marcar los errores sin ir al servidor). Todos a la vez (H-50).
+ */
+export function validarNuevaNotificacion(n: Partial<Record<keyof NuevaNotificacionManual, unknown>>): { campo: string; code: string }[] {
+  const errores: { campo: string; code: string }[] = [];
+  const titulo = typeof n.titulo === 'string' ? n.titulo.trim() : '';
+  const mensaje = typeof n.mensaje === 'string' ? n.mensaje.trim() : '';
+  if (!titulo) errores.push({ campo: 'titulo', code: 'TITULO_REQUERIDO' });
+  else if (titulo.length > TITULO_AVISO_MAX) errores.push({ campo: 'titulo', code: 'TITULO_DEMASIADO_LARGO' });
+  if (!mensaje) errores.push({ campo: 'mensaje', code: 'MENSAJE_REQUERIDO' });
+  else if (mensaje.length > MENSAJE_AVISO_MAX) errores.push({ campo: 'mensaje', code: 'MENSAJE_DEMASIADO_LARGO' });
+  if (typeof n.alcance !== 'string' || !ALCANCES_MANUALES.includes(n.alcance as AlcanceManual)) {
+    errores.push({ campo: 'alcance', code: 'ALCANCE_REQUERIDO' });
+  } else if (n.alcance !== 'todos' && (typeof n.alcanceId !== 'string' || !n.alcanceId.trim())) {
+    errores.push({ campo: 'alcanceId', code: 'ALCANCE_ID_REQUERIDO' });
+  }
+  return errores;
+}

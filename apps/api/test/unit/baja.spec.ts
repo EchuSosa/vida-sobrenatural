@@ -37,7 +37,7 @@ describe('BajaService.proponer', () => {
     expect(prisma.inscripcion.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: { bajaPropuestaEn: expect.any(Date), bajaPropuestaPorId: 'd', bajaPropuestaMotivo: 'Dejó de venir' } }),
     );
-    expect(emitir).toHaveBeenCalledWith({ nombre: 'baja_propuesta', a: { tipo: 'admin' }, datos: { grupoId: 'g-1', inscripcionId: 'i-1' } });
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.baja_propuesta', a: { tipo: 'admin' }, datos: { grupoId: 'g-1', inscripcionId: 'i-1' } });
   });
 });
 
@@ -59,7 +59,7 @@ describe('BajaService.confirmar', () => {
     expect(prisma.grupo.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: { estado: 'finalizado', motivoCierre: 'abandonado', cerradoEn: expect.any(Date), cerradoPorId: 'admin' } }),
     );
-    expect(emitir).toHaveBeenCalledWith({ nombre: 'baja_confirmada', a: { tipo: 'persona', personaId: 'p-1' }, datos: { grupoId: 'g-1', inscripcionId: 'i-1' } });
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.baja_confirmada', a: { tipo: 'persona', personaId: 'p-1' }, datos: { grupoId: 'g-1', inscripcionId: 'i-1' } });
   });
 });
 

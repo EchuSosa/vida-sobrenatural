@@ -36,7 +36,7 @@ describe('SolicitudDiscipuladoService — editar y retirar el pedido propio (T01
       expect(p).toMatchObject({ estado: 'retirada', retiradaPor: 'persona' });
       expect(p.respondidaEn).toBeInstanceOf(Date);
       expect(s.estado).toBe('pendiente');
-      expect(emitir).toHaveBeenCalledWith({ nombre: 'propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId: p.id, retiradaPor: 'persona' } });
+      expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId: p.id, retiradaPor: 'persona' } });
     });
 
     it('sin franjas → error de campo y no toca nada', async () => {
@@ -75,7 +75,7 @@ describe('SolicitudDiscipuladoService — editar y retirar el pedido propio (T01
 
       expect(s.estado).toBe('retirada');
       expect(p).toMatchObject({ estado: 'retirada', retiradaPor: 'persona' });
-      expect(emitir).toHaveBeenCalledWith(expect.objectContaining({ nombre: 'propuesta_retirada' }));
+      expect(emitir).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ nombre: 'discipulado.propuesta_retirada' }));
     });
 
     it('después de retirar puede volver a pedir', async () => {

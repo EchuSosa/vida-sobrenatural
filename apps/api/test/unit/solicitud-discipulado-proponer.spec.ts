@@ -33,7 +33,7 @@ describe('SolicitudDiscipuladoService — proponer (T023)', () => {
       expect.objectContaining({ id: propuestaId, tipo: 'nueva', solicitudId: s.id, discipuladorId: 'disc-1', estado: 'pendiente', propuestaPorId: 'admin', grupoDestinoId: null }),
     ]);
     expect(base.inscripciones).toHaveLength(0);
-    expect(emitir).toHaveBeenCalledWith({ nombre: 'propuesta_nueva', a: { tipo: 'discipulador', personaId: 'disc-1' }, datos: { propuestaId, solicitudId: s.id } });
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.propuesta_nueva', a: { tipo: 'discipulador', personaId: 'disc-1' }, datos: { propuestaId, solicitudId: s.id } });
   });
 
   it.each(['propuesta', 'aprobada', 'rechazada', 'retirada'] as const)('una Solicitud %s → SOLICITUD_NO_PENDIENTE', async (estado) => {
@@ -106,7 +106,7 @@ describe('SolicitudDiscipuladoService — retirar la propuesta y rechazar (T023)
 
     expect(p).toMatchObject({ estado: 'retirada', retiradaPor: 'admin' });
     expect(s.estado).toBe('pendiente');
-    expect(emitir).toHaveBeenCalledWith({ nombre: 'propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId: p.id, retiradaPor: 'admin' } });
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId: p.id, retiradaPor: 'admin' } });
   });
 
   it('retirar sobre una pendiente → SOLICITUD_NO_PROPUESTA', async () => {
@@ -125,7 +125,7 @@ describe('SolicitudDiscipuladoService — retirar la propuesta y rechazar (T023)
     expect(s).toMatchObject({ estado: 'rechazada', revisadoPorId: 'admin' });
     expect(base.propuestas).toHaveLength(0);
     expect(base.inscripciones).toHaveLength(0);
-    expect(emitir).toHaveBeenCalledWith({ nombre: 'solicitud_rechazada', a: { tipo: 'persona', personaId: 'ana' }, datos: { solicitudId: s.id } });
+    expect(emitir).toHaveBeenCalledWith(expect.anything(), { nombre: 'discipulado.solicitud_rechazada', a: { tipo: 'persona', personaId: 'ana' }, datos: { solicitudId: s.id } });
   });
 
   it('rechazar una propuesta → SOLICITUD_NO_PENDIENTE (primero se retira la propuesta)', async () => {

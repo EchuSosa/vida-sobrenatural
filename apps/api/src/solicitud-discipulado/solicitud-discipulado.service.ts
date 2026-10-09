@@ -3,7 +3,6 @@ import type {
   Cruce,
   EstadoMiDiscipulado,
   EstadoSolicitud,
-  EventoDiscipulado,
   Franja,
   PersonaBreve,
   PropuestaHistorial,
@@ -15,7 +14,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
 import { CruceService } from '../discipulado/cruce.service.js';
-import { EventosDiscipuladoService } from '../discipulado/eventos.js';
+import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { cursaOCompletoVidaNueva } from '../discipulado/consultas.js';
 import { bloquearPersona, completitudVigente } from '../camino/consultas.js';
 import { erroresDeFranjas, estadoMiDiscipulado, puedePedirSola } from './reglas-solicitud.js';
@@ -36,14 +35,14 @@ const FRANJA_SELECT = { diaSemana: true, inicio: true, fin: true } as const;
  * propio, la bandeja del Admin, el detalle, el cruce, proponer, retirar la
  * propuesta y rechazar. Aceptar y declinar son del Discipulador (módulo
  * `discipulado`). Cada transición bloquea la Solicitud (`FOR UPDATE`) y emite
- * su evento DESPUÉS de confirmar (contracts/eventos.md).
+ * su aviso DENTRO de la transacción (spec 012, D197).
  */
 @Injectable()
 export class SolicitudDiscipuladoService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cruceService: CruceService,
-    private readonly eventos: EventosDiscipuladoService,
+    private readonly notificaciones: NotificacionesService,
   ) {}
 
   // ─── Pedir (FR-001, FR-002, FR-032, FR-044) ────────────────────────────
@@ -103,27 +102,25 @@ export class SolicitudDiscipuladoService {
   /** PUT /discipulado/solicitudes/me/franjas — reemplaza las franjas; si había una propuesta en curso, la retira (por la Persona). */
   async editarFranjas(personaId: string, franjas: Franja[]): Promise<EstadoMiDiscipulado> {
     validarFranjasOFallar(franjas);
-    const propuestaRetiradaId = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const solicitud = await bloquearAbiertaDe(tx, personaId);
       await tx.franjaSolicitud.deleteMany({ where: { solicitudId: solicitud.id } });
       await tx.franjaSolicitud.createMany({ data: franjas.map((f) => ({ ...soloFranja(f), solicitudId: solicitud.id })) });
       const retirada = await retirarPropuestaPendiente(tx, solicitud.id, 'persona');
       await tx.solicitudDiscipulado.update({ where: { id: solicitud.id }, data: { estado: 'pendiente' } });
-      return retirada;
+      if (retirada) await this.emitirRetirada(tx, retirada, 'persona');
     });
-    if (propuestaRetiradaId) this.emitirRetirada(propuestaRetiradaId, 'persona');
     return this.estadoPropio(personaId);
   }
 
   /** DELETE /discipulado/solicitudes/me — la Persona retira su pedido; puede volver a pedir. */
   async retirar(personaId: string): Promise<void> {
-    const propuestaRetiradaId = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const solicitud = await bloquearAbiertaDe(tx, personaId);
       const retirada = await retirarPropuestaPendiente(tx, solicitud.id, 'persona');
       await tx.solicitudDiscipulado.update({ where: { id: solicitud.id }, data: { estado: 'retirada' } });
-      return retirada;
+      if (retirada) await this.emitirRetirada(tx, retirada, 'persona');
     });
-    if (propuestaRetiradaId) this.emitirRetirada(propuestaRetiradaId, 'persona');
   }
 
   // ─── Mi camino (FR-026 a FR-029) ───────────────────────────────────────
@@ -292,6 +289,11 @@ export class SolicitudDiscipuladoService {
           where: { id },
           data: { estado: 'propuesta', revisadoPorId: adminId, revisadaEn: new Date() },
         });
+        await this.notificaciones.emitir(tx, {
+          nombre: 'discipulado.propuesta_nueva',
+          a: { tipo: 'discipulador', personaId: discipuladorId },
+          datos: { propuestaId: propuesta.id, solicitudId: id },
+        });
         return propuesta.id;
       });
     } catch (error) {
@@ -300,37 +302,37 @@ export class SolicitudDiscipuladoService {
       if (esViolacionDeUnicidad(error)) throw solicitudNoPendiente();
       throw error;
     }
-    this.emitir({ nombre: 'propuesta_nueva', a: { tipo: 'discipulador', personaId: discipuladorId }, datos: { propuestaId, solicitudId: id } });
+    this.notificaciones.empujarEmails();
     return { propuestaId };
   }
 
   /** POST /discipulado/solicitudes/:id/retirar-propuesta — la Solicitud vuelve a `pendiente`; no hay plazo automático. */
   async retirarPropuesta(id: string) {
-    const propuestaId = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const solicitud = await bloquearSolicitud(tx, id);
       if (solicitud.estado !== 'propuesta') {
         throw new AppException('SOLICITUD_NO_PROPUESTA', 409, 'Esta Solicitud no tiene una propuesta esperando respuesta.');
       }
       const retirada = await retirarPropuestaPendiente(tx, id, 'admin');
       await tx.solicitudDiscipulado.update({ where: { id }, data: { estado: 'pendiente' } });
-      return retirada;
+      if (retirada) await this.emitirRetirada(tx, retirada, 'admin');
     });
-    if (propuestaId) this.emitirRetirada(propuestaId, 'admin');
     return { estado: 'pendiente' as const };
   }
 
   /** POST /discipulado/solicitudes/:id/rechazar (FR-008): no crea nada; la Persona puede volver a pedir. */
   async rechazar(id: string, adminId: string) {
-    const personaId = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const solicitud = await bloquearSolicitud(tx, id);
       if (solicitud.estado !== 'pendiente') throw solicitudNoPendiente();
       await tx.solicitudDiscipulado.update({
         where: { id },
         data: { estado: 'rechazada', revisadoPorId: adminId, revisadaEn: new Date() },
       });
-      return solicitud.personaId;
+      // FR-013: sin el motivo — solo el id de la Solicitud.
+      await this.notificaciones.emitir(tx, { nombre: 'discipulado.solicitud_rechazada', a: { tipo: 'persona', personaId: solicitud.personaId }, datos: { solicitudId: id } });
     });
-    this.emitir({ nombre: 'solicitud_rechazada', a: { tipo: 'persona', personaId }, datos: { solicitudId: id } });
+    this.notificaciones.empujarEmails();
     return { estado: 'rechazada' as const };
   }
 
@@ -381,12 +383,8 @@ export class SolicitudDiscipuladoService {
     });
   }
 
-  private emitirRetirada(propuestaId: string, retiradaPor: 'admin' | 'persona') {
-    this.emitir({ nombre: 'propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId, retiradaPor } });
-  }
-
-  private emitir(evento: EventoDiscipulado) {
-    this.eventos.emitir(evento);
+  private emitirRetirada(tx: Tx, propuestaId: string, retiradaPor: 'admin' | 'persona') {
+    return this.notificaciones.emitir(tx, { nombre: 'discipulado.propuesta_retirada', a: { tipo: 'admin' }, datos: { propuestaId, retiradaPor } });
   }
 }
 

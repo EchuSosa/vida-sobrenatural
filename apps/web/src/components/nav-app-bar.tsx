@@ -41,8 +41,29 @@ function MenuMasEscritorio() {
   );
 }
 
+/**
+ * spec 012, T022 (FR-005, D81): el globo con los avisos sin leer, junto al
+ * ícono de Avisos. El número es decorativo para el lector de pantalla: lo que
+ * se anuncia es "{n} avisos sin leer". `null` (no se pudo contar) o 0 → nada.
+ */
+function InsigniaSinLeer({ cantidad }: { cantidad: number | null }) {
+  const t = useTranslations('avisos');
+  if (!cantidad) return null;
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="absolute -top-1 left-1/2 ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1 text-sm leading-5 font-semibold text-primary-foreground md:static md:ml-0"
+      >
+        {cantidad > 99 ? '99+' : cantidad}
+      </span>
+      <span className="sr-only">{t('sinLeerAccesible', { n: cantidad })}</span>
+    </>
+  );
+}
+
 /** Barra de navegación de la app con sesión — Historia 1 (FR-003, FR-015). */
-export function NavAppBar() {
+export function NavAppBar({ sinLeer = null }: { sinLeer?: number | null }) {
   const pathname = usePathname();
   const t = useTranslations('nav');
 
@@ -63,10 +84,11 @@ export function NavAppBar() {
               aria-current={activo ? 'page' : undefined}
               // ajustes-ux #5: etiquetas en 14 px (antes 12) e íconos de 24 px;
               // px-1 en celular para que las cinco sigan entrando a 320 px.
-              className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 px-1 py-1 text-sm text-muted-foreground aria-[current=page]:text-foreground aria-[current=page]:font-semibold sm:px-2 md:flex-row md:gap-2"
+              className="relative flex min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 px-1 py-1 text-sm text-muted-foreground aria-[current=page]:text-foreground aria-[current=page]:font-semibold sm:px-2 md:flex-row md:gap-2"
             >
               <Icon className="size-6 md:size-5" />
               <span>{t(labelKey)}</span>
+              {href === '/avisos' && <InsigniaSinLeer cantidad={sinLeer} />}
             </Link>
           );
           // H-47: en escritorio, "Perfil" abre un menú (Perfil/colores de la

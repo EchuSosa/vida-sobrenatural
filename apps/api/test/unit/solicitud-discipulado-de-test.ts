@@ -3,7 +3,7 @@ import type { Franja } from '@vida-sobrenatural/shared-types';
 import { SolicitudDiscipuladoService } from '../../src/solicitud-discipulado/solicitud-discipulado.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { CruceService } from '../../src/discipulado/cruce.service.js';
-import { EventosDiscipuladoService } from '../../src/discipulado/eventos.js';
+import { NotificacionesService } from '../../src/notificaciones/notificaciones.service.js';
 import { AppException } from '../../src/common/errors/app-exception.js';
 
 /**
@@ -232,7 +232,7 @@ export interface CandidatoFake {
  */
 export async function crearServicio(base: Partial<Base> = {}, disponibles: CandidatoFake[] = []) {
   const completa: Base = { personas: [], solicitudes: [], franjas: [], propuestas: [], inscripciones: [], liderazgos: [], ...base };
-  const emitir = jest.fn();
+  const emitir = jest.fn().mockResolvedValue({ hayEmails: false });
   const cruceService = {
     disponibles: jest.fn(async () =>
       disponibles.map((d) => ({ id: d.id, nombre: d.id, apellido: '', genero: 'femenino', franjas: [], carga: { discipuladosActivos: 0, propuestasPendientes: 0 }, gruposConLugar: d.gruposConLugar ?? [] })),
@@ -244,7 +244,7 @@ export async function crearServicio(base: Partial<Base> = {}, disponibles: Candi
       SolicitudDiscipuladoService,
       { provide: PrismaService, useValue: prismaEnMemoria(completa) },
       { provide: CruceService, useValue: cruceService },
-      { provide: EventosDiscipuladoService, useValue: { emitir } },
+      { provide: NotificacionesService, useValue: { emitir, empujarEmails: jest.fn() } },
     ],
   }).compile();
   return { service: moduleRef.get(SolicitudDiscipuladoService), base: completa, emitir, cruceService };

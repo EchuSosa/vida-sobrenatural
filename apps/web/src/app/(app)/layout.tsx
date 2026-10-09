@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { apiFetch } from '@vida-sobrenatural/shared-types';
 import { auth } from '../../auth';
 import { NavAppBar } from '../../components/nav-app-bar';
 import { NavAppTopBarCelular } from '../../components/nav-app-mas';
@@ -23,6 +24,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/registro');
   }
 
+  // spec 012, T022 (FR-005): el contador de avisos sin leer, sin caché. Si
+  // falla, la barra se muestra sin número (nunca rompe la app por esto).
+  const sinLeer = await apiFetch<{ cantidad: number }>('/avisos/sin-leer', {
+    headers: { Authorization: `Bearer ${session.apiToken}` },
+    cache: 'no-store',
+  })
+    .then((r) => r.cantidad)
+    .catch(() => null);
+
   // H-25/H-28 (revisión manual, actualización 2026-09-20): este contenedor
   // tenía `md:flex-row`, pero NavAppBar ya es responsive por sí solo (barra
   // inferior fija en celular, `md:sticky md:top-0` — barra superior en
@@ -36,7 +46,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {/* H-37: barra superior delgada solo en celular (logo + "Más") — en
           escritorio esas secciones ya viven dentro de NavAppBar. */}
       <NavAppTopBarCelular />
-      <NavAppBar />
+      <NavAppBar sinLeer={sinLeer} />
       {/* H-66: NavAppTopBarCelular ahora es `fixed top-0` en celular (h-14) —
           pt-14 compensa para que no tape el contenido. */}
       <main id="contenido" className="flex-1 pt-14 pb-20 md:pt-0 md:pb-0">

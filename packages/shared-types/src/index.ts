@@ -12,7 +12,6 @@ export * from './pagina.js';
 export * from './formato.js';
 export * from './discipulado.js';
 export * from './disponibilidad.js';
-export * from './eventos-discipulado.js';
 // Lote 0 global (specs 006–013). Cada spec completa SU archivo; ninguna toca esta lista.
 export * from './bandeja.js';
 export * from './avisos.js';

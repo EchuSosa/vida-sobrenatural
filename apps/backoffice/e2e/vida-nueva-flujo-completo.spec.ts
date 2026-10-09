@@ -98,7 +98,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await expect(page.getByRole('listitem').filter({ hasText: 'Capítulos: 1 al 12' })).toBeVisible();
         await sinViolaciones(page);
 
-        // 6. Pide darlo por terminado.
+        // 6. Pide darlo por terminado. A 360 px los toasts ocupan el ancho de abajo y
+        // el mouse quedó donde estaba "Guardar encuentro": sonner no cierra un toast
+        // con el puntero encima, y los dos toasts tapaban el botón hasta el timeout.
+        await page.mouse.move(0, 0);
+        await expect(page.locator('[data-sonner-toast]')).toHaveCount(0, { timeout: 15_000 });
         await page.getByRole('button', { name: 'Pedir darlo por terminado' }).click();
         await page.getByRole('button', { name: 'Sí, pedirlo' }).click();
         await expect(page.getByText(/Falta que el Admin lo confirme/)).toBeVisible();

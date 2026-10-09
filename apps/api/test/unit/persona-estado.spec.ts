@@ -1,12 +1,12 @@
 import { Test } from '@nestjs/testing';
 import { PersonaService } from '../../src/persona/persona.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { conTransaccion, proveedorRolesDeEstado } from './persona-servicio-de-test.js';
+import { conTransaccion, proveedorRolesDeEstado, proveedorNotificaciones } from './persona-servicio-de-test.js';
 import { AppException } from '../../src/common/errors/app-exception.js';
 
 async function crearServicio(prismaMock: Record<string, unknown>, otorgarRolDeEstado: jest.Mock = jest.fn().mockResolvedValue(undefined)) {
   const moduleRef = await Test.createTestingModule({
-    providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado(otorgarRolDeEstado)],
+    providers: [PersonaService, { provide: PrismaService, useValue: conTransaccion(prismaMock) }, proveedorRolesDeEstado(otorgarRolDeEstado), proveedorNotificaciones()],
   }).compile();
   return moduleRef.get(PersonaService);
 }
