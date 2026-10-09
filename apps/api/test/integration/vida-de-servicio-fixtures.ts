@@ -1,6 +1,6 @@
 import { cronogramaPropuesto, hoyEnArgentina, sumarDias } from '@vida-sobrenatural/shared-types';
 import type { PrismaService } from '../../src/prisma/prisma.service.js';
-import { Escenario, MARTES_19_A_21 } from './discipulado-fixtures.js';
+import { Escenario, MARTES_19_A_21, cursoDelCatalogo } from './discipulado-fixtures.js';
 import { tomarCandadoCursos } from './candado-cursos.js';
 
 /**
@@ -32,17 +32,9 @@ export class EscenarioVS {
     // Comparte "Vida Nueva grupal" con el test de Cursos (013): ver candado-cursos.ts.
     this.soltarCandado = await tomarCandadoCursos('compartido');
     await this.esc.preparar();
-    const vs = await this.prisma.curso.upsert({
-      where: { categoria_tipo: { categoria: 'vida_de_servicio', tipo: 'grupal' } },
-      update: {},
-      create: { nombre: 'Vida de Servicio', categoria: 'vida_de_servicio', tipo: 'grupal', modalidad: 'liberacion_programada', prerequisitoCategoria: 'vida_nueva' },
-    });
+    const vs = await cursoDelCatalogo(this.prisma, { nombre: 'Vida de Servicio', categoria: 'vida_de_servicio', tipo: 'grupal', modalidad: 'liberacion_programada', prerequisitoCategoria: 'vida_nueva' });
     this.cursoVsId = vs.id;
-    const vnGrupal = await this.prisma.curso.upsert({
-      where: { categoria_tipo: { categoria: 'vida_nueva', tipo: 'grupal' } },
-      update: {},
-      create: { nombre: 'Vida Nueva grupal', categoria: 'vida_nueva', tipo: 'grupal', modalidad: 'seguimiento_por_encuentros' },
-    });
+    const vnGrupal = await cursoDelCatalogo(this.prisma, { nombre: 'Vida Nueva grupal', categoria: 'vida_nueva', tipo: 'grupal', modalidad: 'seguimiento_por_encuentros' });
     this.cursoVnGrupalId = vnGrupal.id;
   }
 
