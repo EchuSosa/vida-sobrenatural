@@ -154,17 +154,33 @@ Migración propia `20261009135610_eventos_destinatarios_preguntas` (con CHECK de
   `forzar`) + integración `eventos-destinatarios.integration-spec.ts`.
 - [X] T203 Web: "Para quién" y "no corresponde" en la página del Evento + e2e con axe claro/oscuro.
 - [X] T204 Backoffice: sección "Para quién es" del formulario, detalle, confirmación al anotar + e2e.
-- [ ] T205 API preguntas: guardar con el Evento (FR-064, FR-066), responder al anotarse (FR-065),
-  visibilidad y resumen (FR-067, FR-068) + integración `eventos-preguntas.integration-spec.ts`.
-- [ ] T206 Proceso programado de borrado (FR-069) + integración.
-- [ ] T207 Backoffice: editor de preguntas en el formulario; respuestas, resumen y datos de la Persona
-  en la lista de inscriptos; respuestas al anotar en nombre + e2e.
-- [ ] T208 Web: responder las preguntas al anotarse (errores por campo) + e2e.
-- [ ] T209 Datos de la Persona en la lista (FR-070).
-- [ ] T210 Seed demo y fixtures (FR-071).
-- [ ] T211 Manual (FR-072) y decisiones D220–D223.
-- [ ] T212 Checklist de `docs/15` por pantalla tocada: página del Evento (web), formulario del Evento,
-  detalle e inscriptos (backoffice).
+- [X] T205 API preguntas: guardar con el Evento (FR-064, FR-066), responder al anotarse (FR-065),
+  visibilidad y resumen (FR-067, FR-068; `GET /eventos/:id/preguntas/resumen`) + integración
+  `eventos-preguntas.integration-spec.ts`. `req.body.respuestas` y `req.body.preguntas` redactados en
+  los logs de pino.
+- [X] T206 Proceso programado de borrado (`BorradoRespuestasSensiblesService` +
+  `TareaBorrarRespuestasSensibles`, diario a las 3; a mano: `tareas:correr respuestas-sensibles`) +
+  integración.
+- [X] T207 Backoffice: `editor-preguntas.tsx` en el formulario; `resumen-preguntas.tsx`, respuestas y
+  datos de la Persona en la lista de inscriptos; respuestas al anotar en nombre + e2e
+  (`apps/backoffice/e2e/eventos-destinatarios-preguntas.spec.ts`).
+- [X] T208 Web: responder las preguntas al anotarse (`CamposPreguntasEvento` en `packages/ui`, con
+  su test) y "Tus respuestas" + e2e (`apps/web/e2e/eventos-destinatarios-preguntas.spec.ts`).
+- [X] T209 Datos de la Persona en la lista (`datos-persona-inscripta.ts`, FR-070). El grupo de
+  extensión queda `null` y con su lugar en pantalla: la spec 014 no está en `main`.
+- [X] T210 Seed demo: "Jornada de sanidad · Mujeres" con 8 inscriptas y "Noche de jóvenes" (15 a 30).
+  Los e2e crean sus datos por la API (no hacen falta fixtures nuevos; `limpiar-e2e` borra las
+  respuestas en cascada con la Inscripción).
+- [X] T211 Manual (DEMO-17, DEMO-18, EVE-20 a EVE-28) y decisiones D220–D223.
+- [X] T212 Checklist de `docs/15` por pantalla tocada (abajo).
+
+### Checklist de `docs/15` (D114)
+
+| Pantalla | Acción principal | Cuatro estados | Envío protegido (H-57) | Feedback / qué sigue | Texto + ícono (D81) | Celular, teclado, lector | Contraste claro/oscuro |
+|---|---|---|---|---|---|---|---|
+| Web — página del Evento (anotarse con preguntas) | "Sí, anotarme" | Carga (skeleton), error de carga, sin poder anotarse explicado, éxito con "Tus respuestas" | `useEnvio` + `Button loading` | Resumen de errores con foco y enlace (H-50); estado y "qué sigue" | "Para quién" con ícono; candado de dato sensible | e2e `@celular`, radios en `fieldset` con `legend` | axe en claro y oscuro (e2e) |
+| Backoffice — formulario del Evento (destinatarios y preguntas) | "Crear el Evento" / "Guardar cambios" | `loading.tsx` / `error.tsx` de la ruta; "Este Evento no tiene preguntas." | Igual que antes (`useEnvio`) | Errores por campo `pregunta-<i>-…`, `edadMaxima` | Avisos de "ya la respondieron" con ícono | Botones con nombre accesible para subir/bajar | axe en claro y oscuro (e2e) |
+| Backoffice — inscriptos (resumen, respuestas, datos) | "Anotar a una Persona" | `loading.tsx`; resumen con error propio si falla; "Sin respuestas"; vacío de la tabla | `useEnvio` | Confirmación "Sí, anotarla igual" con el porqué | Sensible con candado + texto; "Anotada aunque no está entre los destinatarios" con ícono | Tabla con encabezados; `dl` por respuesta | axe en claro y oscuro (e2e) |
 
 ## Preguntas para Echu
 
