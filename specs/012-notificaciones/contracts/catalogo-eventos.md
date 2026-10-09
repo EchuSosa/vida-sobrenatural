@@ -61,6 +61,8 @@ la spec dueña define otra, actualiza `destino` en su PR.
 | `discipulado.baja_confirmada` | persona | normal | `proceso_actualizado` | `grupo` | Mi camino | `grupoId`, `inscripcionId` | Hay novedades sobre tu discipulado |
 | `discipulado.propuesta_declinada` | admin | — | — | `propuesta_discipulado` | — | `propuestaId`, `solicitudId?`, `grupoId?` | (sin aviso) |
 | `discipulado.propuesta_retirada` | admin | — | — | `propuesta_discipulado` | — | `propuestaId`, `retiradaPor` | (sin aviso) |
+| `discipulado.reasignacion_retirada` (D219) | discipulador | normal | `proceso_actualizado` | `propuesta_discipulado` | `/mis-discipulados` | `propuestaId`, `grupoId` | Ya no hace falta que respondas la propuesta |
+| `discipulado.propuesta_nueva_retirada` (D219) | discipulador | normal | `proceso_actualizado` | `propuesta_discipulado` | `/mis-discipulados` | `propuestaId`, `solicitudId` | Ya no hace falta que respondas la propuesta |
 | `discipulado.finalizacion_propuesta` | admin | — | — | `grupo` | — | `grupoId` | (sin aviso) |
 | `discipulado.baja_propuesta` | admin | — | — | `grupo` | — | `grupoId`, `inscripcionId` | (sin aviso) |
 

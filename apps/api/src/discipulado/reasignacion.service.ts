@@ -6,7 +6,7 @@ import { CruceService } from './cruce.service.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { bloquearGrupo, bloquearPersona, bloquearReasignacionPendiente } from './bloqueos.js';
 import { estaDisponible, franjasDe, franjasDeSolicitudes } from './consultas.js';
-import { exigirEnCurso } from './finalizacion.service.js';
+import { avisarReasignacionRetirada, exigirEnCurso } from './finalizacion.service.js';
 import { interseccionDeFranjas } from './validaciones.js';
 
 function yaPropuesta(): AppException {
@@ -105,13 +105,13 @@ export class ReasignacionService {
       if (!pendiente) throw new AppException('PROPUESTA_NO_VIGENTE', 409, 'No hay una reasignación propuesta: ya se respondió o ya se retiró.');
       await tx.propuestaDiscipulado.update({ where: { id: pendiente.id }, data: { estado: 'retirada', retiradaPor: 'admin' }, select: { id: true } });
       // El catálogo (D201) manda `propuesta_retirada` al Admin: solo log, sin
-      // aviso. Antes la 004 lo dirigía al Discipulador (que no recibía nada:
-      // solo se logueaba). Avisarle a él es una Pregunta para Echu (PR de la 012).
+      // aviso. Y al Discipulador que la tenía, que ya no hace falta responderla (D219).
       await this.notificaciones.emitir(tx, {
         nombre: 'discipulado.propuesta_retirada',
         a: { tipo: 'admin' },
         datos: { propuestaId: pendiente.id, retiradaPor: 'admin' },
       });
+      await avisarReasignacionRetirada(tx, this.notificaciones, pendiente.id, pendiente.discipuladorId, grupoId);
     });
   }
 }

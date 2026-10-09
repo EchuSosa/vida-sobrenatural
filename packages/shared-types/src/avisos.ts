@@ -53,6 +53,9 @@ export type EventoAviso =
   | { nombre: 'discipulado.baja_confirmada'; a: DePersona; datos: { grupoId: string; inscripcionId: string } }
   | { nombre: 'discipulado.propuesta_declinada'; a: Admin; datos: { propuestaId: string; solicitudId?: string; grupoId?: string } }
   | { nombre: 'discipulado.propuesta_retirada'; a: Admin; datos: { propuestaId: string; retiradaPor: 'admin' | 'persona' } }
+  // D219: al Discipulador que tenía la propuesta, cuando se retira antes de que responda.
+  | { nombre: 'discipulado.reasignacion_retirada'; a: { tipo: 'discipulador'; personaId: string }; datos: { propuestaId: string; grupoId: string } }
+  | { nombre: 'discipulado.propuesta_nueva_retirada'; a: { tipo: 'discipulador'; personaId: string }; datos: { propuestaId: string; solicitudId: string } }
   | { nombre: 'discipulado.finalizacion_propuesta'; a: Admin; datos: { grupoId: string } }
   | { nombre: 'discipulado.baja_propuesta'; a: Admin; datos: { grupoId: string; inscripcionId: string } }
   // --- 001 / Flujo 7 / Flujo 12 — activación de cuenta ---
@@ -162,6 +165,20 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
   'discipulado.propuesta_retirada': {
     spec: '004', destinatario: 'admin', disparador: null, prioridad: 'normal',
     entidad: { tipo: 'propuesta_discipulado', id: (d) => d.propuestaId }, destino: () => MI_CAMINO, clave: sinClave,
+  },
+  // D219 (Pregunta 1 del PR #29): retirar una propuesta le avisa al
+  // Discipulador que la tenía, para que no la busque ni la responda. Normal
+  // (sin mail): no le pide nada. La de reasignación también sale cuando la
+  // retira el cierre del Grupo; la `nueva`, cuando la retira el Admin o la
+  // Persona (al editar sus horarios o retirar su pedido). El texto no dice
+  // quién ni por qué, ni nombra a la Persona (FR-013).
+  'discipulado.reasignacion_retirada': {
+    spec: '004', destinatario: 'discipulador', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'propuesta_discipulado', id: (d) => d.propuestaId }, destino: () => '/mis-discipulados', clave: sinClave,
+  },
+  'discipulado.propuesta_nueva_retirada': {
+    spec: '004', destinatario: 'discipulador', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'propuesta_discipulado', id: (d) => d.propuestaId }, destino: () => '/mis-discipulados', clave: sinClave,
   },
   'discipulado.finalizacion_propuesta': {
     spec: '004', destinatario: 'admin', disparador: null, prioridad: 'normal',

@@ -13,6 +13,8 @@ export const DATOS_EJEMPLO: { [N in NombreEventoAviso]: DatosDe<N> } = {
   'discipulado.baja_confirmada': { grupoId: 'gru-1', inscripcionId: 'ins-1' },
   'discipulado.propuesta_declinada': { propuestaId: 'pro-1' },
   'discipulado.propuesta_retirada': { propuestaId: 'pro-1', retiradaPor: 'admin' },
+  'discipulado.reasignacion_retirada': { propuestaId: 'pro-1', grupoId: 'gru-1' },
+  'discipulado.propuesta_nueva_retirada': { propuestaId: 'pro-1', solicitudId: 'sol-1' },
   'discipulado.finalizacion_propuesta': { grupoId: 'gru-1' },
   'discipulado.baja_propuesta': { grupoId: 'gru-1', inscripcionId: 'ins-1' },
   'persona.cuenta_activada': { personaId: 'per-1' },
