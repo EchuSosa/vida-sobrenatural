@@ -290,16 +290,19 @@ export async function sembrarHistoriaDemo(ctx: ContextoSeedDemo): Promise<void> 
   // --- Tomás (14) y su tutora Silvina ----------------------------------------
   await prisma.relacionFamiliar.create({ data: { personaId: id.tomas, familiarId: id.silvina, tipoRelacion: 'tutor' } });
 
-  // --- Coherencia con el bautismo (010) ---------------------------------------
+  // --- Coherencia del camino (010 y 009) ---------------------------------------
   // Pedir el bautismo exige Vida Nueva en curso o hecha, o la habilitación del
-  // Admin (D147). Las Personas de demo con un pedido y sin ninguna de las dos
-  // quedan con Vida Nueva registrada por la iglesia (Flujo 9), como quien la
-  // hizo antes de que existiera la app.
+  // Admin (D147); y quien ya terminó Vida de Servicio (apta para un Ministerio)
+  // hizo antes Vida Nueva. Las Personas de demo que no lo cumplen quedan con
+  // Vida Nueva registrada por la iglesia (Flujo 9), como quien la hizo antes
+  // de que existiera la app.
   const sinRequisito = await prisma.persona.findMany({
     where: {
-      solicitudesBautismo: { some: {} },
-      bautismoHabilitadoEn: null,
-      OR: [{ email: { startsWith: 'demo-' } }, { email: null }],
+      OR: [
+        { solicitudesBautismo: { some: {} }, bautismoHabilitadoEn: null, email: { startsWith: 'demo-' } },
+        { solicitudesBautismo: { some: {} }, bautismoHabilitadoEn: null, email: null },
+        { rol: { has: 'apto_ministerio' }, email: { startsWith: 'demo-' } },
+      ],
     },
     select: { id: true },
   });
