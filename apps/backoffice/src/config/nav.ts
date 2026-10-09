@@ -130,6 +130,8 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/ministerios', labelKey: 'catalogos', icon: FolderKanban, permiso: 'ministerios.ver', enMenu: false },
   { href: '/ministerios/[id]', labelKey: 'catalogos', icon: FolderKanban, permiso: 'ministerios.ver', enMenu: false },
   { href: '/ministerios/papelera', labelKey: 'papelera', icon: Trash2, permiso: 'ministerios.papelera.ver', enMenu: false },
+  // --- spec 010 ---
+  { href: '/solicitudes/bautismo/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   // --- spec 011 ---
   { href: '/eventos/nuevo', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.gestionar', enMenu: false },
   { href: '/eventos/[id]', labelKey: 'eventos', icon: CalendarDays, permiso: 'eventos.ver', enMenu: false },

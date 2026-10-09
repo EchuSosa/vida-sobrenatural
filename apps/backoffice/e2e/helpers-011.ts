@@ -43,7 +43,7 @@ export async function subirComprobantePorApi(email: string, inscripcionId: strin
   const datos = new FormData();
   datos.append('monto', '15000');
   datos.append('medio', 'transferencia');
-  // La fecha civil de Argentina: con la de UTC, de 21 a 24 hs la API la rechaza por futura (FECHA_PAGO_FUTURA).
+  // La fecha civil de HOY en Argentina: entre las 21 y las 24 hs, la fecha UTC ya es "mañana" (FECHA_PAGO_FUTURA).
   datos.append('fechaPago', hoyEnArgentina());
   datos.append('comprobante', new Blob([Buffer.from('%PDF-1.4\n%%EOF')], { type: 'application/pdf' }), 'comprobante.pdf');
   const r = await fetch(`${API_BASE_URL}/inscripciones-evento/${inscripcionId}/pagos`, {
