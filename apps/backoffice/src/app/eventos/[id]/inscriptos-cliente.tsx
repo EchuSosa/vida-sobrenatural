@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { UserRound } from 'lucide-react';
+import { TriangleAlert, UserRound } from 'lucide-react';
 import {
+  ApiError,
   apiFetch,
+  argumentosTextoDestinatarios,
   COMPROBANTE_TAMANO_MAXIMO_BYTES,
   diaCivilEnArgentina,
   formatearFechaHora,
@@ -146,6 +148,12 @@ export function InscriptosCliente({
           {!i.persona.tieneAcceso && <span className="text-xs text-muted-foreground">{t('sinAcceso')}</span>}
           {i.creadoPor && <span className="text-xs text-muted-foreground">{t('anotadaPor', { nombre: `${i.creadoPor.nombre} ${i.creadoPor.apellido}` })}</span>}
           {i.promovidaSinVer && <span className="text-xs font-medium">{t('subioDeLista')}</span>}
+          {i.fueraDeDestinatarios && (
+            <span className="flex items-center gap-1 text-xs font-medium">
+              <TriangleAlert aria-hidden="true" className="size-3.5" />
+              {t('fueraDeDestinatarios')}
+            </span>
+          )}
         </span>
       ),
     },
@@ -433,6 +441,7 @@ function RegistrarPago({ inscripcion, costo, apiToken, onCerrar }: { inscripcion
 /** FR-027: anotar a una Persona (con el buscador de Personas), con su nombre visible durante toda la acción. */
 function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: string }) {
   const t = useTranslations('eventos.inscriptos');
+  const tg = useTranslations('eventos.gestion');
   const te = useTranslations('errors');
   const router = useRouter();
   const [abierto, setAbierto] = useState(false);
@@ -440,6 +449,8 @@ function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: 
   const [resultados, setResultados] = useState<BusquedaPersona[] | null>(null);
   const [elegida, setElegida] = useState<BusquedaPersona | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // FR-062: la API respondió EVENTO_NO_CORRESPONDE; se pide confirmación para anotarla igual.
+  const [noCorresponde, setNoCorresponde] = useState(false);
 
   useEffect(() => {
     if (q.trim().length < 2) return;
@@ -462,18 +473,25 @@ function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: 
       const r = await apiFetch<InscripcionEventoResumen>(`/eventos/${evento.id}/inscripciones`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ personaId: elegida.id }),
+        body: JSON.stringify({ personaId: elegida.id, ...(noCorresponde ? { forzar: true } : {}) }),
       });
       toast(t('anotada', { nombre: `${elegida.nombre} ${elegida.apellido}`, estado: t(`estadoFila.${r.estado}`, { posicion: r.posicionEnLista ?? 0 }) }));
       setAbierto(false);
       setElegida(null);
+      setNoCorresponde(false);
       setQ('');
       setResultados(null);
       router.refresh();
     } catch (e) {
-      setError(mensajeDeError(e, te, t));
+      if (e instanceof ApiError && e.code === 'EVENTO_NO_CORRESPONDE' && !noCorresponde) setNoCorresponde(true);
+      else setError(mensajeDeError(e, te, t));
     }
   });
+  const elegir = (p: BusquedaPersona | null) => {
+    setElegida(p);
+    setNoCorresponde(false);
+    setError(null);
+  };
 
   return (
     <>
@@ -499,11 +517,20 @@ function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: 
                   <UserRound className="size-4" aria-hidden="true" />
                   {t('estasAnotando', { nombre: `${elegida.nombre} ${elegida.apellido}` })}
                 </p>
+                {noCorresponde && (
+                  <div role="alert" className="flex items-start gap-2 rounded-md border border-border p-3 text-sm" data-testid="anotar-no-corresponde">
+                    <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                    <div className="flex flex-col gap-1">
+                      <p className="font-medium">{t('noCorrespondeTitulo', { nombre: `${elegida.nombre} ${elegida.apellido}` })}</p>
+                      <p>{t('noCorrespondeTexto', { destinatarios: tg('detalle.destinatarios', argumentosTextoDestinatarios(evento.destinatarios)) })}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-3">
                   <Button loading={anotar.enviando} loadingText={t('anotando')} onClick={() => void anotar.ejecutar()}>
-                    {t('anotarSi')}
+                    {noCorresponde ? t('anotarIgual') : t('anotarSi')}
                   </Button>
-                  <Button variant="outline" onClick={() => setElegida(null)}>
+                  <Button variant="outline" onClick={() => elegir(null)}>
                     {t('cambiar')}
                   </Button>
                 </div>
@@ -524,7 +551,7 @@ function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: 
                     ) : (
                       resultados.map((p) => (
                         <li key={p.id}>
-                          <button type="button" className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring" onClick={() => setElegida(p)}>
+                          <button type="button" className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring" onClick={() => elegir(p)}>
                             {p.nombre} {p.apellido}
                             {!p.email && <span className="text-muted-foreground"> · {t('sinAcceso')}</span>}
                           </button>

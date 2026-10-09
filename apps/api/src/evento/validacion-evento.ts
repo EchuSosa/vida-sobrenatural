@@ -7,7 +7,9 @@ import {
   EVENTO_PUBLICO_OBJETIVO_MAX,
   INSTRUCCIONES_PAGO_MAX,
   type ErrorDeCampo,
+  type GeneroDestinatario,
   type TipoEvento,
+  validarDestinatarios,
 } from '@vida-sobrenatural/shared-types';
 
 /**
@@ -32,6 +34,10 @@ export interface ConfigEvento {
   costo: number | null;
   instruccionesPago: string | null;
   diasAnticipacionRecordatorio: number | null;
+  /** Ampliación 2026-10-09 (FR-060). */
+  destinatariosGenero: GeneroDestinatario;
+  edadMinima: number | null;
+  edadMaxima: number | null;
 }
 
 /** El costo máximo que entra en `Decimal(10, 2)`. */
@@ -73,10 +79,13 @@ export function validarConfigEvento(c: ConfigEvento): ErrorDeCampo[] {
     errores.push({ campo: 'diasAnticipacionRecordatorio', code: 'DIAS_RECORDATORIO_FUERA_DE_RANGO' });
   }
 
+  errores.push(...validarDestinatarios({ genero: c.destinatariosGenero, edadMinima: c.edadMinima, edadMaxima: c.edadMaxima }));
+
   // FR-045: el bautismo siempre con inscripción, sin aprobación, costo, lista ni recordatorio.
   if (
     c.tipo === 'bautismo' &&
-    (!c.requiereInscripcion || c.requiereAprobacion || c.costo !== null || c.permiteListaEspera || dias !== null)
+    (!c.requiereInscripcion || c.requiereAprobacion || c.costo !== null || c.permiteListaEspera || dias !== null ||
+      c.destinatariosGenero !== 'todas' || c.edadMinima !== null || c.edadMaxima !== null)
   ) {
     errores.push({ campo: 'tipo', code: 'CONFIG_BAUTISMO_INVALIDA' });
   }

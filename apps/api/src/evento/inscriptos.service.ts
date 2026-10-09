@@ -3,6 +3,8 @@ import {
   APROBAR_LOTE_MAX,
   ESTADOS_INSCRIPCION_ABIERTA,
   MOTIVO_RECHAZO_INSCRIPCION_MAX,
+  correspondeAlEvento,
+  edadCumplidaEn,
   estadoPagoDeInscripcion,
   sinAccesoALaApp,
   type EstadoInscripcionEvento,
@@ -17,6 +19,7 @@ import { AppException } from '../common/errors/app-exception.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { conBloqueoDeEvento, contarOcupados, decidirEstadoInicial, liberaLugar, posicionEnLista, promoverDesdeLista } from './motor-cupo.js';
 import { esViolacionDeUnico } from './inscripcion-propia.service.js';
+import { destinatariosDe } from './representacion.js';
 
 const DIA_MS = 86_400_000;
 
@@ -32,8 +35,9 @@ const RESUMEN_SELECT = {
   revisadoPorId: true,
   motivoRechazo: true,
   motivoCancelacion: true,
-  persona: { select: { id: true, nombre: true, apellido: true, email: true } },
-  evento: { select: { costo: true } },
+  fueraDeDestinatarios: true,
+  persona: { select: { id: true, nombre: true, apellido: true, email: true, telefono: true, fechaNacimiento: true } },
+  evento: { select: { costo: true, inicio: true } },
   pagos: { select: { id: true, estado: true, createdAt: true, motivoRechazo: true } },
 } as const satisfies Prisma.InscripcionEventoSelect;
 
@@ -73,27 +77,49 @@ export class InscriptosService {
   }
 
   /** POST /eventos/:id/inscripciones — FR-027, FR-047: el Admin anota a una Persona; cupo, lista y aprobación igual que siempre. */
-  async inscribirEnNombre(eventoId: string, personaId: string | undefined, adminId: string): Promise<InscripcionEventoResumen> {
+  async inscribirEnNombre(
+    eventoId: string,
+    personaId: string | undefined,
+    adminId: string,
+    opciones: { forzar?: boolean } = {},
+  ): Promise<InscripcionEventoResumen> {
     if (!personaId) throw new AppException('VALIDACION', 400, 'Elegí a la Persona.', [{ campo: 'personaId', code: 'PERSONA_REQUERIDA' }]);
     try {
       return await conBloqueoDeEvento(this.prisma, eventoId, async (tx) => {
         const evento = await tx.evento.findFirst({
           where: { id: eventoId, eliminadoEn: null },
-          select: { nombre: true, tipo: true, estado: true, requiereInscripcion: true, requiereAprobacion: true, inicio: true, cupo: true, permiteListaEspera: true },
+          select: {
+            nombre: true,
+            tipo: true,
+            estado: true,
+            requiereInscripcion: true,
+            requiereAprobacion: true,
+            inicio: true,
+            cupo: true,
+            permiteListaEspera: true,
+            destinatariosGenero: true,
+            edadMinima: true,
+            edadMaxima: true,
+          },
         });
         if (!evento) throw new AppException('NO_ENCONTRADO', 404, 'Evento no encontrado.');
         if (evento.estado === 'cancelado') throw new AppException('EVENTO_CANCELADO', 409, 'El Evento está cancelado.');
         if (!evento.requiereInscripcion) throw new AppException('EVENTO_NO_ADMITE_INSCRIPCION', 409, 'Este Evento no necesita inscripción.');
         if (evento.inicio <= new Date()) throw new AppException('EVENTO_YA_EMPEZO', 409, 'El Evento ya empezó.');
-        const persona = await tx.persona.findUnique({ where: { id: personaId }, select: { estado: true } });
+        const persona = await tx.persona.findUnique({ where: { id: personaId }, select: { estado: true, genero: true, fechaNacimiento: true } });
         if (!persona) throw new AppException('NO_ENCONTRADO', 404, 'Persona no encontrada.');
         if (persona.estado !== 'activa') throw new AppException('PERSONA_NO_ACTIVA', 409, 'La Persona no está activa.');
+        // FR-062 (ampliación 2026-10-09): fuera de los destinatarios, solo con confirmación explícita del Admin.
+        const fueraDeDestinatarios = !correspondeAlEvento(persona, destinatariosDe(evento), evento.inicio);
+        if (fueraDeDestinatarios && opciones.forzar !== true) {
+          throw new AppException('EVENTO_NO_CORRESPONDE', 409, 'La Persona no está entre los destinatarios del Evento.');
+        }
         if ((await tx.inscripcionEvento.count({ where: { eventoId, personaId, estado: { in: [...ESTADOS_INSCRIPCION_ABIERTA] } } })) > 0) {
           throw new AppException('INSCRIPCION_EVENTO_YA_ABIERTA', 409, 'La Persona ya está anotada a este Evento.');
         }
         const estado = decidirEstadoInicial(evento, await contarOcupados(tx, eventoId));
         const creada = await tx.inscripcionEvento.create({
-          data: { eventoId, personaId, estado, creadoPorId: adminId, enListaDesde: estado === 'lista_espera' ? new Date() : null },
+          data: { eventoId, personaId, estado, creadoPorId: adminId, enListaDesde: estado === 'lista_espera' ? new Date() : null, fueraDeDestinatarios },
           select: RESUMEN_SELECT,
         });
         await this.emitir(tx, {
@@ -280,6 +306,15 @@ export class InscriptosService {
           revisadoPor: f.revisadoPorId ? (personas.get(f.revisadoPorId) ?? null) : null,
           motivoRechazo: f.motivoRechazo,
           motivoCancelacion: f.motivoCancelacion,
+          fueraDeDestinatarios: f.fueraDeDestinatarios,
+          respuestas: [],
+          datosPersona: {
+            edad: edadCumplidaEn(f.persona.fechaNacimiento, f.evento.inicio),
+            telefono: f.persona.telefono,
+            ministerios: [],
+            referente: null,
+            grupoExtension: null,
+          },
         };
       }),
     );

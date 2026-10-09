@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
+import { Info } from 'lucide-react';
 import {
   apiFetch,
+  argumentosTextoDestinatarios,
   formatearInicioEvento,
   formatearMoneda,
   type EventoPublico,
@@ -61,7 +63,7 @@ export function AccionInscripcion({ evento }: { evento: EventoPublico }) {
   // `?anotarme=1` (al volver del ingreso): abre la confirmación si se puede.
   const pedidoPorUrl = searchParams.get('anotarme') === '1';
   const [abiertaPorUrl, setAbiertaPorUrl] = useState(false);
-  if (pedidoPorUrl && !abiertaPorUrl && estado && !estado.inscripcion?.estado.match(/confirmada|pendiente|lista_espera/) && puedeAnotarse(estado.estadoInscripcion)) {
+  if (pedidoPorUrl && !abiertaPorUrl && estado && estado.corresponde && !estado.inscripcion?.estado.match(/confirmada|pendiente|lista_espera/) && puedeAnotarse(estado.estadoInscripcion)) {
     setAbiertaPorUrl(true);
     setConfirmando(true);
   }
@@ -139,7 +141,9 @@ export function AccionInscripcion({ evento }: { evento: EventoPublico }) {
           )}
 
           {!tieneAbierta(resultado ?? estado?.inscripcion ?? null) &&
-            (estadoEvento === 'cupo_completo' ? (
+            (estado && !estado.corresponde ? (
+              <NoCorresponde evento={evento} />
+            ) : estadoEvento === 'cupo_completo' ? (
               <CupoCompleto />
             ) : !puedeAnotarse(estadoEvento) ? null : confirmando ? (
               <div className="flex flex-col gap-3 rounded-md bg-secondary p-4">
@@ -181,6 +185,21 @@ function puedeAnotarse(estado: MiInscripcionEnEvento['estadoInscripcion']): bool
 
 function tieneAbierta(i: MiInscripcionEvento | null): boolean {
   return i !== null && (i.estado === 'confirmada' || i.estado === 'pendiente' || i.estado === 'lista_espera');
+}
+
+/** FR-061, FR-063 — no está entre los destinatarios: el texto (con ícono, D81) en lugar del botón. */
+function NoCorresponde({ evento }: { evento: EventoPublico }) {
+  const t = useTranslations('eventos.inscripcion');
+  const tp = useTranslations('eventos.publico');
+  return (
+    <div className="flex items-start gap-3 rounded-md border border-border bg-secondary p-4" data-testid="evento-no-corresponde">
+      <Info aria-hidden="true" className="mt-1 size-5 shrink-0" />
+      <div className="flex flex-col gap-1 text-base">
+        <p className="font-semibold">{tp('destinatarios', argumentosTextoDestinatarios(evento.destinatarios))}</p>
+        <p>{t('noCorresponde')}</p>
+      </div>
+    </div>
+  );
 }
 
 function CupoCompleto() {

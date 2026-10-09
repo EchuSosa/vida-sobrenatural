@@ -639,6 +639,12 @@ pública no ofrece "Anotarme" ni muestra nombres, y que la API rechaza una auto-
 - **Dependencias** (detalle en el plan): avisos de la 012; envío de email de la 007; Solicitud de
   Bautismo de la 010; pantalla de ingreso de la 007 (para la vuelta al Evento, FR-020).
 
+## Ampliación 2026-10-09: destinatarios y preguntas propias
+
+Aprobada por Echu el 2026-10-09: destinatarios del Evento con efecto (género y edad) y preguntas
+propias de la inscripción, con sus FR (FR-060 a FR-072), tasks y tests en
+[`ampliacion-2026-10-09.md`](./ampliacion-2026-10-09.md) (D220–D223).
+
 ## Preguntas para Echu
 
 > **Respondidas por Echu el 2026-10-07: se adoptan las recomendaciones de cada pregunta** (numeradas en `docs/05-decisiones.md`, D153–D213).

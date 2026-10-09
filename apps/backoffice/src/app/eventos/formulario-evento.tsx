@@ -4,10 +4,13 @@ import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   DIAS_RECORDATORIO_MAX,
+  EDAD_DESTINATARIO_MAX,
+  GENEROS_DESTINATARIO,
   instanteEnArgentina,
   partesEnArgentina,
   type DatosEvento,
   type EventoDetalle,
+  type GeneroDestinatario,
   type TipoEvento,
 } from '@vida-sobrenatural/shared-types';
 import {
@@ -47,6 +50,9 @@ export interface ValoresEvento {
   tieneCosto: boolean;
   costo: string;
   instruccionesPago: string;
+  destinatariosGenero: GeneroDestinatario;
+  edadMinima: string;
+  edadMaxima: string;
 }
 
 export function valoresVacios(sedeId = ''): ValoresEvento {
@@ -70,6 +76,9 @@ export function valoresVacios(sedeId = ''): ValoresEvento {
     tieneCosto: false,
     costo: '',
     instruccionesPago: '',
+    destinatariosGenero: 'todas',
+    edadMinima: '',
+    edadMaxima: '',
   };
 }
 
@@ -96,6 +105,9 @@ export function valoresDeEvento(e: EventoDetalle): ValoresEvento {
     tieneCosto: e.costo !== null,
     costo: e.costo === null ? '' : String(Number(e.costo)),
     instruccionesPago: e.instruccionesPago ?? '',
+    destinatariosGenero: e.destinatarios.genero,
+    edadMinima: e.destinatarios.edadMinima === null ? '' : String(e.destinatarios.edadMinima),
+    edadMaxima: e.destinatarios.edadMaxima === null ? '' : String(e.destinatarios.edadMaxima),
   };
 }
 
@@ -121,6 +133,10 @@ export function datosParaEnviar(v: ValoresEvento): DatosEvento {
     costo: costo ? v.costo.trim().replace(',', '.') : null,
     instruccionesPago: costo ? v.instruccionesPago : null,
     diasAnticipacionRecordatorio: !bautismo && inscripcion && v.diasRecordatorio.trim() !== '' ? Number(v.diasRecordatorio) : null,
+    // Ampliación 2026-10-09 (FR-060): el bautismo es para todas las personas.
+    destinatariosGenero: bautismo ? 'todas' : v.destinatariosGenero,
+    edadMinima: !bautismo && v.edadMinima.trim() !== '' ? Number(v.edadMinima) : null,
+    edadMaxima: !bautismo && v.edadMaxima.trim() !== '' ? Number(v.edadMaxima) : null,
   };
 }
 
@@ -142,6 +158,14 @@ function erroresLocales(v: ValoresEvento, t: (clave: string) => string): Record<
   if (v.tipo !== 'bautismo' && inscripcion && v.diasRecordatorio.trim() !== '') {
     const dias = Number(v.diasRecordatorio);
     if (!(Number.isInteger(dias) && dias >= 1 && dias <= DIAS_RECORDATORIO_MAX)) e.diasAnticipacionRecordatorio = t('requerido.diasRecordatorio');
+  }
+  if (v.tipo !== 'bautismo') {
+    const edad = (x: string) => x.trim() === '' || (Number.isInteger(Number(x)) && Number(x) >= 0 && Number(x) <= EDAD_DESTINATARIO_MAX);
+    if (!edad(v.edadMinima)) e.edadMinima = t('requerido.edad');
+    if (!edad(v.edadMaxima)) e.edadMaxima = t('requerido.edad');
+    else if (edad(v.edadMinima) && v.edadMinima.trim() !== '' && v.edadMaxima.trim() !== '' && Number(v.edadMaxima) < Number(v.edadMinima)) {
+      e.edadMaxima = t('requerido.edadMaxima');
+    }
   }
   return e;
 }
@@ -371,6 +395,57 @@ export function FormularioEvento({
           {error('publicoObjetivo')}
         </div>
       </fieldset>
+
+      {!bautismo && (
+        <fieldset className="flex flex-col gap-4" aria-describedby="campo-destinatarios-ayuda">
+          <legend className="mb-2 text-lg font-semibold">{t('seccionDestinatarios')}</legend>
+          {ayuda('destinatarios', t('destinatariosAyuda'))}
+          <fieldset className="flex flex-col gap-1">
+            <legend className="text-sm font-medium">{t('destinatariosGenero')}</legend>
+            <div className="flex flex-wrap gap-4">
+              {GENEROS_DESTINATARIO.map((g, i) => (
+                <label key={g} className="flex min-h-10 items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="destinatariosGenero"
+                    id={i === 0 ? 'campo-destinatariosGenero' : undefined}
+                    value={g}
+                    checked={v.destinatariosGenero === g}
+                    onChange={() => poner('destinatariosGenero', g)}
+                    className="size-4"
+                  />
+                  {t(`genero.${g}`)}
+                </label>
+              ))}
+            </div>
+            {error('destinatariosGenero')}
+          </fieldset>
+          <div className="flex flex-wrap gap-4">
+            {(['edadMinima', 'edadMaxima'] as const).map((campo) => (
+              <div key={campo} className="flex flex-col gap-1">
+                <label htmlFor={`campo-${campo}`} className="text-sm font-medium">
+                  {t(campo)}
+                  {opcional}
+                </label>
+                <input
+                  id={`campo-${campo}`}
+                  inputMode="numeric"
+                  className={`${CLASE_CAMPO} w-32`}
+                  value={v[campo]}
+                  onChange={(e) => poner(campo, e.target.value.replace(/\D/g, ''))}
+                  onBlur={() => revisar(campo)}
+                  aria-invalid={m[campo] ? true : undefined}
+                  aria-describedby={[m[campo] ? `campo-${campo}-error` : null, 'campo-edades-ayuda'].filter(Boolean).join(' ')}
+                />
+                {error(campo)}
+              </div>
+            ))}
+          </div>
+          <p id="campo-edades-ayuda" className="text-sm text-muted-foreground">
+            {t('edadesAyuda')}
+          </p>
+        </fieldset>
+      )}
 
       <fieldset className="flex flex-col gap-4">
         <legend className="mb-2 text-lg font-semibold">{t('seccionInscripcion')}</legend>

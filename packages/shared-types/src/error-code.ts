@@ -176,6 +176,9 @@ export type ErrorCode =
   | 'INSCRIPCION_NO_CONFIRMADA'
   | 'PAGO_PENDIENTE_EXISTENTE' // FR-030
   | 'PAGO_NO_PENDIENTE'
+  // spec 011, ampliación 2026-10-09 (D220–D223)
+  | 'EVENTO_NO_CORRESPONDE' // FR-061: no está entre los destinatarios
+  | 'PREGUNTA_CON_RESPUESTAS' // FR-066: no se borra ni cambia de tipo
   // spec 012
   | 'NOTIFICACION_SIN_DESTINATARIOS' // FR-029
   | 'ALCANCE_NO_DISPONIBLE' // FR-027

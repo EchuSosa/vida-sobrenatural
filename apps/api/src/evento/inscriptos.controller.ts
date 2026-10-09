@@ -32,9 +32,14 @@ export class InscriptosController {
 
   @Post('eventos/:id/inscripciones')
   @RequierePermiso('inscripciones_evento.gestionar')
-  @ApiCreatedResponse({ description: 'FR-027, FR-047 — inscribir en nombre de una Persona.' })
-  inscribir(@Param('id') id: string, @Body('personaId') personaId: string | undefined, @Req() request: AuthenticatedRequest) {
-    return this.servicio.inscribirEnNombre(id, personaId, personaDeSesion(request));
+  @ApiCreatedResponse({ description: 'FR-027, FR-047 — inscribir en nombre de una Persona; `forzar: true` la anota aunque no esté entre los destinatarios (FR-062).' })
+  inscribir(
+    @Param('id') id: string,
+    @Body('personaId') personaId: string | undefined,
+    @Body('forzar') forzar: unknown,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.servicio.inscribirEnNombre(id, personaId, personaDeSesion(request), { forzar: forzar === true });
   }
 
   @Post('eventos/:id/inscripciones/aprobar-lote')

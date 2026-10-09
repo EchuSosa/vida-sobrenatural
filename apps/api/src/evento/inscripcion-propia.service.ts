@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { ESTADOS_INSCRIPCION_ABIERTA, estadoInscripcionDeEvento, type MiInscripcionEnEvento, type MiInscripcionEvento } from '@vida-sobrenatural/shared-types';
+import { ESTADOS_INSCRIPCION_ABIERTA, correspondeAlEvento, estadoInscripcionDeEvento, type MiInscripcionEnEvento, type MiInscripcionEvento } from '@vida-sobrenatural/shared-types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { conBloqueoDeEvento, contarOcupados, decidirEstadoInicial } from './motor-cupo.js';
 import { aMisInscripciones, INSCRIPCION_SELECT } from './mis-inscripciones.js';
+import { destinatariosDe } from './representacion.js';
 
 /**
  * spec 011, lote B (US3) — la propia Persona se anota (FR-015 a FR-017,
@@ -21,9 +22,20 @@ export class InscripcionPropiaService {
   async miInscripcion(eventoId: string, personaId: string): Promise<MiInscripcionEnEvento> {
     const evento = await this.prisma.evento.findFirst({
       where: { id: eventoId, eliminadoEn: null },
-      select: { tipo: true, estado: true, requiereInscripcion: true, inicio: true, cupo: true, permiteListaEspera: true },
+      select: {
+        tipo: true,
+        estado: true,
+        requiereInscripcion: true,
+        inicio: true,
+        cupo: true,
+        permiteListaEspera: true,
+        destinatariosGenero: true,
+        edadMinima: true,
+        edadMaxima: true,
+      },
     });
     if (!evento) throw new AppException('NO_ENCONTRADO', 404, 'Evento no encontrado.');
+    const persona = await this.prisma.persona.findUnique({ where: { id: personaId }, select: { genero: true, fechaNacimiento: true } });
     const ocupados = await contarOcupados(this.prisma, eventoId);
     const abierta = await this.prisma.inscripcionEvento.findFirst({
       where: { eventoId, personaId, estado: { in: [...ESTADOS_INSCRIPCION_ABIERTA] } },
@@ -38,6 +50,8 @@ export class InscripcionPropiaService {
       inscripcion,
       lugaresDisponibles: evento.cupo === null ? null : Math.max(0, evento.cupo - ocupados),
       estadoInscripcion: estadoInscripcionDeEvento(evento, ocupados),
+      corresponde: persona !== null && correspondeAlEvento(persona, destinatariosDe(evento), evento.inicio),
+      respuestas: [],
     };
   }
 
@@ -47,7 +61,19 @@ export class InscripcionPropiaService {
       return await conBloqueoDeEvento(this.prisma, eventoId, async (tx) => {
         const evento = await tx.evento.findFirst({
           where: { id: eventoId, eliminadoEn: null },
-          select: { nombre: true, tipo: true, estado: true, requiereInscripcion: true, requiereAprobacion: true, inicio: true, cupo: true, permiteListaEspera: true },
+          select: {
+            nombre: true,
+            tipo: true,
+            estado: true,
+            requiereInscripcion: true,
+            requiereAprobacion: true,
+            inicio: true,
+            cupo: true,
+            permiteListaEspera: true,
+            destinatariosGenero: true,
+            edadMinima: true,
+            edadMaxima: true,
+          },
         });
         if (!evento) throw new AppException('NO_ENCONTRADO', 404, 'Evento no encontrado.');
         if (evento.estado === 'cancelado') throw new AppException('EVENTO_CANCELADO', 409, 'El Evento está cancelado.');
@@ -56,8 +82,12 @@ export class InscripcionPropiaService {
           throw new AppException('EVENTO_SOLO_INSCRIBE_ADMIN', 403, 'El bautismo se pide desde Mi camino; al Evento te anota el equipo.');
         }
         if (evento.inicio <= new Date()) throw new AppException('EVENTO_YA_EMPEZO', 409, 'El Evento ya empezó.');
-        const persona = await tx.persona.findUnique({ where: { id: personaId }, select: { estado: true } });
+        const persona = await tx.persona.findUnique({ where: { id: personaId }, select: { estado: true, genero: true, fechaNacimiento: true } });
         if (persona?.estado !== 'activa') throw new AppException('PERSONA_NO_ACTIVA', 409, 'Tu cuenta todavía no está activa.');
+        // FR-061 (ampliación 2026-10-09): solo quienes están entre los destinatarios, también para la lista de espera.
+        if (!correspondeAlEvento(persona, destinatariosDe(evento), evento.inicio)) {
+          throw new AppException('EVENTO_NO_CORRESPONDE', 403, 'Este Evento es para otro público.');
+        }
         const yaAbierta = await tx.inscripcionEvento.count({ where: { eventoId, personaId, estado: { in: [...ESTADOS_INSCRIPCION_ABIERTA] } } });
         if (yaAbierta > 0) throw new AppException('INSCRIPCION_EVENTO_YA_ABIERTA', 409, 'Ya estás anotada a este Evento.');
 

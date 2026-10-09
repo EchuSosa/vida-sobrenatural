@@ -6,6 +6,7 @@ import {
   type EventoDetalle,
   type EventoResumen,
   type FiltroEventos,
+  type GeneroDestinatario,
   type Pagina,
   type TipoEvento,
   type TotalesEvento,
@@ -117,15 +118,19 @@ export class EventosGestionService {
       select: { ...EVENTO_SELECT, creadoPorId: true, createdAt: true, canceladoEn: true, eliminadoEn: true },
     });
     if (!evento) throw new AppException('NO_ENCONTRADO', 404, 'Evento no encontrado.');
-    const [totales, inscripcionesTotal, pagosTotal, creadoPor] = await Promise.all([
+    const [totales, inscripcionesTotal, pagosTotal, creadoPor, respuestasPorPregunta] = await Promise.all([
       totalesDeEventos(db, [id]),
       db.inscripcionEvento.count({ where: { eventoId: id } }),
       db.pago.count({ where: { inscripcionEvento: { eventoId: id } } }),
       db.persona.findUnique({ where: { id: evento.creadoPorId }, select: { id: true, nombre: true, apellido: true } }),
+      db.respuestaPreguntaEvento.groupBy({ by: ['preguntaId'], where: { pregunta: { eventoId: id } }, _count: { _all: true } }),
     ]);
     const t = totales.get(id)!;
+    const cuantas = new Map(respuestasPorPregunta.map((r) => [r.preguntaId, r._count._all]));
+    const publico = aEventoPublico(evento, t.ocupados);
     return {
-      ...aEventoPublico(evento, t.ocupados),
+      ...publico,
+      preguntas: publico.preguntas.map((p) => ({ ...p, respuestas: cuantas.get(p.id) ?? 0 })),
       ...t,
       lugarPropio: evento.lugar,
       diasAnticipacionRecordatorio: evento.diasAnticipacionRecordatorio,
@@ -158,6 +163,9 @@ export class EventosGestionService {
       costo: null,
       instruccionesPago: null,
       diasAnticipacionRecordatorio: null,
+      destinatariosGenero: 'todas',
+      edadMinima: null,
+      edadMaxima: null,
     });
     const errores = validarConfigEvento(config);
     const sedeValida = await this.sedeActiva(dto.sedeId);
@@ -192,6 +200,9 @@ export class EventosGestionService {
         costo: actual.costo === null ? null : Number(actual.costo),
         instruccionesPago: actual.instruccionesPago,
         diasAnticipacionRecordatorio: actual.diasAnticipacionRecordatorio,
+        destinatariosGenero: actual.destinatariosGenero,
+        edadMinima: actual.edadMinima,
+        edadMaxima: actual.edadMaxima,
       };
       const nueva = this.configDesde(dto, anterior);
       const errores = validarConfigEvento(nueva);
@@ -403,6 +414,9 @@ export class EventosGestionService {
       // Sin costo no hay instrucciones (CHECK de la base): se descartan.
       instruccionesPago: costo === null ? null : texto(dto.instruccionesPago, base.instruccionesPago),
       diasAnticipacionRecordatorio: numero(dto.diasAnticipacionRecordatorio, base.diasAnticipacionRecordatorio),
+      destinatariosGenero: (dto.destinatariosGenero ?? base.destinatariosGenero) as GeneroDestinatario,
+      edadMinima: numero(dto.edadMinima, base.edadMinima),
+      edadMaxima: numero(dto.edadMaxima, base.edadMaxima),
     };
   }
 
@@ -422,6 +436,9 @@ export class EventosGestionService {
       costo: c.costo === null ? null : c.costo.toFixed(2),
       instruccionesPago: c.instruccionesPago,
       diasAnticipacionRecordatorio: c.diasAnticipacionRecordatorio,
+      destinatariosGenero: c.destinatariosGenero,
+      edadMinima: c.edadMinima,
+      edadMaxima: c.edadMaxima,
     };
   }
 }

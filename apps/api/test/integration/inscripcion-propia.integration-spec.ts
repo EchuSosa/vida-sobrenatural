@@ -99,7 +99,7 @@ describe('Anotarse a un Evento (integración)', () => {
     const otra = await como('ajena');
     await anotar(ev.id, otra.token);
     const sinNada = await http().get(`/eventos/${ev.id}/mi-inscripcion`).set('Authorization', `Bearer ${yo.token}`);
-    expect(sinNada.body).toEqual({ inscripcion: null, lugaresDisponibles: 2, estadoInscripcion: 'abierta' });
+    expect(sinNada.body).toEqual({ inscripcion: null, lugaresDisponibles: 2, estadoInscripcion: 'abierta', corresponde: true, respuestas: [] });
     await anotar(ev.id, yo.token);
     const conLa = await http().get(`/eventos/${ev.id}/mi-inscripcion`).set('Authorization', `Bearer ${yo.token}`);
     expect(conLa.body).toMatchObject({ inscripcion: { estado: 'confirmada' }, lugaresDisponibles: 1 });

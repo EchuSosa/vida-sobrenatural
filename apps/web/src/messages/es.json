@@ -180,7 +180,9 @@
       "FECHA_INVALIDA": "Escribí una fecha válida, por ejemplo 28/10/2026.",
       "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última."
     },
-    "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta."
+    "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
+    "EVENTO_NO_CORRESPONDE": "Este evento es para otro público: no podés anotarte.",
+    "PREGUNTA_CON_RESPUESTAS": "Esa pregunta ya tiene respuestas."
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -1539,7 +1541,8 @@
       },
       "proximosTitulo": "Próximos eventos",
       "proximosVerTodos": "Ver todos los eventos",
-      "proximosVacio": "Por ahora no hay eventos próximos. Seguinos en las redes para enterarte."
+      "proximosVacio": "Por ahora no hay eventos próximos. Seguinos en las redes para enterarte.",
+      "destinatarios": "Este evento es para {genero, select, mujeres {mujeres} varones {varones} other {todas las personas}}{desde, select, no {} other { desde {desde} años}}{hasta, select, no {} other { hasta {hasta} años}}."
     },
     "inscripcion": {
       "titulo": "Inscripción",
@@ -1586,7 +1589,8 @@
       "errorCarga": "No pudimos ver tu inscripción. Recargá la página para intentar de nuevo.",
       "errores": {
         "generico": "No pudimos anotarte. Probá de nuevo en unos segundos."
-      }
+      },
+      "noCorresponde": "Por eso no podés anotarte desde acá. Si creés que hay un error, escribile al equipo de la iglesia."
     }
   },
   "misEventos": {

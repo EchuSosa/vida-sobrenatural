@@ -213,8 +213,13 @@
       "SEMANAS_NO_CONSECUTIVAS": "Las semanas tienen que ir seguidas, sin saltear ninguna. Solo se puede quitar la última.",
       "SEDE_INACTIVA": "Elegí una Sede activa.",
       "LINEA_PUBLICA_DEMASIADO_LARGA": "La línea pública puede tener hasta 140 caracteres: acortala.",
-      "OTORGARROLDISCIPULADOR_INVALIDO": "Esta área no ofrece el rol de Discipulador."
-    }
+      "OTORGARROLDISCIPULADOR_INVALIDO": "Esta área no ofrece el rol de Discipulador.",
+      "EDAD_INVALIDA": "Escribí una edad entre 0 y 120 años, o dejala vacía.",
+      "EDAD_MAXIMA_MENOR_A_MINIMA": "La edad máxima no puede ser menor que la mínima.",
+      "DESTINATARIOS_GENERO_INVALIDO": "Elegí para quién es: todas las personas, mujeres o varones."
+    },
+    "EVENTO_NO_CORRESPONDE": "La Persona no está entre los destinatarios del Evento (género o edad).",
+    "PREGUNTA_CON_RESPUESTAS": "Esa pregunta ya tiene respuestas: no se puede borrar ni cambiar de tipo."
   },
   "nav": {
     "saltarAlContenido": "Saltar al contenido",
@@ -1483,7 +1488,7 @@
         "lugarAyuda": "Si lo dejás vacío, se usa la dirección de la Sede.",
         "descripcion": "Descripción",
         "publicoObjetivo": "¿Para quién es?",
-        "publicoObjetivoAyuda": "Por ejemplo \"Jóvenes de 15 a 25\". Es solo informativo.",
+        "publicoObjetivoAyuda": "Por ejemplo \"Mujeres que sirven en la iglesia\". Es solo un texto para dar matices: quién puede anotarse lo definen el género y las edades de abajo.",
         "opcional": "(opcional)",
         "requiereInscripcion": "La gente tiene que anotarse",
         "requiereInscripcionAyuda": "Si no, es un Evento informativo: se muestra en la cartelera sin botón para anotarse.",
@@ -1513,8 +1518,21 @@
           "cupo": "El cupo tiene que ser un número entero mayor que cero.",
           "costo": "El costo tiene que ser un número mayor que cero, por ejemplo 15000.",
           "instruccionesPago": "Contá cómo se paga: alias, CBU o a quién.",
-          "diasRecordatorio": "Escribí un número de días entre 1 y 60."
-        }
+          "diasRecordatorio": "Escribí un número de días entre 1 y 60.",
+          "edad": "Escribí una edad entre 0 y 120 años, o dejala vacía.",
+          "edadMaxima": "La edad máxima no puede ser menor que la mínima."
+        },
+        "seccionDestinatarios": "Para quién es",
+        "destinatariosAyuda": "Solo pueden anotarse (y pedir lugar en la lista de espera) las personas que cumplen. A las demás, la página del Evento les explica para quién es y no les muestra el botón.",
+        "destinatariosGenero": "Género",
+        "genero": {
+          "todas": "Todas las personas",
+          "mujeres": "Mujeres",
+          "varones": "Varones"
+        },
+        "edadMinima": "Edad mínima",
+        "edadMaxima": "Edad máxima",
+        "edadesAyuda": "En años cumplidos el día del Evento. Vacío = sin límite."
       },
       "nuevo": {
         "titulo": "Crear un Evento",
@@ -1541,7 +1559,8 @@
         "creadoPor": "Lo creó {nombre}",
         "cambiosGuardados": "Cambios guardados.",
         "verPublica": "Ver la página pública",
-        "creadoSiguiente": "Evento creado. Ahora podés compartir el QR o subir el flyer."
+        "creadoSiguiente": "Evento creado. Ahora podés compartir el QR o subir el flyer.",
+        "destinatarios": "Este evento es para {genero, select, mujeres {mujeres} varones {varones} other {todas las personas}}{desde, select, no {} other { desde {desde} años}}{hasta, select, no {} other { hasta {hasta} años}}."
       },
       "qr": {
         "titulo": "QR y link para anotarse",
@@ -1687,7 +1706,11 @@
       },
       "seleccionarTodas": "Elegir todas",
       "perfilTitulo": "Eventos",
-      "perfilVacio": "No se anotó a ningún Evento."
+      "perfilVacio": "No se anotó a ningún Evento.",
+      "fueraDeDestinatarios": "Anotada aunque no está entre los destinatarios",
+      "noCorrespondeTitulo": "{nombre} no está entre los destinatarios",
+      "noCorrespondeTexto": "{destinatarios} ¿La anotás igual? Hacelo solo si es una excepción acordada.",
+      "anotarIgual": "Sí, anotarla igual"
     },
     "pagos": {
       "titulo": "Pago de {nombre}",
