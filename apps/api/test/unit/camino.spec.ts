@@ -107,6 +107,33 @@ describe('Mi camino — estadoDeEtapa (spec 006, T005, data-model §reglas)', ()
     );
   });
 
+  it('Encabezados (final): Vida de Servicio y Bautismo también informan su estado propio, y el encabezado no contradice lo de abajo', () => {
+    const conVn = { completas: { vida_nueva: 'sistema' as const } };
+    // Vida de Servicio: pedido pendiente → "En revisión"; inscripta en una edición → en curso, sin "Ya lo hice".
+    expect(estadoDeEtapa('vida_de_servicio', con({ ...conVn, propios: { vida_de_servicio: { estado: 'solicitud_en_revision', desde: '2026-10-05T12:00:00Z' } } }))).toMatchObject({
+      estado: 'solicitud_en_revision',
+      desde: '2026-10-05T12:00:00Z',
+    });
+    const vsEnCurso = con({ ...conVn, propios: { vida_de_servicio: { estado: 'en_curso' } } });
+    expect(estadoDeEtapa('vida_de_servicio', vsEnCurso)).toEqual({ etapa: 'vida_de_servicio', estado: 'en_curso' });
+    expect(puedeDeclarar('vida_de_servicio', vsEnCurso)).toBe(false);
+
+    // Bautismo: pedido en revisión → "En revisión".
+    expect(estadoDeEtapa('bautismo', con({ ...conVn, propios: { bautismo: { estado: 'solicitud_en_revision', desde: '2026-10-05T12:00:00Z' } } })).estado).toBe('solicitud_en_revision');
+    // Aceptado, sin fecha o con fecha: lo refleja, y no ofrece "Ya lo hice".
+    for (const [fecha, yaPaso] of [[null, false], ['2026-11-15T13:00:00Z', false], ['2026-10-01T13:00:00Z', true]] as const) {
+      const aceptado = con({ ...conVn, propios: { bautismo: { estado: 'aceptada', fecha, yaPaso } } });
+      expect(estadoDeEtapa('bautismo', aceptado)).toEqual({ etapa: 'bautismo', estado: 'solicitud_aceptada', fecha, yaPaso });
+      expect(puedeDeclarar('bautismo', aceptado)).toBe(false);
+    }
+    // Habilitada por el Admin sin Vida Nueva: la puede pedir (no "Todavía no se habilita").
+    expect(estadoDeEtapa('bautismo', con({ propios: { bautismo: { estado: 'habilitada' } } }))).toMatchObject({ estado: 'disponible', puedeDeclarar: true });
+    expect(estadoDeEtapa('bautismo', base).estado).toBe('bloqueada');
+    // Completa o "Ya lo hice" pendiente siguen ganando.
+    expect(estadoDeEtapa('bautismo', con({ completas: { bautismo: 'sistema' }, propios: { bautismo: { estado: 'aceptada', fecha: null, yaPaso: false } } })).estado).toBe('completada');
+    expect(estadoDeEtapa('vida_de_servicio', con({ ultimaDeclaracion: { vida_de_servicio: declaracion('pendiente') }, propios: { vida_de_servicio: { estado: 'en_curso' } } })).estado).toBe('en_revision');
+  });
+
   it('menor de 12: Vida Nueva disponible pero sin "Ya lo hice" (la card muestra el texto del tutor, FR-044)', () => {
     expect(estadoDeEtapa('vida_nueva', con({ edad: 10, vidaNueva: VN.lo_pide_su_tutor }))).toEqual({
       etapa: 'vida_nueva',

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { CalendarClock, CircleAlert, CircleCheck, Clock, Hourglass, Lock, MessageCircle, Search, Sparkles, UserRound } from 'lucide-react';
+import { CalendarCheck, CalendarClock, CircleAlert, CircleCheck, Clock, Hourglass, Lock, MessageCircle, Search, Sparkles, UserRound } from 'lucide-react';
 import {
   apiFetch,
   enlaceWhatsapp,
@@ -99,6 +99,18 @@ export default async function MiCaminoPage() {
           aviso,
           estado: { icono: <Hourglass className={ICONO} />, texto: t('estados.solicitudRevisionTitulo'), detalle: t('estados.solicitudRevisionTexto', { fecha: fecha(estado.desde) }) },
         };
+
+      case 'solicitud_aceptada': {
+        // Final: el pedido propio fue aceptado (hoy, el bautismo) — sin fecha, con fecha, o la fecha ya pasó.
+        if (!estado.fecha) {
+          return { estado: { icono: <CircleCheck className={ICONO} />, texto: t('estados.aceptadaTitulo'), detalle: t('estados.aceptadaTexto') } };
+        }
+        return {
+          estado: estado.yaPaso
+            ? { icono: <Hourglass className={ICONO} />, texto: t('estados.confirmandoTitulo'), detalle: t('estados.confirmandoTexto', { fecha: fecha(estado.fecha) }) }
+            : { icono: <CalendarCheck className={ICONO} />, texto: t('estados.conFechaTitulo'), detalle: t('estados.conFechaTexto', { fecha: fecha(estado.fecha) }) },
+        };
+      }
 
       case 'en_curso':
         if (estado.etapa === 'vida_nueva' && vn.estado === 'buscando') {

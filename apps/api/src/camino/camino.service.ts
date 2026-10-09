@@ -15,7 +15,8 @@ import { calcularEdad } from '../persona/calcular-edad.js';
 import { errorDeValidacion } from '../discipulado/validaciones.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { SolicitudDiscipuladoService } from '../solicitud-discipulado/solicitud-discipulado.service.js';
-import { bloquearPersona, completoEtapa, estadosPropios, etapasCompletas, ultimasDeclaraciones, vidaNuevaEnMarcha } from './consultas.js';
+import { bloquearPersona, completoEtapa, etapasCompletas, ultimasDeclaraciones, vidaNuevaEnMarcha } from './consultas.js';
+import { estadosPropios } from './estados-propios.js';
 
 /**
  * spec 006, Historias 1 y 2 — lado de la Persona (contracts/camino-api.md):
@@ -93,6 +94,11 @@ export class CaminoService {
         if (pendiente) throw yaPendiente();
         if (etapa === 'vida_nueva' && (await vidaNuevaEnMarcha(tx, personaId))) {
           throw new AppException('ETAPA_EN_CURSO', 409, 'Vida Nueva está en marcha (hay un pedido abierto o un Grupo en curso).');
+        }
+        // Final: la misma regla que la card (`puedeDeclarar`) — con la etapa en curso o el bautismo aceptado, no.
+        const propio = (await estadosPropios(tx, personaId))[etapa]?.estado;
+        if (propio === 'en_curso' || propio === 'aceptada') {
+          throw new AppException('ETAPA_EN_CURSO', 409, 'Esta etapa está en marcha.');
         }
 
         const creada = await tx.declaracionHistorial.create({

@@ -77,7 +77,17 @@ export type EstadoDeclaracionVisible =
  * (una postulación a un Ministerio pendiente). La API lo junta en
  * `HechosCamino.propios` y `estadoDeEtapa` lo lleva al encabezado de la card.
  */
-export type EstadoPropioEtapa = { estado: 'solicitud_en_revision'; desde: string };
+export type EstadoPropioEtapa =
+  | { estado: 'solicitud_en_revision'; desde: string }
+  /** Final (Vida de Servicio): inscripta en una edición en curso. */
+  | { estado: 'en_curso' }
+  /**
+   * Final (Bautismo): el pedido fue aceptado; `fecha` = inicio del Evento asignado, o null si todavía no
+   * tiene; `yaPaso` = el Evento ya empezó y falta confirmar (lo calcula la API, como la card).
+   */
+  | { estado: 'aceptada'; fecha: string | null; yaPaso: boolean }
+  /** Final (Bautismo, D147): el Admin la habilitó sin Vida Nueva — la puede pedir aunque no cumpla la regla. */
+  | { estado: 'habilitada' };
 
 /** FR-002: lo que ve la card. */
 export type EstadoEtapa =
@@ -86,6 +96,8 @@ export type EstadoEtapa =
   | { etapa: EtapaCamino; estado: 'disponible'; puedeDeclarar: boolean; declaracion?: EstadoDeclaracionVisible }
   /** Su pedido propio de la etapa está en revisión (ver `EstadoPropioEtapa`): el encabezado dice "En revisión". */
   | { etapa: EtapaCamino; estado: 'solicitud_en_revision'; desde: string; puedeDeclarar: boolean; declaracion?: EstadoDeclaracionVisible }
+  /** Final: el pedido propio de la etapa fue aceptado (hoy, el bautismo), con la fecha si ya la tiene. Sin "Ya lo hice". */
+  | { etapa: EtapaCamino; estado: 'solicitud_aceptada'; fecha: string | null; yaPaso: boolean }
   | { etapa: EtapaCamino; estado: 'en_curso' }
   | { etapa: EtapaCamino; estado: 'completada'; como: ComoSeCompleto }
   | { etapa: EtapaCamino; estado: 'en_revision'; declaracionId: string; desde: string };
@@ -139,6 +151,9 @@ export function puedeDeclarar(etapa: EtapaCamino, hechos: HechosCamino): boolean
   if (hechos.edad < EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO) return false;
   if (hechos.completas[etapa] !== undefined) return false;
   if (hechos.ultimaDeclaracion[etapa]?.estado === 'pendiente') return false;
+  // Final: con la etapa en curso (o el bautismo ya aceptado) no se ofrece "Ya lo hice".
+  const propio = hechos.propios?.[etapa]?.estado;
+  if (propio === 'en_curso' || propio === 'aceptada') return false;
   if (etapa === 'vida_nueva') return hechos.vidaNueva.estado === 'puede_pedir' || hechos.vidaNueva.estado === 'baja';
   return true;
 }
@@ -166,7 +181,11 @@ export function estadoDeEtapa(etapa: EtapaCamino, hechos: HechosCamino): EstadoE
   // Ajustes 2: si la etapa informa su propio pedido en revisión, el encabezado lo dice (no "La podés empezar").
   const propio = hechos.propios?.[etapa];
   if (propio?.estado === 'solicitud_en_revision') return { etapa, estado: 'solicitud_en_revision', desde: propio.desde, ...comun };
-  if (!reglaDeEtapa(etapa, hechos.completas, etapasEnCurso(hechos))) {
+  // Final: en curso (Vida de Servicio) o aceptada (Bautismo) — lo mismo que dice la card abajo.
+  if (propio?.estado === 'en_curso') return { etapa, estado: 'en_curso' };
+  if (propio?.estado === 'aceptada') return { etapa, estado: 'solicitud_aceptada', fecha: propio.fecha, yaPaso: propio.yaPaso };
+  // D147: la habilitación del Admin reemplaza la regla (bautismo sin Vida Nueva).
+  if (propio?.estado !== 'habilitada' && !reglaDeEtapa(etapa, hechos.completas, etapasEnCurso(hechos))) {
     return { etapa, estado: 'bloqueada', requisito: requisitoDeEtapa(etapa), ...comun };
   }
   return { etapa, estado: 'disponible', ...comun };
