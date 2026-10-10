@@ -1,4 +1,4 @@
-import { validarConfigEvento, type ConfigEvento } from '../../src/evento/validacion-evento.js';
+import { erroresDeAnioDeInicio, validarConfigEvento, type ConfigEvento } from '../../src/evento/validacion-evento.js';
 
 /** spec 011 — FR-010 (cada error de campo) y FR-045 (bautismo). */
 const valido: ConfigEvento = {
@@ -70,3 +70,17 @@ describe('validarConfigEvento (FR-010, FR-045)', () => {
     ).toEqual(['tipo:CONFIG_BAUTISMO_INVALIDA']);
   });
 });
+
+describe('D236 (DEMO-14): año de inicio del Evento', () => {
+  it('del año pasado a tres adelante; 1000 o 20026 no', () => {
+    const d = (iso: string) => new Date(iso);
+    expect(erroresDeAnioDeInicio(d('2025-03-01T23:00:00Z'), 2026)).toEqual([]);
+    expect(erroresDeAnioDeInicio(d('2029-12-31T23:00:00Z'), 2026)).toEqual([]);
+    expect(erroresDeAnioDeInicio(d('1000-10-17T23:00:00Z'), 2026)).toEqual([{ campo: 'inicio', code: 'INICIO_FUERA_DE_RANGO' }]);
+    expect(erroresDeAnioDeInicio(d('2024-12-31T12:00:00Z'), 2026)).toEqual([{ campo: 'inicio', code: 'INICIO_FUERA_DE_RANGO' }]);
+    expect(erroresDeAnioDeInicio(d('2030-01-02T12:00:00Z'), 2026)).toEqual([{ campo: 'inicio', code: 'INICIO_FUERA_DE_RANGO' }]);
+    // Sin fecha lo marca INICIO_REQUERIDO, no esta regla.
+    expect(erroresDeAnioDeInicio(null, 2026)).toEqual([]);
+  });
+});
+

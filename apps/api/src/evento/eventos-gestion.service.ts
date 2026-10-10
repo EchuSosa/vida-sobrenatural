@@ -24,7 +24,7 @@ import { ImagenPublicaService, PERFIL_FLYER } from '../storage/imagen-publica.se
 import type { DatosEventoDto } from './dto/datos-evento.dto.js';
 import { conBloqueoDeEvento, contarOcupados, promoverDesdeLista } from './motor-cupo.js';
 import { slugDeEvento } from './slug.js';
-import { validarConfigEvento, type ConfigEvento } from './validacion-evento.js';
+import { erroresDeAnioDeInicio, validarConfigEvento, type ConfigEvento } from './validacion-evento.js';
 import { aEventoPublico, aPreguntaEvento, EVENTO_SELECT, inicioDeHoyEnArgentina, PREGUNTA_SELECT, totalesDeEventos } from './representacion.js';
 import { normalizarPreguntas, sincronizarPreguntas } from './preguntas-evento.js';
 
@@ -172,6 +172,7 @@ export class EventosGestionService {
       edadMaxima: null,
     });
     const errores = validarConfigEvento(config);
+    errores.push(...erroresDeAnioDeInicio(config.inicio));
     const preguntas = dto.preguntas === undefined ? [] : normalizarPreguntas(dto.preguntas);
     errores.push(...this.erroresDePreguntas(config, preguntas));
     const sedeValida = await this.sedeActiva(dto.sedeId);
@@ -216,6 +217,8 @@ export class EventosGestionService {
       };
       const nueva = this.configDesde(dto, anterior);
       const errores = validarConfigEvento(nueva);
+      // D236: solo si la fecha cambia (editar otra cosa de un Evento viejo no falla).
+      if (nueva.inicio?.getTime() !== anterior.inicio?.getTime()) errores.push(...erroresDeAnioDeInicio(nueva.inicio));
       const preguntas = dto.preguntas === undefined ? undefined : normalizarPreguntas(dto.preguntas);
       const preguntasResultantes = preguntas ?? (await tx.preguntaEvento.findMany({ where: { eventoId: id }, select: PREGUNTA_SELECT })).map(aPreguntaEvento);
       errores.push(...this.erroresDePreguntas(nueva, preguntasResultantes, preguntas !== undefined));
