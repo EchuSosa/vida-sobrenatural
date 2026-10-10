@@ -7,7 +7,9 @@ import imgQuienesSomos from '@/assets/images/cards/card-comunidad-risas.webp';
 import imgVisionMisionValores from '@/assets/images/hero/hero-adoracion-mujeres.webp';
 import imgLiderazgo from '@/assets/images/cards/card-pastores-pareja.webp';
 import imgEnQueCreemos from '@/assets/images/cards/card-estudio-cuaderno.webp';
-import imgPalabraProfetica from '@/assets/images/cards/card-pastora-oracion.webp';
+// 2026-10-10 (Echu): la tarjeta de Palabra Profética lleva el retrato del pastor
+// principal, Juan Pablo Sosa; antes era `cards/card-pastora-oracion`.
+import imgPalabraProfetica from '@/assets/images/retratos/retrato-pastor-jp.webp';
 
 export const metadata = {
   title: 'Nosotros — Vida Sobrenatural',
@@ -81,6 +83,8 @@ export default function NosotrosPage() {
       descripcion: t('tarjetaPalabraProfeticaDescripcion'),
       imagen: imgPalabraProfetica,
       alt: t('tarjetaPalabraProfeticaAlt'),
+      // Retrato 1:1 en una tarjeta 4:3: se recorta desde arriba para no cortar la cara.
+      posicion: 'object-top',
     },
     {
       href: '/nosotros/ediciones-vs',
@@ -121,7 +125,7 @@ export default function NosotrosPage() {
                     fill
                     sizes={SIZES_TARJETA}
                     priority={index === 0}
-                    className="object-cover"
+                    className={`object-cover ${'posicion' in tarjeta ? tarjeta.posicion : ''}`}
                   />
                 </div>
               ) : (
