@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { obtenerCartelera } from './api-eventos';
 import { TarjetaEvento } from './tarjeta-evento';
+import { ProveedorMisInscripciones } from './mis-inscripciones-cartelera';
 
 /**
  * spec 011, T046 (FR-001) — los próximos tres Eventos para el Inicio público,
@@ -24,13 +25,15 @@ export async function ProximosEventos() {
       {eventos.length === 0 ? (
         <p className="text-base text-muted-foreground">{t('proximosVacio')}</p>
       ) : (
-        <ul className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {eventos.map((e) => (
-            <li key={e.id}>
-              <TarjetaEvento evento={e} ahora={ahora} nivelTitulo="h3" />
-            </li>
-          ))}
-        </ul>
+        <ProveedorMisInscripciones>
+          <ul className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {eventos.map((e) => (
+              <li key={e.id}>
+                <TarjetaEvento evento={e} ahora={ahora} nivelTitulo="h3" />
+              </li>
+            ))}
+          </ul>
+        </ProveedorMisInscripciones>
       )}
       <Link href="/eventos" className="w-fit text-base font-medium underline underline-offset-4 hover:no-underline">
         {t('proximosVerTodos')}

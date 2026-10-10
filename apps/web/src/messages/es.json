@@ -1599,6 +1599,11 @@
         "solo_admin": "Lo coordina el equipo",
         "pasado": "Ya pasó"
       },
+      "miInscripcion": {
+        "confirmada": "Ya te anotaste",
+        "pendiente": "Tu inscripción espera aprobación",
+        "lista_espera": "Estás en la lista de espera"
+      },
       "explicacion": {
         "no_requiere": "No hace falta anotarse: vení directamente.",
         "cupo_completo": "Ya no quedan lugares y este evento no tiene lista de espera.",

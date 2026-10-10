@@ -4,6 +4,7 @@ import { CalendarDays, MapPin, Wallet } from 'lucide-react';
 import { formatearInicioEvento, formatearMoneda, type EventoPublico } from '@vida-sobrenatural/shared-types';
 import { PlaceholderImagen } from '@vida-sobrenatural/ui';
 import { EstadoEventoPublico, estadoPublico } from './estado-evento-publico';
+import { EstadoOMiInscripcion } from './mis-inscripciones-cartelera';
 
 /**
  * spec 011, T022 — la tarjeta de un Evento: la usan la cartelera, el Inicio
@@ -44,7 +45,10 @@ export function TarjetaEvento({ evento, ahora, nivelTitulo = 'h2' }: { evento: E
         </li>
       </ul>
       <div className="mt-auto">
-        <EstadoEventoPublico estado={estadoPublico(evento.estadoInscripcion, evento.inicio, evento.fin, ahora)} />
+        {/* DEMO-17: con sesión (y dentro de ProveedorMisInscripciones), "Ya te anotaste" en lugar del estado público. */}
+        <EstadoOMiInscripcion eventoId={evento.id}>
+          <EstadoEventoPublico estado={estadoPublico(evento.estadoInscripcion, evento.inicio, evento.fin, ahora)} />
+        </EstadoOMiInscripcion>
       </div>
     </Link>
   );
