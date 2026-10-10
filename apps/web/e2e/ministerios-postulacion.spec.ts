@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
+import { abrirEtapa, test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
 import { EMAILS_009, MINISTERIOS_009, entrarConTema, prepararSinPostulacion } from './helpers-009';
 
 /**
@@ -94,6 +94,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.goto('/mi-camino');
       await page.waitForLoadState('networkidle');
       await expect(cardMinisterio(page)).toContainText('Primero, Vida de Servicio');
+      await abrirEtapa(page, 'Ministerio'); // propuesta A: bloqueada, arranca plegada
       await cardMinisterio(page).getByRole('link', { name: 'Conocé los Ministerios' }).click();
       await expect(page.getByText('Para postularte, primero terminá Vida de Servicio')).toBeVisible();
       await page.getByRole('link', { name: new RegExp(MINISTERIOS_009.bienvenida) }).click();
@@ -111,6 +112,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(cardMinisterio(page)).toContainText(`Estás sirviendo en ${MINISTERIOS_009.bienvenida}`);
       await expect(cardMinisterio(page)).toContainText('En el área Seguridad.');
       await sinViolaciones(page, tema);
+      await abrirEtapa(page, 'Ministerio'); // propuesta A: hecha, arranca plegada
       await cardMinisterio(page).getByRole('link', { name: 'Quiero cambiar de Ministerio' }).click();
       await page.getByRole('link', { name: new RegExp(MINISTERIOS_009.bienvenida) }).click();
       await expect(page.getByText('Ya estás sirviendo en este Ministerio')).toBeVisible();

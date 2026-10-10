@@ -13,7 +13,7 @@ const ICONO_NEUTRO = 'text-muted-foreground';
  * integrante), con texto + ícono (D81), y lleva a `/mi-camino/grupo-extension`.
  * Si la API falla, lo atrapa el `error.tsx` de Mi camino.
  */
-export async function TarjetaGrupoExtension({ apiToken }: { apiToken: string }) {
+export async function TarjetaGrupoExtension({ apiToken, compacta }: { apiToken: string; compacta?: boolean }) {
   const [t, tg] = await Promise.all([getTranslations('grupoExtension.card'), getTranslations('grupoExtension')]);
   const estado = await apiFetch<EstadoMiGrupoExtension>('/grupos-extension/me', {
     headers: { Authorization: `Bearer ${apiToken}` },
@@ -71,7 +71,7 @@ export async function TarjetaGrupoExtension({ apiToken }: { apiToken: string }) 
   }
 
   return (
-    <CardEtapa id="grupo-extension" titulo={t('titulo')} descripcion={t('descripcion')} {...props}>
+    <CardEtapa id="grupo-extension" titulo={t('titulo')} descripcion={t('descripcion')} {...props} compacta={compacta}>
       {estado.lidera > 0 && (
         <ButtonLink render={<Link href="/mi-grupo-extension" />} variant="outline" size="xl" className="w-full text-base sm:w-fit">
           <UsersRound aria-hidden />

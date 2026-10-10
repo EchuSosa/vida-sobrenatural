@@ -195,3 +195,16 @@ export async function sinScrollHorizontal(page: Page, ancho = 375) {
   }));
   expect(documento).toBeLessThanOrEqual(ventana);
 }
+
+/**
+ * Mi camino, propuesta A (2026-10-10): las cards de las etapas se pliegan
+ * (las bloqueadas, "Próximamente" y hechas arrancan plegadas). Abre la de
+ * `nombre` si está plegada, con el botón de su título, y devuelve la región.
+ */
+export async function abrirEtapa(page: Page, nombre: string) {
+  const region = page.getByRole('region', { name: nombre, exact: true });
+  const boton = region.getByRole('heading', { level: 2 }).getByRole('button');
+  if ((await boton.getAttribute('aria-expanded')) === 'false') await boton.click();
+  await expect(boton).toHaveAttribute('aria-expanded', 'true');
+  return region;
+}

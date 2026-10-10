@@ -517,6 +517,31 @@
     "cerrarPanel": "Cerrar el panel"
   },
   "miCamino": {
+    "resumen": {
+      "aria": "Tus etapas de un vistazo",
+      "tusEtapas": "Tus etapas",
+      "hecha": "Hecha",
+      "enCurso": "En curso",
+      "pedida": "Pedida",
+      "enRevision": "En revisión",
+      "aceptada": "Aceptado",
+      "conFecha": "Con fecha",
+      "disponible": "Podés empezar",
+      "proximamente": "Próximamente",
+      "bloqueada": "Te falta"
+    },
+    "proximo": {
+      "etiqueta": "Lo próximo para vos",
+      "escribileTitulo": "Escribile a {nombre}",
+      "escribileTexto": "Es quien te acompaña en Vida Nueva. Coordinen juntos el próximo encuentro.",
+      "escribileBoton": "Escribirle por WhatsApp",
+      "vidaNuevaTitulo": "Empezá tu camino con Vida Nueva",
+      "vidaNuevaTexto": "Es el primer paso: alguien de la iglesia te acompaña, en los días y horarios que te queden cómodos.",
+      "vidaNuevaBoton": "Empezar Vida Nueva",
+      "disponibleTitulo": "Ya podés seguir con {etapa}",
+      "disponibleTexto": "Abrí la etapa para ver qué tenés que hacer.",
+      "disponibleBoton": "Ver {etapa}"
+    },
     "titulo": "Mi camino",
     "vidaNueva": {
       "titulo": "Vida Nueva",

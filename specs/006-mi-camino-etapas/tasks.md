@@ -292,3 +292,9 @@ paralelas que no se pisan; el **lote 0** es lo compartido y va primero.
 2. **MVP = US1** (lote A): Mi camino por etapas ya mejora la pantalla para todos.
 3. En paralelo: **B** (historial del Admin), **C** (Discipulador a la web), **D** (alta). A sigue con la parte de la Persona de US2.
 4. **Cierre**: T039, revisión manual (`quickstart.md`), tres suites, docs al mergear.
+
+## Ajuste 2026-10-10 — Mi camino, propuesta A (D237)
+
+- [x] T200 Resumen de las cuatro etapas arriba (enlaces `#etapa-…` que abren la card), "Lo próximo para vos", grupo de extensión compacto arriba, etapas plegables (`CardEtapa` con `plegable`, `PlegableEtapa` en `packages/ui`).
+- [x] T201 e2e: `mi-camino-etapas` (orden, resumen, plegado/abierto, el resumen abre la card) y `abrirEtapa` en los specs que tocan una card plegada.
+- [x] T202 Checklist de `docs/15` para Mi camino: una sola acción principal ("Lo próximo"), estados de carga/vacío/error sin cambios (`loading.tsx`/`error.tsx`), acordeón con `aria-expanded`/`aria-controls`, 44 px, axe en claro y oscuro en los e2e, texto + ícono en el resumen (D81).
