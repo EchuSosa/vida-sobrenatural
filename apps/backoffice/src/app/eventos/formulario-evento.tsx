@@ -3,9 +3,11 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import {
+  anioInicioEventoValido,
   DIAS_RECORDATORIO_MAX,
   EDAD_DESTINATARIO_MAX,
   GENEROS_DESTINATARIO,
+  hoyEnArgentina,
   instanteEnArgentina,
   validarPreguntas,
   partesEnArgentina,
@@ -153,6 +155,8 @@ function erroresLocales(v: ValoresEvento, t: (clave: string) => string, tc: (cla
   if (v.nombre.trim() === '') e.nombre = t('requerido.nombre');
   if (!v.sedeId) e.sedeId = t('requerido.sede');
   if (!v.fechaInicio) e.inicio = t('requerido.inicio');
+  // D236 (DEMO-14): un año como 1000 es un error de tipeo.
+  else if (!anioInicioEventoValido(Number(v.fechaInicio.slice(0, 4)), Number(hoyEnArgentina().slice(0, 4)))) e.inicio = tc('campos.INICIO_FUERA_DE_RANGO');
   if (v.tieneFin && !v.fechaFin) e.fin = t('requerido.fin');
   if (v.descripcion.trim() === '') e.descripcion = t('requerido.descripcion');
   const inscripcion = v.tipo === 'bautismo' || v.requiereInscripcion;

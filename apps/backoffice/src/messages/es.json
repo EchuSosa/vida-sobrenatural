@@ -178,6 +178,7 @@
       "CELULA_NO_DISPONIBLE": "Esa Célula ya no está disponible. Elegí otra o \"No tengo preferencia\".",
       "SOLICITUD_NO_ASIGNADA_A_ESTE_EVENTO": "Esa persona no está asignada a este Evento.",
       "INICIO_REQUERIDO": "Elegí la fecha y la hora de inicio.",
+      "INICIO_FUERA_DE_RANGO": "Revisá el año: la fecha tiene que ser entre el año pasado y dentro de tres años.",
       "FIN_ANTERIOR_AL_INICIO": "El fin tiene que ser después del inicio.",
       "CUPO_INVALIDO": "El cupo tiene que ser un número mayor que cero.",
       "COSTO_INVALIDO": "El costo tiene que ser un monto mayor que cero.",

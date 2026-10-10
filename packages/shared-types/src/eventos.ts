@@ -16,6 +16,17 @@ export type MotivoCancelacionInscripcion = 'persona' | 'admin' | 'pago_rechazado
 export type MedioPago = 'transferencia' | 'efectivo' | 'otro';
 export type EstadoPago = 'pendiente_verificacion' | 'verificado' | 'rechazado';
 
+/**
+ * D236 (DEMO-14, 2026-10-10): el año de inicio de un Evento va del año pasado
+ * a tres años adelante. Lo usan la API (al crear o al cambiar la fecha) y el
+ * formulario del backoffice. Un año como 1000 o 20026 es un error de tipeo.
+ */
+export const EVENTO_ANIOS_ATRAS = 1;
+export const EVENTO_ANIOS_ADELANTE = 3;
+export function anioInicioEventoValido(anio: number, anioActual: number): boolean {
+  return Number.isInteger(anio) && anio >= anioActual - EVENTO_ANIOS_ATRAS && anio <= anioActual + EVENTO_ANIOS_ADELANTE;
+}
+
 /** D192: ocupan lugar. */
 export const ESTADOS_QUE_OCUPAN_LUGAR: readonly EstadoInscripcionEvento[] = ['confirmada', 'pendiente'];
 /** research #2: una sola abierta por Persona y Evento (índice parcial). */

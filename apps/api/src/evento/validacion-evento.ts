@@ -1,4 +1,5 @@
 import {
+  anioInicioEventoValido,
   DIAS_RECORDATORIO_MAX,
   EVENTO_DESCRIPCION_MAX,
   EVENTO_LUGAR_MAX,
@@ -9,6 +10,7 @@ import {
   type ErrorDeCampo,
   type GeneroDestinatario,
   type TipoEvento,
+  hoyEnArgentina,
   validarDestinatarios,
 } from '@vida-sobrenatural/shared-types';
 
@@ -90,4 +92,14 @@ export function validarConfigEvento(c: ConfigEvento): ErrorDeCampo[] {
     errores.push({ campo: 'tipo', code: 'CONFIG_BAUTISMO_INVALIDA' });
   }
   return errores;
+}
+
+/**
+ * D236 (DEMO-14): el año de inicio, del año pasado a tres adelante. Aparte de
+ * `validarConfigEvento` porque depende de hoy y porque al editar solo se
+ * revisa si la fecha cambió.
+ */
+export function erroresDeAnioDeInicio(inicio: Date | null, anioActual = Number(hoyEnArgentina().slice(0, 4))): ErrorDeCampo[] {
+  if (!inicio || Number.isNaN(inicio.getTime())) return [];
+  return anioInicioEventoValido(inicio.getUTCFullYear(), anioActual) ? [] : [{ campo: 'inicio', code: 'INICIO_FUERA_DE_RANGO' }];
 }
