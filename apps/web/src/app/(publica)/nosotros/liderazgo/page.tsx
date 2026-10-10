@@ -2,7 +2,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { MigaDePan, PlaceholderImagen } from '@vida-sobrenatural/ui';
-import imgPastorJp from '@/assets/images/retratos/retrato-pastor-jp.webp';
 
 export const metadata = {
   title: 'Liderazgo — Vida Sobrenatural',
@@ -28,7 +27,10 @@ export default function LiderazgoPage() {
   const t = useTranslations('liderazgo');
   const tn = useTranslations('nosotros');
   const pastores = [
-    { nombre: t('pastor1'), rol: t('pastor1Rol'), imagen: imgPastorJp, alt: t('pastor1FotoAlt') },
+    // 2026-10-10 (Echu): las tres parejas quedan con placeholder hasta tener
+    // los retratos actualizados; el de Juan Pablo pasó a la tarjeta de
+    // Palabra Profética en /nosotros.
+    { nombre: t('pastor1'), rol: t('pastor1Rol'), imagen: null, alt: null },
     // 2026-09-23: acá estaba `retratos/retrato-predicador-swoosh.webp` y se
     // sacó. Echu confirmó que NO es un pastor de Vida Sobrenatural: es un
     // pastor invitado que vino a dar una charla. Presentarlo como parte del

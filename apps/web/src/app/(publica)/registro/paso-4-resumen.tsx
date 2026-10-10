@@ -144,11 +144,16 @@ function ResumenDatos({
               <span className="sr-only"> {grupo.titulo}</span>
             </Button>
           </div>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-base [overflow-wrap:anywhere]">
+          {/* 2026-10-10 (DEMO-01 en celular): con `grid-cols-[auto_1fr]` una
+              etiqueta larga ("¿En qué año empezaste a venir a la iglesia?")
+              se llevaba todo el ancho y el valor quedaba en una columna de
+              una letra. En celular, etiqueta arriba y valor abajo; desde sm,
+              dos columnas con ancho repartido (ninguna se come a la otra). */}
+          <dl className="grid grid-cols-1 gap-y-0.5 text-base [overflow-wrap:anywhere] sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] sm:gap-x-4 sm:gap-y-1">
             {grupo.filas.map((fila) => (
               <Fragment key={fila.label}>
                 <dt className="font-medium text-muted-foreground">{fila.label}</dt>
-                <dd className="text-foreground">{fila.valor || '—'}</dd>
+                <dd className="mb-2 text-foreground sm:mb-0">{fila.valor || '—'}</dd>
               </Fragment>
             ))}
           </dl>

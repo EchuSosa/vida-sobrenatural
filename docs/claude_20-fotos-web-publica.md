@@ -44,10 +44,10 @@ Las fotos **no se recortan de nuevo en CSS** salvo por diferencia mínima de pro
 | Visión, misión y valores | `hero/hero-adoracion-mujeres` (recortar a 4:3 en CSS es aceptable acá, es la única excepción) | Mujeres adorando entre la congregación |
 | Liderazgo | `cards/card-pastores-pareja` | Pareja pastoral hablando al micrófono |
 | En qué creemos | `cards/card-estudio-cuaderno` | Manos escribiendo en un cuaderno sobre una Biblia abierta |
-| Palabra Profética | `cards/card-pastora-oracion` | Pastora orando con el micrófono por una mujer |
+| Palabra Profética | `retratos/retrato-pastor-jp` (desde 2026-10-10, pedido de Echu; antes `cards/card-pastora-oracion`) | Juan Pablo Sosa hablando con micrófono en el escenario, con el swoosh blanco de la marca de fondo |
 | Ediciones VS | sin foto: se usa la primera portada de libro cargada, o el placeholder | — |
 
-Subpágina **Liderazgo**: solo `retratos/retrato-pastor-jp` (Juan Pablo Sosa), con alt *"Juan Pablo Sosa hablando con micrófono en el escenario, con el swoosh blanco de la marca de fondo"* — escrito mirando la foto, no deducido del nombre del archivo. El resto del equipo sigue con placeholder 1:1 hasta tener retratos.
+Subpágina **Liderazgo**: desde 2026-10-10 las tres parejas van con placeholder 1:1 hasta que la iglesia pase los retratos actualizados (pedido de Echu). El retrato de Juan Pablo Sosa (`retratos/retrato-pastor-jp`) pasó a la tarjeta de Palabra Profética en /nosotros.
 
 > **`retrato-predicador-swoosh` se sacó de esta página el 2026-09-23** y pasó a `reserva/predicador-invitado.webp`. **No es un pastor de Vida Sobrenatural**: es un pastor invitado que vino a dar una charla. Estuvo brevemente en la posición que nombra a Lorena Scerra y Ezequiel Rossini, y aunque su alt no afirmaba ninguna identidad, **la posición en la grilla la afirma igual** — presentar la cara de una persona real como parte del liderazgo de la iglesia es tergiversarla. No vuelve a la UI.
 

@@ -48,14 +48,31 @@ pnpm dev:red
 ```
 
 Detecta la IP de esta compu en el wifi, levanta la API, la web app y el backoffice con esa IP y
-muestra las direcciones para abrir desde el celular u otra compu (por ejemplo
-`http://192.168.0.15:3001`). Si elige mal la IP: `IP=192.168.0.15 pnpm dev:red`.
+muestra las direcciones para abrir desde el celular u otra compu. El cartel con las direcciones
+sale al arrancar y **se repite cuando las tres apps terminan de levantar** (o al minuto), así no
+queda tapado por los logs. `192.168.0.15` es solo un ejemplo: usá la IP que muestra el cartel.
+
+- Para ver la IP a mano: `ipconfig getifaddr en0` (Mac), `ipconfig` → "Dirección IPv4" (Windows),
+  `hostname -I` (Linux). Si `dev:red` elige otra (VPN, Docker): `IP=<tu IP> pnpm dev:red`.
+- La primera vez que se abre cada página tarda (Next la compila): hasta 30–40 s.
 
 - Los `.env` no se tocan; en esta compu sigue andando `localhost`.
 - **Google no funciona desde la IP** (solo acepta las direcciones registradas): entrá con
   `/dev/entrar` o con el código por email (los mails llegan a Mailpit, `http://<IP>:8025`).
-- Si el celular no abre la página: que esté en el mismo wifi (no en datos) y que el firewall de la
-  Mac deje entrar conexiones a `node` (Ajustes del Sistema › Red › Firewall).
+- **Si la página se queda cargando (en el celular y hasta en la compu):** casi seguro es el permiso
+  **"Red local"** de macOS 15 o posterior. La app desde la que corrés `pnpm dev:red` (Terminal, iTerm,
+  VS Code, Cursor) necesita ese permiso para conectarse a la IP de la red, aunque sea la de la propia
+  Mac; sin él la conexión se cuelga sin error, y como la web le habla a la API por la IP, la página
+  no carga nunca. Ajustes del Sistema › Privacidad y seguridad › **Red local** › activar esa app,
+  cerrarla del todo y volver a abrirla. Para comprobarlo:
+  `curl -m 5 -s -o /dev/null -w '%{http_code}\n' http://<IP>:3333/` tiene que dar `200` (con `000`
+  falta el permiso). Pasó el 2026-10-10.
+- Si el celular sigue sin abrir la página: que esté en el mismo wifi (no en datos ni en una red de
+  invitados) y que el firewall de la Mac deje entrar conexiones a `node` (Ajustes del Sistema › Red ›
+  Firewall). En iPhone con Chrome: Ajustes › Chrome › "Red local" activado (Safari no lo necesita).
+- Si la API no arranca con "Falta SMTP_HOST" (u otra variable): el `apps/api/.env` es de antes de
+  una spec que sumó variables; compararlo con `apps/api/.env.example` y agregar las que falten (cada
+  una en su propia línea).
 - Sugerencia para probar roles a la vez: Admin y Pastor en perfiles distintos de Chrome en la
   compu; la Persona y el Discipulador en el celular.
 
