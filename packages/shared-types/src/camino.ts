@@ -153,7 +153,9 @@ export function puedeDeclarar(etapa: EtapaCamino, hechos: HechosCamino): boolean
   if (hechos.ultimaDeclaracion[etapa]?.estado === 'pendiente') return false;
   // Final: con la etapa en curso (o el bautismo ya aceptado) no se ofrece "Ya lo hice".
   const propio = hechos.propios?.[etapa]?.estado;
-  if (propio === 'en_curso' || propio === 'aceptada') return false;
+  // D235 (DEMO-12): con su pedido propio en revisión (bautismo, inscripción a
+  // Vida de Servicio, postulación) tampoco: está pidiendo hacerla, no la hizo.
+  if (propio === 'en_curso' || propio === 'aceptada' || propio === 'solicitud_en_revision') return false;
   if (etapa === 'vida_nueva') return hechos.vidaNueva.estado === 'puede_pedir' || hechos.vidaNueva.estado === 'baja';
   // D235 (DEMO-04, 2026-10-10): quien está pidiendo o haciendo Vida Nueva en la
   // app no hizo Vida de Servicio ni sirvió en un Ministerio (las dos vienen

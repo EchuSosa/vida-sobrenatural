@@ -94,8 +94,12 @@ describe('Mi camino — estadoDeEtapa (spec 006, T005, data-model §reglas)', ()
       etapa: 'ministerio',
       estado: 'solicitud_en_revision',
       desde: '2026-10-05T12:00:00Z',
-      puedeDeclarar: true,
+      // D235 (DEMO-12): con el pedido propio en revisión no se ofrece "Ya lo hice".
+      puedeDeclarar: false,
     });
+    for (const etapa of ['vida_de_servicio', 'ministerio', 'bautismo'] as const) {
+      expect(puedeDeclarar(etapa, con({ propios: { [etapa]: enRevision } }))).toBe(false);
+    }
     // Sin pedido propio, la misma etapa está disponible.
     expect(estadoDeEtapa('ministerio', { ...ministerioHabilitado, propios: {} }).estado).toBe('disponible');
     // Un estado propio de OTRA etapa no la toca.
