@@ -93,6 +93,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const { grupoId } = await crearGrupo([rechazada]);
 
       await page.goto(`/personas/${rechazada.id}`);
+      // DEMO-06: con Vida Nueva en curso no se ofrece pedirla en su nombre; se dice por qué.
+      await expect(page.getByRole('button', { name: 'Pedir Vida Nueva en nombre de…' })).toHaveCount(0);
+      await expect(seccion(page, 'En su nombre')).toContainText('Ya tiene Vida Nueva pedida o en curso');
       const solicitudes = seccion(page, 'Solicitudes');
       await expect(solicitudes.getByRole('listitem')).toHaveCount(2);
       await expect(solicitudes).toContainText('Rechazada');

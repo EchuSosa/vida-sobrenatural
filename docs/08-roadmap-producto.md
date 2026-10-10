@@ -29,6 +29,7 @@
 - Reportes / analíticas (ej. cuánta gente completa cada curso, tasa de abandono vs. baja administrativa).
 
 **Acceso, perfil y notificaciones:**
+- **Entrar a la app sin email** (Echu, DEMO-13, 2026-10-10: "no me parece que solo puedan acceder personas con email"). Hoy quien no tiene email lo carga el Admin y queda "Sin acceso a la app" hasta que se le agrega uno (D97, D145). Opciones a evaluar: código por WhatsApp o SMS al celular (tiene costo por mensaje y necesita un proveedor), o que un familiar con cuenta lo acompañe desde la suya. Se decide después del MVP.
 - Subir una foto de perfil propia (en el MVP solo se usa la de Google, D87).
 - Preferencias de canal por Persona (ej. desactivar push de ciertos tipos, o recibir por email también los avisos normales).
 
