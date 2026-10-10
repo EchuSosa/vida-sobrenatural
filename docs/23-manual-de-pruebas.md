@@ -161,11 +161,13 @@ Discipuladora, ella acepta, y la persona sigue su camino. **Hacé los casos en o
 usa lo que dejó el anterior.
 
 Usá un email nuevo para la persona, por ejemplo `prueba-demo-1@example.com` (si repetís la demo,
-usá `prueba-demo-2@…`).
+usá `prueba-demo-2@…`). **No está en la lista de botones de `/dev/entrar` a propósito**: es una
+persona que todavía no existe. Escribilo en el campo "Email" de esa pantalla y tocá "Entrar"; la
+app te lleva al registro.
 
 | ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
 |---|---|---|---|---|---|---|
-| DEMO-01 | ⭐ | Persona nueva (celular) | Email que no existe | 1. Abrí `localhost:3001/dev/entrar` y entrá con `prueba-demo-1@example.com`.<br>2. Paso 1: completá apellido, nombre, Género **Femenino** y una fecha de nacimiento de hace 30 años. Tocá "Siguiente".<br>3. Paso 2: teléfono `221 555 1234`, una dirección, Sede **La Plata**. "Siguiente".<br>4. Paso 3: estado civil, profesión y "¿En qué año empezaste a venir?" → "Este año". "Siguiente".<br>5. Paso 4: revisá el resumen, marcá el consentimiento y tocá "Registrarme". | Arriba se ve "Paso X de 4" en cada paso. Al final aparece "¡Listo, ya sos parte!" con el botón "Ir a mi camino". | |
+| DEMO-01 | ⭐ | Persona nueva (celular) | Email que no existe | 1. Abrí `localhost:3001/dev/entrar`, escribí `prueba-demo-1@example.com` en el campo "Email" y tocá "Entrar".<br>2. Paso 1: completá apellido, nombre, Género **Femenino** y una fecha de nacimiento de hace 30 años. Tocá "Siguiente".<br>3. Paso 2: teléfono `221 555 1234`, una dirección, Sede **La Plata**. "Siguiente".<br>4. Paso 3: estado civil, profesión y "¿En qué año empezaste a venir?" → "Este año". "Siguiente".<br>5. Paso 4: revisá el resumen, marcá el consentimiento y tocá "Registrarme". | Arriba se ve "Paso X de 4" en cada paso. Al final aparece "¡Listo, ya sos parte!" con el botón "Ir a mi camino". | |
 | DEMO-02 | ⭐ | Persona de DEMO-01 | Recién registrada | 1. Tocá "Ir a mi camino". | Se ven cuatro tarjetas en este orden: **Vida Nueva** ("La podés empezar"), **Vida de Servicio** y **Ministerio** ("Todavía no se habilita"), **Bautismo** ("Lo vas a poder pedir cuando empieces Vida Nueva"). Ninguna dice "Próximamente". Abajo se ve la barra con Inicio, Mi camino, Eventos, Avisos y Perfil. | |
 | DEMO-03 | ⭐ | Persona de DEMO-01 | Igual que DEMO-02 | 1. En la tarjeta de Vida Nueva tocá "Quiero empezar Vida Nueva".<br>2. En "¿Qué días y horarios podés?" elegí **Martes**, desde **19:00** hasta **21:00**, y tocá "Agregar franja".<br>3. Tocá "Quiero empezar Vida Nueva". | Aparece el mensaje "Recibimos tu pedido de Vida Nueva." y la pantalla cambia a "Estamos buscando a tu Discipulador", con tus horarios y los botones "Editar horarios" y "Retirar el pedido". | |
 | DEMO-04 | ⭐ | Persona de DEMO-01 | Pidió Vida Nueva | 1. Volvé a "Mi camino". | La tarjeta de Vida Nueva dice "Estamos buscando a tu Discipulador" y ofrece "Ver mi pedido". **No** ofrece "Ya lo hice". | |

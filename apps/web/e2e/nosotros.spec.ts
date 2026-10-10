@@ -48,7 +48,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByAltText('Mujeres adorando entre la congregación')).toBeVisible();
       await expect(page.getByAltText('Pareja pastoral hablando al micrófono')).toBeVisible();
       await expect(page.getByAltText('Manos escribiendo en un cuaderno sobre una Biblia abierta')).toBeVisible();
-      await expect(page.getByAltText('Pastora orando con el micrófono por una mujer')).toBeVisible();
+      await expect(page.getByAltText('Juan Pablo Sosa hablando con micrófono en el escenario, con el swoosh blanco de la marca de fondo')).toBeVisible();
       await expect(page.getByRole('img', { name: 'Imagen de Ediciones VS' })).toBeVisible();
 
       const resultados = await auditar(page);
@@ -123,8 +123,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // con placeholder. H-82: el placeholder está por su role="img" y
       // nombre accesible — el texto "Foto pendiente" ya no se muestra a
       // quien visita la web.
-      await expect(page.getByAltText('Juan Pablo Sosa')).toBeVisible();
-      await expect(page.getByRole('img', { name: /Foto pendiente/ })).toHaveCount(2);
+      // 2026-10-10 (Echu): las tres con placeholder hasta tener los retratos
+      // actualizados; el de Juan Pablo está en la tarjeta de Palabra Profética.
+      await expect(page.getByRole('img', { name: /Foto pendiente/ })).toHaveCount(3);
       await expect(page.getByText('Foto pendiente', { exact: false })).toHaveCount(0);
 
       const resultados = await auditar(page);
