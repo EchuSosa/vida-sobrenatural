@@ -2685,7 +2685,11 @@
     "irAPersonas": "Ir a Personas",
     "errorCargaTitulo": "No pudimos cargar el perfil",
     "errorCarga": "Podés reintentar en unos segundos. Código de referencia:",
-    "editarDatos": "Editar datos"
+    "editarDatos": "Editar datos",
+    "acciones": {
+      "vidaNuevaEnMarcha": "Ya tiene Vida Nueva pedida o en curso: la ves en Solicitudes, abajo.",
+      "vidaNuevaHecha": "Ya hizo Vida Nueva, así que no hace falta pedirla."
+    }
   },
   "personasEditar": {
     "miga": "Editar datos",

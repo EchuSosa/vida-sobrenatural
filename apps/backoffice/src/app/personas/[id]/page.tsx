@@ -2,8 +2,8 @@ import { Suspense, type ReactNode } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { CircleCheck, CircleSlash, Clock, Smartphone, UserRound } from 'lucide-react';
-import { ApiError, aniosCongregando, apiFetch, formatearDiaEnArgentina, formatearFechaLarga, hoyEnArgentina, type PerfilPersona } from '@vida-sobrenatural/shared-types';
+import { CircleCheck, CircleSlash, Clock, Info, Smartphone, UserRound } from 'lucide-react';
+import { ApiError, aniosCongregando, apiFetch, formatearDiaEnArgentina, formatearFechaLarga, hoyEnArgentina, type CaminoDePersonaAdmin, type PerfilPersona } from '@vida-sobrenatural/shared-types';
 import { AvatarPersona, ButtonLink, MigaDePan, Skeleton } from '@vida-sobrenatural/ui';
 import { requerirPermiso, tienePermisoSesion } from '../../../auth';
 import { BloqueConError } from '../../../components/bloque-con-error';
@@ -42,6 +42,22 @@ export default async function PerfilPersonaPage({ params }: { params: Promise<{ 
   // spec 013, Historia 7 (T082, H7.5): "Editar datos" solo con `personas.editar` (el Pastor no lo ve).
   const puedeEditar = tienePermisoSesion(session, 'personas.editar');
   const puedePedirEnNombre = tienePermisoSesion(session, 'solicitudes.crear_en_nombre') && perfil.activo && perfil.estado === 'activa';
+  // DEMO-06 (2026-10-10): si ya tiene Vida Nueva pedida, en curso o hecha, no
+  // se ofrece pedirla en su nombre (la API lo rechazaría igual): se dice por
+  // qué. Si el camino no carga, queda el botón como antes (la API decide).
+  let vidaNueva: CaminoDePersonaAdmin['etapas'][number] | undefined;
+  if (puedePedirEnNombre) {
+    try {
+      const camino = await apiFetch<CaminoDePersonaAdmin>(`/personas/${encodeURIComponent(perfil.id)}/camino`, {
+        headers: { Authorization: `Bearer ${session.apiToken}` },
+        cache: 'no-store',
+      });
+      vidaNueva = camino.etapas.find((e) => e.etapa === 'vida_nueva');
+    } catch {
+      vidaNueva = undefined;
+    }
+  }
+  const motivoSinPedir = vidaNueva?.completa ? t('acciones.vidaNuevaHecha') : vidaNueva?.enCurso ? t('acciones.vidaNuevaEnMarcha') : null;
   const seccionesExtra = SECCIONES_PERFIL.filter((s) => tienePermisoSesion(session, s.permiso));
   const anioActual = Number(hoyEnArgentina().slice(0, 4));
 
@@ -145,7 +161,14 @@ export default async function PerfilPersonaPage({ params }: { params: Promise<{ 
 
       {puedePedirEnNombre && (
         <Seccion id="acciones" titulo={t('secciones.acciones')}>
-          <PedirEnNombreDe apiToken={session.apiToken} persona={{ id: perfil.id, nombre: perfil.nombre, apellido: perfil.apellido }} />
+          {motivoSinPedir ? (
+            <p className="flex items-start gap-2 text-muted-foreground">
+              <Info aria-hidden className="mt-1 size-4 shrink-0" />
+              {motivoSinPedir}
+            </p>
+          ) : (
+            <PedirEnNombreDe apiToken={session.apiToken} persona={{ id: perfil.id, nombre: perfil.nombre, apellido: perfil.apellido }} />
+          )}
         </Seccion>
       )}
 
