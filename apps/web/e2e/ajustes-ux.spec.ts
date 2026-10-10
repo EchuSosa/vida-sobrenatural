@@ -179,6 +179,17 @@ test.describe('Mi camino — Vida Nueva', () => {
     await tarjeta.getByRole('button', { name: 'Quiero empezar Vida Nueva' }).click();
     await expect(tarjeta.getByText('Estamos buscando a tu Discipulador')).toBeFocused();
     await expect(tarjeta.getByText('Martes 19:00 a 21:00')).toBeVisible();
+
+    // DEMO-04: "Editar horarios" (contorno) y "Retirar el pedido" (solo texto,
+    // subrayado) no se ven iguales; Editar va arriba en celular.
+    const editar = tarjeta.getByRole('button', { name: 'Editar horarios' });
+    const retirar = tarjeta.getByRole('button', { name: 'Retirar el pedido' });
+    expect(await retirar.evaluate((el) => getComputedStyle(el).textDecorationLine)).toContain('underline');
+    expect(await retirar.evaluate((el) => getComputedStyle(el).borderTopColor)).not.toBe(
+      await editar.evaluate((el) => getComputedStyle(el).borderTopColor),
+    );
+    expect(await alto(retirar)).toBeGreaterThanOrEqual(44);
+    expect((await editar.boundingBox())!.y).toBeLessThan((await retirar.boundingBox())!.y);
   });
 });
 
