@@ -338,7 +338,7 @@ un recuadro arriba ("Revisá…") con enlace a cada campo. Anotá cualquier mens
 
 | ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
 |---|---|---|---|---|---|---|
-| REG-05 | P2 | Recién registrada | `demo-nueva@example.com` | 1. Entrá por `/dev/entrar` con ese email.<br>2. Abrí `localhost:3001/registro`. | No te pide los datos de nuevo: te lleva a Primeros pasos con "Ya estás registrada, no hace falta completarlo de nuevo." | |
+| REG-05 | P2 | Recién registrada | `demo-nueva@example.com` | 1. Entrá por `/dev/entrar` con ese email.<br>2. Abrí `localhost:3001/registro`. | No te pide los datos de nuevo: te lleva al Inicio de la app con "Ya estás registrada, no hace falta completarlo de nuevo." | |
 | REG-10 | P2 | Persona nueva | Email nuevo, paso 1 | 1. Dejá todo vacío y tocá "Siguiente". | En el recuadro de arriba y debajo de cada campo: "Escribí tu apellido.", "Escribí tu nombre.", "Elegí una opción en Género." y el de la fecha ("…El año va con 4 números, por ejemplo 1965."). | |
 | REG-11 | P2 | Persona nueva | Paso 2 | 1. Escribí el teléfono `abc` y tocá "Siguiente". | "Ingresá un teléfono con código de área, por ejemplo 221 555 1234." | |
 | REG-12 | P2 | Persona nueva | Paso 3 | 1. En Profesión elegí "Otro" y dejá "¿Cuál?" vacío. "Siguiente". | Aparece el campo "¿Cuál?" y el error "Escribí a qué te dedicás." | |

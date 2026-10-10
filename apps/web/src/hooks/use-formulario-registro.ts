@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import {
   type Sede,
   type ErrorCode,
+  DESTINO_POR_DEFECTO,
   TELEFONO_REGEX,
   apiFetch,
   ApiError,
@@ -86,9 +87,11 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     // FR-012 / edge case del spec: un Miembro registrado que ya está `activa`
     // no vuelve a ver el formulario — se lo saca de acá. H-16 (actualización
     // 2026-09-18): el ?ya_registrado=1 hace que Primeros pasos avise por qué
-    // (AvisoPorQuery), en vez de un salto silencioso.
+    // (AvisoPorQuery), en vez de un salto silencioso. 2026-10-10 (Echu, al
+    // probar la demo): va al Inicio de la app (DESTINO_POR_DEFECTO), no a
+    // Primeros pasos de la web pública: quien ya está registrada entra a su app.
     if (session?.user.estado === 'activa' && !acabamosDeRegistrarRef.current) {
-      router.replace('/primeros-pasos?ya_registrado=1');
+      router.replace(`${DESTINO_POR_DEFECTO}?ya_registrado=1`);
     }
     if (session?.user.estado === 'pendiente_tutor') {
       router.replace('/pendiente-tutor');

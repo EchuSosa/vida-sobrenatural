@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { ArrowRight, BookOpen, Inbox, MapPin, Route } from 'lucide-react';
@@ -9,6 +10,7 @@ import {
   type PersonaPerfil,
 } from '@vida-sobrenatural/shared-types';
 import { auth, tienePermisoSesion } from '../../../auth';
+import { AvisoPorQuery } from '../../../components/aviso-por-query';
 
 /**
  * spec 006, T059 (FR-022; ajustes-ux #38–#39): el Inicio de la app. Saluda con
@@ -50,6 +52,10 @@ export default async function InicioAppPage() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
+      {/* H-16: si llegó acá porque /registro la sacó (ya estaba registrada). */}
+      <Suspense fallback={null}>
+        <AvisoPorQuery param="ya_registrado" valor="1" mensaje={t('avisoYaRegistrado')} />
+      </Suspense>
       <h1 className="text-3xl font-semibold tracking-tight">{t('saludo', { nombre: perfil.nombre })}</h1>
 
       {pendientes > 0 && (

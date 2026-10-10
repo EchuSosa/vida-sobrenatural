@@ -26,7 +26,8 @@ export function EntrarDePruebaCliente({ nivelTitulo }: { nivelTitulo?: 'h1' | 'h
         const intentar = () => signIn('test-login', { email, redirect: false });
         const resultado = (await intentar())?.error ? await intentar() : null;
         if (resultado?.error) return;
-        window.location.assign('/registro');
+        // /ingresar resuelve el destino: activa → Inicio de la app; sin registro → /registro; pendiente de tutor → su pantalla.
+        window.location.assign('/ingresar');
       }}
     />
   );

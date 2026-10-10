@@ -1798,6 +1798,7 @@
     "cargando": "Cargando el formulario"
   },
   "inicioApp": {
+    "avisoYaRegistrado": "Ya estás registrada, no hace falta completarlo de nuevo.",
     "saludo": "Hola, {nombre}",
     "pendientesDiscipulador": "{cantidad, plural, one {Tenés # cosa para revisar en tus discipulados} other {Tenés # cosas para revisar en tus discipulados}}",
     "caminoTitulo": "Tu camino",
