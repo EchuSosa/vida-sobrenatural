@@ -4,6 +4,7 @@ import { EstadoVacio } from '@vida-sobrenatural/ui';
 import { PaginacionEventos } from '../../../components/eventos/paginacion-eventos';
 import { obtenerCartelera } from '../../../components/eventos/api-eventos';
 import { TarjetaEvento } from '../../../components/eventos/tarjeta-evento';
+import { ProveedorMisInscripciones } from '../../../components/eventos/mis-inscripciones-cartelera';
 
 const POR_PAGINA = 12;
 
@@ -50,13 +51,15 @@ export default async function EventosPage({ searchParams }: { searchParams: Prom
           }
         />
       ) : (
-        <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {cartelera.items.map((evento) => (
-            <li key={evento.id}>
-              <TarjetaEvento evento={evento} ahora={ahora} />
-            </li>
-          ))}
-        </ul>
+        <ProveedorMisInscripciones>
+          <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {cartelera.items.map((evento) => (
+              <li key={evento.id}>
+                <TarjetaEvento evento={evento} ahora={ahora} />
+              </li>
+            ))}
+          </ul>
+        </ProveedorMisInscripciones>
       )}
       {totalPaginas > 1 && (
         <PaginacionEventos paginaActual={pagina} totalPaginas={totalPaginas} />
