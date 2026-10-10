@@ -48,8 +48,13 @@ pnpm dev:red
 ```
 
 Detecta la IP de esta compu en el wifi, levanta la API, la web app y el backoffice con esa IP y
-muestra las direcciones para abrir desde el celular u otra compu (por ejemplo
-`http://192.168.0.15:3001`). Si elige mal la IP: `IP=192.168.0.15 pnpm dev:red`.
+muestra las direcciones para abrir desde el celular u otra compu. El cartel con las direcciones
+sale al arrancar y **se repite cuando las tres apps terminan de levantar** (o al minuto), así no
+queda tapado por los logs. `192.168.0.15` es solo un ejemplo: usá la IP que muestra el cartel.
+
+- Para ver la IP a mano: `ipconfig getifaddr en0` (Mac), `ipconfig` → "Dirección IPv4" (Windows),
+  `hostname -I` (Linux). Si `dev:red` elige otra (VPN, Docker): `IP=<tu IP> pnpm dev:red`.
+- La primera vez que se abre cada página tarda (Next la compila): hasta 30–40 s.
 
 - Los `.env` no se tocan; en esta compu sigue andando `localhost`.
 - **Google no funciona desde la IP** (solo acepta las direcciones registradas): entrá con

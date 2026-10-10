@@ -62,11 +62,51 @@ function main() {
     },
   ];
 
+  const mostrarDirecciones = () => {
+    console.log(`
+    ─────────────────────────────────────────────────────────────
+    Abrí estas direcciones desde el celular u otra compu
+    (tienen que estar en el mismo wifi que esta compu):
+
+      Web app     ${web}
+      Backoffice  ${backoffice}
+      Entrar      ${web}/dev/entrar   ·   ${backoffice}/dev/entrar
+
+    En esta compu también andan con localhost.
+    Para cortar todo: Ctrl+C.
+    ─────────────────────────────────────────────────────────────
+`);
+  };
+
+  // El cartel con las direcciones se repite cuando las tres apps terminan de
+  // arrancar (si no, los logs lo tapan enseguida) y, por las dudas, a los 60 s.
+  const LISTA = { api: /Nest application successfully started/, web: /Ready in|✓ Ready/, backoffice: /Ready in|✓ Ready/ };
+  const listas = new Set();
+  let yaMostrado = false;
+  const mostrarSiTodasListas = () => {
+    if (!yaMostrado && listas.size === apps.length) {
+      yaMostrado = true;
+      mostrarDirecciones();
+    }
+  };
+  setTimeout(() => {
+    if (!yaMostrado) {
+      yaMostrado = true;
+      mostrarDirecciones();
+    }
+  }, 60_000).unref();
+
   const hijos = apps.map(({ nombre, args, env }) => {
     const hijo = spawn('pnpm', args, { env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
     const prefijo = `[${nombre}] `;
-    const pasar = (destino) => (datos) =>
-      destino.write(datos.toString().split('\n').filter(Boolean).map((l) => prefijo + l).join('\n') + '\n');
+    const pasar = (destino) => (datos) => {
+      const texto = datos.toString();
+      destino.write(texto.split('\n').filter(Boolean).map((l) => prefijo + l).join('\n') + '\n');
+      if (LISTA[nombre]?.test(texto)) {
+        listas.add(nombre);
+        mostrarSiTodasListas();
+      }
+    };
     hijo.stdout.on('data', pasar(process.stdout));
     hijo.stderr.on('data', pasar(process.stderr));
     hijo.on('exit', (codigo) => console.log(`${prefijo}terminó (código ${codigo})`));
@@ -80,19 +120,7 @@ function main() {
   process.on('SIGINT', cortar);
   process.on('SIGTERM', cortar);
 
-  console.log(`
-  ─────────────────────────────────────────────────────────────
-  Abrí estas direcciones desde el celular u otra compu
-  (tienen que estar en el mismo wifi que esta compu):
-
-    Web app     ${web}
-    Backoffice  ${backoffice}
-    Entrar      ${web}/dev/entrar   ·   ${backoffice}/dev/entrar
-
-  En esta compu también andan con localhost.
-  Para cortar todo: Ctrl+C.
-  ─────────────────────────────────────────────────────────────
-`);
+  mostrarDirecciones();
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main();
