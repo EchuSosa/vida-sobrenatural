@@ -1,6 +1,6 @@
 import type { EventoDetalle } from '@vida-sobrenatural/shared-types';
-import { test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
-import { accionDeAdmin, crearEventoComoAdmin } from './helpers-011';
+import { test, expect, auditar, esperarTema, loguearseComoTest, sinScrollHorizontal } from './helpers';
+import { accionDeAdmin, anotarPorApi, crearEventoComoAdmin, crearPersonaActiva } from './helpers-011';
 
 /**
  * spec 011, T047 — la cartelera y la página pública de un Evento, en celular
@@ -117,3 +117,18 @@ for (const tema of ['claro', 'oscuro'] as const) {
     });
   });
 }
+
+test('DEMO-17: con sesión, la tarjeta de un Evento al que ya se anotó dice "Ya te anotaste" en lugar del estado @celular', async ({ page, baseURL }) => {
+  const nombre = `e2e-anotada-${Date.now()}`;
+  const evento = await crearEventoComoAdmin(baseURL!, { nombre, inicio: new Date(Date.now() + 0.5 * 3_600_000).toISOString(), requiereInscripcion: true });
+  const email = `e2e-anotada-${Date.now()}@example.com`;
+  await crearPersonaActiva(baseURL!, email, 'Anotada');
+  await anotarPorApi(baseURL!, email, evento.id);
+
+  await loguearseComoTest(page, email);
+  await page.goto('/eventos');
+  const tarjeta = page.getByRole('link').filter({ hasText: nombre });
+  await expect(tarjeta.getByText('Ya te anotaste')).toBeVisible();
+  await expect(tarjeta.getByText('Inscripción abierta')).toHaveCount(0);
+  expect((await auditar(page)).violations).toEqual([]);
+});
