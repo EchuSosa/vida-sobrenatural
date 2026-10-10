@@ -1,4 +1,5 @@
 import { test, expect, auditar } from './helpers';
+import { crearPersonaActiva } from './helpers-011';
 
 /**
  * H-R13 (revisión manual de la 004): `/dev/entrar` entra con el login de
@@ -23,4 +24,14 @@ test('los botones rápidos entran con las personas de demo del manual', async ({
   await expect(page).toHaveURL(/\/registro$/);
   const sesion = await (await page.request.get('/api/auth/session')).json();
   expect(sesion.user.email).toBe('demo-nueva@example.com');
+});
+
+test('2026-10-10: una Persona ya registrada entra directo al Inicio de la app (no a Primeros pasos)', async ({ page, baseURL }) => {
+  const email = `e2e-dev-entrar-activa-${Date.now()}@example.com`;
+  await crearPersonaActiva(baseURL!, email, 'Activa');
+  await page.goto('/dev/entrar');
+  await page.getByLabel('Email').fill(email);
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await expect(page).toHaveURL(/\/inicio$/);
+  await expect(page.getByRole('heading', { level: 1, name: /^Hola, Activa/ })).toBeVisible();
 });
