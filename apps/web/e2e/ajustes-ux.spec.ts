@@ -134,6 +134,13 @@ test.describe('Registro', () => {
     await page.getByLabel('¿En qué año empezaste a venir a la iglesia?').selectOption('2020');
     await page.getByRole('button', { name: 'Siguiente' }).click();
 
+    // 2026-10-10 (DEMO-01): el valor no puede quedar en una columna de una
+    // letra al lado de una etiqueta larga — en celular va debajo, en una línea.
+    const anio = page.locator('dd').filter({ hasText: /^2020$/ });
+    expect((await anio.boundingBox())?.height ?? 0).toBeLessThan(40);
+    const estadoCivil = page.locator('dd').filter({ hasText: 'Casado/a' });
+    expect((await estadoCivil.boundingBox())?.height ?? 0).toBeLessThan(40);
+
     for (const editar of await page.getByRole('button', { name: /^Editar/ }).all()) {
       expect(await alto(editar)).toBeGreaterThanOrEqual(44);
     }
