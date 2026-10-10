@@ -368,7 +368,11 @@ function Buscando({
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <ConfirmDestructiveDialog
               trigger={
-                <Button type="button" variant="outline" loading={retirando} className="h-11">
+                // DEMO-04 (2026-10-10): junto a "Editar horarios" (secundario,
+                // contorno) los dos botones se veían iguales. Retirar es una
+                // acción menor y se puede deshacer: terciario, solo texto con
+                // subrayado permanente (docs/15, D81), 44 px de alto.
+                <Button type="button" variant="link" loading={retirando} className="h-11 text-base underline">
                   <Undo2 aria-hidden />
                   {t('retirar')}
                 </Button>
@@ -381,7 +385,7 @@ function Buscando({
               tono="neutro"
               onConfirmar={() => void retirar()}
             />
-            <Button type="button" variant="outline" className="h-11" onClick={() => setEditando(true)}>
+            <Button type="button" variant="outline" className="h-11 text-base" onClick={() => setEditando(true)}>
               {t('editarHorarios')}
             </Button>
           </div>
