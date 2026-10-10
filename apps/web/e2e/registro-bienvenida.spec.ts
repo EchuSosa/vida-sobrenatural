@@ -113,7 +113,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // avisa por qué, en vez de un salto silencioso.
       await loguearseComoTest(page, email);
       await page.goto('/registro');
-      await expect(page).toHaveURL(/\/primeros-pasos/);
+      // 2026-10-10: va al Inicio de la app, no a Primeros pasos.
+      await expect(page).toHaveURL(/\/inicio\?ya_registrado=1/);
       await expect(page.getByText('Ya estás registrada, no hace falta completarlo de nuevo.')).toBeVisible();
 
       resultados = await auditar(page);
