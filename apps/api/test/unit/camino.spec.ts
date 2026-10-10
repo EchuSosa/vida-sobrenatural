@@ -222,9 +222,19 @@ describe('Mi camino — puedeDeclarar (FR-008)', () => {
     }
   });
 
-  it('las otras etapas no dependen del estado de Vida Nueva (una bloqueada o próximamente se puede contar)', () => {
-    for (const etapa of ETAPAS_CAMINO.filter((e): e is Exclude<EtapaCamino, 'vida_nueva'> => e !== 'vida_nueva')) {
-      expect(puedeDeclarar(etapa, con({ vidaNueva: VN.en_curso }))).toBe(true);
+  it('D235: con Vida Nueva pedida o en curso, Vida de Servicio y Ministerio no ofrecen "Ya lo hice"; Bautismo sí', () => {
+    for (const estado of ['buscando', 'en_curso'] as const) {
+      expect(puedeDeclarar('vida_de_servicio', con({ vidaNueva: VN[estado] }))).toBe(false);
+      expect(puedeDeclarar('ministerio', con({ vidaNueva: VN[estado] }))).toBe(false);
+      expect(puedeDeclarar('bautismo', con({ vidaNueva: VN[estado] }))).toBe(true);
+    }
+  });
+
+  it('sin Vida Nueva en marcha, las otras etapas se pueden contar aunque estén bloqueadas o próximamente', () => {
+    for (const estado of ['puede_pedir', 'baja', 'finalizado'] as const) {
+      for (const etapa of ETAPAS_CAMINO.filter((e): e is Exclude<EtapaCamino, 'vida_nueva'> => e !== 'vida_nueva')) {
+        expect(puedeDeclarar(etapa, con({ vidaNueva: VN[estado] }))).toBe(true);
+      }
     }
   });
 });
