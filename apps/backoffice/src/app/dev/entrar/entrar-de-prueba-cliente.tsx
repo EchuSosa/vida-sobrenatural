@@ -16,6 +16,7 @@ export function EntrarDePruebaCliente({ nivelTitulo }: { nivelTitulo?: 'h1' | 'h
         entrar: t('entrar'),
         entrando: t('entrando'),
         rapidos: t('rapidos'),
+        error: t('error'),
       }}
       emailsRapidos={EMAILS_DE_PRUEBA}
       nivelTitulo={nivelTitulo}
@@ -25,8 +26,9 @@ export function EntrarDePruebaCliente({ nivelTitulo }: { nivelTitulo?: 'h1' | 'h
         // se reintenta una vez antes de navegar.
         const intentar = () => signIn('test-login', { email, redirect: false });
         const resultado = (await intentar())?.error ? await intentar() : null;
-        if (resultado?.error) return;
+        if (resultado?.error) return false;
         window.location.assign('/');
+        return true;
       }}
     />
   );

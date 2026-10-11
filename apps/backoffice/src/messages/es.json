@@ -869,7 +869,8 @@
     "email": "Email",
     "entrar": "Entrar",
     "entrando": "Entrando…",
-    "rapidos": "Personas de demo (las del manual de pruebas)"
+    "rapidos": "Personas de demo (las del manual de pruebas)",
+    "error": "No pudimos entrar. Revisá que la API esté levantada (puerto 3333) y mirá su terminal: si dice que falta una migración, corré pnpm --filter api exec prisma migrate deploy."
   },
   "etapas": {
     "vida_nueva": "Vida Nueva",
