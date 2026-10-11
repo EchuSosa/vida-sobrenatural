@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-11
 
-**Status**: Draft — espera el OK de Echu
+**Status**: Aprobada por Echu el 2026-10-11 (Preguntas 1 a 3: "sigo tu recomendación", "sí", "ok")
 
 **Input**: Pedido de Echu del 2026-10-11, después del domingo 11/10, en que la iglesia repartió en
 papel la encuesta de ministerios a quienes terminan Vida de Servicio. Hoy es así: el domingo anterior
@@ -19,8 +19,8 @@ como una primera carga de datos".
 **Respuestas de Echu (2026-10-11)**:
 
 1. La charla uno a uno la hacen **los líderes de Vida de Servicio**.
-2. Las notas de la charla: Echu no vio las encuestas en papel (se las quedaron los líderes). Se toma
-   el criterio conservador: **privadas** (líderes de esa edición y Admin). Pregunta 1.
+2. Las notas de la charla son **privadas**: las ven los líderes de esa edición y el Admin, no la
+   persona ni el Pastor (Pregunta 1, sigue la recomendación).
 3. **Hasta 2 Ministerios, y de cada Ministerio un solo área**: "las tareas son los domingos y quizás
    te coinciden varios domingos seguidos y no es la idea". Discipulados Vida Nueva se hace en
    paralelo con cualquier otro (D217) y **no cuenta** en el límite.
@@ -37,7 +37,7 @@ como una primera carga de datos".
 - Q: ¿Una persona puede **servir** en dos Ministerios a la vez, o solo elegir dos para la charla?
   → A: Servir en hasta dos (la razón de Echu es el calendario de domingos, que solo tiene sentido si
   sirve en los dos). **Enmienda D170 / FR-020 de la 009**: hasta **2** Postulaciones `aprobada` por
-  Persona, más la de Discipulados Vida Nueva en paralelo (D217). Pregunta 2.
+  Persona, más la de Discipulados Vida Nueva en paralelo (D217). Confirmado por Echu (Pregunta 2).
 - Q: ¿Quién abre la elección? → A: El Admin, por edición de Vida de Servicio ("Abrir la elección de
   ministerio"), igual que abre la inscripción (`inscripcionAbierta`). Se cierra sola cuando la
   edición finaliza; el Admin también puede cerrarla.
@@ -231,12 +231,10 @@ entre a la app.
 - Que los líderes de cada Ministerio vean o resuelvan elecciones (por ahora, solo el Admin).
 - Formación/capacitación con seguimiento propio.
 
-## Preguntas para Echu
+## Preguntas para Echu (respondidas el 2026-10-11)
 
-1. **Notas privadas**: ¿las ven solo los líderes de VS de esa edición y el Admin? ¿También el Pastor?
-   Recomendación: sin el Pastor, como las respuestas sensibles de Eventos (D232).
-2. **Servir en dos**: ¿confirmás que una persona puede quedar sirviendo en dos Ministerios a la vez
-   (más Discipulados VN)? Hoy la app permite uno solo. Recomendación: sí, es lo que dijiste del
-   calendario de domingos.
-3. **¿Quién confirma?** Por ahora el Admin. ¿Querés que más adelante lo haga el líder de cada
-   Ministerio? Recomendación: Admin ahora, líder de Ministerio después (fuera de esta spec).
+1. **Notas privadas**: solo los líderes de VS de esa edición y el Admin; sin el Pastor. → "Sigo tu
+   recomendación" (D240).
+2. **Servir en dos**: una persona puede servir en dos Ministerios a la vez, más Discipulados VN. → "Sí"
+   (D241).
+3. **¿Quién confirma?** El Admin ahora; el líder de cada Ministerio queda para después. → "Ok" (D242).
