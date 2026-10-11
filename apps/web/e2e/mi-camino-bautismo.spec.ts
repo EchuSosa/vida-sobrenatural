@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, esperarTema, loguearseComoTest, sinScrollHorizontal } from './helpers';
+import { abrirEtapa, test, expect, auditar, esperarTema, loguearseComoTest, sinScrollHorizontal } from './helpers';
 import { registrarMenorActivo, usarTema } from './helpers-006';
 import { crearPersonaActiva } from './helpers-011';
 import { crearEventoDeBautismo, estadoBautismo, habilitarBautismo, pedirYAceptar } from './helpers-010';
@@ -44,6 +44,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await abrirMiCamino(page);
 
       // FR-002: no_habilitada — texto + enlace a Vida Nueva, sin botón de pedir.
+      await abrirEtapa(page, 'Bautismo'); // propuesta A: bloqueada, arranca plegada
       await expect(card(page)).toContainText('Lo vas a poder pedir cuando empieces Vida Nueva');
       await expect(card(page).getByRole('link', { name: 'Ver Vida Nueva' })).toBeVisible();
       await expect(card(page).getByRole('button', { name: 'Quiero bautizarme' })).toHaveCount(0);

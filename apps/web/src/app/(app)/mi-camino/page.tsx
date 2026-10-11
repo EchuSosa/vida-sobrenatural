@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { CalendarCheck, CalendarClock, CircleAlert, CircleCheck, Clock, Hourglass, Lock, MessageCircle, Search, Sparkles, UserRound } from 'lucide-react';
+import { CalendarCheck, CalendarClock, CircleAlert, CircleCheck, CircleDot, Clock, Hourglass, ListChecks, Lock, MessageCircle, Search, Sparkles, UserRound } from 'lucide-react';
 import {
   apiFetch,
   enlaceWhatsapp,
@@ -9,8 +9,9 @@ import {
   type CaminoDeLaPersona,
   type EstadoEtapa,
   type EtapaCamino,
+  type ResumenMiEleccion,
 } from '@vida-sobrenatural/shared-types';
-import { CardEtapa, type CardEtapaProps } from '@vida-sobrenatural/ui';
+import { ButtonLink, CardEtapa, type CardEtapaProps } from '@vida-sobrenatural/ui';
 import { auth } from '../../../auth';
 import { RetirarDeclaracion, YaLoHice, YaSirvo } from './acciones-historial';
 import { AccionesVidaDeServicio } from './tarjeta-vida-de-servicio';
@@ -58,10 +59,12 @@ export default async function MiCaminoPage() {
   const session = await auth();
   const apiToken = session?.apiToken ?? '';
   const [t, tRaiz, locale] = await Promise.all([getTranslations('miCamino'), getTranslations(), getLocale()]);
-  const camino = await apiFetch<CaminoDeLaPersona>('/camino/me', {
-    headers: { Authorization: `Bearer ${apiToken}` },
-    cache: 'no-store',
-  });
+  const headers = { Authorization: `Bearer ${apiToken}` };
+  const [camino, eleccion] = await Promise.all([
+    apiFetch<CaminoDeLaPersona>('/camino/me', { headers, cache: 'no-store' }),
+    // spec 015 (D239): la elección de ministerio de su edición de Vida de Servicio, si hay.
+    apiFetch<ResumenMiEleccion>('/elecciones-ministerio/me/resumen', { headers, cache: 'no-store' }),
+  ]);
   const fecha = (iso: string) => formatearDiaEnArgentina(iso, locale);
   const nombre = (etapa: EtapaCamino) => tRaiz(`etapas.${etapa}`);
 
@@ -196,6 +199,74 @@ export default async function MiCaminoPage() {
     );
   }
 
+  /**
+   * Mi camino, propuesta A (Echu, 2026-10-10): "Lo próximo para vos", una sola
+   * cosa para hacer ahora. Con Vida Nueva en curso, escribirle al Discipulador;
+   * si la puede pedir, empezarla; si no, la primera etapa que ya puede empezar.
+   * Sin nada para hacer (esperando una respuesta, todo hecho), no se muestra.
+   * Los textos son propios (no repiten los de las cards).
+   */
+  function loProximo(): ReactNode {
+    // spec 015 (D239): con la elección de ministerio abierta y sin elegir, eso es lo próximo (tiene fecha: se cierra al terminar la edición).
+    if (eleccion.estado === 'puede_elegir') {
+      return (
+        <Proximo titulo={t('proximo.elegirTitulo')} texto={t('proximo.elegirTexto')}>
+          <ButtonLink render={<Link href="/mi-camino/ministerios/elegir" />} size="xl" className="w-full text-base sm:w-fit">
+            <ListChecks aria-hidden />
+            {t('proximo.elegirBoton')}
+          </ButtonLink>
+        </Proximo>
+      );
+    }
+    const vn = camino.vidaNueva;
+    if (vn.estado === 'en_curso') {
+      const nombreDisc = `${vn.discipulador.nombre} ${vn.discipulador.apellido}`;
+      const telefono = vn.discipulador.telefono.replace(/\D/g, '');
+      return (
+        <Proximo titulo={t('proximo.escribileTitulo', { nombre: nombreDisc })} texto={t('proximo.escribileTexto')}>
+          {telefono && (
+            <ButtonLink href={enlaceWhatsapp(telefono)} target="_blank" rel="noopener noreferrer" size="xl" className="w-full text-base sm:w-fit">
+              <MessageCircle aria-hidden />
+              {t('proximo.escribileBoton')}
+            </ButtonLink>
+          )}
+        </Proximo>
+      );
+    }
+    const etapaVn = camino.etapas.find((e) => e.etapa === 'vida_nueva');
+    if (etapaVn?.estado === 'disponible' && (vn.estado === 'puede_pedir' || vn.estado === 'baja')) {
+      return (
+        <Proximo titulo={t('proximo.vidaNuevaTitulo')} texto={t('proximo.vidaNuevaTexto')}>
+          <ButtonLink render={<Link href="/mi-camino/vida-nueva" />} size="xl" className="w-full text-base sm:w-fit">
+            {t('proximo.vidaNuevaBoton')}
+          </ButtonLink>
+        </Proximo>
+      );
+    }
+    const siguiente = camino.etapas.find((e) => e.etapa !== 'vida_nueva' && e.estado === 'disponible');
+    if (!siguiente) return null;
+    return (
+      <Proximo titulo={t('proximo.disponibleTitulo', { etapa: nombre(siguiente.etapa) })} texto={t('proximo.disponibleTexto')}>
+        <ButtonLink href={`#etapa-${siguiente.etapa}`} size="xl" className="w-full text-base sm:w-fit">
+          {t('proximo.disponibleBoton', { etapa: nombre(siguiente.etapa) })}
+        </ButtonLink>
+      </Proximo>
+    );
+  }
+
+  function Proximo({ titulo, texto, children }: { titulo: string; texto: string; children: ReactNode }) {
+    return (
+      <section aria-labelledby="lo-proximo-titulo" className="flex flex-col gap-3 rounded-lg border border-border bg-card p-5 shadow-xs">
+        <p className="text-sm font-semibold tracking-wide text-primary uppercase">{t('proximo.etiqueta')}</p>
+        <h2 id="lo-proximo-titulo" className="text-xl font-semibold">
+          {titulo}
+        </h2>
+        <p className="text-base text-muted-foreground">{texto}</p>
+        {children}
+      </section>
+    );
+  }
+
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
       <SelectorMiCamino actual="/mi-camino" />
@@ -204,16 +275,52 @@ export default async function MiCaminoPage() {
         <p className="text-base text-muted-foreground">{t('estados.introduccion')}</p>
       </div>
 
+      {/* Propuesta A: las cuatro etapas de un vistazo; cada una lleva a su card (y la abre). */}
+      <nav aria-label={t('resumen.aria')}>
+        <ol className="grid grid-cols-4 gap-2">
+          {camino.etapas.map((estado) => {
+            const r = resumenDe(estado, camino.vidaNueva, eleccion);
+            return (
+              <li key={estado.etapa}>
+                <a
+                  href={`#etapa-${estado.etapa}`}
+                  className="flex min-h-11 flex-col items-center gap-1.5 rounded-md p-1 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`flex size-10 items-center justify-center rounded-full border-2 [&_svg]:size-5 ${
+                      r.tono === 'activo' ? 'border-primary bg-primary text-primary-foreground' : r.tono === 'hecho' ? 'border-foreground bg-foreground text-background' : r.tono === 'atento' ? 'border-primary bg-card text-primary' : 'border-border bg-card text-muted-foreground'
+                    }`}
+                  >
+                    {r.icono}
+                  </span>
+                  <span className="text-sm leading-tight font-semibold underline-offset-2">{nombre(estado.etapa)}</span>
+                  <span className="text-sm leading-tight text-muted-foreground">{t(`resumen.${r.clave}`)}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+
+      {loProximo()}
+
+      {/* spec 014 (D224): aparte de las cuatro etapas. Propuesta A: arriba y chica, porque se usa seguido. */}
+      <TarjetaGrupoExtension apiToken={apiToken} compacta />
+
+      <h2 className="mt-2 text-xl font-semibold">{t('resumen.tusEtapas')}</h2>
       {camino.etapas.map((estado) => {
         const Propias = ACCIONES_PROPIAS[estado.etapa];
         const puede = 'puedeDeclarar' in estado && estado.puedeDeclarar;
+        const presentado = presentar(estado);
         return (
           <CardEtapa
             key={estado.etapa}
             id={`etapa-${estado.etapa}`}
             titulo={nombre(estado.etapa)}
             descripcion={tRaiz(DESCRIPCION[estado.etapa])}
-            {...presentar(estado)}
+            {...presentado}
+            plegable={{ abiertaAlInicio: abiertaAlInicio(estado, eleccion) || Boolean(presentado.aviso) }}
           >
             {Propias && <Propias estado={estado} apiToken={apiToken} />}
             {estado.estado === 'en_revision' && <RetirarDeclaracion declaracionId={estado.declaracionId} nombreEtapa={nombre(estado.etapa)} />}
@@ -222,9 +329,50 @@ export default async function MiCaminoPage() {
           </CardEtapa>
         );
       })}
-
-      {/* spec 014 (D224): aparte de las cuatro etapas. */}
-      <TarjetaGrupoExtension apiToken={apiToken} />
     </div>
   );
+}
+
+/**
+ * Propuesta A: abiertas al entrar, las etapas donde hay algo para hacer o
+ * para mirar; plegadas, las bloqueadas, las de "Próximamente" y las hechas.
+ * Una con aviso ("No pudimos confirmarlo") también arranca abierta (arriba).
+ * spec 015: Ministerio arranca abierta mientras hay una elección de
+ * ministerio para hacer o en marcha (aunque la etapa siga bloqueada).
+ */
+function abiertaAlInicio(estado: EstadoEtapa, eleccion: ResumenMiEleccion): boolean {
+  if (estado.etapa === 'ministerio' && eleccion.estado !== 'ninguna') return true;
+  return !(estado.estado === 'bloqueada' || estado.estado === 'proximamente' || estado.estado === 'completada');
+}
+
+/** El estado corto del resumen de arriba, con su ícono (texto + ícono, D81) y un tono para el círculo. */
+function resumenDe(
+  estado: EstadoEtapa,
+  vn: CaminoDeLaPersona['vidaNueva'],
+  eleccion: ResumenMiEleccion,
+): { clave: string; icono: ReactNode; tono: 'activo' | 'hecho' | 'atento' | 'neutro' } {
+  // spec 015: mientras la etapa no está hecha, la elección de ministerio manda en el resumen.
+  if (estado.etapa === 'ministerio' && estado.estado !== 'completada') {
+    if (eleccion.estado === 'puede_elegir') return { clave: 'puedeElegir', icono: <ListChecks />, tono: 'atento' };
+    if (eleccion.estado === 'borrador' || eleccion.estado === 'charla_hecha') return { clave: 'eligio', icono: <Hourglass />, tono: 'atento' };
+  }
+  switch (estado.estado) {
+    case 'completada':
+      return { clave: 'hecha', icono: <CircleCheck />, tono: 'hecho' };
+    case 'en_curso':
+      return estado.etapa === 'vida_nueva' && vn.estado === 'buscando'
+        ? { clave: 'pedida', icono: <Search />, tono: 'atento' }
+        : { clave: 'enCurso', icono: <CircleDot />, tono: 'activo' };
+    case 'en_revision':
+    case 'solicitud_en_revision':
+      return { clave: 'enRevision', icono: <Hourglass />, tono: 'atento' };
+    case 'solicitud_aceptada':
+      return estado.fecha ? { clave: 'conFecha', icono: <CalendarCheck />, tono: 'activo' } : { clave: 'aceptada', icono: <CircleCheck />, tono: 'atento' };
+    case 'disponible':
+      return { clave: 'disponible', icono: <Sparkles />, tono: 'atento' };
+    case 'proximamente':
+      return { clave: 'proximamente', icono: <CalendarClock />, tono: 'neutro' };
+    case 'bloqueada':
+      return { clave: 'bloqueada', icono: <Lock />, tono: 'neutro' };
+  }
 }

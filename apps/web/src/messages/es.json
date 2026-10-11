@@ -530,6 +530,36 @@
     "cerrarPanel": "Cerrar el panel"
   },
   "miCamino": {
+    "resumen": {
+      "aria": "Tus etapas de un vistazo",
+      "tusEtapas": "Tus etapas",
+      "hecha": "Hecha",
+      "enCurso": "En curso",
+      "pedida": "Pedida",
+      "enRevision": "En revisión",
+      "aceptada": "Aceptado",
+      "conFecha": "Con fecha",
+      "disponible": "Podés empezar",
+      "proximamente": "Próximamente",
+      "bloqueada": "Te falta",
+      "puedeElegir": "Podés elegir",
+      "eligio": "Elegiste"
+    },
+    "proximo": {
+      "etiqueta": "Lo próximo para vos",
+      "escribileTitulo": "Escribile a {nombre}",
+      "escribileTexto": "Es quien te acompaña en Vida Nueva. Coordinen juntos el próximo encuentro.",
+      "escribileBoton": "Escribirle por WhatsApp",
+      "vidaNuevaTitulo": "Empezá tu camino con Vida Nueva",
+      "vidaNuevaTexto": "Es el primer paso: alguien de la iglesia te acompaña, en los días y horarios que te queden cómodos.",
+      "vidaNuevaBoton": "Empezar Vida Nueva",
+      "disponibleTitulo": "Ya podés seguir con {etapa}",
+      "disponibleTexto": "Abrí la etapa para ver qué tenés que hacer.",
+      "disponibleBoton": "Ver {etapa}",
+      "elegirTitulo": "Elegí dónde querés servir",
+      "elegirTexto": "Antes de terminar Vida de Servicio, elegí hasta 2 ministerios. Después lo charlás con tu líder.",
+      "elegirBoton": "Elegir mi ministerio"
+    },
     "titulo": "Mi camino",
     "vidaNueva": {
       "titulo": "Vida Nueva",

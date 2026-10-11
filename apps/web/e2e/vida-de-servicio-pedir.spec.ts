@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, esperarTema, registrarPersonaDeTest, sinScrollHorizontal, usarTemaOscuro } from './helpers';
+import { abrirEtapa, test, expect, auditar, esperarTema, registrarPersonaDeTest, sinScrollHorizontal, usarTemaOscuro } from './helpers';
 import { crearEdicionPorApi, registrarVidaNuevaHecha } from './helpers-008';
 
 /**
@@ -73,6 +73,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       if (tema === 'oscuro') await usarTemaOscuro(page, email);
       await page.goto('/mi-camino');
       await page.waitForLoadState('networkidle');
+      await abrirEtapa(page, 'Vida de Servicio'); // propuesta A: bloqueada, arranca plegada
       await expect(card(page)).toContainText('Para anotarte primero tenés que hacer Vida Nueva.');
       await expect(card(page).getByRole('link', { name: 'Ver Vida Nueva' })).toBeVisible();
       await expect(card(page).getByRole('button', { name: 'Quiero anotarme' })).toHaveCount(0);

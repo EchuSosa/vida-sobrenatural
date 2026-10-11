@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, esperarTema, registrarPersonaDeTest, sinScrollHorizontal, usarTemaOscuro } from './helpers';
+import { test, expect, abrirEtapa, auditar, esperarTema, registrarPersonaDeTest, sinScrollHorizontal, usarTemaOscuro } from './helpers';
 import { registrarMenorActivo } from './helpers-006';
 import mensajes from '../src/messages/es.json';
 
@@ -42,10 +42,25 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.goto('/mi-camino');
       await page.waitForLoadState('networkidle');
 
-      // Orden (FR-001): los títulos de las regiones de la página, de arriba a abajo.
-      const titulos = await page.getByRole('main').getByRole('heading', { level: 2 }).allTextContents();
-      // spec 014 (D224): "Mi grupo de extensión" va después de las cuatro etapas, aparte.
-      expect(titulos).toEqual([...ORDEN, 'Mi grupo de extensión']);
+      // Orden (FR-001): las cards de las etapas, de arriba a abajo.
+      const etapas = await page.getByRole('main').locator('section[id^="etapa-"]').evaluateAll((els) => els.map((e) => e.id));
+      expect(etapas).toEqual(['etapa-vida_nueva', 'etapa-vida_de_servicio', 'etapa-ministerio', 'etapa-bautismo']);
+      // Propuesta A (2026-10-10): arriba, el resumen de las cuatro (cada una enlaza a su card) y,
+      // antes de las etapas, "Lo próximo para vos" y "Mi grupo de extensión" (spec 014, D224).
+      const resumen = page.getByRole('navigation', { name: 'Tus etapas de un vistazo' });
+      await expect(resumen.getByRole('link')).toHaveCount(4);
+      await expect(resumen.getByRole('link').first()).toHaveAttribute('href', '#etapa-vida_nueva');
+      await expect(resumen.getByRole('link').first()).toContainText('Podés empezar');
+      await expect(page.getByRole('region', { name: 'Empezá tu camino con Vida Nueva' })).toBeVisible();
+      const grupo = await page.getByRole('region', { name: 'Mi grupo de extensión' }).boundingBox();
+      const primeraEtapa = await card(page, 'Vida Nueva').boundingBox();
+      expect(grupo!.y).toBeLessThan(primeraEtapa!.y);
+      // Vida Nueva (la puede empezar) arranca abierta; las bloqueadas o "Próximamente", plegadas.
+      await expect(card(page, 'Vida Nueva').getByRole('heading', { level: 2 }).getByRole('button')).toHaveAttribute('aria-expanded', 'true');
+      await expect(card(page, 'Bautismo').getByRole('heading', { level: 2 }).getByRole('button')).toHaveAttribute('aria-expanded', 'false');
+      // Tocar una etapa del resumen abre su card.
+      await resumen.getByRole('link', { name: /Bautismo/ }).click();
+      await expect(card(page, 'Bautismo').getByRole('heading', { level: 2 }).getByRole('button')).toHaveAttribute('aria-expanded', 'true');
 
       // Una sola fuente de texto con /primeros-pasos (FR-001).
       for (const [nombre, descripcion] of Object.entries(DESCRIPCIONES)) {
@@ -61,8 +76,10 @@ for (const tema of ['claro', 'oscuro'] as const) {
         const region = card(page, nombre);
         const texto = await region.textContent();
         if (!texto?.includes('Próximamente')) continue; // la spec de esa etapa ya la habilitó
+        await abrirEtapa(page, nombre);
         await expect(region.getByRole('link')).toHaveCount(0);
-        await expect(region.getByRole('button')).toHaveCount(1);
+        // El botón del título (abre y cierra) y "Ya lo hice".
+        await expect(region.getByRole('button')).toHaveCount(2);
         await expect(region.getByRole('button', { name: 'Ya lo hice' })).toBeVisible();
       }
 
@@ -89,7 +106,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await page.goto('/mi-camino');
       await page.waitForLoadState('networkidle');
 
-      const bautismo = card(page, 'Bautismo');
+      const bautismo = await abrirEtapa(page, 'Bautismo');
       await bautismo.getByRole('button', { name: 'Ya lo hice' }).click();
       const dialogo = page.getByRole('alertdialog');
       await expect(dialogo).toContainText('Bautismo: ¿ya lo hiciste?');
