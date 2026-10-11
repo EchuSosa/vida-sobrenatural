@@ -898,6 +898,10 @@
         "miembro_dado_de_baja": {
           "titulo": "Ya no figurás en un ministerio",
           "detalle": "Si tenés dudas, hablá con alguien del equipo de la iglesia."
+        },
+        "eleccion_abierta": {
+          "titulo": "Ya podés elegir dónde querés servir",
+          "detalle": "Elegí hasta 2 ministerios antes de terminar Vida de Servicio. Después lo charlás con tu líder."
         }
       },
       "bautismo": {

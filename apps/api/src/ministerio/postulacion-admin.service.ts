@@ -15,12 +15,11 @@ import { AppException } from '../common/errors/app-exception.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { RolesDeEstadoService } from '../persona/roles-de-estado.service.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
-import { registrarCambioDeRol } from '../cambio-de-rol/registrar-cambio-de-rol.js';
 import { nombresDe } from '../discipulado/consultas.js';
 import { normalizarMotivo } from '../discipulado/validaciones.js';
 import { bloquearPersona } from '../camino/consultas.js';
 import { crearPostulacion, esViolacionDeUnico } from './crear-postulacion.js';
-import { decidirMembresia, inactivarPorCambio, membresiasDelCarril } from './membresia.js';
+import { decidirMembresia, inactivarPorCambio, membresiasDelCarril, otorgarDiscipulador } from './membresia.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -499,42 +498,6 @@ async function bloquearPendiente(tx: Prisma.TransactionClient, id: string) {
     );
   }
   return p;
-}
-
-/**
- * docs/22 + spec 005 (FR-011, FR-022): el rol `discipulador` al aprobar
- * "Discipulados Vida Nueva". Misma garantía de edad que `RolesService.otorgarRol`
- * (H-128) y mismo UPDATE atómico e idempotente; registra el cambio en la misma
- * transacción. La fila de la Persona ya está bloqueada.
- */
-async function otorgarDiscipulador(
-  tx: Prisma.TransactionClient,
-  personaId: string,
-  autorId: string,
-): Promise<void> {
-  const persona = await tx.persona.findUniqueOrThrow({
-    where: { id: personaId },
-    select: { fechaNacimiento: true },
-  });
-  if (calcularEdad(persona.fechaNacimiento) < EDAD_MINIMA_ROL_DE_CARGO) {
-    throw new AppException(
-      'PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO',
-      409,
-      `Una Persona menor de ${EDAD_MINIMA_ROL_DE_CARGO} años no puede tener un rol de cargo.`,
-    );
-  }
-  const cambiada = await tx.$queryRaw<{ id: string }[]>`
-    UPDATE "personas" SET "rol" = array_append("rol", 'discipulador'::text), "updatedAt" = NOW()
-    WHERE "id" = ${personaId} AND NOT ('discipulador'::text = ANY("rol"))
-    RETURNING "id"`;
-  if (cambiada.length > 0) {
-    await registrarCambioDeRol(tx, {
-      personaId,
-      rol: 'discipulador',
-      accion: 'otorgado',
-      actor: { origen: 'backoffice', realizadoPorId: autorId },
-    });
-  }
 }
 
 function noEncontrada() {

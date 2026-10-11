@@ -170,7 +170,7 @@ export async function inscripcionVSEnCursoOCompleta(db: Db, personaId: string): 
 export async function grupoVSOFallar(db: Db, grupoId: string) {
   const grupo = await db.grupo.findFirst({
     where: { id: grupoId, ...DE_VIDA_DE_SERVICIO },
-    select: { id: true, nombre: true, sedeId: true, fechaInicio: true, estado: true, inscripcionAbierta: true, propuestaFinalizacionEn: true, propuestaFinalizacionPorId: true, finalizacionRechazadaEn: true, finalizacionRechazadaMotivo: true },
+    select: { id: true, nombre: true, sedeId: true, fechaInicio: true, estado: true, inscripcionAbierta: true, eleccionAbierta: true, propuestaFinalizacionEn: true, propuestaFinalizacionPorId: true, finalizacionRechazadaEn: true, finalizacionRechazadaMotivo: true },
   });
   if (!grupo) throw grupoNoEncontrado();
   return grupo;

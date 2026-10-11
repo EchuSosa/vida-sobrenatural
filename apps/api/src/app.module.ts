@@ -25,6 +25,7 @@ import { InicioModule } from './inicio/inicio.module.js';
 import { ComentarioModule } from './comentario/comentario.module.js';
 import { CursoModule } from './curso/curso.module.js';
 import { GrupoExtensionModule } from './grupo-extension/grupo-extension.module.js';
+import { EleccionMinisterioModule } from './eleccion-ministerio/eleccion-ministerio.module.js';
 
 @Module({
   imports: [PrismaModule, AuthModule, SedeModule, PersonaModule, CambioDeRolModule, PalabraProfeticaModule, LibroModule, DiscipuladoModule, SolicitudDiscipuladoModule, DisponibilidadModule,
@@ -35,6 +36,8 @@ import { GrupoExtensionModule } from './grupo-extension/grupo-extension.module.j
     TareasProgramadasModule, InicioModule, ComentarioModule, CursoModule,
     // spec 014 (después del lote 0: registra su propio módulo).
     GrupoExtensionModule,
+    // spec 015: elección de ministerio.
+    EleccionMinisterioModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -772,7 +772,8 @@
         "vida_servicio_finalizaciones": "{cantidad, plural, one {# edición de Vida de Servicio para cerrar} other {# ediciones de Vida de Servicio para cerrar}}",
         "vida_servicio_bajas": "{cantidad, plural, one {# baja de Vida de Servicio para revisar} other {# bajas de Vida de Servicio para revisar}}",
         "ministerio_postulaciones": "{cantidad, plural, one {# postulación a Ministerio pendiente} other {# postulaciones a Ministerio pendientes}}",
-        "grupo_extension_pedidos": "{cantidad, plural, one {# pedido para sumarse a un grupo de extensión esperando respuesta} other {# pedidos para sumarse a grupos de extensión esperando respuesta}}"
+        "grupo_extension_pedidos": "{cantidad, plural, one {# pedido para sumarse a un grupo de extensión esperando respuesta} other {# pedidos para sumarse a grupos de extensión esperando respuesta}}",
+        "eleccion_ministerio_charladas": "{cantidad, plural, one {# elección de ministerio con la charla hecha, para confirmar} other {# elecciones de ministerio con la charla hecha, para confirmar}}"
       }
     }
   },
@@ -2076,7 +2077,8 @@
       "bautismo": "Bautismo",
       "inscripcion_evento": "Inscripción a un Evento",
       "pago": "Pago de un Evento",
-      "grupo_extension": "Grupo de extensión"
+      "grupo_extension": "Grupo de extensión",
+      "eleccion_ministerio": "Elección de ministerio"
     },
     "estados": {
       "discipulado": {
@@ -2130,6 +2132,12 @@
         "rechazada": "No era para ese grupo",
         "retirada": "Retirado",
         "finalizada": "Ya no está en el grupo"
+      },
+      "eleccion_ministerio": {
+        "borrador": "Falta la charla",
+        "charla_hecha": "Charla hecha: para confirmar",
+        "resuelta": "Resuelta",
+        "cancelada": "Cancelada"
       }
     }
   },
