@@ -26,6 +26,8 @@ Desde la raíz del repo:
 ```bash
 docker compose up -d                                    # base de datos y Mailpit (emails en http://localhost:8025)
 pnpm --filter api run db:migrate                        # migraciones al día
+pnpm --filter api exec prisma generate                  # cliente de Prisma al día (Prisma 7 ya no lo hace al migrar)
+pnpm --filter @vida-sobrenatural/shared-types run build # tipos compartidos al día (H-33)
 SEED_ADMIN_EMAIL=estersosaa@gmail.com pnpm --filter api run db:seed   # mínimo + tu rol admin
 ```
 
@@ -38,6 +40,10 @@ pnpm --filter backoffice dev    # backoffice → http://localhost:3002
 ```
 
 Se prueba entrando a **http://localhost:3001**.
+
+Si después de traer cambios la API no arranca con errores como `Property 'eleccionMinisterio' does
+not exist on type 'PrismaService'`, faltó el `prisma generate`: el cliente de Prisma es de antes de
+las tablas nuevas. Sin API, "Entrar para probar" avisa que no pudo entrar.
 
 ### Probar desde el celular u otra compu (misma red wifi)
 
