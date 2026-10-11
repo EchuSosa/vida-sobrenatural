@@ -8,7 +8,7 @@ import type { ConfirmarOpcionEleccion, GuardarEleccionLider, GuardarMiEleccion, 
  * propio por campo (H-50); acá solo se declara qué campos existen.
  */
 export class GuardarMiEleccionDto implements GuardarMiEleccion {
-  @ApiProperty({ description: 'Pares { ministerioId, celulaId }: de 1 a 2 Ministerios, un área por Ministerio, más el paralelo.' })
+  @ApiProperty({ description: 'Pares { ministerioId, celulaId } (celulaId null si el Ministerio no tiene áreas): de 1 a 2 Ministerios, un área por Ministerio, más el paralelo.' })
   @Allow()
   opciones!: OpcionElegida[];
 

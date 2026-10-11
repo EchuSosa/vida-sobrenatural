@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { CircleAlert, ClipboardCheck, Phone } from 'lucide-react';
+import { CircleAlert, ClipboardCheck, ListChecks, Phone } from 'lucide-react';
 import { ApiError, apiFetch, formatearDiaEnArgentina, hoyEnArgentina, type MiGrupoDetalle } from '@vida-sobrenatural/shared-types';
 import { ButtonLink, EstadoSemana, MigaDePan } from '@vida-sobrenatural/ui';
 import { requerirPermiso, tienePermisoSesion } from '../../../../auth';
@@ -54,10 +54,19 @@ export default async function MiGrupoPage({ params }: { params: Promise<{ grupoI
 
       {enCurso ? (
         puedeGestionar && (
-          <ButtonLink render={<Link href={`/mis-grupos/${g.grupoId}/asistencia`} />} size="xl" className="w-full text-base sm:w-fit">
-            <ClipboardCheck aria-hidden />
-            {t('detalle.tomarAsistencia')}
-          </ButtonLink>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <ButtonLink render={<Link href={`/mis-grupos/${g.grupoId}/asistencia`} />} size="xl" className="w-full text-base sm:w-fit">
+              <ClipboardCheck aria-hidden />
+              {t('detalle.tomarAsistencia')}
+            </ButtonLink>
+            {/* spec 015 (D240): con la elección de ministerio abierta, las charlas uno a uno. */}
+            {g.eleccionAbierta && (
+              <ButtonLink render={<Link href={`/mis-grupos/${g.grupoId}/elecciones`} />} variant="outline" size="xl" className="w-full text-base sm:w-fit">
+                <ListChecks aria-hidden />
+                {t('detalle.elecciones')}
+              </ButtonLink>
+            )}
+          </div>
         )
       ) : (
         <p role="note" className="rounded-md border border-border p-3 text-base">

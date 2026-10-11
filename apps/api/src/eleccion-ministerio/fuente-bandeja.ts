@@ -41,7 +41,7 @@ export class FuenteEleccionMinisterio implements FuenteSolicitudes {
       if (!f || !persona) return [];
       const extra: ExtraBandejaEleccion = {
         edicion: f.grupo.nombre ?? '',
-        opciones: ordenarOpciones(f.opciones).map((o) => `${o.ministerio.nombre} · ${o.celula.nombre}`),
+        opciones: ordenarOpciones(f.opciones).map((o) => (o.celula ? `${o.ministerio.nombre} · ${o.celula.nombre}` : o.ministerio.nombre)),
       };
       return [
         {

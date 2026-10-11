@@ -37,7 +37,7 @@ CREATE TABLE "opciones_eleccion_ministerio" (
     "id" TEXT NOT NULL,
     "eleccionId" TEXT NOT NULL,
     "ministerioId" TEXT NOT NULL,
-    "celulaId" TEXT NOT NULL,
+    "celulaId" TEXT,
     "enParalelo" BOOLEAN NOT NULL DEFAULT false,
     "resultado" "ResultadoOpcionEleccion" NOT NULL DEFAULT 'pendiente',
     "postulacionId" TEXT,
@@ -77,7 +77,7 @@ ALTER TABLE "opciones_eleccion_ministerio" ADD CONSTRAINT "opciones_eleccion_min
 ALTER TABLE "opciones_eleccion_ministerio" ADD CONSTRAINT "opciones_eleccion_ministerio_ministerioId_fkey" FOREIGN KEY ("ministerioId") REFERENCES "ministerios"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "opciones_eleccion_ministerio" ADD CONSTRAINT "opciones_eleccion_ministerio_celulaId_fkey" FOREIGN KEY ("celulaId") REFERENCES "celulas"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "opciones_eleccion_ministerio" ADD CONSTRAINT "opciones_eleccion_ministerio_celulaId_fkey" FOREIGN KEY ("celulaId") REFERENCES "celulas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 
 

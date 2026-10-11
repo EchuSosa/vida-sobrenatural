@@ -144,6 +144,7 @@ export const NAV_BACKOFFICE: ItemNavBackoffice[] = [
   { href: '/grupos-extension/[id]', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.ver', enMenu: false },
   { href: '/grupos-extension/[id]/editar', labelKey: 'gruposExtension', icon: House, permiso: 'grupos_extension.gestionar', enMenu: false },
   { href: '/solicitudes/grupo-extension/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
+  { href: '/solicitudes/eleccion-ministerio/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'solicitudes.ver', enMenu: false },
   { href: '/solicitudes/pago/[id]', labelKey: 'solicitudes', icon: Inbox, permiso: 'pagos.verificar', enMenu: false },
   // --- spec 012 ---
   { href: '/notificaciones/[id]', labelKey: 'notificaciones', icon: Bell, permiso: 'notificaciones.ver', enMenu: false },

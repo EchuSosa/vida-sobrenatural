@@ -48,11 +48,13 @@ describe('Elección de ministerio (spec 015, integración)', () => {
     const req = request(app.getHttpServer())[metodo](ruta).set('Authorization', `Bearer ${await tokenDe(personaId, rol)}`);
     return cuerpo ? req.send(cuerpo) : req;
   }
-  const opcion = (...claves: string[]): OpcionElegida[] => claves.map((c) => area[c]);
+  const opcion = (...claves: string[]): OpcionElegida[] => claves.map((c) => (c === 'Mesa' ? { ministerioId: mesaId, celulaId: null } : area[c]));
+  let mesaId = '';
 
   async function ministerio(nombre: string, celulas: Array<{ nombre: string; paralelo?: boolean }>, requiereFormacion = false) {
     const m = await prisma.ministerio.create({ data: { nombre: `${nombre} ${Date.now()}`, descripcion: 'Test', requiereFormacion }, select: { id: true } });
     ministerios.push(m.id);
+    if (nombre === 'Mesa') mesaId = m.id;
     for (const c of celulas) {
       const celula = await prisma.celula.create({ data: { ministerioId: m.id, nombre: c.nombre, ofreceRolDiscipulador: c.paralelo ?? false }, select: { id: true } });
       area[c.nombre] = { ministerioId: m.id, celulaId: celula.id };
@@ -70,7 +72,7 @@ describe('Elección de ministerio (spec 015, integración)', () => {
     pastorId = await vs.persona('pastor', { rol: PASTOR });
     await ministerio('Bienvenida', [{ nombre: 'Consolidadores' }, { nombre: 'Seguridad' }]);
     await ministerio('Multimedia', [{ nombre: 'Fotografía' }], true);
-    await ministerio('Mesa', [{ nombre: 'Informes' }]);
+    await ministerio('Mesa', []); // sin áreas: se elige entero (docs/22)
     await ministerio('Enseñanza', [{ nombre: 'Discipulados Vida Nueva', paralelo: true }], true);
     g = await vs.edicion({ lideres: [lider] });
     await vs.edicion({ lideres: [otroLider] });
@@ -111,7 +113,7 @@ describe('Elección de ministerio (spec 015, integración)', () => {
     const errores = async (claves: string[]) => (await como(ana, MIEMBRO, 'put', '/elecciones-ministerio/me', { opciones: opcion(...claves) })).body.errors;
     expect(await errores([])).toEqual([{ campo: 'opciones', code: 'ELECCION_VACIA' }]);
     expect(await errores(['Consolidadores', 'Seguridad'])).toEqual([{ campo: 'opciones', code: 'ELECCION_UN_AREA_POR_MINISTERIO' }]);
-    expect(await errores(['Consolidadores', 'Fotografía', 'Informes'])).toEqual([{ campo: 'opciones', code: 'ELECCION_MAXIMO_MINISTERIOS' }]);
+    expect(await errores(['Consolidadores', 'Fotografía', 'Mesa'])).toEqual([{ campo: 'opciones', code: 'ELECCION_MAXIMO_MINISTERIOS' }]);
 
     // Dos Ministerios más Discipulados Vida Nueva (no cuenta, D217).
     const ok = await como(ana, MIEMBRO, 'put', '/elecciones-ministerio/me', { opciones: opcion('Consolidadores', 'Fotografía', 'Discipulados Vida Nueva'), comentario: ' Me gusta recibir gente ' });
@@ -148,10 +150,10 @@ describe('Elección de ministerio (spec 015, integración)', () => {
     const mia = await como(ana, MIEMBRO, 'get', '/elecciones-ministerio/me');
     expect(mia.body).toMatchObject({ editable: false, eleccion: { estado: 'charla_hecha' } });
     expect(JSON.stringify(mia.body)).not.toContain('NOTA-PRIVADA');
-    expect((await como(ana, MIEMBRO, 'put', '/elecciones-ministerio/me', { opciones: opcion('Informes') })).body.code).toBe('ELECCION_YA_CHARLADA');
+    expect((await como(ana, MIEMBRO, 'put', '/elecciones-ministerio/me', { opciones: opcion('Mesa') })).body.code).toBe('ELECCION_YA_CHARLADA');
 
     // Beto no eligió: el líder la carga por él en la charla (D97).
-    const porBeto = await como(lider, LIDER, 'put', `/vida-de-servicio/mis-grupos/${g}/elecciones/${beto}`, { opciones: opcion('Informes'), charlaHecha: true });
+    const porBeto = await como(lider, LIDER, 'put', `/vida-de-servicio/mis-grupos/${g}/elecciones/${beto}`, { opciones: opcion('Mesa'), charlaHecha: true });
     expect(porBeto.body.eleccion).toMatchObject({ estado: 'charla_hecha', cargadaPor: { id: lider } });
 
     // En la bandeja, abiertas; el Pastor ve el detalle sin las notas.
@@ -170,7 +172,7 @@ describe('Elección de ministerio (spec 015, integración)', () => {
     const id = (await prisma.eleccionMinisterio.findFirstOrThrow({ where: { personaId: ana, grupoId: g }, select: { id: true } })).id;
     const detalle = (await como(adminId, ADMIN, 'get', `/elecciones-ministerio/${id}`)).body as DetalleEleccionAdmin;
     expect(detalle.apta).toBe(false);
-    const op = (nombre: string) => detalle.opciones.find((o) => o.celula.nombre === nombre)!.id;
+    const op = (nombre: string) => detalle.opciones.find((o) => o.celula?.nombre === nombre)!.id;
     const confirmar = (opcionId: string, cuerpo: object = {}) => como(adminId, ADMIN, 'post', `/elecciones-ministerio/${id}/opciones/${opcionId}/confirmar`, cuerpo);
     expect((await confirmar(op('Consolidadores'))).body.code).toBe('NO_APTA_PARA_MINISTERIO');
 
@@ -198,7 +200,7 @@ describe('Elección de ministerio (spec 015, integración)', () => {
     const r = await como(adminId, ADMIN, 'post', `/elecciones-ministerio/${id}/opciones/${detalle.opciones[0].id}/descartar`, { motivo: 'Por ahora no hay lugar' });
     expect(r.body).toMatchObject({ estado: 'resuelta', opciones: [{ resultado: 'descartada', motivoDescarte: 'Por ahora no hay lugar' }] });
 
-    expect((await como(caro, MIEMBRO, 'put', '/elecciones-ministerio/me', { opciones: opcion('Informes') })).status).toBe(200);
+    expect((await como(caro, MIEMBRO, 'put', '/elecciones-ministerio/me', { opciones: opcion('Mesa') })).status).toBe(200);
     const inscripcion = await prisma.inscripcion.findFirstOrThrow({ where: { personaId: caro, grupoId: g }, select: { id: true } });
     expect((await como(adminId, ADMIN, 'post', `/grupos/vida-de-servicio/${g}/inscripciones/${inscripcion.id}/baja`, { tipo: 'dada_de_baja' })).status).toBe(200);
     expect((await prisma.eleccionMinisterio.findFirstOrThrow({ where: { personaId: caro, grupoId: g }, select: { estado: true } })).estado).toBe('cancelada');

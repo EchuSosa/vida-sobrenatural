@@ -16,19 +16,22 @@ export const ELECCION_MOTIVO_MAX = 500;
 export type EstadoEleccionMinisterio = 'borrador' | 'charla_hecha' | 'resuelta' | 'cancelada';
 export type ResultadoOpcionEleccion = 'pendiente' | 'confirmada' | 'descartada';
 
-/** Un área elegida: el Ministerio y su área (Célula). */
+/**
+ * Lo elegido de un Ministerio: su área (Célula) o, si el Ministerio no tiene
+ * áreas (docs/22: Ceremonial, Mesa de entrada…), el Ministerio entero
+ * (`celulaId: null`).
+ */
 export interface OpcionElegida {
   ministerioId: string;
-  celulaId: string;
+  celulaId: string | null;
 }
 
-/** Lo que la regla necesita saber de cada área (por `celulaId`). */
-export interface AreaParaValidar {
-  ministerioId: string;
-  /** D217: "Discipulados Vida Nueva" — no cuenta en el máximo de 2. */
-  enParalelo: boolean;
-  /** Activa, de un Ministerio activo, sin eliminar. */
+/** Lo que la regla necesita saber de cada Ministerio pedido (por `ministerioId`). */
+export interface MinisterioParaValidar {
+  /** Activo y sin eliminar. */
   disponible: boolean;
+  /** Sus áreas activas: con alguna, se elige una; sin ninguna, el Ministerio entero. */
+  areas: ReadonlyMap<string, { enParalelo: boolean }>;
 }
 
 export interface ErrorCampoEleccion {
@@ -49,7 +52,7 @@ export interface ErrorCampoEleccion {
  */
 export function validarEleccionMinisterio(
   opciones: readonly OpcionElegida[],
-  areas: ReadonlyMap<string, AreaParaValidar>,
+  ministerios: ReadonlyMap<string, MinisterioParaValidar>,
   textos: { comentario?: string | null; notas?: string | null } = {},
 ): ErrorCampoEleccion[] {
   const errores: ErrorCampoEleccion[] = [];
@@ -61,14 +64,17 @@ export function validarEleccionMinisterio(
   let principales = 0;
   let enParalelo = 0;
   for (const o of opciones) {
-    const area = areas.get(o.celulaId);
-    if (!area || !area.disponible || area.ministerioId !== o.ministerioId) {
+    const ministerio = ministerios.get(o.ministerioId);
+    // Con áreas activas se elige una de ellas; sin ninguna, el Ministerio entero.
+    const area = o.celulaId === null ? null : ministerio?.areas.get(o.celulaId);
+    const valida = !!ministerio && ministerio.disponible && (o.celulaId === null ? ministerio.areas.size === 0 : !!area);
+    if (!valida) {
       agregar({ campo: 'opciones', code: 'ELECCION_AREA_NO_DISPONIBLE' });
       continue;
     }
     porMinisterio.set(o.ministerioId, (porMinisterio.get(o.ministerioId) ?? 0) + 1);
     if (porMinisterio.get(o.ministerioId) === 1) {
-      if (area.enParalelo) enParalelo += 1;
+      if (area?.enParalelo) enParalelo += 1;
       else principales += 1;
     }
   }
@@ -91,7 +97,7 @@ export interface AreaParaElegir {
   enParalelo: boolean;
 }
 
-/** Un Ministerio del listado, con sus áreas activas (docs/22). */
+/** Un Ministerio del listado, con sus áreas activas (docs/22); sin áreas, se elige el Ministerio entero. */
 export interface MinisterioParaElegir {
   id: string;
   nombre: string;
@@ -112,7 +118,8 @@ export interface DatosConocidos {
 export interface OpcionVista {
   id: string;
   ministerio: { id: string; nombre: string };
-  celula: { id: string; nombre: string };
+  /** null = el Ministerio entero (no tiene áreas). */
+  celula: { id: string; nombre: string } | null;
   enParalelo: boolean;
   requiereFormacion: boolean;
   resultado: ResultadoOpcionEleccion;
@@ -156,7 +163,7 @@ export type ResumenMiEleccion =
   | {
       estado: 'borrador' | 'charla_hecha';
       editable: boolean;
-      opciones: Array<{ ministerio: string; celula: string }>;
+      opciones: Array<{ ministerio: string; celula: string | null }>;
     };
 
 // --- Líder de Vida de Servicio (D240) ---
@@ -166,7 +173,7 @@ export interface FilaEleccionLider {
   eleccion: {
     id: string;
     estado: EstadoEleccionMinisterio;
-    opciones: Array<{ ministerio: string; celula: string }>;
+    opciones: Array<{ ministerio: string; celula: string | null }>;
   } | null;
 }
 

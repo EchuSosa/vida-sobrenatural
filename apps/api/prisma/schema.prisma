@@ -1557,7 +1557,8 @@ model EleccionMinisterio {
   @@map("elecciones_ministerio")
 }
 
-// Un área por Ministerio (único); el máximo de 2 Ministerios + el paralelo lo
+// Un área por Ministerio (único); sin área (`celulaId` null) = el Ministerio
+// entero, cuando no tiene áreas (docs/22). El máximo de 2 Ministerios + el paralelo lo
 // valida `validarEleccionMinisterio` (shared-types).
 model OpcionEleccionMinisterio {
   id             String                  @id @default(uuid())
@@ -1565,8 +1566,8 @@ model OpcionEleccionMinisterio {
   eleccion       EleccionMinisterio      @relation(fields: [eleccionId], references: [id], onDelete: Cascade)
   ministerioId   String
   ministerio     Ministerio              @relation(fields: [ministerioId], references: [id])
-  celulaId       String
-  celula         Celula                  @relation(fields: [celulaId], references: [id])
+  celulaId       String?
+  celula         Celula?                 @relation(fields: [celulaId], references: [id])
   // Copia de `Celula.ofreceRolDiscipulador` al elegir (D217).
   enParalelo     Boolean                 @default(false)
   resultado      ResultadoOpcionEleccion @default(pendiente)

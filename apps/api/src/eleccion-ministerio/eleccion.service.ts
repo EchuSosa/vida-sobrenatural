@@ -27,10 +27,10 @@ import { grupoDelLiderOFallar, grupoNoEnCurso } from '../vida-de-servicio/consul
 import { crearMembresiaDirecta, membresiasDelCarril } from '../ministerio/membresia.js';
 import {
   SELECT_OPCION,
-  areasParaValidar,
   catalogoParaElegir,
   datosConocidos,
   edicionEnCursoDe,
+  ministeriosParaValidar,
   opcionVista,
   ordenarOpciones,
   type OpcionCargada,
@@ -100,7 +100,7 @@ export class EleccionService {
       return {
         estado: eleccion.estado,
         editable: edicion.eleccionAbierta && eleccion.estado === 'borrador',
-        opciones: ordenarOpciones(eleccion.opciones).map((o) => ({ ministerio: o.ministerio.nombre, celula: o.celula.nombre })),
+        opciones: ordenarOpciones(eleccion.opciones).map((o) => ({ ministerio: o.ministerio.nombre, celula: o.celula?.nombre ?? null })),
       };
     }
     if (!eleccion && edicion.eleccionAbierta) return { estado: 'puede_elegir', edicion: { nombre: edicion.nombre } };
@@ -152,7 +152,7 @@ export class EleccionService {
         return {
           persona,
           eleccion: e
-            ? { id: e.id, estado: e.estado, opciones: ordenarOpciones(e.opciones).map((o) => ({ ministerio: o.ministerio.nombre, celula: o.celula.nombre })) }
+            ? { id: e.id, estado: e.estado, opciones: ordenarOpciones(e.opciones).map((o) => ({ ministerio: o.ministerio.nombre, celula: o.celula?.nombre ?? null })) }
             : null,
         };
       });
@@ -286,7 +286,7 @@ export class EleccionService {
         ...(verNotas ? { motivoDescarte: o.motivoDescarte } : {}),
         resueltaPor: o.resueltaPorId ? (nombres.get(o.resueltaPorId) ?? null) : null,
         resueltaEn: o.resueltaEn?.toISOString() ?? null,
-        ofrecerRolDiscipulador: o.celula.ofreceRolDiscipulador && !esDiscipulador && edad >= EDAD_MINIMA_ROL_DE_CARGO,
+        ofrecerRolDiscipulador: !!o.celula?.ofreceRolDiscipulador && !esDiscipulador && edad >= EDAD_MINIMA_ROL_DE_CARGO,
       })),
     };
   }
@@ -344,16 +344,16 @@ function vistaPersona(e: EleccionCargada): EleccionVistaPersona {
   return { id: e.id, estado: e.estado, comentario: e.comentario, opciones: ordenarOpciones(e.opciones).map(opcionVista) };
 }
 
-/** Las opciones como llegan (DTO sin validar): solo pares de strings, sin repetir el área. */
+/** Las opciones como llegan (DTO sin validar): pares { ministerioId, celulaId | null }, un renglón por Ministerio. */
 function normalizarOpciones(crudas: unknown): OpcionElegida[] {
   if (!Array.isArray(crudas)) return [];
-  const vistas = new Set<string>();
   const opciones: OpcionElegida[] = [];
   for (const o of crudas as unknown[]) {
     const { ministerioId, celulaId } = (o ?? {}) as Record<string, unknown>;
-    if (typeof ministerioId !== 'string' || typeof celulaId !== 'string' || vistas.has(celulaId)) continue;
-    vistas.add(celulaId);
-    opciones.push({ ministerioId, celulaId });
+    if (typeof ministerioId !== 'string' || (celulaId !== null && celulaId !== undefined && typeof celulaId !== 'string')) continue;
+    const celula = typeof celulaId === 'string' ? celulaId : null;
+    if (opciones.some((x) => x.ministerioId === ministerioId && x.celulaId === celula)) continue;
+    opciones.push({ ministerioId, celulaId: celula });
   }
   return opciones;
 }
@@ -364,23 +364,28 @@ function textoOpcional(texto: string | null | undefined): string | null {
 }
 
 async function validar(tx: Tx, opciones: OpcionElegida[], textos: { comentario?: string | null; notas?: string | null }, permitirVacia = false): Promise<void> {
-  const areas = await areasParaValidar(tx, opciones.map((o) => o.celulaId));
-  const errores = validarEleccionMinisterio(opciones, areas, textos).filter((e) => !(permitirVacia && e.code === 'ELECCION_VACIA'));
+  const ministerios = await ministeriosParaValidar(tx, opciones.map((o) => o.ministerioId));
+  const errores = validarEleccionMinisterio(opciones, ministerios, textos).filter((e) => !(permitirVacia && e.code === 'ELECCION_VACIA'));
   if (errores.length > 0) throw new AppException('VALIDACION', 400, 'Revisá la elección.', errores);
 }
 
 /** Las opciones de un borrador se reemplazan enteras (todavía no son una decisión de nadie más que la persona y su líder). */
 async function reemplazarOpciones(tx: Tx, eleccionId: string, opciones: OpcionElegida[]): Promise<void> {
-  const areas = await areasParaValidar(tx, opciones.map((o) => o.celulaId));
+  const ministerios = await ministeriosParaValidar(tx, opciones.map((o) => o.ministerioId));
   await tx.opcionEleccionMinisterio.deleteMany({ where: { eleccionId } });
   await tx.opcionEleccionMinisterio.createMany({
-    data: opciones.map((o) => ({ eleccionId, ministerioId: o.ministerioId, celulaId: o.celulaId, enParalelo: areas.get(o.celulaId)?.enParalelo ?? false })),
+    data: opciones.map((o) => ({
+      eleccionId,
+      ministerioId: o.ministerioId,
+      celulaId: o.celulaId,
+      enParalelo: o.celulaId ? (ministerios.get(o.ministerioId)?.areas.get(o.celulaId)?.enParalelo ?? false) : false,
+    })),
   });
 }
 
 function mismasOpciones(actuales: readonly OpcionCargada[], nuevas: readonly OpcionElegida[]): boolean {
-  const clave = (m: string, c: string) => `${m}:${c}`;
-  const a = new Set(actuales.map((o) => clave(o.ministerio.id, o.celula.id)));
+  const clave = (m: string, c: string | null) => `${m}:${c ?? ''}`;
+  const a = new Set(actuales.map((o) => clave(o.ministerio.id, o.celula?.id ?? null)));
   return a.size === nuevas.length && nuevas.every((o) => a.has(clave(o.ministerioId, o.celulaId)));
 }
 

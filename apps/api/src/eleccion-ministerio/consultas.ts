@@ -1,6 +1,6 @@
 import type {
-  AreaParaValidar,
   DatosConocidos,
+  MinisterioParaValidar,
   MinisterioParaElegir,
   OpcionVista,
 } from '@vida-sobrenatural/shared-types';
@@ -12,7 +12,7 @@ type Db = PrismaService | Prisma.TransactionClient;
 /**
  * spec 015 (D239, docs/22): el listado para elegir — los Ministerios activos con
  * sus áreas activas, en el orden del catálogo (nombre). Un Ministerio sin
- * áreas activas no se ofrece: la elección es siempre de un área.
+ * áreas (Ceremonial, Mesa de entrada…) se elige entero.
  */
 export async function catalogoParaElegir(db: Db): Promise<MinisterioParaElegir[]> {
   const ministerios = await db.ministerio.findMany({
@@ -30,31 +30,30 @@ export async function catalogoParaElegir(db: Db): Promise<MinisterioParaElegir[]
       },
     },
   });
-  return ministerios
-    .filter((m) => m.celulas.length > 0)
-    .map((m) => ({
+  return ministerios.map((m) => ({
       id: m.id,
       nombre: m.nombre,
       descripcion: m.descripcion,
       requiereFormacion: m.requiereFormacion,
-      areas: m.celulas.map((c) => ({ id: c.id, nombre: c.nombre, descripcion: c.descripcion, enParalelo: c.ofreceRolDiscipulador })),
-    }));
+    areas: m.celulas.map((c) => ({ id: c.id, nombre: c.nombre, descripcion: c.descripcion, enParalelo: c.ofreceRolDiscipulador })),
+  }));
 }
 
-/** Lo que `validarEleccionMinisterio` necesita saber de cada área pedida (las que no existen quedan afuera). */
-export async function areasParaValidar(db: Db, celulaIds: readonly string[]): Promise<Map<string, AreaParaValidar>> {
-  const celulas = await db.celula.findMany({
-    where: { id: { in: [...new Set(celulaIds)] } },
-    select: { id: true, ministerioId: true, activo: true, eliminadoEn: true, ofreceRolDiscipulador: true, ministerio: { select: { activo: true, eliminadoEn: true } } },
+/** Lo que `validarEleccionMinisterio` necesita saber de cada Ministerio pedido (los que no existen quedan afuera). */
+export async function ministeriosParaValidar(db: Db, ministerioIds: readonly string[]): Promise<Map<string, MinisterioParaValidar>> {
+  const ministerios = await db.ministerio.findMany({
+    where: { id: { in: [...new Set(ministerioIds)] } },
+    select: {
+      id: true,
+      activo: true,
+      eliminadoEn: true,
+      celulas: { where: { activo: true, eliminadoEn: null }, select: { id: true, ofreceRolDiscipulador: true } },
+    },
   });
   return new Map(
-    celulas.map((c) => [
-      c.id,
-      {
-        ministerioId: c.ministerioId,
-        enParalelo: c.ofreceRolDiscipulador,
-        disponible: c.activo && !c.eliminadoEn && c.ministerio.activo && !c.ministerio.eliminadoEn,
-      },
+    ministerios.map((m) => [
+      m.id,
+      { disponible: m.activo && !m.eliminadoEn, areas: new Map(m.celulas.map((c) => [c.id, { enParalelo: c.ofreceRolDiscipulador }])) },
     ]),
   );
 }
@@ -108,11 +107,11 @@ export function opcionVista(o: OpcionCargada): OpcionVista {
   return {
     id: o.id,
     ministerio: { id: o.ministerio.id, nombre: o.ministerio.nombre },
-    celula: { id: o.celula.id, nombre: o.celula.nombre },
+    celula: o.celula ? { id: o.celula.id, nombre: o.celula.nombre } : null,
     enParalelo: o.enParalelo,
     requiereFormacion: o.ministerio.requiereFormacion,
     resultado: o.resultado,
-    disponible: o.ministerio.activo && !o.ministerio.eliminadoEn && o.celula.activo && !o.celula.eliminadoEn,
+    disponible: o.ministerio.activo && !o.ministerio.eliminadoEn && (!o.celula || (o.celula.activo && !o.celula.eliminadoEn)),
   };
 }
 

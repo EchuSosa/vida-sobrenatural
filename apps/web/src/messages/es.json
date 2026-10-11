@@ -193,7 +193,11 @@
       "DIRECCION_REQUERIDA": "Escribí tu dirección (calle y número, o calle y entre calles), o tocá \"Usar mi ubicación\".",
       "RESPUESTA_REQUERIDA": "Respondé esta pregunta para poder anotarte.",
       "RESPUESTA_INVALIDA": "Elegí una de las opciones de la lista.",
-      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres."
+      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres.",
+      "ELECCION_VACIA": "Elegí al menos un área de algún ministerio.",
+      "ELECCION_MAXIMO_MINISTERIOS": "Podés elegir hasta 2 ministerios (más Discipulados Vida Nueva). Sacá uno marcando \"Ninguna de este ministerio\".",
+      "ELECCION_UN_AREA_POR_MINISTERIO": "Elegí un solo área de cada ministerio.",
+      "ELECCION_AREA_NO_DISPONIBLE": "Un área que elegiste ya no está disponible: elegí otra."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
@@ -207,7 +211,14 @@
     "DIRECCION_NO_UBICADA": "No encontramos esa dirección. Escribí la calle y el número (por ejemplo, \"7 nro 1200\"), o la calle y entre qué calles.",
     "UBICACION_NO_DISPONIBLE": "No pudimos ubicar tu dirección en este momento. Probá con \"Usar mi ubicación\" o intentá de nuevo en unos minutos.",
     "EVENTO_NO_CORRESPONDE": "Este evento es para otro público: no podés anotarte.",
-    "PREGUNTA_CON_RESPUESTAS": "Esa pregunta ya tiene respuestas."
+    "PREGUNTA_CON_RESPUESTAS": "Esa pregunta ya tiene respuestas.",
+    "ELECCION_NO_DISPONIBLE": "La elección de ministerio de tu edición no está abierta.",
+    "ELECCION_YA_CHARLADA": "Ya lo charlaste con tu líder: para cambiarlo, hablá con tu líder de Vida de Servicio.",
+    "ELECCION_CERRADA": "Esta elección ya está cerrada.",
+    "ELECCION_DESACTUALIZADA": "Alguien cambió esta elección mientras la tenías abierta. Recargá para ver lo último.",
+    "ELECCION_OPCIONES_RESUELTAS": "El equipo ya confirmó parte de esta elección: las áreas no se pueden cambiar.",
+    "ELECCION_SIN_CHARLA": "Falta la charla con su líder de Vida de Servicio.",
+    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual."
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -1444,7 +1455,8 @@
       "proponerFinalizacionTitulo": "¿Proponer cerrar {nombre}?",
       "proponerFinalizacionDescripcion": "La iglesia lo revisa y, cuando lo confirme, la edición queda terminada.",
       "proponerFinalizacionEnviar": "Sí, proponer",
-      "finalizacionPropuestaOk": "Listo: la iglesia va a revisar el cierre."
+      "finalizacionPropuestaOk": "Listo: la iglesia va a revisar el cierre.",
+      "elecciones": "Elección de ministerio"
     },
     "material": {
       "titulo": "Semana {numero}",
@@ -1496,7 +1508,38 @@
       "guardada": "Guardamos la asistencia del {fecha}.",
       "faltasAlerta": "{cantidad} faltas"
     },
-    "noEncontradoTitulo": "No encontramos esa edición"
+    "noEncontradoTitulo": "No encontramos esa edición",
+    "elecciones": {
+      "titulo": "Elección de ministerio",
+      "ayuda": "Charlá uno a uno con cada persona sobre dónde quiere servir. Podés ajustar su elección con ella y anotar lo que charlaron.",
+      "progreso": "Charlas hechas: {hechas} de {total}.",
+      "vacio": "Todavía no hay personas inscriptas en esta edición.",
+      "estado": {
+        "sin_eleccion": "Todavía no eligió",
+        "borrador": "Eligió: falta la charla",
+        "charla_hecha": "Charla hecha",
+        "resuelta": "Resuelta por el equipo",
+        "cancelada": "Dejó Vida de Servicio"
+      },
+      "charlaTitulo": "Charla con {nombre}",
+      "charlaAyuda": "Mirá juntos lo que eligió, ajustalo si hace falta y anotá lo que charlaron. Cuando terminen, marcá \"Charla hecha\": el equipo lo revisa y confirma.",
+      "llamar": "Llamar",
+      "whatsapp": "Escribir por WhatsApp",
+      "conocidoTitulo": "Lo que ya sabemos",
+      "formTitulo": "Elección y notas de la charla",
+      "comentarioTitulo": "Lo que nos contó",
+      "yaCharlada": "Charla hecha por {nombre} el {fecha}. Todavía podés corregir las notas.",
+      "notasEtiqueta": "Notas de la charla",
+      "notasAyuda": "Privadas: las ven solo los líderes de esta edición y el equipo de la iglesia. La persona no las ve.",
+      "contadorTexto": "{cantidad} de {maximo} caracteres",
+      "resumenErrores": "Revisá esto para guardar:",
+      "guardar": "Guardar",
+      "marcarCharla": "Charla hecha",
+      "guardada": "Guardamos los cambios.",
+      "charlaMarcada": "¡Listo! Le pasamos la elección al equipo.",
+      "cerrada": "Esta elección ya está cerrada.",
+      "errorGenerico": "No pudimos guardar. Probá de nuevo en un momento."
+    }
   },
   "ministerios": {
     "titulo": "Ministerios",
@@ -1950,5 +1993,53 @@
     "contador": "{cantidad} de {maximo} caracteres",
     "demasiadoLargo": "El mensaje puede tener hasta {maximo} caracteres. Acortalo un poco.",
     "resumenErrores": "Revisá esto:"
+  },
+  "eleccion": {
+    "titulo": "¿Dónde querés servir?",
+    "introduccion": "Antes de terminar {edicion}, elegí hasta 2 ministerios. Después lo charlás con tu líder de Vida de Servicio, que te ayuda a decidir.",
+    "noDisponibleTitulo": "Todavía no podés elegir",
+    "noDisponibleTexto": "La elección de ministerio se abre cerca del final de Vida de Servicio. Te avisamos cuando puedas.",
+    "volverMiCamino": "Volver a Mi camino",
+    "conocidoTitulo": "Esto ya lo sabemos",
+    "conocidoNombre": "{nombre}",
+    "conocidoCelular": "Celular: {telefono}",
+    "conocidoGrupo": "Grupo de extensión: {grupo} (lo lidera {lideres})",
+    "conocidoSinGrupo": "Todavía no tenés grupo de extensión",
+    "sinLider": "sin líder por ahora",
+    "elegirTitulo": "Elegí tus ministerios",
+    "elegirAyuda": "Podés elegir hasta 2 ministerios, y un área de cada uno: las tareas son los domingos y no queremos que te toquen varios seguidos. Discipulados Vida Nueva se puede hacer además, al mismo tiempo.",
+    "contador": "Elegiste {cantidad} de {maximo} ministerios.",
+    "contadorLleno": "Ya elegiste {maximo} ministerios. Para elegir otro, sacá uno marcando \"Ninguna de este ministerio\".",
+    "bloqueYa": "Para empezar a servir ya",
+    "bloqueYaAyuda": "Podés sumarte enseguida.",
+    "bloqueFormacion": "Requieren formación antes",
+    "bloqueFormacionAyuda": "Antes de servir hay una capacitación o una audición: el equipo te cuenta cómo.",
+    "bloqueParalelo": "Además, al mismo tiempo",
+    "bloqueParaleloAyuda": "Se puede hacer al mismo tiempo que otro ministerio y no cuenta en el máximo de 2.",
+    "ninguna": "Ninguna de este ministerio",
+    "comentarioEtiqueta": "¿Querés contarnos algo? (opcional)",
+    "comentarioAyuda": "Por qué te interesa, qué te gusta hacer, en qué horarios podés.",
+    "contadorTexto": "{cantidad} de {maximo} caracteres",
+    "resumenErrores": "Revisá esto para enviar:",
+    "enviar": "Enviar mi elección",
+    "guardarCambios": "Guardar los cambios",
+    "guardada": "¡Listo! Guardamos tu elección. Tu líder de Vida de Servicio la va a charlar con vos.",
+    "errorGenerico": "No pudimos guardar tu elección. Probá de nuevo en un momento.",
+    "elegisteTitulo": "Lo que elegiste",
+    "charlaHechaTitulo": "Ya lo charlaste con tu líder",
+    "charlaHechaTexto": "El equipo lo está revisando y te avisa cuando confirme dónde vas a servir.",
+    "cerradaTitulo": "La elección está cerrada",
+    "cerradaTexto": "Si querés cambiar algo, hablá con tu líder de Vida de Servicio.",
+    "cerradaSinEleccion": "La elección se cerró y no elegiste ministerio. Hablá con tu líder de Vida de Servicio.",
+    "cardPuedeElegirTitulo": "Ya podés elegir dónde querés servir",
+    "cardPuedeElegirTexto": "Elegí hasta 2 ministerios antes de terminar Vida de Servicio.",
+    "cardElegir": "Elegir mi ministerio",
+    "cardElegisteTitulo": "Elegiste: {opciones}",
+    "cardFaltaCharla": "Tu líder de Vida de Servicio lo va a charlar con vos.",
+    "cardCambiar": "Cambiar mi elección",
+    "errorCargaTitulo": "No pudimos cargar la elección",
+    "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, avisanos con este código:",
+    "reintentar": "Reintentar",
+    "quieroServirAca": "Quiero servir acá"
   }
 }
