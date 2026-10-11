@@ -8,7 +8,8 @@ import { EMAILS_014, GRUPOS_014, entrarConTema, prepararSinGrupo } from './helpe
  * la persona busca por dirección y ve solo los grupos de su género y edad por
  * cercanía (sin dirección exacta), pide sumarse, la líder lo ve en "Mi grupo"
  * con "Escribir por WhatsApp" y acepta, y la persona ve su grupo con la
- * dirección y "Cómo llegar". Corre con el geocodificador falso (D223), que
+ * dirección y "Cómo llegar". También busca por nombre del grupo o de quien
+ * lo lidera, sin dirección (D238). Corre con el geocodificador falso (D223), que
  * ubica "7 nro 1200" en el centro.
  */
 
@@ -45,6 +46,25 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(page.locator('#direccion-error')).toContainText('Escribí tu dirección');
       await sinViolaciones(page, tema);
       await sinScrollHorizontal(page, 360);
+
+      // D238: quien ya sabe el grupo o quién lo lidera lo busca por nombre, sin dirección.
+      const porNombre = page.getByRole('button', { name: 'Buscar por nombre' });
+      await porNombre.click();
+      await expect(page.locator('#nombre-error')).toContainText('Escribí al menos 2 letras');
+      const campoNombre = page.getByLabel('Nombre del grupo o de quien lo lidera');
+      await campoNombre.fill('lidia e2e gex');
+      await porNombre.click();
+      const porLider = page.getByRole('region', { name: 'Grupos para vos' });
+      await expect(porLider).toContainText('con ese nombre');
+      const deLidia = (await porLider.getByRole('heading', { level: 3 }).allTextContents()).filter((n) => n.startsWith('e2e-'));
+      expect(deLidia).toEqual([GRUPOS_014.completo, GRUPOS_014.lejos, GRUPOS_014.cerca]);
+      await expect(porLider.getByRole('article', { name: GRUPOS_014.cerca })).toContainText('Distancia sin calcular');
+      await sinViolaciones(page, tema);
+      await sinScrollHorizontal(page, 360);
+      // Un grupo que no es para ella no aparece aunque escriba su nombre.
+      await campoNombre.fill('varones de tolosa');
+      await porNombre.click();
+      await expect(page.getByText('No encontramos un grupo para vos con ese nombre')).toBeVisible();
 
       await page.getByLabel('Tu dirección').fill('7 nro 1200');
       const buscar = page.getByRole('button', { name: 'Buscar grupos' });
