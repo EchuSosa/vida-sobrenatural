@@ -197,7 +197,8 @@
       "ELECCION_VACIA": "Elegí al menos un área de algún ministerio.",
       "ELECCION_MAXIMO_MINISTERIOS": "Podés elegir hasta 2 ministerios (más Discipulados Vida Nueva). Sacá uno marcando \"Ninguna de este ministerio\".",
       "ELECCION_UN_AREA_POR_MINISTERIO": "Elegí un solo área de cada ministerio.",
-      "ELECCION_AREA_NO_DISPONIBLE": "Un área que elegiste ya no está disponible: elegí otra."
+      "ELECCION_AREA_NO_DISPONIBLE": "Un área que elegiste ya no está disponible: elegí otra.",
+      "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
@@ -1918,7 +1919,13 @@
       "confirmarSi": "Sí, quiero sumarme",
       "confirmarNo": "Seguir mirando",
       "enviado": "¡Listo! Le avisamos a quien lidera el grupo.",
-      "errorGenerico": "No pudimos completar el pedido. Probá de nuevo en un momento."
+      "errorGenerico": "No pudimos completar el pedido. Probá de nuevo en un momento.",
+      "porNombreTitulo": "¿Ya sabés a qué grupo querés ir?",
+      "porNombreAyuda": "Si ya conocés el grupo o a quien lo lidera, buscalo por su nombre. No hace falta tu dirección.",
+      "porNombreEtiqueta": "Nombre del grupo o de quien lo lidera",
+      "porNombreBuscar": "Buscar por nombre",
+      "resultadosCantidadPorNombre": "{cantidad, plural, one {Encontramos # grupo} other {Encontramos # grupos}} con ese nombre.",
+      "vacioPorNombre": "No encontramos un grupo para vos con ese nombre. Revisá cómo lo escribiste, o buscá por tu dirección."
     },
     "pendiente": {
       "titulo": "Pediste sumarte a {grupo}",

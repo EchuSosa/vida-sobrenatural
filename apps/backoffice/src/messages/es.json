@@ -242,7 +242,8 @@
       "ELECCION_MAXIMO_MINISTERIOS": "Hasta 2 ministerios (más Discipulados Vida Nueva).",
       "ELECCION_UN_AREA_POR_MINISTERIO": "Un solo área de cada ministerio.",
       "ELECCION_AREA_NO_DISPONIBLE": "Un área elegida ya no está disponible.",
-      "REEMPLAZO_INVALIDO": "Elegí una de las membresías que tiene ahora."
+      "REEMPLAZO_INVALIDO": "Elegí una de las membresías que tiene ahora.",
+      "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera."
     },
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
     "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
