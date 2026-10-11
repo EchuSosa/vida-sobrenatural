@@ -29,7 +29,8 @@
 - Reportes / analíticas (ej. cuánta gente completa cada curso, tasa de abandono vs. baja administrativa).
 
 **Camino de la Persona:**
-- **"Ya sirvo en un Ministerio"** (Echu, DEMO-16, 2026-10-10): quien ya sirve antes de la app elige su Ministerio (y Célula, opcional) de la lista; al aprobarlo el Admin queda miembro y Apto para Ministerio en un solo paso, sin pasar por el "Ya lo hice" de Vida de Servicio. Reemplaza al "Ya lo hice" de texto libre de la card Ministerio. Y, para la carga inicial, que el Admin pueda cargar de una vez la lista de miembros de cada Ministerio.
+- **Elección de ministerio al terminar Vida de Servicio** (Echu, 2026-10-11): **hecha** en la spec 015 (D239–D242) — reemplaza la encuesta en papel; la charla uno a uno la hacen los líderes de Vida de Servicio. Se puede servir en hasta 2 ministerios (D241).
+- **"Ya sirvo en un Ministerio"** (Echu, DEMO-16, 2026-10-10): quien ya sirve antes de la app elige su Ministerio (y Célula, opcional) de la lista; al aprobarlo el Admin queda miembro y Apto para Ministerio en un solo paso, sin pasar por el "Ya lo hice" de Vida de Servicio. Reemplaza al "Ya lo hice" de texto libre de la card Ministerio. Y, para la carga inicial, que el Admin pueda cargar de una vez la lista de miembros de cada Ministerio. **Hecho: spec 015, entrega 3 (D243).**
 
 **Acceso, perfil y notificaciones:**
 - **Entrar a la app sin email** (Echu, DEMO-13, 2026-10-10: "no me parece que solo puedan acceder personas con email"). Hoy quien no tiene email lo carga el Admin y queda "Sin acceso a la app" hasta que se le agrega uno (D97, D145). Opciones a evaluar: código por WhatsApp o SMS al celular (tiene costo por mensaje y necesita un proveedor), o que un familiar con cuenta lo acompañe desde la suya. Se decide después del MVP.

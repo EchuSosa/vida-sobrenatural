@@ -12,7 +12,7 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import { ButtonLink, CardEtapa, type CardEtapaProps } from '@vida-sobrenatural/ui';
 import { auth } from '../../../auth';
-import { RetirarDeclaracion, YaLoHice } from './acciones-historial';
+import { RetirarDeclaracion, YaLoHice, YaSirvo } from './acciones-historial';
 import { AccionesVidaDeServicio } from './tarjeta-vida-de-servicio';
 import { AccionesMinisterio } from './tarjeta-ministerio';
 import { AccionesBautismo } from './tarjeta-bautismo';
@@ -310,7 +310,8 @@ export default async function MiCaminoPage() {
           >
             {Propias && <Propias estado={estado} apiToken={apiToken} />}
             {estado.estado === 'en_revision' && <RetirarDeclaracion declaracionId={estado.declaracionId} nombreEtapa={nombre(estado.etapa)} />}
-            {puede && <YaLoHice etapa={estado.etapa} nombreEtapa={nombre(estado.etapa)} />}
+            {/* spec 015 (D243): en Ministerio, "Ya sirvo en un ministerio" con el listado. */}
+            {puede && (estado.etapa === 'ministerio' ? <YaSirvo /> : <YaLoHice etapa={estado.etapa} nombreEtapa={nombre(estado.etapa)} />)}
           </CardEtapa>
         );
       })}

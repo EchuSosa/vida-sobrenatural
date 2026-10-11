@@ -96,6 +96,13 @@ export class GruposVsController {
     return this.ediciones.abrirInscripcion(grupoId, dto.abierta);
   }
 
+  @Put(':grupoId/eleccion-abierta')
+  @RequierePermiso('grupos.gestionar')
+  @ApiOkResponse({ description: 'spec 015, D239: abre o cierra la elección de ministerio; al abrir avisa a cada inscripta activa.' })
+  eleccionAbierta(@Param('grupoId') grupoId: string, @Body() dto: InscripcionAbiertaDto) {
+    return this.ediciones.abrirEleccion(grupoId, dto.abierta);
+  }
+
   @Get(':grupoId/asistencia/:fecha')
   @RequierePermiso('grupos.ver')
   @ApiOkResponse({ description: 'spec 008, FR-027: AsistenciaDelDia.' })

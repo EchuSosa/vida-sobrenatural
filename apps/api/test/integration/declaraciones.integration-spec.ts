@@ -71,9 +71,10 @@ describe('Declaraciones de historial de la Persona (spec 006, T035)', () => {
 
   it('una segunda pendiente de la misma etapa → 409 DECLARACION_YA_PENDIENTE, sin aviso; otra etapa sí', async () => {
     const id = await esc.persona('dos');
-    await declarar(id, { etapa: 'ministerio' }, 201);
+    // spec 015 (D243): Ministerio pide además lo elegido del listado; acá vale cualquier etapa.
+    await declarar(id, { etapa: 'bautismo' }, 201);
     avisos.emitidos.length = 0;
-    const res = await declarar(id, { etapa: 'ministerio' }, 409);
+    const res = await declarar(id, { etapa: 'bautismo' }, 409);
     expect(res.body.code).toBe('DECLARACION_YA_PENDIENTE');
     expect(avisos.emitidos).toEqual([]);
     await declarar(id, { etapa: 'vida_de_servicio' }, 201);

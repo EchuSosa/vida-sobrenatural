@@ -1,12 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { CircleCheck, Undo2 } from 'lucide-react';
 import { ApiError, COMENTARIO_DECLARACION_MAX, apiFetch, erroresPorCampo, type EtapaCamino } from '@vida-sobrenatural/shared-types';
-import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, ButtonLink, ConfirmDestructiveDialog, DialogoTextoOpcional, useEnvio } from '@vida-sobrenatural/ui';
 
 /**
  * spec 006, T041 (FR-008, FR-009, FR-011, D151): "Ya lo hice" y "Retirar" en
@@ -108,5 +109,20 @@ export function RetirarDeclaracion({ declaracionId, nombreEtapa }: { declaracion
       textoCancelar={t('retirarMantener')}
       onConfirmar={() => void ejecutar()}
     />
+  );
+}
+
+/**
+ * spec 015 (D243): en la etapa Ministerio, "Ya lo hice" pasa a ser "Ya sirvo
+ * en un ministerio" — lleva al listado, así el equipo sabe en cuál y lo
+ * confirma.
+ */
+export function YaSirvo() {
+  const t = useTranslations('yaSirvo');
+  return (
+    <ButtonLink render={<Link href="/mi-camino/ministerios/ya-sirvo" />} variant="outline" size="xl" className="text-base">
+      <CircleCheck aria-hidden />
+      {t('boton')}
+    </ButtonLink>
   );
 }

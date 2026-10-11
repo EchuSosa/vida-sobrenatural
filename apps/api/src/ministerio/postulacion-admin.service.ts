@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   EDAD_MINIMA_ROL_DE_CARGO,
+  maxMembresiasDelCarril,
   sinAccesoALaApp,
   type AprobarPostulacion,
   type MinisterioDePersona,
@@ -14,11 +15,11 @@ import { AppException } from '../common/errors/app-exception.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { RolesDeEstadoService } from '../persona/roles-de-estado.service.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
-import { registrarCambioDeRol } from '../cambio-de-rol/registrar-cambio-de-rol.js';
 import { nombresDe } from '../discipulado/consultas.js';
 import { normalizarMotivo } from '../discipulado/validaciones.js';
 import { bloquearPersona } from '../camino/consultas.js';
 import { crearPostulacion, esViolacionDeUnico } from './crear-postulacion.js';
+import { crearMembresiaDirecta, decidirMembresia, inactivarPorCambio, membresiasDelCarril, otorgarDiscipulador } from './membresia.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -126,7 +127,7 @@ export class PostulacionAdminService {
       },
     });
     if (!p) throw noEncontrada();
-    const [persona, otraAprobada, historial, nombres] = await Promise.all([
+    const [persona, otrasAprobadas, historial, nombres] = await Promise.all([
       this.prisma.persona.findUniqueOrThrow({
         where: { id: p.personaId },
         select: {
@@ -140,15 +141,8 @@ export class PostulacionAdminService {
           rol: true,
         },
       }),
-      this.prisma.postulacion.findFirst({
-        where: {
-          personaId: p.personaId,
-          estado: 'aprobada',
-          enParalelo: p.enParalelo, // D217: lo que el cambio reemplazaría
-          id: { not: p.id },
-        },
-        select: { ministerio: { select: { id: true, nombre: true } } },
-      }),
+      // D217 + D241: las del mismo carril (lo que aprobar sumaría o reemplazaría).
+      membresiasDelCarril(this.prisma, p.personaId, p.enParalelo, p.id),
       historialDe(this.prisma, p.personaId, verMotivos, p.id),
       nombresDe(
         this.prisma,
@@ -195,7 +189,10 @@ export class PostulacionAdminService {
         : null,
       revisadaEn: p.revisadaEn?.toISOString() ?? null,
       ...(verMotivos ? { motivoRechazo: p.motivoRechazo } : {}),
-      ministerioActual: otraAprobada?.ministerio ?? null,
+      ministerioActual: otrasAprobadas[0]?.ministerio ?? null,
+      ministeriosActuales: otrasAprobadas,
+      puedeSumar:
+        otrasAprobadas.length < maxMembresiasDelCarril(p.enParalelo),
       ofrecerRolDiscipulador:
         !!celula?.ofreceRolDiscipulador &&
         !esDiscipulador &&
@@ -218,7 +215,7 @@ export class PostulacionAdminService {
     try {
       await this.prisma.$transaction(async (tx) => {
         const p = await bloquearPendiente(tx, id);
-        const [ministerio, celula, anterior] = await Promise.all([
+        const [ministerio, celula] = await Promise.all([
           tx.ministerio.findUniqueOrThrow({
             where: { id: p.ministerioId },
             select: { activo: true, eliminadoEn: true },
@@ -233,19 +230,6 @@ export class PostulacionAdminService {
                 },
               })
             : Promise.resolve(null),
-          // D217: solo la aprobada del mismo carril se reemplaza; "Discipulados
-          // Vida Nueva" (en paralelo) no saca a nadie de su Ministerio.
-          tx.postulacion.findFirst({
-            where: {
-              personaId: p.personaId,
-              estado: 'aprobada',
-              enParalelo: p.enParalelo,
-            },
-            select: {
-              id: true,
-              ministerio: { select: { id: true, nombre: true } },
-            },
-          }),
         ]);
         // FR-021: no se aprueba hacia un Ministerio o Célula que ya no están disponibles.
         if (!ministerio.activo || ministerio.eliminadoEn) {
@@ -277,30 +261,20 @@ export class PostulacionAdminService {
           );
         }
 
+        // D241: hasta 2 Ministerios (más el paralelo); con el carril ocupado, el
+        // Admin elige sumar o reemplazar — la decisión la exige la API (D173).
+        const anterior = await decidirMembresia(tx, {
+          personaId: p.personaId,
+          ministerioId: p.ministerioId,
+          enParalelo: p.enParalelo,
+          decision: dto,
+          excluirId: id,
+        });
         const ahora = new Date();
         let reemplazaA: string | null = null;
         if (anterior) {
-          // D173: la confirmación la exige la API, no solo la pantalla.
-          if (dto.confirmarCambio !== true) {
-            throw new AppException(
-              'POSTULACION_REQUIERE_CONFIRMAR_CAMBIO',
-              409,
-              `Esta persona ya pertenece al Ministerio ${anterior.ministerio.nombre}: confirmá el cambio.`,
-              undefined,
-              { ministerioActual: anterior.ministerio },
-            );
-          }
-          await tx.postulacion.update({
-            where: { id: anterior.id },
-            data: {
-              estado: 'inactiva',
-              motivoInactivacion: 'cambio_de_ministerio',
-              inactivadaEn: ahora,
-              inactivadaPorId: autorId,
-              reemplazadaPorId: id,
-            },
-          });
-          reemplazaA = anterior.id;
+          await inactivarPorCambio(tx, anterior.postulacionId, id, autorId, ahora);
+          reemplazaA = anterior.postulacionId;
         }
         await tx.postulacion.update({
           where: { id },
@@ -336,7 +310,7 @@ export class PostulacionAdminService {
         });
       });
     } catch (error) {
-      // FR-020: el índice `postulaciones_una_aprobada` es la garantía final ante una carrera.
+      // D241: `postulaciones_aprobada_por_ministerio` y el de la en paralelo son la garantía final ante una carrera.
       if (esViolacionDeUnico(error))
         throw new AppException(
           'POSTULACION_NO_PENDIENTE',
@@ -346,6 +320,35 @@ export class PostulacionAdminService {
       throw error;
     }
     return this.detalle(id, true);
+  }
+
+  /**
+   * spec 015 (D243): POST /ministerios/:id/miembros — la primera carga de los
+   * equipos actuales: el Admin agrega a alguien que ya sirve, sin postulación
+   * (`creadoPorId`, D97). Mismo límite y misma decisión que aprobar (D241).
+   */
+  async agregarMiembro(
+    ministerioId: string,
+    dto: { personaId: string; celulaId?: string | null; sumar?: boolean; reemplazaId?: string },
+    autorId: string,
+  ): Promise<{ postulacionId: string }> {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const persona = await tx.persona.findUnique({ where: { id: dto.personaId }, select: { estado: true, activo: true } });
+        if (!persona || !persona.activo || persona.estado !== 'activa') {
+          throw new AppException('NO_ENCONTRADO', 404, 'No existe una Persona activa con ese id.');
+        }
+        const { postulacionId } = await crearMembresiaDirecta(
+          tx,
+          { rolesDeEstado: this.rolesDeEstado, notificaciones: this.notificaciones },
+          { personaId: dto.personaId, ministerioId, celulaId: dto.celulaId ?? null, autorId, decision: { sumar: dto.sumar, reemplazaId: dto.reemplazaId } },
+        );
+        return { postulacionId };
+      });
+    } catch (error) {
+      if (esViolacionDeUnico(error)) throw new AppException('YA_ES_MIEMBRO_DEL_MINISTERIO', 409, 'Esta persona ya sirve en este Ministerio.');
+      throw error;
+    }
   }
 
   /** POST /postulaciones/:id/rechazar (FR-019): motivo opcional, interno. */
@@ -449,15 +452,16 @@ export class PostulacionAdminService {
         404,
         'No existe una Persona con ese id.',
       );
-    const [actual, pendiente, historial] = await Promise.all([
-      // D217: la membresía es la del Ministerio; la en paralelo queda en el historial.
-      this.prisma.postulacion.findFirst({
+    const [aprobadas, pendiente, historial] = await Promise.all([
+      // D217 + D241: todas las membresías, la del Ministerio primero.
+      this.prisma.postulacion.findMany({
         where: { personaId, estado: 'aprobada' },
-        orderBy: { enParalelo: 'asc' },
+        orderBy: [{ enParalelo: 'asc' }, { revisadaEn: 'asc' }, { createdAt: 'asc' }],
         select: {
           id: true,
           revisadaEn: true,
           createdAt: true,
+          enParalelo: true,
           ministerio: { select: { id: true, nombre: true } },
           celula: { select: { id: true, nombre: true } },
         },
@@ -472,16 +476,17 @@ export class PostulacionAdminService {
       }),
       historialDe(this.prisma, personaId, verMotivos),
     ]);
+    const actuales = aprobadas.map((a) => ({
+      postulacionId: a.id,
+      ministerio: a.ministerio,
+      celula: a.celula,
+      desde: (a.revisadaEn ?? a.createdAt).toISOString(),
+      enParalelo: a.enParalelo,
+    }));
     return {
       persona,
-      actual: actual
-        ? {
-            postulacionId: actual.id,
-            ministerio: actual.ministerio,
-            celula: actual.celula,
-            desde: (actual.revisadaEn ?? actual.createdAt).toISOString(),
-          }
-        : null,
+      actual: actuales[0] ?? null,
+      actuales,
       pendiente: pendiente
         ? {
             postulacionId: pendiente.id,
@@ -522,42 +527,6 @@ async function bloquearPendiente(tx: Prisma.TransactionClient, id: string) {
     );
   }
   return p;
-}
-
-/**
- * docs/22 + spec 005 (FR-011, FR-022): el rol `discipulador` al aprobar
- * "Discipulados Vida Nueva". Misma garantía de edad que `RolesService.otorgarRol`
- * (H-128) y mismo UPDATE atómico e idempotente; registra el cambio en la misma
- * transacción. La fila de la Persona ya está bloqueada.
- */
-async function otorgarDiscipulador(
-  tx: Prisma.TransactionClient,
-  personaId: string,
-  autorId: string,
-): Promise<void> {
-  const persona = await tx.persona.findUniqueOrThrow({
-    where: { id: personaId },
-    select: { fechaNacimiento: true },
-  });
-  if (calcularEdad(persona.fechaNacimiento) < EDAD_MINIMA_ROL_DE_CARGO) {
-    throw new AppException(
-      'PERSONA_MENOR_DE_EDAD_NO_PUEDE_TENER_ROL_DE_CARGO',
-      409,
-      `Una Persona menor de ${EDAD_MINIMA_ROL_DE_CARGO} años no puede tener un rol de cargo.`,
-    );
-  }
-  const cambiada = await tx.$queryRaw<{ id: string }[]>`
-    UPDATE "personas" SET "rol" = array_append("rol", 'discipulador'::text), "updatedAt" = NOW()
-    WHERE "id" = ${personaId} AND NOT ('discipulador'::text = ANY("rol"))
-    RETURNING "id"`;
-  if (cambiada.length > 0) {
-    await registrarCambioDeRol(tx, {
-      personaId,
-      rol: 'discipulador',
-      accion: 'otorgado',
-      actor: { origen: 'backoffice', realizadoPorId: autorId },
-    });
-  }
 }
 
 function noEncontrada() {

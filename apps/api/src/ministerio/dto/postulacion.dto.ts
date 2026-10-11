@@ -64,11 +64,49 @@ export class AprobarPostulacionDto implements AprobarPostulacion {
 
   @ApiPropertyOptional({
     description:
+      'D241: la suma a las membresías actuales (solo si queda lugar: hasta 2 Ministerios).',
+  })
+  @IsOptional()
+  @IsBoolean()
+  sumar?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'D241: la membresía actual que reemplaza (pasa a inactiva, cambio_de_ministerio).',
+  })
+  @IsOptional()
+  @IsUUID()
+  reemplazaId?: string;
+
+  @ApiPropertyOptional({
+    description:
       'docs/22: otorga también el rol discipulador (solo en un área que lo ofrece).',
   })
   @IsOptional()
   @IsBoolean()
   otorgarRolDiscipulador?: boolean;
+}
+
+/** spec 015 (D243): `POST /ministerios/:id/miembros` — agregar a alguien que ya sirve. */
+export class AgregarMiembroDto {
+  @ApiProperty()
+  @IsUUID()
+  personaId!: string;
+
+  @ApiPropertyOptional({ nullable: true, description: 'El área; null si el Ministerio no tiene áreas.' })
+  @IsOptional()
+  @IsUUID()
+  celulaId?: string | null;
+
+  @ApiPropertyOptional({ description: 'D241: la suma a sus membresías actuales (si queda lugar).' })
+  @IsOptional()
+  @IsBoolean()
+  sumar?: boolean;
+
+  @ApiPropertyOptional({ description: 'D241: la membresía actual que reemplaza.' })
+  @IsOptional()
+  @IsUUID()
+  reemplazaId?: string;
 }
 
 /** Rechazar y dar de baja: motivo opcional ≤ 500 (`MOTIVO_DEMASIADO_LARGO`, lo valida el servicio). */

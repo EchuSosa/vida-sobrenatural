@@ -34,6 +34,8 @@ export const DATOS_EJEMPLO: { [N in NombreEventoAviso]: DatosDe<N> } = {
   'vida_servicio.finalizacion_rechazada': { grupoId: 'gru-1' },
   'vida_servicio.completada': { grupoId: 'gru-1', inscripcionId: 'ins-1' },
   'ministerio.postulacion_creada': { postulacionId: 'pos-1', ministerioId: 'min-1', enNombreDe: false },
+  'ministerio.eleccion_abierta': { grupoId: 'gru-1' },
+  'ministerio.eleccion_lista': { eleccionId: 'ele-1' },
   'ministerio.postulacion_retirada': { postulacionId: 'pos-1' },
   'ministerio.postulacion_aprobada': { postulacionId: 'pos-1', ministerioId: 'min-1', ministerio: 'Alabanza', celulaId: null, reemplazaA: null },
   'ministerio.postulacion_rechazada': { postulacionId: 'pos-1' },

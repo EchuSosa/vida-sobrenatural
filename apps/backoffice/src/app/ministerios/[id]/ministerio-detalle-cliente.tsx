@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AgregarMiembro } from './agregar-miembro';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -310,6 +311,8 @@ export function MinisterioDetalleCliente({
         <h2 id="miembros-titulo" className="text-lg font-semibold">
           {t('detalle.miembrosTitulo')} ({miembros.total})
         </h2>
+        {/* spec 015 (D243): la primera carga de quienes ya sirven. */}
+        {puedeGestionar && m.activo && <AgregarMiembro ministerioId={m.id} ministerio={m.nombre} celulas={m.celulas} apiToken={apiToken} />}
         {miembros.items.length === 0 ? (
           <p className="text-muted-foreground">{t('detalle.sinMiembros')}</p>
         ) : (

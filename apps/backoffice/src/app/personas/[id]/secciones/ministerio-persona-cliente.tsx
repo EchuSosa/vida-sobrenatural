@@ -60,17 +60,24 @@ export function MinisterioPersonaCliente({
   const locale = useLocale();
   const fecha = (iso: string) => formatearFechaHora(iso, locale);
   const [abierto, setAbierto] = useState(false);
-  const { actual, pendiente, historial } = datos;
+  // D241: hasta 2 Ministerios, más Discipulados Vida Nueva en paralelo.
+  const { actuales, pendiente, historial } = datos;
 
   return (
     <div className="flex flex-col gap-3">
-      {actual ? (
-        <AvisoEstado
-          icono={<UsersRound className="text-primary" />}
-          titulo={actual.celula ? t('perfil.actualCelula', { ministerio: actual.ministerio.nombre, celula: actual.celula.nombre }) : t('perfil.actual', { ministerio: actual.ministerio.nombre })}
-        >
-          {t('perfil.desde', { fecha: fecha(actual.desde) })}
-        </AvisoEstado>
+      {actuales.length > 0 ? (
+        <ul className="flex flex-col gap-3">
+          {actuales.map((actual) => (
+            <li key={actual.postulacionId}>
+              <AvisoEstado
+                icono={<UsersRound className="text-primary" />}
+                titulo={actual.celula ? t('perfil.actualCelula', { ministerio: actual.ministerio.nombre, celula: actual.celula.nombre }) : t('perfil.actual', { ministerio: actual.ministerio.nombre })}
+              >
+                {t('perfil.desde', { fecha: fecha(actual.desde) })}
+              </AvisoEstado>
+            </li>
+          ))}
+        </ul>
       ) : (
         <AvisoEstado icono={<UserRound className="text-muted-foreground" />} titulo={t('perfil.ninguno')} />
       )}

@@ -69,6 +69,7 @@ export async function detalleDeEdicion(db: Db, grupoId: string): Promise<MiGrupo
     sede: sedes.get(grupo.sedeId) ?? '',
     fechaInicio: grupo.fechaInicio ? fechaCivil(grupo.fechaInicio) : '',
     estado: grupo.estado,
+    eleccionAbierta: grupo.eleccionAbierta,
     lideres: lideres.get(grupoId) ?? [],
     semanas: semanas.map((s) => ({ numero: s.numero, fechaLiberacion: s.fechaLiberacion, estado: estadoSemanaLider(s.fechaLiberacion, s.conMaterial, hoy) })),
     inscriptos,

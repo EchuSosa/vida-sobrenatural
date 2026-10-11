@@ -237,7 +237,14 @@
       "PREGUNTA_CON_RESPUESTAS": "Esta pregunta ya tiene respuestas: no se puede quitar, cambiar de tipo, sacarle opciones ni dejar de ser dato sensible.",
       "RESPUESTA_REQUERIDA": "Respondé esta pregunta.",
       "RESPUESTA_INVALIDA": "Elegí una de las opciones de la lista.",
-      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres."
+      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres.",
+      "ELECCION_VACIA": "Elegí al menos un área de algún ministerio.",
+      "ELECCION_MAXIMO_MINISTERIOS": "Hasta 2 ministerios (más Discipulados Vida Nueva).",
+      "ELECCION_UN_AREA_POR_MINISTERIO": "Un solo área de cada ministerio.",
+      "ELECCION_AREA_NO_DISPONIBLE": "Un área elegida ya no está disponible.",
+      "REEMPLAZO_INVALIDO": "Elegí una de las membresías que tiene ahora.",
+      "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera.",
+      "DESDE_ANIO_INVALIDO": "El año no es válido."
     },
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
     "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
@@ -250,7 +257,14 @@
     "DIRECCION_NO_UBICADA": "No encontramos esa dirección. Escribí la calle y el número (por ejemplo, \"7 nro 1200\"), o la calle y entre qué calles.",
     "UBICACION_NO_DISPONIBLE": "No pudimos ubicar tu dirección en este momento. Probá con \"Usar mi ubicación\" o intentá de nuevo en unos minutos.",
     "EVENTO_NO_CORRESPONDE": "La Persona no está entre los destinatarios del Evento (género o edad).",
-    "PREGUNTA_CON_RESPUESTAS": "Esa pregunta ya tiene respuestas: no se puede borrar ni cambiar de tipo."
+    "PREGUNTA_CON_RESPUESTAS": "Esa pregunta ya tiene respuestas: no se puede borrar ni cambiar de tipo.",
+    "ELECCION_NO_DISPONIBLE": "La elección de ministerio de esa edición no está abierta.",
+    "ELECCION_YA_CHARLADA": "Esa elección ya se charló.",
+    "ELECCION_CERRADA": "Esta elección ya está cerrada.",
+    "ELECCION_DESACTUALIZADA": "Alguien cambió esta elección. Recargá para ver lo último.",
+    "ELECCION_OPCIONES_RESUELTAS": "Ya se confirmó parte de esta elección: las áreas no se pueden cambiar.",
+    "ELECCION_SIN_CHARLA": "Falta la charla con su líder de Vida de Servicio.",
+    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual."
   },
   "nav": {
     "saltarAlContenido": "Saltar al contenido",
@@ -772,7 +786,8 @@
         "vida_servicio_finalizaciones": "{cantidad, plural, one {# edición de Vida de Servicio para cerrar} other {# ediciones de Vida de Servicio para cerrar}}",
         "vida_servicio_bajas": "{cantidad, plural, one {# baja de Vida de Servicio para revisar} other {# bajas de Vida de Servicio para revisar}}",
         "ministerio_postulaciones": "{cantidad, plural, one {# postulación a Ministerio pendiente} other {# postulaciones a Ministerio pendientes}}",
-        "grupo_extension_pedidos": "{cantidad, plural, one {# pedido para sumarse a un grupo de extensión esperando respuesta} other {# pedidos para sumarse a grupos de extensión esperando respuesta}}"
+        "grupo_extension_pedidos": "{cantidad, plural, one {# pedido para sumarse a un grupo de extensión esperando respuesta} other {# pedidos para sumarse a grupos de extensión esperando respuesta}}",
+        "eleccion_ministerio_charladas": "{cantidad, plural, one {# elección de ministerio con la charla hecha, para confirmar} other {# elecciones de ministerio con la charla hecha, para confirmar}}"
       }
     }
   },
@@ -1025,7 +1040,24 @@
     "irASolicitudes": "Ir a Solicitudes",
     "errorCargaTitulo": "No pudimos mostrar este \"Ya lo hice\"",
     "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
-    "reintentar": "Reintentar"
+    "reintentar": "Reintentar",
+    "yaSirvoTitulo": "Dónde dice que sirve",
+    "yaSirvoDesde": "Sirve desde {anio}.",
+    "yaSirvoSinAnio": "No dijo desde qué año.",
+    "yaSirvoActuales": "Hoy figura sirviendo en: {ministerios}",
+    "yaSirvoSinActuales": "Hoy no figura sirviendo en ningún ministerio.",
+    "yaSirvoLeyenda": "Qué confirmás",
+    "yaSirvoFormacion": "Requiere formación",
+    "yaSirvoParalelo": "Al mismo tiempo que otro ministerio",
+    "yaSirvoNoDisponible": "Ya no está disponible",
+    "yaSirvoAyuda": "Cada área que marcás queda como membresía y se le avisa; las que no marcás quedan descartadas.",
+    "yaSirvoTambienVs": "También hizo Vida de Servicio",
+    "yaSirvoTambienVsAyuda": "Queda registrada como hecha y apta para servir en ministerios.",
+    "yaSirvoResultado": {
+      "pendiente": "sin resolver",
+      "confirmada": "confirmada",
+      "descartada": "descartada"
+    }
   },
   "edicionesServicio": {
     "curso": "Curso",
@@ -1184,7 +1216,13 @@
       "irAGrupos": "Ir a Grupos",
       "errorCargaTitulo": "No pudimos cargar la edición",
       "errorCarga": "Podés reintentar en unos segundos. Código de referencia:",
-      "reintentar": "Reintentar"
+      "reintentar": "Reintentar",
+      "eleccionAbierta": "La elección de ministerio está abierta: las inscriptas pueden elegir dónde servir.",
+      "eleccionCerrada": "La elección de ministerio está cerrada.",
+      "abrirEleccion": "Abrir la elección de ministerio",
+      "cerrarEleccion": "Cerrar la elección de ministerio",
+      "eleccionAbiertaOk": "Abrimos la elección de ministerio y les avisamos a las inscriptas.",
+      "eleccionCerradaOk": "Cerramos la elección de ministerio."
     },
     "material": {
       "titulo": "{edicion} · Semana {numero}",
@@ -1326,7 +1364,20 @@
     "reintentar": "Reintentar",
     "noEncontradoTitulo": "Este Ministerio no existe o está en la papelera",
     "volverALista": "Volver a Ministerios",
-    "tarjetaTexto": "Dónde se sirve en la iglesia, con sus áreas."
+    "tarjetaTexto": "Dónde se sirve en la iglesia, con sus áreas.",
+    "agregarMiembro": {
+      "titulo": "Agregar a alguien que ya sirve",
+      "ayuda": "Para cargar a los equipos que ya sirven: queda como miembro sin postularse y se le avisa. Hasta 2 ministerios por persona, más Discipulados Vida Nueva.",
+      "area": "Área",
+      "agregar": "Agregar",
+      "agregarAria": "Agregar a {nombre}",
+      "agregado": "{nombre} ya figura sirviendo en {ministerio}.",
+      "decidirTitulo": "{nombre} ya sirve en {actuales}. ¿Lo sumás o reemplazás uno?",
+      "sumar": "Sumarlo",
+      "reemplazar": "Reemplazar {ministerio}",
+      "cancelar": "Cancelar",
+      "errorGenerico": "No pudimos agregarla. Probá de nuevo en un momento."
+    }
   },
   "postulaciones": {
     "titulo": "Postulación de {nombre} a {ministerio}",
@@ -1348,8 +1399,9 @@
     "sinTexto": "No escribió nada.",
     "requiereFormacionTitulo": "Requiere capacitación o audición",
     "requiereFormacionTexto": "Este ministerio pide formación previa: contactate con la persona para coordinar la capacitación o la audición.",
-    "yaPerteneceTitulo": "Ya pertenece a {ministerio}",
-    "yaPerteneceTexto": "Si aprobás esta postulación, deja ese Ministerio y pasa a {nuevo}.",
+    "yaPerteneceTitulo": "Ya sirve en {ministerio}",
+    "yaPerteneceTextoSumar": "Al aprobar, elegís si suma {nuevo} (puede servir en hasta 2 ministerios) o si deja uno de los que tiene.",
+    "yaPerteneceTextoLleno": "Ya sirve en 2 ministerios: para aprobar {nuevo}, elegís cuál deja.",
     "historialTitulo": "Postulaciones anteriores",
     "sinHistorial": "Es su primera postulación.",
     "historialFila": "{ministerio} · {estado} · {fecha}",
@@ -1358,9 +1410,13 @@
     "aprobar": "Aprobar",
     "aprobarTitulo": "¿Aprobar a {nombre} en {ministerio}?",
     "aprobarDescripcion": "Pasa a servir en este Ministerio y se le avisa.",
+    "decisionDescripcion": "Ya sirve en {actual}. Elegí qué pasa con eso; se le avisa.",
+    "decisionLeyenda": "¿Qué hacés con sus ministerios?",
+    "decisionSumar": "Sumarlo: sirve en {actual} y también en {nuevo}",
+    "decisionReemplazar": "Reemplazar {actual}: lo deja y pasa a {nuevo}",
+    "decisionAyuda": "Lo que deja queda como historia (no se borra). Hasta 2 ministerios, más Discipulados Vida Nueva.",
+    "y": "y",
     "aprobarEnviar": "Sí, aprobar",
-    "cambioTitulo": "Esta persona ya pertenece al Ministerio {actual}. ¿Confirmás el cambio?",
-    "cambioDescripcion": "Su membresía en {actual} queda como historia (no se borra) y pasa a servir en {nuevo}.",
     "cambioEnviar": "Sí, confirmar el cambio",
     "rolDiscipulador": "Otorgarle también el rol de Discipulador",
     "rolDiscipuladorAyuda": "\"Discipulados Vida Nueva\" es el camino para acompañar a personas nuevas: con el rol puede recibir discipulados.",
@@ -2071,7 +2127,8 @@
       "bautismo": "Bautismo",
       "inscripcion_evento": "Inscripción a un Evento",
       "pago": "Pago de un Evento",
-      "grupo_extension": "Grupo de extensión"
+      "grupo_extension": "Grupo de extensión",
+      "eleccion_ministerio": "Elección de ministerio"
     },
     "estados": {
       "discipulado": {
@@ -2125,6 +2182,12 @@
         "rechazada": "No era para ese grupo",
         "retirada": "Retirado",
         "finalizada": "Ya no está en el grupo"
+      },
+      "eleccion_ministerio": {
+        "borrador": "Falta la charla",
+        "charla_hecha": "Charla hecha: para confirmar",
+        "resuelta": "Resuelta",
+        "cancelada": "Cancelada"
       }
     }
   },
@@ -2892,5 +2955,67 @@
       "noEncontrada": "No encontramos ese pedido",
       "irASolicitudes": "Ir a Solicitudes"
     }
+  },
+  "elecciones": {
+    "titulo": "Elección de ministerio de {nombre}",
+    "edicion": "Vida de Servicio: {edicion}",
+    "edad": "{edad} años",
+    "cargadaPor": "La cargó {nombre} en la charla",
+    "charlaPor": "Charla hecha por {nombre} el {fecha}",
+    "faltaCharla": "Falta la charla con su líder de Vida de Servicio: después se puede confirmar.",
+    "noAptaTitulo": "Todavía no terminó Vida de Servicio",
+    "noAptaTexto": "Las áreas se confirman cuando termine: así queda apta para servir.",
+    "conocidoTitulo": "Lo que ya sabemos",
+    "grupo": "Grupo de extensión: {grupo} (lo lidera {lideres})",
+    "sinGrupo": "Sin grupo de extensión",
+    "yaSirve": "Ya sirve en: {ministerios}",
+    "noSirve": "Todavía no sirve en ningún ministerio",
+    "comentarioTitulo": "Lo que contó",
+    "sinTexto": "No escribió nada.",
+    "notasTitulo": "Notas de la charla (privadas)",
+    "sinNotas": "Sin notas.",
+    "opcionesTitulo": "Lo que eligió",
+    "requiereFormacion": "Requiere formación antes",
+    "enParalelo": "Al mismo tiempo que otro ministerio",
+    "noDisponible": "Ya no está disponible",
+    "empezarYa": "Para empezar a servir ya",
+    "resultado": {
+      "pendiente": "Para confirmar",
+      "confirmada": "Confirmada: ya sirve ahí",
+      "descartada": "No por ahora"
+    },
+    "resueltaPor": "{nombre}, {fecha}",
+    "motivoMostrado": "Motivo (interno): {motivo}",
+    "confirmar": "Confirmar",
+    "confirmarAria": "Confirmar {area}",
+    "confirmarTitulo": "¿Confirmar {area}?",
+    "confirmarDescripcion": "Pasa a servir en este ministerio y se le avisa.",
+    "decisionDescripcion": "Ya sirve en {actual}. Elegí qué pasa con eso; se le avisa.",
+    "decisionLeyenda": "¿Qué hacés con sus ministerios?",
+    "decisionSumar": "Sumarlo: sirve en {actual} y también en {nuevo}",
+    "decisionReemplazar": "Reemplazar {actual}: lo deja y pasa a {nuevo}",
+    "rolDiscipulador": "Darle también el rol de Discipulador",
+    "confirmarEnviar": "Sí, confirmar",
+    "confirmada": "Confirmamos {area}.",
+    "confirmarCuandoTermine": "Se confirma cuando termine Vida de Servicio.",
+    "descartar": "No por ahora",
+    "descartarAria": "No por ahora: {area}",
+    "descartarTitulo": "¿{area}: no por ahora?",
+    "descartarDescripcion": "No se le avisa ni ve el motivo. Puede volver a postularse más adelante.",
+    "motivoEtiqueta": "Motivo (opcional)",
+    "motivoAyuda": "Interno: solo lo ve el equipo en el backoffice.",
+    "contador": "{cantidad} de {maximo} caracteres",
+    "resumenErrores": "Revisá esto:",
+    "descartarEnviar": "Sí, no por ahora",
+    "descartada": "{area}: no por ahora.",
+    "volver": "Volver",
+    "y": "y",
+    "soloLectura": "Podés ver la elección, pero no resolverla.",
+    "errorGenerico": "No pudimos completar la acción. Probá de nuevo en un momento.",
+    "noEncontradaTitulo": "No encontramos esa elección",
+    "irASolicitudes": "Ir a Solicitudes",
+    "errorCargaTitulo": "No pudimos cargar la elección",
+    "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, avisanos con este código:",
+    "reintentar": "Reintentar"
   }
 }

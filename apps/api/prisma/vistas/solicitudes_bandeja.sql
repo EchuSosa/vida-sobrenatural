@@ -68,4 +68,12 @@ CREATE OR REPLACE VIEW "solicitudes_bandeja" AS
          (x."estado" = 'pendiente'),
          x."createdAt", x."createdAt",
          x."creadoPorId", x."revisadoPorId", x."revisadaEn"
-    FROM "solicitudes_grupo_extension" x;
+    FROM "solicitudes_grupo_extension" x
+  UNION ALL
+  -- 015: Elección de ministerio (D242). Abierta = con la charla hecha: espera
+  -- que el Admin confirme cada área; la espera cuenta desde la charla.
+  SELECT 'eleccion_ministerio', e."id", e."personaId", e."estado"::text,
+         (e."estado" = 'charla_hecha'),
+         e."createdAt", COALESCE(e."charlaEn", e."createdAt"),
+         e."cargadaPorId", e."resueltaPorId", e."resueltaEn"
+    FROM "elecciones_ministerio" e;

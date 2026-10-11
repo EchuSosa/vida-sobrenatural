@@ -1,3 +1,4 @@
+import { MAX_MINISTERIOS_POR_PERSONA, decisionAlAprobar } from '@vida-sobrenatural/shared-types';
 import {
   estadoMiMinisterio,
   type PostulacionParaEstado,
@@ -103,15 +104,17 @@ describe('estadoMiMinisterio (contracts/postulaciones-api.md, precedencia)', () 
       revisadaEn: dia(3),
       celula: { id: 'c1', nombre: 'Seguridad', activo: true },
     });
+    const vista = {
+      postulacionId: aprobada.id,
+      ministerio: { id: 'm1', nombre: 'Bienvenida', activo: true },
+      celula: { id: 'c1', nombre: 'Seguridad', activo: true },
+      desde: dia(3).toISOString(),
+      enParalelo: false,
+    };
     expect(estadoMiMinisterio(APTA, [aprobada])).toEqual({
       estado: 'miembro',
-      membresia: {
-        postulacionId: aprobada.id,
-        ministerio: { id: 'm1', nombre: 'Bienvenida', activo: true },
-        celula: { id: 'c1', nombre: 'Seguridad', activo: true },
-        desde: dia(3).toISOString(),
-        enParalelo: false,
-      },
+      membresia: vista,
+      membresias: [vista],
       pendiente: null,
     });
     const otra = postulacion({
@@ -182,5 +185,35 @@ describe('estadoMiMinisterio (contracts/postulaciones-api.md, precedencia)', () 
       estadoMiMinisterio(APTA, [postulacion({})]),
     ];
     for (const e of todos) expect(JSON.stringify(e)).not.toMatch(/motivo/i);
+  });
+
+  it('D241: dos Ministerios y el paralelo → todas las membresías, las del Ministerio por antigüedad y la en paralelo al final', () => {
+    const discipulados = postulacion({
+      estado: 'aprobada',
+      enParalelo: true,
+      revisadaEn: dia(1),
+      ministerio: { id: 'm2', nombre: 'Enseñanza', activo: true },
+    });
+    const adoracion = postulacion({ estado: 'aprobada', revisadaEn: dia(5), ministerio: { id: 'm3', nombre: 'Adoración', activo: true } });
+    const bienvenida = postulacion({ estado: 'aprobada', revisadaEn: dia(3) });
+    const estado = estadoMiMinisterio(APTA, [discipulados, adoracion, bienvenida]);
+    expect(estado.estado).toBe('miembro');
+    if (estado.estado !== 'miembro') return;
+    expect(estado.membresias.map((m) => m.ministerio.nombre)).toEqual(['Bienvenida', 'Adoración', 'Enseñanza']);
+    expect(estado.membresia.ministerio.nombre).toBe('Bienvenida');
+  });
+});
+
+describe('D241: decisionAlAprobar (hasta 2 Ministerios, más el paralelo)', () => {
+  it('sin membresías en el carril se aprueba directo; con una, se elige y se puede sumar; con dos, solo reemplazar', () => {
+    expect(decisionAlAprobar(0, false)).toEqual({ tipo: 'directa' });
+    expect(decisionAlAprobar(1, false)).toEqual({ tipo: 'elegir', puedeSumar: true });
+    expect(decisionAlAprobar(2, false)).toEqual({ tipo: 'elegir', puedeSumar: false });
+    expect(MAX_MINISTERIOS_POR_PERSONA).toBe(2);
+  });
+
+  it('el carril en paralelo admite una sola (D217)', () => {
+    expect(decisionAlAprobar(0, true)).toEqual({ tipo: 'directa' });
+    expect(decisionAlAprobar(1, true)).toEqual({ tipo: 'elegir', puedeSumar: false });
   });
 });

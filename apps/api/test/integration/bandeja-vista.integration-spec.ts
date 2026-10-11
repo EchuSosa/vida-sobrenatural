@@ -26,6 +26,7 @@ describe('Vista solicitudes_bandeja — coherencia exhaustiva (spec 013 T011)', 
   let ministerioId: string;
   let eventoId: string;
   let grupoExtensionId: string;
+  let grupoVsId: string;
   let apellido: string;
   /** Las Inscripciones `confirmada` que sostienen a cada Pago: también son filas de la vista. */
   let inscripcionesDePagos = 0;
@@ -66,6 +67,9 @@ describe('Vista solicitudes_bandeja — coherencia exhaustiva (spec 013 T011)', 
       })
     ).id;
 
+    // spec 015: la edición de la elección de ministerio (cualquier Grupo sirve para la vista).
+    grupoVsId = (await prisma.grupo.create({ data: { cursoId: escenario.cursoId, sedeId: escenario.sedeId }, select: { id: true } })).id;
+
     let n = 0;
     for (const tipo of TIPOS_SOLICITUD) {
       for (const estado of ESTADOS_POR_TIPO[tipo]) {
@@ -80,6 +84,8 @@ describe('Vista solicitudes_bandeja — coherencia exhaustiva (spec 013 T011)', 
     const inscripciones = (await prisma.inscripcionEvento.findMany({ where: { eventoId }, select: { id: true } })).map((i) => i.id);
     await prisma.pago.deleteMany({ where: { inscripcionEventoId: { in: inscripciones } } });
     await prisma.solicitudBautismo.deleteMany({ where: { personaId: { in: personas } } });
+    await prisma.eleccionMinisterio.deleteMany({ where: { grupoId: grupoVsId } });
+    await prisma.grupo.deleteMany({ where: { id: grupoVsId } });
     await prisma.solicitudGrupoExtension.deleteMany({ where: { grupoId: grupoExtensionId } });
     await prisma.grupoExtension.deleteMany({ where: { id: grupoExtensionId } });
     await prisma.inscripcionEvento.deleteMany({ where: { eventoId } });
@@ -197,6 +203,19 @@ describe('Vista solicitudes_bandeja — coherencia exhaustiva (spec 013 T011)', 
           ...(estado === 'finalizada' ? { finalizadaEn: new Date() } : {}),
         };
         return fila((await prisma.solicitudGrupoExtension.create({ data, select: { id: true } })).id);
+      }
+      case 'eleccion_ministerio': {
+        // spec 015: la espera cuenta desde la charla (D242).
+        const charlada = estado === 'charla_hecha' || estado === 'resuelta';
+        const data = {
+          ...base,
+          grupoId: grupoVsId,
+          estado: estado as never,
+          ...(charlada ? { charlaEn: propuestaEn, charlaPorId: adminId } : {}),
+          ...(estado === 'resuelta' ? { resueltaEn: new Date(), resueltaPorId: adminId } : {}),
+        };
+        const { id } = await prisma.eleccionMinisterio.create({ data, select: { id: true } });
+        return fila(id, charlada ? propuestaEn : creadoEn);
       }
     }
   }

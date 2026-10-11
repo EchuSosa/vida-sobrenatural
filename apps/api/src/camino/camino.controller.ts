@@ -29,7 +29,7 @@ export class CaminoController {
   @Post('declaraciones')
   @ApiCreatedResponse({ description: 'spec 006, FR-008 a FR-010: "Ya lo hice". 409 EDAD_INSUFICIENTE_PARA_PEDIR_SOLO, ETAPA_YA_COMPLETADA, DECLARACION_YA_PENDIENTE, ETAPA_EN_CURSO; 400 VALIDACION (comentario > 500).' })
   declarar(@Body() dto: DeclararDto, @Req() request: AuthenticatedRequest) {
-    return this.service.declarar(personaActivaDeSesion(request), dto.etapa, dto.comentario);
+    return this.service.declarar(personaActivaDeSesion(request), dto.etapa, dto.comentario, { opciones: dto.opciones, desdeAnio: dto.desdeAnio });
   }
 
   @Delete('declaraciones/:id')

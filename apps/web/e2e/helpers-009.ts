@@ -11,15 +11,17 @@ export const EMAILS_009 = {
   aptaCelular: 'e2e-ministerio-apta-celular@example.com',
   noApta: 'e2e-ministerio-no-apta@example.com',
   miembro: 'e2e-ministerio-miembro@example.com',
+  miembroDos: 'e2e-ministerio-miembro-dos@example.com',
 } as const;
 
 export const MINISTERIOS_009 = {
   bienvenida: 'e2e-Bienvenida',
   adoracion: 'e2e-Adoración',
+  mesa: 'e2e-Mesa de entrada',
   pausado: 'e2e-Pausado',
 } as const;
 
-type Estado = { estado: string; pendiente?: { postulacionId: string } | null; membresia?: { postulacionId: string } };
+type Estado = { estado: string; pendiente?: { postulacionId: string } | null; membresia?: { postulacionId: string }; membresias?: Array<{ postulacionId: string }> };
 
 /**
  * Deja a una Persona apta sin postulación pendiente ni membresía (los
@@ -30,9 +32,12 @@ export async function prepararSinPostulacion(baseURL: string, email: string): Pr
   const token = await tokenDe(baseURL, email);
   let estado = (await api(token, 'GET', '/ministerios/me')) as Estado;
   if (estado.pendiente) estado = (await api(token, 'POST', `/postulaciones/me/${estado.pendiente.postulacionId}/retirar`)) as Estado;
-  if (estado.estado === 'miembro' && estado.membresia) {
+  // D241: puede tener hasta 2 (más la en paralelo): las da de baja a todas.
+  if (estado.estado === 'miembro') {
     const admin = await tokenDe(baseURL, 'e2e-admin@example.com');
-    await api(admin, 'POST', `/postulaciones/${estado.membresia.postulacionId}/dar-de-baja`, {});
+    for (const m of estado.membresias ?? (estado.membresia ? [estado.membresia] : [])) {
+      await api(admin, 'POST', `/postulaciones/${m.postulacionId}/dar-de-baja`, {});
+    }
   }
 }
 

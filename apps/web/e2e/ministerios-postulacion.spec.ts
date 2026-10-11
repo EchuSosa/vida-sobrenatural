@@ -113,10 +113,23 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(cardMinisterio(page)).toContainText('En el área Seguridad.');
       await sinViolaciones(page, tema);
       await abrirEtapa(page, 'Ministerio'); // propuesta A: hecha, arranca plegada
-      await cardMinisterio(page).getByRole('link', { name: 'Quiero cambiar de Ministerio' }).click();
+      await cardMinisterio(page).getByRole('link', { name: 'Quiero sumar o cambiar de ministerio' }).click();
       await page.getByRole('link', { name: new RegExp(MINISTERIOS_009.bienvenida) }).click();
       await expect(page.getByText('Ya estás sirviendo en este Ministerio')).toBeVisible();
       await expect(page.getByRole('button', { name: 'Postularme' })).toHaveCount(0);
+    });
+
+    test('D241: quien sirve en dos Ministerios los ve a los dos en la card, y solo puede cambiar @celular', async ({ page, baseURL }) => {
+      await entrarConTema(page, baseURL!, EMAILS_009.miembroDos, tema);
+      await page.goto('/mi-camino');
+      await page.waitForLoadState('networkidle');
+      await abrirEtapa(page, 'Ministerio'); // propuesta A: hecha, arranca plegada
+      const card = cardMinisterio(page);
+      await expect(card).toContainText(`Estás sirviendo en ${MINISTERIOS_009.bienvenida}`);
+      await expect(card).toContainText(`Estás sirviendo en ${MINISTERIOS_009.mesa}`);
+      await expect(card.getByRole('link', { name: 'Quiero cambiar de Ministerio' })).toBeVisible();
+      await sinViolaciones(page, tema);
+      await sinScrollHorizontal(page, 360);
     });
 
     test('pública: muestra los activos con su línea, no el pausado ni las áreas; sin scroll a 320 px @celular', async ({ page }) => {

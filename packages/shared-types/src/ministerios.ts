@@ -80,6 +80,54 @@ export interface NuevaPostulacion {
   disponibilidad?: string;
 }
 
+// --- D241 (spec 015): hasta 2 Ministerios por Persona, más el paralelo ---
+
+/** D241: en cuántos Ministerios puede servir una Persona a la vez, sin contar el área en paralelo (D217). */
+export const MAX_MINISTERIOS_POR_PERSONA = 2;
+
+/** D241: cuántas membresías admite cada carril — el de los Ministerios (2) y el paralelo (1, D217). */
+export function maxMembresiasDelCarril(enParalelo: boolean): number {
+  return enParalelo ? 1 : MAX_MINISTERIOS_POR_PERSONA;
+}
+
+/**
+ * D241: qué pasa al sumar una membresía a un carril que ya tiene `actuales`.
+ * Sin ninguna se aprueba directo; si no, el Admin elige: sumarla (si queda
+ * lugar) o reemplazar una de las actuales.
+ */
+export function decisionAlAprobar(actuales: number, enParalelo: boolean): { tipo: 'directa' } | { tipo: 'elegir'; puedeSumar: boolean } {
+  if (actuales === 0) return { tipo: 'directa' };
+  return { tipo: 'elegir', puedeSumar: actuales < maxMembresiasDelCarril(enParalelo) };
+}
+
+/** D241: una membresía actual de la Persona, para elegir cuál reemplazar. */
+export interface MembresiaActual {
+  postulacionId: string;
+  ministerio: { id: string; nombre: string };
+  celula: { id: string; nombre: string } | null;
+}
+
+/**
+ * D241: el detalle del 409 `POSTULACION_REQUIERE_CONFIRMAR_CAMBIO`: las
+ * membresías del mismo carril y si todavía se puede sumar sin reemplazar.
+ * `ministerioActual` (la primera) queda por compatibilidad.
+ */
+export interface DetalleDecisionMembresia {
+  ministerioActual: { id: string; nombre: string };
+  ministeriosActuales: MembresiaActual[];
+  puedeSumar: boolean;
+}
+
+/** D241: cómo resolver la membresía nueva cuando la Persona ya sirve en el mismo carril. */
+export interface DecisionMembresia {
+  /** Sumarla a las actuales (solo si queda lugar). */
+  sumar?: boolean;
+  /** Reemplazar esta membresía actual (pasa a `inactiva`, `cambio_de_ministerio`). */
+  reemplazaId?: string;
+  /** Compatibilidad (D173): con UNA sola membresía actual, reemplazarla. */
+  confirmarCambio?: boolean;
+}
+
 // --- Lo que ve la Persona en Mi camino (FR-011 a FR-014) ---
 
 export interface MembresiaVista {
@@ -113,7 +161,14 @@ export type EstadoMiMinisterio =
   | { estado: 'no_apta' }
   | { estado: 'puede_postularse'; ultimo?: UltimoDesenlacePostulacion }
   | { estado: 'pendiente'; pendiente: PendienteVista }
-  | { estado: 'miembro'; membresia: MembresiaVista; pendiente: PendienteVista | null };
+  | {
+      estado: 'miembro';
+      /** La del Ministerio (no la en paralelo, si tiene las dos). */
+      membresia: MembresiaVista;
+      /** D241: todas, la primera es `membresia`; hasta 2 Ministerios más el paralelo. */
+      membresias: MembresiaVista[];
+      pendiente: PendienteVista | null;
+    };
 
 // --- Backoffice: catálogo (Historias 4 y 6) ---
 
@@ -232,8 +287,12 @@ export interface PostulacionDetalle {
   revisadaEn: string | null;
   /** Solo con `solicitudes.aprobar`. */
   motivoRechazo?: string | null;
-  /** La OTRA Postulación aprobada de la Persona (FR-017), si tiene. */
+  /** La OTRA Postulación aprobada de la Persona (FR-017), si tiene — la primera de `ministeriosActuales`. */
   ministerioActual: { id: string; nombre: string } | null;
+  /** D241: las aprobadas del mismo carril (las que aprobar podría reemplazar). */
+  ministeriosActuales: MembresiaActual[];
+  /** D241: si se puede aprobar sumándola, sin reemplazar ninguna. */
+  puedeSumar: boolean;
   /**
    * docs/22: aprobar una postulación a "Discipulados Vida Nueva" ofrece otorgar
    * el rol `discipulador` en el mismo paso — solo si la Persona es mayor de
@@ -244,8 +303,7 @@ export interface PostulacionDetalle {
 }
 
 /** Cuerpo de `POST /postulaciones/:id/aprobar`. */
-export interface AprobarPostulacion {
-  confirmarCambio?: boolean;
+export interface AprobarPostulacion extends DecisionMembresia {
   /** docs/22: otorgar también el rol `discipulador` (solo si `ofrecerRolDiscipulador`). */
   otorgarRolDiscipulador?: boolean;
 }
@@ -256,10 +314,20 @@ export interface PostulacionEnNombreDe extends NuevaPostulacion {
   ministerioId: string;
 }
 
+export interface MembresiaDePersona {
+  postulacionId: string;
+  ministerio: { id: string; nombre: string };
+  celula: { id: string; nombre: string } | null;
+  desde: string;
+  enParalelo: boolean;
+}
+
 /** `GET /personas/:id/ministerio` — la sección del Perfil de Persona. */
 export interface MinisterioDePersona {
   persona: PersonaBreve;
-  actual: { postulacionId: string; ministerio: { id: string; nombre: string }; celula: { id: string; nombre: string } | null; desde: string } | null;
+  actual: MembresiaDePersona | null;
+  /** D241: todas las membresías, la del Ministerio primero (la primera es `actual`). */
+  actuales: MembresiaDePersona[];
   pendiente: { postulacionId: string; ministerio: { id: string; nombre: string }; createdAt: string } | null;
   historial: PostulacionHistorial[];
 }

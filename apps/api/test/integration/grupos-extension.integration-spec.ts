@@ -166,6 +166,24 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
       expect(ids).toEqual([lejosId]);
     });
 
+    it('D238: por nombre del grupo o de quien lo lidera, sin dirección, con los mismos filtros', async () => {
+      const { token } = await personaNueva('pornombre');
+      const porGrupo = await buscar(token, { nombre: '  cerca ' });
+      expect(porGrupo.status).toBe(200);
+      const encontrados = (porGrupo.body as GrupoExtensionEncontrado[]).filter(delGrupo(grupos));
+      expect(encontrados.map((g) => g.id)).toEqual([cercaId]);
+      expect(encontrados[0].distanciaKm).toBeNull();
+      expect(JSON.stringify(porGrupo.body)).not.toContain('820');
+      // Por quien lo lidera: los tres grupos de "lideralejos" que son para ella (no el de mayores), por orden alfabético.
+      const porLider = ((await buscar(token, { nombre: 'LIDERALEJOS' })).body as GrupoExtensionEncontrado[]).filter(delGrupo(grupos)).map((g) => g.id);
+      expect(porLider).toEqual([lejosId, mixtoId, sinUbicarId]);
+      // Un grupo que no es para ella no aparece aunque escriba su nombre.
+      expect(((await buscar(token, { nombre: 'varones' })).body as GrupoExtensionEncontrado[]).filter(delGrupo(grupos))).toEqual([]);
+      const corto = await buscar(token, { nombre: 'a' });
+      expect(corto.status).toBe(400);
+      expect(corto.body.errors).toEqual([{ campo: 'nombre', code: 'NOMBRE_BUSQUEDA_REQUERIDO' }]);
+    });
+
     it('dirección que no se ubica → 400 por campo; servicio caído → 503; nada se guarda', async () => {
       const { id, token } = await personaNueva('perdida');
       const antes = await prisma.persona.findUniqueOrThrow({ where: { id }, select: { direccion: true, updatedAt: true } });
