@@ -2,6 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   DIRECCION_BUSQUEDA_MAX,
   MENSAJE_RECHAZO_GRUPO_EXTENSION_MAX,
+  NOMBRE_BUSQUEDA_GRUPO_MAX,
+  NOMBRE_BUSQUEDA_GRUPO_MIN,
+  coincideBusquedaGrupo,
   distanciaKm,
   esCompatible,
   hoyEnArgentina,
@@ -45,6 +48,8 @@ export interface BusquedaGex {
   latitud?: number | null;
   longitud?: number | null;
   dias?: DiaSemana[];
+  /** D238: el nombre del Grupo o de quien lo lidera. Con nombre, no hace falta dirección. */
+  nombre?: string | null;
 }
 
 /**
@@ -130,7 +135,9 @@ export class SolicitudesGexService {
    * el contacto de nadie (FR-007).
    */
   async buscar(personaId: string, busqueda: BusquedaGex): Promise<GrupoExtensionEncontrado[]> {
-    const origen = await this.origenDe(busqueda);
+    const consulta = busqueda.nombre == null ? null : this.consultaDe(busqueda.nombre);
+    // D238: buscando por nombre no se pide dirección; sin origen no hay distancia y el orden es alfabético.
+    const origen = consulta === null ? await this.origenDe(busqueda) : null;
     const persona = await this.prisma.persona.findUniqueOrThrow({ where: { id: personaId }, select: { genero: true, fechaNacimiento: true } });
     const edad = edadDe(persona);
     const grupos = await this.prisma.grupoExtension.findMany({ where: { activo: true }, include: INCLUDE_GRUPO });
@@ -140,6 +147,7 @@ export class SolicitudesGexService {
       .filter((g) => !g.lideres.some((l) => l.persona.id === personaId))
       .filter((g) => esCompatible({ genero: generoDe(g), edadMinima: g.edadMinima, edadMaxima: g.edadMaxima }, { genero: persona.genero, edad }))
       .filter((g) => !dias || g.dias.some((d) => dias.includes(d as DiaSemana)))
+      .filter((g) => consulta === null || coincideBusquedaGrupo(consulta, { nombre: g.nombre, lideres: g.lideres.map((l) => l.persona) }))
       .map((g): GrupoExtensionEncontrado => ({
         id: g.id,
         nombre: g.nombre,
@@ -149,10 +157,18 @@ export class SolicitudesGexService {
         horaInicio: g.horaInicio,
         zona: g.enLaIglesia ? null : g.zona,
         enLaIglesia: g.enLaIglesia,
-        distanciaKm: g.latitud !== null && g.longitud !== null ? distanciaKm(origen, { latitud: g.latitud, longitud: g.longitud }) : null,
+        distanciaKm: origen && g.latitud !== null && g.longitud !== null ? distanciaKm(origen, { latitud: g.latitud, longitud: g.longitud }) : null,
         completo: g.cupo !== null && (integrantes.get(g.id) ?? 0) >= g.cupo,
       }));
     return ordenarPorDistancia(encontrados);
+  }
+
+  private consultaDe(nombre: unknown): string {
+    const texto = typeof nombre === 'string' ? nombre.trim() : '';
+    if (texto.length < NOMBRE_BUSQUEDA_GRUPO_MIN || texto.length > NOMBRE_BUSQUEDA_GRUPO_MAX) {
+      throw new AppException('VALIDACION', 400, 'Escribí el nombre del grupo o de quien lo lidera.', [{ campo: 'nombre', code: 'NOMBRE_BUSQUEDA_REQUERIDO' }]);
+    }
+    return texto;
   }
 
   private async origenDe(b: BusquedaGex): Promise<Coordenadas> {

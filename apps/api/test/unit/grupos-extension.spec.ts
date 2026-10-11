@@ -1,4 +1,5 @@
 import {
+  coincideBusquedaGrupo,
   consultasDeGeocodificacion,
   direccionDelGrupo,
   distanciaKm,
@@ -113,6 +114,16 @@ describe('Grupos de Extensión — reglas', () => {
     expect(validarDatosGrupo({ ...base, entreCalle2: null })).toEqual([{ campo: 'entreCalle2', code: 'ENTRE_CALLES_INCOMPLETAS' }]);
     expect(validarDatosGrupo({ ...base, enLaIglesia: true, calle: null, zona: null })).toEqual([{ campo: 'sedeId', code: 'SEDE_INVALIDA' }]);
     expect(validarDatosGrupo({ ...base, enLaIglesia: true, sedeId: 's1', calle: null, zona: null })).toEqual([]);
+  });
+
+  it('D238: buscar por el nombre del grupo o de quien lo lidera, sin tildes ni mayúsculas', () => {
+    const grupo = { nombre: 'Jóvenes Centro', lideres: [{ nombre: 'Juan', apellido: 'Pérez' }, { nombre: 'Ana', apellido: 'Gómez' }] };
+    expect(coincideBusquedaGrupo('jovenes', grupo)).toBe(true);
+    expect(coincideBusquedaGrupo('JUAN perez', grupo)).toBe(true);
+    expect(coincideBusquedaGrupo('  ana   gómez ', grupo)).toBe(true);
+    expect(coincideBusquedaGrupo('gomez centro', grupo)).toBe(true);
+    expect(coincideBusquedaGrupo('juan lopez', grupo)).toBe(false);
+    expect(coincideBusquedaGrupo('   ', grupo)).toBe(false);
   });
 });
 
