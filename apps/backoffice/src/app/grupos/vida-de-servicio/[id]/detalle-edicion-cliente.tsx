@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CalendarCog, CircleAlert, CircleCheckBig, CircleX, LockKeyhole, LockKeyholeOpen, Phone, Plus, TriangleAlert, UserMinus } from 'lucide-react';
+import { CalendarCog, CircleAlert, CircleCheckBig, CircleX, ListChecks, LockKeyhole, LockKeyholeOpen, Phone, Plus, TriangleAlert, UserMinus } from 'lucide-react';
 import {
   MOTIVO_MAX,
   SEMANAS_MAX,
@@ -101,6 +101,8 @@ export function DetalleEdicionCliente({
   }
 
   const inscripcion = useEnvio(accion(() => llamar('PUT', '/inscripcion-abierta', { abierta: !e.inscripcionAbierta }), t('inscripcionActualizada')));
+  // spec 015 (D239): abrir la elección de ministerio avisa a cada inscripta.
+  const eleccion = useEnvio(accion(() => llamar('PUT', '/eleccion-abierta', { abierta: !e.eleccionAbierta }), e.eleccionAbierta ? t('eleccionCerradaOk') : t('eleccionAbiertaOk')));
   const cierre = useEnvio(accion(() => llamar('POST', '/finalizacion/confirmar'), t('cierreConfirmado')));
   const estadosSemana = {
     liberada: tm('estados.liberada'),
@@ -131,6 +133,19 @@ export function DetalleEdicionCliente({
             {puedeGestionar && (
               <Button type="button" variant="outline" className="h-11 w-fit" loading={inscripcion.enviando} onClick={() => void inscripcion.ejecutar()}>
                 {e.inscripcionAbierta ? t('cerrarInscripcion') : t('abrirInscripcion')}
+              </Button>
+            )}
+          </div>
+        )}
+        {e.estado === 'en_curso' && (
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <p className="flex items-center gap-1.5">
+              <ListChecks aria-hidden className="size-4" />
+              {e.eleccionAbierta ? t('eleccionAbierta') : t('eleccionCerrada')}
+            </p>
+            {puedeGestionar && (
+              <Button type="button" variant="outline" className="h-11 w-fit" loading={eleccion.enviando} onClick={() => void eleccion.ejecutar()}>
+                {e.eleccionAbierta ? t('cerrarEleccion') : t('abrirEleccion')}
               </Button>
             )}
           </div>

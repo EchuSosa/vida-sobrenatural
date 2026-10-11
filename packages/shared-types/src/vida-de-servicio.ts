@@ -308,6 +308,8 @@ export interface MiGrupoDetalle {
   semanas: SemanaParaLider[];
   inscriptos: InscriptoParaLider[];
   finalizacion: FinalizacionDeEdicion;
+  /** spec 015 (D239): la elección de ministerio de la edición está abierta. */
+  eleccionAbierta: boolean;
 }
 
 export type ContenidoParaLider =

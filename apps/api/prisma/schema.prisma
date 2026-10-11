@@ -247,6 +247,7 @@ model Persona {
   // spec 014: Grupos de Extensión.
   liderazgosExtension   LiderGrupoExtension[]
   solicitudesExtension  SolicitudGrupoExtension[]
+  eleccionesMinisterio  EleccionMinisterio[]
 
   // H-42 (revisión manual, revisión de código): PostgreSQL no indexa las
   // claves foráneas por sí solo — `sedeId` lo necesita como FK.
@@ -620,6 +621,8 @@ model Grupo {
   nombre             String?
   fechaInicio        DateTime? @db.Date
   inscripcionAbierta Boolean   @default(false)
+  // spec 015 (D239): la elección de ministerio de esta edición está abierta.
+  eleccionAbierta    Boolean   @default(false)
 
   inscripciones Inscripcion[]
   liderazgos    Liderazgo[]
@@ -627,6 +630,7 @@ model Grupo {
   items         ItemCronograma[]
   contenidos    Contenido[]
   solicitudesVidaServicio SolicitudVidaServicio[]
+  eleccionesMinisterio    EleccionMinisterio[]
   createdAt     DateTime @default(now())
 
   @@index([cursoId])
@@ -967,6 +971,7 @@ model Ministerio {
 
   celulas       Celula[]
   postulaciones Postulacion[]
+  opcionesEleccion OpcionEleccionMinisterio[]
 
   @@index([activo, eliminadoEn])
   @@map("ministerios")
@@ -989,6 +994,7 @@ model Celula {
   updatedAt    DateTime   @updatedAt
 
   postulaciones Postulacion[]
+  opcionesEleccion OpcionEleccionMinisterio[]
 
   @@index([ministerioId])
   @@map("celulas")
@@ -1501,4 +1507,77 @@ model SolicitudGrupoExtension {
   @@index([grupoId, estado])
   @@index([estado, createdAt])
   @@map("solicitudes_grupo_extension")
+}
+
+// --- spec 015: Elección de ministerio al terminar Vida de Servicio (D239–D242) ---
+
+enum EstadoEleccionMinisterio {
+  borrador // la persona (o el líder por ella) eligió; falta la charla
+  charla_hecha // el líder de VS hizo la charla: espera al Admin (abierta en la bandeja)
+  resuelta // el Admin resolvió todas las opciones
+  cancelada // dejó Vida de Servicio antes de resolverse
+}
+
+enum ResultadoOpcionEleccion {
+  pendiente
+  confirmada // creó la Postulación `aprobada` (membresía, D170)
+  descartada // "No por ahora"
+}
+
+// Una por Persona y edición de Vida de Servicio (único). Las `notas` de la
+// charla son privadas (D240): solo los líderes de la edición y el Admin.
+model EleccionMinisterio {
+  id            String                   @id @default(uuid())
+  personaId     String
+  persona       Persona                  @relation(fields: [personaId], references: [id])
+  grupoId       String
+  grupo         Grupo                    @relation(fields: [grupoId], references: [id])
+  estado        EstadoEleccionMinisterio @default(borrador)
+  // De la persona, ≤ 500 (CHECK).
+  comentario    String?
+  // De la charla, ≤ 2000 (CHECK). Privadas (D240).
+  notas         String?
+  notasPorId    String?
+  notasEn       DateTime?
+  charlaPorId   String?
+  charlaEn      DateTime?
+  // Si la cargó el líder por la persona (D97).
+  cargadaPorId  String?
+  editadaPorId  String?
+  resueltaPorId String?
+  resueltaEn    DateTime?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  opciones OpcionEleccionMinisterio[]
+
+  @@unique([personaId, grupoId])
+  @@index([grupoId])
+  @@index([estado, charlaEn])
+  @@map("elecciones_ministerio")
+}
+
+// Un área por Ministerio (único); sin área (`celulaId` null) = el Ministerio
+// entero, cuando no tiene áreas (docs/22). El máximo de 2 Ministerios + el paralelo lo
+// valida `validarEleccionMinisterio` (shared-types).
+model OpcionEleccionMinisterio {
+  id             String                  @id @default(uuid())
+  eleccionId     String
+  eleccion       EleccionMinisterio      @relation(fields: [eleccionId], references: [id], onDelete: Cascade)
+  ministerioId   String
+  ministerio     Ministerio              @relation(fields: [ministerioId], references: [id])
+  celulaId       String?
+  celula         Celula?                 @relation(fields: [celulaId], references: [id])
+  // Copia de `Celula.ofreceRolDiscipulador` al elegir (D217).
+  enParalelo     Boolean                 @default(false)
+  resultado      ResultadoOpcionEleccion @default(pendiente)
+  postulacionId  String?                 @unique
+  // Solo backoffice, ≤ 500 (CHECK).
+  motivoDescarte String?
+  resueltaPorId  String?
+  resueltaEn     DateTime?
+  createdAt      DateTime                @default(now())
+
+  @@unique([eleccionId, ministerioId])
+  @@map("opciones_eleccion_ministerio")
 }

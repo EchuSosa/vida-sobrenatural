@@ -222,6 +222,22 @@ export class EdicionesService {
     return this.detalle(grupoId);
   }
 
+  /**
+   * spec 015 (D239): PUT /grupos/vida-de-servicio/:grupoId/eleccion-abierta.
+   * Al abrirla (de cerrada a abierta) avisa a cada inscripta activa; la
+   * clave del aviso evita repetirlo si se cierra y se vuelve a abrir.
+   */
+  async abrirEleccion(grupoId: string, abierta: boolean): Promise<EdicionAdminDetalle> {
+    await this.prisma.$transaction(async (tx) => {
+      const grupo = await this.grupoEnCursoBloqueado(tx, grupoId);
+      await tx.grupo.update({ where: { id: grupoId }, data: { eleccionAbierta: abierta } });
+      if (abierta && !grupo.eleccionAbierta) {
+        await this.notificaciones.emitir(tx, { nombre: 'ministerio.eleccion_abierta', a: { tipo: 'grupo', grupoId }, datos: { grupoId } });
+      }
+    });
+    return this.detalle(grupoId);
+  }
+
   /** POST …/inscripciones/:id/baja/confirmar (FR-033): con el tipo propuesto o el corregido. */
   async confirmarBaja(grupoId: string, inscripcionId: string, tipo: TipoBaja | undefined): Promise<EdicionAdminDetalle> {
     await this.prisma.$transaction(async (tx) => {
@@ -280,7 +296,7 @@ export class EdicionesService {
         });
       }
       const ahora = new Date();
-      await tx.grupo.update({ where: { id: grupoId }, data: { estado: 'finalizado', motivoCierre: 'completado', cerradoEn: ahora, cerradoPorId: adminId, inscripcionAbierta: false } });
+      await tx.grupo.update({ where: { id: grupoId }, data: { estado: 'finalizado', motivoCierre: 'completado', cerradoEn: ahora, cerradoPorId: adminId, inscripcionAbierta: false, eleccionAbierta: false } });
       const activas = await tx.inscripcion.findMany({ where: { grupoId, estado: 'activa' }, select: { id: true, personaId: true } });
       await tx.inscripcion.updateMany({ where: { id: { in: activas.map((a) => a.id) } }, data: { estado: 'completada', cerradaEn: ahora } });
       for (const a of activas) {
@@ -317,6 +333,8 @@ export class EdicionesService {
 
   private async aplicarBaja(tx: Prisma.TransactionClient, grupoId: string, inscripcionId: string, personaId: string, tipo: TipoBaja): Promise<void> {
     await tx.inscripcion.update({ where: { id: inscripcionId }, data: { estado: tipo, cerradaEn: new Date(), bajaPropuestaTipo: tipo } });
+    // spec 015: quien deja Vida de Servicio deja también su elección de ministerio sin resolver.
+    await tx.eleccionMinisterio.updateMany({ where: { grupoId, personaId, estado: { in: ['borrador', 'charla_hecha'] } }, data: { estado: 'cancelada' } });
     await this.notificaciones.emitir(tx, { nombre: 'vida_servicio.inscripcion_dada_de_baja', a: { tipo: 'persona', personaId }, datos: { grupoId, inscripcionId } });
   }
 

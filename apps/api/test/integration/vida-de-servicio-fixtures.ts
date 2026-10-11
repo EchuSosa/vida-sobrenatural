@@ -119,6 +119,8 @@ export class EscenarioVS {
     await p.itemCronograma.deleteMany({ where: { grupoId: { in: grupos } } });
     await p.asistencia.deleteMany({ where: { encuentro: { grupoId: { in: grupos } } } });
     await p.encuentro.deleteMany({ where: { grupoId: { in: grupos } } });
+    // spec 015: las elecciones de ministerio cuelgan de la edición (sus opciones se van en cascada).
+    await p.eleccionMinisterio.deleteMany({ where: { OR: [{ grupoId: { in: grupos } }, { personaId: { in: personas } }] } });
     await p.inscripcion.deleteMany({ where: { OR: [{ grupoId: { in: grupos } }, { personaId: { in: personas } }] } });
     await p.solicitudVidaServicio.deleteMany({ where: { OR: [{ personaId: { in: personas } }, { grupoId: { in: grupos } }] } });
     await p.liderazgo.deleteMany({ where: { grupoId: { in: grupos } } });

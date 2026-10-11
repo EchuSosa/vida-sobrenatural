@@ -44,7 +44,7 @@ CHECKs: `estado = 'charla_hecha' → charlaEn IS NOT NULL`; longitudes.
 | id | uuid | |
 | eleccionId | uuid | |
 | ministerioId | uuid | |
-| celulaId | uuid | El área (un área por Ministerio) |
+| celulaId | uuid? | El área (un área por Ministerio); null = el Ministerio entero, si no tiene áreas (docs/22) |
 | enParalelo | bool | Copia de `Celula.ofreceRolDiscipulador` (D217) |
 | resultado | `ResultadoOpcionEleccion` | `pendiente`, `confirmada`, `descartada` |
 | postulacionId | uuid? | La membresía creada al confirmar |

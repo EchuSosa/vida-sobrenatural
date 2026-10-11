@@ -83,6 +83,9 @@ export type EventoAviso =
   | { nombre: 'ministerio.postulacion_aprobada'; a: DePersona; datos: { postulacionId: string; ministerioId: string; ministerio: string; celulaId: string | null; reemplazaA: string | null } }
   | { nombre: 'ministerio.postulacion_rechazada'; a: DePersona; datos: { postulacionId: string } }
   | { nombre: 'ministerio.miembro_dado_de_baja'; a: DePersona; datos: { postulacionId: string; ministerioId: string } }
+  // --- 015 — Elección de ministerio (D239, D242) ---
+  | { nombre: 'ministerio.eleccion_abierta'; a: { tipo: 'grupo'; grupoId: string }; datos: { grupoId: string } }
+  | { nombre: 'ministerio.eleccion_lista'; a: Admin; datos: { eleccionId: string } }
   // --- 010 — Bautismo (D147) ---
   | { nombre: 'bautismo.solicitud_aceptada'; a: DePersona; datos: { solicitudId: string } }
   | { nombre: 'bautismo.solicitud_rechazada'; a: DePersona; datos: { solicitudId: string } }
@@ -116,7 +119,7 @@ export type NombreEventoAviso = EventoAviso['nombre'];
 export type DatosDe<N extends NombreEventoAviso> = Extract<EventoAviso, { nombre: N }>['datos'];
 
 /** La spec que es dueña del hecho (para el test del catálogo y para saber quién lo conecta). */
-export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | '014' | 'flujo-12';
+export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | '014' | '015' | 'flujo-12';
 
 export interface EntradaCatalogo<N extends NombreEventoAviso> {
   spec: SpecDelAviso;
@@ -138,6 +141,8 @@ const MIS_EVENTOS = '/mis-eventos';
 /** spec 014: la card de la persona y la pantalla del líder. */
 const MI_GRUPO_EXTENSION = '/mi-camino/grupo-extension';
 const LIDER_GRUPO_EXTENSION = '/mi-grupo-extension';
+/** spec 015: la pantalla para elegir ministerio. */
+const ELEGIR_MINISTERIO = '/mi-camino/ministerios/elegir';
 const sinClave = () => null;
 
 export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } = {
@@ -287,6 +292,16 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
   'ministerio.miembro_dado_de_baja': {
     spec: '009', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
     entidad: { tipo: 'postulacion', id: (d) => d.postulacionId }, destino: () => MI_CAMINO, clave: sinClave,
+  },
+  // 015 (D239): la elección de ministerio de la edición se abrió — a cada inscripta activa.
+  'ministerio.eleccion_abierta': {
+    spec: '015', destinatario: 'grupo', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'grupo', id: (d) => d.grupoId }, destino: () => ELEGIR_MINISTERIO, clave: (d) => `eleccion_abierta:${d.grupoId}`,
+  },
+  // 015 (D242): una elección con la charla hecha espera al Admin (sin aviso, D201: Pendientes del Inicio).
+  'ministerio.eleccion_lista': {
+    spec: '015', destinatario: 'admin', disparador: null, prioridad: 'normal',
+    entidad: { tipo: 'eleccion_ministerio', id: (d) => d.eleccionId }, destino: () => MI_CAMINO, clave: sinClave,
   },
   // 010 — ningún texto fuera de la app nombra el bautismo (docs/13 §5).
   'bautismo.solicitud_aceptada': {

@@ -21,6 +21,7 @@ export const TIPOS_SOLICITUD = [
   'inscripcion_evento', // 011
   'pago', // 011
   'grupo_extension', // 014 (D227)
+  'eleccion_ministerio', // 015 (D242)
 ] as const;
 
 export type TipoSolicitud = (typeof TIPOS_SOLICITUD)[number];
@@ -35,6 +36,7 @@ export const ESTADOS_POR_TIPO: { readonly [T in TipoSolicitud]: readonly string[
   inscripcion_evento: ['confirmada', 'pendiente', 'rechazada', 'lista_espera', 'cancelada'],
   pago: ['pendiente_verificacion', 'verificado', 'rechazado'],
   grupo_extension: ['pendiente', 'aceptada', 'rechazada', 'retirada', 'finalizada'],
+  eleccion_ministerio: ['borrador', 'charla_hecha', 'resuelta', 'cancelada'],
 };
 
 /**
@@ -52,6 +54,8 @@ export const ESTADOS_ABIERTOS: { readonly [T in TipoSolicitud]: readonly string[
   inscripcion_evento: ['pendiente'],
   pago: ['pendiente_verificacion'],
   grupo_extension: ['pendiente'],
+  // D242: con la charla hecha, espera que el Admin confirme cada área.
+  eleccion_ministerio: ['charla_hecha'],
 };
 
 export function esAbierta(tipo: TipoSolicitud, estado: string): boolean {
