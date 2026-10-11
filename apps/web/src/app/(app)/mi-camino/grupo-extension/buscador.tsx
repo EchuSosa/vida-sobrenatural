@@ -10,6 +10,8 @@ import {
   ApiError,
   DIAS_SEMANA,
   DIRECCION_BUSQUEDA_MAX,
+  NOMBRE_BUSQUEDA_GRUPO_MAX,
+  NOMBRE_BUSQUEDA_GRUPO_MIN,
   apiFetch,
   erroresPorCampo,
   formatearDistanciaKm,
@@ -18,7 +20,8 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import { Button, ConfirmDestructiveDialog, EstadoVacio, Input, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos, textoHorario, textoNombres } from '@vida-sobrenatural/ui';
 
-type Origen = { direccion: string } | { latitud: number; longitud: number };
+type Origen = { direccion: string } | { latitud: number; longitud: number } | { nombre: string };
+type Validacion = ReturnType<typeof useValidacionCampos>;
 
 /**
  * spec 014 (D224): "Encontrá tu grupo". La dirección (o la ubicación del
@@ -26,6 +29,8 @@ type Origen = { direccion: string } | { latitud: number; longitud: number };
  * lado: tampoco acá, más allá del campo. Errores por campo con resumen y foco
  * (H-50); envíos protegidos de la reentrada (H-57). Resultados: nombre,
  * líder, días y horario, zona y distancia — nunca la dirección exacta.
+ * D238: quien ya sabe el grupo o quién lo lidera lo busca por nombre, sin
+ * dirección (entonces no hay distancia y el orden es alfabético).
  */
 export function BuscadorGrupos() {
   const t = useTranslations('grupoExtension.buscar');
@@ -33,12 +38,15 @@ export function BuscadorGrupos() {
   const te = useTranslations('errors');
   const { data: session } = useSession();
   const validacion = useValidacionCampos();
+  const validacionNombre = useValidacionCampos();
   const [direccion, setDireccion] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [porNombreBuscado, setPorNombreBuscado] = useState(false);
   const [dias, setDias] = useState<DiaSemana[]>([]);
   const [resultados, setResultados] = useState<GrupoExtensionEncontrado[] | null>(null);
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
 
-  async function buscarDesde(origen: Origen) {
+  async function buscarDesde(origen: Origen, v: Validacion = validacion) {
     setErrorGeneral(null);
     try {
       const encontrados = await apiFetch<GrupoExtensionEncontrado[]>('/grupos-extension/buscar', {
@@ -47,11 +55,13 @@ export function BuscadorGrupos() {
         body: JSON.stringify({ ...origen, dias }),
       });
       setResultados(encontrados);
+      setPorNombreBuscado('nombre' in origen);
       validacion.limpiar('direccion');
+      validacionNombre.limpiar('nombre');
     } catch (error) {
       const campos = erroresPorCampo(error);
       if (campos) {
-        validacion.reemplazar(Object.fromEntries(campos.map(({ campo, code }) => [campo, te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico')])));
+        v.reemplazar(Object.fromEntries(campos.map(({ campo, code }) => [campo, te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico')])));
         return;
       }
       const code = error instanceof ApiError ? error.code : null;
@@ -81,7 +91,16 @@ export function BuscadorGrupos() {
     await buscarDesde({ latitud: posicion.coords.latitude, longitud: posicion.coords.longitude });
   });
 
-  const ocupado = porDireccion.enviando || porUbicacion.enviando;
+  const porNombre = useEnvio(async () => {
+    const texto = nombre.trim();
+    if (texto.length < NOMBRE_BUSQUEDA_GRUPO_MIN) {
+      validacionNombre.reemplazar({ nombre: te('campos.NOMBRE_BUSQUEDA_REQUERIDO') });
+      return;
+    }
+    await buscarDesde({ nombre: texto }, validacionNombre);
+  });
+
+  const ocupado = porDireccion.enviando || porUbicacion.enviando || porNombre.enviando;
 
   return (
     <section aria-labelledby="buscar-grupo-titulo" className="flex flex-col gap-6">
@@ -149,11 +168,11 @@ export function BuscadorGrupos() {
         </fieldset>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="submit" size="xl" className="w-full text-base sm:w-fit" loading={porDireccion.enviando} disabled={porUbicacion.enviando}>
+          <Button type="submit" size="xl" className="w-full text-base sm:w-fit" loading={porDireccion.enviando} disabled={porUbicacion.enviando || porNombre.enviando}>
             <Search aria-hidden />
             {t('buscar')}
           </Button>
-          <Button type="button" variant="outline" size="xl" className="w-full text-base sm:w-fit" loading={porUbicacion.enviando} disabled={porDireccion.enviando} onClick={() => void porUbicacion.ejecutar()}>
+          <Button type="button" variant="outline" size="xl" className="w-full text-base sm:w-fit" loading={porUbicacion.enviando} disabled={porDireccion.enviando || porNombre.enviando} onClick={() => void porUbicacion.ejecutar()}>
             <Crosshair aria-hidden />
             {t('usarUbicacion')}
           </Button>
@@ -166,21 +185,65 @@ export function BuscadorGrupos() {
         )}
       </form>
 
-      {resultados && <Resultados grupos={resultados} filtrando={dias.length > 0} />}
+      <form
+        noValidate
+        aria-labelledby="buscar-nombre-titulo"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void porNombre.ejecutar();
+        }}
+        className="flex flex-col gap-4 rounded-lg border border-border p-4 sm:p-5"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 id="buscar-nombre-titulo" className="text-lg font-semibold">
+            {t('porNombreTitulo')}
+          </h2>
+          <p className="text-base text-muted-foreground">{t('porNombreAyuda')}</p>
+        </div>
+        <ResumenErrores errores={validacionNombre.resumen} foco={validacionNombre.foco} titulo={t('resumenErrores')} />
+        <div className="flex flex-col gap-2">
+          <label htmlFor="campo-nombre" className="text-base font-medium">
+            {t('porNombreEtiqueta')}
+          </label>
+          <Input
+            id="campo-nombre"
+            name="nombre"
+            type="search"
+            autoComplete="off"
+            value={nombre}
+            maxLength={NOMBRE_BUSQUEDA_GRUPO_MAX}
+            onChange={(e) => {
+              setNombre(e.target.value);
+              validacionNombre.limpiar('nombre');
+            }}
+            disabled={ocupado}
+            aria-invalid={validacionNombre.mensajes.nombre ? true : undefined}
+            aria-describedby={validacionNombre.mensajes.nombre ? 'nombre-error' : undefined}
+            className="h-11 text-base"
+          />
+          <MensajeErrorCampo id="nombre-error" mensaje={validacionNombre.mensajes.nombre} />
+        </div>
+        <Button type="submit" variant="outline" size="xl" className="w-full text-base sm:w-fit" loading={porNombre.enviando} disabled={porDireccion.enviando || porUbicacion.enviando}>
+          <Search aria-hidden />
+          {t('porNombreBuscar')}
+        </Button>
+      </form>
+
+      {resultados && <Resultados grupos={resultados} filtrando={dias.length > 0} porNombre={porNombreBuscado} />}
     </section>
   );
 }
 
-function Resultados({ grupos, filtrando }: { grupos: GrupoExtensionEncontrado[]; filtrando: boolean }) {
+function Resultados({ grupos, filtrando, porNombre }: { grupos: GrupoExtensionEncontrado[]; filtrando: boolean; porNombre: boolean }) {
   const t = useTranslations('grupoExtension.buscar');
-  if (grupos.length === 0) return <EstadoVacio mensaje={filtrando ? t('vacio') : t('vacioSinFiltro')} />;
+  if (grupos.length === 0) return <EstadoVacio mensaje={porNombre ? t('vacioPorNombre') : filtrando ? t('vacio') : t('vacioSinFiltro')} />;
   return (
     <section aria-labelledby="resultados-titulo" aria-live="polite" className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <h2 id="resultados-titulo" className="text-xl font-semibold">
           {t('resultadosTitulo')}
         </h2>
-        <p className="text-base text-muted-foreground">{t('resultadosCantidad', { cantidad: grupos.length })}</p>
+        <p className="text-base text-muted-foreground">{t(porNombre ? 'resultadosCantidadPorNombre' : 'resultadosCantidad', { cantidad: grupos.length })}</p>
       </div>
       <ul className="flex flex-col gap-3">
         {grupos.map((g) => (

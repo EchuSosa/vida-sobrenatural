@@ -1,4 +1,4 @@
-import type { Genero } from './persona.js';
+import { normalizarNombre, type Genero } from './persona.js';
 
 /**
  * spec 014 — Grupos de Extensión (D220–D228). Tipos de respuesta, límites y
@@ -18,6 +18,25 @@ export const NOMBRE_GRUPO_EXTENSION_MAX = 80;
 export const TEXTO_LUGAR_MAX = 80;
 export const MENSAJE_RECHAZO_GRUPO_EXTENSION_MAX = 500;
 export const DIRECCION_BUSQUEDA_MAX = 200;
+/** D238: buscar un Grupo por su nombre o el de quien lo lidera — de 2 a 80 letras. */
+export const NOMBRE_BUSQUEDA_GRUPO_MIN = 2;
+export const NOMBRE_BUSQUEDA_GRUPO_MAX = 80;
+
+/**
+ * D238: ¿el Grupo coincide con lo que la persona escribió? Cada palabra tiene
+ * que aparecer en el nombre del Grupo o en el nombre y apellido de alguno de
+ * sus líderes, sin importar tildes ni mayúsculas ("juan perez" encuentra al
+ * grupo que lidera Juan Pérez; "jovenes centro" al grupo "Jóvenes Centro").
+ */
+export function coincideBusquedaGrupo(
+  consulta: string,
+  grupo: { nombre: string; lideres: ReadonlyArray<{ nombre: string; apellido: string }> },
+): boolean {
+  const palabras = normalizarNombre(consulta).split(' ').filter(Boolean);
+  if (palabras.length === 0) return false;
+  const texto = normalizarNombre([grupo.nombre, ...grupo.lideres.map((l) => `${l.nombre} ${l.apellido}`)].join(' '));
+  return palabras.every((p) => texto.includes(p));
+}
 export const EDAD_GRUPO_MAX = 120;
 /** D221: la hora de inicio va en pasos de 15 minutos. */
 export const PASO_MINUTOS_HORA_GRUPO = 15;
