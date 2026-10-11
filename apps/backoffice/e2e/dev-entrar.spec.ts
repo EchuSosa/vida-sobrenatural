@@ -44,3 +44,15 @@ test('con sesión, /dev/entrar cambia de persona', async ({ page, permitirErrorD
   // El login de prueba refresca la ruta después de entrar; que termine antes de cerrar la página.
   await page.waitForLoadState('networkidle');
 });
+
+test('si no se puede entrar (la API no responde), lo dice en vez de quedarse quieto', async ({ page }) => {
+  // Auth.js responde con `?error=` cuando falla el `jwt` (por ejemplo, la API apagada).
+  await page.route('**/api/auth/callback/test-login**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ url: 'http://localhost:3002/?error=AccessDenied' }) }),
+  );
+  await page.goto('/dev/entrar');
+  await page.getByRole('button', { name: 'demo-admin@example.com' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'No pudimos entrar' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'demo-admin@example.com' })).toBeEnabled();
+  expect((await auditar(page)).violations).toEqual([]);
+});

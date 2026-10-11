@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useState } from 'react';
+import { CircleAlert } from 'lucide-react';
 import { useEnvio } from '../hooks/use-envio';
 import { Button } from './ui/button';
 
@@ -39,6 +40,8 @@ export interface EtiquetasEntrarDePrueba {
   entrar: string;
   entrando: string;
   rapidos: string;
+  /** Si no se pudo entrar (por ejemplo, la API no responde). */
+  error: string;
 }
 
 export function EntrarDePrueba({
@@ -49,14 +52,27 @@ export function EntrarDePrueba({
 }: {
   etiquetas: EtiquetasEntrarDePrueba;
   emailsRapidos: readonly string[];
-  onEntrar: (email: string) => Promise<void>;
+  /**
+   * Devuelve `false` si no se pudo entrar: la pantalla lo dice en vez de quedarse
+   * quieta (antes el error se perdía y parecía que el botón no andaba).
+   */
+  onEntrar: (email: string) => Promise<boolean>;
   /** `h1` cuando es lo único de la página (`/dev/entrar`); `h2` dentro de otra pantalla. */
   nivelTitulo?: 'h1' | 'h2';
 }) {
   const Titulo = nivelTitulo;
   const [email, setEmail] = useState('');
+  const [fallo, setFallo] = useState(false);
   const { enviando, ejecutar } = useEnvio(async (destino: string) => {
-    if (destino.trim()) await onEntrar(destino.trim());
+    if (!destino.trim()) return;
+    setFallo(false);
+    let entro = false;
+    try {
+      entro = await onEntrar(destino.trim());
+    } catch {
+      entro = false;
+    }
+    if (!entro) setFallo(true);
   });
 
   return (
@@ -67,6 +83,12 @@ export function EntrarDePrueba({
         </Titulo>
         <p className="text-sm text-muted-foreground">{etiquetas.descripcion}</p>
       </div>
+      {fallo && (
+        <p role="alert" className="flex items-start gap-2 rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-sm text-foreground">
+          <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+          <span>{etiquetas.error}</span>
+        </p>
+      )}
       <form
         className="flex flex-col gap-2 sm:flex-row sm:items-end"
         onSubmit={(e) => {

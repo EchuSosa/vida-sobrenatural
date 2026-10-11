@@ -16,6 +16,7 @@ export function EntrarDePruebaCliente({ nivelTitulo }: { nivelTitulo?: 'h1' | 'h
         entrar: t('entrar'),
         entrando: t('entrando'),
         rapidos: t('rapidos'),
+        error: t('error'),
       }}
       emailsRapidos={EMAILS_DE_PRUEBA}
       nivelTitulo={nivelTitulo}
@@ -25,9 +26,10 @@ export function EntrarDePruebaCliente({ nivelTitulo }: { nivelTitulo?: 'h1' | 'h
         // se reintenta una vez antes de navegar.
         const intentar = () => signIn('test-login', { email, redirect: false });
         const resultado = (await intentar())?.error ? await intentar() : null;
-        if (resultado?.error) return;
+        if (resultado?.error) return false;
         // /ingresar resuelve el destino: activa → Inicio de la app; sin registro → /registro; pendiente de tutor → su pantalla.
         window.location.assign('/ingresar');
+        return true;
       }}
     />
   );
