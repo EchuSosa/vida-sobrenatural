@@ -3,13 +3,19 @@ import {
   COMENTARIO_DECLARACION_MAX,
   EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO,
   ETAPAS_CAMINO,
+  desdeAnioValido,
   estadoDeEtapa,
+  hoyEnArgentina,
+  validarEleccionMinisterio,
   type CaminoDeLaPersona,
+  type OpcionElegida,
   type DeclaracionCreada,
   type EtapaCamino,
   type HechosCamino,
 } from '@vida-sobrenatural/shared-types';
+import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { ministeriosParaValidar } from '../eleccion-ministerio/consultas.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
 import { errorDeValidacion } from '../discipulado/validaciones.js';
@@ -72,7 +78,12 @@ export class CaminoService {
    * se pisen. Las reglas son las de `puedeDeclarar` (shared-types), en el
    * orden del contrato para dar el código de cada una.
    */
-  async declarar(personaId: string, etapa: EtapaCamino, comentarioCrudo: string | undefined): Promise<DeclaracionCreada> {
+  async declarar(
+    personaId: string,
+    etapa: EtapaCamino,
+    comentarioCrudo: string | undefined,
+    ministerio: { opciones?: unknown; desdeAnio?: unknown } = {},
+  ): Promise<DeclaracionCreada> {
     const comentario = normalizarComentario(comentarioCrudo);
     try {
       return await this.prisma.$transaction(async (tx) => {
@@ -101,8 +112,17 @@ export class CaminoService {
           throw new AppException('ETAPA_EN_CURSO', 409, 'Esta etapa está en marcha.');
         }
 
+        // spec 015 (D243): "Ya sirvo en un ministerio" — lo elegido del listado, con la misma regla de la elección.
+        const ministerioDeclarado = etapa === 'ministerio' ? await validarYaSirvo(tx, ministerio) : null;
         const creada = await tx.declaracionHistorial.create({
-          data: { personaId, etapa, comentario },
+          data: {
+            personaId,
+            etapa,
+            comentario,
+            ...(ministerioDeclarado
+              ? { desdeAnio: ministerioDeclarado.desdeAnio, opcionesMinisterio: { create: ministerioDeclarado.opciones } }
+              : {}),
+          },
           select: { id: true, etapa: true, createdAt: true },
         });
         // D197: dentro de la transacción; va al Admin, que lo ve en la bandeja (D201).
@@ -158,4 +178,30 @@ function yaPendiente() {
 
 function esViolacionDeUnicidad(error: unknown): boolean {
   return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002';
+}
+
+/**
+ * spec 015 (D243): valida lo que trae "Ya sirvo en un ministerio" — de 1 a 2
+ * Ministerios, un área de cada uno (o el Ministerio entero si no tiene), más
+ * Discipulados Vida Nueva aparte (`validarEleccionMinisterio`), y el año.
+ */
+async function validarYaSirvo(
+  tx: Prisma.TransactionClient,
+  crudo: { opciones?: unknown; desdeAnio?: unknown },
+): Promise<{ desdeAnio: number | null; opciones: Array<{ ministerioId: string; celulaId: string | null; enParalelo: boolean }> }> {
+  const opciones: OpcionElegida[] = [];
+  for (const o of Array.isArray(crudo.opciones) ? (crudo.opciones as unknown[]) : []) {
+    const { ministerioId, celulaId } = (o ?? {}) as Record<string, unknown>;
+    if (typeof ministerioId !== 'string') continue;
+    opciones.push({ ministerioId, celulaId: typeof celulaId === 'string' ? celulaId : null });
+  }
+  const ministerios = await ministeriosParaValidar(tx, opciones.map((o) => o.ministerioId));
+  const errores: Array<{ campo: string; code: string }> = validarEleccionMinisterio(opciones, ministerios);
+  const desdeAnio = crudo.desdeAnio === null || crudo.desdeAnio === undefined || crudo.desdeAnio === '' ? null : Number(crudo.desdeAnio);
+  if (desdeAnio !== null && !desdeAnioValido(desdeAnio, Number(hoyEnArgentina().slice(0, 4)))) errores.push({ campo: 'desdeAnio', code: 'DESDE_ANIO_INVALIDO' });
+  if (errores.length > 0) throw new AppException('VALIDACION', 400, 'Revisá lo que elegiste.', errores);
+  return {
+    desdeAnio,
+    opciones: opciones.map((o) => ({ ...o, enParalelo: o.celulaId ? (ministerios.get(o.ministerioId)?.areas.get(o.celulaId)?.enParalelo ?? false) : false })),
+  };
 }

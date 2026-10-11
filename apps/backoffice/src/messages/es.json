@@ -243,7 +243,8 @@
       "ELECCION_UN_AREA_POR_MINISTERIO": "Un solo área de cada ministerio.",
       "ELECCION_AREA_NO_DISPONIBLE": "Un área elegida ya no está disponible.",
       "REEMPLAZO_INVALIDO": "Elegí una de las membresías que tiene ahora.",
-      "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera."
+      "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera.",
+      "DESDE_ANIO_INVALIDO": "El año no es válido."
     },
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
     "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
@@ -1039,7 +1040,24 @@
     "irASolicitudes": "Ir a Solicitudes",
     "errorCargaTitulo": "No pudimos mostrar este \"Ya lo hice\"",
     "errorCarga": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
-    "reintentar": "Reintentar"
+    "reintentar": "Reintentar",
+    "yaSirvoTitulo": "Dónde dice que sirve",
+    "yaSirvoDesde": "Sirve desde {anio}.",
+    "yaSirvoSinAnio": "No dijo desde qué año.",
+    "yaSirvoActuales": "Hoy figura sirviendo en: {ministerios}",
+    "yaSirvoSinActuales": "Hoy no figura sirviendo en ningún ministerio.",
+    "yaSirvoLeyenda": "Qué confirmás",
+    "yaSirvoFormacion": "Requiere formación",
+    "yaSirvoParalelo": "Al mismo tiempo que otro ministerio",
+    "yaSirvoNoDisponible": "Ya no está disponible",
+    "yaSirvoAyuda": "Cada área que marcás queda como membresía y se le avisa; las que no marcás quedan descartadas.",
+    "yaSirvoTambienVs": "También hizo Vida de Servicio",
+    "yaSirvoTambienVsAyuda": "Queda registrada como hecha y apta para servir en ministerios.",
+    "yaSirvoResultado": {
+      "pendiente": "sin resolver",
+      "confirmada": "confirmada",
+      "descartada": "descartada"
+    }
   },
   "edicionesServicio": {
     "curso": "Curso",
@@ -1346,7 +1364,20 @@
     "reintentar": "Reintentar",
     "noEncontradoTitulo": "Este Ministerio no existe o está en la papelera",
     "volverALista": "Volver a Ministerios",
-    "tarjetaTexto": "Dónde se sirve en la iglesia, con sus áreas."
+    "tarjetaTexto": "Dónde se sirve en la iglesia, con sus áreas.",
+    "agregarMiembro": {
+      "titulo": "Agregar a alguien que ya sirve",
+      "ayuda": "Para cargar a los equipos que ya sirven: queda como miembro sin postularse y se le avisa. Hasta 2 ministerios por persona, más Discipulados Vida Nueva.",
+      "area": "Área",
+      "agregar": "Agregar",
+      "agregarAria": "Agregar a {nombre}",
+      "agregado": "{nombre} ya figura sirviendo en {ministerio}.",
+      "decidirTitulo": "{nombre} ya sirve en {actuales}. ¿Lo sumás o reemplazás uno?",
+      "sumar": "Sumarlo",
+      "reemplazar": "Reemplazar {ministerio}",
+      "cancelar": "Cancelar",
+      "errorGenerico": "No pudimos agregarla. Probá de nuevo en un momento."
+    }
   },
   "postulaciones": {
     "titulo": "Postulación de {nombre} a {ministerio}",

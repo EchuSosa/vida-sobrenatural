@@ -1,10 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CircleCheck, CircleX } from 'lucide-react';
+import { CircleCheck, CircleMinus, CircleX, GraduationCap, UsersRound } from 'lucide-react';
 import {
   ApiError,
   MOTIVO_RECHAZO_DECLARACION_MAX,
@@ -22,6 +23,10 @@ import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, MigaDePan, useE
  * que la Persona va a leer. Las dos son neutras (se puede volver a registrar
  * o a contar). Si otra pestaña ya la resolvió (`DECLARACION_NO_PENDIENTE`),
  * lo dice y recarga.
+ * spec 015 (D243): un "Ya sirvo en un ministerio" muestra lo que eligió, desde
+ * qué año y dónde ya sirve; el Admin marca qué áreas confirma (cada una crea
+ * la membresía; las demás quedan descartadas) y, si hace falta, registra
+ * también Vida de Servicio.
  */
 export function DeclaracionDetalleCliente({
   declaracion,
@@ -43,6 +48,11 @@ export function DeclaracionDetalleCliente({
   const etapa = tEtapas(declaracion.etapa);
   const fecha = (iso: string) => formatearFechaHora(iso, locale);
   const { contexto } = declaracion;
+  const ministerio = declaracion.ministerio;
+  const resolviendo = puedeResolver && declaracion.estado === 'pendiente';
+  const [marcadas, setMarcadas] = useState<ReadonlySet<string>>(new Set(ministerio?.opciones.filter((o) => o.disponible).map((o) => o.id) ?? []));
+  const [conVidaDeServicio, setConVidaDeServicio] = useState(false);
+  const actuales = ministerio ? [...ministerio.membresias.principales, ...ministerio.membresias.enParalelo] : [];
 
   function llamar(accion: 'confirmar' | 'rechazar', body?: unknown) {
     return apiFetch(`/historial/declaraciones/${declaracion.id}/${accion}`, {
@@ -60,9 +70,14 @@ export function DeclaracionDetalleCliente({
 
   const { enviando: confirmando, ejecutar: confirmar } = useEnvio(async () => {
     try {
-      await llamar('confirmar');
+      await llamar('confirmar', ministerio ? { opcionesConfirmadas: [...marcadas], tambienVidaDeServicio: conVidaDeServicio } : undefined);
       toast.success(t('confirmada', { nombre, etapa }));
     } catch (error) {
+      const campos = erroresPorCampo(error);
+      if (campos) {
+        toast.error(te.has(`campos.${campos[0].code}`) ? te(`campos.${campos[0].code}`) : t('errorGenerico'));
+        return;
+      }
       avisarError(error);
       return;
     }
@@ -99,6 +114,83 @@ export function DeclaracionDetalleCliente({
         </h2>
         <p className={declaracion.comentario ? 'whitespace-pre-line break-words' : 'text-muted-foreground'}>{declaracion.comentario ?? t('sinComentario')}</p>
       </section>
+
+      {ministerio && (
+        <section aria-labelledby="ya-sirvo-titulo" className="flex flex-col gap-3">
+          <h2 id="ya-sirvo-titulo" className="text-lg font-semibold">
+            {t('yaSirvoTitulo')}
+          </h2>
+          <p className="text-muted-foreground">{ministerio.desdeAnio ? t('yaSirvoDesde', { anio: ministerio.desdeAnio }) : t('yaSirvoSinAnio')}</p>
+          <p className="flex items-center gap-2">
+            <UsersRound aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+            {actuales.length > 0 ? t('yaSirvoActuales', { ministerios: actuales.map((a) => a.ministerio.nombre).join(', ') }) : t('yaSirvoSinActuales')}
+          </p>
+          {resolviendo ? (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1 font-medium">{t('yaSirvoLeyenda')}</legend>
+              {ministerio.opciones.map((o) => (
+                <div key={o.id} className="flex min-h-11 items-start gap-3 text-base">
+                  <input
+                    id={`opcion-${o.id}`}
+                    type="checkbox"
+                    checked={marcadas.has(o.id)}
+                    disabled={!o.disponible || confirmando}
+                    onChange={(e) => {
+                      const siguiente = new Set(marcadas);
+                      if (e.target.checked) siguiente.add(o.id);
+                      else siguiente.delete(o.id);
+                      setMarcadas(siguiente);
+                    }}
+                    aria-describedby={`opcion-${o.id}-detalle`}
+                    className="mt-1 size-5 shrink-0 accent-primary"
+                  />
+                  <span className="flex flex-col">
+                    <label htmlFor={`opcion-${o.id}`} className="cursor-pointer font-medium">
+                      {o.celula ? `${o.ministerio.nombre} · ${o.celula.nombre}` : o.ministerio.nombre}
+                    </label>
+                    <span id={`opcion-${o.id}-detalle`} className="text-sm text-muted-foreground">
+                      {[o.requiereFormacion ? t('yaSirvoFormacion') : null, o.enParalelo ? t('yaSirvoParalelo') : null, !o.disponible ? t('yaSirvoNoDisponible') : null].filter(Boolean).join(' · ')}
+                    </span>
+                  </span>
+                </div>
+              ))}
+              <p className="text-sm text-muted-foreground">{t('yaSirvoAyuda')}</p>
+              {!ministerio.vidaDeServicioHecha && (
+                <div className="flex min-h-11 items-start gap-3 text-base">
+                  <input
+                    id="tambien-vs"
+                    type="checkbox"
+                    checked={conVidaDeServicio}
+                    disabled={confirmando}
+                    onChange={(e) => setConVidaDeServicio(e.target.checked)}
+                    aria-describedby="tambien-vs-ayuda"
+                    className="mt-1 size-5 shrink-0 accent-primary"
+                  />
+                  <span className="flex flex-col">
+                    <label htmlFor="tambien-vs" className="flex cursor-pointer items-center gap-1.5 font-medium">
+                      <GraduationCap aria-hidden className="size-4 shrink-0" />
+                      {t('yaSirvoTambienVs')}
+                    </label>
+                    <span id="tambien-vs-ayuda" className="text-sm text-muted-foreground">
+                      {t('yaSirvoTambienVsAyuda')}
+                    </span>
+                  </span>
+                </div>
+              )}
+            </fieldset>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {ministerio.opciones.map((o) => (
+                <li key={o.id} className="flex items-center gap-2">
+                  {o.resultado === 'confirmada' ? <CircleCheck aria-hidden className="size-4 shrink-0 text-primary" /> : <CircleMinus aria-hidden className="size-4 shrink-0" />}
+                  {o.celula ? `${o.ministerio.nombre} · ${o.celula.nombre}` : o.ministerio.nombre}
+                  {` — ${t(`yaSirvoResultado.${o.resultado}`)}`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <section aria-labelledby="contexto-titulo" className="flex flex-col gap-2">
         <h2 id="contexto-titulo" className="text-lg font-semibold">

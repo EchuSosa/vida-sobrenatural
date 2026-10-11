@@ -787,6 +787,9 @@ model DeclaracionHistorial {
   updatedAt     DateTime          @updatedAt
 
   completitud CompletitudManual?
+  // spec 015 (D243): "Ya sirvo en un ministerio" — lo elegido del listado y desde qué año.
+  desdeAnio            Int?
+  opcionesMinisterio   OpcionDeclaracionMinisterio[]
 
   @@index([personaId, etapa])
   @@index([estado, createdAt])
@@ -972,6 +975,7 @@ model Ministerio {
   celulas       Celula[]
   postulaciones Postulacion[]
   opcionesEleccion OpcionEleccionMinisterio[]
+  opcionesDeclaracion OpcionDeclaracionMinisterio[]
 
   @@index([activo, eliminadoEn])
   @@map("ministerios")
@@ -995,6 +999,7 @@ model Celula {
 
   postulaciones Postulacion[]
   opcionesEleccion OpcionEleccionMinisterio[]
+  opcionesDeclaracion OpcionDeclaracionMinisterio[]
 
   @@index([ministerioId])
   @@map("celulas")
@@ -1580,4 +1585,24 @@ model OpcionEleccionMinisterio {
 
   @@unique([eleccionId, ministerioId])
   @@map("opciones_eleccion_ministerio")
+}
+
+// spec 015 (D243): lo que declara "Ya sirvo en un ministerio" — el mismo shape
+// que las opciones de la elección. Al confirmar, cada una marcada crea la
+// membresía (`postulacionId`); las que el Admin no marca quedan `descartada`.
+model OpcionDeclaracionMinisterio {
+  id            String                  @id @default(uuid())
+  declaracionId String
+  declaracion   DeclaracionHistorial    @relation(fields: [declaracionId], references: [id], onDelete: Cascade)
+  ministerioId  String
+  ministerio    Ministerio              @relation(fields: [ministerioId], references: [id])
+  celulaId      String?
+  celula        Celula?                 @relation(fields: [celulaId], references: [id])
+  enParalelo    Boolean                 @default(false)
+  resultado     ResultadoOpcionEleccion @default(pendiente)
+  postulacionId String?                 @unique
+  createdAt     DateTime                @default(now())
+
+  @@unique([declaracionId, ministerioId])
+  @@map("opciones_declaracion_ministerio")
 }

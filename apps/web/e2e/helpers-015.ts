@@ -13,6 +13,8 @@ export const EMAILS_015 = {
   lider: 'e2e-elm-lider@example.com',
   persona: 'e2e-elm-persona@example.com',
   personaCelular: 'e2e-elm-persona-celular@example.com',
+  yaSirvo: 'e2e-elm-ya-sirvo@example.com',
+  yaSirvoCelular: 'e2e-elm-ya-sirvo-celular@example.com',
 } as const;
 
 export const EDICION_015 = 'e2e-Edición con elección de ministerio';
@@ -25,6 +27,20 @@ export async function reiniciarEleccion(email: string): Promise<void> {
       `DELETE FROM "elecciones_ministerio" WHERE "personaId" = (SELECT "id" FROM "personas" WHERE "email" = $1)
          AND "grupoId" = (SELECT "id" FROM "grupos" WHERE "nombre" = $2)`,
       [email, EDICION_015],
+    );
+  } finally {
+    await db.end();
+  }
+}
+
+/** D243: deja a la persona sin declaraciones de Ministerio (sus opciones se van en cascada). */
+export async function reiniciarYaSirvo(email: string): Promise<void> {
+  const db = new Client({ connectionString: leerEnvE2e().DATABASE_URL });
+  await db.connect();
+  try {
+    await db.query(
+      `DELETE FROM "declaraciones_historial" WHERE "etapa" = 'ministerio' AND "personaId" = (SELECT "id" FROM "personas" WHERE "email" = $1)`,
+      [email],
     );
   } finally {
     await db.end();
