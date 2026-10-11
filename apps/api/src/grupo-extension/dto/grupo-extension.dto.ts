@@ -31,6 +31,7 @@ export class BuscarGruposDto {
   @ApiPropertyOptional() @Allow() direccion?: string | null;
   @ApiPropertyOptional() @Allow() latitud?: number | null;
   @ApiPropertyOptional() @Allow() longitud?: number | null;
+  @ApiPropertyOptional({ description: 'D238: nombre del Grupo o de quien lo lidera; con esto no hace falta dirección.' }) @Allow() nombre?: string | null;
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsIn(['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'], { each: true })

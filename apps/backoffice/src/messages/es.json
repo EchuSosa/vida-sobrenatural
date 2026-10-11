@@ -237,7 +237,8 @@
       "PREGUNTA_CON_RESPUESTAS": "Esta pregunta ya tiene respuestas: no se puede quitar, cambiar de tipo, sacarle opciones ni dejar de ser dato sensible.",
       "RESPUESTA_REQUERIDA": "Respondé esta pregunta.",
       "RESPUESTA_INVALIDA": "Elegí una de las opciones de la lista.",
-      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres."
+      "RESPUESTA_DEMASIADO_LARGA": "Escribí hasta 200 caracteres.",
+      "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera."
     },
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
     "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
