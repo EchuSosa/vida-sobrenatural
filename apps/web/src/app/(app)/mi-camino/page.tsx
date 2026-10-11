@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { CalendarCheck, CalendarClock, CircleAlert, CircleCheck, CircleDot, Clock, Hourglass, Lock, MessageCircle, Search, Sparkles, UserRound } from 'lucide-react';
+import { CalendarCheck, CalendarClock, CircleAlert, CircleCheck, CircleDot, Clock, Hourglass, ListChecks, Lock, MessageCircle, Search, Sparkles, UserRound } from 'lucide-react';
 import {
   apiFetch,
   enlaceWhatsapp,
@@ -9,6 +9,7 @@ import {
   type CaminoDeLaPersona,
   type EstadoEtapa,
   type EtapaCamino,
+  type ResumenMiEleccion,
 } from '@vida-sobrenatural/shared-types';
 import { ButtonLink, CardEtapa, type CardEtapaProps } from '@vida-sobrenatural/ui';
 import { auth } from '../../../auth';
@@ -58,10 +59,12 @@ export default async function MiCaminoPage() {
   const session = await auth();
   const apiToken = session?.apiToken ?? '';
   const [t, tRaiz, locale] = await Promise.all([getTranslations('miCamino'), getTranslations(), getLocale()]);
-  const camino = await apiFetch<CaminoDeLaPersona>('/camino/me', {
-    headers: { Authorization: `Bearer ${apiToken}` },
-    cache: 'no-store',
-  });
+  const headers = { Authorization: `Bearer ${apiToken}` };
+  const [camino, eleccion] = await Promise.all([
+    apiFetch<CaminoDeLaPersona>('/camino/me', { headers, cache: 'no-store' }),
+    // spec 015 (D239): la elección de ministerio de su edición de Vida de Servicio, si hay.
+    apiFetch<ResumenMiEleccion>('/elecciones-ministerio/me/resumen', { headers, cache: 'no-store' }),
+  ]);
   const fecha = (iso: string) => formatearDiaEnArgentina(iso, locale);
   const nombre = (etapa: EtapaCamino) => tRaiz(`etapas.${etapa}`);
 
@@ -204,6 +207,17 @@ export default async function MiCaminoPage() {
    * Los textos son propios (no repiten los de las cards).
    */
   function loProximo(): ReactNode {
+    // spec 015 (D239): con la elección de ministerio abierta y sin elegir, eso es lo próximo (tiene fecha: se cierra al terminar la edición).
+    if (eleccion.estado === 'puede_elegir') {
+      return (
+        <Proximo titulo={t('proximo.elegirTitulo')} texto={t('proximo.elegirTexto')}>
+          <ButtonLink render={<Link href="/mi-camino/ministerios/elegir" />} size="xl" className="w-full text-base sm:w-fit">
+            <ListChecks aria-hidden />
+            {t('proximo.elegirBoton')}
+          </ButtonLink>
+        </Proximo>
+      );
+    }
     const vn = camino.vidaNueva;
     if (vn.estado === 'en_curso') {
       const nombreDisc = `${vn.discipulador.nombre} ${vn.discipulador.apellido}`;
@@ -265,7 +279,7 @@ export default async function MiCaminoPage() {
       <nav aria-label={t('resumen.aria')}>
         <ol className="grid grid-cols-4 gap-2">
           {camino.etapas.map((estado) => {
-            const r = resumenDe(estado, camino.vidaNueva);
+            const r = resumenDe(estado, camino.vidaNueva, eleccion);
             return (
               <li key={estado.etapa}>
                 <a
@@ -306,7 +320,7 @@ export default async function MiCaminoPage() {
             titulo={nombre(estado.etapa)}
             descripcion={tRaiz(DESCRIPCION[estado.etapa])}
             {...presentado}
-            plegable={{ abiertaAlInicio: abiertaAlInicio(estado) || Boolean(presentado.aviso) }}
+            plegable={{ abiertaAlInicio: abiertaAlInicio(estado, eleccion) || Boolean(presentado.aviso) }}
           >
             {Propias && <Propias estado={estado} apiToken={apiToken} />}
             {estado.estado === 'en_revision' && <RetirarDeclaracion declaracionId={estado.declaracionId} nombreEtapa={nombre(estado.etapa)} />}
@@ -323,8 +337,11 @@ export default async function MiCaminoPage() {
  * Propuesta A: abiertas al entrar, las etapas donde hay algo para hacer o
  * para mirar; plegadas, las bloqueadas, las de "Próximamente" y las hechas.
  * Una con aviso ("No pudimos confirmarlo") también arranca abierta (arriba).
+ * spec 015: Ministerio arranca abierta mientras hay una elección de
+ * ministerio para hacer o en marcha (aunque la etapa siga bloqueada).
  */
-function abiertaAlInicio(estado: EstadoEtapa): boolean {
+function abiertaAlInicio(estado: EstadoEtapa, eleccion: ResumenMiEleccion): boolean {
+  if (estado.etapa === 'ministerio' && eleccion.estado !== 'ninguna') return true;
   return !(estado.estado === 'bloqueada' || estado.estado === 'proximamente' || estado.estado === 'completada');
 }
 
@@ -332,7 +349,13 @@ function abiertaAlInicio(estado: EstadoEtapa): boolean {
 function resumenDe(
   estado: EstadoEtapa,
   vn: CaminoDeLaPersona['vidaNueva'],
+  eleccion: ResumenMiEleccion,
 ): { clave: string; icono: ReactNode; tono: 'activo' | 'hecho' | 'atento' | 'neutro' } {
+  // spec 015: mientras la etapa no está hecha, la elección de ministerio manda en el resumen.
+  if (estado.etapa === 'ministerio' && estado.estado !== 'completada') {
+    if (eleccion.estado === 'puede_elegir') return { clave: 'puedeElegir', icono: <ListChecks />, tono: 'atento' };
+    if (eleccion.estado === 'borrador' || eleccion.estado === 'charla_hecha') return { clave: 'eligio', icono: <Hourglass />, tono: 'atento' };
+  }
   switch (estado.estado) {
     case 'completada':
       return { clave: 'hecha', icono: <CircleCheck />, tono: 'hecho' };

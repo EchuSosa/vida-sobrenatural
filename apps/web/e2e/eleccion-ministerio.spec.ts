@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
+import { abrirEtapa, test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
 import { MINISTERIOS_009 } from './helpers-009';
 import { EDICION_015, EMAILS_015, entrarConTema, reiniciarEleccion, reiniciarYaSirvo } from './helpers-015';
 
@@ -33,6 +33,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
 
       await page.goto('/mi-camino');
       await expect(cardMinisterio(page)).toContainText('Ya podés elegir dónde querés servir');
+      // Propuesta A: es lo próximo, y el resumen de arriba lo dice.
+      await expect(page.getByRole('region', { name: 'Elegí dónde querés servir' })).toBeVisible();
+      await expect(page.getByRole('navigation', { name: 'Tus etapas de un vistazo' })).toContainText('Podés elegir');
       await sinViolaciones(page, tema);
       await cardMinisterio(page).getByRole('link', { name: 'Elegir mi ministerio' }).click();
       await expect(page).toHaveURL(/\/mi-camino\/ministerios\/elegir$/);
@@ -113,6 +116,7 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await reiniciarYaSirvo(email);
       await entrarConTema(page, baseURL!, email, tema);
       await page.goto('/mi-camino');
+      await abrirEtapa(page, 'Ministerio'); // propuesta A: bloqueada (no hizo Vida de Servicio), arranca plegada
       await cardMinisterio(page).getByRole('link', { name: 'Ya sirvo en un ministerio' }).click();
       await expect(page).toHaveURL(/\/mi-camino\/ministerios\/ya-sirvo$/);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ya sirvo en un ministerio');
