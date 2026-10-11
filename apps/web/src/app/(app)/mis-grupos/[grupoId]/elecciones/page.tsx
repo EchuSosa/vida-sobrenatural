@@ -5,7 +5,7 @@ import { ChevronRight, CircleCheck, CircleDashed, Hourglass } from 'lucide-react
 import { ApiError, apiFetch, type EleccionesDeMiGrupo, type EstadoEleccionMinisterio } from '@vida-sobrenatural/shared-types';
 import { EstadoVacio, MigaDePan } from '@vida-sobrenatural/ui';
 import { requerirPermiso } from '../../../../../auth';
-import { textoOpcion } from '../../../../../components/eleccion/selector-ministerios';
+import { textoOpcion } from '../../../../../components/eleccion/texto-opcion';
 
 /**
  * spec 015 (D240): las elecciones de ministerio de la edición, para el líder

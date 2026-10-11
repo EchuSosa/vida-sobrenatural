@@ -5,7 +5,7 @@ import { apiFetch, type MiEleccionMinisterio } from '@vida-sobrenatural/shared-t
 import { AvisoEstado, ButtonLink, MigaDePan } from '@vida-sobrenatural/ui';
 import { auth } from '../../../../../auth';
 import { DatosConocidosVista } from '../../../../../components/eleccion/datos-conocidos';
-import { textoOpcion } from '../../../../../components/eleccion/selector-ministerios';
+import { textoOpcion } from '../../../../../components/eleccion/texto-opcion';
 import { FormularioEleccion } from './formulario-eleccion';
 
 /**

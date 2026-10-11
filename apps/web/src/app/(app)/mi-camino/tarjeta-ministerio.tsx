@@ -5,7 +5,7 @@ import { apiFetch, type EstadoMiMinisterio, type ResumenMiEleccion } from '@vida
 import { AvisoEstado, ButtonLink } from '@vida-sobrenatural/ui';
 import type { PropsAccionesEtapa } from './acciones-etapa';
 import { CardMinisterioCliente } from './card-ministerio';
-import { textoOpcion } from '../../../components/eleccion/selector-ministerios';
+import { textoOpcion } from '../../../components/eleccion/texto-opcion';
 
 /**
  * spec 009, T035 (FR-011 a FR-014) — lo propio de la card de Ministerio en Mi

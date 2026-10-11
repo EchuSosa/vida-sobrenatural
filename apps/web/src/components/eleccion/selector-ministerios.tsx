@@ -20,10 +20,7 @@ export function seleccionDe(opciones: ReadonlyArray<{ ministerio: { id: string }
   return Object.fromEntries(opciones.map((o) => [o.ministerio.id, o.celula?.id ?? ENTERO]));
 }
 
-/** "Bienvenida · Seguridad", o solo el Ministerio si se eligió entero. */
-export function textoOpcion(o: { ministerio: string; celula: string | null }): string {
-  return o.celula ? `${o.ministerio} · ${o.celula}` : o.ministerio;
-}
+export { textoOpcion } from './texto-opcion';
 
 /**
  * spec 015 (D239): el listado para elegir ministerio — el mismo para la
