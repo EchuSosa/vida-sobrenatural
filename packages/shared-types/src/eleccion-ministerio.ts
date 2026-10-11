@@ -156,9 +156,13 @@ export interface GuardarMiEleccion {
   comentario?: string | null;
 }
 
-/** `GET /elecciones-ministerio/me/resumen` — lo que muestra la card de Ministerio de Mi camino. */
+/**
+ * `GET /elecciones-ministerio/me/resumen` — lo que muestra la card de Ministerio
+ * de Mi camino. `ninguna`: no hay nada que mostrar (siempre un objeto: un `null`
+ * viaja como cuerpo vacío y no se puede leer como JSON).
+ */
 export type ResumenMiEleccion =
-  | null
+  | { estado: 'ninguna' }
   | { estado: 'puede_elegir'; edicion: { nombre: string } }
   | {
       estado: 'borrador' | 'charla_hecha';

@@ -11,6 +11,7 @@ import {
   type GuardarEleccionLider,
   type GuardarMiEleccion,
   type MiEleccionMinisterio,
+  type MinisterioParaElegir,
   type OpcionElegida,
   type ResumenMiEleccion,
 } from '@vida-sobrenatural/shared-types';
@@ -73,6 +74,11 @@ export class EleccionService {
 
   // --- Persona ---
 
+  /** GET /elecciones-ministerio/me/catalogo — el mismo listado, para "Ya sirvo" (D243). */
+  catalogo(): Promise<MinisterioParaElegir[]> {
+    return catalogoParaElegir(this.prisma);
+  }
+
   /** GET /elecciones-ministerio/me. */
   async miEleccion(personaId: string): Promise<MiEleccionMinisterio> {
     const edicion = await edicionEnCursoDe(this.prisma, personaId);
@@ -94,7 +100,7 @@ export class EleccionService {
   /** GET /elecciones-ministerio/me/resumen — lo que muestra la card de Ministerio de Mi camino. */
   async resumen(personaId: string): Promise<ResumenMiEleccion> {
     const edicion = await edicionEnCursoDe(this.prisma, personaId);
-    if (!edicion) return null;
+    if (!edicion) return { estado: 'ninguna' };
     const eleccion = await this.cargar({ personaId_grupoId: { personaId, grupoId: edicion.id } });
     if (eleccion && (eleccion.estado === 'borrador' || eleccion.estado === 'charla_hecha')) {
       return {
@@ -104,7 +110,7 @@ export class EleccionService {
       };
     }
     if (!eleccion && edicion.eleccionAbierta) return { estado: 'puede_elegir', edicion: { nombre: edicion.nombre } };
-    return null;
+    return { estado: 'ninguna' };
   }
 
   /** PUT /elecciones-ministerio/me: elegir o cambiar, hasta la charla (D239). */

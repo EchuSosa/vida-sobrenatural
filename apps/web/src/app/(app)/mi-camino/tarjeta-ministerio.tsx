@@ -22,13 +22,13 @@ export async function AccionesMinisterio({ apiToken }: PropsAccionesEtapa) {
   ]);
   return (
     <div className="flex flex-col gap-4">
-      {eleccion && <ResumenEleccion resumen={eleccion} />}
+      {eleccion.estado !== 'ninguna' && <ResumenEleccion resumen={eleccion} />}
       <CardMinisterioCliente estadoInicial={estado} />
     </div>
   );
 }
 
-async function ResumenEleccion({ resumen }: { resumen: NonNullable<ResumenMiEleccion> }) {
+async function ResumenEleccion({ resumen }: { resumen: Exclude<ResumenMiEleccion, { estado: 'ninguna' }> }) {
   const t = await getTranslations('eleccion');
   if (resumen.estado === 'puede_elegir') {
     return (

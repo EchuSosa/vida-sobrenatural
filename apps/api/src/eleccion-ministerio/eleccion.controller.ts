@@ -29,9 +29,16 @@ export class EleccionPersonaController {
   }
 
   @Get('resumen')
-  @ApiOkResponse({ description: 'spec 015: ResumenMiEleccion para la card de Ministerio de Mi camino (o null).' })
+  @ApiOkResponse({ description: 'spec 015: ResumenMiEleccion para la card de Ministerio de Mi camino (`ninguna` si no hay nada que mostrar).' })
   resumen(@Req() request: AuthenticatedRequest) {
     return this.service.resumen(personaActivaDeSesion(request));
+  }
+
+  @Get('catalogo')
+  @ApiOkResponse({ description: 'spec 015, D243: el listado para "Ya sirvo en un ministerio" (MinisterioParaElegir[]).' })
+  catalogo(@Req() request: AuthenticatedRequest) {
+    personaActivaDeSesion(request);
+    return this.service.catalogo();
   }
 
   @Put()

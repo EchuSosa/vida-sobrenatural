@@ -94,6 +94,8 @@ describe('Elección de ministerio (spec 015, integración)', () => {
 
   it('⭐ el Admin la abre (aviso a las inscriptas) y la persona elige con la regla de D239', async () => {
     expect((await como(ana, MIEMBRO, 'get', '/elecciones-ministerio/me')).body).toEqual({ disponible: false });
+    // Siempre un objeto: un null viaja como cuerpo vacío y Mi camino no lo puede leer.
+    expect((await como(ana, MIEMBRO, 'get', '/elecciones-ministerio/me/resumen')).body).toEqual({ estado: 'ninguna' });
     expect((await como(ana, MIEMBRO, 'put', '/elecciones-ministerio/me', { opciones: opcion('Consolidadores') })).body.code).toBe('ELECCION_NO_DISPONIBLE');
 
     avisos.emitidos.length = 0;
