@@ -26,7 +26,7 @@ Mismo stack que el resto (NestJS + Prisma, Next.js 16 con next-intl, `packages/u
 - **Regla compartida** (`shared-types/ministerios.ts`): `MAX_MINISTERIOS_POR_PERSONA = 2` y
   `decisionAlAprobar(actuales, enParalelo)`: `aprobar` | `elegir` (sumar o reemplazar) |
   `reemplazar` (carril lleno).
-- **API** (`postulacion-admin.service.ts` → un helper `otorgarMembresia` en
+- **API** (`postulacion-admin.service.ts` → `decidirMembresia` en
   `ministerio/membresia.ts`, que reusan las entregas 2 y 3): bloquea la Persona (`bloquearPersona`),
   cuenta las aprobadas del carril y aplica la decisión. `AprobarPostulacion` suma `sumar?: boolean` y
   `reemplazaId?: string`; `confirmarCambio` sigue valiendo para el caso de una sola (compatibilidad). El
@@ -48,7 +48,7 @@ Mismo stack que el resto (NestJS + Prisma, Next.js 16 con next-intl, `packages/u
 - **Regla**: `validarEleccionMinisterio` (shared-types), la usan API, web y backoffice.
 - **API**:
   - Admin: `PUT /grupos/vida-de-servicio/:id/eleccion-abierta`; `GET /elecciones-ministerio/:id`;
-    `POST /elecciones-ministerio/:id/opciones/:opcionId/confirmar` (usa `otorgarMembresia`) y
+    `POST /elecciones-ministerio/:id/opciones/:opcionId/confirmar` (usa `decidirMembresia`) y
     `.../descartar`.
   - Persona: `GET /elecciones-ministerio/me` (lo que la app ya sabe + catálogo + su elección) y
     `PUT /elecciones-ministerio/me`.
@@ -69,7 +69,7 @@ Mismo stack que el resto (NestJS + Prisma, Next.js 16 con next-intl, `packages/u
 ## Entrega 3 — "Ya sirvo" y primera carga (D243)
 
 - `DeclaracionHistorial` de etapa `ministerio` suma opciones (tabla `OpcionDeclaracionMinisterio`,
-  mismo shape) y `desdeAnio`. Confirmar cada opción usa `otorgarMembresia` y, al confirmar la primera,
+  mismo shape) y `desdeAnio`. Confirmar cada opción usa `decidirMembresia` y, al confirmar la primera,
   la CompletitudManual de la etapa (D153); casilla "También hizo Vida de Servicio".
 - `POST /ministerios/:id/miembros` (Admin): membresía directa con `creadoPorId`.
 - Web: el "Ya lo hice" de Ministerio pasa a "Ya sirvo en un ministerio" con el listado. Backoffice:

@@ -499,15 +499,46 @@ describe('Postulaciones del Admin (spec 009, T026/T049/T053)', () => {
     expect((await admin('post', `/postulaciones/${cambio}/aprobar`, { confirmarCambio: true })).status).toBe(200);
     expect(await estados()).toEqual({ [servicio]: 'inactiva', [disc]: 'aprobada', [cambio]: 'aprobada' });
 
-    // La base sigue garantizando una sola membresía por carril.
+    // D241: la base garantiza una sola membresía por Ministerio y una en paralelo (el máximo de 2 lo cuida el servicio).
     await expect(
-      prisma.postulacion.create({ data: { personaId: id, ministerioId: bienvenida.id, estado: 'aprobada', revisadaEn: new Date() } }),
+      prisma.postulacion.create({ data: { personaId: id, ministerioId: nuevo.id, estado: 'aprobada', revisadaEn: new Date() } }),
     ).rejects.toThrow();
     await expect(
       prisma.postulacion.create({
         data: { personaId: id, ministerioId: ensenanza.id, estado: 'aprobada', revisadaEn: new Date(), enParalelo: true },
       }),
     ).rejects.toThrow();
+  });
+
+  it('D241: hasta 2 Ministerios — con uno se elige sumar o reemplazar; con dos, solo reemplazar uno de esos', async () => {
+    const id = await persona('dos');
+    const primero = await pendiente(id, bienvenida.id);
+    expect((await admin('post', `/postulaciones/${primero}/aprobar`, {})).status).toBe(200);
+
+    const adoracion = await mins.ministerio('Adoración D241');
+    const segundo = await pendiente(id, adoracion.id);
+    const detalle = (await admin('get', `/postulaciones/${segundo}`)).body;
+    expect(detalle).toMatchObject({ puedeSumar: true, ministeriosActuales: [{ postulacionId: primero, ministerio: { id: bienvenida.id } }] });
+    const sinDecidir = await admin('post', `/postulaciones/${segundo}/aprobar`, {});
+    expect([sinDecidir.status, sinDecidir.body.code, sinDecidir.body.puedeSumar]).toEqual([409, 'POSTULACION_REQUIERE_CONFIRMAR_CAMBIO', true]);
+    expect((await admin('post', `/postulaciones/${segundo}/aprobar`, { sumar: true })).status).toBe(200);
+
+    const miCamino = (await como(id, APTA, 'get', '/ministerios/me')).body;
+    expect(miCamino.membresias.map((m: { postulacionId: string }) => m.postulacionId)).toEqual([primero, segundo]);
+    expect(((await admin('get', `/personas/${id}/ministerio`)).body as MinisterioDePersona).actuales.map((a) => a.postulacionId)).toEqual([primero, segundo]);
+
+    // Un tercero: no se puede sumar; hay que elegir cuál reemplaza, y tiene que ser uno de los suyos.
+    const multimedia = await mins.ministerio('Multimedia D241');
+    const tercero = await pendiente(id, multimedia.id);
+    const lleno = await admin('post', `/postulaciones/${tercero}/aprobar`, { sumar: true });
+    expect([lleno.status, lleno.body.puedeSumar, lleno.body.ministeriosActuales.length]).toEqual([409, false, 2]);
+    const ajena = await admin('post', `/postulaciones/${tercero}/aprobar`, { reemplazaId: tercero });
+    expect(ajena.body.errors).toEqual([{ campo: 'reemplazaId', code: 'REEMPLAZO_INVALIDO' }]);
+    expect((await admin('post', `/postulaciones/${tercero}/aprobar`, { reemplazaId: primero })).status).toBe(200);
+    const estados = Object.fromEntries(
+      (await prisma.postulacion.findMany({ where: { personaId: id }, select: { id: true, estado: true, reemplazadaPorId: true } })).map((p) => [p.id, [p.estado, p.reemplazadaPorId]]),
+    );
+    expect(estados).toEqual({ [primero]: ['inactiva', tercero], [segundo]: ['aprobada', null], [tercero]: ['aprobada', null] });
   });
 
   it('bandeja y Pendientes del Inicio (FR-015, FR-041): la fila trae Ministerio, Célula y la marca de formación; el contador cuenta las pendientes', async () => {

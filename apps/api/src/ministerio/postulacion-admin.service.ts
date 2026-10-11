@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   EDAD_MINIMA_ROL_DE_CARGO,
+  maxMembresiasDelCarril,
   sinAccesoALaApp,
   type AprobarPostulacion,
   type MinisterioDePersona,
@@ -19,6 +20,7 @@ import { nombresDe } from '../discipulado/consultas.js';
 import { normalizarMotivo } from '../discipulado/validaciones.js';
 import { bloquearPersona } from '../camino/consultas.js';
 import { crearPostulacion, esViolacionDeUnico } from './crear-postulacion.js';
+import { decidirMembresia, inactivarPorCambio, membresiasDelCarril } from './membresia.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -126,7 +128,7 @@ export class PostulacionAdminService {
       },
     });
     if (!p) throw noEncontrada();
-    const [persona, otraAprobada, historial, nombres] = await Promise.all([
+    const [persona, otrasAprobadas, historial, nombres] = await Promise.all([
       this.prisma.persona.findUniqueOrThrow({
         where: { id: p.personaId },
         select: {
@@ -140,15 +142,8 @@ export class PostulacionAdminService {
           rol: true,
         },
       }),
-      this.prisma.postulacion.findFirst({
-        where: {
-          personaId: p.personaId,
-          estado: 'aprobada',
-          enParalelo: p.enParalelo, // D217: lo que el cambio reemplazaría
-          id: { not: p.id },
-        },
-        select: { ministerio: { select: { id: true, nombre: true } } },
-      }),
+      // D217 + D241: las del mismo carril (lo que aprobar sumaría o reemplazaría).
+      membresiasDelCarril(this.prisma, p.personaId, p.enParalelo, p.id),
       historialDe(this.prisma, p.personaId, verMotivos, p.id),
       nombresDe(
         this.prisma,
@@ -195,7 +190,10 @@ export class PostulacionAdminService {
         : null,
       revisadaEn: p.revisadaEn?.toISOString() ?? null,
       ...(verMotivos ? { motivoRechazo: p.motivoRechazo } : {}),
-      ministerioActual: otraAprobada?.ministerio ?? null,
+      ministerioActual: otrasAprobadas[0]?.ministerio ?? null,
+      ministeriosActuales: otrasAprobadas,
+      puedeSumar:
+        otrasAprobadas.length < maxMembresiasDelCarril(p.enParalelo),
       ofrecerRolDiscipulador:
         !!celula?.ofreceRolDiscipulador &&
         !esDiscipulador &&
@@ -218,7 +216,7 @@ export class PostulacionAdminService {
     try {
       await this.prisma.$transaction(async (tx) => {
         const p = await bloquearPendiente(tx, id);
-        const [ministerio, celula, anterior] = await Promise.all([
+        const [ministerio, celula] = await Promise.all([
           tx.ministerio.findUniqueOrThrow({
             where: { id: p.ministerioId },
             select: { activo: true, eliminadoEn: true },
@@ -233,19 +231,6 @@ export class PostulacionAdminService {
                 },
               })
             : Promise.resolve(null),
-          // D217: solo la aprobada del mismo carril se reemplaza; "Discipulados
-          // Vida Nueva" (en paralelo) no saca a nadie de su Ministerio.
-          tx.postulacion.findFirst({
-            where: {
-              personaId: p.personaId,
-              estado: 'aprobada',
-              enParalelo: p.enParalelo,
-            },
-            select: {
-              id: true,
-              ministerio: { select: { id: true, nombre: true } },
-            },
-          }),
         ]);
         // FR-021: no se aprueba hacia un Ministerio o Célula que ya no están disponibles.
         if (!ministerio.activo || ministerio.eliminadoEn) {
@@ -277,30 +262,20 @@ export class PostulacionAdminService {
           );
         }
 
+        // D241: hasta 2 Ministerios (más el paralelo); con el carril ocupado, el
+        // Admin elige sumar o reemplazar — la decisión la exige la API (D173).
+        const anterior = await decidirMembresia(tx, {
+          personaId: p.personaId,
+          ministerioId: p.ministerioId,
+          enParalelo: p.enParalelo,
+          decision: dto,
+          excluirId: id,
+        });
         const ahora = new Date();
         let reemplazaA: string | null = null;
         if (anterior) {
-          // D173: la confirmación la exige la API, no solo la pantalla.
-          if (dto.confirmarCambio !== true) {
-            throw new AppException(
-              'POSTULACION_REQUIERE_CONFIRMAR_CAMBIO',
-              409,
-              `Esta persona ya pertenece al Ministerio ${anterior.ministerio.nombre}: confirmá el cambio.`,
-              undefined,
-              { ministerioActual: anterior.ministerio },
-            );
-          }
-          await tx.postulacion.update({
-            where: { id: anterior.id },
-            data: {
-              estado: 'inactiva',
-              motivoInactivacion: 'cambio_de_ministerio',
-              inactivadaEn: ahora,
-              inactivadaPorId: autorId,
-              reemplazadaPorId: id,
-            },
-          });
-          reemplazaA = anterior.id;
+          await inactivarPorCambio(tx, anterior.postulacionId, id, autorId, ahora);
+          reemplazaA = anterior.postulacionId;
         }
         await tx.postulacion.update({
           where: { id },
@@ -336,7 +311,7 @@ export class PostulacionAdminService {
         });
       });
     } catch (error) {
-      // FR-020: el índice `postulaciones_una_aprobada` es la garantía final ante una carrera.
+      // D241: `postulaciones_aprobada_por_ministerio` y el de la en paralelo son la garantía final ante una carrera.
       if (esViolacionDeUnico(error))
         throw new AppException(
           'POSTULACION_NO_PENDIENTE',
@@ -449,15 +424,16 @@ export class PostulacionAdminService {
         404,
         'No existe una Persona con ese id.',
       );
-    const [actual, pendiente, historial] = await Promise.all([
-      // D217: la membresía es la del Ministerio; la en paralelo queda en el historial.
-      this.prisma.postulacion.findFirst({
+    const [aprobadas, pendiente, historial] = await Promise.all([
+      // D217 + D241: todas las membresías, la del Ministerio primero.
+      this.prisma.postulacion.findMany({
         where: { personaId, estado: 'aprobada' },
-        orderBy: { enParalelo: 'asc' },
+        orderBy: [{ enParalelo: 'asc' }, { revisadaEn: 'asc' }, { createdAt: 'asc' }],
         select: {
           id: true,
           revisadaEn: true,
           createdAt: true,
+          enParalelo: true,
           ministerio: { select: { id: true, nombre: true } },
           celula: { select: { id: true, nombre: true } },
         },
@@ -472,16 +448,17 @@ export class PostulacionAdminService {
       }),
       historialDe(this.prisma, personaId, verMotivos),
     ]);
+    const actuales = aprobadas.map((a) => ({
+      postulacionId: a.id,
+      ministerio: a.ministerio,
+      celula: a.celula,
+      desde: (a.revisadaEn ?? a.createdAt).toISOString(),
+      enParalelo: a.enParalelo,
+    }));
     return {
       persona,
-      actual: actual
-        ? {
-            postulacionId: actual.id,
-            ministerio: actual.ministerio,
-            celula: actual.celula,
-            desde: (actual.revisadaEn ?? actual.createdAt).toISOString(),
-          }
-        : null,
+      actual: actuales[0] ?? null,
+      actuales,
       pendiente: pendiente
         ? {
             postulacionId: pendiente.id,

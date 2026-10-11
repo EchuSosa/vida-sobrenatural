@@ -2,12 +2,12 @@
 
 ## Entrega 1 — hasta 2 membresías (D241)
 
-- [ ] T001 Migración: borrar `postulaciones_una_aprobada`, crear `postulaciones_aprobada_por_ministerio`.
-- [ ] T002 shared-types: `MAX_MINISTERIOS_POR_PERSONA`, `decisionAlAprobar`, `membresias` en `EstadoMiMinisterio` (`miembro`), `actuales` en `MinisterioDePersona`, `ministeriosActuales` en `PostulacionDetalle`, `sumar`/`reemplazaId` en `AprobarPostulacion` + unit.
-- [ ] T003 API: `otorgarMembresia` (`ministerio/membresia.ts`) y `aprobar` con la decisión; `estadoMiMinisterio` con todas las membresías; `deLaPersona` con `actuales` + integración.
-- [ ] T004 Web: card de Ministerio de Mi camino con todas las membresías + e2e.
-- [ ] T005 Backoffice: diálogo "¿Lo suma o reemplaza a …?" en el detalle de la Postulación y lista en el Perfil + e2e.
-- [ ] T006 Docs: manual (MIN), docs/04 (regla de la membresía), checklist de docs/15 por pantalla.
+- [x] T001 Migración: borrar `postulaciones_una_aprobada`, crear `postulaciones_aprobada_por_ministerio`.
+- [x] T002 shared-types: `MAX_MINISTERIOS_POR_PERSONA`, `decisionAlAprobar`, `membresias` en `EstadoMiMinisterio` (`miembro`), `actuales` en `MinisterioDePersona`, `ministeriosActuales` en `PostulacionDetalle`, `sumar`/`reemplazaId` en `AprobarPostulacion` + unit.
+- [x] T003 API: `decidirMembresia` e `inactivarPorCambio` (`ministerio/membresia.ts`) y `aprobar` con la decisión; `estadoMiMinisterio` con todas las membresías; `deLaPersona` con `actuales` + integración.
+- [x] T004 Web: card de Ministerio de Mi camino con todas las membresías + e2e.
+- [x] T005 Backoffice: diálogo "¿Lo suma o reemplaza a …?" en el detalle de la Postulación y lista en el Perfil + e2e.
+- [x] T006 Docs: manual (MIN-04 y MIN-15), docs/04 (regla de la membresía). Checklist de docs/15 revisado en la card de Ministerio, el detalle de la Postulación y el Perfil: cuatro estados (sin cambios de carga/error), radios con `legend`, textos en `next-intl`, colores de tokens, estado en texto + ícono (D81).
 
 ## Entrega 2 — elección (D239, D240, D242)
 

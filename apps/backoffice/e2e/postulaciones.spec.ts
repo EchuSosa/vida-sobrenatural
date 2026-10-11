@@ -58,7 +58,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(await estadoDe(EMAILS_009.postulante)).toMatchObject({ estado: 'miembro', membresia: { ministerio: { nombre: MINISTERIOS_009.bienvenida } } });
     });
 
-    test('cambio de Ministerio: la advertencia se ve antes de actuar y el diálogo pide confirmar el cambio (FR-017, SC-002)', async ({ page }) => {
+    test('D241: ya sirve en uno — la advertencia se ve antes de actuar y el diálogo pregunta si lo suma o lo reemplaza (FR-017, SC-002)', async ({ page }) => {
       await prepararSinPostulacion(EMAILS_009.cambio);
       const bienvenida = await ministerioPorNombre(MINISTERIOS_009.bienvenida);
       const mesa = await ministerioPorNombre(MINISTERIOS_009.mesa);
@@ -67,14 +67,35 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await loguearseComoAdminE2E(page);
       await page.goto(`/solicitudes/postulacion/${id}`);
-      await expect(page.getByRole('note').filter({ hasText: `Ya pertenece a ${MINISTERIOS_009.bienvenida}` })).toBeVisible();
+      await expect(page.getByRole('note').filter({ hasText: `Ya sirve en ${MINISTERIOS_009.bienvenida}` })).toBeVisible();
       await sinViolaciones(page);
       await page.getByRole('button', { name: 'Aprobar', exact: true }).click();
-      await expect(page.getByRole('alertdialog')).toContainText(`Esta persona ya pertenece al Ministerio ${MINISTERIOS_009.bienvenida}. ¿Confirmás el cambio?`);
+      const dialogo = page.getByRole('alertdialog');
+      await expect(dialogo.getByRole('group', { name: '¿Qué hacés con sus ministerios?' })).toBeVisible();
+      // Por defecto, sumarlo (queda lugar: hasta 2).
+      await expect(dialogo.getByLabel(`Sumarlo: sirve en ${MINISTERIOS_009.bienvenida} y también en ${MINISTERIOS_009.mesa}`)).toBeChecked();
       await sinViolaciones(page);
-      await page.getByRole('button', { name: 'Sí, confirmar el cambio' }).click();
+      await dialogo.getByLabel(`Reemplazar ${MINISTERIOS_009.bienvenida}: lo deja y pasa a ${MINISTERIOS_009.mesa}`).check();
+      await dialogo.getByRole('button', { name: 'Sí, confirmar el cambio' }).click();
       await expect(page.getByText('Aprobada', { exact: true })).toBeVisible();
-      expect(await estadoDe(EMAILS_009.cambio)).toMatchObject({ estado: 'miembro', membresia: { ministerio: { nombre: MINISTERIOS_009.mesa } } });
+      expect(await estadoDe(EMAILS_009.cambio)).toMatchObject({ estado: 'miembro', membresias: [{ ministerio: { nombre: MINISTERIOS_009.mesa } }] });
+    });
+
+    test('D241: sumar un segundo Ministerio — sirve en los dos', async ({ page }) => {
+      await prepararSinPostulacion(EMAILS_009.cambio);
+      const bienvenida = await ministerioPorNombre(MINISTERIOS_009.bienvenida);
+      const mesa = await ministerioPorNombre(MINISTERIOS_009.mesa);
+      await aprobarComoAdmin(await postularComo(EMAILS_009.cambio, bienvenida.id));
+      const id = await postularComo(EMAILS_009.cambio, mesa.id);
+
+      await loguearseComoAdminE2E(page);
+      await page.goto(`/solicitudes/postulacion/${id}`);
+      await page.getByRole('button', { name: 'Aprobar', exact: true }).click();
+      await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, aprobar' }).click();
+      await expect(page.getByText('Aprobada', { exact: true })).toBeVisible();
+      const estado = await estadoDe(EMAILS_009.cambio);
+      expect(estado).toMatchObject({ estado: 'miembro' });
+      expect(estado.membresias?.map((m) => m.ministerio.nombre)).toEqual([MINISTERIOS_009.bienvenida, MINISTERIOS_009.mesa]);
     });
 
     test('en nombre de (FR-024): desde el Perfil de Persona, con su nombre a la vista; queda pendiente y cargada por el Admin', async ({ page }) => {

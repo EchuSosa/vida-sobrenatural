@@ -654,8 +654,12 @@
       "ministerioPausado": "{ministerio} está en pausa por ahora. Si tenés dudas, consultá en tu Sede.",
       "celulaPausada": "El área {celula} está en pausa por ahora. Si tenés dudas, consultá en tu Sede.",
       "cambiar": "Quiero cambiar de Ministerio",
+      "sumarOCambiar": "Quiero sumar o cambiar de ministerio",
+      "y": "y",
       "pendienteOtroTitulo": "También te postulaste a {ministerio}",
-      "pendienteOtroTexto": "Si el equipo la aprueba, pasás a servir ahí y dejás {actual}.",
+      "pendienteOtroTexto": "Si el equipo la aprueba, lo charlan con vos: podés servir también ahí (hasta 2 ministerios) o dejar {actual}.",
+      "pendienteOtroTextoLleno": "Ya servís en {actual}: si el equipo la aprueba, dejás uno de los dos. Lo charlan con vos.",
+      "pendienteOtroTextoReemplaza": "Si el equipo la aprueba, pasás a servir ahí y dejás {actual}.",
       "errorGenerico": "No pudimos guardarlo. Probá de nuevo en unos segundos."
     },
     "bautismo": {

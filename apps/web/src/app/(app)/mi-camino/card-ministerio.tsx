@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ArrowRightLeft, CircleAlert, CircleMinus, GraduationCap, Hourglass, CirclePause, Sparkles, Undo2, UsersRound } from 'lucide-react';
-import { ApiError, apiFetch, formatearDiaEnArgentina, type EstadoMiMinisterio, type PendienteVista } from '@vida-sobrenatural/shared-types';
+import { ApiError, MAX_MINISTERIOS_POR_PERSONA, apiFetch, formatearDiaEnArgentina, type EstadoMiMinisterio, type PendienteVista } from '@vida-sobrenatural/shared-types';
 import { AvisoEstado, Button, ButtonLink, ConfirmDestructiveDialog, useEnvio } from '@vida-sobrenatural/ui';
 
 const ICONO = 'text-primary';
@@ -67,31 +67,44 @@ export function CardMinisterioCliente({ estadoInicial }: { estadoInicial: Estado
       return <Pendiente pendiente={estado.pendiente} fecha={fecha} onCambio={setEstado} />;
 
     case 'miembro': {
-      const { membresia, pendiente } = estado;
+      const { membresias, pendiente } = estado;
+      // D241: hasta 2 Ministerios (más el paralelo, D217): cada carril cuenta lo suyo.
+      const delCarril = (enParalelo: boolean) => membresias.filter((m) => m.enParalelo === enParalelo);
+      const principales = delCarril(false);
+      const lleno = principales.length >= MAX_MINISTERIOS_POR_PERSONA;
+      const carrilDelPendiente = pendiente ? delCarril(pendiente.enParalelo) : [];
       return (
         <div className="flex flex-col gap-4">
-          <AvisoEstado icono={<UsersRound className={ICONO} />} titulo={t('miembroTitulo', { ministerio: membresia.ministerio.nombre })}>
-            <span className="flex flex-col gap-1">
-              {membresia.celula && <span>{t('miembroCelula', { celula: membresia.celula.nombre })}</span>}
-              <span>{t('miembroDesde', { fecha: fecha(membresia.desde) })}</span>
-            </span>
-          </AvisoEstado>
-          {!membresia.ministerio.activo && (
-            <AvisoEstado role="note" icono={<CirclePause className={ICONO_NEUTRO} />} titulo={t('ministerioPausado', { ministerio: membresia.ministerio.nombre })} />
-          )}
-          {membresia.ministerio.activo && membresia.celula && !membresia.celula.activo && (
-            <AvisoEstado role="note" icono={<CirclePause className={ICONO_NEUTRO} />} titulo={t('celulaPausada', { celula: membresia.celula.nombre })} />
-          )}
+          <ul className="flex flex-col gap-3">
+            {membresias.map((membresia) => (
+              <li key={membresia.postulacionId} className="flex flex-col gap-2">
+                <AvisoEstado icono={<UsersRound className={ICONO} />} titulo={t('miembroTitulo', { ministerio: membresia.ministerio.nombre })}>
+                  <span className="flex flex-col gap-1">
+                    {membresia.celula && <span>{t('miembroCelula', { celula: membresia.celula.nombre })}</span>}
+                    <span>{t('miembroDesde', { fecha: fecha(membresia.desde) })}</span>
+                  </span>
+                </AvisoEstado>
+                {!membresia.ministerio.activo && (
+                  <AvisoEstado role="note" icono={<CirclePause className={ICONO_NEUTRO} />} titulo={t('ministerioPausado', { ministerio: membresia.ministerio.nombre })} />
+                )}
+                {membresia.ministerio.activo && membresia.celula && !membresia.celula.activo && (
+                  <AvisoEstado role="note" icono={<CirclePause className={ICONO_NEUTRO} />} titulo={t('celulaPausada', { celula: membresia.celula.nombre })} />
+                )}
+              </li>
+            ))}
+          </ul>
           {pendiente ? (
-            <Pendiente pendiente={pendiente} fecha={fecha} onCambio={setEstado} actual={
-                // D217: una postulación en paralelo ("Discipulados Vida Nueva") no deja el Ministerio actual, ni al revés.
-                pendiente.enParalelo === membresia.enParalelo ? membresia.ministerio.nombre : undefined
-              }
+            <Pendiente
+              pendiente={pendiente}
+              fecha={fecha}
+              onCambio={setEstado}
+              actuales={carrilDelPendiente.map((m) => m.ministerio.nombre)}
+              lleno={carrilDelPendiente.length >= (pendiente.enParalelo ? 1 : MAX_MINISTERIOS_POR_PERSONA)}
             />
           ) : (
             <ButtonLink render={<Link href="/mi-camino/ministerios" />} variant="ghost" size="xl" className="w-full text-base sm:w-fit">
               <ArrowRightLeft aria-hidden />
-              {t('cambiar')}
+              {lleno ? t('cambiar') : t('sumarOCambiar')}
             </ButtonLink>
           )}
         </div>
@@ -100,17 +113,23 @@ export function CardMinisterioCliente({ estadoInicial }: { estadoInicial: Estado
   }
 }
 
-/** Una postulación en revisión, con "Retirar postulación" (FR-006). `actual`: el Ministerio en el que ya sirve, si es un cambio. */
+/**
+ * Una postulación en revisión, con "Retirar postulación" (FR-006). `actuales`:
+ * los Ministerios del mismo carril en los que ya sirve; `lleno`: si aprobarla
+ * obliga a dejar uno (D241: hasta 2, el paralelo hasta 1).
+ */
 function Pendiente({
   pendiente,
   fecha,
   onCambio,
-  actual,
+  actuales = [],
+  lleno = false,
 }: {
   pendiente: PendienteVista;
   fecha: (iso: string) => string;
   onCambio: (e: EstadoMiMinisterio) => void;
-  actual?: string;
+  actuales?: string[];
+  lleno?: boolean;
 }) {
   const t = useTranslations('miCamino.ministerio');
   const te = useTranslations('errors');
@@ -138,11 +157,13 @@ function Pendiente({
     <div className="flex flex-col gap-3">
       <AvisoEstado
         icono={<Hourglass className={ICONO} />}
-        titulo={actual ? t('pendienteOtroTitulo', { ministerio }) : t('pendienteTitulo')}
+        titulo={actuales.length > 0 ? t('pendienteOtroTitulo', { ministerio }) : t('pendienteTitulo')}
       >
         <span className="flex flex-col gap-1">
           <span>{pendiente.celula ? t('pendienteTextoCelula', { ...datos, celula: pendiente.celula.nombre }) : t('pendienteTexto', datos)}</span>
-          {actual && <span>{t('pendienteOtroTexto', { actual })}</span>}
+          {actuales.length > 0 && (
+            <span>{t(!lleno ? 'pendienteOtroTexto' : actuales.length > 1 ? 'pendienteOtroTextoLleno' : 'pendienteOtroTextoReemplaza', { actual: textoLista(actuales, t('y')) })}</span>
+          )}
         </span>
       </AvisoEstado>
       {pendiente.requiereFormacion && (
@@ -164,4 +185,9 @@ function Pendiente({
       />
     </div>
   );
+}
+
+/** "A", "A y B". */
+function textoLista(nombres: string[], y: string): string {
+  return nombres.length <= 1 ? (nombres[0] ?? '') : `${nombres.slice(0, -1).join(', ')} ${y} ${nombres[nombres.length - 1]}`;
 }
