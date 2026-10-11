@@ -84,18 +84,24 @@ export async function datosConocidos(db: Db, personaId: string): Promise<DatosCo
   };
 }
 
-/** El `select` de las opciones con lo que muestran todas las vistas. */
-export const SELECT_OPCION = {
+/** El `select` de una opción con lo que muestran todas las vistas (sirve también para las de "Ya sirvo", D243). */
+export const SELECT_OPCION_VISTA = {
   id: true,
   enParalelo: true,
   resultado: true,
+  ministerio: { select: { id: true, nombre: true, activo: true, eliminadoEn: true, requiereFormacion: true } },
+  celula: { select: { id: true, nombre: true, activo: true, eliminadoEn: true, ofreceRolDiscipulador: true } },
+} as const satisfies Prisma.OpcionEleccionMinisterioSelect & Prisma.OpcionDeclaracionMinisterioSelect;
+
+/** El de las opciones de la elección: con cómo las resolvió el Admin. */
+export const SELECT_OPCION = {
+  ...SELECT_OPCION_VISTA,
   motivoDescarte: true,
   resueltaPorId: true,
   resueltaEn: true,
-  ministerio: { select: { id: true, nombre: true, activo: true, eliminadoEn: true, requiereFormacion: true } },
-  celula: { select: { id: true, nombre: true, activo: true, eliminadoEn: true, ofreceRolDiscipulador: true } },
 } as const satisfies Prisma.OpcionEleccionMinisterioSelect;
 
+export type OpcionCargadaVista = Prisma.OpcionEleccionMinisterioGetPayload<{ select: typeof SELECT_OPCION_VISTA }>;
 export type OpcionCargada = Prisma.OpcionEleccionMinisterioGetPayload<{ select: typeof SELECT_OPCION }>;
 
 /** Las opciones en el orden de la vista: las de un Ministerio primero (por nombre), la en paralelo al final. */
@@ -103,7 +109,7 @@ export function ordenarOpciones<T extends { enParalelo: boolean; ministerio: { n
   return [...opciones].sort((a, b) => Number(a.enParalelo) - Number(b.enParalelo) || a.ministerio.nombre.localeCompare(b.ministerio.nombre, 'es'));
 }
 
-export function opcionVista(o: OpcionCargada): OpcionVista {
+export function opcionVista(o: OpcionCargadaVista): OpcionVista {
   return {
     id: o.id,
     ministerio: { id: o.ministerio.id, nombre: o.ministerio.nombre },

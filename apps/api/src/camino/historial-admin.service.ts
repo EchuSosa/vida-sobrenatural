@@ -5,9 +5,11 @@ import {
   NOTA_COMPLETITUD_MAX,
   sinAccesoALaApp,
   type CaminoDePersonaAdmin,
+  type ConfirmarDeclaracion,
   type ContextoEtapa,
   type DeclaracionDetalle,
   type EtapaCamino,
+  type MinisterioDeclarado,
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -19,6 +21,9 @@ import { NotificacionesService } from '../notificaciones/notificaciones.service.
 import { BautismoService } from '../bautismo/bautismo.service.js';
 import { bloquearPersona, completoEtapa, vidaNuevaEnMarcha } from './consultas.js';
 import { alCompletarCategoria } from '../vida-de-servicio/efectos.js';
+import { RolesDeEstadoService } from '../persona/roles-de-estado.service.js';
+import { crearMembresiaDirecta, membresiasDelCarril } from '../ministerio/membresia.js';
+import { SELECT_OPCION_VISTA, opcionVista, ordenarOpciones, type OpcionCargadaVista } from '../eleccion-ministerio/consultas.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -36,6 +41,8 @@ export class HistorialAdminService {
     private readonly notificaciones: NotificacionesService,
     // spec 010 (H3): confirmar "ya se bautizó" retira la Solicitud de Bautismo abierta, si hay.
     private readonly bautismo: BautismoService,
+    // spec 015 (D243): la membresía de "Ya sirvo", por el lugar único de roles de estado.
+    private readonly rolesDeEstado: RolesDeEstadoService,
   ) {}
 
   /** GET /historial/declaraciones/:id (FR-013). */
@@ -44,10 +51,12 @@ export class HistorialAdminService {
       where: { id },
       select: {
         id: true, personaId: true, etapa: true, estado: true, comentario: true, createdAt: true,
-        revisadoPorId: true, revisadaEn: true, motivoRechazo: true,
+        revisadoPorId: true, revisadaEn: true, motivoRechazo: true, desdeAnio: true,
+        opcionesMinisterio: { select: SELECT_OPCION_VISTA },
       },
     });
     if (!d) throw noEncontrada();
+    const ministerio = d.etapa === 'ministerio' && d.opcionesMinisterio.length > 0 ? await ministerioDeclarado(this.prisma, d.personaId, d.desdeAnio, d.opcionesMinisterio) : null;
     const [persona, contexto, anteriores, nombres] = await Promise.all([
       this.prisma.persona.findUniqueOrThrow({
         where: { id: d.personaId },
@@ -82,14 +91,21 @@ export class HistorialAdminService {
         ...contexto,
         declaracionesAnteriores: anteriores.map((a) => ({ estado: a.estado, fecha: (a.revisadaEn ?? a.retiradaEn ?? a.createdAt).toISOString() })),
       },
+      ...(ministerio ? { ministerio } : {}),
     };
   }
 
-  /** POST /historial/declaraciones/:id/confirmar (FR-013): pasa a confirmada y crea la Completitud. */
-  async confirmar(id: string, autorId: string): Promise<DeclaracionDetalle> {
+  /**
+   * POST /historial/declaraciones/:id/confirmar (FR-013): pasa a confirmada y crea la Completitud.
+   * spec 015 (D243): un "Ya sirvo en un ministerio" crea además la membresía de
+   * cada área que el Admin confirma (las demás quedan descartadas) y, si se
+   * pide, registra Vida de Servicio como hecha (queda apta para Ministerio).
+   */
+  async confirmar(id: string, autorId: string, cuerpo: ConfirmarDeclaracion = {}): Promise<DeclaracionDetalle> {
     await this.prisma.$transaction(async (tx) => {
       const d = await bloquearDeclaracionPendiente(tx, id);
       await exigirEtapaNoCompletaNiEnCurso(tx, d.personaId, d.etapa);
+      if (d.etapa === 'ministerio') await this.confirmarYaSirvo(tx, id, d.personaId, autorId, cuerpo);
       await tx.declaracionHistorial.update({ where: { id }, data: { estado: 'confirmada', revisadoPorId: autorId, revisadaEn: new Date() } });
       await tx.completitudManual.create({
         data: { personaId: d.personaId, etapa: d.etapa, origen: 'declaracion', declaracionId: id, registradaPorId: autorId },
@@ -103,6 +119,33 @@ export class HistorialAdminService {
       });
     });
     return this.detalle(id);
+  }
+
+  /** spec 015 (D243): las membresías de "Ya sirvo" y, si se pide, Vida de Servicio hecha. */
+  private async confirmarYaSirvo(tx: Prisma.TransactionClient, declaracionId: string, personaId: string, autorId: string, cuerpo: ConfirmarDeclaracion): Promise<void> {
+    const opciones = await tx.opcionDeclaracionMinisterio.findMany({ where: { declaracionId }, select: { id: true, ministerioId: true, celulaId: true } });
+    if (opciones.length === 0) return; // un "Ya lo hice" de antes, con texto libre
+    const confirmadas = new Set(cuerpo.opcionesConfirmadas ?? opciones.map((o) => o.id));
+    if (!opciones.some((o) => confirmadas.has(o.id))) {
+      throw new AppException('VALIDACION', 400, 'Marcá al menos un ministerio para confirmar, o tocá "No confirmar".', [{ campo: 'opcionesConfirmadas', code: 'ELECCION_VACIA' }]);
+    }
+    if (cuerpo.tambienVidaDeServicio && !(await completoEtapa(tx, personaId, 'vida_de_servicio'))) {
+      await tx.completitudManual.create({ data: { personaId, etapa: 'vida_de_servicio', origen: 'admin', nota: 'Registrada al confirmar "Ya sirvo en un ministerio".', registradaPorId: autorId } });
+      await alCompletarCategoria(tx, personaId, 'vida_de_servicio');
+    }
+    for (const o of opciones) {
+      if (!confirmadas.has(o.id)) {
+        await tx.opcionDeclaracionMinisterio.update({ where: { id: o.id }, data: { resultado: 'descartada' } });
+        continue;
+      }
+      // Las de una misma declaración entran juntas (hasta 2 + el paralelo): se suman a lo que ya tenga.
+      const { postulacionId } = await crearMembresiaDirecta(
+        tx,
+        { rolesDeEstado: this.rolesDeEstado, notificaciones: this.notificaciones },
+        { personaId, ministerioId: o.ministerioId, celulaId: o.celulaId, autorId, decision: { sumar: true } },
+      );
+      await tx.opcionDeclaracionMinisterio.update({ where: { id: o.id }, data: { resultado: 'confirmada', postulacionId } });
+    }
   }
 
   /** POST /historial/declaraciones/:id/rechazar (FR-013): "No confirmar", con un motivo opcional que lee la Persona. */
@@ -253,4 +296,19 @@ function noEncontrada() {
 
 function yaCompleta() {
   return new AppException('ETAPA_YA_COMPLETADA', 409, 'Esta etapa ya figura como hecha.');
+}
+
+/** spec 015 (D243): lo que declaró "Ya sirvo" y lo que el Admin necesita para confirmarlo. */
+async function ministerioDeclarado(
+  db: Db,
+  personaId: string,
+  desdeAnio: number | null,
+  opciones: OpcionCargadaVista[],
+): Promise<MinisterioDeclarado> {
+  const [principales, enParalelo, vidaDeServicioHecha] = await Promise.all([
+    membresiasDelCarril(db as Prisma.TransactionClient, personaId, false),
+    membresiasDelCarril(db as Prisma.TransactionClient, personaId, true),
+    completoEtapa(db, personaId, 'vida_de_servicio'),
+  ]);
+  return { desdeAnio, opciones: ordenarOpciones(opciones).map(opcionVista), membresias: { principales, enParalelo }, vidaDeServicioHecha: vidaDeServicioHecha !== null };
 }

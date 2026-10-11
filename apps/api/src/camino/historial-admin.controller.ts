@@ -7,6 +7,7 @@ import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
 import { personaDeSesion } from '../discipulado/sesion.js';
 import { HistorialAdminService } from './historial-admin.service.js';
 import { RechazarDeclaracionDto, RegistrarCompletitudDto } from './dto/historial-admin.dto.js';
+import { ConfirmarDeclaracionDto } from './dto/declarar.dto.js';
 
 /**
  * spec 006, Historia 2 — el Admin y el Pastor (contracts/historial-admin-api.md).
@@ -32,8 +33,8 @@ export class HistorialAdminController {
   @HttpCode(200)
   @RequierePermiso('historial.resolver')
   @ApiOkResponse({ description: 'spec 006, FR-013: confirma y registra la etapa hecha. 409 DECLARACION_NO_PENDIENTE, ETAPA_YA_COMPLETADA, ETAPA_EN_CURSO.' })
-  confirmar(@Param('id') id: string, @Req() request: AuthenticatedRequest) {
-    return this.service.confirmar(id, personaDeSesion(request));
+  confirmar(@Param('id') id: string, @Body() dto: ConfirmarDeclaracionDto, @Req() request: AuthenticatedRequest) {
+    return this.service.confirmar(id, personaDeSesion(request), dto);
   }
 
   @Post('historial/declaraciones/:id/rechazar')

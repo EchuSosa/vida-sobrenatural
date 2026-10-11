@@ -345,6 +345,17 @@ el Admin puede confirmarla. Hacé los casos en orden.
 | ELM-05 | P1 | Admin | Backoffice | 1. Solicitudes → filtro "Elección de ministerio".<br>2. Abrí la de **Bruno**.<br>3. Abrí la de **Gabriela** y tocá "Confirmar" en "Ministerio de Bienvenida · Seguridad".<br>4. En "Multimedia" tocá "Confirmar"; en el diálogo dejá "Sumarlo…" y tocá "Sí, confirmar". | 1: Bruno, Diego y Gabriela aparecen con "Charla hecha: para confirmar". 2: se ven lo que contó y "Notas de la charla (privadas)"; "Confirmar" está deshabilitado con "Se confirma cuando termine Vida de Servicio". 3: "Confirmamos …", el área dice "Confirmada: ya sirve ahí". 4: el diálogo pregunta "¿Qué hacés con sus ministerios?" (D241); al confirmar, la elección queda "Resuelta". Gabriela, en su Mi camino, sirve en los dos. | |
 | ELM-06 | P1 | Pastor | `demo-pastor@…`, backoffice | 1. Solicitudes → abrí la elección de Bruno. | La ve **sin** las notas de la charla y sin botones: "Podés ver la elección, pero no resolverla." | |
 
+### 4.15. "Ya sirvo en un ministerio" y carga de equipos (YAS)
+
+Para quien ya sirve antes de usar la app (spec 015, D243): elige del mismo listado y el Admin lo
+confirma. Y la primera carga de los equipos desde cada ministerio.
+
+| ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
+|---|---|---|---|---|---|---|
+| YAS-01 | P1 | Recién registrada (celular) | `demo-nueva@example.com` | 1. Mi camino → tarjeta Ministerio → "Ya sirvo en un ministerio".<br>2. Tocá "Enviar" sin marcar nada.<br>3. Marcá **Ministerio de Bienvenida → Seguridad** y **Mesa de entrada → Quiero servir acá**; en "¿Desde qué año servís?" elegí 2019 y tocá "Enviar". | 1: el mismo listado que la elección (tres bloques, hasta 2 ministerios). 2: "Revisá esto para enviar:" con "Elegí al menos un área…". 3: "¡Listo! Le avisamos al equipo…"; en Mi camino la tarjeta Ministerio queda en revisión, con "Retirar". | |
+| YAS-02 | P1 | Admin | Después de YAS-01 | 1. Solicitudes → la de Florencia ("contó que ya hizo Ministerio").<br>2. En "Dónde dice que sirve", desmarcá **Mesa de entrada** y marcá "También hizo Vida de Servicio".<br>3. Tocá "Confirmar" → "Sí, confirmar". | 1: "Sirve desde 2019.", "Hoy no figura sirviendo en ningún ministerio." y las dos áreas marcadas. 3: queda "Confirmada"; Bienvenida · Seguridad "— confirmada" y Mesa de entrada "— descartada". En la app de Florencia, la tarjeta Ministerio dice "Estás sirviendo en Ministerio de Bienvenida", y Vida de Servicio figura hecha. | |
+| YAS-03 | P1 | Admin | Backoffice | 1. Ministerios → **Adoración** → "Quiénes sirven" → "Agregar a alguien que ya sirve".<br>2. Elegí el área **Voces**, buscá `Gabriela` y tocá "Agregar".<br>3. Repetí en **Multimedia** con Gabriela (si ya la confirmaste en ELM-05, sirve en dos). | 2: "Gabriela Apto Demo ya figura sirviendo en Adoración." y aparece en la lista. 3: si ya sirve en 2, aparece "…ya sirve en … ¿Lo sumás o reemplazás uno?" sin "Sumarlo" (D241): solo "Reemplazar …" por cada uno, o "Cancelar". | |
+
 ---
 
 ## 5. P2: validaciones, casos borde, celular y modo oscuro

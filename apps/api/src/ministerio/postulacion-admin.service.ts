@@ -19,7 +19,7 @@ import { nombresDe } from '../discipulado/consultas.js';
 import { normalizarMotivo } from '../discipulado/validaciones.js';
 import { bloquearPersona } from '../camino/consultas.js';
 import { crearPostulacion, esViolacionDeUnico } from './crear-postulacion.js';
-import { decidirMembresia, inactivarPorCambio, membresiasDelCarril, otorgarDiscipulador } from './membresia.js';
+import { crearMembresiaDirecta, decidirMembresia, inactivarPorCambio, membresiasDelCarril, otorgarDiscipulador } from './membresia.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -320,6 +320,35 @@ export class PostulacionAdminService {
       throw error;
     }
     return this.detalle(id, true);
+  }
+
+  /**
+   * spec 015 (D243): POST /ministerios/:id/miembros — la primera carga de los
+   * equipos actuales: el Admin agrega a alguien que ya sirve, sin postulación
+   * (`creadoPorId`, D97). Mismo límite y misma decisión que aprobar (D241).
+   */
+  async agregarMiembro(
+    ministerioId: string,
+    dto: { personaId: string; celulaId?: string | null; sumar?: boolean; reemplazaId?: string },
+    autorId: string,
+  ): Promise<{ postulacionId: string }> {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const persona = await tx.persona.findUnique({ where: { id: dto.personaId }, select: { estado: true, activo: true } });
+        if (!persona || !persona.activo || persona.estado !== 'activa') {
+          throw new AppException('NO_ENCONTRADO', 404, 'No existe una Persona activa con ese id.');
+        }
+        const { postulacionId } = await crearMembresiaDirecta(
+          tx,
+          { rolesDeEstado: this.rolesDeEstado, notificaciones: this.notificaciones },
+          { personaId: dto.personaId, ministerioId, celulaId: dto.celulaId ?? null, autorId, decision: { sumar: dto.sumar, reemplazaId: dto.reemplazaId } },
+        );
+        return { postulacionId };
+      });
+    } catch (error) {
+      if (esViolacionDeUnico(error)) throw new AppException('YA_ES_MIEMBRO_DEL_MINISTERIO', 409, 'Esta persona ya sirve en este Ministerio.');
+      throw error;
+    }
   }
 
   /** POST /postulaciones/:id/rechazar (FR-019): motivo opcional, interno. */

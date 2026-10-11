@@ -1,3 +1,5 @@
+import type { OpcionElegida, OpcionVista } from './eleccion-ministerio.js';
+import type { MembresiaActual } from './ministerios.js';
 import type { EstadoMiDiscipulado, MisDiscipuladosRespuesta, PersonaBreve } from './discipulado.js';
 import { EDAD_MINIMA_PEDIR_VIDA_NUEVA_SOLO } from './persona.js';
 
@@ -233,6 +235,41 @@ export interface DeclaracionDetalle {
   motivoRechazo: string | null;
   persona: PersonaBreve & { edad: number; sinAccesoALaApp: boolean };
   contexto: ContextoEtapa & { declaracionesAnteriores: Array<{ estado: EstadoDeclaracion; fecha: string }> };
+  /** spec 015 (D243): "Ya sirvo en un ministerio" — lo elegido del listado. Solo en la etapa Ministerio. */
+  ministerio?: MinisterioDeclarado;
+}
+
+/** spec 015 (D243): lo que declara "Ya sirvo en un ministerio" y lo que el Admin necesita para confirmarlo. */
+export interface MinisterioDeclarado {
+  desdeAnio: number | null;
+  opciones: OpcionVista[];
+  /** D241: lo que ya tiene, por carril. */
+  membresias: { principales: MembresiaActual[]; enParalelo: MembresiaActual[] };
+  /** Si ya figura con Vida de Servicio hecha (si no, el Admin puede registrarla en el mismo paso). */
+  vidaDeServicioHecha: boolean;
+}
+
+/** Cuerpo de `POST /camino/me/declaraciones` (spec 006 + spec 015). */
+export interface NuevaDeclaracion {
+  etapa: EtapaCamino;
+  comentario?: string;
+  /** Solo Ministerio (D243): lo elegido del listado — obligatorio ahí. */
+  opciones?: OpcionElegida[];
+  /** Solo Ministerio (D243): desde qué año sirve, opcional. */
+  desdeAnio?: number | null;
+}
+
+/** Cuerpo de `POST /historial/declaraciones/:id/confirmar`. */
+export interface ConfirmarDeclaracion {
+  /** Ministerio (D243): las opciones que confirma; las demás quedan descartadas. Sin esto, todas. */
+  opcionesConfirmadas?: string[];
+  /** Ministerio (D243): registra también Vida de Servicio como hecha. */
+  tambienVidaDeServicio?: boolean;
+}
+
+/** D243: desde qué año puede decir que sirve (de 1950 a este año). */
+export function desdeAnioValido(anio: number, anioActual: number): boolean {
+  return Number.isInteger(anio) && anio >= 1950 && anio <= anioActual;
 }
 
 /** Una etapa de `GET /personas/:id/camino` (FR-014): lo que necesita el Admin para registrar o anular. */

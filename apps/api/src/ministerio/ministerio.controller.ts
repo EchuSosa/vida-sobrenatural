@@ -27,6 +27,8 @@ import { rechazarEstadoPapelera } from '../common/rechazar-estado-papelera.js';
 import { personaDeSesion } from '../discipulado/sesion.js';
 import { MinisterioService } from './ministerio.service.js';
 import { CelulaService } from './celula.service.js';
+import { PostulacionAdminService } from './postulacion-admin.service.js';
+import { AgregarMiembroDto } from './dto/postulacion.dto.js';
 import {
   ActualizarCelulaDto,
   ActualizarMinisterioDto,
@@ -49,6 +51,7 @@ export class MinisterioController {
   constructor(
     private readonly ministerios: MinisterioService,
     private readonly celulas: CelulaService,
+    private readonly postulaciones: PostulacionAdminService,
   ) {}
 
   @Get('ministerios/publicos')
@@ -121,6 +124,18 @@ export class MinisterioController {
       Math.min(TAKE_MAX, Math.max(1, Number(take) || 20)),
       buscar,
     );
+  }
+
+  @Post('ministerios/:id/miembros')
+  @UseGuards(JwtNextAuthGuard, PermisosGuard)
+  @RequierePermiso('ministerios.gestionar')
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    description:
+      'spec 015, D243: el Admin agrega a alguien que ya sirve (membresía directa, sin postulación). 409 YA_ES_MIEMBRO_DEL_MINISTERIO, POSTULACION_REQUIERE_CONFIRMAR_CAMBIO (D241), MINISTERIO_NO_DISPONIBLE; 400 VALIDACION (celulaId); 404 si la Persona no existe o no está activa.',
+  })
+  agregarMiembro(@Param('id') id: string, @Body() dto: AgregarMiembroDto, @Req() request: AuthenticatedRequest) {
+    return this.postulaciones.agregarMiembro(id, dto, personaDeSesion(request));
   }
 
   @Get('ministerios/:id/celulas/papelera')

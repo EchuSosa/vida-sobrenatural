@@ -87,6 +87,28 @@ export class AprobarPostulacionDto implements AprobarPostulacion {
   otorgarRolDiscipulador?: boolean;
 }
 
+/** spec 015 (D243): `POST /ministerios/:id/miembros` — agregar a alguien que ya sirve. */
+export class AgregarMiembroDto {
+  @ApiProperty()
+  @IsUUID()
+  personaId!: string;
+
+  @ApiPropertyOptional({ nullable: true, description: 'El área; null si el Ministerio no tiene áreas.' })
+  @IsOptional()
+  @IsUUID()
+  celulaId?: string | null;
+
+  @ApiPropertyOptional({ description: 'D241: la suma a sus membresías actuales (si queda lugar).' })
+  @IsOptional()
+  @IsBoolean()
+  sumar?: boolean;
+
+  @ApiPropertyOptional({ description: 'D241: la membresía actual que reemplaza.' })
+  @IsOptional()
+  @IsUUID()
+  reemplazaId?: string;
+}
+
 /** Rechazar y dar de baja: motivo opcional ≤ 500 (`MOTIVO_DEMASIADO_LARGO`, lo valida el servicio). */
 export class MotivoOpcionalDto {
   @ApiPropertyOptional({

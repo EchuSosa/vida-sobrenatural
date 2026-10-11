@@ -9,6 +9,7 @@ import { CaminoService } from './camino.service.js';
 import { HistorialAdminController } from './historial-admin.controller.js';
 import { HistorialAdminService } from './historial-admin.service.js';
 import { FuenteHistorial } from './fuente-bandeja.js';
+import { RolesDeEstadoService } from '../persona/roles-de-estado.service.js';
 
 /**
  * spec 006 — Mi camino por etapas, historial previo y Completitud Manual.
@@ -22,7 +23,8 @@ import { FuenteHistorial } from './fuente-bandeja.js';
 @Module({
   imports: [SolicitudDiscipuladoModule, BautismoModule],
   controllers: [CaminoController, HistorialAdminController],
-  providers: [CaminoService, HistorialAdminService],
+  // spec 015 (D243): confirmar "Ya sirvo" crea membresías con el lugar único de roles de estado.
+  providers: [CaminoService, HistorialAdminService, RolesDeEstadoService],
 })
 export class CaminoModule implements OnModuleInit {
   constructor(

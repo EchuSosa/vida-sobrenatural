@@ -25,8 +25,9 @@
 
 ## Entrega 3 — "Ya sirvo" y primera carga (D243)
 
-- [ ] T030 Migración y modelo de opciones de la declaración; `desdeAnio`.
-- [ ] T031 API: declarar con opciones; confirmar por opción (membresía + completitud, VS opcional); `POST /ministerios/:id/miembros` + integración.
-- [ ] T032 Web: "Ya sirvo en un ministerio" con el listado + e2e.
-- [ ] T033 Backoffice: detalle de la declaración con opciones; "Agregar personas que ya sirven" + e2e.
-- [ ] T034 Docs: manual, docs/04, docs/08 (sale del roadmap).
+- [x] T030 Migración y modelo de opciones de la declaración; `desdeAnio`.
+- [x] T031 API: declarar con opciones; confirmar por opción (membresía + completitud, VS opcional); `POST /ministerios/:id/miembros` + integración.
+- [x] T032 Web: "Ya sirvo en un ministerio" con el listado + e2e.
+- [x] T033 Backoffice: detalle de la declaración con opciones; "Agregar personas que ya sirven" + e2e.
+- [x] T034 Docs: manual (YAS-01 a YAS-03), docs/04, docs/08 (sale del roadmap). Checklist de docs/15 revisado en "Ya sirvo" (web), el detalle del historial y "Agregar a alguien que ya sirve" (backoffice): cuatro estados, errores por campo con resumen y foco, `useEnvio`/bloqueo de reentrada, textos en `next-intl`, colores de tokens, estado en texto + ícono, 44 px, axe claro/oscuro.
+- [x] T035 `GET /elecciones-ministerio/me/resumen` responde siempre un objeto (`ninguna`); `textoOpcion` en un módulo sin 'use client' (las dos fallas que encontró el e2e de la entrega 3, corregidas también en #51).

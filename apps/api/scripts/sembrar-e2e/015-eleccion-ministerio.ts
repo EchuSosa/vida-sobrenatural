@@ -13,6 +13,9 @@ export const EMAILS_E2E_015 = {
   persona: 'e2e-elm-persona@example.com',
   personaCelular: 'e2e-elm-persona-celular@example.com',
   charlada: 'e2e-elm-charlada@example.com',
+  /** D243: ya sirve y lo cuenta con "Ya sirvo en un ministerio" (escritorio y celular). */
+  yaSirvo: 'e2e-elm-ya-sirvo@example.com',
+  yaSirvoCelular: 'e2e-elm-ya-sirvo-celular@example.com',
 } as const;
 
 export const EDICION_E2E_015 = 'e2e-Edición con elección de ministerio';
@@ -46,6 +49,8 @@ export async function sembrarE2e015({ prisma, sedeId }: ContextoSembrarE2e): Pro
   const elige = await persona(EMAILS_E2E_015.persona, 'Elena', ['miembro_registrado']);
   const eligeCelular = await persona(EMAILS_E2E_015.personaCelular, 'Ema', ['miembro_registrado']);
   const charlada = await persona(EMAILS_E2E_015.charlada, 'Clara', ['miembro_registrado', 'apto_ministerio']);
+  await persona(EMAILS_E2E_015.yaSirvo, 'Sofía', ['miembro_registrado']);
+  await persona(EMAILS_E2E_015.yaSirvoCelular, 'Sol', ['miembro_registrado']);
 
   let grupo = await prisma.grupo.findFirst({ where: { nombre: EDICION_E2E_015 }, select: { id: true } });
   if (!grupo) {

@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
 import { MINISTERIOS_009 } from './helpers-009';
-import { EDICION_015, EMAILS_015, entrarConTema, reiniciarEleccion } from './helpers-015';
+import { EDICION_015, EMAILS_015, entrarConTema, reiniciarEleccion, reiniciarYaSirvo } from './helpers-015';
 
 /**
  * spec 015 (D239, D240) — el flujo ⭐ de la elección de ministerio en la web
@@ -106,6 +106,30 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page, tema);
 
       await reiniciarEleccion(email);
+    });
+
+    test('D243 "Ya sirvo en un ministerio": elige del listado y queda en revisión @celular', async ({ page, baseURL }, testInfo) => {
+      const email = testInfo.project.name === 'celular' ? EMAILS_015.yaSirvoCelular : EMAILS_015.yaSirvo;
+      await reiniciarYaSirvo(email);
+      await entrarConTema(page, baseURL!, email, tema);
+      await page.goto('/mi-camino');
+      await cardMinisterio(page).getByRole('link', { name: 'Ya sirvo en un ministerio' }).click();
+      await expect(page).toHaveURL(/\/mi-camino\/ministerios\/ya-sirvo$/);
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ya sirvo en un ministerio');
+
+      await page.getByRole('button', { name: 'Enviar', exact: true }).click();
+      await expect(page.getByRole('alert').filter({ hasText: 'Revisá esto para enviar:' })).toBeFocused();
+      await sinViolaciones(page, tema);
+      await sinScrollHorizontal(page, 360);
+
+      await page.getByRole('group', { name: MINISTERIOS_009.bienvenida }).getByLabel('Seguridad').check();
+      await page.getByRole('group', { name: MINISTERIOS_009.mesa }).getByLabel('Quiero servir acá').check();
+      await page.getByLabel('¿Desde qué año servís? (opcional)').selectOption('2019');
+      await page.getByRole('button', { name: 'Enviar', exact: true }).click();
+      await expect(page).toHaveURL(/\/mi-camino$/);
+      await expect(cardMinisterio(page).getByRole('button', { name: /Retirar/ })).toBeVisible();
+      await sinViolaciones(page, tema);
+      await reiniciarYaSirvo(email);
     });
   });
 }

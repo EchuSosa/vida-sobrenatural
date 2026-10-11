@@ -198,7 +198,8 @@
       "ELECCION_MAXIMO_MINISTERIOS": "Podés elegir hasta 2 ministerios (más Discipulados Vida Nueva). Sacá uno marcando \"Ninguna de este ministerio\".",
       "ELECCION_UN_AREA_POR_MINISTERIO": "Elegí un solo área de cada ministerio.",
       "ELECCION_AREA_NO_DISPONIBLE": "Un área que elegiste ya no está disponible: elegí otra.",
-      "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera."
+      "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera.",
+      "DESDE_ANIO_INVALIDO": "Elegí un año de la lista."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
@@ -2048,5 +2049,23 @@
     "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, avisanos con este código:",
     "reintentar": "Reintentar",
     "quieroServirAca": "Quiero servir acá"
+  },
+  "yaSirvo": {
+    "boton": "Ya sirvo en un ministerio",
+    "titulo": "Ya sirvo en un ministerio",
+    "introduccion": "Si ya servís en la iglesia, contanos dónde. Elegí hasta 2 ministerios y un área de cada uno; el equipo lo confirma y queda en tu camino.",
+    "desdeEtiqueta": "¿Desde qué año servís? (opcional)",
+    "desdeNoSe": "No me acuerdo",
+    "desdeEsteAnio": "Este año ({anio})",
+    "comentarioEtiqueta": "¿Querés contarnos algo? (opcional)",
+    "comentarioAyuda": "Por ejemplo, qué hacés o con quién servís.",
+    "resumenErrores": "Revisá esto para enviar:",
+    "enviar": "Enviar",
+    "enviado": "¡Listo! Le avisamos al equipo; lo confirman pronto.",
+    "errorGenerico": "No pudimos enviarlo. Probá de nuevo en un momento.",
+    "errorCargaTitulo": "No pudimos cargar los ministerios",
+    "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, avisanos con este código:",
+    "reintentar": "Reintentar",
+    "volverMiCamino": "Volver a Mi camino"
   }
 }
