@@ -64,6 +64,22 @@ export class AprobarPostulacionDto implements AprobarPostulacion {
 
   @ApiPropertyOptional({
     description:
+      'D241: la suma a las membresías actuales (solo si queda lugar: hasta 2 Ministerios).',
+  })
+  @IsOptional()
+  @IsBoolean()
+  sumar?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'D241: la membresía actual que reemplaza (pasa a inactiva, cambio_de_ministerio).',
+  })
+  @IsOptional()
+  @IsUUID()
+  reemplazaId?: string;
+
+  @ApiPropertyOptional({
+    description:
       'docs/22: otorga también el rol discipulador (solo en un área que lo ofrece).',
   })
   @IsOptional()

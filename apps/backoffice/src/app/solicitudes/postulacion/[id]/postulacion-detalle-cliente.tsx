@@ -12,6 +12,8 @@ import {
   apiFetch,
   erroresPorCampo,
   formatearFechaHora,
+  type DetalleDecisionMembresia,
+  type MembresiaActual,
   type PostulacionDetalle,
 } from '@vida-sobrenatural/shared-types';
 import {
@@ -35,8 +37,9 @@ import { claveEstado } from '../estado';
  * spec 009, T028 (FR-016 a FR-019, FR-021, FR-023; docs/22): el detalle de
  * una Postulación. Muestra la Persona, lo que pidió, la marca de "requiere
  * formación" y, si ya pertenece a otro Ministerio, la advertencia ANTES de
- * actuar (texto + ícono, D81). "Aprobar" es la principal: si hay cambio de
- * Ministerio, el diálogo lo pregunta (y la API lo exige, D173); en
+ * actuar (texto + ícono, D81). "Aprobar" es la principal: si ya sirve en
+ * otro Ministerio, el diálogo pregunta si lo suma (D241, hasta 2) o cuál
+ * reemplaza (y la API lo exige, D173); en
  * "Discipulados Vida Nueva" ofrece el rol `discipulador` en el mismo paso.
  * "Rechazar" pide un motivo opcional interno. Las dos son neutras (D151): se
  * puede volver a postular. Si otro Admin la resolvió, lo dice y recarga.
@@ -59,7 +62,11 @@ export function PostulacionDetalleCliente({
   const nombre = `${p.persona.nombre} ${p.persona.apellido}`;
   const ministerio = p.ministerio.nombre;
   const fecha = (iso: string) => formatearFechaHora(iso, locale);
-  const [ministerioActual, setMinisterioActual] = useState(p.ministerioActual);
+  // D241: las membresías del mismo carril y si queda lugar para sumar.
+  const [actuales, setActuales] = useState<MembresiaActual[]>(p.ministeriosActuales);
+  const [puedeSumar, setPuedeSumar] = useState(p.puedeSumar);
+  const [eleccion, setEleccion] = useState<string>(p.puedeSumar ? 'sumar' : (p.ministeriosActuales[0]?.postulacionId ?? 'sumar'));
+  const listaActuales = textoLista(actuales.map((a) => a.ministerio.nombre), t('y'));
   const [abierto, setAbierto] = useState(false);
   const [conRol, setConRol] = useState(false);
 
@@ -74,12 +81,19 @@ export function PostulacionDetalleCliente({
       await apiFetch(`/postulaciones/${p.id}/aprobar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
-        body: JSON.stringify({ confirmarCambio: ministerioActual !== null, otorgarRolDiscipulador: p.ofrecerRolDiscipulador && conRol }),
+        body: JSON.stringify({
+          ...(actuales.length === 0 ? {} : eleccion === 'sumar' ? { sumar: true } : { reemplazaId: eleccion }),
+          otorgarRolDiscipulador: p.ofrecerRolDiscipulador && conRol,
+        }),
       });
     } catch (error) {
-      // D173: otro Admin la aprobó en otro Ministerio mientras tanto → se pregunta de nuevo, con el dato real.
+      // D173 + D241: cambió lo que tiene (otro Admin aprobó otra mientras tanto) → se pregunta de nuevo, con el dato real.
       if (error instanceof ApiError && error.code === 'POSTULACION_REQUIERE_CONFIRMAR_CAMBIO') {
-        setMinisterioActual((error.extensiones?.ministerioActual as PostulacionDetalle['ministerioActual']) ?? null);
+        const detalle = error.extensiones as unknown as DetalleDecisionMembresia | undefined;
+        const nuevas = detalle?.ministeriosActuales ?? [];
+        setActuales(nuevas);
+        setPuedeSumar(detalle?.puedeSumar ?? false);
+        setEleccion(detalle?.puedeSumar ? 'sumar' : (nuevas[0]?.postulacionId ?? 'sumar'));
         return;
       }
       const campos = erroresPorCampo(error);
@@ -116,14 +130,14 @@ export function PostulacionDetalleCliente({
         )}
       </div>
 
-      {p.estado === 'pendiente' && ministerioActual && (
+      {p.estado === 'pendiente' && actuales.length > 0 && (
         <AvisoEstado
           role="note"
           icono={<ArrowRightLeft className="text-primary" />}
-          titulo={t('yaPerteneceTitulo', { ministerio: ministerioActual.nombre })}
+          titulo={t('yaPerteneceTitulo', { ministerio: listaActuales })}
           className="rounded-md border border-border p-4"
         >
-          {t('yaPerteneceTexto', { nuevo: ministerio })}
+          {puedeSumar ? t('yaPerteneceTextoSumar', { nuevo: ministerio }) : t('yaPerteneceTextoLleno', { nuevo: ministerio })}
         </AvisoEstado>
       )}
       {p.requiereFormacion && (
@@ -230,13 +244,43 @@ export function PostulacionDetalleCliente({
             />
             <AlertDialogContent data-tono="neutro">
               <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {ministerioActual ? t('cambioTitulo', { actual: ministerioActual.nombre }) : t('aprobarTitulo', { nombre, ministerio })}
-                </AlertDialogTitle>
+                <AlertDialogTitle>{t('aprobarTitulo', { nombre, ministerio })}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {ministerioActual ? t('cambioDescripcion', { actual: ministerioActual.nombre, nuevo: ministerio }) : t('aprobarDescripcion')}
+                  {actuales.length > 0 ? t('decisionDescripcion', { actual: listaActuales }) : t('aprobarDescripcion')}
                 </AlertDialogDescription>
               </AlertDialogHeader>
+              {actuales.length > 0 && (
+                <fieldset className="flex flex-col gap-2">
+                  <legend className="mb-1 font-medium">{t('decisionLeyenda')}</legend>
+                  {puedeSumar && (
+                    <label className="flex min-h-11 cursor-pointer items-start gap-3 text-base">
+                      <input
+                        type="radio"
+                        name="decision-membresia"
+                        value="sumar"
+                        checked={eleccion === 'sumar'}
+                        onChange={() => setEleccion('sumar')}
+                        className="mt-1 size-5 shrink-0 accent-primary"
+                      />
+                      {t('decisionSumar', { actual: listaActuales, nuevo: ministerio })}
+                    </label>
+                  )}
+                  {actuales.map((a) => (
+                    <label key={a.postulacionId} className="flex min-h-11 cursor-pointer items-start gap-3 text-base">
+                      <input
+                        type="radio"
+                        name="decision-membresia"
+                        value={a.postulacionId}
+                        checked={eleccion === a.postulacionId}
+                        onChange={() => setEleccion(a.postulacionId)}
+                        className="mt-1 size-5 shrink-0 accent-primary"
+                      />
+                      {t('decisionReemplazar', { actual: a.ministerio.nombre, nuevo: ministerio })}
+                    </label>
+                  ))}
+                  <p className="text-sm text-muted-foreground">{t('decisionAyuda')}</p>
+                </fieldset>
+              )}
               {p.ofrecerRolDiscipulador && (
                 <div className="flex flex-col gap-1">
                   <label className="flex min-h-11 cursor-pointer items-center gap-3 text-base">
@@ -257,7 +301,7 @@ export function PostulacionDetalleCliente({
               <AlertDialogFooter>
                 <AlertDialogCancel>{t('volver')}</AlertDialogCancel>
                 <Button type="button" loading={aprobando} onClick={() => void aprobar()}>
-                  {ministerioActual ? t('cambioEnviar') : t('aprobarEnviar')}
+                  {actuales.length > 0 && eleccion !== 'sumar' ? t('cambioEnviar') : t('aprobarEnviar')}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -266,4 +310,9 @@ export function PostulacionDetalleCliente({
       )}
     </div>
   );
+}
+
+/** "A", "A y B". */
+function textoLista(nombres: string[], y: string): string {
+  return nombres.length <= 1 ? (nombres[0] ?? '') : `${nombres.slice(0, -1).join(', ')} ${y} ${nombres[nombres.length - 1]}`;
 }

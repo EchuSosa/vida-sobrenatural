@@ -19,6 +19,8 @@ export const EMAILS_E2E_009 = {
   postulanteCambio: 'e2e-ministerio-cambio@example.com',
   catalogo: 'e2e-ministerio-catalogo@example.com',
   enNombre: 'e2e-ministerio-en-nombre@example.com',
+  /** D241 (spec 015): sirve en dos Ministerios. */
+  miembroDos: 'e2e-ministerio-miembro-dos@example.com',
 } as const;
 
 const APTA = ['miembro_registrado', 'apto_ministerio'];
@@ -166,7 +168,7 @@ export async function sembrarE2e009({
       },
     ],
   );
-  await ministerio(
+  const mesa = await ministerio(
     'e2e-Mesa de entrada',
     {
       descripcion: 'Informes, inscripciones y materiales.',
@@ -210,5 +212,15 @@ export async function sembrarE2e009({
         revisadaEn: new Date(),
       },
     });
+  }
+  // D241: dos membresías (Bienvenida/Seguridad y Mesa de entrada).
+  const dos = await persona(EMAILS_E2E_009.miembroDos, 'MiembroDos', [...APTA, 'miembro_ministerio']);
+  for (const [ministerioId, celulaId] of [
+    [bienvenida.id, bienvenida.celulas.Seguridad],
+    [mesa.id, null],
+  ] as const) {
+    if (!(await prisma.postulacion.findFirst({ where: { personaId: dos, ministerioId, estado: 'aprobada' }, select: { id: true } }))) {
+      await prisma.postulacion.create({ data: { personaId: dos, ministerioId, celulaId, estado: 'aprobada', revisadaEn: new Date() } });
+    }
   }
 }

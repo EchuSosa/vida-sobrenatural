@@ -51,19 +51,22 @@ export function estadoMiMinisterio(
       }
     : null;
 
-  // D217: con la membresía del Ministerio y una en paralelo, la card muestra la del Ministerio.
-  const aprobadas = postulaciones.filter((p) => p.estado === 'aprobada');
-  const aprobada = aprobadas.find((p) => !p.enParalelo) ?? aprobadas[0];
-  if (aprobada) {
+  // D217 + D241: todas las membresías, las del Ministerio primero (por antigüedad) y la en paralelo al final.
+  const aprobadas = postulaciones
+    .filter((p) => p.estado === 'aprobada')
+    .sort((a, b) => Number(a.enParalelo) - Number(b.enParalelo) || desdeDe(a).getTime() - desdeDe(b).getTime());
+  if (aprobadas.length > 0) {
+    const membresias = aprobadas.map((a) => ({
+      postulacionId: a.id,
+      ministerio: a.ministerio,
+      celula: a.celula,
+      desde: desdeDe(a).toISOString(),
+      enParalelo: a.enParalelo,
+    }));
     return {
       estado: 'miembro',
-      membresia: {
-        postulacionId: aprobada.id,
-        ministerio: aprobada.ministerio,
-        celula: aprobada.celula,
-        desde: (aprobada.revisadaEn ?? aprobada.createdAt).toISOString(),
-        enParalelo: aprobada.enParalelo,
-      },
+      membresia: membresias[0],
+      membresias,
       pendiente: pendienteVista,
     };
   }
@@ -74,6 +77,10 @@ export function estadoMiMinisterio(
   return ultimo
     ? { estado: 'puede_postularse', ultimo }
     : { estado: 'puede_postularse' };
+}
+
+function desdeDe(p: PostulacionParaEstado): Date {
+  return p.revisadaEn ?? p.createdAt;
 }
 
 function ultimoDesenlace(

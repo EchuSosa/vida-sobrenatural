@@ -19,7 +19,8 @@ export const MINISTERIOS_009 = {
   mesa: 'e2e-Mesa de entrada',
 } as const;
 
-type Estado = { estado: string; pendiente?: { postulacionId: string } | null; membresia?: { postulacionId: string; ministerio: { nombre: string } } };
+type Membresia = { postulacionId: string; ministerio: { nombre: string } };
+type Estado = { estado: string; pendiente?: { postulacionId: string } | null; membresia?: Membresia; membresias?: Membresia[] };
 
 export function estadoDe(email: string): Promise<Estado> {
   return apiComo<Estado>(email, 'GET', '/ministerios/me');
@@ -33,8 +34,11 @@ export function estadoDe(email: string): Promise<Estado> {
 export async function prepararSinPostulacion(email: string): Promise<void> {
   let estado = await estadoDe(email);
   if (estado.pendiente) estado = await apiComo<Estado>(email, 'POST', `/postulaciones/me/${estado.pendiente.postulacionId}/retirar`);
-  if (estado.estado === 'miembro' && estado.membresia) {
-    await apiComo(EMAIL_ADMIN, 'POST', `/postulaciones/${estado.membresia.postulacionId}/dar-de-baja`, {});
+  // D241: puede tener hasta 2 (más la en paralelo): las da de baja a todas.
+  if (estado.estado === 'miembro') {
+    for (const m of estado.membresias ?? (estado.membresia ? [estado.membresia] : [])) {
+      await apiComo(EMAIL_ADMIN, 'POST', `/postulaciones/${m.postulacionId}/dar-de-baja`, {});
+    }
   }
 }
 

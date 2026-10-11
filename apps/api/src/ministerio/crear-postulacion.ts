@@ -75,8 +75,9 @@ export async function crearPostulacion(
             where: { id: ministerioId, eliminadoEn: null },
             select: { id: true, activo: true, requiereFormacion: true },
           }),
+          // D241: puede tener hasta 2; lo que importa es si ya sirve en ESTE Ministerio.
           tx.postulacion.findFirst({
-            where: { personaId, estado: 'aprobada', enParalelo },
+            where: { personaId, estado: 'aprobada', ministerioId },
             select: { ministerioId: true },
           }),
           tx.postulacion.findFirst({
