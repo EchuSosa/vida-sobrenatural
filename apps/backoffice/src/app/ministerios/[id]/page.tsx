@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import {
   ApiError,
   apiFetch,
+  type LiderMinisterioVista,
   type EliminadoEnPapelera,
   type MiembroMinisterio,
   type MinisterioDetalleCatalogo,
@@ -30,18 +31,20 @@ export default async function MinisterioDetallePage({
   const headers = { Authorization: `Bearer ${session.apiToken}` };
   const puedeVerPapelera = tienePermisoSesion(session, 'ministerios.papelera.ver');
   const ruta = `/ministerios/${encodeURIComponent(id)}`;
-  let datos: [MinisterioDetalleCatalogo, Pagina<MiembroMinisterio>, EliminadoEnPapelera[]];
+  let datos: [MinisterioDetalleCatalogo, Pagina<MiembroMinisterio>, EliminadoEnPapelera[], LiderMinisterioVista[]];
   try {
     datos = await Promise.all([
       apiFetch<MinisterioDetalleCatalogo>(ruta, { headers, cache: 'no-store' }),
       apiFetch<Pagina<MiembroMinisterio>>(`${ruta}/miembros?skip=${(pagina - 1) * POR_PAGINA}&take=${POR_PAGINA}`, { headers, cache: 'no-store' }),
       puedeVerPapelera ? apiFetch<EliminadoEnPapelera[]>(`${ruta}/celulas/papelera`, { headers, cache: 'no-store' }) : Promise.resolve([]),
+      // spec 016 (D244): los líderes vigentes, con la fecha.
+      apiFetch<LiderMinisterioVista[]>(`${ruta}/lideres`, { headers, cache: 'no-store' }),
     ]);
   } catch (e) {
     if (e instanceof ApiError && e.code === 'NO_ENCONTRADO') notFound();
     throw e;
   }
-  const [ministerio, miembros, papeleraCelulas] = datos;
+  const [ministerio, miembros, papeleraCelulas, lideres] = datos;
   return (
     <MinisterioDetalleCliente
       ministerio={ministerio}
@@ -49,6 +52,7 @@ export default async function MinisterioDetallePage({
       pagina={pagina}
       porPagina={POR_PAGINA}
       papeleraCelulas={papeleraCelulas}
+      lideres={lideres}
       apiToken={session.apiToken}
       puedeGestionar={tienePermisoSesion(session, 'ministerios.gestionar')}
       puedeVerPapelera={puedeVerPapelera}

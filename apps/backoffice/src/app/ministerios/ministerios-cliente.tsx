@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { GraduationCap, Plus } from 'lucide-react';
+import { GraduationCap, Plus, UserRoundX } from 'lucide-react';
 import { ApiError, apiFetch, type MinisterioCatalogo } from '@vida-sobrenatural/shared-types';
 import {
   Button,
@@ -71,6 +71,20 @@ export function MinisteriosCliente({
     },
     { id: 'celulas', encabezado: t('columnaCelulas'), className: 'hidden sm:table-cell', celda: (m) => m.celulasActivas },
     { id: 'miembros', encabezado: t('columnaMiembros'), className: 'hidden sm:table-cell', celda: (m) => m.miembrosActivos },
+    // spec 016 (D244): quién lidera, para ver de un vistazo cuál quedó sin asignar ("Sin líder" en texto, D81).
+    {
+      id: 'lideres',
+      encabezado: t('columnaLideres'),
+      celda: (m) =>
+        m.lideres.length === 0 ? (
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <UserRoundX aria-hidden className="size-4 shrink-0" />
+            {t('sinLider')}
+          </span>
+        ) : (
+          <span className="break-words">{m.lideres.map((l) => `${l.nombre} ${l.apellido}`).join(', ')}</span>
+        ),
+    },
     ...(filtro === 'todos'
       ? [{ id: 'estado', encabezado: t('columnaEstado'), celda: (m: MinisterioCatalogo) => <EstadoActivoBadge activo={m.activo} textoActivo={t('detalle.estadoActivo')} textoInactivo={t('detalle.estadoInactivo')} /> } satisfies ColumnaTabla<MinisterioCatalogo>]
       : []),

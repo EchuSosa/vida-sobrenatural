@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Hourglass, Plus, UserRound, UsersRound } from 'lucide-react';
+import { Crown, Hourglass, Plus, UserRound, UsersRound } from 'lucide-react';
 import {
   ApiError,
   POSTULACION_TEXTO_MAX,
@@ -61,10 +61,18 @@ export function MinisterioPersonaCliente({
   const fecha = (iso: string) => formatearFechaHora(iso, locale);
   const [abierto, setAbierto] = useState(false);
   // D241: hasta 2 Ministerios, más Discipulados Vida Nueva en paralelo.
-  const { actuales, pendiente, historial } = datos;
+  const { actuales, pendiente, historial, lidera } = datos;
 
   return (
     <div className="flex flex-col gap-3">
+      {/* spec 016 (D244): qué Ministerios lidera (el rol lo maneja la API). */}
+      {lidera.length > 0 && (
+        <AvisoEstado icono={<Crown className="text-primary" />} titulo={t('perfil.lidera', { ministerios: lidera.map((m) => m.nombre).join(', ') })}>
+          <Link href={`/ministerios/${lidera[0].id}`} className="underline underline-offset-4">
+            {t('perfil.liderVer')}
+          </Link>
+        </AvisoEstado>
+      )}
       {actuales.length > 0 ? (
         <ul className="flex flex-col gap-3">
           {actuales.map((actual) => (
