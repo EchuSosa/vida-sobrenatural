@@ -671,7 +671,8 @@
       "miCamino": "Mi camino",
       "misDiscipulados": "Mis discipulados",
       "misGrupos": "Mis grupos",
-      "miGrupoExtension": "Mi grupo"
+      "miGrupoExtension": "Mi grupo",
+      "miMinisterio": "Mi ministerio"
     },
     "ministerio": {
       "noAptaTitulo": "Primero, Vida de Servicio",
@@ -1995,6 +1996,33 @@
       "finalizadaTitulo": "Ya no figurás en {grupo}",
       "finalizadaTexto": "Si fue un error, hablá con alguien del equipo. Podés elegir otro grupo cuando quieras.",
       "retiradaTitulo": "Retiraste tu pedido para {grupo}"
+    }
+  },
+  "miMinisterio": {
+    "titulo": "Mi ministerio",
+    "tituloVarios": "Mis ministerios",
+    "introVarios": "Los ministerios que liderás. Elegí uno para ver a su equipo.",
+    "vacio": "Todavía no liderás ningún ministerio. Si te asignaron hace poco, cerrá sesión y volvé a entrar.",
+    "resumen": "{integrantes, plural, =0 {Nadie todavía} one {# integrante} other {# integrantes}} · {areas, plural, =0 {sin áreas} one {# área} other {# áreas}}",
+    "otrosLideres": "También lideran: {nombres}",
+    "sinIntegrantes": "Todavía no hay nadie cargado en este ministerio. Hablá con el equipo de la iglesia para que carguen a quienes ya sirven.",
+    "todoElMinisterio": "Integrantes",
+    "sinArea": "Sin área",
+    "areaInactiva": "{area} (área inactiva)",
+    "areaVacia": "Nadie en esta área todavía.",
+    "desde": "Sirve desde el {fecha}",
+    "llamar": "Llamar a {nombre}",
+    "whatsapp": "Escribir por WhatsApp",
+    "whatsappAria": "Escribir por WhatsApp a {nombre}",
+    "saludoWhatsapp": "Hola {nombre}, soy {yo}, de {ministerio} en Vida Sobrenatural.",
+    "sinTelefono": "No dejó teléfono",
+    "errorCargaTitulo": "No pudimos cargar tu ministerio",
+    "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, contale al equipo este código:",
+    "reintentar": "Reintentar",
+    "noEncontrado": {
+      "titulo": "No encontramos ese ministerio",
+      "texto": "Puede que ya no lo lideres o que el enlace esté mal.",
+      "volver": "Volver a Mi camino"
     }
   },
   "miGrupoExtension": {
