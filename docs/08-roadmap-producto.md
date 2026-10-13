@@ -24,7 +24,8 @@
 ## Fase 2 (candidatas, después de mostrar el MVP)
 
 - Motor genérico de Formularios (Opción A, descartada para el MVP — ver `05-decisiones.md`, D31), si el patrón de Solicitudes específicas empieza a quedarse corto.
-- Líder de Ministerio propio revisando Postulaciones (hoy lo hace el Admin para todos los Ministerios).
+- Líder de Ministerio propio revisando Postulaciones (hoy lo hace el Admin para todos los Ministerios). **Primer paso propuesto: `specs/016-lideres-ministerio`** (Echu, 2026-10-12): el Admin asigna uno o varios líderes por Ministerio y el líder ve a su equipo con áreas y contacto desde la app; revisar Postulaciones queda para después.
+- **Turnos de servicio** ("qué domingo le toca a quién", Echu, 2026-10-12): fechas de servicio por Ministerio (domingos, el sábado del Mercadito, la Santa Cena del segundo domingo), grilla fecha × área que arma el líder, la persona ve su próximo turno en el Inicio con recordatorio, y después disponibilidad, "No puedo" y rotación automática que no ponga a nadie el mismo día en sus dos Ministerios (D241). **Se especifica cuando la iglesia responda** las preguntas de `06-preguntas-abiertas.md`; la propuesta completa está en `specs/016-lideres-ministerio/spec.md` (Out of Scope).
 - Múltiples Sedes activas simultáneamente (el modelo ya lo soporta, falta la gestión operativa cuando exista más de una sede real).
 - Reportes / analíticas (ej. cuánta gente completa cada curso, tasa de abandono vs. baja administrativa).
 
