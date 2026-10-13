@@ -9,6 +9,21 @@ Temas identificados pero no resueltos todavía — a definir en próximas sesion
 - **Completar el inventario de contenido** (criterio en D98): `12-contenido-bienvenida.md` ya cubre Bienvenida, culto, Palabra Profética, Liderazgo y redes. Falta: preguntas frecuentes de Primeros pasos, el texto real de Bautismo para Mi camino (hay uno provisorio, D98), y marcar qué textos son reales y cuáles provisorios. Además, alinear ese documento con la navegación nueva (D91, D92): la sección "¿Cómo sigue el proceso?" pasa a vivir en **Primeros pasos**, y los botones deben seguir la guía de UX (D94).
 - **Guion de la demo** para la presentación a los pastores, apoyado en los escenarios del seed (D99).
 
+## Para preguntar a la iglesia — Ministerios (Echu, 2026-10-12)
+
+Antes de especificar los **turnos de servicio** ("qué domingo le toca a quién"; propuesta anotada en
+`specs/016-lideres-ministerio/spec.md`, Out of Scope). Para el líder de Bienvenida o Flor:
+
+1. ¿Cómo arman hoy quién va cada domingo? ¿Un mensaje en el grupo de WhatsApp, una planilla, "siempre
+   los mismos"?
+2. ¿Cuánta gente necesita cada área un domingo normal? (ej. 2 en la puerta, 3 en seguridad)
+3. ¿La gente va todos los domingos o se turnan?
+4. ¿Quién lidera cada Ministerio? (lo carga el Admin con la spec 016)
+5. ¿Qué hace Ceremonial además de la Santa Cena (segundo domingo del mes)? ¿Y los Ministerios que
+   trabajan entre semana (Vida en Acción: el comedor del Mercadito es los sábados)?
+6. "Atender a quienes ministran" (llevarle agua al pastor) y "limpieza" no figuran como áreas en
+   `22-ministerios.md`: ¿son áreas de Bienvenida, u otro Ministerio?
+
 ## Técnicas
 
 - **Proveedor de email transaccional** (D96). La captura en local ya está decidida (Mailpit en Docker Compose, D105): falta el proveedor real para producción.

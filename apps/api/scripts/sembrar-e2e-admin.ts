@@ -12,6 +12,7 @@ import { sembrarE2e012 } from './sembrar-e2e/012-avisos.js';
 import { sembrarE2e013 } from './sembrar-e2e/013-backoffice.js';
 import { sembrarE2e014 } from './sembrar-e2e/014-grupos-extension.js';
 import { sembrarE2e015 } from './sembrar-e2e/015-eleccion-ministerio.js';
+import { sembrarE2e016 } from './sembrar-e2e/016-lideres-ministerio.js';
 
 /**
  * H-34 (revisión manual ronda 3): los e2e de `apps/backoffice` necesitan una
@@ -143,6 +144,7 @@ async function main() {
   await sembrarE2e013(ctx);
   await sembrarE2e014(ctx);
   await sembrarE2e015(ctx);
+  await sembrarE2e016(ctx);
 }
 
 main()

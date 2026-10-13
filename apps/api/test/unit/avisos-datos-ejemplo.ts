@@ -63,6 +63,8 @@ export const DATOS_EJEMPLO: { [N in NombreEventoAviso]: DatosDe<N> } = {
   'grupo_extension.solicitud_aceptada': { solicitudId: 'sge-1', grupoId: 'gex-1', grupo: 'Mujeres de Tolosa' },
   'grupo_extension.solicitud_rechazada': { solicitudId: 'sge-1', grupoId: 'gex-1', grupo: 'Mujeres de Tolosa' },
   'grupo_extension.agregada_por_admin': { solicitudId: 'sge-1', grupoId: 'gex-1', grupo: 'Mujeres de Tolosa' },
+
+  'ministerio.lider_asignado': { ministerioId: 'min-1', ministerio: 'Bienvenida' },
 };
 
 /** Los importantes según `docs/16` §1 — lista fija a propósito (T004 e): cambiarla es una decisión. */

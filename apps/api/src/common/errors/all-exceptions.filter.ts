@@ -114,6 +114,8 @@ const TITULOS: Record<ErrorCode, string> = {
   POSTULACION_NO_APROBADA: 'La postulación no está aprobada',
   NO_APTA_PARA_MINISTERIO: 'Todavía no puede postularse',
   YA_ES_MIEMBRO_DEL_MINISTERIO: 'Ya es parte de ese Ministerio',
+
+  YA_ES_LIDER_DEL_MINISTERIO: 'Ya es líder de este Ministerio.',
   POSTULACION_YA_PENDIENTE: 'Ya hay una postulación pendiente',
   POSTULACION_NO_PENDIENTE: 'La postulación ya no está pendiente',
   POSTULACION_REQUIERE_CONFIRMAR_CAMBIO: 'La persona ya pertenece a otro Ministerio',

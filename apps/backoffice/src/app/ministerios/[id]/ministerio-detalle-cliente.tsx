@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { AgregarMiembro } from './agregar-miembro';
+import { LideresMinisterio } from './lideres-ministerio';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -18,6 +19,7 @@ import {
   type DatosCelula,
   type DatosMinisterio,
   type EliminadoEnPapelera,
+  type LiderMinisterioVista,
   type MiembroMinisterio,
   type MinisterioDetalleCatalogo,
   type Pagina,
@@ -53,6 +55,7 @@ export function MinisterioDetalleCliente({
   pagina,
   porPagina,
   papeleraCelulas,
+  lideres,
   apiToken,
   puedeGestionar,
   puedeVerPapelera,
@@ -63,6 +66,7 @@ export function MinisterioDetalleCliente({
   pagina: number;
   porPagina: number;
   papeleraCelulas: EliminadoEnPapelera[];
+  lideres: LiderMinisterioVista[];
   apiToken: string;
   puedeGestionar: boolean;
   puedeVerPapelera: boolean;
@@ -306,6 +310,9 @@ export function MinisterioDetalleCliente({
           </details>
         )}
       </section>
+
+      {/* spec 016 (D244): quién lidera el Ministerio. */}
+      <LideresMinisterio ministerioId={m.id} ministerio={m.nombre} lideres={lideres} activo={m.activo} puedeGestionar={puedeGestionar} apiToken={apiToken} />
 
       <section aria-labelledby="miembros-titulo" className="flex flex-col gap-3">
         <h2 id="miembros-titulo" className="text-lg font-semibold">

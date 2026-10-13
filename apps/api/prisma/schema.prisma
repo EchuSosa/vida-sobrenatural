@@ -246,6 +246,8 @@ model Persona {
 
   // spec 014: Grupos de Extensión.
   liderazgosExtension   LiderGrupoExtension[]
+  // spec 016 (D244): Ministerios que lidera.
+  liderazgosMinisterio  LiderMinisterio[]
   solicitudesExtension  SolicitudGrupoExtension[]
   eleccionesMinisterio  EleccionMinisterio[]
 
@@ -976,9 +978,30 @@ model Ministerio {
   postulaciones Postulacion[]
   opcionesEleccion OpcionEleccionMinisterio[]
   opcionesDeclaracion OpcionDeclaracionMinisterio[]
+  lideres       LiderMinisterio[]
 
   @@index([activo, eliminadoEn])
   @@map("ministerios")
+}
+
+// spec 016 (D244): líder de un Ministerio. Lo asigna el Admin; el sistema le da
+// y le quita el rol `lider_ministerio` (como `lider_extension`, D226). Se
+// cierra con `hasta`, nunca se borra. Único parcial `lideres_ministerio_vigente`
+// (ministerioId, personaId) WHERE hasta IS NULL — en la migración.
+model LiderMinisterio {
+  id            String     @id @default(uuid())
+  ministerioId  String
+  ministerio    Ministerio @relation(fields: [ministerioId], references: [id])
+  personaId     String
+  persona       Persona    @relation(fields: [personaId], references: [id])
+  desde         DateTime   @default(now())
+  hasta         DateTime?
+  asignadoPorId String
+  quitadoPorId  String?
+
+  @@index([ministerioId])
+  @@index([personaId])
+  @@map("lideres_ministerio")
 }
 
 model Celula {

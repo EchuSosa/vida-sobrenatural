@@ -31,6 +31,7 @@ export const EMAILS_DE_PRUEBA = [
   'demo-vn-en-curso@example.com',
   'demo-apta@example.com',
   'demo-tutora-silvina@example.com',
+  'demo-ministerio-lider@example.com',
 ] as const;
 
 export interface EtiquetasEntrarDePrueba {

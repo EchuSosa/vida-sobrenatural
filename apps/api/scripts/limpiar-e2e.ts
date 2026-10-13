@@ -115,6 +115,8 @@ const ENTIDADES_E2E: { nombre: string; borrar: () => Promise<number> }[] = [
       sumar(await prisma.grupoExtension.deleteMany({ where: { id: { in: grupoExtensionIds } } }));
       // 015 — Elección de ministerio (sus opciones se van en cascada): antes que las Células y los Grupos.
       sumar(await prisma.eleccionMinisterio.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { opciones: { some: { ministerioId: { in: ministerioIds } } } }] } }));
+      // 016 — líderes de Ministerio.
+      sumar(await prisma.liderMinisterio.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { ministerioId: { in: ministerioIds } }] } }));
       // 009 — Postulación → Célula → Ministerio.
       sumar(await prisma.postulacion.deleteMany({ where: { OR: [{ personaId: { in: idsE2E } }, { ministerioId: { in: ministerioIds } }] } }));
       sumar(await prisma.celula.deleteMany({ where: { ministerioId: { in: ministerioIds } } }));

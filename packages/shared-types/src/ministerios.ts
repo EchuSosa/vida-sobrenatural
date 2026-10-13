@@ -195,6 +195,8 @@ export interface MinisterioCatalogo {
   miembrosActivos: number;
   postulacionesPendientes: number;
   tieneDatosRelacionados: boolean;
+  /** spec 016 (D244): líderes vigentes, por apellido. */
+  lideres: PersonaBreve[];
 }
 
 /** `GET /ministerios/:id`. */
@@ -330,4 +332,48 @@ export interface MinisterioDePersona {
   actuales: MembresiaDePersona[];
   pendiente: { postulacionId: string; ministerio: { id: string; nombre: string }; createdAt: string } | null;
   historial: PostulacionHistorial[];
+  /** spec 016 (D244): Ministerios activos que lidera hoy. */
+  lidera: { id: string; nombre: string }[];
+}
+
+// --- spec 016 (D244): líderes de Ministerio ---
+
+/** `POST /ministerios/:id/lideres` y cada fila de `lideres` en el detalle del backoffice. */
+export interface LiderMinisterioVista {
+  id: string;
+  persona: PersonaBreve;
+  desde: string;
+}
+
+/** Un integrante como lo ve su líder: contacto incluido (Pregunta 1 de la 016, como D226). */
+export interface IntegranteMinisterio {
+  postulacionId: string;
+  persona: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    fotoUrl: string | null;
+    telefono: string | null;
+    email: string | null;
+    /** Teléfono normalizado para `wa.me` (D218), o null. */
+    whatsapp: string | null;
+  };
+  desde: string;
+}
+
+/** `GET /ministerios/liderados`: cada Ministerio activo que lidera la persona de la sesión. */
+export interface MinisterioLiderado {
+  id: string;
+  nombre: string;
+  integrantes: number;
+  areas: number;
+}
+
+/** `GET /ministerios/liderados/:id`: el equipo por área; `sinArea` para quien no tiene (o el Ministerio no tiene áreas). */
+export interface MinisterioLideradoDetalle extends MinisterioLiderado {
+  descripcion: string;
+  porArea: { celula: { id: string; nombre: string; activo: boolean }; integrantes: IntegranteMinisterio[] }[];
+  sinArea: IntegranteMinisterio[];
+  /** Los otros líderes vigentes (sin contarse a sí mismo). */
+  otrosLideres: PersonaBreve[];
 }

@@ -21,7 +21,7 @@ export interface ItemNavApp {
 
 export const NAV_APP: ItemNavApp[] = [
   { href: '/inicio', labelKey: 'inicio', icon: Home },
-  { href: '/mi-camino', labelKey: 'miCamino', icon: MapIcon, rutasRelacionadas: ['/mis-discipulados', '/mi-disponibilidad', '/mis-grupos', '/mi-grupo-extension'] },
+  { href: '/mi-camino', labelKey: 'miCamino', icon: MapIcon, rutasRelacionadas: ['/mis-discipulados', '/mi-disponibilidad', '/mis-grupos', '/mi-grupo-extension', '/mi-ministerio'] },
   // H-26 (revisión manual, actualización 2026-09-20, D107): /mis-eventos,
   // no /eventos — esa URL ya la usa la cartelera pública (`(publica)/eventos`)
   // y Next.js no permite que dos route groups resuelvan la misma URL.
@@ -50,4 +50,6 @@ export const SUBNAV_MI_CAMINO: ItemSubnavMiCamino[] = [
   { href: '/mis-grupos', labelKey: 'misGrupos', permiso: 'mis_grupos.ver' },
   // spec 014 (D226): el líder de un Grupo de Extensión.
   { href: '/mi-grupo-extension', labelKey: 'miGrupoExtension', permiso: 'mi_grupo_extension.ver' },
+  // spec 016 (D244): el líder de un Ministerio.
+  { href: '/mi-ministerio', labelKey: 'miMinisterio', permiso: 'mi_ministerio.ver' },
 ];
