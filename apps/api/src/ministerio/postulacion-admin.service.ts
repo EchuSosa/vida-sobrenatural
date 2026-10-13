@@ -13,6 +13,7 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
+import { ministeriosQueLidera } from './lideres.service.js';
 import { RolesDeEstadoService } from '../persona/roles-de-estado.service.js';
 import { calcularEdad } from '../persona/calcular-edad.js';
 import { nombresDe } from '../discipulado/consultas.js';
@@ -452,7 +453,7 @@ export class PostulacionAdminService {
         404,
         'No existe una Persona con ese id.',
       );
-    const [aprobadas, pendiente, historial] = await Promise.all([
+    const [aprobadas, pendiente, historial, lidera] = await Promise.all([
       // D217 + D241: todas las membresías, la del Ministerio primero.
       this.prisma.postulacion.findMany({
         where: { personaId, estado: 'aprobada' },
@@ -475,6 +476,7 @@ export class PostulacionAdminService {
         },
       }),
       historialDe(this.prisma, personaId, verMotivos),
+      ministeriosQueLidera(this.prisma, personaId),
     ]);
     const actuales = aprobadas.map((a) => ({
       postulacionId: a.id,
@@ -495,6 +497,7 @@ export class PostulacionAdminService {
           }
         : null,
       historial,
+      lidera,
     };
   }
 }

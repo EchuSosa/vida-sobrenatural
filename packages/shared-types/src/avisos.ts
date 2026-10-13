@@ -86,6 +86,8 @@ export type EventoAviso =
   // --- 015 — Elección de ministerio (D239, D242) ---
   | { nombre: 'ministerio.eleccion_abierta'; a: { tipo: 'grupo'; grupoId: string }; datos: { grupoId: string } }
   | { nombre: 'ministerio.eleccion_lista'; a: Admin; datos: { eleccionId: string } }
+  // 016 (D244): el Admin te asignó como líder de un Ministerio.
+  | { nombre: 'ministerio.lider_asignado'; a: DePersona; datos: { ministerioId: string; ministerio: string } }
   // --- 010 — Bautismo (D147) ---
   | { nombre: 'bautismo.solicitud_aceptada'; a: DePersona; datos: { solicitudId: string } }
   | { nombre: 'bautismo.solicitud_rechazada'; a: DePersona; datos: { solicitudId: string } }
@@ -119,7 +121,7 @@ export type NombreEventoAviso = EventoAviso['nombre'];
 export type DatosDe<N extends NombreEventoAviso> = Extract<EventoAviso, { nombre: N }>['datos'];
 
 /** La spec que es dueña del hecho (para el test del catálogo y para saber quién lo conecta). */
-export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | '014' | '015' | 'flujo-12';
+export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | '014' | '015' | '016' | 'flujo-12';
 
 export interface EntradaCatalogo<N extends NombreEventoAviso> {
   spec: SpecDelAviso;
@@ -140,6 +142,8 @@ const MI_CAMINO = '/mi-camino';
 const MIS_EVENTOS = '/mis-eventos';
 /** spec 014: la card de la persona y la pantalla del líder. */
 const MI_GRUPO_EXTENSION = '/mi-camino/grupo-extension';
+/** spec 016: la pantalla del líder de un Ministerio. */
+const MI_MINISTERIO = '/mi-ministerio';
 const LIDER_GRUPO_EXTENSION = '/mi-grupo-extension';
 /** spec 015: la pantalla para elegir ministerio. */
 const ELEGIR_MINISTERIO = '/mi-camino/ministerios/elegir';
@@ -302,6 +306,11 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
   'ministerio.eleccion_lista': {
     spec: '015', destinatario: 'admin', disparador: null, prioridad: 'normal',
     entidad: { tipo: 'eleccion_ministerio', id: (d) => d.eleccionId }, destino: () => MI_CAMINO, clave: sinClave,
+  },
+  // 016 (D244): asignado como líder — a la persona, con el nombre del Ministerio.
+  'ministerio.lider_asignado': {
+    spec: '016', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'persona', id: (d) => d.ministerioId }, destino: (d) => `${MI_MINISTERIO}/${d.ministerioId}`, clave: sinClave,
   },
   // 010 — ningún texto fuera de la app nombra el bautismo (docs/13 §5).
   'bautismo.solicitud_aceptada': {

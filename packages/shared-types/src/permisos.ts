@@ -9,7 +9,7 @@ import type { DiscipuladoActivo, PropuestaPendiente } from './discipulado.js';
  * sitios existentes y se agregan los nuevos — T001 lo deja vacío, T009
  * agrega los permisos `.ver` de las rutas ya existentes del backoffice.
  */
-export type RolDeCargo = 'admin' | 'pastor' | 'discipulador' | 'lider_curso' | 'lider_extension';
+export type RolDeCargo = 'admin' | 'pastor' | 'discipulador' | 'lider_curso' | 'lider_extension' | 'lider_ministerio';
 
 /**
  * Roles de ESTADO del proceso (D131, FR-019): los escribe el sistema como
@@ -111,7 +111,10 @@ export type Permiso =
   | 'grupos_extension.ver'
   | 'grupos_extension.gestionar'
   | 'mi_grupo_extension.ver'
-  | 'mi_grupo_extension.gestionar';
+  | 'mi_grupo_extension.gestionar'
+  // spec 016 (D244): el líder de un Ministerio ve a su equipo. `lider_ministerio`
+  // lo da y lo quita el sistema al asignar líderes (como `lider_extension`).
+  | 'mi_ministerio.ver';
 
 export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'inicio.ver': ['admin', 'pastor'],
@@ -182,6 +185,7 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'grupos_extension.gestionar': ['admin'],
   'mi_grupo_extension.ver': ['lider_extension'],
   'mi_grupo_extension.gestionar': ['lider_extension'],
+  'mi_ministerio.ver': ['lider_ministerio'],
 };
 
 /**

@@ -119,3 +119,10 @@ export class MotivoOpcionalDto {
   @IsString()
   motivo?: string;
 }
+
+/** spec 016 (D244): `POST /ministerios/:id/lideres`. */
+export class AsignarLiderDto {
+  @ApiProperty()
+  @IsUUID()
+  personaId!: string;
+}

@@ -11,6 +11,8 @@ import { MinisterioController } from './ministerio.controller.js';
 import { MinisterioService } from './ministerio.service.js';
 import { CelulaService } from './celula.service.js';
 import { FuentePostulacion } from './fuente-bandeja.js';
+import { LideresMinisterioController } from './lideres.controller.js';
+import { LideresMinisterioService } from './lideres.service.js';
 
 /**
  * spec 009 — Ministerios, Células y Postulaciones. `miembros.ts`
@@ -26,6 +28,8 @@ import { FuentePostulacion } from './fuente-bandeja.js';
   controllers: [
     PostulacionPersonaController,
     PostulacionAdminController,
+    // spec 016: antes del catálogo, por `/ministerios/liderados` vs `/ministerios/:id`.
+    LideresMinisterioController,
     MinisterioController,
   ],
   providers: [
@@ -33,6 +37,7 @@ import { FuentePostulacion } from './fuente-bandeja.js';
     PostulacionAdminService,
     MinisterioService,
     CelulaService,
+    LideresMinisterioService,
     RolesDeEstadoService,
   ],
 })

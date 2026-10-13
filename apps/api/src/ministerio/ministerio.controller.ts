@@ -170,8 +170,8 @@ export class MinisterioController {
     description:
       'spec 009, FR-026/FR-028: editar, inactivar o reactivar. 409 CONFIRMACION_NOMBRE_REQUERIDA (con conteos).',
   })
-  actualizar(@Param('id') id: string, @Body() dto: ActualizarMinisterioDto) {
-    return this.ministerios.actualizar(id, dto);
+  actualizar(@Param('id') id: string, @Body() dto: ActualizarMinisterioDto, @Req() request: AuthenticatedRequest) {
+    return this.ministerios.actualizar(id, dto, personaDeSesion(request));
   }
 
   @Delete('ministerios/:id')

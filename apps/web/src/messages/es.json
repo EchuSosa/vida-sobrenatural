@@ -946,6 +946,10 @@
         "eleccion_abierta": {
           "titulo": "Ya podés elegir dónde querés servir",
           "detalle": "Elegí hasta 2 ministerios antes de terminar Vida de Servicio. Después lo charlás con tu líder."
+        },
+        "lider_asignado": {
+          "titulo": "Sos líder de {ministerio}",
+          "detalle": "Desde Mi ministerio podés ver a tu equipo y cómo contactarlos."
         }
       },
       "bautismo": {

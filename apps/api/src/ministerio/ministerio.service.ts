@@ -10,6 +10,7 @@ import {
   type MinisterioDetalleCatalogo,
   type MinisterioPublico,
   type Pagina,
+  type PersonaBreve,
 } from '@vida-sobrenatural/shared-types';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -17,6 +18,7 @@ import { AppException } from '../common/errors/app-exception.js';
 import { errorDeValidacion } from '../discipulado/validaciones.js';
 import { nombresDe } from '../discipulado/consultas.js';
 import { erroresMinisterio, opcional } from './validar-catalogo.js';
+import { LideresMinisterioService, lideresVigentesDe } from './lideres.service.js';
 import {
   MINISTERIO_DISPONIBLE,
   ORDEN_MINISTERIOS,
@@ -40,6 +42,7 @@ async function conteos(db: Db, ministerioIds: string[]) {
         postulaciones: number;
         celulasActivas: number;
         celulas: number;
+        lideres: number;
       }
     >();
   const filas = await db.$queryRaw<
@@ -50,6 +53,7 @@ async function conteos(db: Db, ministerioIds: string[]) {
       postulaciones: bigint;
       celulasActivas: bigint;
       celulas: bigint;
+      lideres: bigint;
     }[]
   >`
     SELECT m."id",
@@ -58,7 +62,8 @@ async function conteos(db: Db, ministerioIds: string[]) {
       (SELECT count(*) FROM "postulaciones" p WHERE p."ministerioId" = m."id" AND p."estado" = 'pendiente') AS "pendientes",
       (SELECT count(*) FROM "postulaciones" p WHERE p."ministerioId" = m."id") AS "postulaciones",
       (SELECT count(*) FROM "celulas" c WHERE c."ministerioId" = m."id" AND c."eliminadoEn" IS NULL AND c."activo" = true) AS "celulasActivas",
-      (SELECT count(*) FROM "celulas" c WHERE c."ministerioId" = m."id" AND c."eliminadoEn" IS NULL) AS "celulas"
+      (SELECT count(*) FROM "celulas" c WHERE c."ministerioId" = m."id" AND c."eliminadoEn" IS NULL) AS "celulas",
+      (SELECT count(*) FROM "lideres_ministerio" l WHERE l."ministerioId" = m."id") AS "lideres"
     FROM "ministerios" m WHERE m."id" = ANY(${ministerioIds}::text[])`;
   return new Map(
     filas.map((f) => [
@@ -69,6 +74,7 @@ async function conteos(db: Db, ministerioIds: string[]) {
         postulaciones: Number(f.postulaciones),
         celulasActivas: Number(f.celulasActivas),
         celulas: Number(f.celulas),
+        lideres: Number(f.lideres),
       },
     ]),
   );
@@ -94,7 +100,10 @@ type FilaMinisterio = Prisma.MinisterioGetPayload<{
  */
 @Injectable()
 export class MinisterioService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly lideres: LideresMinisterioService,
+  ) {}
 
   /** GET /ministerios/publicos (FR-034): solo nombre y línea pública (docs/22). */
   publicos(): Promise<MinisterioPublico[]> {
@@ -122,11 +131,9 @@ export class MinisterioService {
     const filtradas = termino
       ? filas.filter((m) => normalizarNombre(m.nombre).includes(termino))
       : filas;
-    const c = await conteos(
-      this.prisma,
-      filtradas.map((m) => m.id),
-    );
-    return filtradas.map((m) => aCatalogo(m, c.get(m.id)));
+    const ids = filtradas.map((m) => m.id);
+    const [c, l] = await Promise.all([conteos(this.prisma, ids), lideresVigentesDe(this.prisma, ids)]);
+    return filtradas.map((m) => aCatalogo(m, c.get(m.id), l.get(m.id)));
   }
 
   /** GET /ministerios/papelera (D119). */
@@ -157,11 +164,12 @@ export class MinisterioService {
       select: SELECT_MINISTERIO,
     });
     if (!m) throw noEncontrado();
-    const [c, celulas] = await Promise.all([
+    const [c, celulas, l] = await Promise.all([
       conteos(this.prisma, [id]),
       celulasCatalogo(this.prisma, id),
+      lideresVigentesDe(this.prisma, [id]),
     ]);
-    return { ...aCatalogo(m, c.get(id)), celulas };
+    return { ...aCatalogo(m, c.get(id), l.get(id)), celulas };
   }
 
   /** GET /ministerios/:id/miembros (FR-032): Postulaciones aprobadas con Persona activa, por apellido. */
@@ -242,13 +250,14 @@ export class MinisterioService {
       },
       select: SELECT_MINISTERIO,
     });
-    return aCatalogo(m, undefined);
+    return aCatalogo(m, undefined, undefined);
   }
 
   /** PATCH /ministerios/:id (FR-026, FR-028, D38): inactivar con miembros o pendientes exige el nombre exacto. */
   async actualizar(
     id: string,
     dto: ActualizarMinisterio,
+    adminId: string,
   ): Promise<MinisterioDetalleCatalogo> {
     const existente = await this.prisma.ministerio.findFirst({
       where: { id, eliminadoEn: null },
@@ -283,7 +292,8 @@ export class MinisterioService {
         );
       }
     }
-    await this.prisma.ministerio.update({
+    await this.prisma.$transaction(async (tx) => {
+      await tx.ministerio.update({
       where: { id },
       data: {
         ...(dto.nombre !== undefined ? { nombre: dto.nombre.trim() } : {}),
@@ -298,6 +308,11 @@ export class MinisterioService {
           : {}),
         ...(dto.activo !== undefined ? { activo: dto.activo } : {}),
       },
+      });
+      // spec 016: el rol `lider_ministerio` sigue a los Ministerios activos.
+      if (dto.activo !== undefined && dto.activo !== existente.activo) {
+        await this.lideres.sincronizarRolPorEstado(tx, id, dto.activo, adminId);
+      }
     });
     return this.detalle(id);
   }
@@ -310,11 +325,11 @@ export class MinisterioService {
     });
     if (!existente) throw noEncontrado();
     const c = (await conteos(this.prisma, [id])).get(id)!;
-    if (c.postulaciones > 0 || c.celulas > 0) {
+    if (c.postulaciones > 0 || c.celulas > 0 || c.lideres > 0) {
       throw new AppException(
         'MINISTERIO_TIENE_DATOS_RELACIONADOS',
         409,
-        'No se puede eliminar: tiene postulaciones o células. Inactivalo en su lugar.',
+        'No se puede eliminar: tiene postulaciones, células o líderes. Inactivalo en su lugar.',
       );
     }
     await this.prisma.ministerio.update({
@@ -375,16 +390,19 @@ function aCatalogo(
         postulaciones: number;
         celulasActivas: number;
         celulas: number;
+        lideres: number;
       }
     | undefined,
+  lideres: PersonaBreve[] | undefined,
 ): MinisterioCatalogo {
   return {
     ...m,
+    lideres: lideres ?? [],
     celulasActivas: c?.celulasActivas ?? 0,
     miembrosActivos: c?.miembros ?? 0,
     postulacionesPendientes: c?.pendientes ?? 0,
     tieneDatosRelacionados:
-      (c?.postulaciones ?? 0) > 0 || (c?.celulas ?? 0) > 0,
+      (c?.postulaciones ?? 0) > 0 || (c?.celulas ?? 0) > 0 || (c?.lideres ?? 0) > 0,
   };
 }
 
