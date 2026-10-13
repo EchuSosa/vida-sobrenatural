@@ -124,6 +124,11 @@ export class EscenarioVS {
     await p.inscripcion.deleteMany({ where: { OR: [{ grupoId: { in: grupos } }, { personaId: { in: personas } }] } });
     await p.solicitudVidaServicio.deleteMany({ where: { OR: [{ personaId: { in: personas } }, { grupoId: { in: grupos } }] } });
     await p.liderazgo.deleteMany({ where: { grupoId: { in: grupos } } });
+    // Grupos de extensión que un test creó para estas personas (el detalle del pedido los muestra).
+    const gex = (await p.grupoExtension.findMany({ where: { OR: [{ lideres: { some: { personaId: { in: personas } } } }, { solicitudes: { some: { personaId: { in: personas } } } }] }, select: { id: true } })).map((g) => g.id);
+    await p.solicitudGrupoExtension.deleteMany({ where: { grupoId: { in: gex } } });
+    await p.liderGrupoExtension.deleteMany({ where: { grupoId: { in: gex } } });
+    await p.grupoExtension.deleteMany({ where: { id: { in: gex } } });
     await p.completitudManual.deleteMany({ where: { personaId: { in: personas } } });
     await p.declaracionHistorial.deleteMany({ where: { personaId: { in: personas } } });
     const notificaciones = (await p.entregaNotificacion.findMany({ where: { personaId: { in: personas } }, select: { notificacionId: true } })).map((e) => e.notificacionId);

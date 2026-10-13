@@ -11,6 +11,7 @@ import {
   type IntegranteGex,
   type PersonaContactoGex,
   type SolicitudGexParaLider,
+  type GrupoExtensionDePersona,
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
@@ -153,3 +154,24 @@ export function grupoCompleto() {
 }
 
 export { esViolacionDeUnico } from '../ministerio/crear-postulacion.js';
+
+/**
+ * El Grupo de Extensión de una Persona con sus líderes vigentes (la pertenencia ES la Solicitud
+ * `aceptada`, D225). Una sola fuente para la elección de ministerio (D239) y el pedido de Vida de
+ * Servicio (Principio XI).
+ */
+export async function grupoExtensionDePersona(db: Db, personaId: string): Promise<GrupoExtensionDePersona | null> {
+  const gex = await db.solicitudGrupoExtension.findFirst({
+    where: { personaId, estado: 'aceptada' },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      grupo: {
+        select: {
+          nombre: true,
+          lideres: { where: { hasta: null }, orderBy: { desde: 'asc' }, select: { persona: { select: { nombre: true, apellido: true } } } },
+        },
+      },
+    },
+  });
+  return gex ? { nombre: gex.grupo.nombre, lideres: gex.grupo.lideres.map((l) => `${l.persona.nombre} ${l.persona.apellido}`) } : null;
+}

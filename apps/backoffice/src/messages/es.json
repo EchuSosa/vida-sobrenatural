@@ -2417,8 +2417,8 @@
       "vida_de_servicio": "Vida de Servicio"
     },
     "tipos": {
-      "individual": "Individual",
-      "grupal": "Grupal"
+      "individual": "Personalizado (1 a 1)",
+      "grupal": "Intensivo (4 clases)"
     },
     "modalidades": {
       "seguimiento_por_encuentros": "Seguimiento por encuentros",
@@ -2575,7 +2575,10 @@
     "creadaPor": "La cargó {nombre} en su nombre.",
     "revisadaPor": "Resuelta por {nombre}, el {fecha}.",
     "prerrequisitoTitulo": "Cómo cumple el requisito",
-    "prerrequisitoInscripcion": "Terminó Vida Nueva {tipo, select, individual {individual} other {grupal}} en el sistema{fecha, select, sin {} other { el {fecha}}}.",
+    "prerrequisitoInscripcion": "Terminó Vida Nueva {tipo, select, individual {personalizado (1 a 1)} other {intensivo (4 clases)}} en el sistema{fecha, select, sin {} other { el {fecha}}}.",
+    "grupoExtensionTitulo": "Grupo de extensión",
+    "grupoExtensionCon": "Está en {nombre}. {cantidad, plural, =0 {Sin líderes asignados.} one {Líder: {lideres}.} other {Líderes: {lideres}.}}",
+    "grupoExtensionSin": "No está en ningún grupo de extensión.",
     "prerrequisitoManual": "La iglesia registró que hizo Vida Nueva (el {fecha}).",
     "prerrequisitoNoCumple": "Hoy no cumple el requisito: ya no figura Vida Nueva terminada. No se puede aprobar.",
     "edicionPedidaTitulo": "Edición pedida",

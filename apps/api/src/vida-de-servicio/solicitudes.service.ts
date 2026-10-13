@@ -13,6 +13,7 @@ import { calcularEdad } from '../persona/calcular-edad.js';
 import { errorDeValidacion, normalizarMotivo } from '../discipulado/validaciones.js';
 import { nombresDe } from '../discipulado/consultas.js';
 import { bloquearPersona, completoEtapa } from '../camino/consultas.js';
+import { grupoExtensionDePersona } from '../grupo-extension/consultas.js';
 import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 import { estadoPrerrequisito } from './prerrequisito.js';
 import { DE_VIDA_DE_SERVICIO, edicionesAbiertas, fechaCivil, inscripcionVSEnCursoOCompleta } from './consultas-vs.js';
@@ -86,7 +87,7 @@ export class SolicitudesVidaDeServicioService {
       },
     });
     if (!s) throw new AppException('NO_ENCONTRADO', HttpStatus.NOT_FOUND, 'No existe esa Solicitud.');
-    const [persona, prerrequisito, nombres, enCurso, cursadas] = await Promise.all([
+    const [persona, prerrequisito, nombres, enCurso, cursadas, grupoExtension] = await Promise.all([
       this.prisma.persona.findUniqueOrThrow({
         where: { id: s.personaId },
         select: { id: true, nombre: true, apellido: true, fotoUrl: true, fechaNacimiento: true, email: true, telefono: true },
@@ -99,6 +100,7 @@ export class SolicitudesVidaDeServicioService {
         select: { id: true, nombre: true, fechaInicio: true, inscripcionAbierta: true },
       }),
       this.prisma.inscripcion.findMany({ where: { personaId: s.personaId, grupo: DE_VIDA_DE_SERVICIO }, select: { grupoId: true } }),
+      grupoExtensionDePersona(this.prisma, s.personaId),
     ]);
     const yaCursadas = new Set(cursadas.map((c) => c.grupoId));
     return {
@@ -116,6 +118,7 @@ export class SolicitudesVidaDeServicioService {
         sinAccesoALaApp: sinAccesoALaApp(persona),
       },
       prerrequisito: prerrequisito.cumple ? prerrequisito.via : null,
+      grupoExtension,
       edicionPedida: s.grupo ? { grupoId: s.grupo.id, nombre: s.grupo.nombre ?? '', estado: s.grupo.estado, inscripcionAbierta: s.grupo.inscripcionAbierta } : null,
       creadoPor: s.creadoPorId ? (nombres.get(s.creadoPorId) ?? null) : null,
       revisadoPor: s.revisadoPorId ? (nombres.get(s.revisadoPorId) ?? null) : null,

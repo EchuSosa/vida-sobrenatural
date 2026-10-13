@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, apiComo, auditar, loguearseComoAdminE2E } from './helpers';
+import { test, expect, apiComo, auditar, loguearseComoAdminE2E, EMAIL_ADMIN } from './helpers';
 import { crearEdicionPorApi, crearPersonaApta } from './helpers-008';
 
 /**
@@ -31,6 +31,11 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const beto = await crearPersonaApta(`e2e-vs-beto-${sufijo}@example.com`, 'Beto', `Rechaza${sufijo}`);
       const { solicitudId: s1 } = await apiComo<{ solicitudId: string }>(ana.email, 'POST', '/vida-de-servicio/solicitudes/me', { grupoId });
       const { solicitudId: s2 } = await apiComo<{ solicitudId: string }>(beto.email, 'POST', '/vida-de-servicio/solicitudes/me', { grupoId });
+      // Lo que preguntaba el formulario en papel: el pedido muestra el grupo de extensión y sus líderes (Ana en uno, Beto en ninguno).
+      const grupos = await apiComo<Array<{ id: string; nombre: string; lideres: string[] }>>(EMAIL_ADMIN, 'GET', '/grupos-extension');
+      const gex = grupos.find((g) => g.nombre === 'e2e-Mujeres del centro');
+      if (!gex) throw new Error('falta el grupo e2e-Mujeres del centro (sembrar-e2e 014)');
+      await apiComo(EMAIL_ADMIN, 'POST', `/grupos-extension/${gex.id}/integrantes`, { personaId: ana.id });
 
       await loguearseComoAdminE2E(page);
       await page.goto(`/solicitudes?tipo=vida_de_servicio&buscar=${encodeURIComponent(`Aprueba${sufijo}`)}`);
@@ -39,6 +44,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.goto(`/solicitudes/vida-de-servicio/${s1}`);
       await expect(page.getByRole('heading', { level: 1 })).toContainText(`Ana Aprueba${sufijo}`);
       await expect(page.getByRole('region', { name: 'Cómo cumple el requisito' })).toContainText('La iglesia registró que hizo Vida Nueva');
+      await expect(page.getByRole('region', { name: 'Grupo de extensión' })).toContainText(`Está en e2e-Mujeres del centro. Líder: ${gex.lideres[0]}.`);
       await sinViolaciones(page);
 
       await page.getByRole('button', { name: 'Aprobar inscripción' }).click();
@@ -50,6 +56,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
       await page.waitForLoadState('networkidle');
       await page.goto(`/solicitudes/vida-de-servicio/${s2}`);
+      await expect(page.getByRole('region', { name: 'Grupo de extensión' })).toContainText('No está en ningún grupo de extensión.');
       await page.getByRole('button', { name: 'Rechazar' }).click();
       await page.getByRole('alertdialog').getByLabel('Motivo (opcional)').fill('Este año no hay lugar');
       await page.getByRole('alertdialog').getByRole('button', { name: 'Rechazar el pedido' }).click();
