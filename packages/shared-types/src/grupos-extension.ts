@@ -355,3 +355,14 @@ export function validarDatosGrupo(d: DatosGrupoExtension): ErrorCampoGex[] {
   }
   return e;
 }
+
+/**
+ * El Grupo de Extensión al que pertenece hoy una Persona (su Solicitud `aceptada`, D225) con los
+ * nombres de sus líderes vigentes. Lo que la encuesta en papel preguntaba ("¿Formás parte de un
+ * grupo de extensión? ¿Quiénes son tus líderes?"): lo muestran la elección de ministerio (D239) y el
+ * detalle del pedido de Vida de Servicio.
+ */
+export interface GrupoExtensionDePersona {
+  nombre: string;
+  lideres: string[];
+}

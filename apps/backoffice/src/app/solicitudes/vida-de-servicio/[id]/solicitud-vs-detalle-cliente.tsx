@@ -138,6 +138,17 @@ export function SolicitudVsDetalleCliente({
         </p>
       </section>
 
+      <section aria-labelledby="grupo-extension-titulo" className="flex flex-col gap-1">
+        <h2 id="grupo-extension-titulo" className="text-lg font-semibold">
+          {t('grupoExtensionTitulo')}
+        </h2>
+        <p className={solicitud.grupoExtension ? undefined : 'text-muted-foreground'}>
+          {solicitud.grupoExtension
+            ? t('grupoExtensionCon', { nombre: solicitud.grupoExtension.nombre, cantidad: solicitud.grupoExtension.lideres.length, lideres: solicitud.grupoExtension.lideres.join(', ') })
+            : t('grupoExtensionSin')}
+        </p>
+      </section>
+
       <section aria-labelledby="edicion-titulo" className="flex flex-col gap-1">
         <h2 id="edicion-titulo" className="text-lg font-semibold">
           {t('edicionPedidaTitulo')}

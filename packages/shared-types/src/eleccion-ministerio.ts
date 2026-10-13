@@ -1,3 +1,4 @@
+import type { GrupoExtensionDePersona } from './grupos-extension.js';
 import type { PersonaBreve } from './discipulado.js';
 import type { DecisionMembresia, MembresiaActual } from './ministerios.js';
 
@@ -112,7 +113,7 @@ export interface DatosConocidos {
   nombre: string;
   apellido: string;
   telefono: string;
-  grupoExtension: { nombre: string; lideres: string[] } | null;
+  grupoExtension: GrupoExtensionDePersona | null;
 }
 
 export interface OpcionVista {

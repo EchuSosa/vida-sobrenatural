@@ -1,3 +1,4 @@
+import type { GrupoExtensionDePersona } from './grupos-extension.js';
 import type { ErrorDeCampo } from './api-field-error.js';
 import type { CategoriaCurso } from './curso.js';
 import { sumarDias } from './cumpleanos.js';
@@ -370,6 +371,8 @@ export interface SolicitudVidaServicioDetalle {
   createdAt: string;
   persona: PersonaBreve & { edad: number; email: string | null; telefono: string | null; sinAccesoALaApp: boolean };
   prerrequisito: ViaPrerrequisito | null;
+  /** Su grupo de extensión y líderes, si tiene (lo que preguntaba el formulario en papel). */
+  grupoExtension: GrupoExtensionDePersona | null;
   edicionPedida: { grupoId: string; nombre: string; estado: EstadoEdicion; inscripcionAbierta: boolean } | null;
   creadoPor: PersonaBreve | null;
   revisadoPor: PersonaBreve | null;

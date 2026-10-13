@@ -74,10 +74,20 @@ describe('Vida de Servicio — revisar los pedidos (spec 008, T031)', () => {
     const g = await vs.edicion({ lideres: [lider], abierta: false });
     const a = await vs.apta('detalle', 'grupal');
     const id = await pedido(a, g);
+    // Lo que preguntaba el formulario en papel: su grupo de extensión y sus líderes (D225: la pertenencia es la Solicitud aceptada).
+    const gex = await prisma.grupoExtension.create({
+      data: { nombre: `Gex ${vs.sufijo}`, dias: ['martes'], horaInicio: '19:00', calle: '7', entreCalle1: '50', entreCalle2: '51', zona: 'Centro', creadoPorId: adminId, lideres: { create: { personaId: lider } } },
+      select: { id: true },
+    });
+    await prisma.solicitudGrupoExtension.create({ data: { personaId: a, grupoId: gex.id, estado: 'aceptada', revisadoPorId: lider, revisadaEn: new Date() } });
     const res = await como(pastorId, PASTOR, 'get', `/vida-de-servicio/solicitudes/${id}`);
     expect(res.status).toBe(200);
     const d = res.body as SolicitudVidaServicioDetalle;
     expect(d).toMatchObject({ estado: 'pendiente', persona: { id: a }, prerrequisito: { via: 'inscripcion', cursoTipo: 'grupal' }, edicionPedida: { grupoId: g, inscripcionAbierta: false }, creadoPor: null });
+    expect(d.grupoExtension).toEqual({ nombre: `Gex ${vs.sufijo}`, lideres: [expect.stringMatching(/\S/)] });
+    // Sin grupo: null, no un error.
+    const sinGex = await como(pastorId, PASTOR, 'get', `/vida-de-servicio/solicitudes/${await pedido(await vs.apta('detalle-sin-gex', 'grupal'), g)}`);
+    expect((sinGex.body as SolicitudVidaServicioDetalle).grupoExtension).toBeNull();
     expect(d.edicionesEnCurso.map((e) => e.grupoId)).toContain(g);
     expect((await como(pastorId, PASTOR, 'post', `/vida-de-servicio/solicitudes/${id}/aprobar`, { grupoId: g })).status).toBe(403);
   });

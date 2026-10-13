@@ -6,6 +6,7 @@ import type {
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
+import { grupoExtensionDePersona } from '../grupo-extension/consultas.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -60,27 +61,15 @@ export async function ministeriosParaValidar(db: Db, ministerioIds: readonly str
 
 /** D239: lo que la app ya sabe de la persona (nombre, celular y su grupo de extensión con sus líderes). */
 export async function datosConocidos(db: Db, personaId: string): Promise<DatosConocidos> {
-  const [persona, gex] = await Promise.all([
+  const [persona, grupoExtension] = await Promise.all([
     db.persona.findUniqueOrThrow({ where: { id: personaId }, select: { nombre: true, apellido: true, telefono: true } }),
-    // spec 014 (D225): la pertenencia ES la Solicitud `aceptada`.
-    db.solicitudGrupoExtension.findFirst({
-      where: { personaId, estado: 'aceptada' },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        grupo: {
-          select: {
-            nombre: true,
-            lideres: { where: { hasta: null }, orderBy: { desde: 'asc' }, select: { persona: { select: { nombre: true, apellido: true } } } },
-          },
-        },
-      },
-    }),
+    grupoExtensionDePersona(db, personaId),
   ]);
   return {
     nombre: persona.nombre,
     apellido: persona.apellido,
     telefono: persona.telefono,
-    grupoExtension: gex ? { nombre: gex.grupo.nombre, lideres: gex.grupo.lideres.map((l) => `${l.persona.nombre} ${l.persona.apellido}`) } : null,
+    grupoExtension,
   };
 }
 
