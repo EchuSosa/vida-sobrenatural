@@ -55,10 +55,10 @@ Cada app tiene **su propia sesión**: entrar en una no te hace entrar en la otra
 
 | Bloque | Casos | Tiempo estimado |
 |---|---|---|
-| ⭐ **Demo** — el recorrido del domingo | 22 | 1 h 25 min |
-| **P1** — lo principal de cada módulo y los permisos | 56 | 3 h 40 min |
-| **P2** — validaciones, casos borde, celular y modo oscuro | 94 | 4 h 10 min |
-| **Total** | **172** | **unas 9 h 15 min** (dos días con pausas) |
+| ⭐ **Demo** — el recorrido del domingo | 23 | 1 h 30 min |
+| **P1** — lo principal de cada módulo y los permisos | 69 | 4 h 30 min |
+| **P2** — validaciones, casos borde, celular y modo oscuro | 95 | 4 h 15 min |
+| **Total** | **187** | **unas 10 h 15 min** (dos días con pausas) |
 
 **Orden sugerido:** primero todo el bloque ⭐ (si algo falla ahí, es lo más urgente), después P1,
 y si queda tiempo, P2.
@@ -123,6 +123,7 @@ persona, volvés a `/dev/entrar` y escribís otro email.
 | Haciendo Vida Nueva con Jorge | `demo-vn-matias@example.com`, `demo-vn-lucas@example.com` | Matías Vera y Lucas Godoy (Jorge ya pidió dar por terminado el de Lucas) |
 | Menor sin tutor | `demo-pendiente-tutor@example.com` | No puede entrar hasta que el Admin lo active |
 | **Líder de un Grupo de Extensión** | `demo-gex-lider@example.com` | Carolina Benítez: lidera "Mujeres del centro" (martes 19 hs) y tiene el pedido de Sofía Molina esperando |
+| **Líder de Ministerio** | `demo-ministerio-lider@example.com` | Rocío Villalba: lidera el Ministerio de Bienvenida (y sirve en Atención de la Casa) |
 
 Además hay una persona **sin email** (Héctor Ríos), cargada por el Admin: no puede entrar a la
 app, pero se la ve en el backoffice.
@@ -355,6 +356,17 @@ confirma. Y la primera carga de los equipos desde cada ministerio.
 | YAS-01 | P1 | Recién registrada (celular) | `demo-nueva@example.com` | 1. Mi camino → tocá **Ministerio** para abrir la etapa (arranca cerrada) → "Ya sirvo en un ministerio".<br>2. Tocá "Enviar" sin marcar nada.<br>3. Marcá **Ministerio de Bienvenida → Seguridad** y **Mesa de entrada → Quiero servir acá**; en "¿Desde qué año servís?" elegí 2019 y tocá "Enviar". | 1: el mismo listado que la elección (tres bloques, hasta 2 ministerios). 2: "Revisá esto para enviar:" con "Elegí al menos un área…". 3: "¡Listo! Le avisamos al equipo…"; en Mi camino la tarjeta Ministerio queda en revisión, con "Retirar". | |
 | YAS-02 | P1 | Admin | Después de YAS-01 | 1. Solicitudes → la de Florencia ("contó que ya hizo Ministerio").<br>2. En "Dónde dice que sirve", desmarcá **Mesa de entrada** y marcá "También hizo Vida de Servicio".<br>3. Tocá "Confirmar" → "Sí, confirmar". | 1: "Sirve desde 2019.", "Hoy no figura sirviendo en ningún ministerio." y las dos áreas marcadas. 3: queda "Confirmada"; Bienvenida · Seguridad "— confirmada" y Mesa de entrada "— descartada". En la app de Florencia, la tarjeta Ministerio dice "Estás sirviendo en Ministerio de Bienvenida", y Vida de Servicio figura hecha. | |
 | YAS-03 | P1 | Admin | Backoffice | 1. Ministerios → **Adoración** → "Quiénes sirven" → "Agregar a alguien que ya sirve".<br>2. Elegí el área **Voces**, buscá `Gabriela` y tocá "Agregar".<br>3. Repetí en **Multimedia** con Gabriela (si ya la confirmaste en ELM-05, sirve en dos). | 2: "Gabriela Apto Demo ya figura sirviendo en Adoración." y aparece en la lista. 3: si ya sirve en 2, aparece "…ya sirve en … ¿Lo sumás o reemplazás uno?" sin "Sumarlo" (D241): solo "Reemplazar …" por cada uno, o "Cancelar". | |
+
+### 4.16. Líderes de Ministerio (LMI)
+
+Cada Ministerio tiene uno o varios líderes, que el Admin asigna desde el backoffice; el líder ve a
+su equipo y cómo contactarlo desde la app (spec 016, D244). Todavía no decide sobre postulaciones.
+
+| ID | Prio | Rol | Partida | Pasos | Esperado | Resultado |
+|---|---|---|---|---|---|---|
+| LMI-01 | P1 | Admin | Backoffice | 1. Ministerios: mirá la columna "Líderes".<br>2. Entrá a **Ministerio Ceremonial** → sección "Líderes" → "Asignar líder".<br>3. Buscá `Martín` (Sosa Echeverría) y tocá "Asignar".<br>4. Buscá `Tomás` (el menor) e intentá asignarlo.<br>5. Volvé a Ministerios y abrí el perfil de Martín desde Personas. | 1: Bienvenida dice "Rocío Villalba"; Ceremonial, "Sin líder" (con ícono). 3: "Martín Sosa Echeverría ya es líder de Ministerio Ceremonial." y aparece con "Líder desde el …". 4: Tomás aparece sin "Asignar", con el motivo de que es menor. 5: en el Perfil, "Líder de: Ministerio Ceremonial". | |
+| LMI-02 | P1 | Líder de Ministerio (celular) | `demo-ministerio-lider@example.com` (Rocío) | 1. Mi camino → arriba, "Mi ministerio".<br>2. Mirá las áreas y tocá "Escribir por WhatsApp" de alguien. | 1: va derecho a "Ministerio de Bienvenida": cuántos integrantes y áreas, y las áreas con cada persona: desde cuándo sirve, "Llamar a …", "Escribir por WhatsApp" y el email. Las áreas vacías dicen "Nadie en esta área todavía." 2: abre WhatsApp con un saludo armado. | |
+| LMI-03 | P1 | Admin | Después de LMI-01 | 1. Ministerio Ceremonial → "Líderes" → "Quitar" en Martín → "Quitar como líder".<br>2. Entrá a la app como `demo-miembro@example.com` (Martín) y mirá Mi camino. | 1: "Martín Sosa Echeverría ya no es líder." y Ceremonial vuelve a "Sin líder". 2: no tiene "Mi ministerio"; si entra a `/mi-ministerio`, "Todavía no liderás ningún ministerio." | |
 
 ---
 

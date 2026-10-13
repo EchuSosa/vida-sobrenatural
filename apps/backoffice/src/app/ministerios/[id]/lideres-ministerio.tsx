@@ -115,6 +115,7 @@ export function LideresMinisterio({
               ariaElegir={(nombre) => t('asignarAria', { nombre })}
               onElegir={(p) => void asignar(p)}
               deshabilitado={enviando}
+              bloquearMenores
             />
           </div>
         </details>
