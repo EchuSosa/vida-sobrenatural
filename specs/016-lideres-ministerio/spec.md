@@ -4,9 +4,9 @@
 
 **Created**: 2026-10-12
 
-**Status**: Propuesta — pendiente de aprobación de Echu. Se escribe solo la parte que no depende de
-lo que falta averiguar con la iglesia (el líder por Ministerio); lo de los turnos queda anotado en
-"Out of Scope" y en `docs/06-preguntas-abiertas.md` hasta tener respuestas.
+**Status**: Aprobada por Echu el 2026-10-12 (Preguntas 1 y 2: "sí", "sí, los ve"). Cubre solo la
+parte que no depende de lo que falta averiguar con la iglesia (el líder por Ministerio); lo de los
+turnos queda anotado en "Out of Scope" y en `docs/06-preguntas-abiertas.md` hasta tener respuestas.
 
 **Input**: Pedido de Echu del 2026-10-12: "tenemos forma de saber quiénes son los integrantes de cada
 ministerio y que desde el admin se puedan agregar personas a un ministerio con su área? cada domingo
@@ -160,9 +160,10 @@ D81), para que de un vistazo se vea qué Ministerio quedó sin asignar.
   para los domingos); se confirman con la iglesia y se cargan desde el catálogo, sin cambios de
   código.
 
-## Preguntas para Echu
+## Preguntas para Echu (respondidas el 2026-10-12)
 
 1. ¿Está bien que el líder vea el **celular y el email** de sus integrantes (como el líder de
    extensión, D226)? Recomendación: sí, es a quien tiene que llamar para organizar el domingo.
+   **Echu: sí.**
 2. ¿El Pastor también puede **asignar** líderes, o solo verlos? Recomendación: solo verlos (D132:
-   `ministerios.gestionar` es del Admin).
+   `ministerios.gestionar` es del Admin). **Echu: solo los ve.**
