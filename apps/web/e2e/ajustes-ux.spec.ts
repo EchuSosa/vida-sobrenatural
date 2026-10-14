@@ -91,10 +91,27 @@ test.describe('Registro', () => {
     const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
     await expect(resumen.getByRole('link', { name: 'Escribí tu apellido.' })).toBeVisible();
     await expect(resumen.getByRole('link', { name: 'Escribí tu nombre.' })).toBeVisible();
-    // Ningún enlace del resumen repite el genérico "Revisá este dato.". Género
-    // no se afirma acá: en CI no apareció en el resumen y no se pudo ver por
-    // qué sin el informe (anotado en el PR).
+    // Ningún enlace del resumen repite el genérico "Revisá este dato.".
     await expect(page.getByText('Revisá este dato.')).toHaveCount(0);
+  });
+
+  test('el primer toque en "Siguiente" con un campo vacío enfocado marca TODOS los campos del paso (hallazgo 1 de la auditoría de tests) @celular', async ({ page }) => {
+    // Auditoría de tests del 2026-10-13 (docs/24, hallazgo 1): el commit 74ddeb3 sacó de arriba la
+    // aserción de Género porque "en CI no apareció en el resumen". Apareció no por el select: al
+    // tocar "Siguiente" con Nombre vacío y enfocado, el blur muestra el error de Nombre, el botón se
+    // corre ~57 px y el toque se levanta sobre el formulario: el click se pierde y hay que tocar dos
+    // veces. Marcado `fail` hasta que se arregle el producto: cuando pase, Playwright avisa y se saca.
+    test.fail(true, 'Bug del producto: el primer toque en "Siguiente" se pierde por el corrimiento del layout (docs/24, hallazgo 1).');
+    await loguearseComoTest(page, `e2e-ux-reg-toque-${Date.now()}@example.com`);
+    await page.goto('/registro');
+    await page.getByLabel('Apellido').fill('');
+    await page.getByLabel('Nombre').fill('');
+    // `delay`: un toque real tiene ~100 ms entre apoyar y levantar el dedo; sin esperar, a veces el
+    // re-render no llega a meterse en el medio y el click entra (por eso en CI parecía inestable).
+    await page.getByRole('button', { name: 'Siguiente' }).click({ delay: 150 });
+    const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
+    await expect(resumen.getByRole('link', { name: 'Elegí una opción en Género.' })).toBeVisible();
+    await expect(resumen.getByRole('link', { name: /Completá el día, el mes y el año/ })).toBeVisible();
   });
 
   test('botones apilados a todo el ancho con el principal arriba, ayudas en Teléfono y Dirección (#28, #32) @celular', async ({ page }) => {
