@@ -56,7 +56,9 @@ export default defineConfig({
   // corrida deja un JSON en disco, con la fecha en el nombre para que una
   // corrida que falla no la pise la siguiente. No va en `test-results/`: esa
   // carpeta la vacía Playwright al empezar cada corrida.
-  reporter: [['list'], ['json', { outputFile: `reportes-e2e/corrida-${new Date().toISOString().replace(/[:.]/g, '-')}.json` }]],
+  // `github`: en Actions, cada falla también como anotación del job (lo único de la CI que se lee
+  // desde afuera sin bajar artefactos; docs/24).
+  reporter: [['list'], ...(process.env.GITHUB_ACTIONS ? ([['github']] as const) : []), ['json', { outputFile: `reportes-e2e/corrida-${new Date().toISOString().replace(/[:.]/g, '-')}.json` }]],
   // H-20/D111 (specs/002-base-transversal, docs/05-decisiones.md): mismo
   // motivo que apps/web/playwright.config.ts — más de un worker comparte
   // estado de sesión entre corridas paralelas contra la misma API/base.
