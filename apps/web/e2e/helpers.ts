@@ -120,8 +120,10 @@ export async function auditar(page: Page, reglasDeshabilitadas: string[] = []) {
  * quieta. No se audita una página que dice que está ocupada.
  */
 async function esperarQueNoEsteCargando(page: Page) {
+  // También el `<title>`: en una navegación del App Router llega con el resto de la página; axe
+  // (`document-title`) lo vio vacío un instante (docs/24, 2026-10-14, `ministerios-postulacion`).
   await page
-    .waitForFunction(() => !document.querySelector('[aria-busy="true"]'), undefined, { timeout: 15_000 })
+    .waitForFunction(() => !document.querySelector('[aria-busy="true"]') && document.title.trim() !== '', undefined, { timeout: 15_000 })
     .catch(() => {});
 }
 
