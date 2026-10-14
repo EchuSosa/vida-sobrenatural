@@ -5,6 +5,11 @@ producto ni a un cambio de regla, se anota acá con fecha y síntoma. **A la ter
 "entorno" y se investiga como bug.** Cuando se resuelve, la fila se marca y se deja (sirve de
 historia).
 
+**Cómo llega una falla acá desde la CI:** los e2e corren con `retries: 2` y `failOnFlakyTests: true`.
+Un test que falla y pasa al reintento aparece en el reporte de Playwright como **flaky** y hace
+fallar la corrida igual. No se "reintenta hasta que pase": se abre esta tabla, se decide si es (a),
+(b) o (c), y recién después se toca algo.
+
 | Fecha | Suite | Síntoma | Veces | Qué se cree | Estado |
 |---|---|---|---|---|---|
 | 2026-10-11 | e2e backoffice, en local (no en CI) | `Hydration failed … server rendered text didn't match`: "Lo pidió el 13 de octubre de 2026, 11:00 a. m." (servidor) vs "… a las 11:00 a. m." (cliente). El cuerpo del test pasa; falla por el guard de errores de consola (H-100). | 3+ (todas las corridas locales del backoffice) | Diferencia de datos ICU de Node entre el servidor (`full-icu`) y Chromium en el contenedor de desarrollo. En CI no pasa. | **Pendiente de investigar** (ya superó las 3 veces): o se fija el formato en código (sin depender del ICU de cada lado) o se documenta por qué no aplica. |

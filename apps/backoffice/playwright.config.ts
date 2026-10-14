@@ -52,6 +52,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  // Regla "Cuando un test falla" (CLAUDE.md): un test que falla y pasa al reintento no deja la
+  // corrida en verde. El reintento sigue sirviendo para ver si es inestable, pero la corrida falla
+  // igual y el caso se anota en docs/24-fallas-conocidas.md.
+  failOnFlakyTests: true,
   // H-146 (aplicado también acá): además de la salida en consola, cada
   // corrida deja un JSON en disco, con la fecha en el nombre para que una
   // corrida que falla no la pise la siguiente. No va en `test-results/`: esa
