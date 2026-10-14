@@ -125,8 +125,27 @@ export function crearAxeBuilder(page: Page, reglasDeshabilitadas: string[] = [])
  * todos los usos.
  */
 export async function auditar(page: Page, reglasDeshabilitadas: string[] = []) {
+  await sinTransiciones(page);
   await esperarAnimacionesAsentadas(page);
   return crearAxeBuilder(page, reglasDeshabilitadas).analyze();
+}
+
+/**
+ * docs/24 (2026-10-14, primer flaky que atrapó `failOnFlakyTests`): axe midió el botón "Más" del
+ * encabezado con el color de texto del tema claro sobre el fondo del tema oscuro (1.12:1). No es un
+ * color que exista: next-themes aplica la clase del tema en el cliente, los colores del botón
+ * transicionan (`transition-all`) y, si la transición arranca DESPUÉS de `esperarAnimacionesAsentadas`
+ * y antes de que axe mida, se mide a mitad de camino. Sin transiciones ni animaciones, texto y fondo
+ * cambian de tema en el mismo instante y lo que se mide es siempre un estado real de la pantalla.
+ */
+async function sinTransiciones(page: Page) {
+  await page.evaluate(() => {
+    if (document.getElementById('e2e-sin-transiciones')) return;
+    const style = document.createElement('style');
+    style.id = 'e2e-sin-transiciones';
+    style.textContent = '*, *::before, *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation-duration: 0s !important; animation-delay: 0s !important; }';
+    document.head.appendChild(style);
+  });
 }
 
 async function esperarAnimacionesAsentadas(page: Page) {
