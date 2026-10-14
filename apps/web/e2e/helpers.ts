@@ -108,8 +108,21 @@ const EMBEDS_DE_TERCEROS = [
  */
 export async function auditar(page: Page, reglasDeshabilitadas: string[] = []) {
   await sinTransiciones(page);
+  await esperarQueNoEsteCargando(page);
   await esperarAnimacionesAsentadas(page);
   return crearAxeBuilder(page, reglasDeshabilitadas).analyze();
+}
+
+/**
+ * docs/24 (2026-10-14, flaky `page-has-heading-one`): los `loading.tsx` declaran `aria-busy="true"` y
+ * no tienen `<h1>`; si axe mide mientras el esqueleto está en pantalla (navegación del App Router en
+ * curso, aunque la red ya esté quieta), reporta una página sin encabezado que la persona nunca ve
+ * quieta. No se audita una página que dice que está ocupada.
+ */
+async function esperarQueNoEsteCargando(page: Page) {
+  await page
+    .waitForFunction(() => !document.querySelector('[aria-busy="true"]'), undefined, { timeout: 15_000 })
+    .catch(() => {});
 }
 
 /**
