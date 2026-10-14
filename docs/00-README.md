@@ -24,6 +24,7 @@ Documentación de producto, previa a los specs técnicos (metodología SDD). Cad
 | [16-sistemas-transversales.md](16-sistemas-transversales.md) | Sistemas de notificaciones (Avisos, push, email), errores (Problem Details, Sentry) y feedback de acciones |
 | [21-instalacion.md](21-instalacion.md) | Instalar el sistema para una iglesia: primera instalación y recuperación del Admin (D130/D131) — distinto del atajo de desarrollo |
 | [23-manual-de-pruebas.md](23-manual-de-pruebas.md) | Manual de pruebas a mano, sin jerga: glosario, personas de demo para `/dev/entrar` y casos por prioridad (⭐ Demo, P1, P2) con columna de resultado |
+| [24-fallas-conocidas.md](24-fallas-conocidas.md) | Fallas de tests atribuidas al entorno, con fecha y conteo: a la tercera vez se investigan como bug (regla "Cuando un test falla" de `CLAUDE.md`) |
 | [diagrama-er.mermaid](diagrama-er.mermaid) | Diagrama ER completo (entidades, atributos, cardinalidades) |
 | [diagrama-arquitectura.mermaid](diagrama-arquitectura.mermaid) | Diagrama de arquitectura (apps del monorepo, API, tareas programadas, base de datos, servicios externos) |
 

@@ -46,6 +46,21 @@ nadie tenga que acordarse de pegarla. Cada línea dice dónde vive la regla comp
   `docs/12-contenido-bienvenida.md`.
 - Nombres del dominio siempre como están en `docs/04-dominio-entidades.md` (Principio II).
 
+## Cuando un test falla
+
+- **Primero se decide, después se toca.** Antes de cambiar código o test, el commit dice cuál de las
+  tres es y por qué: **(a) bug del producto** → se arregla el producto; **(b) la regla cambió** → el
+  commit cita la decisión (Dxxx) que la cambió y el test se adapta a la regla nueva; **(c) entorno**
+  → se anota en `docs/24-fallas-conocidas.md` con fecha y síntoma. **A la tercera vez deja de ser
+  "entorno"** y se investiga como (a).
+- **Nunca se debilita una aserción en silencio.** Cambiar un `toBe(409)` por algo más laxo, borrar un
+  `expect`, agregar un `test.skip`, un `permitirErrorDeConsola(/./)` o un `retries` va dicho
+  explícitamente en el mensaje del PR, con el motivo. Un test que pasa y no valida nada es peor que
+  no tener test.
+- **"Lo volví a correr y pasó" no cierra nada**: es un caso (c) y se anota igual.
+- Los agentes de Playwright (Planner, Generator, Healer) **no se usan** en este repo: ya hay un
+  agente escribiendo tests; el criterio de qué es correcto lo pone Echu revisando aserciones.
+
 ## Antes de cerrar una fase o un lote
 
 - **Las tres suites en verde**: `pnpm --filter api run test`, `pnpm --filter api run test:e2e`
