@@ -77,6 +77,13 @@ class ReporterAArchivo {
     const contenido = `${JSON.stringify(informe, null, 2)}\n`;
     fs.writeFileSync(archivo, contenido);
     fs.writeFileSync(path.join(this.directorio, 'ultima.json'), contenido);
+    // En GitHub Actions, cada falla también como anotación del job (`::error`): el log del job y el
+    // artefacto se bajan de otro host y desde acá no se leen; las anotaciones sí (docs/24, fila 2).
+    if (process.env.GITHUB_ACTIONS) {
+      const unaLinea = (texto) => sinColor(texto).split('\n').map((l) => l.trim()).filter(Boolean).slice(0, 6).join(' | ').replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A').slice(0, 1500);
+      for (const f of fallas) console.log(`::error file=apps/api/${f.archivo},title=${f.nombre.replace(/,/g, ' ').slice(0, 200)}::${unaLinea(f.mensaje)}`);
+      for (const e of suitesConError) console.log(`::error file=apps/api/${e.archivo},title=No llegó a correr::${unaLinea(e.mensaje)}`);
+    }
     const sinCorrer = suitesConError.length ? `, y ${suitesConError.length} archivo(s) que no llegaron a correr` : '';
     console.log(
       `\n[reporter-a-archivo] ${informe.totales.fallados} fallas de ${informe.totales.tests} tests${sinCorrer} — informe: ${path.relative(process.cwd(), archivo)}`,

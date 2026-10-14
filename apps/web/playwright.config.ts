@@ -50,7 +50,9 @@ export default defineConfig({
   // falla no la pise la siguiente. No va en `test-results/`: esa carpeta la
   // vacía Playwright al empezar cada corrida. Acá vive H-145 (perfil-tema,
   // intermitente): la próxima aparición tiene que dejar rastro.
-  reporter: [['list'], ['json', { outputFile: `reportes-e2e/corrida-${new Date().toISOString().replace(/[:.]/g, '-')}.json` }]],
+  // `github`: en Actions, cada falla también como anotación del job (lo único de la CI que se lee
+  // desde afuera sin bajar artefactos; docs/24).
+  reporter: [['list'], ...(process.env.GITHUB_ACTIONS ? ([['github']] as const) : []), ['json', { outputFile: `reportes-e2e/corrida-${new Date().toISOString().replace(/[:.]/g, '-')}.json` }]],
   // H-20 (revisión manual, D111 en docs/05-decisiones.md): más de un worker
   // comparte estado de sesión entre corridas paralelas contra la misma
   // API/base y produce fallas espurias. Aislarlo (storage state o datos
