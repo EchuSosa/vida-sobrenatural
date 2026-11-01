@@ -3044,5 +3044,14 @@
     "errorCargaTitulo": "No pudimos cargar la elección",
     "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, avisanos con este código:",
     "reintentar": "Reintentar"
+  },
+  "sedesAcciones": {
+    "creada": "Sede creada.",
+    "reactivada": "Sede reactivada.",
+    "inactivada": "Sede inactivada.",
+    "eliminada": "Sede eliminada.",
+    "errorCrear": "No pudimos crear la Sede. Probá de nuevo en un rato.",
+    "errorActualizar": "No pudimos actualizar la Sede. Probá de nuevo en un rato.",
+    "errorEliminar": "No pudimos eliminar la Sede. Probá de nuevo en un rato."
   }
 }

@@ -96,22 +96,31 @@ test.describe('Registro', () => {
   });
 
   test('el primer toque en "Siguiente" con un campo vacío enfocado marca TODOS los campos del paso (hallazgo 1 de la auditoría de tests) @celular', async ({ page }) => {
-    // Auditoría de tests del 2026-10-13 (docs/24, hallazgo 1): el commit 74ddeb3 sacó de arriba la
-    // aserción de Género porque "en CI no apareció en el resumen". Apareció no por el select: al
-    // tocar "Siguiente" con Nombre vacío y enfocado, el blur muestra el error de Nombre, el botón se
-    // corre ~57 px y el toque se levanta sobre el formulario: el click se pierde y hay que tocar dos
-    // veces. Marcado `fail` hasta que se arregle el producto: cuando pase, Playwright avisa y se saca.
-    test.fail(true, 'Bug del producto: el primer toque en "Siguiente" se pierde por el corrimiento del layout (docs/24, hallazgo 1).');
+    // Auditoría de tests del 2026-10-13 (docs/24, hallazgo 1): al tocar "Siguiente" con un campo
+    // vacío enfocado, el blur hacía aparecer el resumen, la pantalla se corría ~57 px y el toque se
+    // perdía. Arreglado con la opción 1 (Echu, 2026-11-01): el resumen aparece solo al intentar
+    // avanzar. `delay`: un toque real tiene ~100 ms entre apoyar y levantar el dedo.
     await loguearseComoTest(page, `e2e-ux-reg-toque-${Date.now()}@example.com`);
     await page.goto('/registro');
     await page.getByLabel('Apellido').fill('');
     await page.getByLabel('Nombre').fill('');
-    // `delay`: un toque real tiene ~100 ms entre apoyar y levantar el dedo; sin esperar, a veces el
-    // re-render no llega a meterse en el medio y el click entra (por eso en CI parecía inestable).
     await page.getByRole('button', { name: 'Siguiente' }).click({ delay: 150 });
     const resumen = page.getByRole('alert').filter({ hasText: 'Revisá estos campos' });
     await expect(resumen.getByRole('link', { name: 'Elegí una opción en Género.' })).toBeVisible();
     await expect(resumen.getByRole('link', { name: /Completá el día, el mes y el año/ })).toBeVisible();
+    // Un solo toque: el resumen recibe el foco y la persona sigue en el paso 1.
+    await expect(resumen).toBeFocused();
+  });
+
+  test('salir de un campo vacío marca solo ese campo, sin resumen; el resumen aparece al tocar "Siguiente" @celular', async ({ page }) => {
+    await loguearseComoTest(page, `e2e-ux-reg-blur-${Date.now()}@example.com`);
+    await page.goto('/registro');
+    await page.getByLabel('Apellido').fill('');
+    await page.getByLabel('Apellido').blur();
+    await expect(page.locator('#campo-apellido-error')).toHaveText('Escribí tu apellido.');
+    await expect(page.getByRole('alert').filter({ hasText: 'Revisá estos campos' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Siguiente' }).click({ delay: 150 });
+    await expect(page.getByRole('alert').filter({ hasText: 'Revisá estos campos' }).getByRole('link', { name: 'Escribí tu apellido.' })).toBeVisible();
   });
 
   test('botones apilados a todo el ancho con el principal arriba, ayudas en Teléfono y Dirección (#28, #32) @celular', async ({ page }) => {
