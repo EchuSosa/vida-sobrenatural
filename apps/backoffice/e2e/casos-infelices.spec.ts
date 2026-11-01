@@ -123,6 +123,10 @@ test('asignar un líder de ministerio: si la API falla, avisa y no queda asignad
   await expect(lideres.getByRole('button', { name: 'Quitar: Nora E2E Líder' })).toHaveCount(0);
 
   await page.unrouteAll({ behavior: 'wait' });
+  // El buscador limpia el texto y los resultados al elegir, aunque la API falle después (hallazgo
+  // menor, anotado en el PR): para reintentar hay que volver a buscar.
+  await lideres.getByLabel('Buscar por nombre, apellido o email').fill('Nora E2E');
+  await lideres.getByRole('button', { name: 'Buscar', exact: true }).click();
   const pedidos = contarPedidos(page, 'POST', /\/ministerios\/[^/]+\/lideres$/);
   try {
     await tresClics(asignar);
