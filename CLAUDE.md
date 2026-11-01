@@ -24,6 +24,10 @@ nadie tenga que acordarse de pegarla. Cada línea dice dónde vive la regla comp
 - **Los errores de validación se muestran por campo**, con la pieza compartida de `packages/ui`
   (H-50): mensaje debajo del campo, resumen arriba con enlace a cada uno, foco al resumen, y
   decir *cómo* corregir. La API ya manda `errors: [{campo, code}]`.
+- **Cada historia lleva al menos un e2e del caso de error** además del caso feliz: API caída
+  (`page.route` que responde 500 o aborta), validación por campo, o doble envío — el que aplique a
+  esa pantalla (Echu, 2026-11-01). Los e2e de solo caso feliz fueron el hueco de la auditoría de
+  tests (`docs/24`).
 - **Cada pantalla nueva o modificada lleva su tarea de checklist** del final de
   `docs/15-guia-ux-ui.md` en el `tasks.md` (definición de terminado, D114).
 
@@ -79,6 +83,7 @@ nadie tenga que acordarse de pegarla. Cada línea dice dónde vive la regla comp
 ## Entorno
 
 - Puertos fijos: `apps/web` 3001, `apps/backoffice` 3002, `apps/api` 3333 (D104).
-- Cómo levantar todo y cómo dejar la base en condiciones: `specs/revision-manual/COMO-ARRANCAR.md`.
+- Entorno nuevo (contenedor de la nube o compu sin Docker): `bash scripts/preparar-entorno.sh [--demo]`
+  (idempotente). Cómo levantar todo y dejar la base en condiciones: `specs/revision-manual/COMO-ARRANCAR.md`.
 - `packages/shared-types` se compila: si editás un tipo compartido con los servidores levantados,
   hay que reconstruirlo (H-33).
