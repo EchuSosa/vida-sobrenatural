@@ -55,7 +55,7 @@ export default async function AppLayout({
         <NavAppBar sinLeer={sinLeer} />
         {/* H-66: NavAppTopBarCelular ahora es `fixed top-0` en celular (h-14) —
           pt-14 compensa para que no tape el contenido. */}
-        <main id="contenido" className="flex-1 pt-14 pb-20 md:pt-0 md:pb-0">
+        <main id="contenido" className="min-w-0 flex-1 pt-14 pb-20 md:pt-0 md:pb-0">
           {children}
         </main>
       </div>

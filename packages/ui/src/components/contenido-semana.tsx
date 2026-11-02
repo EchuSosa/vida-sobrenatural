@@ -21,7 +21,7 @@ function TextoConEnlaces({ texto }: { texto: string }) {
   return (
     <div className="flex flex-col gap-3 text-base leading-relaxed">
       {texto.split(/\n{2,}/).map((parrafo, i) => (
-        <p key={i} className="whitespace-pre-line break-words">
+        <p key={i} className="whitespace-pre-line [overflow-wrap:anywhere]">
           {parrafo.split(URL_EN_TEXTO).map((parte, j) =>
             j % 2 === 1 ? (
               <a key={j} href={parte} target="_blank" rel="noopener noreferrer" className="break-all text-primary underline underline-offset-2">

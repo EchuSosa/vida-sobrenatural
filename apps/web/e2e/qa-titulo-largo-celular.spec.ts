@@ -1,17 +1,23 @@
-import { test, expect, registrarPersonaDeTest } from './helpers';
+import type { Page } from '@playwright/test';
+import { test, expect, loguearseComoTest, registrarPersonaDeTest } from './helpers';
 import { cargarMaterialPorApi, crearEdicionPorApi, inscribirPorApi, registrarVidaNuevaHecha, EMAIL_LIDER_1 } from './helpers-008';
 
 /**
  * QA ronda 1, BUG-06: un título de semana sin espacios ensancha la página en
  * celular, y el encabezado fijo se estira con ella: el botón "Más" queda fuera
- * de la pantalla. Marcado `fail` hasta arreglar el producto.
+ * de la pantalla. Arreglado: los títulos y el texto de la semana usan
+ * `overflow-wrap: anywhere`, y `main` tiene `min-w-0`. Se revisan las tres
+ * pantallas que lo muestran: la lista, la semana de la persona y la del líder.
  */
+async function excesoHorizontal(page: Page): Promise<number> {
+  return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+}
+
 test.describe('Vida de Servicio en celular', () => {
   test.use({ viewport: { width: 390, height: 844 } });
   test.slow();
 
   test('un título largo sin espacios no ensancha la página', async ({ page, baseURL }) => {
-    test.fail(true, 'BUG-06 de QA-REPORT.md: el título largo no se corta dentro de la tarjeta.');
     const sufijo = Date.now();
     const grupoId = await crearEdicionPorApi(baseURL!, { nombre: `e2e-qa-titulo-${sufijo}`, semanas: 3, inicio: new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10) });
     const email = `e2e-qa-titulo-${sufijo}@example.com`;
@@ -22,7 +28,20 @@ test.describe('Vida de Servicio en celular', () => {
 
     await page.goto('/mi-camino/vida-de-servicio');
     await expect(page.getByRole('heading', { name: 'Semanas' })).toBeVisible();
-    const exceso = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(exceso).toBeLessThanOrEqual(0);
+    expect(await excesoHorizontal(page)).toBeLessThanOrEqual(0);
+
+    await page.goto('/mi-camino/vida-de-servicio/semanas/1');
+    await expect(page.getByRole('heading', { level: 1, name: 'T'.repeat(120) })).toBeVisible();
+    expect(await excesoHorizontal(page)).toBeLessThanOrEqual(0);
+
+    await loguearseComoTest(page, EMAIL_LIDER_1);
+    await page.goto(`/mis-grupos/${grupoId}/semanas/1`);
+    await expect(page.getByRole('heading', { level: 2, name: 'T'.repeat(120) })).toBeVisible();
+    expect(await excesoHorizontal(page)).toBeLessThanOrEqual(0);
+    // El botón "Más" del encabezado fijo sigue dentro de la pantalla.
+    const mas = page.getByRole('button', { name: 'Más' });
+    await expect(mas).toBeVisible();
+    const caja = await mas.boundingBox();
+    expect(caja!.x + caja!.width).toBeLessThanOrEqual(390);
   });
 });

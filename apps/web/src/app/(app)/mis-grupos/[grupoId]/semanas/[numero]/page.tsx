@@ -74,7 +74,7 @@ export default async function MaterialSemanaPage({ params }: { params: Promise<{
           {grupo.estado !== 'en_curso' && <p role="note" className="rounded-md border border-border p-3 text-base">{t('material.terminada')}</p>}
           {material && (
             <section className="flex flex-col gap-3">
-              <h2 className="text-xl font-semibold break-words">{material.titulo}</h2>
+              <h2 className="text-xl font-semibold [overflow-wrap:anywhere]">{material.titulo}</h2>
               <ContenidoSemana
                 contenido={material}
                 hrefArchivo={(id) => `/mi-camino/vida-de-servicio/archivos/${id}`}
