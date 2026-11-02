@@ -6,6 +6,7 @@ nadie tenga que acordarse de pegarla. Cada línea dice dónde vive la regla comp
 
 ## Antes de escribir código
 
+- **Respondé siempre en español** (Echu, 2026-11-02): mensajes, resúmenes, PRs y commits.
 - **Consultá al advisor antes de fijar un plan, cuando el mismo error aparece dos veces y antes de
   dar una tarea por terminada** (Echu, 2026-11-01; `advisorModel` en `.claude/settings.json`).
 - **Spec primero.** Ninguna funcionalidad sin spec o ADR aprobada (Principio I). El índice de la
