@@ -444,6 +444,7 @@
     },
     "errorCampo": "Revisá este dato.",
     "errorFechaNacimiento": "Completá el día, el mes y el año en que naciste. El año va con 4 números, por ejemplo 1965.",
+    "errorFechaNacimientoRango": "Revisá el año en que naciste: tiene que ser desde 1900 y la fecha no puede ser futura.",
     "elegirOpcion": "Elegí una opción",
     "soloNumeros": "Solo números",
     "opciones": {
