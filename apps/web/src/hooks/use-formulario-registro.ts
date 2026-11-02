@@ -158,6 +158,13 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     congregaDesde: requerido(t('errores.congregaDesde')),
   };
 
+  // Los campos que revisa cada paso (los mismos de `revalidarPaso`): los que puede mostrar el resumen.
+  const CAMPOS_POR_PASO: Record<number, readonly string[]> = {
+    1: ['apellido', 'nombre', 'genero', 'fechaNacimiento'],
+    2: ['telefono', 'direccion', 'sedeId'],
+    3: ['estadoCivil', 'profesion', 'profesionDetalle', 'congregaDesde'],
+  };
+
   function pasoValido(numeroPaso: number): boolean {
     if (numeroPaso === 1) {
       return Boolean(
@@ -202,8 +209,10 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
 
   function siguiente() {
     if (!pasoValido(paso)) {
-      // Marca los campos sin completar del paso actual sin llamar a la API todavía.
+      // Marca los campos sin completar del paso actual sin llamar a la API todavía, y recién ahí
+      // muestra el resumen (docs/24, hallazgo 1: el resumen ya no aparece al salir de un campo).
       revalidarPaso(paso);
+      validacion.intentar(CAMPOS_POR_PASO[paso] ?? []);
       return;
     }
     setPaso((p) => Math.min(p + 1, TOTAL_PASOS));

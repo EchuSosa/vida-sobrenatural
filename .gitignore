@@ -50,3 +50,6 @@ BRIEF-ESTADO.md
 # un checkout aparte con sus propias bases y puertos; no se versionan.
 .worktrees/
 .claude/settings.local.json
+
+# Configs de Playwright solo para correr en local sin globalSetup (nunca se commitean)
+playwright.local.config.ts
