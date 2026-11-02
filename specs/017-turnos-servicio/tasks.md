@@ -13,10 +13,19 @@
 - [ ] T006 API suspender / volver a habilitar fecha + integración.
 - [ ] T007 Seed de demo: reglas de Bienvenida, Ceremonial y Vida en Acción; Células "Atención a
   quienes ministran" y "Limpieza" en Bienvenida (D254).
-- [ ] T008 Backoffice "Días de servicio" y cupo por Célula (cuatro estados, H-50, useEnvio).
-- [ ] T009 e2e backoffice US1: caso feliz + regla repetida + cupo inválido + API caída + doble
+- [x] T008 Backoffice "Días de servicio" y cupo por Célula (cuatro estados, H-50, useEnvio).
+- [x] T009 e2e backoffice US1: caso feliz + regla repetida + cupo inválido + API caída + doble
   envío; axe claro/oscuro.
-- [ ] T010 Checklist de `docs/15` para la pantalla del Ministerio (D114).
+- [x] T010 Checklist de `docs/15` para la pantalla del Ministerio (D114).
+  - [x] Una sola acción principal, con verbo concreto: "Agregar día" (el resto, por fila: "Quitar", "Guardar", "Este día no hay").
+  - [x] Orden de botones según la convención: confirmaciones con "Volver" y la acción a la derecha (`ConfirmDestructiveDialog`, tono neutro: todo se puede deshacer).
+  - [x] Cuatro estados: cargando y error con `loading.tsx`/`error.tsx` de `ministerios/[id]`; vacío con "Todavía no tiene días de servicio" y "Cuando cargues un día…"; éxito con aviso y la lista al día.
+  - [x] Botones bloqueados y con indicador mientras se procesa, envío protegido de la reentrada (`useEnvio`; e2e de tres toques).
+  - [x] Feedback según `16`: aviso de éxito; errores de validación por campo con resumen (H-50); fallas de la API con aviso que dice qué pasó.
+  - [x] Se entiende qué pasa después: la descripción de "Este día no hay" dice que avisa a quien tenía turno y que se puede volver a habilitar.
+  - [x] Textos en el tono definido, con voseo y sin jerga ("En armado", "Este día no hay").
+  - [x] Celular (e2e a 390 px sin desborde), teclado (e2e con Enter) y lector de pantalla (sección con `aria-labelledby`, `aria-invalid`/`aria-describedby`, botones con nombre que incluye la fecha o la regla).
+  - [x] Contraste: solo tokens; `axe` en claro y oscuro en el e2e.
 
 ## Entrega 2 — Rol del líder, avisos e Inicio (US2, US3)
 
