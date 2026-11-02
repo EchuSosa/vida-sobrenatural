@@ -135,10 +135,14 @@ test.describe('Registro', () => {
     await expect(page.getByLabel('Dirección')).toHaveAccessibleDescription(/no la compartimos/i);
     await expect(page.getByLabel('Número de teléfono')).toHaveAccessibleDescription(/Discipulador/);
 
+    // D249 (QA ronda 1, BUG-04): en celular "Atrás" ya no va debajo de "Siguiente" sino arriba,
+    // antes del título del paso, para que un doble toque en "Siguiente" no caiga sobre él.
     const siguiente = await page.getByRole('button', { name: 'Siguiente' }).boundingBox();
     const atras = await page.getByRole('button', { name: 'Atrás' }).boundingBox();
-    expect(siguiente && atras).toBeTruthy();
-    expect(siguiente!.y).toBeLessThan(atras!.y);
+    const titulo = await page.getByRole('heading', { level: 2 }).boundingBox();
+    expect(siguiente && atras && titulo).toBeTruthy();
+    expect(atras!.y + atras!.height).toBeLessThanOrEqual(titulo!.y);
+    expect(siguiente!.y).toBeGreaterThan(atras!.y + atras!.height);
     expect(siguiente!.width).toBeGreaterThan(CELULAR.width - 64);
   });
 
