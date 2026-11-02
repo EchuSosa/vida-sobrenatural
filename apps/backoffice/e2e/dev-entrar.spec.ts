@@ -24,6 +24,8 @@ test('con sesión, /dev/entrar cambia de persona', async ({ page, permitirErrorD
   // `getSession` de SessionProvider queda en vuelo cuando el login de prueba hace
   // `window.location.assign('/')`, next-auth loguea un ClientFetchError (solo en /dev/entrar,
   // que no existe en producción). Antes lo tapaba la redirección a /mis-discipulados.
+  // docs/24 (2026-11-02): este test fallaba en CI cuando era el primero en pedir `/` a su servidor
+  // (`next dev` compila al pedir y corta la navegación); lo evita el calentamiento por worker.
   permitirErrorDeConsola(/ClientFetchError: Failed to fetch/);
   await page.goto('/dev/entrar');
   await page.getByLabel('Email', { exact: true }).fill('e2e-admin@example.com');
