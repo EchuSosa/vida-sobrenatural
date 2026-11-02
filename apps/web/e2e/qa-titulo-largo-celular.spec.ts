@@ -34,9 +34,12 @@ test.describe('Vida de Servicio en celular', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'T'.repeat(120) })).toBeVisible();
     expect(await excesoHorizontal(page)).toBeLessThanOrEqual(0);
 
+    // Cambiar de persona: sin borrar la sesión de antes, /mis-grupos la llevaba a Mi camino.
+    await page.context().clearCookies();
     await loguearseComoTest(page, EMAIL_LIDER_1);
     await page.goto(`/mis-grupos/${grupoId}/semanas/1`);
-    await expect(page.getByRole('heading', { level: 2, name: 'T'.repeat(120) })).toBeVisible();
+    // Con la edición en curso, el líder ve el título en el formulario para editarlo.
+    await expect(page.getByRole('textbox', { name: 'Título' })).toHaveValue('T'.repeat(120));
     expect(await excesoHorizontal(page)).toBeLessThanOrEqual(0);
     // El botón "Más" del encabezado fijo sigue dentro de la pantalla.
     const mas = page.getByRole('button', { name: 'Más' });
