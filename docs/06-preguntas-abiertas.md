@@ -11,18 +11,38 @@ Temas identificados pero no resueltos todavía — a definir en próximas sesion
 
 ## Para preguntar a la iglesia — Ministerios (Echu, 2026-10-12)
 
-Antes de especificar los **turnos de servicio** ("qué domingo le toca a quién"; propuesta anotada en
-`specs/016-lideres-ministerio/spec.md`, Out of Scope). Para el líder de Bienvenida o Flor:
+**Turnos de servicio** ("qué domingo le toca a quién", spec 017). Estas seis preguntas eran para el
+líder de Bienvenida o Flor. Todavía no hay iglesia con quien hablar, así que Echu pidió (2026-11-01)
+que Claude eligiera la respuesta más razonable, la documentara con el porqué y la dejara fácil de
+cambiar. **Están respondidas así hasta confirmarlas con la iglesia**; cada una dice dónde se cambia.
 
-1. ¿Cómo arman hoy quién va cada domingo? ¿Un mensaje en el grupo de WhatsApp, una planilla, "siempre
-   los mismos"?
-2. ¿Cuánta gente necesita cada área un domingo normal? (ej. 2 en la puerta, 3 en seguridad)
-3. ¿La gente va todos los domingos o se turnan?
-4. ¿Quién lidera cada Ministerio? (lo carga el Admin con la spec 016)
-5. ¿Qué hace Ceremonial además de la Santa Cena (segundo domingo del mes)? ¿Y los Ministerios que
-   trabajan entre semana (Vida en Acción: el comedor del Mercadito es los sábados)?
-6. "Atender a quienes ministran" (llevarle agua al pastor) y "limpieza" no figuran como áreas en
-   `22-ministerios.md`: ¿son áreas de Bienvenida, u otro Ministerio?
+1. **¿Cómo arman hoy quién va cada domingo?** No lo sabemos, así que la app no copia ningún método:
+   **el líder arma el rol a mano** en una grilla fecha × área, y puede copiar el de la fecha
+   anterior. Sin rotación automática. *Por qué:* cualquier método actual (WhatsApp, planilla,
+   "siempre los mismos") entra en una grilla; una rotación automática supone reglas que no
+   conocemos. (D252)
+2. **¿Cuánta gente necesita cada área un domingo normal?** **Un número por área** (cupo), que carga
+   el Admin o el líder; **1 por defecto**. *Por qué:* es lo único que hace falta para mostrar
+   "faltan 2 en Seguridad", y se ajusta sin tocar código. Se cambia en el Ministerio → área.
+   (D251)
+3. **¿La gente va todos los domingos o se turnan?** La app **no lo asume**: se puede poner a la misma
+   persona todas las fechas o turnar. Para ayudar a repartir, el líder ve **cuántas veces sirvió
+   cada uno en las últimas fechas**. *Por qué:* las dos formas son comunes; mostrar el conteo ayuda
+   sin imponer una regla. (D252)
+4. **¿Quién lidera cada Ministerio?** Los **líderes que asigna el Admin** (spec 016). Ellos y el Admin
+   arman el rol; el Pastor lo ve. *Por qué:* ya existe y es lo que pidió Echu ("un líder al menos a
+   cada ministerio"). (D253)
+5. **¿Qué hace Ceremonial además de la Santa Cena? ¿Y los Ministerios de entre semana?** Cada
+   Ministerio tiene **sus días de servicio** como una regla que se carga una vez: "todos los
+   domingos", "el segundo domingo del mes", "todos los sábados". En la demo: Bienvenida los
+   domingos, Ceremonial el segundo domingo (Santa Cena), Vida en Acción los sábados (Mercadito).
+   *Por qué:* cubre los tres casos conocidos sin inventar otros; el Admin los cambia en el
+   Ministerio. (D250)
+6. **"Atender a quienes ministran" y "limpieza", ¿de qué Ministerio son?** Se cargan como **áreas de
+   Bienvenida** en los datos de demo (son tareas del domingo, como la puerta y la seguridad). Un
+   Ministerio sin áreas (Ceremonial) tiene turnos del Ministerio entero. *Por qué:* las nombró Echu
+   junto con las de Bienvenida; si la iglesia dice otra cosa, el Admin las mueve desde Catálogos,
+   sin código. (D254, D255)
 
 ## Técnicas
 
