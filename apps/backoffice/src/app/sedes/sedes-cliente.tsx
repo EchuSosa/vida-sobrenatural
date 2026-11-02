@@ -81,6 +81,11 @@ export function SedesCliente({
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [erroresCampoAlta, setErroresCampoAlta] = useState<ErrorDeCampo[] | null>(null);
   const te = useTranslations('errors');
+  const ts = useTranslations('sedesAcciones');
+  const mensajeDeError = (e: unknown, generico: string) => {
+    const code = e instanceof ApiError ? (e.code as ErrorCode) : null;
+    return code && te.has(code) ? te(code) : generico;
+  };
   const tc = useTranslations('comun');
   const tcat = useTranslations('catalogos');
   const procesandoRef = useRef(new Set<string>());
@@ -104,7 +109,7 @@ export function SedesCliente({
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         body: JSON.stringify(datosSedeParaEnviar(valores)),
       });
-      toast('Sede creada.');
+      toast(ts('creada'));
       setModalAbierto(false);
       router.refresh();
     } catch (e) {
@@ -112,7 +117,7 @@ export function SedesCliente({
       if (campos) {
         setErroresCampoAlta(campos);
       } else {
-        setErrorAlta(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos crear la Sede.');
+        setErrorAlta(mensajeDeError(e, ts('errorCrear')));
       }
     }
   });
@@ -129,10 +134,10 @@ export function SedesCliente({
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         body: JSON.stringify({ activo }),
       });
-      toast(activo ? 'Sede reactivada.' : 'Sede inactivada.');
+      toast(activo ? ts('reactivada') : ts('inactivada'));
       router.refresh();
     } catch (e) {
-      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos actualizar la Sede.');
+      toast.error(mensajeDeError(e, ts('errorActualizar')));
     } finally {
       procesandoRef.current.delete(sede.id);
     }
@@ -312,6 +317,11 @@ function AccionEliminarSede({ sede, apiToken }: { sede: Sede; apiToken: string }
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const te = useTranslations('errors');
+  const ts = useTranslations('sedesAcciones');
+  const mensajeDeError = (e: unknown, generico: string) => {
+    const code = e instanceof ApiError ? (e.code as ErrorCode) : null;
+    return code && te.has(code) ? te(code) : generico;
+  };
   const bloqueada = sede.personasAsociadas > 0;
 
   const { enviando, ejecutar: eliminar } = useEnvio(async () => {
@@ -320,11 +330,11 @@ function AccionEliminarSede({ sede, apiToken }: { sede: Sede; apiToken: string }
         method: 'DELETE',
         headers: { Authorization: `Bearer ${apiToken}` },
       });
-      toast('Sede eliminada.');
+      toast(ts('eliminada'));
       setOpen(false);
       router.refresh();
     } catch (e) {
-      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos eliminar la Sede.');
+      toast.error(mensajeDeError(e, ts('errorEliminar')));
     }
   });
 

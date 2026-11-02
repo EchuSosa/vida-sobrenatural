@@ -1,5 +1,6 @@
 'use client';
 
+import { CircleAlert } from 'lucide-react';
 import { useState } from 'react';
 import {
   type Sede,
@@ -167,8 +168,11 @@ export function FormularioSede({
       inert={soloLectura}
     >
       {error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
+        // Casos infelices (2026-11-01): con `role="alert"` el lector de pantalla lo anuncia; texto
+        // en `text-foreground` sobre el velo (el contraste medido de docs/17), con ícono (D81).
+        <p role="alert" className="flex items-start gap-2 rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-sm text-foreground">
+          <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+          <span>{error}</span>
         </p>
       )}
       <ResumenErrores errores={validacion.resumen} foco={validacion.foco} />

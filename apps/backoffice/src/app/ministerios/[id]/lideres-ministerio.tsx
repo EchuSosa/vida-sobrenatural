@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Crown, UserMinus, UserPlus } from 'lucide-react';
 import { ApiError, apiFetch, formatearDiaEnArgentina, type LiderMinisterioVista } from '@vida-sobrenatural/shared-types';
-import { Button, ConfirmDestructiveDialog } from '@vida-sobrenatural/ui';
+import { Button, ConfirmDestructiveDialog, useEnvio } from '@vida-sobrenatural/ui';
 import { BuscarPersonaGex, type PersonaElegibleGex } from '../../grupos-extension/buscar-persona';
 
 /**
@@ -34,11 +33,9 @@ export function LideresMinisterio({
   const te = useTranslations('errors');
   const locale = useLocale();
   const router = useRouter();
-  const [enviando, setEnviando] = useState(false);
-
-  async function llamar(ruta: string, method: 'POST' | 'DELETE', cuerpo: object | undefined, exito: string) {
-    if (enviando) return;
-    setEnviando(true);
+  // Casos infelices (2026-11-01): el freno contra el doble toque es `useEnvio` (un ref), no un
+  // `useState`: entre dos clics seguidos React todavía no re-renderizó y el estado sigue en false (H-57).
+  const { enviando, ejecutar: llamar } = useEnvio(async (ruta: string, method: 'POST' | 'DELETE', cuerpo: object | undefined, exito: string) => {
     try {
       await apiFetch(ruta, {
         method,
@@ -50,10 +47,8 @@ export function LideresMinisterio({
     } catch (error) {
       const code = error instanceof ApiError ? error.code : null;
       toast.error(code && te.has(code) ? te(code) : t('errorGenerico'));
-    } finally {
-      setEnviando(false);
     }
-  }
+  });
 
   const asignar = (p: PersonaElegibleGex) =>
     llamar(`/ministerios/${ministerioId}/lideres`, 'POST', { personaId: p.id }, t('asignado', { nombre: `${p.nombre} ${p.apellido}`, ministerio }));
