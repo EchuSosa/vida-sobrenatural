@@ -9,6 +9,7 @@ import { AppModule } from './app.module.js';
 import { configurarApp } from './configurar-app.js';
 import { servirArchivosPublicos } from './storage/archivos-publicos.js';
 import { serializarPedido } from './common/logs/serializar-pedido.js';
+import { montarDocumentacionApi } from './common/documentacion-api.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -61,14 +62,17 @@ async function bootstrap() {
   // que reflejar el origin es suficiente sin necesitar `credentials: true`.
   app.enableCors();
 
-  const config = new DocumentBuilder()
-    .setTitle('Vida Sobrenatural — API')
-    .setDescription('Fase de Bienvenida: Persona y Sede')
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // docs/25, S-07: Swagger solo fuera de producción.
+  if (montarDocumentacionApi()) {
+    const config = new DocumentBuilder()
+      .setTitle('Vida Sobrenatural — API')
+      .setDescription('Fase de Bienvenida: Persona y Sede')
+      .setVersion('0.1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
 
   await app.listen(process.env.PORT ?? 3333);
 }
