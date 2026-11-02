@@ -24,6 +24,9 @@ export function PedirEnNombreDe({ apiToken, onCreado }: { apiToken: string; onCr
   const franjas: EtiquetasEditorFranjas = {
     dias: tf.raw('dias') as EtiquetasEditorFranjas['dias'],
     dia: tf('dia'),
+    elegirDia: tf('elegirDia'),
+    elegirHora: tf('elegirHora'),
+    errorIncompleta: tf('errorIncompleta'),
     desde: tf('desde'),
     hasta: tf('hasta'),
     hora: tf('hora'),

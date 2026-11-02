@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { test, expect, auditar, esperarTema, loguearseComoTest, registrarPersonaDeTest, sinScrollHorizontal, usarTemaOscuro } from './helpers';
 import { api, sesionDe, usarTema } from './helpers-006';
+import { elegirFranja } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * spec 006, T052 (Historia 3, escenarios 1, 2, 5 y 6; FR-021 a FR-024,
@@ -164,6 +165,7 @@ test('pedir Vida Nueva en nombre de alguien sin app: la busca, carga horarios y 
     await panel.getByLabel('Buscar a la persona').fill(apellido);
     await panel.getByRole('button', { name: new RegExp(`Elsa ${apellido}`) }).click();
     await expect(panel.getByText(`Estás pidiendo en nombre de Elsa ${apellido}.`)).toBeVisible();
+    await elegirFranja(panel, 'Martes', '19:00', '21:00');
     await panel.getByRole('button', { name: 'Agregar franja' }).click();
     await sinViolaciones(page, 'claro');
     await panel.getByRole('button', { name: 'Pedir Vida Nueva' }).click();
@@ -174,6 +176,7 @@ test('pedir Vida Nueva en nombre de alguien sin app: la busca, carga horarios y 
     panel = page.getByRole('dialog');
     await panel.getByLabel('Buscar a la persona').fill(apellido);
     await panel.getByRole('button', { name: new RegExp(`Elsa ${apellido}`) }).click();
+    await elegirFranja(panel, 'Martes', '19:00', '21:00');
     await panel.getByRole('button', { name: 'Agregar franja' }).click();
     await panel.getByRole('button', { name: 'Pedir Vida Nueva' }).click();
     await expect(panel.getByRole('alert').filter({ hasNotText: 'Revisá' })).toBeVisible();
