@@ -47,7 +47,7 @@ const COPIA_POR_CODIGO: Record<string, string> = {
   WHATSAPPSECRETARIA_INVALIDO:
     'Escribí un celular argentino con la característica, sin el 0 ni el 15. Por ejemplo: 221 555 0101.',
   CONTACTOEMAIL_INVALIDO: 'Ingresá un email válido, por ejemplo nombre@ejemplo.com.',
-  FECHANACIMIENTO_INVALIDO: 'Ingresá una fecha válida.',
+  FECHANACIMIENTO_INVALIDO: 'Revisá la fecha de nacimiento: tiene que ser desde 1900 y no puede ser futura.',
   // specs/003-contenido-institucional, FR-011: no es un código derivado de
   // `${CAMPO}_INVALIDO` por class-validator — lo lanza el service a mano
   // (AppException), pero se muestra igual bajo el campo youtubeUrl.
