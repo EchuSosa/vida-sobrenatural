@@ -4,6 +4,7 @@ import {
   diaSemanaDe,
   erroresDeReglaDiaDeServicio,
   fechasDeServicio,
+  tienePermiso,
   type ReglaDiaDeServicio,
 } from '@vida-sobrenatural/shared-types';
 
@@ -68,5 +69,14 @@ describe('validaciones (D250, D251)', () => {
   it('el cupo va de 1 a 20, entero', () => {
     expect([1, 20].every(cupoTurnoValido)).toBe(true);
     expect([0, 21, 1.5, '2', null].some(cupoTurnoValido)).toBe(false);
+  });
+});
+
+describe('permisos de turnos (D253)', () => {
+  it('el Admin gestiona; el Pastor ve sin gestionar; un miembro, nada', () => {
+    expect(tienePermiso(['admin'], 'turnos.gestionar')).toBe(true);
+    expect(tienePermiso(['pastor'], 'turnos.ver')).toBe(true);
+    expect(tienePermiso(['pastor'], 'turnos.gestionar')).toBe(false);
+    expect(tienePermiso(['miembro_registrado', 'lider_ministerio'], 'turnos.gestionar')).toBe(false);
   });
 });
