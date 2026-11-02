@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { test, expect, auditar, crearPersonaActiva, dejarSinDisponibles, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
+import { elegirFranja } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * specs/004, Historia 3 (T030): la bandeja y el detalle de una Solicitud con
@@ -138,6 +139,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       // El ResumenErrores dentro del Sheet, en los dos temas (docs/17: 13.4 / 12.6).
       expect((await auditar(page, ['region'])).violations).toEqual([]);
 
+      await elegirFranja(panel, 'Martes', '19:00', '21:00');
       await panel.getByRole('button', { name: 'Agregar franja' }).click();
       await panel.getByRole('button', { name: 'Pedir Vida Nueva' }).click();
       await expect(panel).toHaveCount(0);

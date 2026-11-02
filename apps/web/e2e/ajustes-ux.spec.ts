@@ -1,5 +1,5 @@
 import { test, expect, registrarPersonaDeTest, loguearseComoTest } from './helpers';
-import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
+import { campo, completarFecha, elegirFranja } from '../../../scripts/e2e-campos-fecha-hora';
 import { objetivosDe44, tamanoDeLetra, contenido, alto } from './helpers-ajustes-ux';
 
 /**
@@ -195,13 +195,14 @@ test.describe('Mi camino — Vida Nueva', () => {
     const hasta = await tarjeta.getByRole('group', { name: 'Hasta' }).boundingBox();
     expect(agregar!.y).toBeGreaterThan(hasta!.y + hasta!.height - 1);
 
+    await elegirFranja(tarjeta, 'Martes', '19:00', '21:00');
     await tarjeta.getByRole('button', { name: 'Agregar franja' }).click();
     const quitar = tarjeta.getByRole('button', { name: 'Quitar' });
     expect(await alto(quitar)).toBeGreaterThanOrEqual(44);
     await expect(quitar.locator('svg')).toHaveCount(1);
     await quitar.click();
 
-    // #40: la lista quedó vacía, pero en los selectores sigue Martes 19 a 21.
+    // #40: la lista quedó vacía, pero en los selectores sigue Martes 19 a 21 (lo eligió la persona).
     await tarjeta.getByRole('button', { name: 'Quiero empezar Vida Nueva' }).click();
     await expect(tarjeta.getByText('Estamos buscando a tu Discipulador')).toBeFocused();
     await expect(tarjeta.getByText('Martes 19:00 a 21:00')).toBeVisible();
