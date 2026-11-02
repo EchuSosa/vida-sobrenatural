@@ -8,6 +8,7 @@ import { pinoHttp } from 'pino-http';
 import { AppModule } from './app.module.js';
 import { configurarApp } from './configurar-app.js';
 import { servirArchivosPublicos } from './storage/archivos-publicos.js';
+import { serializarPedido } from './common/logs/serializar-pedido.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,6 +21,8 @@ async function bootstrap() {
   app.use(
     pinoHttp({
       genReqId: (req) => (req as { id?: string }).id ?? randomUUID(),
+      // docs/25, S-05: la URL va sin la query (puede tener un email o un nombre).
+      serializers: { req: serializarPedido },
       redact: {
         paths: [
           'req.headers.authorization',
