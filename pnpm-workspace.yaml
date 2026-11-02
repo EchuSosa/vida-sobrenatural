@@ -12,3 +12,7 @@ allowBuilds:
   prisma: true
   unrs-resolver: true
   workerd: true
+
+# docs/25, S-01: proxy-addr < 2.0.8 permite falsear la IP (llega por Express). Patch de la misma versión mayor.
+overrides:
+  proxy-addr: ^2.0.8
