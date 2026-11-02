@@ -136,6 +136,7 @@ export { DialogoTextoOpcional, type DialogoTextoOpcionalProps, type CamposExtraD
 export { CampoTalleRemera, type CampoTalleRemeraProps } from './components/campo-talle-remera';
 export { PanelMotivo, type TextosPanelMotivo } from './components/panel-motivo';
 export { mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type Traductor } from './lib/discipulado-comun';
+export { textoDeCampo } from './lib/texto-de-campo';
 export { PedirEnNombreDe, type PedirEnNombreDeProps, type EtiquetasPedirEnNombreDe, type PersonaElegible } from './components/pedir-en-nombre-de';
 
 // --- spec 007 (FormularioIngresoCodigo, BotonIngresarGoogle) ---

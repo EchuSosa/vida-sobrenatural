@@ -20,7 +20,7 @@ import {
   type ArchivoDeContenido,
   type EnlaceDeContenido,
 } from '@vida-sobrenatural/shared-types';
-import { Button, CampoArchivo, Input, MensajeErrorCampo, ResumenErrores, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, CampoArchivo, Input, MensajeErrorCampo, ResumenErrores, useEnvio, textoDeCampo } from '@vida-sobrenatural/ui';
 
 interface Nuevo {
   clave: string;
@@ -60,7 +60,7 @@ export function FormularioMaterial({
   const [foco, setFoco] = useState(0);
   const tamanio = (bytes: number) => formatearTamanio(bytes, locale);
 
-  const mensaje = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : tg('errorGenerico'));
+  const mensaje = (code: string) => textoDeCampo(te, code, tg('errorGenerico'));
 
   function mostrar(nuevosErrores: Record<string, string>) {
     setErrores(nuevosErrores);

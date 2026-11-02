@@ -27,6 +27,7 @@ import {
   SheetTitle,
   useEnvio,
   useValidacionCampos,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 import { claveEstado } from '../../../solicitudes/postulacion/estado';
 
@@ -176,7 +177,7 @@ function FormularioEnNombreDe({
       const campos = erroresPorCampo(error);
       if (campos) {
         validacion.reemplazar(
-          Object.fromEntries(campos.map(({ campo, code }) => [campo, code === 'TEXTO_DEMASIADO_LARGO' ? largo : te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico')])),
+          Object.fromEntries(campos.map(({ campo, code }) => [campo, code === 'TEXTO_DEMASIADO_LARGO' ? largo : textoDeCampo(te, code, t('errorGenerico'))])),
         );
         return;
       }

@@ -32,6 +32,7 @@ import {
   DialogoTextoOpcional,
   MigaDePan,
   useEnvio,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 
 /**
@@ -162,7 +163,7 @@ function Opcion({
   function avisarError(error: unknown) {
     const campos = erroresPorCampo(error);
     const code = campos ? campos[0].code : error instanceof ApiError ? error.code : null;
-    const texto = campos ? (te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico')) : code && te.has(code) ? te(code) : t('errorGenerico');
+    const texto = campos ? textoDeCampo(te, campos[0].code, t('errorGenerico')) : code && te.has(code) ? te(code) : t('errorGenerico');
     toast.error(texto);
     router.refresh();
   }

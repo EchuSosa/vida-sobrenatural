@@ -12,7 +12,7 @@ import {
   type DatosCelula,
   type DatosMinisterio,
 } from '@vida-sobrenatural/shared-types';
-import { Button, MensajeErrorCampo, ResumenErrores, cn, useEnvio, useValidacionCampos } from '@vida-sobrenatural/ui';
+import { Button, MensajeErrorCampo, ResumenErrores, cn, useEnvio, useValidacionCampos, textoDeCampo } from '@vida-sobrenatural/ui';
 
 const CLASE_CAMPO =
   'w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30';
@@ -24,7 +24,7 @@ function useMensajesDeCampo() {
   return (error: unknown): Record<string, string> | null => {
     const campos = erroresPorCampo(error);
     if (!campos) return null;
-    return Object.fromEntries(campos.map(({ campo, code }) => [campo, te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico')]));
+    return Object.fromEntries(campos.map(({ campo, code }) => [campo, textoDeCampo(te, code, t('errorGenerico'))]));
   };
 }
 

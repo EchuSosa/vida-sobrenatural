@@ -30,6 +30,7 @@ import {
   DialogoTextoOpcional,
   MigaDePan,
   useEnvio,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 import { claveEstado } from '../estado';
 
@@ -98,7 +99,7 @@ export function PostulacionDetalleCliente({
       }
       const campos = erroresPorCampo(error);
       if (campos) {
-        toast.error(te.has(`campos.${campos[0].code}`) ? te(`campos.${campos[0].code}`) : t('errorGenerico'));
+        toast.error(textoDeCampo(te, campos[0].code, t('errorGenerico')));
         router.refresh();
         return;
       }

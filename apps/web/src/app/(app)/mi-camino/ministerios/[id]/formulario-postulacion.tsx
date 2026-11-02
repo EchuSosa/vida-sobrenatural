@@ -14,7 +14,7 @@ import {
   type CelulaParaPostularse,
   type NuevaPostulacion,
 } from '@vida-sobrenatural/shared-types';
-import { Button, MensajeErrorCampo, ResumenErrores, cn, useEnvio, useValidacionCampos } from '@vida-sobrenatural/ui';
+import { Button, MensajeErrorCampo, ResumenErrores, cn, useEnvio, useValidacionCampos, textoDeCampo } from '@vida-sobrenatural/ui';
 
 const SIN_PREFERENCIA = '';
 const CLASE_TEXTO =
@@ -58,7 +58,7 @@ export function FormularioPostulacion({ ministerioId, celulas }: { ministerioId:
       const campos = erroresPorCampo(error);
       if (campos) {
         validacion.reemplazar(
-          Object.fromEntries(campos.map(({ campo, code }) => [campo, code === 'TEXTO_DEMASIADO_LARGO' ? demasiadoLargo : te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico')])),
+          Object.fromEntries(campos.map(({ campo, code }) => [campo, code === 'TEXTO_DEMASIADO_LARGO' ? demasiadoLargo : textoDeCampo(te, code, t('errorGenerico'))])),
         );
         return;
       }

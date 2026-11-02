@@ -29,6 +29,7 @@ import {
   ResumenErrores,
   useEnvio,
   useValidacionCampos,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 
 const CAMPO =
@@ -63,7 +64,7 @@ export function EnviarAvisoDialogo({ trigger, apiToken }: { trigger: ReactElemen
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
 
   const headers = { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'application/json' };
-  const textoError = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : te.has(code) ? te(code) : t('errorGenerico'));
+  const textoError = (code: string) => textoDeCampo(te, code, t('errorGenerico'));
 
   function reiniciar() {
     setPaso('editar');
