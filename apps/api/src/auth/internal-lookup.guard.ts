@@ -1,4 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { timingSafeEqual } from 'node:crypto';
 import type { Request } from 'express';
 
 /**
@@ -14,9 +15,20 @@ export class InternalLookupGuard implements CanActivate {
     if (!secret) {
       throw new Error('Falta la variable de entorno INTERNAL_API_SECRET.');
     }
-    if (request.headers['x-internal-secret'] !== secret) {
+    if (!mismoSecreto(request.headers['x-internal-secret'], secret)) {
       throw new UnauthorizedException('X-Internal-Secret inválido o ausente.');
     }
     return true;
   }
+}
+
+/**
+ * docs/25, S-09: compara en tiempo constante, para que el tiempo de respuesta
+ * no cuente cuántos caracteres del secreto acertó quien prueba.
+ */
+export function mismoSecreto(recibido: unknown, secreto: string): boolean {
+  if (typeof recibido !== 'string') return false;
+  const a = Buffer.from(recibido);
+  const b = Buffer.from(secreto);
+  return a.length === b.length && timingSafeEqual(a, b);
 }

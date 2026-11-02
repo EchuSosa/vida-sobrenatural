@@ -53,7 +53,10 @@ export async function mintApiToken(claims: {
   estado: 'activa' | 'pendiente_tutor' | null;
   rol: string[];
 }): Promise<string> {
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET ?? '');
+  // docs/25, S-10: sin secreto no se firma nada (antes firmaba con '' y la API lo rechazaba tarde).
+  const secreto = process.env.NEXTAUTH_SECRET;
+  if (!secreto) throw new Error('Falta la variable de entorno NEXTAUTH_SECRET.');
+  const secret = new TextEncoder().encode(secreto);
   return new SignJWT(claims)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
