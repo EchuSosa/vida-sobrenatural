@@ -494,7 +494,9 @@
     },
     "errores": {
       "apellido": "Escribí tu apellido.",
+      "apellidoLargo": "Tu apellido puede tener hasta {maximo} letras. Revisá que esté bien escrito.",
       "nombre": "Escribí tu nombre.",
+      "nombreLargo": "Tu nombre puede tener hasta {maximo} letras. Revisá que esté bien escrito.",
       "genero": "Elegí una opción en Género.",
       "direccion": "Escribí tu dirección, por ejemplo: calle 7 n.º 1234.",
       "sedeId": "Elegí la Sede a la que vas.",

@@ -27,6 +27,12 @@ const casos: Array<[string, Record<string, unknown>]> = [
   ['todo bien', {}],
   ['todo vacío', Object.fromEntries(Object.keys(validos).map((k) => [k, undefined]))],
   ['apellido vacío', { apellido: '' }],
+  // QA ronda 1, BUG-05
+  ['apellido y nombre solo con espacios', { apellido: '   ', nombre: '  ' }],
+  ['apellido de 101 caracteres', { apellido: 'A'.repeat(101) }],
+  ['nombre de 100 caracteres (el máximo)', { nombre: 'A'.repeat(100) }],
+  ['nombre con espacios en los bordes', { nombre: '  Rosa  ' }],
+  ['nombre de 5000 caracteres', { nombre: 'A'.repeat(5000) }],
   ['género raro', { genero: 'otro' }],
   ['fecha que no es fecha', { fechaNacimiento: 'ayer' }],
   ['teléfono sin código de país', { telefono: '221 5550101' }],

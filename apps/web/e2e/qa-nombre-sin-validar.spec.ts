@@ -4,15 +4,14 @@ import { campo, completarFecha } from '../../../scripts/e2e-campos-fecha-hora';
 /**
  * QA ronda 1, BUG-05: el registro acepta apellido y nombre hechos solo de
  * espacios, y también de 5000 caracteres, y los guarda. Con espacios muestra
- * "Escribí tu apellido." y aun así pasa al paso 2. Marcado `fail` hasta
- * arreglar el producto.
+ * "Escribí tu apellido." y aun así pasa al paso 2. Arreglado (D248): se recortan
+ * los espacios y van de 1 a 100 caracteres (`nombreValido`, shared-types).
  */
 for (const { caso, texto } of [
   { caso: 'solo con espacios', texto: '     ' },
   { caso: 'de 5000 caracteres', texto: 'A'.repeat(5000) },
 ]) {
   test(`no deja seguir con apellido y nombre ${caso}`, async ({ page }) => {
-    test.fail(true, 'BUG-05 de QA-REPORT.md: apellido y nombre no se validan al registrarse.');
     await loguearseComoTest(page, `e2e-qa-nombre-${Date.now()}@example.com`);
     await page.goto('/registro');
     await page.getByLabel('Apellido').fill(texto);

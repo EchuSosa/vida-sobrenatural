@@ -13,6 +13,8 @@ import {
   ApiError,
   erroresPorCampo,
   mensajeDeCampo,
+  nombreValido,
+  LARGO_MAXIMO_NOMBRE,
 } from '@vida-sobrenatural/shared-types';
 import { useEnvio, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from './use-opciones-registro';
@@ -138,9 +140,15 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
   // un "Revisá este dato." igual para todos — en el resumen de arriba los
   // tres enlaces se leían idénticos.
   const requerido = (mensaje: string): ValidacionCampo<string> => ({ esValido: (v) => v.trim() !== '', mensaje });
+  // QA ronda 1, BUG-05: la misma regla que la API (algo escrito y hasta LARGO_MAXIMO_NOMBRE); si está
+  // vacío dice qué escribir, y si es largo, hasta cuánto.
+  const nombreOApellido = (vacio: string, largo: string, valor: string): ValidacionCampo<string> => ({
+    esValido: (v) => nombreValido(v),
+    mensaje: valor.trim() === '' ? vacio : largo,
+  });
   const validaciones = {
-    apellido: requerido(t('errores.apellido')),
-    nombre: requerido(t('errores.nombre')),
+    apellido: nombreOApellido(t('errores.apellido'), t('errores.apellidoLargo', { maximo: LARGO_MAXIMO_NOMBRE }), apellidoEfectivo),
+    nombre: nombreOApellido(t('errores.nombre'), t('errores.nombreLargo', { maximo: LARGO_MAXIMO_NOMBRE }), nombreEfectivo),
     genero: requerido(t('errores.genero')),
     fechaNacimiento: requerido(t('errorFechaNacimiento')),
     telefono: {
@@ -168,7 +176,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
   function pasoValido(numeroPaso: number): boolean {
     if (numeroPaso === 1) {
       return Boolean(
-        apellidoEfectivo && nombreEfectivo && datos.genero && datos.fechaNacimiento,
+        nombreValido(apellidoEfectivo) && nombreValido(nombreEfectivo) && datos.genero && datos.fechaNacimiento,
       );
     }
     if (numeroPaso === 2) {
@@ -230,8 +238,8 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     validacion.reset();
 
     const body = {
-      apellido: apellidoEfectivo,
-      nombre: nombreEfectivo,
+      apellido: apellidoEfectivo.trim(),
+      nombre: nombreEfectivo.trim(),
       genero: datos.genero,
       fechaNacimiento: datos.fechaNacimiento,
       telefono: `${datos.telefonoCodigoPais} ${datos.telefonoNumero}`,
