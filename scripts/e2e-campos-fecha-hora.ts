@@ -21,6 +21,17 @@ export async function completarFecha(grupo: Locator, fecha: string) {
   await grupo.getByLabel('Año', { exact: true }).fill(anio);
 }
 
+/**
+ * Elige día, desde y hasta en un `EditorDeFranjas` (sin tocar "Agregar franja").
+ * QA ronda 1, BUG-02 (D247): el editor arranca sin nada elegido, así que todo
+ * test que carga una franja la elige explícitamente.
+ */
+export async function elegirFranja(ambito: Page | Locator, dia: string, desde: string, hasta: string) {
+  await ambito.getByLabel('Día', { exact: true }).first().selectOption({ label: dia });
+  await elegirHora(campo(ambito, 'Desde').first(), desde);
+  await elegirHora(campo(ambito, 'Hasta').first(), hasta);
+}
+
 /** Elige una hora `HH:mm` en un `CampoHora`. */
 export async function elegirHora(grupo: Locator, hora: string) {
   const [hh, mm] = hora.split(':');

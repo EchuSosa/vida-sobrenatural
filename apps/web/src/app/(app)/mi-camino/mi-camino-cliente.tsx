@@ -159,6 +159,9 @@ function useEtiquetasFranjas(): EtiquetasEditorFranjas {
   return {
     dias: t.raw('dias') as EtiquetasEditorFranjas['dias'],
     dia: t('dia'),
+    elegirDia: t('elegirDia'),
+    elegirHora: t('elegirHora'),
+    errorIncompleta: t('errorIncompleta'),
     desde: t('desde'),
     hasta: t('hasta'),
     hora: t('hora'),

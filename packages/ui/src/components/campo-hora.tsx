@@ -29,6 +29,12 @@ export interface CampoHoraProps {
   error?: boolean;
   idError?: string;
   disabled?: boolean;
+  /**
+   * QA ronda 1, BUG-02: texto de la opción vacía ("--"). Con este prop, un
+   * `value` vacío se muestra vacío —no como "00:00"— y los minutos se
+   * habilitan cuando ya hay hora. Sin él, el comportamiento de siempre.
+   */
+  vacio?: string;
 }
 
 const HORAS = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0'));
@@ -36,8 +42,10 @@ const MINUTOS = ['00', '15', '30', '45'];
 
 const CLASE = 'h-11 rounded-md border border-input bg-transparent px-2 text-base font-normal aria-invalid:border-destructive disabled:opacity-50 sm:text-sm tactil:sm:text-base dark:bg-input/30';
 
-export function CampoHora({ id, etiqueta, value, onChange, etiquetas, error, idError, disabled }: CampoHoraProps) {
-  const [hora = '00', minutos = '00'] = /^\d{2}:\d{2}$/.test(value) ? value.split(':') : [];
+export function CampoHora({ id, etiqueta, value, onChange, etiquetas, error, idError, disabled, vacio }: CampoHoraProps) {
+  const completo = /^\d{2}:\d{2}$/.test(value);
+  const sinElegir = vacio !== undefined && !completo;
+  const [hora = '00', minutos = '00'] = completo ? value.split(':') : [];
   const opcionesMinutos = MINUTOS.includes(minutos) ? MINUTOS : [...MINUTOS, minutos].sort();
   const aria = {
     'aria-invalid': error || undefined,
@@ -51,12 +59,17 @@ export function CampoHora({ id, etiqueta, value, onChange, etiquetas, error, idE
         <select
           id={id}
           aria-label={etiquetas.hora}
-          value={hora}
+          value={sinElegir ? '' : hora}
           disabled={disabled}
           onChange={(e) => onChange(`${e.target.value}:${minutos}`)}
           className={CLASE}
           {...aria}
         >
+          {sinElegir && (
+            <option value="" disabled>
+              {vacio}
+            </option>
+          )}
           {HORAS.map((h) => (
             <option key={h} value={h}>
               {h}
@@ -67,12 +80,17 @@ export function CampoHora({ id, etiqueta, value, onChange, etiquetas, error, idE
         <select
           id={`${id}-minutos`}
           aria-label={etiquetas.minutos}
-          value={minutos}
-          disabled={disabled}
+          value={sinElegir ? '' : minutos}
+          disabled={disabled || sinElegir}
           onChange={(e) => onChange(`${hora}:${e.target.value}`)}
           className={CLASE}
           {...aria}
         >
+          {sinElegir && (
+            <option value="" disabled>
+              {vacio}
+            </option>
+          )}
           {opcionesMinutos.map((m) => (
             <option key={m} value={m}>
               {m}

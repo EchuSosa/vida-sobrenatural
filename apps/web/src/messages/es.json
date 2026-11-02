@@ -769,6 +769,9 @@
       "Sábado"
     ],
     "dia": "Día",
+    "elegirDia": "Elegí",
+    "elegirHora": "--",
+    "errorIncompleta": "Elegí el día, la hora de inicio y la de fin.",
     "desde": "Desde",
     "hasta": "Hasta",
     "hora": "Hora",
