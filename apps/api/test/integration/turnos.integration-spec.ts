@@ -98,8 +98,8 @@ describe('Turnos de servicio (spec 017, US2 y US3)', () => {
     expect(g.fechas).toHaveLength(8);
     expect(g.fechas[0]).toMatchObject({ dia: d1, estado: 'borrador', enOtroMinisterio: [] });
     expect(g.fechas[0].celdas).toEqual([
-      { areaId: limpiezaId, turnos: [], faltan: 1 },
-      { areaId: seguridadId, turnos: [], faltan: 2 },
+      { areaId: limpiezaId, turnos: [], faltan: 1, noPueden: [] },
+      { areaId: seguridadId, turnos: [], faltan: 2, noPueden: [] },
     ]);
     const veces = Object.fromEntries(g.integrantes.map((i) => [i.persona.nombre, [i.areaId, i.vecesQueSirvio]]));
     expect(veces).toEqual({ ana: [seguridadId, 1], beto: [seguridadId, 0], caro: [null, 0], dani: [limpiezaId, 0] });

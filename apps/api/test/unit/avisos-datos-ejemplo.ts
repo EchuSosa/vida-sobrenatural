@@ -70,6 +70,7 @@ export const DATOS_EJEMPLO: { [N in NombreEventoAviso]: DatosDe<N> } = {
   'turno.quitado': { turnoId: 'tur-1', ministerioId: 'min-1', dia: '2026-11-08', fecha: 'domingo, 8 de noviembre', lugar: 'Bienvenida — Seguridad' },
   'turno.fecha_suspendida': { turnoId: 'tur-1', ministerioId: 'min-1', dia: '2026-11-08', fecha: 'domingo, 8 de noviembre', lugar: 'Bienvenida — Seguridad' },
   'turno.recordatorio': { turnoId: 'tur-1', ministerioId: 'min-1', dia: '2026-11-08', fecha: 'domingo, 8 de noviembre', lugar: 'Bienvenida — Seguridad' },
+  'turno.no_puede': { turnoId: 'tur-1', ministerioId: 'min-1', dia: '2026-11-08', fecha: 'domingo, 8 de noviembre', lugar: 'Bienvenida — Seguridad' },
 };
 
 /** Los importantes según `docs/16` §1 — lista fija a propósito (T004 e): cambiarla es una decisión. */

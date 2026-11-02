@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   FECHAS_PARA_CONTAR_TURNOS,
+  MOTIVO_CANCELACION_MAX,
   FECHAS_VISIBLES_TURNOS,
   fechasDeServicio,
   hoyEnArgentina,
@@ -109,7 +110,11 @@ export class TurnosService {
       select: {
         dia: true,
         estado: true,
-        turnos: { where: { estado: 'asignado' }, select: { id: true, celulaId: true, persona: { select: PERSONA } }, orderBy: { asignadoEn: 'asc' } },
+        turnos: {
+          where: { estado: { in: ['asignado', 'cancelado_por_persona'] } },
+          select: { id: true, celulaId: true, estado: true, motivoCancelacion: true, persona: { select: PERSONA } },
+          orderBy: { asignadoEn: 'asc' },
+        },
       },
     });
     const porDia = new Map(guardadas.map((g) => [fechaComoDia(g.dia), g]));
@@ -126,13 +131,23 @@ export class TurnosService {
 
     const fechas: FechaDeLaGrilla[] = dias.map((dia) => {
       const g = porDia.get(dia);
-      const turnos = g?.turnos ?? [];
+      const todos = g?.turnos ?? [];
+      const turnos = todos.filter((t) => t.estado === 'asignado');
+      const asignadas = new Set(turnos.map((t) => t.persona.id));
+      // D257: quien avisó que no puede (y no la volvieron a sumar ese día). El motivo, solo a quien edita.
+      const noPueden = todos.filter((t) => t.estado === 'cancelado_por_persona' && !asignadas.has(t.persona.id));
       return {
         dia,
         estado: g?.estado === 'publicada' ? 'publicada' : 'borrador',
         celdas: areas.map((a) => {
           const enCelda: TurnoEnGrilla[] = turnos.filter((t) => (a.id === null ? true : t.celulaId === a.id)).map((t) => ({ id: t.id, persona: t.persona }));
-          return { areaId: a.id, turnos: enCelda, faltan: Math.max(0, a.cupo - enCelda.length) };
+          const delArea = (t: { celulaId: string | null }) => (a.id === null ? true : t.celulaId === a.id);
+          return {
+            areaId: a.id,
+            turnos: enCelda,
+            faltan: Math.max(0, a.cupo - enCelda.length),
+            noPueden: noPueden.filter(delArea).map((t) => ({ id: t.id, persona: t.persona, motivo: puedeEditar ? t.motivoCancelacion : null })),
+          };
         }),
         enOtroMinisterio: otros.filter((o) => fechaComoDia(o.fecha.dia) === dia).map((o) => ({ personaId: o.personaId, ministerio: o.fecha.ministerio.nombre })),
       };
@@ -304,7 +319,41 @@ export class TurnosService {
     return { dia, estado: 'publicada', avisados };
   }
 
-  // --- La persona (US3) ---
+  // --- La persona (US3, US4) ---
+
+  /**
+   * D257: "No puedo ir" — la persona, en su turno publicado y futuro. El motivo (opcional) lo ven
+   * solo los líderes y el Admin: nunca va a los avisos ni a los logs. Dos toques: el segundo no
+   * encuentra el turno asignado y no vuelve a avisar.
+   */
+  async cancelar(turnoId: string, personaId: string, motivo: unknown, hoy: string = hoyEnArgentina()): Promise<{ id: string; estado: 'cancelado_por_persona' }> {
+    const texto = typeof motivo === 'string' && motivo.trim() ? motivo.trim() : null;
+    if (texto && texto.length > MOTIVO_CANCELACION_MAX) {
+      throw new AppException('VALIDACION', 400, `El motivo puede tener hasta ${MOTIVO_CANCELACION_MAX} caracteres.`, [{ campo: 'motivo', code: 'MOTIVO_CANCELACION_LARGO' }]);
+    }
+    const turno = await this.prisma.turno.findFirst({
+      where: { id: turnoId, personaId, fecha: { estado: 'publicada' } },
+      select: { estado: true, celula: { select: { nombre: true } }, fecha: { select: { dia: true, ministerio: { select: { id: true, nombre: true } } } } },
+    });
+    if (!turno) throw new AppException('NO_ENCONTRADO', 404, 'No tenés ese turno.');
+    const dia = fechaComoDia(turno.fecha.dia);
+    if (turno.estado === 'cancelado_por_persona') return { id: turnoId, estado: 'cancelado_por_persona' };
+    if (turno.estado !== 'asignado') throw new AppException('NO_ENCONTRADO', 404, 'No tenés ese turno.');
+    if (dia <= hoy) throw new AppException('TURNO_YA_EMPEZO', 409, 'Ese turno ya empezó: avisale directamente a tu líder.');
+    const ministerio = turno.fecha.ministerio;
+    await this.prisma.$transaction(async (tx) => {
+      const r = await tx.turno.updateMany({
+        where: { id: turnoId, estado: 'asignado' },
+        data: { estado: 'cancelado_por_persona', motivoCancelacion: texto, cerradoPorId: personaId, cerradoEn: new Date() },
+      });
+      if (r.count === 0) return;
+      const lideres = await tx.liderMinisterio.findMany({ where: { ministerioId: ministerio.id, hasta: null, personaId: { not: personaId } }, select: { personaId: true } });
+      for (const l of lideres) {
+        await this.notificaciones.emitir(tx, { nombre: 'turno.no_puede', a: { tipo: 'persona', personaId: l.personaId }, datos: datosAvisoTurno(turnoId, ministerio, dia, turno.celula?.nombre ?? null) });
+      }
+    });
+    return { id: turnoId, estado: 'cancelado_por_persona' };
+  }
 
   async misTurnos(personaId: string, hoy: string = hoyEnArgentina()): Promise<MiTurno[]> {
     const turnos = await this.prisma.turno.findMany({

@@ -119,7 +119,9 @@ export type EventoAviso =
   | { nombre: 'turno.asignado'; a: DePersona; datos: DatosAvisoTurno }
   | { nombre: 'turno.quitado'; a: DePersona; datos: DatosAvisoTurno }
   | { nombre: 'turno.fecha_suspendida'; a: DePersona; datos: DatosAvisoTurno }
-  | { nombre: 'turno.recordatorio'; a: DePersona; datos: DatosAvisoTurno };
+  | { nombre: 'turno.recordatorio'; a: DePersona; datos: DatosAvisoTurno }
+  // D257: a cada líder vigente, sin el nombre de la persona ni el motivo (los ve en la grilla).
+  | { nombre: 'turno.no_puede'; a: DePersona; datos: DatosAvisoTurno };
 
 /** spec 017: los datos de cada aviso de un turno. */
 export interface DatosAvisoTurno {
@@ -453,6 +455,11 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
   'turno.recordatorio': {
     spec: '017', destinatario: 'persona', disparador: 'evento_proximo', prioridad: 'normal',
     entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.recordatorio:${d.turnoId}`,
+  },
+  // 017 (D257): alguien avisó que no puede ir — a cada líder, que reemplaza desde la grilla.
+  'turno.no_puede': {
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: (d) => `${MI_MINISTERIO}/${d.ministerioId}/turnos`, clave: (d) => `turno.no_puede:${d.turnoId}`,
   },
 };
 

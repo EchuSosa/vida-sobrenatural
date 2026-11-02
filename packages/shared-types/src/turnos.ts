@@ -145,6 +145,8 @@ export interface CeldaDeTurnos {
   areaId: string | null;
   turnos: TurnoEnGrilla[];
   faltan: number;
+  /** D257: quienes avisaron "No puedo ir". `motivo` solo para quien edita (líder o Admin); al Pastor, null. */
+  noPueden: Array<TurnoEnGrilla & { motivo: string | null }>;
 }
 
 /** Una fecha de la grilla (las suspendidas no aparecen). */

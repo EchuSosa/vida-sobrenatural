@@ -123,6 +123,7 @@ const TITULOS: Record<ErrorCode, string> = {
   YA_TIENE_TURNO_ESE_DIA: 'Ya tiene turno ese día',
   NO_ES_INTEGRANTE: 'No es integrante',
   SIN_FECHA_ANTERIOR: 'No hay una fecha anterior publicada',
+  TURNO_YA_EMPEZO: 'El turno ya empezó',
   POSTULACION_YA_PENDIENTE: 'Ya hay una postulación pendiente',
   POSTULACION_NO_PENDIENTE: 'La postulación ya no está pendiente',
   POSTULACION_REQUIERE_CONFIRMAR_CAMBIO: 'La persona ya pertenece a otro Ministerio',
