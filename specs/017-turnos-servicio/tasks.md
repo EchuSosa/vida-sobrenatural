@@ -29,12 +29,12 @@
 
 ## Entrega 2 — Rol del líder, avisos e Inicio (US2, US3)
 
-- [ ] T011 API grilla `GET /ministerios/:id/turnos` (fechas, Células, cupos, faltantes, conteos).
-- [ ] T012 API asignar / quitar / copiar anterior, con advertencia de otro Ministerio.
-- [ ] T013 API publicar + avisos en la transacción + aviso a quien entra y sale.
-- [ ] T014 Tarea diaria del recordatorio (`DIAS_RECORDATORIO_TURNO`).
-- [ ] T015 API `GET /turnos/me`.
-- [ ] T016 Integración de T011–T015 (permisos, 409, avisos una sola vez).
+- [x] T011 API grilla `GET /ministerios/:id/turnos` (fechas, Células, cupos, faltantes, conteos).
+- [x] T012 API asignar / quitar / copiar anterior, con advertencia de otro Ministerio.
+- [x] T013 API publicar + avisos en la transacción + aviso a quien entra y sale.
+- [x] T014 Tarea diaria del recordatorio (`DIAS_RECORDATORIO_TURNO`).
+- [x] T015 API `GET /turnos/me`.
+- [x] T016 Integración de T011–T015 (permisos, 409, avisos una sola vez).
 - [ ] T017 packages/ui `GrillaTurnos` (celular: una fecha por vez).
 - [ ] T018 Web `/mi-ministerio/[id]/turnos` + backoffice pestaña "Turnos" (Pastor sin botones).
 - [ ] T019 Web tarjeta "Tu próximo turno" en `/inicio` y `/mis-turnos`.

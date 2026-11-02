@@ -1055,6 +1055,24 @@
           "titulo": "Te sumaron al grupo {grupo}",
           "detalle": "En Mi camino tenés la dirección, los días y el horario, y cómo llegar."
         }
+      },
+      "turno": {
+        "asignado": {
+          "titulo": "Servís el {fecha}",
+          "detalle": "En {lugar}. En Mis turnos ves todos tus turnos."
+        },
+        "quitado": {
+          "titulo": "Ya no servís el {fecha}",
+          "detalle": "Te sacaron del turno de {lugar}. Si tenés dudas, hablá con tu líder."
+        },
+        "fecha_suspendida": {
+          "titulo": "El {fecha} no hay servicio",
+          "detalle": "Se suspendió la fecha en la que servías en {lugar}. No hace falta que vayas."
+        },
+        "recordatorio": {
+          "titulo": "Te toca servir el {fecha}",
+          "detalle": "En {lugar}. Si no podés ir, avisale a tu líder."
+        }
       }
     }
   },

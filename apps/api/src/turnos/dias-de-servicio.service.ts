@@ -15,6 +15,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AppException } from '../common/errors/app-exception.js';
 import { esViolacionDeUnico } from '../ministerio/crear-postulacion.js';
 import type { Prisma } from '../generated/prisma/client.js';
+import { NotificacionesService } from '../notificaciones/notificaciones.service.js';
+import { datosAvisoTurno } from './avisos-turno.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -34,7 +36,10 @@ const DIA = /^\d{4}-\d{2}-\d{2}$/;
  */
 @Injectable()
 export class DiasDeServicioService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificaciones: NotificacionesService,
+  ) {}
 
   async reglasActivas(ministerioId: string, db: Db = this.prisma): Promise<DiaDeServicioVista[]> {
     const filas = await db.diaDeServicio.findMany({
@@ -118,21 +123,32 @@ export class DiasDeServicioService {
     return { cupo: valor };
   }
 
-  /** "Este día no hay" (US1-3). Los avisos a quienes tenían turno publicado llegan con la entrega 2. */
-  async suspender(ministerioId: string, dia: string, adminId: string, hoy: string = hoyEnArgentina()): Promise<{ dia: string; estado: EstadoFechaDeServicio }> {
-    await this.diaDeServicioOFallar(ministerioId, dia, hoy);
+  /** "Este día no hay" (US1-3): si la fecha estaba publicada, avisa a quien tenía turno (en la misma transacción, D197). */
+  async suspender(ministerioId: string, dia: string, adminId: string, hoy: string = hoyEnArgentina()): Promise<{ dia: string; estado: EstadoFechaDeServicio; avisados: number }> {
+    await this.validarDiaDeServicio(ministerioId, dia, hoy);
+    const ministerio = await this.prisma.ministerio.findUniqueOrThrow({ where: { id: ministerioId }, select: { id: true, nombre: true } });
     const fecha = diaComoFecha(dia);
-    await this.prisma.fechaDeServicio.upsert({
-      where: { ministerioId_dia: { ministerioId, dia: fecha } },
-      create: { ministerioId, dia: fecha, estado: 'suspendida', suspendidaEn: new Date(), suspendidaPorId: adminId },
-      update: { estado: 'suspendida', suspendidaEn: new Date(), suspendidaPorId: adminId },
+    const avisados = await this.prisma.$transaction(async (tx) => {
+      const antes = await tx.fechaDeServicio.findUnique({ where: { ministerioId_dia: { ministerioId, dia: fecha } }, select: { estado: true } });
+      const fila = await tx.fechaDeServicio.upsert({
+        where: { ministerioId_dia: { ministerioId, dia: fecha } },
+        create: { ministerioId, dia: fecha, estado: 'suspendida', suspendidaEn: new Date(), suspendidaPorId: adminId },
+        update: { estado: 'suspendida', suspendidaEn: new Date(), suspendidaPorId: adminId },
+        select: { id: true },
+      });
+      if (antes?.estado !== 'publicada') return 0;
+      const turnos = await tx.turno.findMany({ where: { fechaId: fila.id, estado: 'asignado' }, select: { id: true, personaId: true, celula: { select: { nombre: true } } } });
+      for (const t of turnos) {
+        await this.notificaciones.emitir(tx, { nombre: 'turno.fecha_suspendida', a: { tipo: 'persona', personaId: t.personaId }, datos: datosAvisoTurno(t.id, ministerio, dia, t.celula?.nombre ?? null) });
+      }
+      return turnos.length;
     });
-    return { dia, estado: 'suspendida' };
+    return { dia, estado: 'suspendida', avisados };
   }
 
   /** Volver a habilitar: vuelve a como estaba (publicada si ya se había publicado; si no, borrador). */
   async habilitar(ministerioId: string, dia: string, hoy: string = hoyEnArgentina()): Promise<{ dia: string; estado: EstadoFechaDeServicio }> {
-    await this.diaDeServicioOFallar(ministerioId, dia, hoy);
+    await this.validarDiaDeServicio(ministerioId, dia, hoy);
     const fila = await this.prisma.fechaDeServicio.findUnique({
       where: { ministerioId_dia: { ministerioId, dia: diaComoFecha(dia) } },
       select: { id: true, estado: true, publicadaEn: true },
@@ -150,7 +166,8 @@ export class DiasDeServicioService {
     return cupo;
   }
 
-  private async diaDeServicioOFallar(ministerioId: string, dia: string, hoy: string): Promise<void> {
+  /** La fecha es `AAAA-MM-DD`, no pasó y sale de una regla activa del Ministerio. */
+  async validarDiaDeServicio(ministerioId: string, dia: string, hoy: string): Promise<void> {
     if (!DIA.test(dia) || Number.isNaN(diaComoFecha(dia).getTime())) {
       throw new AppException('VALIDACION', 400, 'La fecha no es válida.', [{ campo: 'dia', code: 'FECHA_INVALIDA' }]);
     }

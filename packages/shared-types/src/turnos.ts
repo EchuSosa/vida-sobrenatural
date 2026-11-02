@@ -126,3 +126,75 @@ export function formatearDiaDeServicio(dia: string, locale: string): string {
     new Date(`${dia}T00:00:00.000Z`),
   );
 }
+
+/** Un área de la grilla: una Célula activa, o el Ministerio entero si no tiene (`id: null`). */
+export interface AreaDeTurnos {
+  id: string | null;
+  nombre: string | null;
+  cupo: number;
+}
+
+/** Un turno asignado, como lo ve la grilla. */
+export interface TurnoEnGrilla {
+  id: string;
+  persona: { id: string; nombre: string; apellido: string; fotoUrl: string | null };
+}
+
+/** Una celda: fecha × área. `faltan` = cupo − asignados (0 si está completa). */
+export interface CeldaDeTurnos {
+  areaId: string | null;
+  turnos: TurnoEnGrilla[];
+  faltan: number;
+}
+
+/** Una fecha de la grilla (las suspendidas no aparecen). */
+export interface FechaDeLaGrilla {
+  dia: string;
+  estado: Exclude<EstadoFechaDeServicio, 'suspendida'>;
+  celdas: CeldaDeTurnos[];
+  /** D255: integrantes que ese día ya tienen turno en otro Ministerio (aviso, no bloqueo). */
+  enOtroMinisterio: Array<{ personaId: string; ministerio: string }>;
+}
+
+/** Un integrante que se puede asignar, con cuántas veces sirvió en las últimas fechas (FR-007). */
+export interface IntegranteParaTurno {
+  persona: { id: string; nombre: string; apellido: string; fotoUrl: string | null };
+  /** Su área en el Ministerio; null si no tiene (puede ir en cualquiera). */
+  areaId: string | null;
+  vecesQueSirvio: number;
+}
+
+/** GET /ministerios/:id/turnos — la grilla del líder y del Admin (US2). */
+export interface GrillaDeTurnos {
+  ministerio: { id: string; nombre: string };
+  areas: AreaDeTurnos[];
+  fechas: FechaDeLaGrilla[];
+  integrantes: IntegranteParaTurno[];
+  /** false para el Pastor (D253): ve sin cambiar nada. */
+  puedeEditar: boolean;
+}
+
+/** Lo que devuelve asignar: el turno y, si corresponde, el aviso de otro Ministerio (D255). */
+export interface TurnoAsignado {
+  turno: TurnoEnGrilla & { dia: string; areaId: string | null };
+  advertencias: Array<{ code: 'TURNO_EN_OTRO_MINISTERIO'; ministerio: string }>;
+}
+
+/** GET /turnos/me — un turno publicado y futuro de la persona (US3). */
+export interface MiTurno {
+  id: string;
+  dia: string;
+  ministerio: { id: string; nombre: string };
+  area: string | null;
+}
+
+/** ¿Quién puede estar en esta área? Su área, o cualquiera si no tiene (US2). */
+export function puedeIrEnArea(integrante: Pick<IntegranteParaTurno, 'areaId'>, areaId: string | null): boolean {
+  return integrante.areaId === null || areaId === null || integrante.areaId === areaId;
+}
+
+/** "Bienvenida — Seguridad", o solo "Ceremonial" si no tiene áreas. Para los avisos (D256). */
+export function lugarDelTurno(ministerio: string, area: string | null): string {
+  return area ? `${ministerio} — ${area}` : ministerio;
+}
+
