@@ -39,6 +39,7 @@ import {
   useValidacionCampos,
   type EtiquetasCampoFecha,
   type EtiquetasEditorFranjas,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 import { EditarPeriodo } from './editar-periodo';
 
@@ -113,7 +114,7 @@ export function MiDisponibilidadCliente({
 
   /** Un code de campo de la API a su texto; si no tiene uno propio, el genérico (nunca solo "inválido"). */
   function mensajeDeCodigo(code: string): string {
-    return te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errores.generico');
+    return textoDeCampo(te, code, t('errores.generico'));
   }
 
   /** Los errores que no son de un campo (sin permiso, red, etc.) van a un toast; la pantalla no cambia. */
