@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { CircleAlert, CircleCheck, CircleX, Save } from 'lucide-react';
 import { ApiError, apiFetch, erroresPorCampo, type AsistenciaDelDia } from '@vida-sobrenatural/shared-types';
-import { Button, MensajeErrorCampo, ResumenErrores, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, MensajeErrorCampo, ResumenErrores, useEnvio, textoDeCampo } from '@vida-sobrenatural/ui';
 
 /**
  * spec 008, T052: la lista de inscriptos con un interruptor de un toque
@@ -51,7 +51,7 @@ export function TomarAsistencia({
     } catch (e) {
       const campo = erroresPorCampo(e)?.[0];
       if (campo) {
-        setError(te.has(`campos.${campo.code}`) ? te(`campos.${campo.code}`) : tg('errorGenerico'));
+        setError(textoDeCampo(te, campo.code, tg('errorGenerico')));
         setFoco((f) => f + 1);
         return;
       }

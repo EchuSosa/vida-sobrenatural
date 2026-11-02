@@ -14,7 +14,7 @@ import {
   formatearFechaHora,
   type DeclaracionDetalle,
 } from '@vida-sobrenatural/shared-types';
-import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, MigaDePan, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, MigaDePan, useEnvio, textoDeCampo } from '@vida-sobrenatural/ui';
 
 /**
  * spec 006, T046 (FR-013, D151): el detalle de un "Ya lo hice". Muestra la
@@ -75,7 +75,7 @@ export function DeclaracionDetalleCliente({
     } catch (error) {
       const campos = erroresPorCampo(error);
       if (campos) {
-        toast.error(te.has(`campos.${campos[0].code}`) ? te(`campos.${campos[0].code}`) : t('errorGenerico'));
+        toast.error(textoDeCampo(te, campos[0].code, t('errorGenerico')));
         return;
       }
       avisarError(error);

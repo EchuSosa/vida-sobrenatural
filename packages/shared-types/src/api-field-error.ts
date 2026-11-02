@@ -1,5 +1,6 @@
 import { ApiError } from './api-client.js';
 import { LIBRO_ANIO_MINIMO, LIBRO_ORDEN_MAXIMO, libroAnioMaximo } from './libro.js';
+import { LARGO_MAXIMO_NOMBRE } from './registro.js';
 
 export interface ErrorDeCampo {
   campo: string;
@@ -47,6 +48,9 @@ const COPIA_POR_CODIGO: Record<string, string> = {
   WHATSAPPSECRETARIA_INVALIDO:
     'Escribí un celular argentino con la característica, sin el 0 ni el 15. Por ejemplo: 221 555 0101.',
   CONTACTOEMAIL_INVALIDO: 'Ingresá un email válido, por ejemplo nombre@ejemplo.com.',
+  // QA ronda 1, BUG-05: vacío (o solo espacios) o de más de LARGO_MAXIMO_NOMBRE.
+  APELLIDO_INVALIDO: `Escribí el apellido, con hasta ${LARGO_MAXIMO_NOMBRE} letras.`,
+  NOMBRE_INVALIDO: `Escribí el nombre, con hasta ${LARGO_MAXIMO_NOMBRE} letras.`,
   FECHANACIMIENTO_INVALIDO: 'Revisá la fecha de nacimiento: tiene que ser desde 1900 y no puede ser futura.',
   // specs/003-contenido-institucional, FR-011: no es un código derivado de
   // `${CAMPO}_INVALIDO` por class-validator — lo lanza el service a mano

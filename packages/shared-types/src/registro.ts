@@ -46,6 +46,22 @@ function textoRequerido(v: unknown): boolean {
   return typeof v === 'string' && v.length > 0;
 }
 
+/** QA ronda 1, BUG-05: el largo máximo de un apellido o un nombre, ya sin espacios de los bordes. */
+export const LARGO_MAXIMO_NOMBRE = 100;
+
+/**
+ * QA ronda 1, BUG-05: apellido o nombre con algo escrito (sin contar los
+ * espacios de los bordes) y de hasta `LARGO_MAXIMO_NOMBRE` caracteres. Antes
+ * se guardaban Personas con nombre de espacios o de 5000 caracteres. Se
+ * guarda recortado (el DTO del registro recorta; el alta y la edición
+ * también).
+ */
+export function nombreValido(v: unknown): v is string {
+  if (typeof v !== 'string') return false;
+  const recortado = v.trim();
+  return recortado.length > 0 && recortado.length <= LARGO_MAXIMO_NOMBRE;
+}
+
 function fechaValida(v: unknown): boolean {
   if (typeof v !== 'string' || !FECHA.test(v)) return false;
   return !Number.isNaN(new Date(v).getTime());
@@ -76,8 +92,8 @@ export function erroresDeDatosPersonales(d: Partial<Record<keyof DatosPersonales
   const errores: ErrorDeDatoPersonal[] = [];
   const error = (campo: keyof DatosPersonales) => errores.push({ campo, code: `${campo.toUpperCase()}_INVALIDO` });
 
-  if (!textoRequerido(d.apellido)) error('apellido');
-  if (!textoRequerido(d.nombre)) error('nombre');
+  if (!nombreValido(d.apellido)) error('apellido');
+  if (!nombreValido(d.nombre)) error('nombre');
   if (!GENEROS.includes(d.genero as Genero)) error('genero');
   if (!fechaNacimientoValida(d.fechaNacimiento)) error('fechaNacimiento');
   if (!textoRequerido(d.telefono) || !TELEFONO_REGEX.test(d.telefono as string)) error('telefono');

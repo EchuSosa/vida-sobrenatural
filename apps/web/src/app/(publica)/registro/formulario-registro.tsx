@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { type Sede } from '@vida-sobrenatural/shared-types';
+import { ChevronLeft } from 'lucide-react';
 import { Button, PasoIndicador, ResumenErrores } from '@vida-sobrenatural/ui';
 import { useFormularioRegistro } from '../../../hooks/use-formulario-registro';
 import { TOTAL_PASOS } from './tipos';
@@ -45,7 +46,7 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
     return <RedirigirAIngresar texto={t('cargando')} />;
   }
 
-  const { paso, error, validacion, enviando, handleSubmit, siguiente, atras, tituloPaso, encabezadoRef } = form;
+  const { paso, error, validacion, enviando, handleSubmit, siguiente, atras, navegacionPausada, tituloPaso, encabezadoRef } = form;
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
@@ -82,6 +83,15 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
         }}
         className="flex flex-col gap-4"
       >
+        {/* QA ronda 1, BUG-04 (D249): en celular "Atrás" va arriba, antes del título del paso, y
+            no en la pila de abajo: ahí caía justo donde estaba "Siguiente" del paso anterior y un
+            doble toque volvía atrás. En escritorio sigue al lado de "Siguiente" (abajo). */}
+        {paso > 1 && (
+          <Button type="button" variant="outline" size="lg" onClick={atras} disabled={navegacionPausada} className="self-start sm:hidden">
+            <ChevronLeft aria-hidden="true" />
+            {t('botones.atras')}
+          </Button>
+        )}
         {/* tabIndex -1 + focus programático (arriba) — anuncia el paso nuevo sin robar el foco de un click real. */}
         <h2 ref={encabezadoRef} tabIndex={-1} className="text-lg font-medium outline-none">
           {tituloPaso}
@@ -92,17 +102,17 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
         {paso === 3 && <Paso3Perfil form={form} />}
         {paso === 4 && <Paso4Resumen form={form} />}
 
-        {/* ajustes-ux #28 (docs/15 "Botones"): en celular, apilados a todo el
-            ancho con la principal arriba (col-reverse: "Atrás" va primero en
-            el DOM); en escritorio, a la derecha con la principal a la derecha. */}
+        {/* ajustes-ux #28 (docs/15 "Botones"): en celular, la principal a todo el
+            ancho ("Atrás" va arriba, D249); en escritorio, a la derecha con la
+            principal a la derecha (col-reverse: "Atrás" va primero en el DOM). */}
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
           {paso > 1 && (
-            <Button type="button" variant="outline" size="xl" onClick={atras}>
+            <Button type="button" variant="outline" size="xl" onClick={atras} disabled={navegacionPausada} className="hidden sm:inline-flex">
               {t('botones.atras')}
             </Button>
           )}
           {paso < TOTAL_PASOS && (
-            <Button type="button" size="xl" onClick={siguiente}>
+            <Button type="button" size="xl" onClick={siguiente} disabled={navegacionPausada}>
               {t('botones.siguiente')}
             </Button>
           )}

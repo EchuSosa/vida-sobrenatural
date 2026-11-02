@@ -53,6 +53,7 @@ import {
   useEnvio,
   useValidacionCampos,
   type ColumnaTabla,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 
 /**
@@ -531,7 +532,7 @@ function AnotarPersona({ evento, apiToken }: { evento: EventoDetalle; apiToken: 
     const enviadas = Object.entries(respuestas).map(([preguntaId, valor]) => ({ preguntaId, valor }));
     const locales = validarRespuestas(evento.preguntas, enviadas).errores;
     if (locales.length > 0) {
-      validacion.reemplazar(Object.fromEntries(locales.map((x) => [x.campo, te.has(`campos.${x.code}`) ? te(`campos.${x.code}`) : t('errores.generico')])));
+      validacion.reemplazar(Object.fromEntries(locales.map((x) => [x.campo, textoDeCampo(te, x.code, t('errores.generico'))])));
       return;
     }
     try {

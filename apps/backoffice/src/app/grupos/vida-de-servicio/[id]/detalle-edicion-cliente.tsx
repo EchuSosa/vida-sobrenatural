@@ -33,6 +33,7 @@ import {
   MigaDePan,
   ResumenErrores,
   useEnvio,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 
 type Traducir = ReturnType<typeof useTranslations>;
@@ -577,7 +578,7 @@ function EditarCronograma({
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [foco, setFoco] = useState(0);
   const fija = (i: number) => semanas[i]?.estado === 'liberada';
-  const mensaje = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : te.has(code) ? te(code) : t('errorGenerico'));
+  const mensaje = (code: string) => textoDeCampo(te, code, t('errorGenerico'));
 
   const { enviando, ejecutar } = useEnvio(async () => {
     try {

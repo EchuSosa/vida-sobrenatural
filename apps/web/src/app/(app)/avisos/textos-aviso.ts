@@ -1,4 +1,4 @@
-import type { AvisoResumen } from '@vida-sobrenatural/shared-types';
+import { formatearFechaHora, type AvisoResumen } from '@vida-sobrenatural/shared-types';
 
 /**
  * spec 012, FR-002 — piezas de la pantalla de Avisos que no son JSX: la fecha
@@ -9,7 +9,9 @@ import type { AvisoResumen } from '@vida-sobrenatural/shared-types';
 const ZONA = 'America/Argentina/Buenos_Aires';
 
 export function fechaCompleta(iso: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeStyle: 'short', timeZone: ZONA }).format(new Date(iso));
+  // docs/24 (2026-11-01): dateStyle/timeStyle unen fecha y hora distinto en el ICU de Node y en el
+  // de cada navegador (error de hidratación); la pieza compartida arma el mismo texto en los dos.
+  return formatearFechaHora(iso, locale);
 }
 
 export function fechaRelativa(iso: string, ahora: Date, locale: string): string {
