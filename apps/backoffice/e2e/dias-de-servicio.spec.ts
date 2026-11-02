@@ -195,3 +195,36 @@ test.describe('en celular', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   });
 });
+
+test.describe('Turnos (US2-8)', () => {
+  const MIEMBRO = 'Miembro E2E Ministerio';
+
+  test('el Admin suma y quita a alguien en la grilla del Ministerio', async ({ page }) => {
+    const id = (await ministerioPorNombre(MINISTERIOS_009.bienvenida)).id;
+    await apiComo(EMAIL_ADMIN, 'POST', `/ministerios/${id}/dias-de-servicio`, { frecuencia: 'semanal', diaSemana: 0 });
+    await loguearseComoAdminE2E(page);
+    await irAlMinisterio(page, MINISTERIOS_009.bienvenida);
+    const turnos = page.getByRole('region', { name: 'Turnos', exact: true });
+    const elegida = turnos.getByRole('region', { name: PRIMER_DOMINGO() });
+    await expect(elegida).toContainText('Borrador');
+    const seguridad = elegida.getByRole('listitem').filter({ has: page.getByRole('heading', { level: 3, name: 'Seguridad' }) });
+    await seguridad.getByText('Agregar en Seguridad').click();
+    await seguridad.getByRole('button', { name: new RegExp(`^Sumar a ${MIEMBRO}`) }).click();
+    await expect(page.getByText(`Listo: ${MIEMBRO} sirve el ${PRIMER_DOMINGO()}.`)).toBeVisible();
+    await sinViolaciones(page);
+    await seguridad.getByRole('button', { name: `Quitar a ${MIEMBRO} del ${PRIMER_DOMINGO()}` }).click();
+    await expect(page.getByText(`Listo: ${MIEMBRO} ya no está el ${PRIMER_DOMINGO()}.`)).toBeVisible();
+    await expect(seguridad).toContainText('Falta 1 persona');
+  });
+
+  test('el Pastor ve la grilla sin poder cambiarla (D253)', async ({ page }) => {
+    const id = (await ministerioPorNombre(MINISTERIOS_009.bienvenida)).id;
+    await apiComo(EMAIL_ADMIN, 'POST', `/ministerios/${id}/dias-de-servicio`, { frecuencia: 'semanal', diaSemana: 0 });
+    await loguearseComoPastorE2E(page);
+    await irAlMinisterio(page, MINISTERIOS_009.bienvenida);
+    const turnos = page.getByRole('region', { name: 'Turnos', exact: true });
+    await expect(turnos.getByText('Ves los turnos sin poder cambiarlos.')).toBeVisible();
+    await expect(turnos.getByRole('button', { name: /^(Publicar|Copiar la fecha anterior|Quitar)/ })).toHaveCount(0);
+    await expect(turnos.getByText(/^Agregar en/)).toHaveCount(0);
+  });
+});
