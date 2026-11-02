@@ -13,6 +13,7 @@ import {
   ApiError,
   erroresPorCampo,
   mensajeDeCampo,
+  fechaNacimientoValida,
 } from '@vida-sobrenatural/shared-types';
 import { useEnvio, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from './use-opciones-registro';
@@ -142,7 +143,12 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     apellido: requerido(t('errores.apellido')),
     nombre: requerido(t('errores.nombre')),
     genero: requerido(t('errores.genero')),
-    fechaNacimiento: requerido(t('errorFechaNacimiento')),
+    // QA ronda 1, BUG-01: la misma regla que la API (desde 1900, nunca futura); si falta algo,
+    // dice cómo completarla, y si está completa pero fuera de rango, qué revisar.
+    fechaNacimiento: {
+      esValido: (v: string) => fechaNacimientoValida(v),
+      mensaje: datos.fechaNacimiento.trim() === '' ? t('errorFechaNacimiento') : t('errorFechaNacimientoRango'),
+    } satisfies ValidacionCampo<string>,
     telefono: {
       esValido: (v: { codigoPais: string; numero: string }) => TELEFONO_REGEX.test(`${v.codigoPais} ${v.numero}`),
       mensaje: mensajeDeCampo('TELEFONO_INVALIDO', t('campos.numeroTelefono')),
@@ -158,10 +164,17 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     congregaDesde: requerido(t('errores.congregaDesde')),
   };
 
+  // Los campos que revisa cada paso (los mismos de `revalidarPaso`): los que puede mostrar el resumen.
+  const CAMPOS_POR_PASO: Record<number, readonly string[]> = {
+    1: ['apellido', 'nombre', 'genero', 'fechaNacimiento'],
+    2: ['telefono', 'direccion', 'sedeId'],
+    3: ['estadoCivil', 'profesion', 'profesionDetalle', 'congregaDesde'],
+  };
+
   function pasoValido(numeroPaso: number): boolean {
     if (numeroPaso === 1) {
       return Boolean(
-        apellidoEfectivo && nombreEfectivo && datos.genero && datos.fechaNacimiento,
+        apellidoEfectivo && nombreEfectivo && datos.genero && fechaNacimientoValida(datos.fechaNacimiento),
       );
     }
     if (numeroPaso === 2) {
@@ -202,8 +215,10 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
 
   function siguiente() {
     if (!pasoValido(paso)) {
-      // Marca los campos sin completar del paso actual sin llamar a la API todavía.
+      // Marca los campos sin completar del paso actual sin llamar a la API todavía, y recién ahí
+      // muestra el resumen (docs/24, hallazgo 1: el resumen ya no aparece al salir de un campo).
       revalidarPaso(paso);
+      validacion.intentar(CAMPOS_POR_PASO[paso] ?? []);
       return;
     }
     setPaso((p) => Math.min(p + 1, TOTAL_PASOS));

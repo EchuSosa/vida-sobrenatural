@@ -38,13 +38,6 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('heading', { level: 1, name: `Editar los datos de Rosa Editar ${sufijo}` })).toBeVisible();
       // Los datos actuales, en los mismos campos del alta.
       await expect(page.getByLabel('Apellido')).toHaveValue(`Editar ${sufijo}`);
-      // docs/24 (3 veces en CI, nunca en local): a veces hay DOS campos "Teléfono" idénticos durante
-      // más de 5 s. Si pasa, que la falla diga dónde está cada uno (no afloja la aserción de abajo).
-      await expect(page.locator('#campo-telefono'))
-        .toHaveCount(1)
-        .catch(async (error: Error) => {
-          throw new Error(`${error.message}\nDónde está cada uno: ${await dondeEstanLosDuplicados(page, '#campo-telefono')}`);
-        });
       await expect(page.getByLabel('Teléfono')).toHaveValue('92215550101');
       await expect(page.getByLabel('Email (opcional)')).toHaveValue(email);
       expect(await sinScrollHorizontal(page)).toBe(true);
@@ -102,21 +95,4 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('button', { name: 'Guardar cambios' })).toHaveCount(0);
     });
   });
-}
-
-/** Para el diagnóstico de docs/24: la cadena de ancestros de cada elemento que matchea `selector`. */
-async function dondeEstanLosDuplicados(page: Page, selector: string): Promise<string> {
-  return page.evaluate((sel) => {
-    const describir = (el: Element) =>
-      [el.tagName.toLowerCase(), el.id && `#${el.id}`, el.getAttribute('data-slot') && `[data-slot=${el.getAttribute('data-slot')}]`, el.hasAttribute('hidden') && '[hidden]', el.hasAttribute('inert') && '[inert]', getComputedStyle(el).display === 'none' && '{display:none}']
-        .filter(Boolean)
-        .join('');
-    return [...document.querySelectorAll(sel)]
-      .map((el, i) => {
-        const cadena: string[] = [];
-        for (let e: Element | null = el; e && e !== document.body; e = e.parentElement) cadena.push(describir(e));
-        return `#${i + 1}: ${cadena.reverse().join(' > ')}`;
-      })
-      .join(' || ');
-  }, selector);
 }

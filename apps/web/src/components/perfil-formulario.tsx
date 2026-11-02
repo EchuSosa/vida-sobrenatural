@@ -44,6 +44,7 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
   const { data: session } = useSession();
   const t = useTranslations('registro');
   const tp = useTranslations('perfil');
+  const te = useTranslations('errors');
   // #54: el éxito queda también en pantalla, no solo en el toast (docs/15 "Éxito").
   const [guardado, setGuardado] = useState(false);
   const opciones = useOpcionesRegistro();
@@ -112,8 +113,10 @@ export function PerfilFormulario({ perfil }: { perfil: PerfilEditable }) {
           Object.fromEntries(campos.map(({ campo, code }) => [campo, mensajeDeCampo(code, etiquetasCampo[campo] ?? campo)])),
         );
       } else {
-        const mensaje = error instanceof ApiError ? error.message : tp('errorGuardar');
-        toast.error(mensaje);
+        // Casos infelices (2026-11-01): antes mostraba `error.message`, el `detail` crudo del servidor
+        // (o "No se pudo conectar con el servidor.", texto fijo fuera de next-intl, D84).
+        const code = error instanceof ApiError ? error.code : null;
+        toast.error(code && te.has(code) ? te(code) : tp('errorGuardar'));
       }
     }
   });
