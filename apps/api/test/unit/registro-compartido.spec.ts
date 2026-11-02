@@ -35,6 +35,10 @@ const casos: Array<[string, Record<string, unknown>]> = [
   ['nombre de 5000 caracteres', { nombre: 'A'.repeat(5000) }],
   ['género raro', { genero: 'otro' }],
   ['fecha que no es fecha', { fechaNacimiento: 'ayer' }],
+  // QA ronda 1, BUG-01
+  ['fecha de nacimiento futura', { fechaNacimiento: `${ANIO + 70}-03-10` }],
+  ['fecha de nacimiento antes de 1900', { fechaNacimiento: '1800-01-01' }],
+  ['fecha de nacimiento en 1900', { fechaNacimiento: '1900-01-01' }],
   ['teléfono sin código de país', { telefono: '221 5550101' }],
   ['teléfono con letras', { telefono: '+54 221 55A0101' }],
   ['sede que no es uuid', { sedeId: 'la-plata' }],

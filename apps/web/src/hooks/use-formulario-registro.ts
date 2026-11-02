@@ -15,6 +15,7 @@ import {
   mensajeDeCampo,
   nombreValido,
   LARGO_MAXIMO_NOMBRE,
+  fechaNacimientoValida,
 } from '@vida-sobrenatural/shared-types';
 import { useEnvio, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
 import { useOpcionesRegistro } from './use-opciones-registro';
@@ -150,7 +151,12 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     apellido: nombreOApellido(t('errores.apellido'), t('errores.apellidoLargo', { maximo: LARGO_MAXIMO_NOMBRE }), apellidoEfectivo),
     nombre: nombreOApellido(t('errores.nombre'), t('errores.nombreLargo', { maximo: LARGO_MAXIMO_NOMBRE }), nombreEfectivo),
     genero: requerido(t('errores.genero')),
-    fechaNacimiento: requerido(t('errorFechaNacimiento')),
+    // QA ronda 1, BUG-01: la misma regla que la API (desde 1900, nunca futura); si falta algo,
+    // dice cómo completarla, y si está completa pero fuera de rango, qué revisar.
+    fechaNacimiento: {
+      esValido: (v: string) => fechaNacimientoValida(v),
+      mensaje: datos.fechaNacimiento.trim() === '' ? t('errorFechaNacimiento') : t('errorFechaNacimientoRango'),
+    } satisfies ValidacionCampo<string>,
     telefono: {
       esValido: (v: { codigoPais: string; numero: string }) => TELEFONO_REGEX.test(`${v.codigoPais} ${v.numero}`),
       mensaje: mensajeDeCampo('TELEFONO_INVALIDO', t('campos.numeroTelefono')),
@@ -176,7 +182,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
   function pasoValido(numeroPaso: number): boolean {
     if (numeroPaso === 1) {
       return Boolean(
-        nombreValido(apellidoEfectivo) && nombreValido(nombreEfectivo) && datos.genero && datos.fechaNacimiento,
+        nombreValido(apellidoEfectivo) && nombreValido(nombreEfectivo) && datos.genero && fechaNacimientoValida(datos.fechaNacimiento),
       );
     }
     if (numeroPaso === 2) {

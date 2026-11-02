@@ -51,7 +51,7 @@ const COPIA_POR_CODIGO: Record<string, string> = {
   // QA ronda 1, BUG-05: vacío (o solo espacios) o de más de LARGO_MAXIMO_NOMBRE.
   APELLIDO_INVALIDO: `Escribí el apellido, con hasta ${LARGO_MAXIMO_NOMBRE} letras.`,
   NOMBRE_INVALIDO: `Escribí el nombre, con hasta ${LARGO_MAXIMO_NOMBRE} letras.`,
-  FECHANACIMIENTO_INVALIDO: 'Ingresá una fecha válida.',
+  FECHANACIMIENTO_INVALIDO: 'Revisá la fecha de nacimiento: tiene que ser desde 1900 y no puede ser futura.',
   // specs/003-contenido-institucional, FR-011: no es un código derivado de
   // `${CAMPO}_INVALIDO` por class-validator — lo lanza el service a mano
   // (AppException), pero se muestra igual bajo el campo youtubeUrl.
