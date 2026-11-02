@@ -1,5 +1,6 @@
 import type { DatosPersonales, EstadoCivil, Genero, Profesion } from './persona.js';
 import { TELEFONO_REGEX, congregaDesdeValido } from './persona.js';
+import { hoyEnArgentina } from './disponibilidad.js';
 
 /**
  * spec 006 (FR-031, research #9) — las validaciones de los datos personales,
@@ -50,6 +51,21 @@ function fechaValida(v: unknown): boolean {
   return !Number.isNaN(new Date(v).getTime());
 }
 
+/** QA ronda 1, BUG-01: el año de nacimiento más viejo que se acepta. */
+export const ANIO_MINIMO_NACIMIENTO = 1900;
+
+/**
+ * QA ronda 1, BUG-01: una fecha de nacimiento posible — desde
+ * `ANIO_MINIMO_NACIMIENTO` y nunca después de hoy en Argentina. Un año mal
+ * tipeado (2096 por 1996) dejaba a una persona adulta bloqueada como menor.
+ * Única regla para el registro, el alta y la edición por el Admin, y la API.
+ */
+export function fechaNacimientoValida(v: unknown, hoy: string = hoyEnArgentina()): v is string {
+  if (!fechaValida(v)) return false;
+  const dia = (v as string).slice(0, 10);
+  return Number(dia.slice(0, 4)) >= ANIO_MINIMO_NACIMIENTO && dia <= hoy;
+}
+
 /**
  * Los errores de campo de unos datos personales, en el orden del formulario.
  * Lista vacía = válidos. `anioActual` (en Argentina) es para `congregaDesde`
@@ -63,7 +79,7 @@ export function erroresDeDatosPersonales(d: Partial<Record<keyof DatosPersonales
   if (!textoRequerido(d.apellido)) error('apellido');
   if (!textoRequerido(d.nombre)) error('nombre');
   if (!GENEROS.includes(d.genero as Genero)) error('genero');
-  if (!fechaValida(d.fechaNacimiento)) error('fechaNacimiento');
+  if (!fechaNacimientoValida(d.fechaNacimiento)) error('fechaNacimiento');
   if (!textoRequerido(d.telefono) || !TELEFONO_REGEX.test(d.telefono as string)) error('telefono');
   if (!textoRequerido(d.direccion)) error('direccion');
   if (typeof d.sedeId !== 'string' || !UUID.test(d.sedeId)) error('sedeId');
