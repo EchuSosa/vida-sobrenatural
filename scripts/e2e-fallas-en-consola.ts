@@ -54,9 +54,40 @@ const MENSAJES_PERMITIDOS: RegExp[] = [
  * decoración por un filtro ancho, sin obligar a cada test que ejercita un
  * camino de error a propósito a fallar por algo que no eligió causar.
  */
+/**
+ * docs/24 (2026-11-02, "contenido duplicado"): React 19.2 manda en streaming el contenido de cada
+ * `loading.tsx` dentro de `<div hidden id="S:n">` y lo revela con `$RC`/`$RV`, pero **retrasa la
+ * revelación a propósito** (`setTimeout($RV, $RT + 300 - ahora)`, hasta 2,3 s en un caso). En esa
+ * ventana conviven la copia oculta y una visible, con los mismos ids. Para quien usa la app no se ve
+ * nada (está `hidden`), pero Playwright cuenta los elementos ocultos y su modo estricto falla en el
+ * acto, sin reintentar: era el flaky de "resolved to 2 elements" (persona-editar, mi-ministerio,
+ * avisos). Reproducido en producción (`next start`): 18 de 25 cargas; con este script, 0 de 25.
+ *
+ * Solo en los tests: cada vez que llega una parte del streaming (`$RC`), se revela en el acto
+ * (`$RV`, que vacía la lista; el `setTimeout` que React deja programado después no hace nada). La
+ * app de verdad no cambia.
+ */
+const REVELAR_STREAMING_YA = `(() => {
+  let original;
+  Object.defineProperty(window, '$RC', {
+    configurable: true,
+    get() {
+      return original && function (a, b) {
+        original(a, b);
+        if (Array.isArray(window.$RB) && window.$RB.length && typeof window.$RV === 'function') window.$RV(window.$RB);
+      };
+    },
+    set(fn) { original = fn; },
+  });
+})();`;
+
 export const test = base.extend<{
   permitirErrorDeConsola: (patron: RegExp) => void;
 }>({
+  context: async ({ context }, use) => {
+    await context.addInitScript({ content: REVELAR_STREAMING_YA });
+    await use(context);
+  },
   permitirErrorDeConsola: [
     async ({ page }, use) => {
       const permitidosDeEsteTest: RegExp[] = [];
