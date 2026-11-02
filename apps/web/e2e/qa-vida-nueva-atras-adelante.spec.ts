@@ -4,13 +4,14 @@ import { campo, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
 /**
  * QA ronda 1, BUG-07: después de pedir Vida Nueva, atrás y adelante en el
  * navegador muestran otra vez el formulario vacío, como si no hubiera pedido.
- * Marcado `fail` hasta arreglar el producto.
+ * Arreglado: cada cambio de la tarjeta hace `router.refresh()`.
  */
 test('atrás y adelante después de pedir no vuelven a mostrar el formulario @celular', async ({ page }) => {
-  test.fail(true, 'BUG-07 de QA-REPORT.md: la pantalla queda vieja al volver con el historial.');
   await registrarPersonaDeTest(page, `e2e-qa-vn-atras-${Date.now()}@example.com`);
   await page.goto('/mi-camino');
   await page.goto('/mi-camino/vida-nueva');
+  // El día se elige explícitamente: el editor no trae ninguno por defecto (D247, BUG-02).
+  await page.getByLabel('Día', { exact: true }).selectOption({ label: 'Martes' });
   await elegirHora(campo(page, 'Desde'), '10:00');
   await elegirHora(campo(page, 'Hasta'), '12:00');
   await page.getByRole('button', { name: 'Quiero empezar Vida Nueva' }).click();
