@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -40,9 +41,14 @@ export function MiCaminoCliente({ estadoInicial }: { estadoInicial: EstadoMiDisc
   // quien usa lector de pantalla o teclado sabe dónde quedó.
   const seccion = useRef<HTMLElement>(null);
   const [moverFoco, setMoverFoco] = useState(0);
+  const router = useRouter();
   function setEstado(nuevo: EstadoMiDiscipulado) {
     setEstadoBase(nuevo);
     setMoverFoco((n) => n + 1);
+    // QA ronda 1, BUG-07: el App Router guarda la página tal como llegó del servidor; sin esto,
+    // atrás y adelante en el navegador volvían a mostrar el formulario vacío aunque el pedido ya
+    // existiera. `refresh` descarta esa copia y trae la página con el estado nuevo (sin recargar).
+    router.refresh();
   }
   useEffect(() => {
     if (moverFoco === 0) return;
