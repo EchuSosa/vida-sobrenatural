@@ -1,4 +1,4 @@
-import { test as base, expect, type ConsoleMessage } from '@playwright/test';
+import { test as base, expect, request as playwrightRequest, type ConsoleMessage } from '@playwright/test';
 
 /**
  * H-100/H-01 (revisión manual): ni axe ni ninguna otra herramienta agarra
@@ -81,13 +81,43 @@ const REVELAR_STREAMING_YA = `(() => {
   });
 })();`;
 
-export const test = base.extend<{
-  permitirErrorDeConsola: (patron: RegExp) => void;
-}>({
+/**
+ * Fallas conocidas (docs/24, "arranque en frío", 3 veces): `next dev` compila cada ruta la primera
+ * vez que alguien la pide, y en un disco lento el primer test de la corrida se pasaba de su timeout
+ * (`page.goto: net::ERR_ABORTED`, o el `GET /api/auth/csrf` del login de prueba). Una vez por worker,
+ * antes del primer test, se piden las rutas que usa todo test (con paciencia, sin afirmar nada): el
+ * timeout de cada test vuelve a medir el test, no la compilación. Por worker y no en `globalSetup`
+ * porque `globalSetup` corre ANTES de levantar los servidores (H-114) y así funciona igual con shards.
+ */
+const RUTAS_A_CALENTAR = ['/api/auth/csrf', '/api/auth/session', '/'];
+
+export const test = base.extend<
+  {
+    permitirErrorDeConsola: (patron: RegExp) => void;
+  },
+  { calentarServidor: void }
+>({
   context: async ({ context }, use) => {
     await context.addInitScript({ content: REVELAR_STREAMING_YA });
     await use(context);
   },
+  calentarServidor: [
+    async ({}, use, workerInfo) => {
+      const baseURL = workerInfo.project.use.baseURL;
+      if (baseURL) {
+        const ctx = await playwrightRequest.newContext({ baseURL });
+        try {
+          for (const ruta of RUTAS_A_CALENTAR) {
+            await ctx.get(ruta, { timeout: 180_000, maxRedirects: 0 }).catch(() => {});
+          }
+        } finally {
+          await ctx.dispose();
+        }
+      }
+      await use();
+    },
+    { scope: 'worker', auto: true, timeout: 600_000 },
+  ],
   permitirErrorDeConsola: [
     async ({ page }, use) => {
       const permitidosDeEsteTest: RegExp[] = [];
