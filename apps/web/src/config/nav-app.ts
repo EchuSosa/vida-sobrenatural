@@ -20,7 +20,8 @@ export interface ItemNavApp {
 }
 
 export const NAV_APP: ItemNavApp[] = [
-  { href: '/inicio', labelKey: 'inicio', icon: Home },
+  // spec 017: "Mis turnos" se abre desde la tarjeta del Inicio.
+  { href: '/inicio', labelKey: 'inicio', icon: Home, rutasRelacionadas: ['/mis-turnos'] },
   { href: '/mi-camino', labelKey: 'miCamino', icon: MapIcon, rutasRelacionadas: ['/mis-discipulados', '/mi-disponibilidad', '/mis-grupos', '/mi-grupo-extension', '/mi-ministerio'] },
   // H-26 (revisión manual, actualización 2026-09-20, D107): /mis-eventos,
   // no /eventos — esa URL ya la usa la cartelera pública (`(publica)/eventos`)

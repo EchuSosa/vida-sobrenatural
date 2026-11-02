@@ -203,7 +203,10 @@
       "FRECUENCIA_INVALIDA": "Elegí si es todas las semanas o una vez por mes.",
       "POSICION_EN_MES_INVALIDA": "Elegí qué vez del mes: primero, segundo, tercero, cuarto o último.",
       "DIA_DE_SERVICIO_REPETIDO": "Ese día ya está cargado. Elegí otro.",
-      "CUPO_TURNO_INVALIDO": "Escribí un número de 1 a 20: cuántas personas hacen falta por fecha."
+      "CUPO_TURNO_INVALIDO": "Escribí un número de 1 a 20: cuántas personas hacen falta por fecha.",
+      "YA_TIENE_TURNO_ESE_DIA": "Ya tiene turno ese día. Elegí a otra persona.",
+      "NO_ES_INTEGRANTE": "No es integrante de esta área. Elegí a alguien de la lista.",
+      "AREA_INVALIDA": "Elegí un área del Ministerio."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
@@ -227,7 +230,11 @@
     "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual.",
     "DIA_DE_SERVICIO_REPETIDO": "Ese día de servicio ya está cargado en este Ministerio.",
     "NO_ES_DIA_DE_SERVICIO": "Esa fecha no es un día de servicio de este Ministerio. Revisá los días cargados.",
-    "FECHA_YA_PASO": "Esa fecha ya pasó: solo se pueden cambiar las fechas que vienen."
+    "FECHA_YA_PASO": "Esa fecha ya pasó: solo se pueden cambiar las fechas que vienen.",
+    "FECHA_SUSPENDIDA": "Ese día no hay servicio: primero hay que volver a habilitarlo.",
+    "YA_TIENE_TURNO_ESE_DIA": "Esa persona ya tiene turno ese día en este Ministerio.",
+    "NO_ES_INTEGRANTE": "Esa persona no es integrante de esta área.",
+    "SIN_FECHA_ANTERIOR": "Todavía no hay una fecha publicada antes de esta para copiar."
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -1905,7 +1912,11 @@
     "visitanos": "Horarios y cómo llegar",
     "errorTitulo": "No pudimos mostrar tu Inicio",
     "errorTexto": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
-    "reintentar": "Reintentar"
+    "reintentar": "Reintentar",
+    "proximoTurnoTitulo": "Tu próximo turno",
+    "proximoTurnoVerTodos": "Ver mis turnos",
+    "proximoTurnoMas": "{n, plural, one {Tenés # turno más.} other {Tenés # turnos más.}}",
+    "proximoTurnoError": "No pudimos cargar tus turnos. El resto del Inicio sigue andando."
   },
   "perfil": {
     "titulo": "Perfil",
@@ -2054,6 +2065,12 @@
       "titulo": "No encontramos ese ministerio",
       "texto": "Puede que ya no lo lideres o que el enlace esté mal.",
       "volver": "Volver a Mi camino"
+    },
+    "turnos": {
+      "titulo": "Turnos",
+      "tituloDe": "Turnos de {ministerio}",
+      "intro": "Armá quién sirve en cada fecha. Mientras está en borrador nadie lo ve; al publicar, a cada persona le llega un aviso.",
+      "irATurnos": "Armar los turnos"
     }
   },
   "miGrupoExtension": {
@@ -2161,5 +2178,50 @@
     "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, avisanos con este código:",
     "reintentar": "Reintentar",
     "volverMiCamino": "Volver a Mi camino"
+  },
+  "turnos": {
+    "grilla": {
+      "fechas": "Próximas fechas",
+      "estado": {
+        "borrador": "Borrador",
+        "publicada": "Publicada"
+      },
+      "faltan": "{n, plural, one {Falta # persona} other {Faltan # personas}}",
+      "completa": "Completa",
+      "necesita": "{n, plural, one {Necesita # persona por fecha} other {Necesita # personas por fecha}}",
+      "todoElMinisterio": "Todo el Ministerio",
+      "agregarEn": "Agregar en {area}",
+      "sinDisponibles": "No hay más integrantes para sumar acá.",
+      "vecesQueSirvio": "{n, plural, =0 {No sirvió en las últimas fechas} one {Sirvió # vez en las últimas fechas} other {Sirvió # veces en las últimas fechas}}",
+      "enOtroMinisterio": "Ese día ya sirve en {ministerio}",
+      "asignar": "Sumar a {nombre}",
+      "asignado": "Listo: {nombre} sirve el {fecha}.",
+      "asignadoConAviso": "Listo: {nombre} sirve el {fecha}. Ese día también sirve en {ministerio}.",
+      "quitar": "Quitar",
+      "quitarA": "Quitar a {nombre} del {fecha}",
+      "quitado": "Listo: {nombre} ya no está el {fecha}.",
+      "copiar": "Copiar la fecha anterior",
+      "copiados": "{n, plural, =0 {No había nadie más para copiar.} one {Listo: se copió # turno.} other {Listo: se copiaron # turnos.}}",
+      "publicar": "Publicar",
+      "publicarTitulo": "¿Publicar el {fecha}?",
+      "publicarDescripcion": "{n, plural, =0 {Todavía no hay nadie asignado. Igual queda publicada.} one {Se le avisa a la persona que tiene turno.} other {Se les avisa a las # personas que tienen turno.}}",
+      "publicarConfirmar": "Sí, publicar",
+      "volver": "Volver",
+      "publicada": "Listo: el {fecha} quedó publicado.",
+      "publicadaAvisa": "Ya está publicada: lo que cambies se le avisa a quien entra y a quien sale.",
+      "borradorAyuda": "En borrador nadie ve estos turnos. Cuando esté lista, publicala.",
+      "sinFechas": "Todavía no hay fechas: el Ministerio necesita días de servicio, que los carga el Admin en el backoffice.",
+      "soloVer": "Ves los turnos sin poder cambiarlos.",
+      "reintentar": "Reintentar",
+      "errorGenerico": "No pudimos guardar el cambio. Probá de nuevo en un momento."
+    }
+  },
+  "misTurnos": {
+    "titulo": "Mis turnos",
+    "intro": "Las fechas en las que servís, ya publicadas por tu líder.",
+    "vacio": "Todavía no tenés turnos publicados. Cuando tu líder publique una fecha en la que servís, la vas a ver acá.",
+    "errorTitulo": "No pudimos mostrar tus turnos",
+    "errorTexto": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
+    "reintentar": "Reintentar"
   }
 }

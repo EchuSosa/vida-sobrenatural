@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AgregarMiembro } from './agregar-miembro';
 import { LideresMinisterio } from './lideres-ministerio';
 import { DiasDeServicio } from './dias-de-servicio';
+import { TurnosMinisterio } from './turnos-ministerio';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -21,6 +22,7 @@ import {
   type DatosMinisterio,
   type EliminadoEnPapelera,
   type DiasDeServicioDelMinisterio,
+  type GrillaDeTurnos,
   type LiderMinisterioVista,
   type MiembroMinisterio,
   type MinisterioDetalleCatalogo,
@@ -59,6 +61,7 @@ export function MinisterioDetalleCliente({
   papeleraCelulas,
   lideres,
   diasDeServicio,
+  grillaTurnos,
   puedeGestionarTurnos,
   apiToken,
   puedeGestionar,
@@ -72,6 +75,7 @@ export function MinisterioDetalleCliente({
   papeleraCelulas: EliminadoEnPapelera[];
   lideres: LiderMinisterioVista[];
   diasDeServicio: DiasDeServicioDelMinisterio | null;
+  grillaTurnos: GrillaDeTurnos | null;
   puedeGestionarTurnos: boolean;
   apiToken: string;
   puedeGestionar: boolean;
@@ -322,6 +326,7 @@ export function MinisterioDetalleCliente({
 
       {/* spec 017, US1: cuándo sirve el Ministerio y cuánta gente hace falta. */}
       {diasDeServicio && <DiasDeServicio ministerioId={m.id} datos={diasDeServicio} puedeGestionar={puedeGestionarTurnos} apiToken={apiToken} />}
+      {grillaTurnos && <TurnosMinisterio grilla={grillaTurnos} apiToken={apiToken} />}
 
       <section aria-labelledby="miembros-titulo" className="flex flex-col gap-3">
         <h2 id="miembros-titulo" className="text-lg font-semibold">
