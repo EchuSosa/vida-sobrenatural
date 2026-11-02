@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { AgregarMiembro } from './agregar-miembro';
 import { LideresMinisterio } from './lideres-ministerio';
+import { DiasDeServicio } from './dias-de-servicio';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -19,6 +20,7 @@ import {
   type DatosCelula,
   type DatosMinisterio,
   type EliminadoEnPapelera,
+  type DiasDeServicioDelMinisterio,
   type LiderMinisterioVista,
   type MiembroMinisterio,
   type MinisterioDetalleCatalogo,
@@ -56,6 +58,8 @@ export function MinisterioDetalleCliente({
   porPagina,
   papeleraCelulas,
   lideres,
+  diasDeServicio,
+  puedeGestionarTurnos,
   apiToken,
   puedeGestionar,
   puedeVerPapelera,
@@ -67,6 +71,8 @@ export function MinisterioDetalleCliente({
   porPagina: number;
   papeleraCelulas: EliminadoEnPapelera[];
   lideres: LiderMinisterioVista[];
+  diasDeServicio: DiasDeServicioDelMinisterio | null;
+  puedeGestionarTurnos: boolean;
   apiToken: string;
   puedeGestionar: boolean;
   puedeVerPapelera: boolean;
@@ -313,6 +319,9 @@ export function MinisterioDetalleCliente({
 
       {/* spec 016 (D244): quién lidera el Ministerio. */}
       <LideresMinisterio ministerioId={m.id} ministerio={m.nombre} lideres={lideres} activo={m.activo} puedeGestionar={puedeGestionar} apiToken={apiToken} />
+
+      {/* spec 017, US1: cuándo sirve el Ministerio y cuánta gente hace falta. */}
+      {diasDeServicio && <DiasDeServicio ministerioId={m.id} datos={diasDeServicio} puedeGestionar={puedeGestionarTurnos} apiToken={apiToken} />}
 
       <section aria-labelledby="miembros-titulo" className="flex flex-col gap-3">
         <h2 id="miembros-titulo" className="text-lg font-semibold">

@@ -4,6 +4,7 @@ import {
   diaSemanaDe,
   erroresDeReglaDiaDeServicio,
   fechasDeServicio,
+  formatearDiaDeServicio,
   tienePermiso,
   type ReglaDiaDeServicio,
 } from '@vida-sobrenatural/shared-types';
@@ -78,5 +79,11 @@ describe('permisos de turnos (D253)', () => {
     expect(tienePermiso(['pastor'], 'turnos.ver')).toBe(true);
     expect(tienePermiso(['pastor'], 'turnos.gestionar')).toBe(false);
     expect(tienePermiso(['miembro_registrado', 'lider_ministerio'], 'turnos.gestionar')).toBe(false);
+  });
+});
+
+describe('formatearDiaDeServicio', () => {
+  it('con el día de la semana, sin correrse por la zona horaria', () => {
+    expect(formatearDiaDeServicio('2026-11-08', 'es')).toBe('domingo, 8 de noviembre');
   });
 });

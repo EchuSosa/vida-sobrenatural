@@ -119,3 +119,10 @@ export interface DiasDeServicioDelMinisterio {
   celulas: Array<{ id: string; nombre: string; cupoTurno: number }>;
   proximas: ProximaFechaDeServicio[];
 }
+
+/** "domingo 8 de noviembre" (la fecha civil, sin zona horaria). Una sola versión para las dos apps. */
+export function formatearDiaDeServicio(dia: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale === 'es' ? 'es-AR' : locale, { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(
+    new Date(`${dia}T00:00:00.000Z`),
+  );
+}
