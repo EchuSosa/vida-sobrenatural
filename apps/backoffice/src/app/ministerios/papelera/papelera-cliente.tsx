@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { RotateCcw } from 'lucide-react';
 import { ApiError, apiFetch, erroresPorCampo, formatearFechaHora, type EliminadoEnPapelera } from '@vida-sobrenatural/shared-types';
-import { Button, EstadoVacio, MigaDePan, useEnvio } from '@vida-sobrenatural/ui';
+import { Button, EstadoVacio, MigaDePan, useEnvio  } from '@vida-sobrenatural/ui';
 
 /**
  * spec 009, T043 (FR-030, D119): la papelera de Ministerios. "Restaurar" lo

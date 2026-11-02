@@ -52,3 +52,11 @@ test('CampoHora: siempre 24 h, y un minuto guardado fuera de la lista se muestra
   assert.ok(!/p\.m\.|a\.m\./.test(html), html);
   assert.ok(html.includes('<option value="31" selected="">31</option>'), html);
 });
+
+// QA ronda 1, BUG-02 (D247): con `vacio`, un valor vacío se ve vacío (no "00:00") y los minutos
+// esperan a que haya hora.
+test('CampoHora con `vacio` y sin valor: muestra la opción vacía y deshabilita los minutos', () => {
+  const html = renderToStaticMarkup(<CampoHora id="campo-desde" etiqueta="Desde" value="" onChange={() => {}} etiquetas={{ hora: 'Hora', minutos: 'Minutos' }} vacio="--" />);
+  assert.match(html, /<option value="" disabled="" selected="">--<\/option>/);
+  assert.match(html, /id="campo-desde-minutos"[^>]*disabled=""/);
+});

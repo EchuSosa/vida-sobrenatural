@@ -21,3 +21,10 @@ test('si ya está cargada (o la pisa), no hay franja pendiente', () => {
   assert.equal(franjaPendiente(2, '19:00', '21:00', cargadas), null);
   assert.equal(franjaPendiente(2, '20:00', '22:00', cargadas), null);
 });
+
+// QA ronda 1, BUG-02 (D247): sin día o sin horas elegidos no hay franja que tomar.
+test('sin día elegido o con una hora vacía, no hay franja pendiente', () => {
+  assert.equal(franjaPendiente(null, '19:00', '21:00', []), null);
+  assert.equal(franjaPendiente(2, '', '21:00', []), null);
+  assert.equal(franjaPendiente(2, '19:00', '', []), null);
+});

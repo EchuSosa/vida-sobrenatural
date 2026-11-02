@@ -15,7 +15,7 @@ import {
   type DetalleEleccionLider,
   type GuardarEleccionLider,
 } from '@vida-sobrenatural/shared-types';
-import { AvisoEstado, Button, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos } from '@vida-sobrenatural/ui';
+import { AvisoEstado, Button, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos, textoDeCampo } from '@vida-sobrenatural/ui';
 import { SelectorMinisterios, opcionesDe, seleccionDe, textoOpcion, type SeleccionMinisterios } from '../../../../../../components/eleccion/selector-ministerios';
 
 const CLASE_TEXTO =
@@ -40,7 +40,7 @@ export function CharlaEleccion({ grupoId, personaId, datos }: { grupoId: string;
   const [seleccion, setSeleccion] = useState<SeleccionMinisterios>(e ? seleccionDe(e.opciones) : {});
   const [notas, setNotas] = useState(e?.notas ?? '');
   const yaCharlada = e !== null && e.estado !== 'borrador';
-  const mensajeDe = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico'));
+  const mensajeDe = (code: string) => textoDeCampo(te, code, t('errorGenerico'));
 
   async function guardar(charlaHecha: boolean) {
     const opciones = opcionesDe(seleccion);

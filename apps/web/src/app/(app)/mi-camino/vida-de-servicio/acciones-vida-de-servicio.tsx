@@ -20,6 +20,7 @@ import {
   MensajeErrorCampo,
   ResumenErrores,
   useEnvio,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 
 /**
@@ -83,7 +84,7 @@ export function PedirVidaDeServicio({ ediciones }: { ediciones: OpcionEdicion[] 
     } catch (e) {
       const campo = erroresPorCampo(e)?.find((c) => c.campo === 'grupoId');
       if (campo) {
-        setError(te.has(`campos.${campo.code}`) ? te(`campos.${campo.code}`) : t('errorGenerico'));
+        setError(textoDeCampo(te, campo.code, t('errorGenerico')));
         setFoco((f) => f + 1);
         return;
       }

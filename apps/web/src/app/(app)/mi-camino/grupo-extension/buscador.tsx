@@ -18,7 +18,7 @@ import {
   type DiaSemana,
   type GrupoExtensionEncontrado,
 } from '@vida-sobrenatural/shared-types';
-import { Button, ConfirmDestructiveDialog, EstadoVacio, Input, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos, textoHorario, textoNombres } from '@vida-sobrenatural/ui';
+import { Button, ConfirmDestructiveDialog, EstadoVacio, Input, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos, textoHorario, textoNombres, textoDeCampo } from '@vida-sobrenatural/ui';
 
 type Origen = { direccion: string } | { latitud: number; longitud: number } | { nombre: string };
 type Validacion = ReturnType<typeof useValidacionCampos>;
@@ -61,7 +61,7 @@ export function BuscadorGrupos() {
     } catch (error) {
       const campos = erroresPorCampo(error);
       if (campos) {
-        v.reemplazar(Object.fromEntries(campos.map(({ campo, code }) => [campo, te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico')])));
+        v.reemplazar(Object.fromEntries(campos.map(({ campo, code }) => [campo, textoDeCampo(te, code, t('errorGenerico'))])));
         return;
       }
       const code = error instanceof ApiError ? error.code : null;
