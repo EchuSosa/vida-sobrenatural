@@ -95,3 +95,27 @@ export function fechasDeServicio(reglas: readonly ReglaDiaDeServicio[], cantidad
   }
   return fechas;
 }
+
+/** Estado de una fecha de servicio (D256): en borrador, publicada o suspendida ("este día no hay"). */
+export type EstadoFechaDeServicio = 'borrador' | 'publicada' | 'suspendida';
+
+/** Una regla cargada, como la devuelve la API. */
+export interface DiaDeServicioVista extends ReglaDiaDeServicio {
+  id: string;
+}
+
+/** Una próxima fecha de servicio del Ministerio, con su estado y cuántos turnos tiene asignados. */
+export interface ProximaFechaDeServicio {
+  dia: string;
+  estado: EstadoFechaDeServicio;
+  turnosAsignados: number;
+}
+
+/** GET /ministerios/:id/dias-de-servicio — US1 de la spec 017 (backoffice). */
+export interface DiasDeServicioDelMinisterio {
+  reglas: DiaDeServicioVista[];
+  /** Cupo del Ministerio entero; solo cuenta si no tiene Células (D251). */
+  cupoMinisterio: number;
+  celulas: Array<{ id: string; nombre: string; cupoTurno: number }>;
+  proximas: ProximaFechaDeServicio[];
+}

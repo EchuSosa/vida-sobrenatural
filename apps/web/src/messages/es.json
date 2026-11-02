@@ -199,7 +199,11 @@
       "ELECCION_UN_AREA_POR_MINISTERIO": "Elegí un solo área de cada ministerio.",
       "ELECCION_AREA_NO_DISPONIBLE": "Un área que elegiste ya no está disponible: elegí otra.",
       "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera.",
-      "DESDE_ANIO_INVALIDO": "Elegí un año de la lista."
+      "DESDE_ANIO_INVALIDO": "Elegí un año de la lista.",
+      "FRECUENCIA_INVALIDA": "Elegí si es todas las semanas o una vez por mes.",
+      "POSICION_EN_MES_INVALIDA": "Elegí qué vez del mes: primero, segundo, tercero, cuarto o último.",
+      "DIA_DE_SERVICIO_REPETIDO": "Ese día ya está cargado. Elegí otro.",
+      "CUPO_TURNO_INVALIDO": "Escribí un número de 1 a 20: cuántas personas hacen falta por fecha."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
@@ -220,7 +224,10 @@
     "ELECCION_DESACTUALIZADA": "Alguien cambió esta elección mientras la tenías abierta. Recargá para ver lo último.",
     "ELECCION_OPCIONES_RESUELTAS": "El equipo ya confirmó parte de esta elección: las áreas no se pueden cambiar.",
     "ELECCION_SIN_CHARLA": "Falta la charla con su líder de Vida de Servicio.",
-    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual."
+    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual.",
+    "DIA_DE_SERVICIO_REPETIDO": "Ese día de servicio ya está cargado en este Ministerio.",
+    "NO_ES_DIA_DE_SERVICIO": "Esa fecha no es un día de servicio de este Ministerio. Revisá los días cargados.",
+    "FECHA_YA_PASO": "Esa fecha ya pasó: solo se pueden cambiar las fechas que vienen."
   },
   "nav": {
     "nosotros": "Nosotros",

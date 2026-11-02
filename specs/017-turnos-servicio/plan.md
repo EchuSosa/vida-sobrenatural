@@ -35,7 +35,8 @@ Mismo stack. Sin dependencias nuevas. La tarea diaria del recordatorio va en
   'pastor']`. El líder actúa sobre sus Ministerios resolviendo la pertenencia contra la base
   (`ministerioDelLiderOFallar`, spec 016), sin permiso del catálogo.
 - Admin: `GET/POST /ministerios/:id/dias-de-servicio`, `DELETE …/:diaId`;
-  `PATCH /ministerios/:id` y `PATCH /celulas/:id` aceptan `cupoTurno`;
+  `PATCH /ministerios/:id/cupo-turno` y `PATCH /celulas/:id/cupo-turno` `{ cupo }` (endpoints propios:
+  así el cupo no pasa por la validación del catálogo y su permiso es `turnos.gestionar`);
   `POST /ministerios/:id/fechas/:dia/suspension` y `DELETE` (volver a habilitar).
 - Grilla (líder o Admin): `GET /ministerios/:id/turnos?desde=` → próximas fechas con Células,
   cupos, turnos, faltantes y conteos; `POST /ministerios/:id/fechas/:dia/turnos`
