@@ -15,7 +15,7 @@ import {
   type MinisterioParaElegir,
   type NuevaDeclaracion,
 } from '@vida-sobrenatural/shared-types';
-import { Button, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos } from '@vida-sobrenatural/ui';
+import { Button, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos, textoDeCampo } from '@vida-sobrenatural/ui';
 import { SelectorMinisterios, opcionesDe, type SeleccionMinisterios } from '../../../../../components/eleccion/selector-ministerios';
 
 const CLASE_TEXTO =
@@ -39,7 +39,7 @@ export function FormularioYaSirvo({ catalogo }: { catalogo: MinisterioParaElegir
   const [comentario, setComentario] = useState('');
   const anioActual = Number(hoyEnArgentina().slice(0, 4));
   const anios = Array.from({ length: anioActual - 1950 + 1 }, (_, i) => anioActual - i);
-  const mensajeDe = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errorGenerico'));
+  const mensajeDe = (code: string) => textoDeCampo(te, code, t('errorGenerico'));
 
   const { enviando, ejecutar } = useEnvio(async () => {
     const opciones = opcionesDe(seleccion);

@@ -13,6 +13,8 @@ import {
   ApiError,
   erroresPorCampo,
   mensajeDeCampo,
+  nombreValido,
+  LARGO_MAXIMO_NOMBRE,
   fechaNacimientoValida,
 } from '@vida-sobrenatural/shared-types';
 import { useEnvio, useValidacionCampos, type ValidacionCampo } from '@vida-sobrenatural/ui';
@@ -25,6 +27,12 @@ import {
 } from '../app/(publica)/registro/tipos';
 import { calcularEdadAproximada } from '../app/(publica)/registro/helpers';
 
+
+/**
+ * QA ronda 1, BUG-04 (D249): cuánto quedan sin efecto "Siguiente" y "Atrás" después de cambiar de
+ * paso. Un doble toque dura menos de 300 ms; 400 deja margen sin que se note al usar la app.
+ */
+export const PAUSA_ENTRE_PASOS_MS = 400;
 /**
  * H-44 (revisión manual): toda la lógica de validación, navegación entre
  * pasos y envío de `formulario-registro.tsx` (antes 778 líneas), separada
@@ -139,9 +147,15 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
   // un "Revisá este dato." igual para todos — en el resumen de arriba los
   // tres enlaces se leían idénticos.
   const requerido = (mensaje: string): ValidacionCampo<string> => ({ esValido: (v) => v.trim() !== '', mensaje });
+  // QA ronda 1, BUG-05: la misma regla que la API (algo escrito y hasta LARGO_MAXIMO_NOMBRE); si está
+  // vacío dice qué escribir, y si es largo, hasta cuánto.
+  const nombreOApellido = (vacio: string, largo: string, valor: string): ValidacionCampo<string> => ({
+    esValido: (v) => nombreValido(v),
+    mensaje: valor.trim() === '' ? vacio : largo,
+  });
   const validaciones = {
-    apellido: requerido(t('errores.apellido')),
-    nombre: requerido(t('errores.nombre')),
+    apellido: nombreOApellido(t('errores.apellido'), t('errores.apellidoLargo', { maximo: LARGO_MAXIMO_NOMBRE }), apellidoEfectivo),
+    nombre: nombreOApellido(t('errores.nombre'), t('errores.nombreLargo', { maximo: LARGO_MAXIMO_NOMBRE }), nombreEfectivo),
     genero: requerido(t('errores.genero')),
     // QA ronda 1, BUG-01: la misma regla que la API (desde 1900, nunca futura); si falta algo,
     // dice cómo completarla, y si está completa pero fuera de rango, qué revisar.
@@ -174,7 +188,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
   function pasoValido(numeroPaso: number): boolean {
     if (numeroPaso === 1) {
       return Boolean(
-        apellidoEfectivo && nombreEfectivo && datos.genero && fechaNacimientoValida(datos.fechaNacimiento),
+        nombreValido(apellidoEfectivo) && nombreValido(nombreEfectivo) && datos.genero && fechaNacimientoValida(datos.fechaNacimiento),
       );
     }
     if (numeroPaso === 2) {
@@ -213,7 +227,29 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     }
   }
 
+  // QA ronda 1, BUG-04 (D249): un doble toque no saltea ni deshace un paso. Después de cada cambio
+  // de paso, "Siguiente" y "Atrás" quedan sin efecto (y deshabilitados) `PAUSA_ENTRE_PASOS_MS`:
+  // el segundo toque cae sobre la pantalla nueva y no hace nada. La ref corta también dos toques
+  // que llegan antes del próximo render; el estado deshabilita los botones.
+  const navegacionPausadaRef = useRef(false);
+  const [navegacionPausada, setNavegacionPausada] = useState(false);
+  const temporizadorPausa = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (temporizadorPausa.current) clearTimeout(temporizadorPausa.current);
+  }, []);
+  function cambiarPaso(cambio: (p: number) => number) {
+    setPaso(cambio);
+    navegacionPausadaRef.current = true;
+    setNavegacionPausada(true);
+    if (temporizadorPausa.current) clearTimeout(temporizadorPausa.current);
+    temporizadorPausa.current = setTimeout(() => {
+      navegacionPausadaRef.current = false;
+      setNavegacionPausada(false);
+    }, PAUSA_ENTRE_PASOS_MS);
+  }
+
   function siguiente() {
+    if (navegacionPausadaRef.current) return;
     if (!pasoValido(paso)) {
       // Marca los campos sin completar del paso actual sin llamar a la API todavía, y recién ahí
       // muestra el resumen (docs/24, hallazgo 1: el resumen ya no aparece al salir de un campo).
@@ -221,11 +257,12 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
       validacion.intentar(CAMPOS_POR_PASO[paso] ?? []);
       return;
     }
-    setPaso((p) => Math.min(p + 1, TOTAL_PASOS));
+    cambiarPaso((p) => Math.min(p + 1, TOTAL_PASOS));
   }
 
   function atras() {
-    setPaso((p) => Math.max(p - 1, 1));
+    if (navegacionPausadaRef.current) return;
+    cambiarPaso((p) => Math.max(p - 1, 1));
   }
 
   const edadAproximada = calcularEdadAproximada(datos.fechaNacimiento);
@@ -236,8 +273,8 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     validacion.reset();
 
     const body = {
-      apellido: apellidoEfectivo,
-      nombre: nombreEfectivo,
+      apellido: apellidoEfectivo.trim(),
+      nombre: nombreEfectivo.trim(),
       genero: datos.genero,
       fechaNacimiento: datos.fechaNacimiento,
       telefono: `${datos.telefonoCodigoPais} ${datos.telefonoNumero}`,
@@ -350,6 +387,7 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
     validaciones,
     siguiente,
     atras,
+    navegacionPausada,
     edadAproximada,
     esProbablementeMayorDeEdad,
     tituloPaso,

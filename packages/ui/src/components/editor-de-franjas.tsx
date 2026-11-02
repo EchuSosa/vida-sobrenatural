@@ -21,6 +21,15 @@ export interface EtiquetasEditorFranjas {
   /** Los siete días, de domingo (0) a sábado (6). */
   dias: [string, string, string, string, string, string, string];
   dia: string;
+  /**
+   * QA ronda 1, BUG-02: la opción vacía de cada lista ("Elegí" en el día, "--"
+   * en las horas). El editor arranca sin nada elegido: ningún horario sale
+   * de un valor por defecto que la persona no tocó.
+   */
+  elegirDia: string;
+  elegirHora: string;
+  /** "Agregar franja" con el día o alguna hora sin elegir. */
+  errorIncompleta: string;
   desde: string;
   hasta: string;
   /** Nombres accesibles de las dos listas de cada hora (CampoHora). */
@@ -52,7 +61,7 @@ export interface EditorDeFranjasProps {
    * campo con error es `${idBase}-${campo}`: `hasta` si la hora de fin no
    * sirve (rango, muy corta), `desde` si choca con otra franja.
    */
-  onErrorChange?: (error: string | null, campo: 'desde' | 'hasta') => void;
+  onErrorChange?: (error: string | null, campo: CampoDeFranja) => void;
   /** Mientras la pantalla guarda la franja nueva: "Agregar" en estado de carga (H-57). */
   enviando?: boolean;
   /**
@@ -65,8 +74,11 @@ export interface EditorDeFranjasProps {
   onPendienteChange?: (franja: Franja | null) => void;
 }
 
-/** La franja de los selectores, si se puede agregar tal cual a `cargadas` (ajustes-ux #40). */
-export function franjaPendiente(diaSemana: number, desde: string, hasta: string, cargadas: Franja[]): Franja | null {
+export type CampoDeFranja = 'dia' | 'desde' | 'hasta';
+
+/** La franja de los selectores, si se puede agregar tal cual a `cargadas` (ajustes-ux #40). Sin día elegido, ninguna. */
+export function franjaPendiente(diaSemana: number | null, desde: string, hasta: string, cargadas: Franja[]): Franja | null {
+  if (diaSemana === null) return null;
   const inicio = aMinutos(desde);
   const fin = aMinutos(hasta);
   if (inicio === null || fin === null || fin <= inicio) return null;
@@ -89,11 +101,13 @@ export function minutosAHHMM(min: number): string {
 }
 
 export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja', disabled, onErrorChange, enviando, onPendienteChange }: EditorDeFranjasProps) {
-  const [dia, setDia] = useState(2);
-  const [desde, setDesde] = useState('19:00');
-  const [hasta, setHasta] = useState('21:00');
+  // QA ronda 1, BUG-02: antes arrancaba en "Martes 19:00 a 21:00" y el pedido de Vida Nueva salía
+  // con ese horario aunque nadie lo eligiera. Ahora todo arranca vacío.
+  const [dia, setDia] = useState<number | null>(null);
+  const [desde, setDesde] = useState('');
+  const [hasta, setHasta] = useState('');
   const [error, setErrorLocal] = useState<string | null>(null);
-  const [campoConError, setCampoConError] = useState<'desde' | 'hasta'>('hasta');
+  const [campoConError, setCampoConError] = useState<CampoDeFranja>('hasta');
 
   const pendiente = franjaPendiente(dia, desde, hasta, value);
   const clavePendiente = pendiente ? `${pendiente.diaSemana}-${pendiente.inicio}-${pendiente.fin}` : '';
@@ -102,7 +116,7 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
     // eslint-disable-next-line react-hooks/exhaustive-deps -- solo cuando cambia la franja elegida (la clave); `pendiente` es un objeto nuevo en cada render y `onPendienteChange` suele ser una función inline.
   }, [clavePendiente]);
 
-  function setError(nuevo: string | null, campo: 'desde' | 'hasta' = 'hasta') {
+  function setError(nuevo: string | null, campo: CampoDeFranja = 'hasta') {
     setErrorLocal(nuevo);
     setCampoConError(campo);
     onErrorChange?.(nuevo, campo);
@@ -115,9 +129,12 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
   const etiquetasHora = { hora: etiquetas.hora, minutos: etiquetas.minutos };
 
   function agregar() {
+    if (dia === null) return setError(etiquetas.errorIncompleta, 'dia');
     const inicio = aMinutos(desde);
     const fin = aMinutos(hasta);
-    if (inicio === null || fin === null || fin <= inicio) {
+    if (inicio === null) return setError(etiquetas.errorIncompleta, 'desde');
+    if (fin === null) return setError(etiquetas.errorIncompleta, 'hasta');
+    if (fin <= inicio) {
       setError(etiquetas.errorRango);
       return;
     }
@@ -169,11 +186,16 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
           <label htmlFor={idDia}>{etiquetas.dia}</label>
           <select
             id={idDia}
-            value={dia}
+            value={dia ?? ''}
             disabled={disabled}
             onChange={(e) => setDia(Number(e.target.value))}
-            className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal tactil:text-base dark:bg-input/30"
+            aria-invalid={(Boolean(error) && campoConError === 'dia') || undefined}
+            aria-describedby={error && campoConError === 'dia' ? idError : undefined}
+            className="h-11 rounded-md border border-input bg-transparent px-2 text-sm font-normal aria-invalid:border-destructive tactil:text-base dark:bg-input/30"
           >
+            <option value="" disabled>
+              {etiquetas.elegirDia}
+            </option>
             {etiquetas.dias.map((nombre, i) => (
               <option key={i} value={i}>
                 {nombre}
@@ -187,6 +209,7 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
           value={desde}
           onChange={setDesde}
           etiquetas={etiquetasHora}
+          vacio={etiquetas.elegirHora}
           disabled={disabled}
           error={Boolean(error) && campoConError === 'desde'}
           idError={idError}
@@ -197,6 +220,7 @@ export function EditorDeFranjas({ value, onChange, etiquetas, idBase = 'franja',
           value={hasta}
           onChange={setHasta}
           etiquetas={etiquetasHora}
+          vacio={etiquetas.elegirHora}
           disabled={disabled}
           error={Boolean(error) && campoConError === 'hasta'}
           idError={idError}
