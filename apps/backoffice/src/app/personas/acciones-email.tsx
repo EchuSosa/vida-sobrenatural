@@ -19,6 +19,7 @@ import {
   SheetTitle,
   useEnvio,
   useValidacionCampos,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 
 /** spec 006, FR-037 (D81): "Sin acceso a la app", con ícono y texto. */
@@ -65,7 +66,7 @@ export function AgregarEmail({ personaId, nombre, apiToken }: { personaId: strin
       if (campos) {
         validacion.reemplazar(
           Object.fromEntries(
-            campos.map(({ campo, code }) => [campo, te.has(`campos.${code}`) ? te(`campos.${code}`) : te.has(code) ? te(code) : t('errorGenerico')]),
+            campos.map(({ campo, code }) => [campo, textoDeCampo(te, code, t('errorGenerico'))]),
           ),
         );
         return;

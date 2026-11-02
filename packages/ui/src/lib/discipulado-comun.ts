@@ -4,6 +4,7 @@ import {
   type Franja,
 } from '@vida-sobrenatural/shared-types';
 import { minutosAHHMM } from '../components/editor-de-franjas';
+import { textoDeCampo } from './texto-de-campo';
 
 /**
  * specs/004, lote B: piezas que comparten las pantallas del discipulado
@@ -26,12 +27,12 @@ export function mensajeDeError(e: unknown, te: Traductor, t: Traductor): string 
   return t('errores.generico');
 }
 
-/** Los errores de campo de la API (H-50), traducidos con `errors.campos.<CODE>`. */
+/** Los errores de campo de la API (H-50), traducidos con `textoDeCampo` (`errors.campos.<CODE>` o `errors.<CODE>`). */
 export function mensajesDeCampo(e: unknown, te: Traductor, t: Traductor): Record<string, string> | null {
   const campos = erroresPorCampo(e);
   if (!campos) return null;
   return Object.fromEntries(
-    campos.map(({ campo, code }) => [campo, te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errores.generico')]),
+    campos.map(({ campo, code }) => [campo, textoDeCampo(te, code, t('errores.generico'))]),
   );
 }
 

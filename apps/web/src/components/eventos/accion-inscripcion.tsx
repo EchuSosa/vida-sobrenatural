@@ -28,6 +28,7 @@ import {
   mensajesDeCampo,
   useEnvio,
   useValidacionCampos,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 
 /**
@@ -87,7 +88,7 @@ export function AccionInscripcion({ evento }: { evento: EventoPublico }) {
   // FR-065 (ampliación 2026-10-09): las preguntas del Evento se responden en el mismo paso.
   const [respuestas, setRespuestas] = useState<Record<string, string>>({});
   const validacion = useValidacionCampos();
-  const mensajeDeCampo = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : t('errores.generico'));
+  const mensajeDeCampo = (code: string) => textoDeCampo(te, code, t('errores.generico'));
 
   const anotarme = useEnvio(async () => {
     setError(null);

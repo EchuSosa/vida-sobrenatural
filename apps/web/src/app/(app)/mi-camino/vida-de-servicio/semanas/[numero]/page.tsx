@@ -42,7 +42,7 @@ export default async function SemanaVidaDeServicioPage({ params }: { params: Pro
             <p className="text-base text-muted-foreground">
               {t('semana', { numero: contenido.numero })} · {formatearDiaEnArgentina(contenido.fechaLiberacion, locale)}
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight break-words">{contenido.titulo}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight [overflow-wrap:anywhere]">{contenido.titulo}</h1>
           </div>
           <ContenidoSemana
             contenido={contenido}

@@ -9,11 +9,13 @@ import {
   IsUUID,
   IsUrl,
   Matches,
+  MaxLength,
   ValidateBy,
   ValidateIf,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { EstadoCivil, Genero, Profesion } from '../../generated/prisma/enums.js';
-import { TELEFONO_REGEX, anioEnArgentina, congregaDesdeValido, fechaNacimientoValida } from '@vida-sobrenatural/shared-types';
+import { LARGO_MAXIMO_NOMBRE, TELEFONO_REGEX, anioEnArgentina, congregaDesdeValido, fechaNacimientoValida } from '@vida-sobrenatural/shared-types';
 
 /**
  * D214: año entero entre 1900 y el año en curso (en Argentina). Código de
@@ -25,6 +27,9 @@ export function EsAnioCongregaDesde(): PropertyDecorator {
     validator: { validate: (valor: unknown) => congregaDesdeValido(valor, anioEnArgentina()) },
   });
 }
+
+/** QA ronda 1, BUG-05: se guarda sin los espacios de los bordes, así "   " cuenta como vacío. */
+const recortar = Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value));
 
 /**
  * QA ronda 1, BUG-01: fecha posible, desde 1900 y nunca futura (en Argentina).
@@ -39,14 +44,18 @@ export function EsFechaNacimiento(): PropertyDecorator {
 
 /** Formulario obligatorio de FR-006, completado luego de la autorización SSO. */
 export class RegistroPersonaDto {
-  @ApiProperty()
+  @ApiProperty({ maxLength: LARGO_MAXIMO_NOMBRE })
+  @recortar
   @IsString()
   @IsNotEmpty()
+  @MaxLength(LARGO_MAXIMO_NOMBRE)
   apellido!: string;
 
-  @ApiProperty()
+  @ApiProperty({ maxLength: LARGO_MAXIMO_NOMBRE })
+  @recortar
   @IsString()
   @IsNotEmpty()
+  @MaxLength(LARGO_MAXIMO_NOMBRE)
   nombre!: string;
 
   @ApiProperty({ enum: Genero })

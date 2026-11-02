@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { test, expect, auditar, registrarPersonaDeTest, usarTemaOscuro, esperarTema } from './helpers';
 import { api, registrarMenorActivo, tokenDe } from './helpers-006';
-import { campo, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
+import { campo, elegirFranja, elegirHora } from '../../../scripts/e2e-campos-fecha-hora';
 
 /**
  * specs/004, Historias 1 y 2 (T021, T035): Vida Nueva en Mi camino, de punta
@@ -68,8 +68,9 @@ for (const tema of ['claro', 'oscuro'] as const) {
       );
       await sinViolaciones(page, tema);
 
-      // Con una franja (martes 19 a 21, el default del editor): pasa a buscando sin recargar.
-      await elegirHora(campo(page, 'Hasta'), '21:00');
+      // Con una franja (martes 19 a 21, elegida: el editor no trae ninguna por defecto, D247):
+      // pasa a buscando sin recargar.
+      await elegirFranja(page, 'Martes', '19:00', '21:00');
       await page.getByRole('button', { name: 'Agregar franja' }).click();
       await expect(resumen).toHaveCount(0);
       // FR-017a (H-R7): la misma franja otra vez no se suma; el editor dice cómo seguir.

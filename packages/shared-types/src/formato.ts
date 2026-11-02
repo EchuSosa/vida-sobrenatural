@@ -89,14 +89,32 @@ export function formatearDiaEnArgentina(valor: string | Date, locale: string): s
   return formatearFechaLarga(civil, locale);
 }
 
-/** "10 de marzo de 2012, 14:30" */
+/**
+ * "10 de marzo de 2012, 14:30", en la hora de Argentina. Fallas conocidas (docs/24, 2026-11-01):
+ * antes no fijaba la zona (el servidor formateaba en la suya y el navegador en la de quien mira: en
+ * producción, con el servidor en UTC, la hora salía corrida 3 h y la hidratación fallaba) y unía
+ * fecha y hora con el patrón del ICU de cada lado ("…, 11:00 a. m." en Node y "… a las 11:00 a. m."
+ * en Chromium). Ahora fecha y hora se arman por separado, en 24 h, y se unen acá: el mismo texto en
+ * el servidor y en cualquier navegador.
+ */
 export function formatearFechaHora(fecha: string | Date, locale: string): string {
-  return new Intl.DateTimeFormat(conRegion(locale), {
+  const instante = comoFecha(fecha);
+  const dia = new Intl.DateTimeFormat(conRegion(locale), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: ZONA_ARGENTINA,
+  }).format(instante);
+  return `${dia}, ${formatearHoraEnArgentina(instante, locale)}`;
+}
+
+/** "14:30" — la hora de un instante en Argentina, en 24 h. */
+export function formatearHoraEnArgentina(fecha: string | Date, locale: string): string {
+  return new Intl.DateTimeFormat(conRegion(locale), {
     hour: '2-digit',
     minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: ZONA_ARGENTINA,
   }).format(comoFecha(fecha));
 }
 
