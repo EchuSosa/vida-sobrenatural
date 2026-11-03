@@ -41,7 +41,7 @@ export class BajaPersonaService {
     }
     const motivo = typeof cuerpo.motivo === 'string' && cuerpo.motivo.trim() ? cuerpo.motivo.trim() : null;
     if (motivo && motivo.length > MOTIVO_BAJA_MAX) {
-      throw new AppException('VALIDACION', 400, `El motivo puede tener hasta ${MOTIVO_BAJA_MAX} caracteres.`, [{ campo: 'motivo', code: 'MOTIVO_DEMASIADO_LARGO' }]);
+      throw new AppException('VALIDACION', 400, `El motivo puede tener hasta ${MOTIVO_BAJA_MAX} caracteres.`, [{ campo: 'motivo', code: 'MOTIVO_BAJA_LARGO' }]);
     }
 
     const { resultado, archivos } = await this.prisma.$transaction(async (tx) => {

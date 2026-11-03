@@ -27,7 +27,7 @@ D170, D244, D258, y la spec 017 (`liberarTurnosFuturos`).
 | D261 | **Se anonimiza, no se borra la fila.** La Persona queda como "Persona dada de baja": se borran nombre, apellido, email, DNI, teléfono, dirección, fecha de nacimiento, foto, datos familiares, y los textos libres y archivos que escribió o subió. Quedan, sin nombre, los registros que sostienen a otros (turnos pasados, grupos, inscripciones y pagos para los conteos), para que no se rompan historiales ajenos. |
 | D262 | **En el momento.** Con una confirmación que dice que no se puede deshacer. No hay período de gracia: no queda nada pendiente de borrar. |
 | D263 | **La pide la persona o el Admin.** La persona desde su Perfil; el Admin en su nombre desde el backoffice (pedido por WhatsApp o en persona; para un menor, a pedido del tutor). |
-| D264 | **Con cargos vigentes, se cierran y se avisa.** Liderazgos de Ministerio, de Grupo de Extensión y de Grupo; turnos futuros (como la baja de un integrante, spec 017); discipulados y propuestas en curso. A quien corresponde le llega el aviso. **Solo frena si es el único Admin.** |
+| D264 | **Con cargos vigentes, se cierran y se avisa.** Liderazgos de Ministerio, de Grupo de Extensión y de Grupo; turnos futuros (como la baja de un integrante, spec 017); discipulados y propuestas en curso. Los turnos avisan a los líderes (`turno.no_puede`); lo demás lo ve el Admin en cada pantalla. **Solo frena si es el único Admin.** |
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -121,8 +121,9 @@ discipulado cerrado, un pago verificado en Pagos, un grupo de Vida de Servicio t
 - **FR-005**: La baja MUST cerrar sus cargos vigentes (D264), en la misma transacción, con los avisos
   que ya existen: liderazgo de Ministerio (D244), de Grupo de Extensión, de Grupo de Vida de Servicio,
   turnos futuros (`liberarTurnosFuturos`), membresías (Postulaciones aprobadas → inactivas por baja),
-  discipulados en curso como discípula o como Discipuladora (al Admin, en Pendientes) y propuestas
-  pendientes (retiradas). Sus roles de cargo se quitan con su CambioDeRol.
+  discipulados en curso como discípula o como Discipuladora y propuestas pendientes (retiradas). Sus
+  roles de cargo se quitan con su CambioDeRol. El único aviso es el que ya existe para turnos
+  (`turno.no_puede` a los líderes); el resto lo ve el Admin en cada pantalla.
 - **FR-006**: La baja MUST frenar con 409 `ULTIMO_ADMIN` si la persona es la única con rol `admin`
   activa.
 - **FR-007**: Donde se muestra una Persona dada de baja, MUST verse "Persona dada de baja", sin foto

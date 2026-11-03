@@ -253,7 +253,9 @@
       "YA_TIENE_TURNO_ESE_DIA": "Ya tiene turno ese día. Elegí a otra persona.",
       "NO_ES_INTEGRANTE": "No es integrante de esta área. Elegí a alguien de la lista.",
       "AREA_INVALIDA": "Elegí un área del Ministerio.",
-      "MOTIVO_CANCELACION_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco."
+      "MOTIVO_CANCELACION_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco.",
+      "CONFIRMACION_BAJA_INVALIDA": "Escribí BAJA para confirmar.",
+      "MOTIVO_BAJA_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco."
     },
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
     "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
@@ -281,7 +283,8 @@
     "YA_TIENE_TURNO_ESE_DIA": "Esa persona ya tiene turno ese día en este Ministerio.",
     "NO_ES_INTEGRANTE": "Esa persona no es integrante de esta área.",
     "SIN_FECHA_ANTERIOR": "Todavía no hay una fecha publicada antes de esta para copiar.",
-    "TURNO_YA_EMPEZO": "Ese turno ya empezó: avisale directamente a tu líder."
+    "TURNO_YA_EMPEZO": "Ese turno ya empezó: avisale directamente a tu líder.",
+    "ULTIMO_ADMIN": "Es la única persona Admin: antes de darla de baja, tiene que haber otra."
   },
   "nav": {
     "saltarAlContenido": "Saltar al contenido",
@@ -2754,7 +2757,8 @@
       "solicitudes": "Solicitudes",
       "gruposCursados": "Grupos que cursó",
       "gruposACargo": "Grupos a cargo",
-      "familia": "Familia"
+      "familia": "Familia",
+      "baja": "Baja de la app"
     },
     "datos": {
       "fechaNacimiento": "Fecha de nacimiento",
@@ -2874,6 +2878,21 @@
     "acciones": {
       "vidaNuevaEnMarcha": "Ya tiene Vida Nueva pedida o en curso: la ves en Solicitudes, abajo.",
       "vidaNuevaHecha": "Ya hizo Vida Nueva, así que no hace falta pedirla."
+    },
+    "baja": {
+      "ayuda": "Para cuando la persona pide que se borren sus datos (por WhatsApp, en persona, o el tutor si es menor). Se borran su nombre, su contacto y lo que escribió; donde aparecía en registros de otros queda \"Persona dada de baja\". No se puede deshacer.",
+      "abrir": "Dar de baja de la app",
+      "titulo": "¿Dar de baja a {nombre}?",
+      "descripcion": "Se borran sus datos y se cierran sus ministerios, grupos y turnos. No se puede deshacer.",
+      "confirmacion": "Para confirmar, escribí BAJA",
+      "motivo": "Motivo (opcional, interno)",
+      "motivoAyuda": "Por ejemplo: \"Lo pidió por WhatsApp\". Lo ve solo el Admin.",
+      "contador": "{cantidad} de {maximo} caracteres",
+      "resumen": "Revisá esto antes de seguir:",
+      "confirmar": "Sí, dar de baja",
+      "volver": "Volver",
+      "listo": "Listo: se dio de baja a la persona y se borraron sus datos.",
+      "errorGenerico": "No pudimos dar de baja a la persona y no se borró nada. Probá de nuevo en un momento."
     }
   },
   "personasEditar": {

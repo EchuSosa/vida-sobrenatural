@@ -207,7 +207,9 @@
       "YA_TIENE_TURNO_ESE_DIA": "Ya tiene turno ese día. Elegí a otra persona.",
       "NO_ES_INTEGRANTE": "No es integrante de esta área. Elegí a alguien de la lista.",
       "AREA_INVALIDA": "Elegí un área del Ministerio.",
-      "MOTIVO_CANCELACION_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco."
+      "MOTIVO_CANCELACION_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco.",
+      "CONFIRMACION_BAJA_INVALIDA": "Escribí BAJA para confirmar.",
+      "MOTIVO_BAJA_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
@@ -236,7 +238,8 @@
     "YA_TIENE_TURNO_ESE_DIA": "Esa persona ya tiene turno ese día en este Ministerio.",
     "NO_ES_INTEGRANTE": "Esa persona no es integrante de esta área.",
     "SIN_FECHA_ANTERIOR": "Todavía no hay una fecha publicada antes de esta para copiar.",
-    "TURNO_YA_EMPEZO": "Ese turno ya empezó: avisale directamente a tu líder."
+    "TURNO_YA_EMPEZO": "Ese turno ya empezó: avisale directamente a tu líder.",
+    "ULTIMO_ADMIN": "Sos la única persona Admin: antes de darte de baja, tiene que haber otra."
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -1935,7 +1938,27 @@
     "guardando": "Guardando…",
     "guardado": "Guardamos tus cambios.",
     "errorGuardar": "No pudimos guardar tus cambios. Probá de nuevo en un rato.",
-    "ayudaTelefono": "Con la característica, sin el 0 ni el 15."
+    "ayudaTelefono": "Con la característica, sin el 0 ni el 15.",
+    "baja": {
+      "enlace": "Darme de baja de la app",
+      "miga": "Perfil",
+      "titulo": "Darme de baja de la app",
+      "intro": "Si te das de baja:",
+      "queSeBorra": "Se borran tu nombre, tu email, tu teléfono, tu dirección, tu foto y lo que escribiste en la app.",
+      "queSeCierra": "Dejás de figurar en tus ministerios, grupos y turnos. Si tenías un turno, a tu líder le avisamos que falta cubrirlo.",
+      "queQueda": "Donde aparecías en registros de otras personas (un turno que ya pasó, un grupo que terminó), se ve \"Persona dada de baja\", sin tu nombre.",
+      "noSeDeshace": "No se puede deshacer.",
+      "volver": "Si más adelante querés volver, te registrás de nuevo como alguien nuevo.",
+      "confirmacion": "Para confirmar, escribí BAJA",
+      "confirmacionAyuda": "En mayúsculas o minúsculas, da igual.",
+      "resumen": "Revisá esto antes de seguir:",
+      "confirmar": "Darme de baja",
+      "enviando": "Dándote de baja…",
+      "errorGenerico": "No pudimos darte de baja y no se borró nada. Probá de nuevo en un momento.",
+      "listaTitulo": "Listo, te diste de baja",
+      "listaTexto": "Borramos tus datos de la app. Gracias por haber sido parte. Si algún día querés volver, te esperamos.",
+      "listaInicio": "Ir al inicio"
+    }
   },
   "grupoExtension": {
     "dias": {
