@@ -3,6 +3,7 @@ import {
   ApiError,
   apiFetch,
   type DiasDeServicioDelMinisterio,
+  type GrillaDeTurnos,
   type LiderMinisterioVista,
   type EliminadoEnPapelera,
   type MiembroMinisterio,
@@ -33,7 +34,7 @@ export default async function MinisterioDetallePage({
   const puedeVerPapelera = tienePermisoSesion(session, 'ministerios.papelera.ver');
   const puedeVerTurnos = tienePermisoSesion(session, 'turnos.ver');
   const ruta = `/ministerios/${encodeURIComponent(id)}`;
-  let datos: [MinisterioDetalleCatalogo, Pagina<MiembroMinisterio>, EliminadoEnPapelera[], LiderMinisterioVista[], DiasDeServicioDelMinisterio | null];
+  let datos: [MinisterioDetalleCatalogo, Pagina<MiembroMinisterio>, EliminadoEnPapelera[], LiderMinisterioVista[], DiasDeServicioDelMinisterio | null, GrillaDeTurnos | null];
   try {
     datos = await Promise.all([
       apiFetch<MinisterioDetalleCatalogo>(ruta, { headers, cache: 'no-store' }),
@@ -43,12 +44,19 @@ export default async function MinisterioDetallePage({
       apiFetch<LiderMinisterioVista[]>(`${ruta}/lideres`, { headers, cache: 'no-store' }),
       // spec 017, US1 (D250, D251, D253): días de servicio y cupos — Admin y Pastor.
       puedeVerTurnos ? apiFetch<DiasDeServicioDelMinisterio>(`${ruta}/dias-de-servicio`, { headers, cache: 'no-store' }) : Promise.resolve(null),
+      // spec 017, US2-8: la grilla de turnos (solo de un Ministerio activo: si no, la API da 404 y no se muestra).
+      puedeVerTurnos
+        ? apiFetch<GrillaDeTurnos>(`${ruta}/turnos`, { headers, cache: 'no-store' }).catch((e: unknown) => {
+            if (e instanceof ApiError && e.code === 'NO_ENCONTRADO') return null;
+            throw e;
+          })
+        : Promise.resolve(null),
     ]);
   } catch (e) {
     if (e instanceof ApiError && e.code === 'NO_ENCONTRADO') notFound();
     throw e;
   }
-  const [ministerio, miembros, papeleraCelulas, lideres, diasDeServicio] = datos;
+  const [ministerio, miembros, papeleraCelulas, lideres, diasDeServicio, grillaTurnos] = datos;
   return (
     <MinisterioDetalleCliente
       ministerio={ministerio}
@@ -58,6 +66,7 @@ export default async function MinisterioDetallePage({
       papeleraCelulas={papeleraCelulas}
       lideres={lideres}
       diasDeServicio={diasDeServicio}
+      grillaTurnos={grillaTurnos}
       puedeGestionarTurnos={tienePermisoSesion(session, 'turnos.gestionar')}
       apiToken={session.apiToken}
       puedeGestionar={tienePermisoSesion(session, 'ministerios.gestionar')}

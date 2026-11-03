@@ -240,6 +240,17 @@
           ],
           "boton": "Ver mi grupo"
         }
+      },
+      "turno": {
+        "asignado": {
+          "asunto": "Tenés un turno de servicio",
+          "titulo": "Servís el {fecha}",
+          "parrafos": [
+            "En {lugar}.",
+            "En Mis turnos ves todos tus turnos. Si no podés ir, avisale a tu líder."
+          ],
+          "boton": "Ver mis turnos"
+        }
       }
     },
     "manual": {

@@ -143,8 +143,12 @@ export type ErrorCode =
   | 'DIA_DE_SERVICIO_REPETIDO' // D250
   | 'NO_ES_DIA_DE_SERVICIO' // la fecha no sale de ninguna regla activa
   | 'FECHA_YA_PASO'
+  | 'FECHA_SUSPENDIDA' // "Este día no hay": no se asigna ni se publica
+  | 'YA_TIENE_TURNO_ESE_DIA' // D255
+  | 'NO_ES_INTEGRANTE' // no tiene Postulación aprobada en el Ministerio (o en esa área)
+  | 'SIN_FECHA_ANTERIOR' // "Copiar la fecha anterior" sin una publicada antes
   // Los de campo (FRECUENCIA_INVALIDA, DIA_SEMANA_INVALIDO, POSICION_EN_MES_INVALIDA,
-  // CUPO_TURNO_INVALIDO) van en `errors[]`, no acá.
+  // CUPO_TURNO_INVALIDO, AREA_INVALIDA) van en `errors[]`, no acá.
   | 'POSTULACION_YA_PENDIENTE' // FR-003
   | 'POSTULACION_NO_PENDIENTE'
   | 'POSTULACION_REQUIERE_CONFIRMAR_CAMBIO' // FR-019, D173

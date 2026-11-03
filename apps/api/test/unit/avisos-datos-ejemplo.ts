@@ -65,6 +65,11 @@ export const DATOS_EJEMPLO: { [N in NombreEventoAviso]: DatosDe<N> } = {
   'grupo_extension.agregada_por_admin': { solicitudId: 'sge-1', grupoId: 'gex-1', grupo: 'Mujeres de Tolosa' },
 
   'ministerio.lider_asignado': { ministerioId: 'min-1', ministerio: 'Bienvenida' },
+
+  'turno.asignado': { turnoId: 'tur-1', ministerioId: 'min-1', dia: '2026-11-08', fecha: 'domingo, 8 de noviembre', lugar: 'Bienvenida — Seguridad' },
+  'turno.quitado': { turnoId: 'tur-1', ministerioId: 'min-1', dia: '2026-11-08', fecha: 'domingo, 8 de noviembre', lugar: 'Bienvenida — Seguridad' },
+  'turno.fecha_suspendida': { turnoId: 'tur-1', ministerioId: 'min-1', dia: '2026-11-08', fecha: 'domingo, 8 de noviembre', lugar: 'Bienvenida — Seguridad' },
+  'turno.recordatorio': { turnoId: 'tur-1', ministerioId: 'min-1', dia: '2026-11-08', fecha: 'domingo, 8 de noviembre', lugar: 'Bienvenida — Seguridad' },
 };
 
 /** Los importantes según `docs/16` §1 — lista fija a propósito (T004 e): cambiarla es una decisión. */
@@ -101,4 +106,6 @@ export const IMPORTANTES_DOCS_16: readonly NombreEventoAviso[] = [
   'grupo_extension.solicitud_aceptada',
   'grupo_extension.solicitud_rechazada',
   'grupo_extension.agregada_por_admin',
+  // spec 017 (D256): el turno publicado ("servís el domingo…")
+  'turno.asignado',
 ];

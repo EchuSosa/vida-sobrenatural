@@ -1,6 +1,7 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { Crown, Layers, Mail, Phone, UsersRound } from 'lucide-react';
+import { CalendarDays, Crown, Layers, Mail, Phone, UsersRound } from 'lucide-react';
 import { ApiError, apiFetch, formatearDiaEnArgentina, type IntegranteMinisterio, type MinisterioLideradoDetalle } from '@vida-sobrenatural/shared-types';
 import { AvatarPersona } from '@vida-sobrenatural/ui';
 import { auth } from '../../../../auth';
@@ -99,6 +100,11 @@ export default async function MiMinisterioDetallePage({ params }: { params: Prom
             {t('otrosLideres', { nombres: m.otrosLideres.map((l) => `${l.nombre} ${l.apellido}`).join(', ') })}
           </p>
         )}
+        {/* spec 017, US2: el rol de servicio del Ministerio. */}
+        <Link href={`/mi-ministerio/${m.id}/turnos`} className={`${ENLACE} min-h-11`}>
+          <CalendarDays aria-hidden className="size-5 shrink-0" />
+          {t('turnos.irATurnos')}
+        </Link>
       </div>
       {m.integrantes === 0 ? (
         <p className="rounded-lg border border-border p-5 text-base text-muted-foreground">{t('sinIntegrantes')}</p>

@@ -29,18 +29,27 @@
 
 ## Entrega 2 — Rol del líder, avisos e Inicio (US2, US3)
 
-- [ ] T011 API grilla `GET /ministerios/:id/turnos` (fechas, Células, cupos, faltantes, conteos).
-- [ ] T012 API asignar / quitar / copiar anterior, con advertencia de otro Ministerio.
-- [ ] T013 API publicar + avisos en la transacción + aviso a quien entra y sale.
-- [ ] T014 Tarea diaria del recordatorio (`DIAS_RECORDATORIO_TURNO`).
-- [ ] T015 API `GET /turnos/me`.
-- [ ] T016 Integración de T011–T015 (permisos, 409, avisos una sola vez).
-- [ ] T017 packages/ui `GrillaTurnos` (celular: una fecha por vez).
-- [ ] T018 Web `/mi-ministerio/[id]/turnos` + backoffice pestaña "Turnos" (Pastor sin botones).
-- [ ] T019 Web tarjeta "Tu próximo turno" en `/inicio` y `/mis-turnos`.
-- [ ] T020 e2e web US2 (feliz + API caída + doble toque en Publicar) y US3 (feliz + API caída en la
+- [x] T011 API grilla `GET /ministerios/:id/turnos` (fechas, Células, cupos, faltantes, conteos).
+- [x] T012 API asignar / quitar / copiar anterior, con advertencia de otro Ministerio.
+- [x] T013 API publicar + avisos en la transacción + aviso a quien entra y sale.
+- [x] T014 Tarea diaria del recordatorio (`DIAS_RECORDATORIO_TURNO`).
+- [x] T015 API `GET /turnos/me`.
+- [x] T016 Integración de T011–T015 (permisos, 409, avisos una sola vez).
+- [x] T017 packages/ui `GrillaTurnos` (celular: una fecha por vez).
+- [x] T018 Web `/mi-ministerio/[id]/turnos` + backoffice pestaña "Turnos" (Pastor sin botones).
+- [x] T019 Web tarjeta "Tu próximo turno" en `/inicio` y `/mis-turnos`.
+- [x] T020 e2e web US2 (feliz + API caída + doble toque en Publicar) y US3 (feliz + API caída en la
   tarjeta); `@celular`, axe.
-- [ ] T021 Checklist de `docs/15` para la grilla, el Inicio y "Mis turnos" (D114).
+- [x] T021 Checklist de `docs/15` para la grilla, el Inicio y "Mis turnos" (D114).
+  - [x] Una acción principal por pantalla: "Publicar" en la fecha elegida; en Mis turnos solo se lee; en el Inicio, "Ver mis turnos".
+  - [x] Orden de botones: "Copiar la fecha anterior" (secundario) y "Publicar" (principal); el diálogo con "Volver" y "Sí, publicar".
+  - [x] Cuatro estados: `loading.tsx` y `error.tsx` en `/mi-ministerio/[id]/turnos` (el de `[id]`) y en `/mis-turnos`; vacío ("Todavía no hay fechas…", "Todavía no tenés turnos publicados…"); la tarjeta del Inicio tiene su carga, su error con "Reintentar" y no aparece si no hay turnos.
+  - [x] Botones bloqueados con indicador y un solo envío (`useEnvio`; e2e de tres toques en "Sí, publicar").
+  - [x] Feedback según `16`: aviso de éxito con nombre y fecha; error de la API con "Reintentar"; "ya tiene turno ese día" en la celda.
+  - [x] Qué pasa después: la confirmación dice a cuántas personas se avisa, y la fecha publicada dice que los cambios se avisan.
+  - [x] Tono: voseo, "Sumar a…", "Falta 1 persona", sin jerga.
+  - [x] Celular (`@celular`, una fecha por vez, sin desborde a 360 px), teclado (botones y `<details>` nativos) y lector (regiones con título, estados con texto e ícono, D81).
+  - [x] Contraste: solo tokens; `axe` claro y oscuro en web y backoffice.
 
 ## Entrega 3 — "No puedo ir" y casos borde (US4)
 
