@@ -160,6 +160,8 @@ describe('Declaraciones de historial de la Persona (spec 006, T035)', () => {
   it('sin sesión 401; con una cuenta que no está activa 403', async () => {
     await request(app.getHttpServer()).post('/camino/me/declaraciones').send({ etapa: 'bautismo' }).expect(401);
     const id = await esc.persona('pendientetutor');
+    // D258: el estado sale de la base, no del token: la Persona tiene que estar pendiente de tutor.
+    await prisma.persona.update({ where: { id }, data: { estado: 'pendiente_tutor' } });
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
     const token = await new SignJWT({ email: 'x@example.com', personaId: id, estado: 'pendiente_tutor', rol: [] })
       .setProtectedHeader({ alg: 'HS256' })

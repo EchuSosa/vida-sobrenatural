@@ -106,6 +106,8 @@ export type Permiso =
   | 'cursos.gestionar'
   | 'cursos.papelera.ver'
   | 'personas.editar'
+  // spec 018 (D263): dar de baja de la app en nombre de alguien.
+  | 'personas.baja'
   // spec 014 (D220–D228): Grupos de Extensión. `lider_extension` lo da y lo
   // quita el sistema al asignar líderes (D226); no está en ROLES_DE_CARGO.
   | 'grupos_extension.ver'
@@ -114,7 +116,12 @@ export type Permiso =
   | 'mi_grupo_extension.gestionar'
   // spec 016 (D244): el líder de un Ministerio ve a su equipo. `lider_ministerio`
   // lo da y lo quita el sistema al asignar líderes (como `lider_extension`).
-  | 'mi_ministerio.ver';
+  | 'mi_ministerio.ver'
+  // spec 017 (D253): días de servicio, cupos y el rol de turnos. El líder del Ministerio arma el
+  // rol de los suyos sin permiso del catálogo (la pertenencia se resuelve contra la base, como
+  // `mi_ministerio.ver` en la 016); el Pastor lo ve.
+  | 'turnos.gestionar'
+  | 'turnos.ver';
 
 export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'inicio.ver': ['admin', 'pastor'],
@@ -180,12 +187,15 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'cursos.gestionar': ['admin'],
   'cursos.papelera.ver': ['admin'],
   'personas.editar': ['admin'],
+  'personas.baja': ['admin'],
   // spec 014 — el Pastor ve, no gestiona (D142).
   'grupos_extension.ver': ['admin', 'pastor'],
   'grupos_extension.gestionar': ['admin'],
   'mi_grupo_extension.ver': ['lider_extension'],
   'mi_grupo_extension.gestionar': ['lider_extension'],
   'mi_ministerio.ver': ['lider_ministerio'],
+  'turnos.gestionar': ['admin'],
+  'turnos.ver': ['admin', 'pastor'],
 };
 
 /**

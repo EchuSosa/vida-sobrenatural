@@ -103,7 +103,11 @@ test('H6.5: agregar "Vida Nueva grupal", inactivarlo, reactivarlo, eliminarlo y 
   await page.getByRole('button', { name: 'Inactivar' }).click();
   await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, inactivar' }).click();
   await expect(page.getByText('Inactivo', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Reactivar' }).click();
+  // Flaky de #87 (2026-11-02): el diálogo de "Sí, inactivar" todavía se estaba cerrando y ya decía
+  // "Sí, reactivar", que el nombre sin `exact` también encuentra. Se espera a que se cierre y se
+  // busca el botón por su nombre exacto (la aserción es la misma).
+  await expect(page.getByRole('alertdialog')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Reactivar', exact: true }).click();
   await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, reactivar' }).click();
   await expect(page.getByText('Activo', { exact: true })).toBeVisible();
 

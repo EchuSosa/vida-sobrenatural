@@ -245,7 +245,17 @@
       "ELECCION_AREA_NO_DISPONIBLE": "Un área elegida ya no está disponible.",
       "REEMPLAZO_INVALIDO": "Elegí una de las membresías que tiene ahora.",
       "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera.",
-      "DESDE_ANIO_INVALIDO": "El año no es válido."
+      "DESDE_ANIO_INVALIDO": "El año no es válido.",
+      "FRECUENCIA_INVALIDA": "Elegí si es todas las semanas o una vez por mes.",
+      "POSICION_EN_MES_INVALIDA": "Elegí qué vez del mes: primero, segundo, tercero, cuarto o último.",
+      "DIA_DE_SERVICIO_REPETIDO": "Ese día ya está cargado. Elegí otro.",
+      "CUPO_TURNO_INVALIDO": "Escribí un número de 1 a 20: cuántas personas hacen falta por fecha.",
+      "YA_TIENE_TURNO_ESE_DIA": "Ya tiene turno ese día. Elegí a otra persona.",
+      "NO_ES_INTEGRANTE": "No es integrante de esta área. Elegí a alguien de la lista.",
+      "AREA_INVALIDA": "Elegí un área del Ministerio.",
+      "MOTIVO_CANCELACION_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco.",
+      "CONFIRMACION_BAJA_INVALIDA": "Escribí BAJA para confirmar.",
+      "MOTIVO_BAJA_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco."
     },
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
     "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
@@ -265,7 +275,16 @@
     "ELECCION_DESACTUALIZADA": "Alguien cambió esta elección. Recargá para ver lo último.",
     "ELECCION_OPCIONES_RESUELTAS": "Ya se confirmó parte de esta elección: las áreas no se pueden cambiar.",
     "ELECCION_SIN_CHARLA": "Falta la charla con su líder de Vida de Servicio.",
-    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual."
+    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual.",
+    "DIA_DE_SERVICIO_REPETIDO": "Ese día de servicio ya está cargado en este Ministerio.",
+    "NO_ES_DIA_DE_SERVICIO": "Esa fecha no es un día de servicio de este Ministerio. Revisá los días cargados.",
+    "FECHA_YA_PASO": "Esa fecha ya pasó: solo se pueden cambiar las fechas que vienen.",
+    "FECHA_SUSPENDIDA": "Ese día no hay servicio: primero hay que volver a habilitarlo.",
+    "YA_TIENE_TURNO_ESE_DIA": "Esa persona ya tiene turno ese día en este Ministerio.",
+    "NO_ES_INTEGRANTE": "Esa persona no es integrante de esta área.",
+    "SIN_FECHA_ANTERIOR": "Todavía no hay una fecha publicada antes de esta para copiar.",
+    "TURNO_YA_EMPEZO": "Ese turno ya empezó: avisale directamente a tu líder.",
+    "ULTIMO_ADMIN": "Es la única persona Admin: antes de darla de baja, tiene que haber otra."
   },
   "nav": {
     "saltarAlContenido": "Saltar al contenido",
@@ -803,6 +822,9 @@
       "Sábado"
     ],
     "dia": "Día",
+    "elegirDia": "Elegí",
+    "elegirHora": "--",
+    "errorIncompleta": "Elegí el día, la hora de inicio y la de fin.",
     "desde": "Desde",
     "hasta": "Hasta",
     "hora": "Hora",
@@ -1399,6 +1421,81 @@
       "asignarAria": "Asignar a {nombre} como líder",
       "asignado": "{nombre} ya es líder de {ministerio}.",
       "errorGenerico": "No pudimos hacerlo. Probá de nuevo en un momento."
+    },
+    "diasDeServicio": {
+      "titulo": "Días de servicio",
+      "ayuda": "Los días en que este Ministerio sirve. De acá salen las fechas que el líder completa en los turnos.",
+      "sinReglas": "Todavía no tiene días de servicio: sin días cargados, no hay turnos.",
+      "reglaSemanal": "Todos los {dia}",
+      "reglaMensual": "El {posicion} {dia} de cada mes",
+      "diasPlural": [
+        "domingos",
+        "lunes",
+        "martes",
+        "miércoles",
+        "jueves",
+        "viernes",
+        "sábados"
+      ],
+      "dias": [
+        "domingo",
+        "lunes",
+        "martes",
+        "miércoles",
+        "jueves",
+        "viernes",
+        "sábado"
+      ],
+      "posiciones": {
+        "1": "primer",
+        "2": "segundo",
+        "3": "tercer",
+        "4": "cuarto",
+        "-1": "último"
+      },
+      "quitar": "Quitar",
+      "quitarTitulo": "¿Quitar «{regla}»?",
+      "quitarDescripcion": "Dejan de salir esas fechas. Lo que ya se publicó no se borra.",
+      "quitarConfirmar": "Sí, quitar",
+      "volver": "Volver",
+      "quitada": "Listo: se quitó «{regla}».",
+      "agregarTitulo": "Agregar un día",
+      "frecuencia": "Cada cuánto",
+      "frecuenciaSemanal": "Todas las semanas",
+      "frecuenciaMensual": "Una vez por mes",
+      "posicion": "Qué vez del mes",
+      "dia": "Día",
+      "elegir": "Elegí",
+      "agregar": "Agregar día",
+      "agregada": "Listo: se agregó «{regla}».",
+      "resumenErrores": "Revisá estos campos:",
+      "cuposTitulo": "Cuánta gente hace falta por fecha",
+      "cuposAyuda": "Un número de 1 a 20 por área. La grilla de turnos avisa cuando falta gente.",
+      "cupoMinisterio": "Todo el Ministerio (no tiene áreas)",
+      "cupo": "Personas por fecha en {area}",
+      "guardarCupo": "Guardar",
+      "cupoGuardado": "Listo: {area} necesita {cupo} por fecha.",
+      "proximasTitulo": "Próximas fechas",
+      "sinProximas": "Cuando cargues un día de servicio, acá aparecen las próximas fechas.",
+      "estado": {
+        "borrador": "En armado",
+        "publicada": "Publicada",
+        "suspendida": "Este día no hay"
+      },
+      "turnos": "{n, plural, =0 {Sin turnos asignados} one {# turno asignado} other {# turnos asignados}}",
+      "suspender": "Este día no hay",
+      "suspenderTitulo": "¿El {fecha} no hay servicio?",
+      "suspenderDescripcion": "La fecha deja de aparecer en la grilla de turnos. Se puede volver a habilitar.",
+      "suspenderDescripcionConTurnos": "{n, plural, one {La persona que tenía turno recibe un aviso.} other {Las # personas que tenían turno reciben un aviso.}} Se puede volver a habilitar.",
+      "suspenderConfirmar": "Sí, ese día no hay",
+      "suspendida": "Listo: el {fecha} no hay servicio.",
+      "habilitar": "Volver a habilitar",
+      "habilitada": "Listo: el {fecha} vuelve a estar en la grilla.",
+      "errorGenerico": "No pudimos guardar el cambio. Probá de nuevo en un momento."
+    },
+    "turnos": {
+      "titulo": "Turnos",
+      "ayuda": "Quién sirve en cada fecha. Lo arman los líderes del Ministerio desde la app; acá se ve y se puede corregir."
     }
   },
   "postulaciones": {
@@ -2660,7 +2757,8 @@
       "solicitudes": "Solicitudes",
       "gruposCursados": "Grupos que cursó",
       "gruposACargo": "Grupos a cargo",
-      "familia": "Familia"
+      "familia": "Familia",
+      "baja": "Baja de la app"
     },
     "datos": {
       "fechaNacimiento": "Fecha de nacimiento",
@@ -2780,6 +2878,21 @@
     "acciones": {
       "vidaNuevaEnMarcha": "Ya tiene Vida Nueva pedida o en curso: la ves en Solicitudes, abajo.",
       "vidaNuevaHecha": "Ya hizo Vida Nueva, así que no hace falta pedirla."
+    },
+    "baja": {
+      "ayuda": "Para cuando la persona pide que se borren sus datos (por WhatsApp, en persona, o el tutor si es menor). Se borran su nombre, su contacto y lo que escribió; donde aparecía en registros de otros queda \"Persona dada de baja\". No se puede deshacer.",
+      "abrir": "Dar de baja de la app",
+      "titulo": "¿Dar de baja a {nombre}?",
+      "descripcion": "Se borran sus datos y se cierran sus ministerios, grupos y turnos. No se puede deshacer.",
+      "confirmacion": "Para confirmar, escribí BAJA",
+      "motivo": "Motivo (opcional, interno)",
+      "motivoAyuda": "Por ejemplo: \"Lo pidió por WhatsApp\". Lo ve solo el Admin.",
+      "contador": "{cantidad} de {maximo} caracteres",
+      "resumen": "Revisá esto antes de seguir:",
+      "confirmar": "Sí, dar de baja",
+      "volver": "Volver",
+      "listo": "Listo: se dio de baja a la persona y se borraron sus datos.",
+      "errorGenerico": "No pudimos dar de baja a la persona y no se borró nada. Probá de nuevo en un momento."
     }
   },
   "personasEditar": {
@@ -3053,5 +3166,141 @@
     "errorCrear": "No pudimos crear la Sede. Probá de nuevo en un rato.",
     "errorActualizar": "No pudimos actualizar la Sede. Probá de nuevo en un rato.",
     "errorEliminar": "No pudimos eliminar la Sede. Probá de nuevo en un rato."
+  },
+  "turnos": {
+    "grilla": {
+      "fechas": "Próximas fechas",
+      "estado": {
+        "borrador": "Borrador",
+        "publicada": "Publicada"
+      },
+      "faltan": "{n, plural, one {Falta # persona} other {Faltan # personas}}",
+      "completa": "Completa",
+      "necesita": "{n, plural, one {Necesita # persona por fecha} other {Necesita # personas por fecha}}",
+      "todoElMinisterio": "Todo el Ministerio",
+      "agregarEn": "Agregar en {area}",
+      "sinDisponibles": "No hay más integrantes para sumar acá.",
+      "vecesQueSirvio": "{n, plural, =0 {No sirvió en las últimas fechas} one {Sirvió # vez en las últimas fechas} other {Sirvió # veces en las últimas fechas}}",
+      "enOtroMinisterio": "Ese día ya sirve en {ministerio}",
+      "asignar": "Sumar a {nombre}",
+      "asignado": "Listo: {nombre} sirve el {fecha}.",
+      "asignadoConAviso": "Listo: {nombre} sirve el {fecha}. Ese día también sirve en {ministerio}.",
+      "quitar": "Quitar",
+      "quitarA": "Quitar a {nombre} del {fecha}",
+      "quitado": "Listo: {nombre} ya no está el {fecha}.",
+      "copiar": "Copiar la fecha anterior",
+      "copiados": "{n, plural, =0 {No había nadie más para copiar.} one {Listo: se copió # turno.} other {Listo: se copiaron # turnos.}}",
+      "publicar": "Publicar",
+      "publicarTitulo": "¿Publicar el {fecha}?",
+      "publicarDescripcion": "{n, plural, =0 {Todavía no hay nadie asignado. Igual queda publicada.} one {Se le avisa a la persona que tiene turno.} other {Se les avisa a las # personas que tienen turno.}}",
+      "publicarConfirmar": "Sí, publicar",
+      "volver": "Volver",
+      "publicada": "Listo: el {fecha} quedó publicado.",
+      "publicadaAvisa": "Ya está publicada: lo que cambies se le avisa a quien entra y a quien sale.",
+      "borradorAyuda": "En borrador nadie ve estos turnos. Cuando esté lista, publicala.",
+      "sinFechas": "Todavía no hay fechas: el Ministerio necesita días de servicio, que los carga el Admin en el backoffice.",
+      "soloVer": "Ves los turnos sin poder cambiarlos.",
+      "reintentar": "Reintentar",
+      "errorGenerico": "No pudimos guardar el cambio. Probá de nuevo en un momento.",
+      "noPuede": "{nombre} avisó que no puede ir",
+      "motivo": "Motivo: {motivo}"
+    }
+  },
+  "sedes": {
+    "titulo": "Sedes",
+    "papelera": "Papelera",
+    "crear": "Crear Sede",
+    "creando": "Creando…",
+    "crearDescripcion": "Se agrega activa; podés editarla después desde su detalle.",
+    "columnas": {
+      "nombre": "Nombre",
+      "direccion": "Dirección",
+      "horarios": "Horarios",
+      "estado": "Estado",
+      "eliminadaEl": "Eliminada el"
+    },
+    "buscar": "Buscar por nombre",
+    "buscarEjemplo": "Ej. La Plata",
+    "filtrarPorEstado": "Filtrar por estado",
+    "activas": "Activas",
+    "todas": "Todas",
+    "vacioBusqueda": "No encontramos Sedes que coincidan con \"{busqueda}\".",
+    "vacioActivas": "Todavía no hay Sedes activas.",
+    "vacioTodas": "Todavía no hay Sedes cargadas.",
+    "acciones": "Acciones para {nombre}",
+    "verDetalle": "Ver detalle",
+    "inactivar": "Inactivar",
+    "reactivar": "Reactivar",
+    "eliminar": "Eliminar {nombre}",
+    "eliminarBloqueadaTitulo": "No se puede eliminar {nombre}",
+    "eliminarBloqueadaDescripcion": "Tiene {n, plural, one {# Persona asociada} other {# Personas asociadas}} — eliminar una Sede se lleva también su historia (Principio III). Si ya no se usa, inactivala: sigue viéndose en \"Todas\", pero desaparece de Visitanos y del registro.",
+    "entendido": "Entendido",
+    "eliminarTitulo": "¿Eliminar {nombre}?",
+    "eliminarDescripcion": "Es para corregir un error de carga (duplicada, de prueba) — se saca de todas las vistas y queda en la papelera, desde donde se puede restaurar.",
+    "cancelar": "Cancelar",
+    "eliminando": "Eliminando…",
+    "siEliminar": "Sí, eliminar",
+    "error": {
+      "lista": "No pudimos cargar las Sedes",
+      "detalle": "No pudimos cargar esta Sede",
+      "papelera": "No pudimos cargar la papelera",
+      "texto": "Podés reintentar en unos segundos. Código de referencia:",
+      "reintentar": "Reintentar"
+    },
+    "noEncontrada": {
+      "titulo": "No encontramos esta Sede",
+      "volver": "Volver a Sedes"
+    },
+    "detalle": {
+      "guardados": "Cambios guardados.",
+      "errorGuardar": "No pudimos guardar los cambios.",
+      "desactivada": "Sede desactivada.",
+      "errorDesactivar": "No pudimos desactivar la Sede.",
+      "reactivada": "Sede reactivada.",
+      "nombreDuplicado": "Ya existe otra Sede activa con este nombre — cambiá el nombre antes de reactivar.",
+      "errorReactivar": "No pudimos reactivar la Sede.",
+      "desactivar": "Desactivar",
+      "desactivando": "Desactivando…",
+      "desactivarTitulo": "¿Desactivar la Sede {nombre}?",
+      "desactivarDescripcion": "Deja de mostrarse en Visitanos y en el registro. No se borra nada: las personas asociadas siguen igual y podés volver a activarla cuando quieras.",
+      "siDesactivar": "Sí, desactivar",
+      "volver": "Volver",
+      "reactivar": "Reactivar",
+      "reactivando": "Reactivando…",
+      "reactivarTitulo": "¿Reactivar la Sede {nombre}?",
+      "reactivarDescripcion": "Vuelve a mostrarse en Visitanos y en el registro.",
+      "siReactivar": "Sí, reactivar",
+      "guardar": "Guardar cambios",
+      "guardando": "Guardando…",
+      "unicaActivaTitulo": "Necesitás al menos una Sede activa",
+      "crearUna": "Crear una Sede"
+    },
+    "papeleraPantalla": {
+      "titulo": "Papelera de Sedes",
+      "descripcion": "Sedes eliminadas. Restaurar las devuelve a \"Todas\".",
+      "vacia": "La papelera está vacía.",
+      "restaurada": "{nombre} restaurada.",
+      "errorRestaurar": "No pudimos restaurar la Sede.",
+      "restaurar": "Restaurar",
+      "restaurando": "Restaurando…"
+    },
+    "formulario": {
+      "campos": {
+        "nombre": "Nombre",
+        "direccion": "Dirección",
+        "horarios": "Horarios",
+        "contactoTelefono": "Teléfono de contacto",
+        "contactoEmail": "Email de contacto",
+        "descripcionBienvenida": "Descripción para la Bienvenida",
+        "whatsappSecretaria": "WhatsApp de Secretaría"
+      },
+      "requerido": "Revisá este dato.",
+      "horariosEjemplo": "Horarios (ej. \"Domingos 10:30 hs\")",
+      "telefonoOpcional": "Teléfono de contacto (opcional)",
+      "codigoPais": "Código de país",
+      "whatsappOpcional": "WhatsApp de Secretaría (opcional)",
+      "whatsappAyuda": "Un celular, con la característica y sin el 0 ni el 15. Por ejemplo: 221 555 0101. Si lo cargás, Visitanos muestra el botón \"Escribir por WhatsApp\".",
+      "descripcionOpcional": "Descripción para la Bienvenida (opcional)"
+    }
   }
 }

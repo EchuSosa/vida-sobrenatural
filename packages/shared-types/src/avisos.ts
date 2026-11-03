@@ -113,7 +113,24 @@ export type EventoAviso =
   | { nombre: 'grupo_extension.solicitud_nueva'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
   | { nombre: 'grupo_extension.solicitud_aceptada'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
   | { nombre: 'grupo_extension.solicitud_rechazada'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
-  | { nombre: 'grupo_extension.agregada_por_admin'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } };
+  | { nombre: 'grupo_extension.agregada_por_admin'; a: DePersona; datos: { solicitudId: string; grupoId: string; grupo: string } }
+  // --- 017 — Turnos de servicio (D256). `fecha` ya en palabras ("domingo, 8 de noviembre") y `lugar`
+  // = "Bienvenida — Seguridad": así los arman igual la web y el mail. Sin datos personales. ---
+  | { nombre: 'turno.asignado'; a: DePersona; datos: DatosAvisoTurno }
+  | { nombre: 'turno.quitado'; a: DePersona; datos: DatosAvisoTurno }
+  | { nombre: 'turno.fecha_suspendida'; a: DePersona; datos: DatosAvisoTurno }
+  | { nombre: 'turno.recordatorio'; a: DePersona; datos: DatosAvisoTurno }
+  // D257: a cada líder vigente, sin el nombre de la persona ni el motivo (los ve en la grilla).
+  | { nombre: 'turno.no_puede'; a: DePersona; datos: DatosAvisoTurno };
+
+/** spec 017: los datos de cada aviso de un turno. */
+export interface DatosAvisoTurno {
+  turnoId: string;
+  ministerioId: string;
+  dia: string;
+  fecha: string;
+  lugar: string;
+}
 
 export type NombreEventoAviso = EventoAviso['nombre'];
 
@@ -121,7 +138,7 @@ export type NombreEventoAviso = EventoAviso['nombre'];
 export type DatosDe<N extends NombreEventoAviso> = Extract<EventoAviso, { nombre: N }>['datos'];
 
 /** La spec que es dueña del hecho (para el test del catálogo y para saber quién lo conecta). */
-export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | '014' | '015' | '016' | 'flujo-12';
+export type SpecDelAviso = '001' | '004' | '006' | '008' | '009' | '010' | '011' | '014' | '015' | '016' | '017' | 'flujo-12';
 
 export interface EntradaCatalogo<N extends NombreEventoAviso> {
   spec: SpecDelAviso;
@@ -147,6 +164,8 @@ const MI_MINISTERIO = '/mi-ministerio';
 const LIDER_GRUPO_EXTENSION = '/mi-grupo-extension';
 /** spec 015: la pantalla para elegir ministerio. */
 const ELEGIR_MINISTERIO = '/mi-camino/ministerios/elegir';
+/** spec 017: los turnos publicados de la persona. */
+const MIS_TURNOS = '/mis-turnos';
 const sinClave = () => null;
 
 export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } = {
@@ -415,6 +434,32 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
   'grupo_extension.agregada_por_admin': {
     spec: '014', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
     entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => MI_GRUPO_EXTENSION, clave: sinClave,
+  },
+  // 017 (D256): al publicar la fecha, o al sumarla a una fecha ya publicada — importante (también por mail).
+  'turno.asignado': {
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
+    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.asignado:${d.turnoId}`,
+  },
+  // 017 (D256, D260): sacada de una fecha ya publicada — importante (también por mail).
+  'turno.quitado': {
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
+    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.quitado:${d.turnoId}`,
+  },
+  // 017 (US1-3, D260): "Este día no hay" en una fecha publicada, a quien tenía turno — importante
+  // (también por mail). Sin clave: suspender, habilitar y volver a suspender avisa las dos veces.
+  'turno.fecha_suspendida': {
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
+    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: sinClave,
+  },
+  // 017 (D256): `DIAS_RECORDATORIO_TURNO` días antes (tarea diaria).
+  'turno.recordatorio': {
+    spec: '017', destinatario: 'persona', disparador: 'evento_proximo', prioridad: 'normal',
+    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.recordatorio:${d.turnoId}`,
+  },
+  // 017 (D257): alguien avisó que no puede ir — a cada líder, que reemplaza desde la grilla.
+  'turno.no_puede': {
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: (d) => `${MI_MINISTERIO}/${d.ministerioId}/turnos`, clave: (d) => `turno.no_puede:${d.turnoId}`,
   },
 };
 

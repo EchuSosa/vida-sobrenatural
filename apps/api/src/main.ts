@@ -8,6 +8,9 @@ import { pinoHttp } from 'pino-http';
 import { AppModule } from './app.module.js';
 import { configurarApp } from './configurar-app.js';
 import { servirArchivosPublicos } from './storage/archivos-publicos.js';
+import { serializarPedido } from './common/logs/serializar-pedido.js';
+import { montarDocumentacionApi } from './common/documentacion-api.js';
+import { configurarSeguridadHttp } from './common/seguridad-http.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,6 +23,8 @@ async function bootstrap() {
   app.use(
     pinoHttp({
       genReqId: (req) => (req as { id?: string }).id ?? randomUUID(),
+      // docs/25, S-05: la URL va sin la query (puede tener un email o un nombre).
+      serializers: { req: serializarPedido },
       redact: {
         paths: [
           'req.headers.authorization',
@@ -53,19 +58,22 @@ async function bootstrap() {
   // Lote 0 global (D168): las áreas privadas viven bajo `.privado/` dentro de
   // la misma carpeta, y `dotfiles: 'deny'` hace que nunca se sirvan.
   servirArchivosPublicos(app);
-  // Desarrollo local únicamente — apps/web y apps/backoffice corren en otro
-  // puerto. No se usan cookies de sesión hacia esta API (solo Bearer JWT), así
-  // que reflejar el origin es suficiente sin necesitar `credentials: true`.
-  app.enableCors();
+  // docs/25, S-04/S-08: cabeceras de seguridad y CORS. Fuera de producción, CORS acepta cualquier
+  // origen (las apps corren en otro puerto); en producción, solo WEB_URL y BACKOFFICE_URL
+  // (o CORS_ORIGENES). Solo Bearer JWT, sin cookies: no hace falta `credentials`.
+  configurarSeguridadHttp(app);
 
-  const config = new DocumentBuilder()
-    .setTitle('Vida Sobrenatural — API')
-    .setDescription('Fase de Bienvenida: Persona y Sede')
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // docs/25, S-07: Swagger solo fuera de producción.
+  if (montarDocumentacionApi()) {
+    const config = new DocumentBuilder()
+      .setTitle('Vida Sobrenatural — API')
+      .setDescription('Fase de Bienvenida: Persona y Sede')
+      .setVersion('0.1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
 
   await app.listen(process.env.PORT ?? 3333);
 }

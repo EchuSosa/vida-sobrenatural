@@ -7,7 +7,11 @@ import { hoyEnArgentina, type Franja, type MiDisponibilidad } from '@vida-sobren
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { configurarApp } from '../../src/configurar-app.js';
+import { cerrarSesionesDeTest, tokenConRoles } from './sesion-con-roles.js';
 import { CruceService } from '../../src/discipulado/cruce.service.js';
+
+// D258: el helper de sesiones abre su propia conexión; se cierra al terminar el archivo.
+afterAll(cerrarSesionesDeTest);
 
 async function mintToken(claims: { email: string; personaId: string | null; estado: string | null; rol: string[] }): Promise<string> {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -81,7 +85,8 @@ describe('Disponibilidad del Discipulador (integración, Historia 4)', () => {
     discipuladorId = await crearPersona(email, ['miembro_registrado', 'discipulador']);
     otroId = await crearPersona(`integ-disponibilidad-otro-${sufijo}@example.com`, ['miembro_registrado', 'discipulador']);
     token = await mintToken({ email, personaId: discipuladorId, estado: 'activa', rol: ['miembro_registrado', 'discipulador'] });
-    tokenMiembro = await mintToken({ email, personaId: discipuladorId, estado: 'activa', rol: ['miembro_registrado'] });
+    // D258: el rol sale de la base; "sin el rol discipulador" es otra Persona, no el mismo token con menos roles.
+    tokenMiembro = await tokenConRoles(['miembro_registrado']);
   });
 
   afterAll(async () => {

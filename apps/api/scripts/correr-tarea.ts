@@ -5,6 +5,7 @@ import { NotificacionesService } from '../src/notificaciones/notificaciones.serv
 import { EnvioEmailsService } from '../src/notificaciones/envio-emails.service.js';
 import { RecordatoriosEventosService } from '../src/tareas-programadas/recordatorios-eventos.service.js';
 import { BorradoRespuestasSensiblesService } from '../src/evento/borrado-respuestas-sensibles.service.js';
+import { RecordatoriosTurnosService } from '../src/turnos/recordatorios-turnos.service.js';
 
 /**
  * spec 012, T043/T056 (FR-038, quickstart) — corre una tarea programada a mano,
@@ -13,6 +14,7 @@ import { BorradoRespuestasSensiblesService } from '../src/evento/borrado-respues
  *   pnpm --filter api run tareas:correr emails         # manda los mails pendientes vencidos
  *   pnpm --filter api run tareas:correr recordatorios  # recordatorios de Eventos de hoy
  *   pnpm --filter api run tareas:correr respuestas-sensibles  # borra las respuestas sensibles vencidas (FR-069 de la 011)
+ *   pnpm --filter api run tareas:correr turnos         # recordatorios de turnos de servicio (spec 017, D256)
  *
  * Arma los servicios a mano (tsx no emite la metadata de decoradores que usa
  * la inyección de Nest); son los mismos que usa la API.
@@ -41,8 +43,11 @@ async function main() {
     } else if (tarea === 'respuestas-sensibles') {
       const r = await new BorradoRespuestasSensiblesService(prisma).correr();
       console.log(`respuestas sensibles: ${r.respuestas} borradas de ${r.eventos} Eventos terminados hace más de 30 días.`);
+    } else if (tarea === 'turnos') {
+      const r = await new RecordatoriosTurnosService(prisma, notificaciones).correr();
+      console.log(`turnos: ${r.avisos} recordatorios en ${r.fechas} fechas; ${r.fallidas} con error.`);
     } else {
-      console.error('Uso: pnpm --filter api run tareas:correr <emails|recordatorios|respuestas-sensibles>');
+      console.error('Uso: pnpm --filter api run tareas:correr <emails|recordatorios|respuestas-sensibles|turnos>');
       process.exitCode = 1;
     }
   } finally {

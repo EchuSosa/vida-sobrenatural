@@ -17,7 +17,7 @@ import {
   type DiaSemana,
   type ResultadoGuardarGrupo,
 } from '@vida-sobrenatural/shared-types';
-import { Button, ButtonLink, CampoHora, Input, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos } from '@vida-sobrenatural/ui';
+import { Button, ButtonLink, CampoHora, Input, MensajeErrorCampo, ResumenErrores, useEnvio, useValidacionCampos, textoDeCampo } from '@vida-sobrenatural/ui';
 import { BuscarPersonaGex } from './buscar-persona';
 
 export interface LiderElegido {
@@ -68,7 +68,7 @@ export function FormularioGrupoExtension({ inicial, sedes, apiToken }: { inicial
     validacion.limpiar(campo);
   }
   const numero = (texto: string) => (texto.trim() === '' ? null : Number(texto));
-  const mensaje = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : tg('errorGenerico'));
+  const mensaje = (code: string) => textoDeCampo(te, code, tg('errorGenerico'));
 
   const { enviando, ejecutar } = useEnvio(async () => {
     const datos: DatosGrupoExtension = {

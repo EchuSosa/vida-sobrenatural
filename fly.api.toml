@@ -1,0 +1,47 @@
+# docs/26 — la API. Se publica con: flyctl deploy --config fly.api.toml (desde la raíz).
+app = "vida-sobrenatural-api"
+primary_region = "gru" # São Paulo, lo más cerca de La Plata (docs/13)
+
+[build]
+  dockerfile = "Dockerfile"
+  [build.args]
+    APP = "api"
+
+[deploy]
+  # Las migraciones corren antes de cambiar de versión; si fallan, no se publica nada.
+  release_command = "sh -c 'cd /repo/apps/api && node_modules/.bin/prisma migrate deploy'"
+
+[env]
+  NODE_ENV = "production"
+  # docs/25, S-06: la IP del cliente la pone el proxy de Fly; el navegador no la puede falsear.
+  IP_REAL_HEADER = "fly-client-ip"
+  PORT = "8080"
+  STORAGE_DIR = "/data/almacenamiento"
+  TAREAS_PROGRAMADAS = "true"
+  WEB_URL = "https://vida-sobrenatural-web.fly.dev"
+  BACKOFFICE_URL = "https://vida-sobrenatural-backoffice.fly.dev"
+  API_PUBLIC_URL = "https://vida-sobrenatural-api.fly.dev"
+
+# Archivos subidos (portadas, flyers, comprobantes, contenidos): un volumen, no el disco de la máquina.
+[[mounts]]
+  source = "almacenamiento"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off" # las tareas programadas (avisos, borrado de datos sensibles) necesitan la máquina prendida
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "30s"
+    interval = "30s"
+    method = "GET"
+    path = "/"
+    timeout = "5s"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

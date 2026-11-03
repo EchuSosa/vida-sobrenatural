@@ -72,7 +72,9 @@ export default async function MiVidaDeServicioPage() {
                   {s.estado === 'liberada' ? (
                     <Link
                       href={`/mi-camino/vida-de-servicio/semanas/${s.numero}`}
-                      className="font-medium text-primary underline underline-offset-2"
+                      // QA ronda 1, BUG-06: `anywhere` (no `break-word`) para que un título sin espacios se corte
+                      // dentro de la tarjeta en vez de ensanchar la página.
+                      className="font-medium text-primary underline underline-offset-2 [overflow-wrap:anywhere]"
                       aria-label={t('detalle.abrirSemana', { numero: s.numero })}
                     >
                       {t('semanaConTitulo', { numero: s.numero, titulo: s.titulo })}

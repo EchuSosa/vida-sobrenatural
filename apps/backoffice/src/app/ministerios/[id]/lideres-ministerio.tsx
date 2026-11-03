@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -35,6 +36,7 @@ export function LideresMinisterio({
   const router = useRouter();
   // Casos infelices (2026-11-01): el freno contra el doble toque es `useEnvio` (un ref), no un
   // `useState`: entre dos clics seguidos React todavía no re-renderizó y el estado sigue en false (H-57).
+  const salioBien = useRef(false);
   const { enviando, ejecutar: llamar } = useEnvio(async (ruta: string, method: 'POST' | 'DELETE', cuerpo: object | undefined, exito: string) => {
     try {
       await apiFetch(ruta, {
@@ -43,6 +45,7 @@ export function LideresMinisterio({
         ...(cuerpo ? { body: JSON.stringify(cuerpo) } : {}),
       });
       toast.success(exito);
+      salioBien.current = true;
       router.refresh();
     } catch (error) {
       const code = error instanceof ApiError ? error.code : null;
@@ -50,8 +53,12 @@ export function LideresMinisterio({
     }
   });
 
-  const asignar = (p: PersonaElegibleGex) =>
-    llamar(`/ministerios/${ministerioId}/lideres`, 'POST', { personaId: p.id }, t('asignado', { nombre: `${p.nombre} ${p.apellido}`, ministerio }));
+  // Backlog (Echu, 2026-11-03): si la API falla, el buscador conserva la búsqueda.
+  const asignar = async (p: PersonaElegibleGex) => {
+    salioBien.current = false;
+    await llamar(`/ministerios/${ministerioId}/lideres`, 'POST', { personaId: p.id }, t('asignado', { nombre: `${p.nombre} ${p.apellido}`, ministerio }));
+    return salioBien.current;
+  };
   const quitar = (l: LiderMinisterioVista) =>
     llamar(`/ministerios/${ministerioId}/lideres/${l.persona.id}`, 'DELETE', undefined, t('quitado', { nombre: `${l.persona.nombre} ${l.persona.apellido}` }));
 
@@ -108,7 +115,7 @@ export function LideresMinisterio({
               apiToken={apiToken}
               textoElegir={t('asignarBoton')}
               ariaElegir={(nombre) => t('asignarAria', { nombre })}
-              onElegir={(p) => void asignar(p)}
+              onElegir={asignar}
               deshabilitado={enviando}
               bloquearMenores
             />

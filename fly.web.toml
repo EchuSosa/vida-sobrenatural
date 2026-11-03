@@ -1,0 +1,38 @@
+# docs/26 — apps/web. Se publica con: flyctl deploy --config fly.web.toml (desde la raíz).
+app = "vida-sobrenatural-web"
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+  [build.args]
+    APP = "web"
+    NEXT_PUBLIC_API_BASE_URL = "https://vida-sobrenatural-api.fly.dev"
+    NEXT_PUBLIC_WEB_APP_URL = "https://vida-sobrenatural-web.fly.dev"
+
+[env]
+  NODE_ENV = "production"
+  # docs/25, S-06: la IP del cliente la pone el proxy de Fly (límite del código de ingreso).
+  IP_REAL_HEADER = "fly-client-ip"
+  PORT = "8080"
+  NEXTAUTH_URL = "https://vida-sobrenatural-web.fly.dev"
+  AUTH_TRUST_HOST = "true" # detrás del proxy de Fly, Auth.js necesita confiar en el host
+  API_BASE_URL = "https://vida-sobrenatural-api.fly.dev"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "30s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/auth/csrf"
+    timeout = "5s"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

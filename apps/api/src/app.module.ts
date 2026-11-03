@@ -18,6 +18,7 @@ import { CaminoModule } from './camino/camino.module.js';
 import { CodigoIngresoModule } from './codigo-ingreso/codigo-ingreso.module.js';
 import { VidaDeServicioModule } from './vida-de-servicio/vida-de-servicio.module.js';
 import { MinisterioModule } from './ministerio/ministerio.module.js';
+import { TurnosModule } from './turnos/turnos.module.js';
 import { BautismoModule } from './bautismo/bautismo.module.js';
 import { EventoModule } from './evento/evento.module.js';
 import { TareasProgramadasModule } from './tareas-programadas/tareas-programadas.module.js';
@@ -32,7 +33,7 @@ import { EleccionMinisterioModule } from './eleccion-ministerio/eleccion-ministe
     // Lote 0 global (specs 006–013, specs/IMPLEMENTACION.md): transversales…
     EmailModule, NotificacionesModule, BandejaModule,
     // …y uno por spec, cada uno dueño de su carpeta.
-    CaminoModule, CodigoIngresoModule, VidaDeServicioModule, MinisterioModule, BautismoModule, EventoModule,
+    CaminoModule, CodigoIngresoModule, VidaDeServicioModule, MinisterioModule, TurnosModule, BautismoModule, EventoModule,
     TareasProgramadasModule, InicioModule, ComentarioModule, CursoModule,
     // spec 014 (después del lote 0: registra su propio módulo).
     GrupoExtensionModule,

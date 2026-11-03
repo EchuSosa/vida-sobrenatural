@@ -35,6 +35,7 @@ import {
   TablaDatos,
   useEnvio,
   type ColumnaTabla,
+  textoDeCampo,
 } from '@vida-sobrenatural/ui';
 import { useControlesTablaUrl } from '../../../hooks/use-controles-tabla-url';
 
@@ -220,7 +221,7 @@ function CrearEdicion({ sedes, lideres, apiToken }: { sedes: Array<{ id: string;
   const [elegidos, setElegidos] = useState<Set<string>>(new Set());
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [foco, setFoco] = useState(0);
-  const mensaje = (code: string) => (te.has(`campos.${code}`) ? te(`campos.${code}`) : td('errorGenerico'));
+  const mensaje = (code: string) => textoDeCampo(te, code, td('errorGenerico'));
 
   function proponer(nuevoInicio: string, nuevaCantidad: number) {
     if (/^\d{4}-\d{2}-\d{2}$/.test(nuevoInicio) && nuevaCantidad >= SEMANAS_MIN && nuevaCantidad <= SEMANAS_MAX) setFechas(cronogramaPropuesto(nuevoInicio, nuevaCantidad));

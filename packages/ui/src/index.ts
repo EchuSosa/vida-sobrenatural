@@ -136,6 +136,7 @@ export { DialogoTextoOpcional, type DialogoTextoOpcionalProps, type CamposExtraD
 export { CampoTalleRemera, type CampoTalleRemeraProps } from './components/campo-talle-remera';
 export { PanelMotivo, type TextosPanelMotivo } from './components/panel-motivo';
 export { mensajeDeError, mensajesDeCampo, nombresDe, textoFranja, type Traductor } from './lib/discipulado-comun';
+export { textoDeCampo } from './lib/texto-de-campo';
 export { PedirEnNombreDe, type PedirEnNombreDeProps, type EtiquetasPedirEnNombreDe, type PersonaElegible } from './components/pedir-en-nombre-de';
 
 // --- spec 007 (FormularioIngresoCodigo, BotonIngresarGoogle) ---
@@ -183,3 +184,4 @@ export { BarraProporcion, type BarraProporcionProps } from './components/barra-p
 
 // --- spec 014 (Grupos de Extensión) ---
 export { textoDias, textoHorario, textoNombres } from './lib/textos-grupo-extension';
+export { GrillaTurnos, type GrillaTurnosProps, type TraductorGrilla } from './components/grilla-turnos';

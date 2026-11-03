@@ -6,6 +6,7 @@ import { CircleCheck, CircleSlash, Clock, Info, Smartphone, UserRound } from 'lu
 import { ApiError, aniosCongregando, apiFetch, formatearDiaEnArgentina, formatearFechaLarga, hoyEnArgentina, type CaminoDePersonaAdmin, type PerfilPersona } from '@vida-sobrenatural/shared-types';
 import { AvatarPersona, ButtonLink, MigaDePan, Skeleton } from '@vida-sobrenatural/ui';
 import { requerirPermiso, tienePermisoSesion } from '../../../auth';
+import { DarDeBaja } from './dar-de-baja';
 import { BloqueConError } from '../../../components/bloque-con-error';
 import { PedirEnNombreDe } from '../../../components/pedir-en-nombre-de';
 import { SECCIONES_PERFIL } from './secciones';
@@ -41,6 +42,8 @@ export default async function PerfilPersonaPage({ params }: { params: Promise<{ 
   const puedeGestionarRoles = tienePermisoSesion(session, 'personas.gestionar_roles');
   // spec 013, Historia 7 (T082, H7.5): "Editar datos" solo con `personas.editar` (el Pastor no lo ve).
   const puedeEditar = tienePermisoSesion(session, 'personas.editar');
+  // spec 018 (D263): dar de baja de la app en su nombre, solo el Admin.
+  const puedeDarDeBaja = tienePermisoSesion(session, 'personas.baja') && perfil.activo;
   const puedePedirEnNombre = tienePermisoSesion(session, 'solicitudes.crear_en_nombre') && perfil.activo && perfil.estado === 'activa';
   // DEMO-06 (2026-10-10): si ya tiene Vida Nueva pedida, en curso o hecha, no
   // se ofrece pedirla en su nombre (la API lo rechazaría igual): se dice por
@@ -215,6 +218,13 @@ export default async function PerfilPersonaPage({ params }: { params: Promise<{ 
           </BloqueConError>
         </Seccion>
       ))}
+
+      {puedeDarDeBaja && (
+        <Seccion id="baja" titulo={t('secciones.baja')}>
+          <p className="text-muted-foreground">{t('baja.ayuda')}</p>
+          <DarDeBaja personaId={perfil.id} nombre={nombre} apiToken={session.apiToken} />
+        </Seccion>
+      )}
     </div>
   );
 }

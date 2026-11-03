@@ -6,7 +6,12 @@ import type { Server } from 'node:http';
 import { AppModule } from '../src/app.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { configurarApp } from '../src/configurar-app.js';
+import { cerrarSesionesDeTest, tokenConRoles } from './integration/sesion-con-roles.js';
 import { limpiarAvisos } from './integration/notificaciones-fixtures.js';
+import { cursoDelCatalogo } from './integration/discipulado-fixtures.js';
+
+// D258: el helper de sesiones abre su propia conexión; se cierra al terminar el archivo.
+afterAll(cerrarSesionesDeTest);
 
 /**
  * specs/005-roles-permisos-acceso, T026 (Historia 2): de punta a punta — HTTP
@@ -115,13 +120,9 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     // specs/004 (D137): un discipulado activo = Liderazgo vigente en un Grupo
     // en curso. Armado por Prisma: lo que se prueba acá es la guarda, no
     // cómo se llega a tenerlo (eso es de los lotes A y B).
-    cursoId = (
-      await prisma.curso.upsert({
-        where: { categoria_tipo: { categoria: 'vida_nueva', tipo: 'individual' } },
-        update: {},
-        create: { nombre: 'Vida Nueva', categoria: 'vida_nueva', tipo: 'individual', modalidad: 'seguimiento_por_encuentros' },
-      })
-    ).id;
+    // Falla de la CI de #90 (2026-11-03): un `upsert` del mismo Curso desde otro archivo de test a la
+    // vez chocaba con el único (P2002). `cursoDelCatalogo` es el que ya tolera esa carrera.
+    cursoId = (await cursoDelCatalogo(prisma, { nombre: 'Vida Nueva', categoria: 'vida_nueva', tipo: 'individual', modalidad: 'seguimiento_por_encuentros' })).id;
     grupoId = await grupoLideradoPor(ids.discipuladora, ids.inscripta);
     // FR-043: una Propuesta pendiente también traba la quita.
     solicitudPideId = (await prisma.solicitudDiscipulado.create({ data: { personaId: ids.pide, estado: 'propuesta' } })).id;
@@ -315,7 +316,7 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
 
   describe('permisos (catálogo, D132)', () => {
     it('otorgar/quitar es solo del Admin: un Pastor recibe 403 y no cambia nada', async () => {
-      const tokenPastor = await token('pastor-x', ['pastor']);
+      const tokenPastor = await tokenConRoles(['pastor']);
       const otorgar = await servidor()
         .post(`/personas/${ids.adulta}/roles`)
         .set('Authorization', `Bearer ${tokenPastor}`)
@@ -331,13 +332,13 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     it('GET /personas/buscar sigue abierto a admin y discipulador, y cerrado a pastor (T025, sin cambio de roles)', async () => {
       const q = `?q=${apellido}`;
       expect((await servidor().get(`/personas/buscar${q}`).set('Authorization', `Bearer ${tokenAdmin}`)).status).toBe(200);
-      expect((await servidor().get(`/personas/buscar${q}`).set('Authorization', `Bearer ${await token('d', ['discipulador'])}`)).status).toBe(200);
-      expect((await servidor().get(`/personas/buscar${q}`).set('Authorization', `Bearer ${await token('p', ['pastor'])}`)).status).toBe(403);
+      expect((await servidor().get(`/personas/buscar${q}`).set('Authorization', `Bearer ${await tokenConRoles(['discipulador'])}`)).status).toBe(200);
+      expect((await servidor().get(`/personas/buscar${q}`).set('Authorization', `Bearer ${await tokenConRoles(['pastor'])}`)).status).toBe(403);
     });
 
     it('GET /personas: lo ven admin y pastor (personas.ver), no un discipulador', async () => {
-      expect((await servidor().get('/personas').set('Authorization', `Bearer ${await token('p', ['pastor'])}`)).status).toBe(200);
-      expect((await servidor().get('/personas').set('Authorization', `Bearer ${await token('d', ['discipulador'])}`)).status).toBe(403);
+      expect((await servidor().get('/personas').set('Authorization', `Bearer ${await tokenConRoles(['pastor'])}`)).status).toBe(200);
+      expect((await servidor().get('/personas').set('Authorization', `Bearer ${await tokenConRoles(['discipulador'])}`)).status).toBe(403);
     });
 
     // T070 (D64): la lista de pendientes de tutor — la única compuesta
@@ -345,9 +346,9 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     // (incluido el Pastor); activar y cerrar siguen en .gestionar.
     // D139 (H-R6): el Discipulador ni la lee ni la gestiona.
     it('GET /personas/pendientes-tutor lo leen admin y pastor; activar y cerrar no son del pastor', async () => {
-      const tokenPastor = await token('p', ['pastor']);
+      const tokenPastor = await tokenConRoles(['pastor']);
       expect((await servidor().get('/personas/pendientes-tutor').set('Authorization', `Bearer ${tokenPastor}`)).status).toBe(200);
-      expect((await servidor().get('/personas/pendientes-tutor').set('Authorization', `Bearer ${await token('l', ['lider_curso'])}`)).status).toBe(403);
+      expect((await servidor().get('/personas/pendientes-tutor').set('Authorization', `Bearer ${await tokenConRoles(['lider_curso'])}`)).status).toBe(403);
       const activar = await servidor().patch(`/personas/${ids.menor}/activar`).set('Authorization', `Bearer ${tokenPastor}`).send({});
       const cerrar = await servidor().patch(`/personas/${ids.menor}/marcar-inactiva`).set('Authorization', `Bearer ${tokenPastor}`);
       expect(activar.status).toBe(403);
@@ -355,7 +356,7 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     });
 
     it('D139 (H-R6): el Discipulador no lee Pendientes de tutor ni activa ni cierra un caso', async () => {
-      const tokenDiscipulador = await token('d', ['discipulador']);
+      const tokenDiscipulador = await tokenConRoles(['discipulador']);
       expect((await servidor().get('/personas/pendientes-tutor').set('Authorization', `Bearer ${tokenDiscipulador}`)).status).toBe(403);
       const activar = await servidor().patch(`/personas/${ids.menor}/activar`).set('Authorization', `Bearer ${tokenDiscipulador}`).send({});
       const cerrar = await servidor().patch(`/personas/${ids.menor}/marcar-inactiva`).set('Authorization', `Bearer ${tokenDiscipulador}`);
@@ -514,8 +515,8 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     });
 
     it('el historial es del Admin (personas.gestionar_roles): Pastor y Discipulador reciben 403', async () => {
-      expect((await servidor().get('/cambios-de-rol').set('Authorization', `Bearer ${await token('p', ['pastor'])}`)).status).toBe(403);
-      expect((await servidor().get('/cambios-de-rol').set('Authorization', `Bearer ${await token('d', ['discipulador'])}`)).status).toBe(403);
+      expect((await servidor().get('/cambios-de-rol').set('Authorization', `Bearer ${await tokenConRoles(['pastor'])}`)).status).toBe(403);
+      expect((await servidor().get('/cambios-de-rol').set('Authorization', `Bearer ${await tokenConRoles(['discipulador'])}`)).status).toBe(403);
     });
 
     it('no hay escritura directa sobre el historial (sin POST/PATCH/DELETE)', async () => {
@@ -662,7 +663,7 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     it('caso 2: el admin propio no se puede quitar (FR-010) — el de otra Persona sí', async () => {
       expect((await quitarDe(ids.admin, tokenAdmin)).admin).toEqual({ puede: false, motivo: 'ADMIN_NO_PUEDE_AUTO_REVOCARSE' });
       // Mirado por OTRA Admin identificada, esa misma Persona sí.
-      expect((await quitarDe(ids.admin, await token(ids.adulta, ['admin']))).admin).toEqual({ puede: true });
+      expect((await quitarDe(ids.admin, await tokenConRoles(['miembro_registrado', 'admin']))).admin).toEqual({ puede: true });
       const rechazo = await servidor().delete(`/personas/${ids.admin}/roles/admin`).set('Authorization', `Bearer ${tokenAdmin}`);
       expect(rechazo.body.code).toBe('ADMIN_NO_PUEDE_AUTO_REVOCARSE');
     });

@@ -11,6 +11,7 @@ import { calcularEdad } from '../persona/calcular-edad.js';
 import { registrarCambioDeRol } from '../cambio-de-rol/registrar-cambio-de-rol.js';
 import { bloquearPersona } from '../camino/consultas.js';
 import type { NotificacionesService } from '../notificaciones/notificaciones.service.js';
+import { liberarTurnosFuturos } from '../turnos/liberar-turnos.js';
 
 type Db = Prisma.TransactionClient;
 
@@ -125,13 +126,14 @@ export async function decidirMembresia(
 
 /** D241: la membresía reemplazada pasa a `inactiva` por cambio de Ministerio, apuntando a la nueva. */
 export async function inactivarPorCambio(
-  db: Db,
+  db: Prisma.TransactionClient,
   anteriorId: string,
   nuevaId: string,
   autorId: string,
   ahora: Date,
+  notificaciones: NotificacionesService,
 ): Promise<void> {
-  await db.postulacion.update({
+  const anterior = await db.postulacion.update({
     where: { id: anteriorId },
     data: {
       estado: 'inactiva',
@@ -140,7 +142,10 @@ export async function inactivarPorCambio(
       inactivadaPorId: autorId,
       reemplazadaPorId: nuevaId,
     },
+    select: { personaId: true, ministerioId: true },
   });
+  // spec 017 (T023): sus turnos futuros en el Ministerio que deja quedan para cubrir.
+  await liberarTurnosFuturos(db, notificaciones, { personaId: anterior.personaId, ministerioId: anterior.ministerioId, autorId });
 }
 
 /**
@@ -252,7 +257,7 @@ export async function crearMembresiaDirecta(
     },
     select: { id: true },
   });
-  if (anterior) await inactivarPorCambio(tx, anterior.postulacionId, creada.id, args.autorId, ahora);
+  if (anterior) await inactivarPorCambio(tx, anterior.postulacionId, creada.id, args.autorId, ahora, deps.notificaciones);
   await deps.rolesDeEstado.otorgarRolDeEstado(args.personaId, 'miembro_ministerio', tx);
   if (args.otorgarRolDiscipulador) await otorgarDiscipulador(tx, args.personaId, args.autorId);
   await deps.notificaciones.emitir(tx, {

@@ -1,5 +1,6 @@
 import type { DatosPersonales, EstadoCivil, Genero, Profesion } from './persona.js';
 import { TELEFONO_REGEX, congregaDesdeValido } from './persona.js';
+import { hoyEnArgentina } from './disponibilidad.js';
 
 /**
  * spec 006 (FR-031, research #9) — las validaciones de los datos personales,
@@ -45,9 +46,40 @@ function textoRequerido(v: unknown): boolean {
   return typeof v === 'string' && v.length > 0;
 }
 
+/** QA ronda 1, BUG-05: el largo máximo de un apellido o un nombre, ya sin espacios de los bordes. */
+export const LARGO_MAXIMO_NOMBRE = 100;
+
+/**
+ * QA ronda 1, BUG-05: apellido o nombre con algo escrito (sin contar los
+ * espacios de los bordes) y de hasta `LARGO_MAXIMO_NOMBRE` caracteres. Antes
+ * se guardaban Personas con nombre de espacios o de 5000 caracteres. Se
+ * guarda recortado (el DTO del registro recorta; el alta y la edición
+ * también).
+ */
+export function nombreValido(v: unknown): v is string {
+  if (typeof v !== 'string') return false;
+  const recortado = v.trim();
+  return recortado.length > 0 && recortado.length <= LARGO_MAXIMO_NOMBRE;
+}
+
 function fechaValida(v: unknown): boolean {
   if (typeof v !== 'string' || !FECHA.test(v)) return false;
   return !Number.isNaN(new Date(v).getTime());
+}
+
+/** QA ronda 1, BUG-01: el año de nacimiento más viejo que se acepta. */
+export const ANIO_MINIMO_NACIMIENTO = 1900;
+
+/**
+ * QA ronda 1, BUG-01: una fecha de nacimiento posible — desde
+ * `ANIO_MINIMO_NACIMIENTO` y nunca después de hoy en Argentina. Un año mal
+ * tipeado (2096 por 1996) dejaba a una persona adulta bloqueada como menor.
+ * Única regla para el registro, el alta y la edición por el Admin, y la API.
+ */
+export function fechaNacimientoValida(v: unknown, hoy: string = hoyEnArgentina()): v is string {
+  if (!fechaValida(v)) return false;
+  const dia = (v as string).slice(0, 10);
+  return Number(dia.slice(0, 4)) >= ANIO_MINIMO_NACIMIENTO && dia <= hoy;
 }
 
 /**
@@ -60,10 +92,10 @@ export function erroresDeDatosPersonales(d: Partial<Record<keyof DatosPersonales
   const errores: ErrorDeDatoPersonal[] = [];
   const error = (campo: keyof DatosPersonales) => errores.push({ campo, code: `${campo.toUpperCase()}_INVALIDO` });
 
-  if (!textoRequerido(d.apellido)) error('apellido');
-  if (!textoRequerido(d.nombre)) error('nombre');
+  if (!nombreValido(d.apellido)) error('apellido');
+  if (!nombreValido(d.nombre)) error('nombre');
   if (!GENEROS.includes(d.genero as Genero)) error('genero');
-  if (!fechaValida(d.fechaNacimiento)) error('fechaNacimiento');
+  if (!fechaNacimientoValida(d.fechaNacimiento)) error('fechaNacimiento');
   if (!textoRequerido(d.telefono) || !TELEFONO_REGEX.test(d.telefono as string)) error('telefono');
   if (!textoRequerido(d.direccion)) error('direccion');
   if (typeof d.sedeId !== 'string' || !UUID.test(d.sedeId)) error('sedeId');

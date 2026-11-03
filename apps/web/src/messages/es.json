@@ -199,7 +199,17 @@
       "ELECCION_UN_AREA_POR_MINISTERIO": "Elegí un solo área de cada ministerio.",
       "ELECCION_AREA_NO_DISPONIBLE": "Un área que elegiste ya no está disponible: elegí otra.",
       "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera.",
-      "DESDE_ANIO_INVALIDO": "Elegí un año de la lista."
+      "DESDE_ANIO_INVALIDO": "Elegí un año de la lista.",
+      "FRECUENCIA_INVALIDA": "Elegí si es todas las semanas o una vez por mes.",
+      "POSICION_EN_MES_INVALIDA": "Elegí qué vez del mes: primero, segundo, tercero, cuarto o último.",
+      "DIA_DE_SERVICIO_REPETIDO": "Ese día ya está cargado. Elegí otro.",
+      "CUPO_TURNO_INVALIDO": "Escribí un número de 1 a 20: cuántas personas hacen falta por fecha.",
+      "YA_TIENE_TURNO_ESE_DIA": "Ya tiene turno ese día. Elegí a otra persona.",
+      "NO_ES_INTEGRANTE": "No es integrante de esta área. Elegí a alguien de la lista.",
+      "AREA_INVALIDA": "Elegí un área del Ministerio.",
+      "MOTIVO_CANCELACION_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco.",
+      "CONFIRMACION_BAJA_INVALIDA": "Escribí BAJA para confirmar.",
+      "MOTIVO_BAJA_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco."
     },
     "SESION_SIN_PERSONA": "Tu sesión no está asociada a una Persona del sistema, así que no podemos registrar quién hace el cambio. Pedile a quien administra el sistema que revise tu cuenta.",
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
@@ -220,7 +230,16 @@
     "ELECCION_DESACTUALIZADA": "Alguien cambió esta elección mientras la tenías abierta. Recargá para ver lo último.",
     "ELECCION_OPCIONES_RESUELTAS": "El equipo ya confirmó parte de esta elección: las áreas no se pueden cambiar.",
     "ELECCION_SIN_CHARLA": "Falta la charla con su líder de Vida de Servicio.",
-    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual."
+    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual.",
+    "DIA_DE_SERVICIO_REPETIDO": "Ese día de servicio ya está cargado en este Ministerio.",
+    "NO_ES_DIA_DE_SERVICIO": "Esa fecha no es un día de servicio de este Ministerio. Revisá los días cargados.",
+    "FECHA_YA_PASO": "Esa fecha ya pasó: solo se pueden cambiar las fechas que vienen.",
+    "FECHA_SUSPENDIDA": "Ese día no hay servicio: primero hay que volver a habilitarlo.",
+    "YA_TIENE_TURNO_ESE_DIA": "Esa persona ya tiene turno ese día en este Ministerio.",
+    "NO_ES_INTEGRANTE": "Esa persona no es integrante de esta área.",
+    "SIN_FECHA_ANTERIOR": "Todavía no hay una fecha publicada antes de esta para copiar.",
+    "TURNO_YA_EMPEZO": "Ese turno ya empezó: avisale directamente a tu líder.",
+    "ULTIMO_ADMIN": "Sos la única persona Admin: antes de darte de baja, tiene que haber otra."
   },
   "nav": {
     "nosotros": "Nosotros",
@@ -444,6 +463,7 @@
     },
     "errorCampo": "Revisá este dato.",
     "errorFechaNacimiento": "Completá el día, el mes y el año en que naciste. El año va con 4 números, por ejemplo 1965.",
+    "errorFechaNacimientoRango": "Revisá el año en que naciste: tiene que ser desde 1900 y la fecha no puede ser futura.",
     "elegirOpcion": "Elegí una opción",
     "soloNumeros": "Solo números",
     "opciones": {
@@ -494,7 +514,9 @@
     },
     "errores": {
       "apellido": "Escribí tu apellido.",
+      "apellidoLargo": "Tu apellido puede tener hasta {maximo} letras. Revisá que esté bien escrito.",
       "nombre": "Escribí tu nombre.",
+      "nombreLargo": "Tu nombre puede tener hasta {maximo} letras. Revisá que esté bien escrito.",
       "genero": "Elegí una opción en Género.",
       "direccion": "Escribí tu dirección, por ejemplo: calle 7 n.º 1234.",
       "sedeId": "Elegí la Sede a la que vas.",
@@ -769,6 +791,9 @@
       "Sábado"
     ],
     "dia": "Día",
+    "elegirDia": "Elegí",
+    "elegirHora": "--",
+    "errorIncompleta": "Elegí el día, la hora de inicio y la de fin.",
     "desde": "Desde",
     "hasta": "Hasta",
     "hora": "Hora",
@@ -1041,6 +1066,28 @@
         "agregada_por_admin": {
           "titulo": "Te sumaron al grupo {grupo}",
           "detalle": "En Mi camino tenés la dirección, los días y el horario, y cómo llegar."
+        }
+      },
+      "turno": {
+        "asignado": {
+          "titulo": "Servís el {fecha}",
+          "detalle": "En {lugar}. En Mis turnos ves todos tus turnos."
+        },
+        "quitado": {
+          "titulo": "Ya no servís el {fecha}",
+          "detalle": "Te sacaron del turno de {lugar}. Si tenés dudas, hablá con tu líder."
+        },
+        "fecha_suspendida": {
+          "titulo": "El {fecha} no hay servicio",
+          "detalle": "Se suspendió la fecha en la que servías en {lugar}. No hace falta que vayas."
+        },
+        "recordatorio": {
+          "titulo": "Te toca servir el {fecha}",
+          "detalle": "En {lugar}. Si no podés ir, avisale a tu líder."
+        },
+        "no_puede": {
+          "titulo": "Alguien no puede ir el {fecha}",
+          "detalle": "Falta cubrir un lugar en {lugar}. En Turnos ves quién y podés sumar a otra persona."
         }
       }
     }
@@ -1874,7 +1921,11 @@
     "visitanos": "Horarios y cómo llegar",
     "errorTitulo": "No pudimos mostrar tu Inicio",
     "errorTexto": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
-    "reintentar": "Reintentar"
+    "reintentar": "Reintentar",
+    "proximoTurnoTitulo": "Tu próximo turno",
+    "proximoTurnoVerTodos": "Ver mis turnos",
+    "proximoTurnoMas": "{n, plural, one {Tenés # turno más.} other {Tenés # turnos más.}}",
+    "proximoTurnoError": "No pudimos cargar tus turnos. El resto del Inicio sigue andando."
   },
   "perfil": {
     "titulo": "Perfil",
@@ -1887,7 +1938,27 @@
     "guardando": "Guardando…",
     "guardado": "Guardamos tus cambios.",
     "errorGuardar": "No pudimos guardar tus cambios. Probá de nuevo en un rato.",
-    "ayudaTelefono": "Con la característica, sin el 0 ni el 15."
+    "ayudaTelefono": "Con la característica, sin el 0 ni el 15.",
+    "baja": {
+      "enlace": "Darme de baja de la app",
+      "miga": "Perfil",
+      "titulo": "Darme de baja de la app",
+      "intro": "Si te das de baja:",
+      "queSeBorra": "Se borran tu nombre, tu email, tu teléfono, tu dirección, tu foto y lo que escribiste en la app.",
+      "queSeCierra": "Dejás de figurar en tus ministerios, grupos y turnos. Si tenías un turno, a tu líder le avisamos que falta cubrirlo.",
+      "queQueda": "Donde aparecías en registros de otras personas (un turno que ya pasó, un grupo que terminó), se ve \"Persona dada de baja\", sin tu nombre.",
+      "noSeDeshace": "No se puede deshacer.",
+      "volver": "Si más adelante querés volver, te registrás de nuevo como alguien nuevo.",
+      "confirmacion": "Para confirmar, escribí BAJA",
+      "confirmacionAyuda": "En mayúsculas o minúsculas, da igual.",
+      "resumen": "Revisá esto antes de seguir:",
+      "confirmar": "Darme de baja",
+      "enviando": "Dándote de baja…",
+      "errorGenerico": "No pudimos darte de baja y no se borró nada. Probá de nuevo en un momento.",
+      "listaTitulo": "Listo, te diste de baja",
+      "listaTexto": "Borramos tus datos de la app. Gracias por haber sido parte. Si algún día querés volver, te esperamos.",
+      "listaInicio": "Ir al inicio"
+    }
   },
   "grupoExtension": {
     "dias": {
@@ -2023,6 +2094,12 @@
       "titulo": "No encontramos ese ministerio",
       "texto": "Puede que ya no lo lideres o que el enlace esté mal.",
       "volver": "Volver a Mi camino"
+    },
+    "turnos": {
+      "titulo": "Turnos",
+      "tituloDe": "Turnos de {ministerio}",
+      "intro": "Armá quién sirve en cada fecha. Mientras está en borrador nadie lo ve; al publicar, a cada persona le llega un aviso.",
+      "irATurnos": "Armar los turnos"
     }
   },
   "miGrupoExtension": {
@@ -2130,5 +2207,63 @@
     "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, avisanos con este código:",
     "reintentar": "Reintentar",
     "volverMiCamino": "Volver a Mi camino"
+  },
+  "turnos": {
+    "grilla": {
+      "fechas": "Próximas fechas",
+      "estado": {
+        "borrador": "Borrador",
+        "publicada": "Publicada"
+      },
+      "faltan": "{n, plural, one {Falta # persona} other {Faltan # personas}}",
+      "completa": "Completa",
+      "necesita": "{n, plural, one {Necesita # persona por fecha} other {Necesita # personas por fecha}}",
+      "todoElMinisterio": "Todo el Ministerio",
+      "agregarEn": "Agregar en {area}",
+      "sinDisponibles": "No hay más integrantes para sumar acá.",
+      "vecesQueSirvio": "{n, plural, =0 {No sirvió en las últimas fechas} one {Sirvió # vez en las últimas fechas} other {Sirvió # veces en las últimas fechas}}",
+      "enOtroMinisterio": "Ese día ya sirve en {ministerio}",
+      "asignar": "Sumar a {nombre}",
+      "asignado": "Listo: {nombre} sirve el {fecha}.",
+      "asignadoConAviso": "Listo: {nombre} sirve el {fecha}. Ese día también sirve en {ministerio}.",
+      "quitar": "Quitar",
+      "quitarA": "Quitar a {nombre} del {fecha}",
+      "quitado": "Listo: {nombre} ya no está el {fecha}.",
+      "copiar": "Copiar la fecha anterior",
+      "copiados": "{n, plural, =0 {No había nadie más para copiar.} one {Listo: se copió # turno.} other {Listo: se copiaron # turnos.}}",
+      "publicar": "Publicar",
+      "publicarTitulo": "¿Publicar el {fecha}?",
+      "publicarDescripcion": "{n, plural, =0 {Todavía no hay nadie asignado. Igual queda publicada.} one {Se le avisa a la persona que tiene turno.} other {Se les avisa a las # personas que tienen turno.}}",
+      "publicarConfirmar": "Sí, publicar",
+      "volver": "Volver",
+      "publicada": "Listo: el {fecha} quedó publicado.",
+      "publicadaAvisa": "Ya está publicada: lo que cambies se le avisa a quien entra y a quien sale.",
+      "borradorAyuda": "En borrador nadie ve estos turnos. Cuando esté lista, publicala.",
+      "sinFechas": "Todavía no hay fechas: el Ministerio necesita días de servicio, que los carga el Admin en el backoffice.",
+      "soloVer": "Ves los turnos sin poder cambiarlos.",
+      "reintentar": "Reintentar",
+      "errorGenerico": "No pudimos guardar el cambio. Probá de nuevo en un momento.",
+      "noPuede": "{nombre} avisó que no puede ir",
+      "motivo": "Motivo: {motivo}"
+    }
+  },
+  "misTurnos": {
+    "titulo": "Mis turnos",
+    "intro": "Las fechas en las que servís, ya publicadas por tu líder.",
+    "vacio": "Todavía no tenés turnos publicados. Cuando tu líder publique una fecha en la que servís, la vas a ver acá.",
+    "errorTitulo": "No pudimos mostrar tus turnos",
+    "errorTexto": "Probá de nuevo en unos segundos. Si sigue pasando, contanos e incluí este código:",
+    "reintentar": "Reintentar",
+    "noPuedoIr": "No puedo ir",
+    "noPuedoIrA": "No puedo ir el {fecha}",
+    "noPuedoTitulo": "¿No podés ir el {fecha}?",
+    "noPuedoDescripcion": "Le avisamos a tu líder para que busque a otra persona. Si querés, contale por qué: lo ve solo tu líder.",
+    "motivo": "Motivo (opcional)",
+    "contador": "{cantidad} de {maximo} caracteres",
+    "resumen": "Revisá esto antes de seguir:",
+    "avisar": "Avisar que no puedo",
+    "volver": "Volver",
+    "avisado": "Listo: le avisamos a tu líder que no podés ir el {fecha}.",
+    "errorGenerico": "No pudimos avisar. Probá de nuevo en un momento."
   }
 }
