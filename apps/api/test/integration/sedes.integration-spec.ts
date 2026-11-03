@@ -1,20 +1,17 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SignJWT } from 'jose';
 import request from 'supertest';
 import type { Server } from 'node:http';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { configurarApp } from '../../src/configurar-app.js';
+import { cerrarSesionesDeTest, tokenConRoles } from './sesion-con-roles.js';
 
-async function mintToken(rol: string[]): Promise<string> {
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-  return new SignJWT({ email: `${rol.join('-')}-integ@example.com`, personaId: 'x', estado: 'activa', rol })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('1h')
-    .sign(secret);
-}
+// D258: el helper de sesiones abre su propia conexión; se cierra al terminar el archivo.
+afterAll(cerrarSesionesDeTest);
+
+// D258: el rol sale de la base, así que el token es de una Persona real con ese rol.
+const mintToken = (rol: string[]): Promise<string> => tokenConRoles(rol);
 
 const mintAdminToken = () => mintToken(['admin']);
 
@@ -105,12 +102,7 @@ describe('PATCH /sedes/:id (integración) — soft delete real (Principio III)',
       data: { nombre: `Sede integ 403 ${Date.now()}`, direccion: 'D', horarios: 'H', contactoTelefono: '+54', activo: true },
     });
 
-    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-    const tokenSinRol = await new SignJWT({ email: 'x@example.com', personaId: 'x', estado: 'activa', rol: ['miembro_registrado'] })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('1h')
-      .sign(secret);
+    const tokenSinRol = await tokenConRoles(['miembro_registrado']);
 
     const response = await request(app.getHttpServer())
       .patch(`/sedes/${sede.id}`)

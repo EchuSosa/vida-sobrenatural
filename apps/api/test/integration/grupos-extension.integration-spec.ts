@@ -142,7 +142,8 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
       expect(encontrados.map((g) => g.id)).toEqual([mixtoId, cercaId, lejosId, sinUbicarId]);
       expect(encontrados[0].distanciaKm).toBeLessThan(encontrados[1].distanciaKm!);
       expect(encontrados[3].distanciaKm).toBeNull();
-      const texto = JSON.stringify(r.body);
+      // Sin los ids: un UUID al azar puede contener "820" (pasó el 2026-11-02) y no es la dirección.
+      const texto = JSON.stringify((r.body as GrupoExtensionEncontrado[]).map(({ id: _id, ...resto }) => resto));
       expect(texto).not.toContain('820');
       expect(texto).not.toContain('calle');
       expect(texto).not.toContain('telefono');
