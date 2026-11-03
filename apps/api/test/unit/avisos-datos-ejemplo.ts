@@ -107,6 +107,8 @@ export const IMPORTANTES_DOCS_16: readonly NombreEventoAviso[] = [
   'grupo_extension.solicitud_aceptada',
   'grupo_extension.solicitud_rechazada',
   'grupo_extension.agregada_por_admin',
-  // spec 017 (D256): el turno publicado ("servís el domingo…")
+  // spec 017 (D256, D260): el turno publicado, el que te quitaron y "este día no hay"
   'turno.asignado',
+  'turno.quitado',
+  'turno.fecha_suspendida',
 ];

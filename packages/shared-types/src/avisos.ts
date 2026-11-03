@@ -440,15 +440,15 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
     spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
     entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.asignado:${d.turnoId}`,
   },
-  // 017 (D256): sacada de una fecha ya publicada.
+  // 017 (D256, D260): sacada de una fecha ya publicada — importante (también por mail).
   'turno.quitado': {
-    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
     entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.quitado:${d.turnoId}`,
   },
-  // 017 (US1-3): "Este día no hay" en una fecha publicada, a quien tenía turno. Sin clave: suspender,
-  // habilitar y volver a suspender avisa las dos veces.
+  // 017 (US1-3, D260): "Este día no hay" en una fecha publicada, a quien tenía turno — importante
+  // (también por mail). Sin clave: suspender, habilitar y volver a suspender avisa las dos veces.
   'turno.fecha_suspendida': {
-    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
     entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: sinClave,
   },
   // 017 (D256): `DIAS_RECORDATORIO_TURNO` días antes (tarea diaria).

@@ -250,6 +250,23 @@
             "En Mis turnos ves todos tus turnos. Si no podés ir, avisale a tu líder."
           ],
           "boton": "Ver mis turnos"
+        },
+        "quitado": {
+          "asunto": "Cambió tu turno de servicio",
+          "titulo": "Ya no servís el {fecha}",
+          "parrafos": [
+            "Te sacaron del turno de {lugar}.",
+            "Si tenés dudas, hablá con tu líder."
+          ],
+          "boton": "Ver mis turnos"
+        },
+        "fecha_suspendida": {
+          "asunto": "Cambió tu turno de servicio",
+          "titulo": "El {fecha} no hay servicio",
+          "parrafos": [
+            "Se suspendió la fecha en la que servías en {lugar}. No hace falta que vayas."
+          ],
+          "boton": "Ver mis turnos"
         }
       }
     },
