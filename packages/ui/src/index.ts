@@ -184,3 +184,4 @@ export { BarraProporcion, type BarraProporcionProps } from './components/barra-p
 
 // --- spec 014 (Grupos de Extensión) ---
 export { textoDias, textoHorario, textoNombres } from './lib/textos-grupo-extension';
+export { GrillaTurnos, type GrillaTurnosProps, type TraductorGrilla } from './components/grilla-turnos';

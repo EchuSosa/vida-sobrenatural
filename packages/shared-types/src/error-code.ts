@@ -139,6 +139,17 @@ export type ErrorCode =
   | 'NO_APTA_PARA_MINISTERIO' // FR-002
   | 'YA_ES_MIEMBRO_DEL_MINISTERIO' // FR-004
   | 'YA_ES_LIDER_DEL_MINISTERIO' // spec 016
+  // spec 017 — turnos de servicio
+  | 'DIA_DE_SERVICIO_REPETIDO' // D250
+  | 'NO_ES_DIA_DE_SERVICIO' // la fecha no sale de ninguna regla activa
+  | 'FECHA_YA_PASO'
+  | 'FECHA_SUSPENDIDA' // "Este día no hay": no se asigna ni se publica
+  | 'YA_TIENE_TURNO_ESE_DIA' // D255
+  | 'NO_ES_INTEGRANTE' // no tiene Postulación aprobada en el Ministerio (o en esa área)
+  | 'SIN_FECHA_ANTERIOR' // "Copiar la fecha anterior" sin una publicada antes
+  | 'TURNO_YA_EMPEZO' // D257: "No puedo ir" después de que empezó la fecha
+  // Los de campo (FRECUENCIA_INVALIDA, DIA_SEMANA_INVALIDO, POSICION_EN_MES_INVALIDA,
+  // CUPO_TURNO_INVALIDO, AREA_INVALIDA, MOTIVO_CANCELACION_LARGO) van en `errors[]`, no acá.
   | 'POSTULACION_YA_PENDIENTE' // FR-003
   | 'POSTULACION_NO_PENDIENTE'
   | 'POSTULACION_REQUIERE_CONFIRMAR_CAMBIO' // FR-019, D173

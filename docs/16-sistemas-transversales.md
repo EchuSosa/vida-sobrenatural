@@ -21,6 +21,7 @@
 - Una propuesta de discipulado nuevo para el Discipulador (D201).
 - La cancelación de un Evento, para sus inscriptos (D193).
 - Grupos de Extensión (D228): el pedido nuevo para cada líder del Grupo, y la aceptación, el "no es para este grupo" o el alta directa por el Admin para la persona.
+- Turnos de servicio (D256, D260): el turno publicado ("Servís el domingo 8 de noviembre en Bienvenida — Seguridad"), que te saquen de un turno publicado y "Este día no hay" en una fecha en la que servías. El recordatorio va solo por Avisos.
 - Notificaciones manuales que el Admin marque explícitamente como importantes (opción al crearlas, con advertencia de usarla con moderación).
 
 Todo lo demás (contenido liberado, recordatorios de eventos, cambios del proceso como una finalización confirmada — disparador `proceso_actualizado`, D199 —, cambios de fecha o lugar de un Evento) va solo por Avisos (y push cuando exista). **Los eventos dirigidos al Admin no generan avisos en esta tanda**: el Admin los ve en Pendientes del backoffice (D201). La lista completa de avisos automáticos es un catálogo único en el código (`CATALOGO_AVISOS`, `packages/shared-types/src/avisos.ts`, D198).
