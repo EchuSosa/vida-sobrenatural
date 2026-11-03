@@ -91,6 +91,12 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(panel.getByText('El comprobante tiene que ser JPG, PNG, WebP o PDF: elegí otro archivo.').first()).toBeVisible();
 
       // Solo con teclado: el archivo se elige con el input (enfocable), y se envía con Enter.
+      // Flaky de #87 (2026-11-02, docs/24): después del primer envío el foco está en el resumen de
+      // errores. `setInputFiles` no mueve el foco, así que el resumen desaparecía estando enfocado y
+      // el panel se llevaba el foco a sí mismo, a veces después del `focus()` de "Efectivo": el
+      // espacio caía en el panel. Una persona con teclado llega al campo antes de elegir el archivo;
+      // el test hace lo mismo.
+      await panel.getByLabel('Comprobante').focus();
       await panel.getByLabel('Comprobante').setInputFiles({ name: 'comprobante.pdf', mimeType: 'application/pdf', buffer: PDF });
       await panel.getByLabel('Efectivo').focus();
       await page.keyboard.press('Space');
