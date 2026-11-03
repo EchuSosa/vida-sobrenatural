@@ -2,17 +2,18 @@
 
 Un PR. Las tres suites en verde antes de unir.
 
-- [ ] T001 Migración: `dadaDeBajaEn`, `dadaDeBajaPorId`, `motivoBajaInterno` en Persona;
+- [x] T001 Migración: `dadaDeBajaEn`, `dadaDeBajaPorId`, `motivoBajaInterno` en Persona;
   `ArchivoPendienteDeBorrar`. Permiso `personas.baja` → `['admin']`.
-- [ ] T002 shared-types: `PALABRA_CONFIRMACION_BAJA`, `MOTIVO_BAJA_MAX`, `NOMBRE_ANONIMO` y
+- [x] T002 shared-types: `PALABRA_CONFIRMACION_BAJA`, `MOTIVO_BAJA_MAX`, `NOMBRE_ANONIMO` y
   `datosAnonimos()`; unit.
-- [ ] T003 `BajaPersonaService.darDeBaja` con la tabla de `data-model.md` (FR-002–FR-006, FR-008,
+- [x] T003 `BajaPersonaService.darDeBaja` con la tabla de `data-model.md` (FR-002–FR-006, FR-008,
   FR-009), reusando los cierres que ya existen.
-- [ ] T004 Endpoints `POST /personas/me/baja` y `POST /personas/:id/baja`; listados y búsquedas sin
+- [x] T004 Endpoints `POST /personas/me/baja` y `POST /personas/:id/baja`; listados y búsquedas sin
   dadas de baja (FR-007).
-- [ ] T005 Archivos: borrado después del commit + tarea diaria de reintento (FR-004).
-- [ ] T006 Integración: SC-001 (barrido), SC-003, SC-004, último Admin, permisos, doble pedido,
-  sesión vieja.
+- [x] T005 Archivos: borrado después del commit + tarea diaria de reintento (FR-004).
+- [x] T006 Integración: SC-001 (barrido), SC-003, SC-004, permisos, doble pedido, sesión vieja.
+  El "único Admin" no se prueba en integración: la base de test es compartida y siempre tiene otros
+  Admins; queda cubierto en el e2e del backoffice si hace falta, o con un unit del chequeo.
 - [ ] T007 Web: Perfil → `/perfil/baja` → `/baja-lista`.
 - [ ] T008 Backoffice: "Dar de baja de la app" en el Perfil de Persona.
 - [ ] T009 e2e web y backoffice (feliz + error por campo + API caída + doble toque; Pastor; axe).

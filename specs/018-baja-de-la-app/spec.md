@@ -93,8 +93,7 @@ discipulado cerrado, un pago verificado en Pagos, un grupo de Vida de Servicio t
   ella (rechazos, bajas, "No puedo ir"): se borran — son datos sobre la persona.
 - **Lo que la persona escribió sobre otros** (notas de Encuentros como Discipuladora, motivos de
   rechazo como Admin): queda, porque es del registro del otro; el autor se ve como "Persona dada de baja".
-- **Comentarios de la app** ("Contanos qué te parece") con su nombre o contacto: se borran texto y
-  contacto.
+- **Comentarios de la app** ("Contanos qué te parece") que dejó con su sesión: se borran.
 - **Avisos**: se borran sus entregas; los avisos manuales que creó como Admin quedan, con el autor como "Persona dada de baja".
 - **Códigos de ingreso** pedidos con su email: se borran.
 - **Logs y Sentry**: no tienen datos personales (D101), así que no hay nada que borrar ahí; el log de

@@ -32,7 +32,7 @@ Al dar de baja: `nombre` "Persona", `apellido` "dada de baja", `email`, `dni`, `
 | FranjaAgenda, BloqueoDisponibilidad | se borran |
 | CodigoIngreso (por su email) | se borran |
 | EntregaNotificacion (suyas) | se borran |
-| ComentarioApp (suyos) | texto y contacto → null/"" (queda la fila, sin nada) |
+| ComentarioApp (suyos) | se borran (el texto es suyo; con sesión no guardan contacto) |
 | SolicitudDiscipulado, SolicitudVidaServicio, SolicitudBautismo, DeclaracionHistorial, SolicitudGrupoExtension (suyas) | `comentario`/`mensaje`/`motivo…` → null; las abiertas se cierran (retirada) |
 | PropuestaDiscipulado (como Discipuladora, pendiente) | se retira con aviso al Admin (Pendientes) |
 | Inscripcion / Liderazgo (Vida Nueva y Vida de Servicio, en curso) | baja / cierre como hoy, con aviso; motivos sobre ella → null |

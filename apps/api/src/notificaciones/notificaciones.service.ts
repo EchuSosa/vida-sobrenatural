@@ -81,6 +81,14 @@ export class NotificacionesService {
   }
 
   /**
+   * spec 018 (FR-003): al dar de baja a una Persona se borran sus Entregas (sus avisos y sus mails
+   * pendientes). Vive acá porque este servicio es el único que escribe en las tablas de avisos (T037).
+   */
+  async borrarEntregasDe(tx: Prisma.TransactionClient, personaId: string): Promise<number> {
+    return (await tx.entregaNotificacion.deleteMany({ where: { personaId } })).count;
+  }
+
+  /**
    * Las Entregas de una Notificación, una sentencia por canal (la usan `emitir`
    * y los avisos manuales del backoffice, Principio XI): `app` para todos,
    * `email` `pendiente` solo si es importante y para quienes tienen email.

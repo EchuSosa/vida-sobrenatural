@@ -1725,6 +1725,7 @@ model Turno {
   @@index([fechaId])
   @@index([personaId])
   @@map("turnos")
+}
 
 // spec 018 (FR-004): un archivo privado de una Persona dada de baja que no se pudo borrar al momento.
 // La tarea diaria lo reintenta; la baja no espera al archivo.

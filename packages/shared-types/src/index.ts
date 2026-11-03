@@ -32,3 +32,4 @@ export * from './registro.js';
 export * from './grupos-extension.js';
 export * from './eleccion-ministerio.js';
 export * from './turnos.js';
+export * from './baja.js';
