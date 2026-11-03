@@ -3056,5 +3056,102 @@
     "errorCrear": "No pudimos crear la Sede. Probá de nuevo en un rato.",
     "errorActualizar": "No pudimos actualizar la Sede. Probá de nuevo en un rato.",
     "errorEliminar": "No pudimos eliminar la Sede. Probá de nuevo en un rato."
+  },
+  "sedes": {
+    "titulo": "Sedes",
+    "papelera": "Papelera",
+    "crear": "Crear Sede",
+    "creando": "Creando…",
+    "crearDescripcion": "Se agrega activa; podés editarla después desde su detalle.",
+    "columnas": {
+      "nombre": "Nombre",
+      "direccion": "Dirección",
+      "horarios": "Horarios",
+      "estado": "Estado",
+      "eliminadaEl": "Eliminada el"
+    },
+    "buscar": "Buscar por nombre",
+    "buscarEjemplo": "Ej. La Plata",
+    "filtrarPorEstado": "Filtrar por estado",
+    "activas": "Activas",
+    "todas": "Todas",
+    "vacioBusqueda": "No encontramos Sedes que coincidan con \"{busqueda}\".",
+    "vacioActivas": "Todavía no hay Sedes activas.",
+    "vacioTodas": "Todavía no hay Sedes cargadas.",
+    "acciones": "Acciones para {nombre}",
+    "verDetalle": "Ver detalle",
+    "inactivar": "Inactivar",
+    "reactivar": "Reactivar",
+    "eliminar": "Eliminar {nombre}",
+    "eliminarBloqueadaTitulo": "No se puede eliminar {nombre}",
+    "eliminarBloqueadaDescripcion": "Tiene {n, plural, one {# Persona asociada} other {# Personas asociadas}} — eliminar una Sede se lleva también su historia (Principio III). Si ya no se usa, inactivala: sigue viéndose en \"Todas\", pero desaparece de Visitanos y del registro.",
+    "entendido": "Entendido",
+    "eliminarTitulo": "¿Eliminar {nombre}?",
+    "eliminarDescripcion": "Es para corregir un error de carga (duplicada, de prueba) — se saca de todas las vistas y queda en la papelera, desde donde se puede restaurar.",
+    "cancelar": "Cancelar",
+    "eliminando": "Eliminando…",
+    "siEliminar": "Sí, eliminar",
+    "error": {
+      "lista": "No pudimos cargar las Sedes",
+      "detalle": "No pudimos cargar esta Sede",
+      "papelera": "No pudimos cargar la papelera",
+      "texto": "Podés reintentar en unos segundos. Código de referencia:",
+      "reintentar": "Reintentar"
+    },
+    "noEncontrada": {
+      "titulo": "No encontramos esta Sede",
+      "volver": "Volver a Sedes"
+    },
+    "detalle": {
+      "guardados": "Cambios guardados.",
+      "errorGuardar": "No pudimos guardar los cambios.",
+      "desactivada": "Sede desactivada.",
+      "errorDesactivar": "No pudimos desactivar la Sede.",
+      "reactivada": "Sede reactivada.",
+      "nombreDuplicado": "Ya existe otra Sede activa con este nombre — cambiá el nombre antes de reactivar.",
+      "errorReactivar": "No pudimos reactivar la Sede.",
+      "desactivar": "Desactivar",
+      "desactivando": "Desactivando…",
+      "desactivarTitulo": "¿Desactivar la Sede {nombre}?",
+      "desactivarDescripcion": "Deja de mostrarse en Visitanos y en el registro. No se borra nada: las personas asociadas siguen igual y podés volver a activarla cuando quieras.",
+      "siDesactivar": "Sí, desactivar",
+      "volver": "Volver",
+      "reactivar": "Reactivar",
+      "reactivando": "Reactivando…",
+      "reactivarTitulo": "¿Reactivar la Sede {nombre}?",
+      "reactivarDescripcion": "Vuelve a mostrarse en Visitanos y en el registro.",
+      "siReactivar": "Sí, reactivar",
+      "guardar": "Guardar cambios",
+      "guardando": "Guardando…",
+      "unicaActivaTitulo": "Necesitás al menos una Sede activa",
+      "crearUna": "Crear una Sede"
+    },
+    "papeleraPantalla": {
+      "titulo": "Papelera de Sedes",
+      "descripcion": "Sedes eliminadas. Restaurar las devuelve a \"Todas\".",
+      "vacia": "La papelera está vacía.",
+      "restaurada": "{nombre} restaurada.",
+      "errorRestaurar": "No pudimos restaurar la Sede.",
+      "restaurar": "Restaurar",
+      "restaurando": "Restaurando…"
+    },
+    "formulario": {
+      "campos": {
+        "nombre": "Nombre",
+        "direccion": "Dirección",
+        "horarios": "Horarios",
+        "contactoTelefono": "Teléfono de contacto",
+        "contactoEmail": "Email de contacto",
+        "descripcionBienvenida": "Descripción para la Bienvenida",
+        "whatsappSecretaria": "WhatsApp de Secretaría"
+      },
+      "requerido": "Revisá este dato.",
+      "horariosEjemplo": "Horarios (ej. \"Domingos 10:30 hs\")",
+      "telefonoOpcional": "Teléfono de contacto (opcional)",
+      "codigoPais": "Código de país",
+      "whatsappOpcional": "WhatsApp de Secretaría (opcional)",
+      "whatsappAyuda": "Un celular, con la característica y sin el 0 ni el 15. Por ejemplo: 221 555 0101. Si lo cargás, Visitanos muestra el botón \"Escribir por WhatsApp\".",
+      "descripcionOpcional": "Descripción para la Bienvenida (opcional)"
+    }
   }
 }

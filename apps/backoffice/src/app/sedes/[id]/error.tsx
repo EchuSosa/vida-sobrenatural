@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@vida-sobrenatural/ui';
 
 // H-60/H-43 (revisión manual ronda 7): mismo patrón que arregló H-04.
@@ -13,6 +14,7 @@ export default function ErrorSedeDetalle({
   reset: () => void;
 }) {
   const router = useRouter();
+  const t = useTranslations('sedes.error');
 
   useEffect(() => {
     console.error('[sedes/[id]/error.tsx]', error.digest, error);
@@ -25,13 +27,13 @@ export default function ErrorSedeDetalle({
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16 text-center">
-      <h1 className="text-2xl font-semibold">No pudimos cargar esta Sede</h1>
+      <h1 className="text-2xl font-semibold">{t('detalle')}</h1>
       <p className="text-muted-foreground">
-        Podés reintentar en unos segundos. Código de referencia:{' '}
+        {t('texto')}{' '}
         <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{error.digest ?? 'sin-id'}</code>
       </p>
       <Button onClick={reintentar} className="mx-auto">
-        Reintentar
+        {t('reintentar')}
       </Button>
     </div>
   );

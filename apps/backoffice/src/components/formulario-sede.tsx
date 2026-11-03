@@ -2,6 +2,7 @@
 
 import { CircleAlert } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   type Sede,
   type ErrorDeCampo,
@@ -71,17 +72,7 @@ export function datosSedeParaEnviar(valores: ValoresSede) {
  * de alta, copiado íntegro hubiera sido la misma duplicación que ya marcó
  * H-49/Principio XI en el selector de tema.
  */
-const ETIQUETAS_CAMPO: Record<string, string> = {
-  nombre: 'Nombre',
-  direccion: 'Dirección',
-  horarios: 'Horarios',
-  contactoTelefono: 'Teléfono de contacto',
-  contactoEmail: 'Email de contacto',
-  descripcionBienvenida: 'Descripción para la Bienvenida',
-  whatsappSecretaria: 'WhatsApp de Secretaría',
-};
-
-const MENSAJE_REQUERIDO = 'Revisá este dato.';
+const CAMPOS_SEDE = ['nombre', 'direccion', 'horarios', 'contactoTelefono', 'contactoEmail', 'descripcionBienvenida', 'whatsappSecretaria'] as const;
 
 export function FormularioSede({
   valoresIniciales,
@@ -108,6 +99,10 @@ export function FormularioSede({
    */
   soloLectura?: boolean;
 }) {
+  const t = useTranslations('sedes.formulario');
+  // Backlog de casos infelices (#65): los textos del formulario salen de next-intl (D84).
+  const ETIQUETAS_CAMPO: Record<string, string> = Object.fromEntries(CAMPOS_SEDE.map((c) => [c, t(`campos.${c}`)]));
+  const MENSAJE_REQUERIDO = t('requerido');
   const [valores, setValores] = useState(valoresIniciales);
   // H-72 (revisión manual ronda 7): un error se limpia al escribir y se
   // revalida al salir del campo — antes horarios era el único campo con
@@ -179,7 +174,7 @@ export function FormularioSede({
       <div className="flex flex-col gap-1">
         <Input
           id="campo-nombre"
-          placeholder="Nombre"
+          placeholder={ETIQUETAS_CAMPO.nombre}
           aria-label={ETIQUETAS_CAMPO.nombre}
           required
           aria-invalid={Boolean(validacion.mensajes.nombre)}
@@ -197,7 +192,7 @@ export function FormularioSede({
       <div className="flex flex-col gap-1">
         <Input
           id="campo-direccion"
-          placeholder="Dirección"
+          placeholder={ETIQUETAS_CAMPO.direccion}
           aria-label={ETIQUETAS_CAMPO.direccion}
           required
           aria-invalid={Boolean(validacion.mensajes.direccion)}
@@ -215,7 +210,7 @@ export function FormularioSede({
       <div className="flex flex-col gap-1">
         <Input
           id="campo-horarios"
-          placeholder='Horarios (ej. "Domingos 10:30 hs")'
+          placeholder={t('horariosEjemplo')}
           aria-label={ETIQUETAS_CAMPO.horarios}
           required
           aria-invalid={Boolean(validacion.mensajes.horarios)}
@@ -232,8 +227,8 @@ export function FormularioSede({
       </div>
       <CampoTelefono
         id="campo-contactoTelefono"
-        labelTelefono="Teléfono de contacto (opcional)"
-        labelCodigo="Código de país"
+        labelTelefono={t('telefonoOpcional')}
+        labelCodigo={t('codigoPais')}
         codigoPais={valores.codigoPais}
         numero={valores.numero}
         onChangeCodigo={(v) => {
@@ -258,7 +253,7 @@ export function FormularioSede({
       <div className="flex flex-col gap-1">
         <Input
           id="campo-contactoEmail"
-          placeholder="Email de contacto"
+          placeholder={ETIQUETAS_CAMPO.contactoEmail}
           aria-label={ETIQUETAS_CAMPO.contactoEmail}
           type="email"
           aria-invalid={Boolean(validacion.mensajes.contactoEmail)}
@@ -274,11 +269,10 @@ export function FormularioSede({
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="campo-whatsappSecretaria" className="text-sm font-medium">
-          WhatsApp de Secretaría (opcional)
+          {t('whatsappOpcional')}
         </label>
         <p id="campo-whatsappSecretaria-ayuda" className="text-sm text-muted-foreground">
-          Un celular, con la característica y sin el 0 ni el 15. Por ejemplo: 221 555 0101. Si lo cargás,
-          Visitanos muestra el botón &quot;Escribir por WhatsApp&quot;.
+          {t('whatsappAyuda')}
         </p>
         <Input
           id="campo-whatsappSecretaria"
@@ -305,7 +299,7 @@ export function FormularioSede({
       </div>
       <textarea
         id="campo-descripcionBienvenida"
-        placeholder="Descripción para la Bienvenida (opcional)"
+        placeholder={t('descripcionOpcional')}
         aria-label={ETIQUETAS_CAMPO.descripcionBienvenida}
         value={valores.descripcionBienvenida}
         disabled={soloLectura}

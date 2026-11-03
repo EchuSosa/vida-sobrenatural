@@ -30,6 +30,8 @@ export function PapeleraCliente({
   const router = useRouter();
   const te = useTranslations('errors');
   const tcat = useTranslations('catalogos');
+  const ts = useTranslations('sedes');
+  const t = useTranslations('sedes.papeleraPantalla');
   const locale = useLocale();
   const procesandoRef = useRef(new Set<string>());
   const [restaurandoId, setRestaurandoId] = useState<string | null>(null);
@@ -44,10 +46,10 @@ export function PapeleraCliente({
         method: 'POST',
         headers: { Authorization: `Bearer ${apiToken}` },
       });
-      toast(`${sede.nombre} restaurada.`);
+      toast(t('restaurada', { nombre: sede.nombre }));
       router.refresh();
     } catch (e) {
-      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos restaurar la Sede.');
+      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : t('errorRestaurar'));
     } finally {
       procesandoRef.current.delete(sede.id);
       setRestaurandoId(null);
@@ -57,13 +59,13 @@ export function PapeleraCliente({
   const columnas: ColumnaTabla<Sede>[] = [
     {
       id: 'nombre',
-      encabezado: 'Nombre',
+      encabezado: ts('columnas.nombre'),
       ordenable: true,
       celda: (sede) => <span className="font-medium">{sede.nombre}</span>,
     },
     {
       id: 'eliminadoEn',
-      encabezado: 'Eliminada el',
+      encabezado: ts('columnas.eliminadaEl'),
       ordenable: true,
       className: 'hidden sm:table-cell',
       celda: (sede) => (sede.eliminadoEn ? formatearFechaHora(sede.eliminadoEn, locale) : '—'),
@@ -75,22 +77,22 @@ export function PapeleraCliente({
       {/* H-95: la miga de pan reemplaza el "Volver a X" escrito a mano — va
           arriba del <h1>, mismo componente en toda la app. */}
       <MigaDePan
-        tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: 'Sedes', href: '/sedes' }, { label: 'Papelera' }]}
+        tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: ts('titulo'), href: '/sedes' }, { label: ts('papelera') }]}
         LinkComponente={Link}
       />
       {/* H-96: el texto de acá abajo es lo único que necesita saber quien
           usa el backoffice — las referencias a decisiones (D119: borrado
           recuperable) van en comentarios como este, no en la interfaz. */}
-      <h1 className="text-2xl font-semibold">Papelera de Sedes</h1>
+      <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
       <p className="text-sm text-muted-foreground">
-        Sedes eliminadas. Restaurar las devuelve a &quot;Todas&quot;.
+        {t('descripcion')}
       </p>
 
       <ControlesTabla
         busqueda={busqueda}
         onBuscarChange={setBusqueda}
-        etiquetaBusqueda="Buscar por nombre"
-        placeholderBusqueda="Ej. La Plata"
+        etiquetaBusqueda={ts('buscar')}
+        placeholderBusqueda={ts('buscarEjemplo')}
         hayAlgoAplicado={busqueda.trim() !== ''}
         onLimpiar={() => limpiar()}
         cantidadResultados={sedes.length}
@@ -100,8 +102,8 @@ export function PapeleraCliente({
         columnas={columnas}
         datos={sedes}
         obtenerId={(sede) => sede.id}
-        etiqueta="Papelera de Sedes"
-        mensajeVacio={busqueda.trim() ? `No encontramos Sedes que coincidan con "${busqueda.trim()}".` : 'La papelera está vacía.'}
+        etiqueta={t('titulo')}
+        mensajeVacio={busqueda.trim() ? ts('vacioBusqueda', { busqueda: busqueda.trim() }) : t('vacia')}
         orden={orden}
         onOrdenar={(columnaId) =>
           actualizarParams({
@@ -116,10 +118,10 @@ export function PapeleraCliente({
                   variant="outline"
                   size="sm"
                   loading={restaurandoId === sede.id}
-                  loadingText="Restaurando…"
+                  loadingText={t('restaurando')}
                   onClick={() => restaurar(sede)}
                 >
-                  Restaurar
+                  {t('restaurar')}
                 </Button>
               )
             : undefined
