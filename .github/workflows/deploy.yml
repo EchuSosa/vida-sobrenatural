@@ -1,0 +1,79 @@
+# docs/26 — Publicar en Fly.io. Solo a mano (Actions → "Publicar en Fly.io" → Run workflow), y
+# además nada corre hasta que exista la variable del repo FLY_HABILITADO = "true". Así, tener este
+# archivo en main no publica nada por sí solo (Echu, 2026-11-02: "No avances con el deploy real
+# hasta que te avise").
+name: Publicar en Fly.io
+
+on:
+  workflow_dispatch:
+    inputs:
+      que:
+        description: "Qué publicar"
+        type: choice
+        options: [todo, api, web, backoffice]
+        default: todo
+
+concurrency:
+  group: publicar-fly
+  cancel-in-progress: false
+
+jobs:
+  api:
+    # La API primero: su release_command corre las migraciones antes de que las apps nuevas la usen.
+    if: vars.FLY_HABILITADO == 'true' && (inputs.que == 'todo' || inputs.que == 'api')
+    runs-on: ubuntu-latest
+    environment: produccion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Secretos de la API
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+          CODIGO_INGRESO_SECRET: ${{ secrets.CODIGO_INGRESO_SECRET }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_SEGURO: ${{ secrets.SMTP_SEGURO }}
+          EMAIL_REMITENTE: ${{ secrets.EMAIL_REMITENTE }}
+          EMAIL_COMENTARIOS_DESTINO: ${{ secrets.EMAIL_COMENTARIOS_DESTINO }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN_API }}
+        # --stage: quedan cargados y se aplican en el deploy de abajo (no reinicia dos veces).
+        # DATABASE_URL no va acá: lo carga `fly mpg attach` (docs/26, paso 3).
+        run: bash scripts/fly/cargar-secretos.sh fly.api.toml NEXTAUTH_SECRET INTERNAL_API_SECRET CODIGO_INGRESO_SECRET SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS SMTP_SEGURO EMAIL_REMITENTE EMAIL_COMENTARIOS_DESTINO SENTRY_DSN
+      - name: Publicar la API
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --config fly.api.toml --remote-only
+
+  apps:
+    needs: api
+    if: always() && vars.FLY_HABILITADO == 'true' && (needs.api.result == 'success' || needs.api.result == 'skipped') && inputs.que != 'api'
+    runs-on: ubuntu-latest
+    environment: produccion
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [web, backoffice]
+    steps:
+      - uses: actions/checkout@v4
+        if: inputs.que == 'todo' || inputs.que == matrix.app
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+        if: inputs.que == 'todo' || inputs.que == matrix.app
+      - name: Secretos de ${{ matrix.app }}
+        if: inputs.que == 'todo' || inputs.que == matrix.app
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+          AUTH_GOOGLE_ID: ${{ secrets.AUTH_GOOGLE_ID }}
+          AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
+          SENTRY_DSN: ${{ matrix.app == 'web' && secrets.SENTRY_DSN_WEB || secrets.SENTRY_DSN_BACKOFFICE }}
+        run: bash scripts/fly/cargar-secretos.sh fly.${{ matrix.app }}.toml NEXTAUTH_SECRET INTERNAL_API_SECRET AUTH_GOOGLE_ID AUTH_GOOGLE_SECRET SENTRY_DSN
+      - name: Publicar ${{ matrix.app }}
+        if: inputs.que == 'todo' || inputs.que == matrix.app
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --config fly.${{ matrix.app }}.toml --remote-only

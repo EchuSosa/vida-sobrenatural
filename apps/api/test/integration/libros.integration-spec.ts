@@ -1,22 +1,19 @@
 import { INestApplication } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SignJWT } from 'jose';
 import request from 'supertest';
 import sharp from 'sharp';
 import type { Server } from 'node:http';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { configurarApp } from '../../src/configurar-app.js';
+import { cerrarSesionesDeTest, tokenConRoles } from './sesion-con-roles.js';
 
-async function mintToken(rol: string[]): Promise<string> {
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-  return new SignJWT({ email: 'integ-libros@example.com', personaId: 'integ-libros', estado: 'activa', rol })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('1h')
-    .sign(secret);
-}
+// D258: el helper de sesiones abre su propia conexión; se cierra al terminar el archivo.
+afterAll(cerrarSesionesDeTest);
+
+// D258: el rol sale de la base, así que el token es de una Persona real con ese rol.
+const mintToken = (rol: string[]): Promise<string> => tokenConRoles(rol);
 
 // H-94: 1000×1500 (2:3, por encima del mínimo de 800×1200) — el mínimo en
 // sí tiene sus propios tests en imagen-portada.spec.ts (unit); acá sólo
