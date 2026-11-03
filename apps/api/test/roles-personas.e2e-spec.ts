@@ -8,6 +8,7 @@ import { PrismaService } from '../src/prisma/prisma.service.js';
 import { configurarApp } from '../src/configurar-app.js';
 import { cerrarSesionesDeTest, tokenConRoles } from './integration/sesion-con-roles.js';
 import { limpiarAvisos } from './integration/notificaciones-fixtures.js';
+import { cursoDelCatalogo } from './integration/discipulado-fixtures.js';
 
 // D258: el helper de sesiones abre su propia conexión; se cierra al terminar el archivo.
 afterAll(cerrarSesionesDeTest);
@@ -119,13 +120,9 @@ describe('Roles de cargo y listado de Personas (integración, contra base de dat
     // specs/004 (D137): un discipulado activo = Liderazgo vigente en un Grupo
     // en curso. Armado por Prisma: lo que se prueba acá es la guarda, no
     // cómo se llega a tenerlo (eso es de los lotes A y B).
-    cursoId = (
-      await prisma.curso.upsert({
-        where: { categoria_tipo: { categoria: 'vida_nueva', tipo: 'individual' } },
-        update: {},
-        create: { nombre: 'Vida Nueva', categoria: 'vida_nueva', tipo: 'individual', modalidad: 'seguimiento_por_encuentros' },
-      })
-    ).id;
+    // Falla de la CI de #90 (2026-11-03): un `upsert` del mismo Curso desde otro archivo de test a la
+    // vez chocaba con el único (P2002). `cursoDelCatalogo` es el que ya tolera esa carrera.
+    cursoId = (await cursoDelCatalogo(prisma, { nombre: 'Vida Nueva', categoria: 'vida_nueva', tipo: 'individual', modalidad: 'seguimiento_por_encuentros' })).id;
     grupoId = await grupoLideradoPor(ids.discipuladora, ids.inscripta);
     // FR-043: una Propuesta pendiente también traba la quita.
     solicitudPideId = (await prisma.solicitudDiscipulado.create({ data: { personaId: ids.pide, estado: 'propuesta' } })).id;
