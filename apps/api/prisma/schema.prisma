@@ -44,9 +44,9 @@ model Sede {
   eliminadoEn  DateTime?
   eliminadoPor String?
 
-  personas Persona[]
+  personas        Persona[]
   // spec 011: una Sede con Eventos no se puede eliminar, solo inactivar (D119).
-  eventos  Evento[]
+  eventos         Evento[]
   // spec 014: los Grupos de Extensión que se reúnen "En la iglesia".
   gruposExtension GrupoExtension[]
 
@@ -119,7 +119,7 @@ enum Profesion {
 }
 
 model Persona {
-  id       String @id @default(uuid())
+  id       String  @id @default(uuid())
   // Único dato de contacto con constraint de unicidad (FR-009) — el teléfono
   // explícitamente no lo es (ver Clarifications en spec.md).
   // D145 (spec 006): opcional — una Persona dada de alta por el Admin puede no
@@ -137,28 +137,28 @@ model Persona {
   nombre   String
   apellido String
 
-  genero             Genero
-  fechaNacimiento    DateTime
-  telefono           String
+  genero              Genero
+  fechaNacimiento     DateTime
+  telefono            String
   // D145 (spec 006, research #7): solo dígitos y sin el 9 de celular de AR
   // (`normalizarTelefono`, shared-types). Lo calcula la BASE con un trigger
   // en cada INSERT/UPDATE de `telefono` (migración lote_0_global): ningún
   // camino de escritura puede olvidarlo. El código nunca lo escribe; el
   // `@default("")` es solo para que Prisma no lo exija al crear.
-  telefonoNormalizado String @default("")
-  direccion          String
-  estadoCivil        EstadoCivil
-  profesion          Profesion
+  telefonoNormalizado String      @default("")
+  direccion           String
+  estadoCivil         EstadoCivil
+  profesion           Profesion
   // Solo tiene sentido (y se completa) cuando profesion = otro.
-  profesionDetalle   String?
+  profesionDetalle    String?
   // D214: el año en que la Persona empezó a venir a la iglesia. El tiempo
   // congregándose se calcula al mostrarlo (`rangoCongregacion`, shared-types),
   // así queda al día. Reemplaza al viejo rango `tiempoCongregacion`: la
   // migración del lote 0 lo convirtió (año de registro − límite inferior).
-  congregaDesde      Int
+  congregaDesde       Int
   // Foto de perfil de Google (picture), guardada al registrarse. Opcional,
   // no editable por la propia Persona por ahora.
-  fotoUrl            String?
+  fotoUrl             String?
 
   // Base Transversal (specs/002-base-transversal) — sin UI para cambiar
   // idiomaPreferido todavía (solo "es"); temaPreferido sí es editable por la
@@ -245,16 +245,18 @@ model Persona {
   solicitudesBautismo   SolicitudBautismo[]
   inscripcionesEvento   InscripcionEvento[]
   entregasNotificacion  EntregaNotificacion[]
-  notificacionesCreadas Notificacion[]       @relation("NotificacionesCreadas")
-  comentarios           ComentarioApp[]      @relation("ComentariosDePersona")
-  comentariosRevisados  ComentarioApp[]      @relation("ComentariosRevisados")
+  notificacionesCreadas Notificacion[]        @relation("NotificacionesCreadas")
+  comentarios           ComentarioApp[]       @relation("ComentariosDePersona")
+  comentariosRevisados  ComentarioApp[]       @relation("ComentariosRevisados")
 
   // spec 014: Grupos de Extensión.
-  liderazgosExtension   LiderGrupoExtension[]
+  liderazgosExtension  LiderGrupoExtension[]
   // spec 016 (D244): Ministerios que lidera.
-  liderazgosMinisterio  LiderMinisterio[]
-  solicitudesExtension  SolicitudGrupoExtension[]
-  eleccionesMinisterio  EleccionMinisterio[]
+  liderazgosMinisterio LiderMinisterio[]
+  // spec 017: turnos de servicio de la Persona (D255).
+  turnos               Turno[]
+  solicitudesExtension SolicitudGrupoExtension[]
+  eleccionesMinisterio EleccionMinisterio[]
 
   // H-42 (revisión manual, revisión de código): PostgreSQL no indexa las
   // claves foráneas por sí solo — `sedeId` lo necesita como FK.
@@ -324,12 +326,12 @@ model RelacionFamiliar {
 model PalabraProfetica {
   id String @id @default(uuid())
 
-  anio  Int
+  anio   Int
   titulo String
   // D121: el texto es lo único realmente obligatorio de la palabra — sin
   // texto no hay palabra que publicar. El video es una de las formas en
   // que se comparte, no la palabra en sí.
-  texto String @db.Text
+  texto  String @db.Text
 
   // D121 (precisa D109): el video de YouTube es OPCIONAL — puede llegar
   // después del anuncio, o no existir. Se guarda tal como la cargó el
@@ -414,18 +416,18 @@ enum OrigenCambioRol {
 }
 
 model CambioDeRol {
-  id        String          @id @default(uuid())
-  personaId String
-  persona   Persona         @relation(fields: [personaId], references: [id])
-  rol       String
-  accion    AccionCambioRol
-  origen    OrigenCambioRol
+  id             String          @id @default(uuid())
+  personaId      String
+  persona        Persona         @relation(fields: [personaId], references: [id])
+  rol            String
+  accion         AccionCambioRol
+  origen         OrigenCambioRol
   // Referencia lógica al id de la Persona Admin (mismo criterio que
   // Persona.altaPor, D97). Nullable SOLO por la fila del CLI: la invariante
   // "toda fila de backoffice tiene autor" la sostiene un CHECK en la base
   // (migración 20260925204725_cambio_de_rol), no este comentario (H-140).
   realizadoPorId String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime        @default(now())
 
   // H-42: el filtro frecuente es "el historial de esta Persona".
   @@index([personaId])
@@ -506,19 +508,19 @@ enum EstadoInscripcion {
 }
 
 model Curso {
-  id        String         @id @default(uuid())
-  nombre    String
-  categoria CategoriaCurso
-  tipo      TipoCurso
-  modalidad ModalidadCurso
-  activo    Boolean        @default(true)
+  id                    String          @id @default(uuid())
+  nombre                String
+  categoria             CategoriaCurso
+  tipo                  TipoCurso
+  modalidad             ModalidadCurso
+  activo                Boolean         @default(true)
   // spec 008: para inscribirse hay que haber completado una etapa de esta
   // categoría (`vida_nueva` para Vida de Servicio). null = sin prerrequisito.
   prerequisitoCategoria CategoriaCurso?
   // spec 013 (D212, D119): el Admin edita nombre y descripción; borrado lógico.
-  descripcion  String?
-  eliminadoEn  DateTime?
-  eliminadoPor String?
+  descripcion           String?
+  eliminadoEn           DateTime?
+  eliminadoPor          String?
 
   grupos    Grupo[]
   createdAt DateTime @default(now())
@@ -532,13 +534,13 @@ model Curso {
 // FR-031: la agenda semanal del Discipulador. `inicio`/`fin` en minutos desde
 // las 0:00 (0..1440), `fin > inicio` (CHECK). Borrado lógico (FR-040).
 model FranjaAgenda {
-  id         String    @id @default(uuid())
-  personaId  String
-  diaSemana  Int
-  inicio     Int
-  fin        Int
+  id          String    @id @default(uuid())
+  personaId   String
+  diaSemana   Int
+  inicio      Int
+  fin         Int
   eliminadaEn DateTime?
-  createdAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([personaId, eliminadaEn])
   @@map("franjas_agenda")
@@ -547,7 +549,7 @@ model FranjaAgenda {
 // FR-032: las franjas de una Solicitud (los horarios de la Persona). Al editar
 // (FR-039) se reemplazan todas. Al menos una por Solicitud lo exige el servicio.
 model FranjaSolicitud {
-  id          String              @id @default(uuid())
+  id          String               @id @default(uuid())
   solicitudId String
   solicitud   SolicitudDiscipulado @relation(fields: [solicitudId], references: [id])
   diaSemana   Int
@@ -570,8 +572,8 @@ model SolicitudDiscipulado {
   grupoId       String?
 
   franjas   FranjaSolicitud[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
   // Un solo pedido abierto por Persona (pendiente|propuesta): índice único
   // parcial en SQL a mano (FR-001).
@@ -584,20 +586,20 @@ model SolicitudDiscipulado {
 // FR-036 a FR-038: el Admin propone, el Discipulador acepta o declina. Entidad
 // propia porque FR-038 pide historial (a quién, cuándo, cómo terminó).
 model PropuestaDiscipulado {
-  id             String          @id @default(uuid())
-  tipo           TipoPropuesta
+  id                String          @id @default(uuid())
+  tipo              TipoPropuesta
   // `nueva` tiene solicitudId; `reasignacion` tiene grupoId (CHECK en SQL).
-  solicitudId    String?
-  grupoId        String?
-  discipuladorId String
+  solicitudId       String?
+  grupoId           String?
+  discipuladorId    String
   // Solo en `nueva`: sumar la Persona a este Grupo en curso en vez de abrir uno (FR-045).
-  grupoDestinoId String?
-  propuestaPorId String
-  propuestaEn    DateTime        @default(now())
-  estado         EstadoPropuesta @default(pendiente)
-  respondidaEn   DateTime?
+  grupoDestinoId    String?
+  propuestaPorId    String
+  propuestaEn       DateTime        @default(now())
+  estado            EstadoPropuesta @default(pendiente)
+  respondidaEn      DateTime?
   motivoDeclinacion String?
-  retiradaPor    RetiradaPor?
+  retiradaPor       RetiradaPor?
 
   // Una `pendiente` por Solicitud y una por Grupo: índices únicos parciales en SQL.
   @@index([solicitudId])
@@ -607,21 +609,21 @@ model PropuestaDiscipulado {
 }
 
 model Grupo {
-  id       String @id @default(uuid())
-  cursoId  String
-  curso    Curso  @relation(fields: [cursoId], references: [id])
+  id           String             @id @default(uuid())
+  cursoId      String
+  curso        Curso              @relation(fields: [cursoId], references: [id])
   // Referencia lógica a Sede (no navegamos Sede→Grupos en este spec).
-  sedeId   String
-  estado   EstadoGrupo       @default(en_curso)
+  sedeId       String
+  estado       EstadoGrupo        @default(en_curso)
   // Solo en `finalizado`: (estado = finalizado) = (motivoCierre no es null), CHECK en SQL.
   motivoCierre MotivoCierreGrupo?
 
-  propuestaFinalizacionEn      DateTime?
-  propuestaFinalizacionPorId   String?
-  finalizacionRechazadaEn      DateTime?
-  finalizacionRechazadaMotivo  String?
-  cerradoEn                    DateTime?
-  cerradoPorId                 String?
+  propuestaFinalizacionEn     DateTime?
+  propuestaFinalizacionPorId  String?
+  finalizacionRechazadaEn     DateTime?
+  finalizacionRechazadaMotivo String?
+  cerradoEn                   DateTime?
+  cerradoPorId                String?
 
   // spec 008: una edición de Vida de Servicio tiene nombre (≤ 80) y fecha de
   // inicio (obligatorios ahí, lo valida el servicio); Vida Nueva los deja null.
@@ -631,14 +633,14 @@ model Grupo {
   // spec 015 (D239): la elección de ministerio de esta edición está abierta.
   eleccionAbierta    Boolean   @default(false)
 
-  inscripciones Inscripcion[]
-  liderazgos    Liderazgo[]
-  encuentros    Encuentro[]
-  items         ItemCronograma[]
-  contenidos    Contenido[]
+  inscripciones           Inscripcion[]
+  liderazgos              Liderazgo[]
+  encuentros              Encuentro[]
+  items                   ItemCronograma[]
+  contenidos              Contenido[]
   solicitudesVidaServicio SolicitudVidaServicio[]
   eleccionesMinisterio    EleccionMinisterio[]
-  createdAt     DateTime @default(now())
+  createdAt               DateTime                @default(now())
 
   @@index([cursoId])
   @@index([sedeId])
@@ -647,19 +649,19 @@ model Grupo {
 }
 
 model Inscripcion {
-  id          String            @id @default(uuid())
-  personaId   String
-  grupoId     String
-  grupo       Grupo             @relation(fields: [grupoId], references: [id])
+  id                      String                 @id @default(uuid())
+  personaId               String
+  grupoId                 String
+  grupo                   Grupo                  @relation(fields: [grupoId], references: [id])
   // De qué pedido nació: sus franjas son el horario de esta Persona (research
   // #14). spec 008: una Inscripción nace de una Solicitud de Discipulado O de
   // una Solicitud de Vida de Servicio — exactamente una (CHECK num_nonnulls).
-  solicitudId             String?           @unique
-  solicitudVidaServicioId String?           @unique
+  solicitudId             String?                @unique
+  solicitudVidaServicioId String?                @unique
   solicitudVidaServicio   SolicitudVidaServicio? @relation(fields: [solicitudVidaServicioId], references: [id])
-  estado      EstadoInscripcion @default(activa)
+  estado                  EstadoInscripcion      @default(activa)
   // spec 008 (D158): tipo propuesto por el Líder; solo Vida de Servicio.
-  bajaPropuestaTipo TipoBaja?
+  bajaPropuestaTipo       TipoBaja?
 
   bajaPropuestaEn     DateTime?
   bajaPropuestaPorId  String?
@@ -669,7 +671,7 @@ model Inscripcion {
   cerradaEn           DateTime?
 
   asistencias Asistencia[]
-  createdAt   DateTime @default(now())
+  createdAt   DateTime     @default(now())
 
   @@unique([personaId, grupoId])
   @@index([personaId])
@@ -678,15 +680,15 @@ model Inscripcion {
 }
 
 model Liderazgo {
-  id          String    @id @default(uuid())
-  personaId   String
-  grupoId     String
-  grupo       Grupo     @relation(fields: [grupoId], references: [id])
-  desde       DateTime  @default(now())
+  id           String    @id @default(uuid())
+  personaId    String
+  grupoId      String
+  grupo        Grupo     @relation(fields: [grupoId], references: [id])
+  desde        DateTime  @default(now())
   // null = vigente. Lo cierra una reasignación aceptada (FR-030).
-  hasta       DateTime?
+  hasta        DateTime?
   // La Propuesta que lo abrió (FR-037): queda quién propuso y quién aceptó.
-  propuestaId String?
+  propuestaId  String?
   cerradoPorId String?
 
   // discipulados activos de una Persona (D137) y "mis discipulados".
@@ -696,19 +698,19 @@ model Liderazgo {
 }
 
 model Encuentro {
-  id             String    @id @default(uuid())
-  grupoId        String
-  grupo          Grupo     @relation(fields: [grupoId], references: [id])
-  fecha          DateTime  @db.Date
+  id              String   @id @default(uuid())
+  grupoId         String
+  grupo           Grupo    @relation(fields: [grupoId], references: [id])
+  fecha           DateTime @db.Date
   // spec 008: opcional — un Encuentro de asistencia de Vida de Servicio no
   // tiene capítulos (uno por Grupo y fecha, índice parcial en SQL). Vida Nueva
   // lo sigue exigiendo en su servicio.
-  capitulos      String?
+  capitulos       String?
   // Solo las ve el Discipulador vigente (D134, FR-029).
-  notas          String?
+  notas           String?
   registradoPorId String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   asistencias Asistencia[]
 
@@ -733,12 +735,12 @@ model Asistencia {
 // FR-016: período de no disponibilidad por rango de fechas civiles. `hasta >=
 // desde` (CHECK). Borrado lógico (FR-040).
 model BloqueoDisponibilidad {
-  id         String    @id @default(uuid())
-  personaId  String
-  desde      DateTime  @db.Date
-  hasta      DateTime  @db.Date
+  id          String    @id @default(uuid())
+  personaId   String
+  desde       DateTime  @db.Date
+  hasta       DateTime  @db.Date
   eliminadoEn DateTime?
-  createdAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([personaId, hasta])
   @@map("bloqueos_disponibilidad")
@@ -771,7 +773,7 @@ enum EstadoDeclaracion {
 
 enum OrigenCompletitud {
   declaracion // la confirmó el Admin a partir de un "Ya lo hice"
-  admin       // la registró el Admin directamente (Flujo 9)
+  admin // la registró el Admin directamente (Flujo 9)
 }
 
 // Lo que la Persona declara con "Ya lo hice" (forma común de las Solicitudes).
@@ -793,10 +795,10 @@ model DeclaracionHistorial {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
-  completitud CompletitudManual?
+  completitud        CompletitudManual?
   // spec 015 (D243): "Ya sirvo en un ministerio" — lo elegido del listado y desde qué año.
-  desdeAnio            Int?
-  opcionesMinisterio   OpcionDeclaracionMinisterio[]
+  desdeAnio          Int?
+  opcionesMinisterio OpcionDeclaracionMinisterio[]
 
   @@index([personaId, etapa])
   @@index([estado, createdAt])
@@ -965,25 +967,29 @@ enum MotivoInactivacionPostulacion {
 }
 
 model Ministerio {
-  id           String    @id @default(uuid())
-  nombre       String
-  descripcion  String
+  id                String    @id @default(uuid())
+  nombre            String
+  descripcion       String
   // docs/22 (migración `ministerios_contenido`): la "línea pública" (lo único
   // que muestra la web pública además del nombre) y si requiere capacitación
   // o audición antes de servir.
   lineaPublica      String?
   requiereFormacion Boolean   @default(false)
-  activo       Boolean   @default(true)
-  eliminadoEn  DateTime?
-  eliminadoPor String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  activo            Boolean   @default(true)
+  eliminadoEn       DateTime?
+  eliminadoPor      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  celulas       Celula[]
-  postulaciones Postulacion[]
-  opcionesEleccion OpcionEleccionMinisterio[]
+  celulas             Celula[]
+  postulaciones       Postulacion[]
+  opcionesEleccion    OpcionEleccionMinisterio[]
   opcionesDeclaracion OpcionDeclaracionMinisterio[]
-  lideres       LiderMinisterio[]
+  lideres             LiderMinisterio[]
+  // spec 017 (D250, D251): días de servicio, fechas y cupo para los Ministerios sin Células.
+  diasDeServicio      DiaDeServicio[]
+  fechasDeServicio    FechaDeServicio[]
+  cupoTurno           Int                           @default(1)
 
   @@index([activo, eliminadoEn])
   @@map("ministerios")
@@ -1010,24 +1016,28 @@ model LiderMinisterio {
 }
 
 model Celula {
-  id           String     @id @default(uuid())
-  ministerioId String
-  ministerio   Ministerio @relation(fields: [ministerioId], references: [id])
-  nombre       String
+  id                    String     @id @default(uuid())
+  ministerioId          String
+  ministerio            Ministerio @relation(fields: [ministerioId], references: [id])
+  nombre                String
   // docs/22: qué se hace en esta área (lo ve la Persona al postularse).
-  descripcion  String?
+  descripcion           String?
   // docs/22: "Discipulados Vida Nueva" — al aprobar, el Admin puede otorgar
   // el rol `discipulador` en el mismo paso (reglas de la 005).
-  ofreceRolDiscipulador Boolean @default(false)
-  activo       Boolean    @default(true)
-  eliminadoEn  DateTime?
-  eliminadoPor String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  ofreceRolDiscipulador Boolean    @default(false)
+  activo                Boolean    @default(true)
+  eliminadoEn           DateTime?
+  eliminadoPor          String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
 
-  postulaciones Postulacion[]
-  opcionesEleccion OpcionEleccionMinisterio[]
+  postulaciones       Postulacion[]
+  opcionesEleccion    OpcionEleccionMinisterio[]
   opcionesDeclaracion OpcionDeclaracionMinisterio[]
+
+  // spec 017 (D251): cuánta gente necesita esta Célula (área) por fecha de servicio.
+  cupoTurno Int     @default(1)
+  turnos    Turno[]
 
   @@index([ministerioId])
   @@map("celulas")
@@ -1079,7 +1089,7 @@ model Postulacion {
 
 enum EstadoSolicitudBautismo {
   pendiente
-  aprobada  // "aceptada" en la interfaz; sin o con Evento asignado
+  aprobada // "aceptada" en la interfaz; sin o con Evento asignado
   rechazada
   retirada
   realizada // el Admin confirmó que se bautizó (D180)
@@ -1164,44 +1174,44 @@ enum EstadoPago {
 }
 
 model Evento {
-  id                           String       @id @default(uuid())
-  sedeId                       String
-  sede                         Sede         @relation(fields: [sedeId], references: [id])
-  nombre                       String
+  id                            String             @id @default(uuid())
+  sedeId                        String
+  sede                          Sede               @relation(fields: [sedeId], references: [id])
+  nombre                        String
   // Se genera al crear y nunca cambia (D194).
-  slug                         String       @unique
-  descripcion                  String
-  tipo                         TipoEvento   @default(general)
-  inicio                       DateTime     @db.Timestamptz
-  fin                          DateTime?    @db.Timestamptz
+  slug                          String             @unique
+  descripcion                   String
+  tipo                          TipoEvento         @default(general)
+  inicio                        DateTime           @db.Timestamptz
+  fin                           DateTime?          @db.Timestamptz
   // null = la dirección de la Sede (D190).
-  lugar                        String?
-  publicoObjetivo              String?
-  imagenUrl                    String?
-  imagenRuta                   String?
-  descripcionImagen            String?
-  requiereInscripcion          Boolean
-  requiereAprobacion           Boolean      @default(false)
-  cupo                         Int?
-  permiteListaEspera           Boolean      @default(false)
-  costo                        Decimal?     @db.Decimal(10, 2)
-  instruccionesPago            String?
-  diasAnticipacionRecordatorio Int?
+  lugar                         String?
+  publicoObjetivo               String?
+  imagenUrl                     String?
+  imagenRuta                    String?
+  descripcionImagen             String?
+  requiereInscripcion           Boolean
+  requiereAprobacion            Boolean            @default(false)
+  cupo                          Int?
+  permiteListaEspera            Boolean            @default(false)
+  costo                         Decimal?           @db.Decimal(10, 2)
+  instruccionesPago             String?
+  diasAnticipacionRecordatorio  Int?
   // Ampliación 2026-10-09 (FR-060, D230): destinatarios con efecto. Edades en
   // años cumplidos al día del Evento; null = sin límite.
-  destinatariosGenero          GeneroDestinatario @default(todas)
-  edadMinima                   Int?
-  edadMaxima                   Int?
+  destinatariosGenero           GeneroDestinatario @default(todas)
+  edadMinima                    Int?
+  edadMaxima                    Int?
   // FR-069 (D232): cuándo se borraron las respuestas sensibles (idempotencia).
   respuestasSensiblesBorradasEn DateTime?
-  estado                       EstadoEvento @default(publicado)
-  canceladoEn                  DateTime?
-  canceladoPorId               String?
-  eliminadoEn                  DateTime?
-  eliminadoPorId               String?
-  creadoPorId                  String
-  createdAt                    DateTime     @default(now())
-  updatedAt                    DateTime     @updatedAt
+  estado                        EstadoEvento       @default(publicado)
+  canceladoEn                   DateTime?
+  canceladoPorId                String?
+  eliminadoEn                   DateTime?
+  eliminadoPorId                String?
+  creadoPorId                   String
+  createdAt                     DateTime           @default(now())
+  updatedAt                     DateTime           @updatedAt
 
   inscripciones InscripcionEvento[]
   preguntas     PreguntaEvento[]
@@ -1214,27 +1224,27 @@ model Evento {
 }
 
 model InscripcionEvento {
-  id                String                        @id @default(uuid())
-  eventoId          String
-  evento            Evento                        @relation(fields: [eventoId], references: [id])
-  personaId         String
-  persona           Persona                       @relation(fields: [personaId], references: [id])
-  estado            EstadoInscripcionEvento
-  createdAt         DateTime                      @default(now())
+  id                   String                        @id @default(uuid())
+  eventoId             String
+  evento               Evento                        @relation(fields: [eventoId], references: [id])
+  personaId            String
+  persona              Persona                       @relation(fields: [personaId], references: [id])
+  estado               EstadoInscripcionEvento
+  createdAt            DateTime                      @default(now())
   // null = la propia Persona.
-  creadoPorId       String?
-  enListaDesde      DateTime?
-  promovidaEn       DateTime?
-  promocionVistaEn  DateTime?
-  revisadoPorId     String?
-  revisadoEn        DateTime?
-  motivoRechazo     String?
-  canceladaEn       DateTime?
-  canceladaPorId    String?
-  motivoCancelacion MotivoCancelacionInscripcion?
+  creadoPorId          String?
+  enListaDesde         DateTime?
+  promovidaEn          DateTime?
+  promocionVistaEn     DateTime?
+  revisadoPorId        String?
+  revisadoEn           DateTime?
+  motivoRechazo        String?
+  canceladaEn          DateTime?
+  canceladaPorId       String?
+  motivoCancelacion    MotivoCancelacionInscripcion?
   // FR-062: el Admin la anotó con confirmación aunque no estaba entre los destinatarios.
-  fueraDeDestinatarios Boolean                    @default(false)
-  updatedAt         DateTime                      @updatedAt
+  fueraDeDestinatarios Boolean                       @default(false)
+  updatedAt            DateTime                      @updatedAt
 
   pagos             Pago[]
   respuestas        RespuestaPreguntaEvento[]
@@ -1459,7 +1469,7 @@ enum DiaSemana {
 
 enum EstadoSolicitudGrupoExtension {
   pendiente
-  aceptada   // ES la pertenencia (D225, mismo criterio que D170)
+  aceptada // ES la pertenencia (D225, mismo criterio que D170)
   rechazada
   retirada
   finalizada // la quitó el Admin
@@ -1470,29 +1480,29 @@ enum EstadoSolicitudGrupoExtension {
 // faltar (el Grupo queda sin distancia). El género NO se guarda: sale de los
 // líderes vigentes (D222). CHECK de forma en la migración `grupos_extension`.
 model GrupoExtension {
-  id           String      @id @default(uuid())
-  nombre       String
-  dias         DiaSemana[]
+  id          String      @id @default(uuid())
+  nombre      String
+  dias        DiaSemana[]
   // "HH:MM", en pasos de 15 minutos (CHECK).
-  horaInicio   String
-  cupo         Int?
-  edadMinima   Int?
-  edadMaxima   Int?
-  enLaIglesia  Boolean     @default(false)
-  sedeId       String?
-  sede         Sede?       @relation(fields: [sedeId], references: [id])
-  calle        String?
-  numero       String?
-  entreCalle1  String?
-  entreCalle2  String?
+  horaInicio  String
+  cupo        Int?
+  edadMinima  Int?
+  edadMaxima  Int?
+  enLaIglesia Boolean     @default(false)
+  sedeId      String?
+  sede        Sede?       @relation(fields: [sedeId], references: [id])
+  calle       String?
+  numero      String?
+  entreCalle1 String?
+  entreCalle2 String?
   // Barrio o zona: lo único del lugar que ve quien todavía no es integrante (D224).
-  zona         String?
-  latitud      Float?
-  longitud     Float?
-  activo       Boolean     @default(true)
-  creadoPorId  String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  zona        String?
+  latitud     Float?
+  longitud    Float?
+  activo      Boolean     @default(true)
+  creadoPorId String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   lideres     LiderGrupoExtension[]
   solicitudes SolicitudGrupoExtension[]
@@ -1634,6 +1644,87 @@ model OpcionDeclaracionMinisterio {
   @@unique([declaracionId, ministerioId])
   @@map("opciones_declaracion_ministerio")
 }
+
+// --- spec 017: turnos de servicio (D250–D257) ---
+
+enum FrecuenciaDiaDeServicio {
+  semanal
+  mensual
+}
+
+enum EstadoFechaDeServicio {
+  borrador
+  publicada
+  suspendida
+}
+
+enum EstadoTurno {
+  asignado
+  cancelado_por_persona
+  quitado
+}
+
+// D250: regla de días de servicio de un Ministerio. Quitar = activo false (Principio III). El único
+// "una regla igual activa por Ministerio" es un índice parcial de la migración.
+model DiaDeServicio {
+  id            String                  @id @default(uuid())
+  ministerioId  String
+  ministerio    Ministerio              @relation(fields: [ministerioId], references: [id])
+  frecuencia    FrecuenciaDiaDeServicio
+  diaSemana     Int
+  posicionEnMes Int?
+  activo        Boolean                 @default(true)
+  creadoPorId   String
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([ministerioId])
+  @@map("dias_de_servicio")
+}
+
+// Una fecha de servicio que ya tiene algo (turno, suspensión o publicación): las demás se calculan
+// de las reglas (FR-002). `dia` es la fecha civil en Argentina.
+model FechaDeServicio {
+  id                    String                @id @default(uuid())
+  ministerioId          String
+  ministerio            Ministerio            @relation(fields: [ministerioId], references: [id])
+  dia                   DateTime              @db.Date
+  estado                EstadoFechaDeServicio @default(borrador)
+  publicadaEn           DateTime?
+  publicadaPorId        String?
+  suspendidaEn          DateTime?
+  suspendidaPorId       String?
+  recordatorioEnviadoEn DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  turnos Turno[]
+
+  @@unique([ministerioId, dia])
+  @@map("fechas_de_servicio")
+}
+
+// D255: una Persona en una fecha de servicio, en una Célula (o en el Ministerio entero si no tiene).
+// "Una vez por fecha" (mientras está asignado) es un índice parcial de la migración.
+model Turno {
+  id                String          @id @default(uuid())
+  fechaId           String
+  fecha             FechaDeServicio @relation(fields: [fechaId], references: [id])
+  personaId         String
+  persona           Persona         @relation(fields: [personaId], references: [id])
+  celulaId          String?
+  celula            Celula?         @relation(fields: [celulaId], references: [id])
+  estado            EstadoTurno     @default(asignado)
+  // D257: solo lo ven los líderes y el Admin; nunca a logs ni a avisos.
+  motivoCancelacion String?         @db.VarChar(200)
+  asignadoPorId     String
+  asignadoEn        DateTime        @default(now())
+  cerradoPorId      String?
+  cerradoEn         DateTime?
+
+  @@index([fechaId])
+  @@index([personaId])
+  @@map("turnos")
 
 // spec 018 (FR-004): un archivo privado de una Persona dada de baja que no se pudo borrar al momento.
 // La tarea diaria lo reintenta; la baja no espera al archivo.

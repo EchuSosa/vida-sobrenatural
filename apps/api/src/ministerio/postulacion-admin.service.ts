@@ -21,6 +21,7 @@ import { normalizarMotivo } from '../discipulado/validaciones.js';
 import { bloquearPersona } from '../camino/consultas.js';
 import { crearPostulacion, esViolacionDeUnico } from './crear-postulacion.js';
 import { crearMembresiaDirecta, decidirMembresia, inactivarPorCambio, membresiasDelCarril, otorgarDiscipulador } from './membresia.js';
+import { liberarTurnosFuturos } from '../turnos/liberar-turnos.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
 
@@ -274,7 +275,7 @@ export class PostulacionAdminService {
         const ahora = new Date();
         let reemplazaA: string | null = null;
         if (anterior) {
-          await inactivarPorCambio(tx, anterior.postulacionId, id, autorId, ahora);
+          await inactivarPorCambio(tx, anterior.postulacionId, id, autorId, ahora, this.notificaciones);
           reemplazaA = anterior.postulacionId;
         }
         await tx.postulacion.update({
@@ -429,6 +430,8 @@ export class PostulacionAdminService {
           motivoBaja: motivo,
         },
       });
+      // spec 017 (T023): sus turnos futuros quedan para cubrir, con aviso a los líderes.
+      await liberarTurnosFuturos(tx, this.notificaciones, { personaId: previa.personaId, ministerioId: p.ministerioId, autorId });
       await this.notificaciones.emitir(tx, {
         nombre: 'ministerio.miembro_dado_de_baja',
         a: { tipo: 'persona', personaId: previa.personaId },

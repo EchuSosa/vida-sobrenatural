@@ -11,6 +11,7 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import { auth, tienePermisoSesion } from '../../../auth';
 import { AvisoPorQuery } from '../../../components/aviso-por-query';
+import { ProximoTurno } from './proximo-turno';
 
 /**
  * spec 006, T059 (FR-022; ajustes-ux #38–#39): el Inicio de la app. Saluda con
@@ -68,6 +69,9 @@ export default async function InicioAppPage() {
           <ArrowRight aria-hidden className="size-5 shrink-0" />
         </Link>
       )}
+
+      {/* spec 017, US3: la tarjeta se pide aparte; si falla, el resto del Inicio sigue. */}
+      <ProximoTurno apiToken={session?.apiToken ?? ''} />
 
       <section aria-labelledby="tu-camino" className="flex flex-col gap-3 rounded-lg border border-border p-5">
         <h2 id="tu-camino" className="flex items-center gap-2 text-xl font-semibold">

@@ -245,7 +245,15 @@
       "ELECCION_AREA_NO_DISPONIBLE": "Un área elegida ya no está disponible.",
       "REEMPLAZO_INVALIDO": "Elegí una de las membresías que tiene ahora.",
       "NOMBRE_BUSQUEDA_REQUERIDO": "Escribí al menos 2 letras del nombre del grupo o de quien lo lidera.",
-      "DESDE_ANIO_INVALIDO": "El año no es válido."
+      "DESDE_ANIO_INVALIDO": "El año no es válido.",
+      "FRECUENCIA_INVALIDA": "Elegí si es todas las semanas o una vez por mes.",
+      "POSICION_EN_MES_INVALIDA": "Elegí qué vez del mes: primero, segundo, tercero, cuarto o último.",
+      "DIA_DE_SERVICIO_REPETIDO": "Ese día ya está cargado. Elegí otro.",
+      "CUPO_TURNO_INVALIDO": "Escribí un número de 1 a 20: cuántas personas hacen falta por fecha.",
+      "YA_TIENE_TURNO_ESE_DIA": "Ya tiene turno ese día. Elegí a otra persona.",
+      "NO_ES_INTEGRANTE": "No es integrante de esta área. Elegí a alguien de la lista.",
+      "AREA_INVALIDA": "Elegí un área del Ministerio.",
+      "MOTIVO_CANCELACION_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco."
     },
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
     "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
@@ -265,7 +273,15 @@
     "ELECCION_DESACTUALIZADA": "Alguien cambió esta elección. Recargá para ver lo último.",
     "ELECCION_OPCIONES_RESUELTAS": "Ya se confirmó parte de esta elección: las áreas no se pueden cambiar.",
     "ELECCION_SIN_CHARLA": "Falta la charla con su líder de Vida de Servicio.",
-    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual."
+    "OPCION_YA_RESUELTA": "Esta área ya se resolvió. Recargá para ver el estado actual.",
+    "DIA_DE_SERVICIO_REPETIDO": "Ese día de servicio ya está cargado en este Ministerio.",
+    "NO_ES_DIA_DE_SERVICIO": "Esa fecha no es un día de servicio de este Ministerio. Revisá los días cargados.",
+    "FECHA_YA_PASO": "Esa fecha ya pasó: solo se pueden cambiar las fechas que vienen.",
+    "FECHA_SUSPENDIDA": "Ese día no hay servicio: primero hay que volver a habilitarlo.",
+    "YA_TIENE_TURNO_ESE_DIA": "Esa persona ya tiene turno ese día en este Ministerio.",
+    "NO_ES_INTEGRANTE": "Esa persona no es integrante de esta área.",
+    "SIN_FECHA_ANTERIOR": "Todavía no hay una fecha publicada antes de esta para copiar.",
+    "TURNO_YA_EMPEZO": "Ese turno ya empezó: avisale directamente a tu líder."
   },
   "nav": {
     "saltarAlContenido": "Saltar al contenido",
@@ -1402,6 +1418,81 @@
       "asignarAria": "Asignar a {nombre} como líder",
       "asignado": "{nombre} ya es líder de {ministerio}.",
       "errorGenerico": "No pudimos hacerlo. Probá de nuevo en un momento."
+    },
+    "diasDeServicio": {
+      "titulo": "Días de servicio",
+      "ayuda": "Los días en que este Ministerio sirve. De acá salen las fechas que el líder completa en los turnos.",
+      "sinReglas": "Todavía no tiene días de servicio: sin días cargados, no hay turnos.",
+      "reglaSemanal": "Todos los {dia}",
+      "reglaMensual": "El {posicion} {dia} de cada mes",
+      "diasPlural": [
+        "domingos",
+        "lunes",
+        "martes",
+        "miércoles",
+        "jueves",
+        "viernes",
+        "sábados"
+      ],
+      "dias": [
+        "domingo",
+        "lunes",
+        "martes",
+        "miércoles",
+        "jueves",
+        "viernes",
+        "sábado"
+      ],
+      "posiciones": {
+        "1": "primer",
+        "2": "segundo",
+        "3": "tercer",
+        "4": "cuarto",
+        "-1": "último"
+      },
+      "quitar": "Quitar",
+      "quitarTitulo": "¿Quitar «{regla}»?",
+      "quitarDescripcion": "Dejan de salir esas fechas. Lo que ya se publicó no se borra.",
+      "quitarConfirmar": "Sí, quitar",
+      "volver": "Volver",
+      "quitada": "Listo: se quitó «{regla}».",
+      "agregarTitulo": "Agregar un día",
+      "frecuencia": "Cada cuánto",
+      "frecuenciaSemanal": "Todas las semanas",
+      "frecuenciaMensual": "Una vez por mes",
+      "posicion": "Qué vez del mes",
+      "dia": "Día",
+      "elegir": "Elegí",
+      "agregar": "Agregar día",
+      "agregada": "Listo: se agregó «{regla}».",
+      "resumenErrores": "Revisá estos campos:",
+      "cuposTitulo": "Cuánta gente hace falta por fecha",
+      "cuposAyuda": "Un número de 1 a 20 por área. La grilla de turnos avisa cuando falta gente.",
+      "cupoMinisterio": "Todo el Ministerio (no tiene áreas)",
+      "cupo": "Personas por fecha en {area}",
+      "guardarCupo": "Guardar",
+      "cupoGuardado": "Listo: {area} necesita {cupo} por fecha.",
+      "proximasTitulo": "Próximas fechas",
+      "sinProximas": "Cuando cargues un día de servicio, acá aparecen las próximas fechas.",
+      "estado": {
+        "borrador": "En armado",
+        "publicada": "Publicada",
+        "suspendida": "Este día no hay"
+      },
+      "turnos": "{n, plural, =0 {Sin turnos asignados} one {# turno asignado} other {# turnos asignados}}",
+      "suspender": "Este día no hay",
+      "suspenderTitulo": "¿El {fecha} no hay servicio?",
+      "suspenderDescripcion": "La fecha deja de aparecer en la grilla de turnos. Se puede volver a habilitar.",
+      "suspenderDescripcionConTurnos": "{n, plural, one {La persona que tenía turno recibe un aviso.} other {Las # personas que tenían turno reciben un aviso.}} Se puede volver a habilitar.",
+      "suspenderConfirmar": "Sí, ese día no hay",
+      "suspendida": "Listo: el {fecha} no hay servicio.",
+      "habilitar": "Volver a habilitar",
+      "habilitada": "Listo: el {fecha} vuelve a estar en la grilla.",
+      "errorGenerico": "No pudimos guardar el cambio. Probá de nuevo en un momento."
+    },
+    "turnos": {
+      "titulo": "Turnos",
+      "ayuda": "Quién sirve en cada fecha. Lo arman los líderes del Ministerio desde la app; acá se ve y se puede corregir."
     }
   },
   "postulaciones": {
@@ -3056,5 +3147,44 @@
     "errorCrear": "No pudimos crear la Sede. Probá de nuevo en un rato.",
     "errorActualizar": "No pudimos actualizar la Sede. Probá de nuevo en un rato.",
     "errorEliminar": "No pudimos eliminar la Sede. Probá de nuevo en un rato."
+  },
+  "turnos": {
+    "grilla": {
+      "fechas": "Próximas fechas",
+      "estado": {
+        "borrador": "Borrador",
+        "publicada": "Publicada"
+      },
+      "faltan": "{n, plural, one {Falta # persona} other {Faltan # personas}}",
+      "completa": "Completa",
+      "necesita": "{n, plural, one {Necesita # persona por fecha} other {Necesita # personas por fecha}}",
+      "todoElMinisterio": "Todo el Ministerio",
+      "agregarEn": "Agregar en {area}",
+      "sinDisponibles": "No hay más integrantes para sumar acá.",
+      "vecesQueSirvio": "{n, plural, =0 {No sirvió en las últimas fechas} one {Sirvió # vez en las últimas fechas} other {Sirvió # veces en las últimas fechas}}",
+      "enOtroMinisterio": "Ese día ya sirve en {ministerio}",
+      "asignar": "Sumar a {nombre}",
+      "asignado": "Listo: {nombre} sirve el {fecha}.",
+      "asignadoConAviso": "Listo: {nombre} sirve el {fecha}. Ese día también sirve en {ministerio}.",
+      "quitar": "Quitar",
+      "quitarA": "Quitar a {nombre} del {fecha}",
+      "quitado": "Listo: {nombre} ya no está el {fecha}.",
+      "copiar": "Copiar la fecha anterior",
+      "copiados": "{n, plural, =0 {No había nadie más para copiar.} one {Listo: se copió # turno.} other {Listo: se copiaron # turnos.}}",
+      "publicar": "Publicar",
+      "publicarTitulo": "¿Publicar el {fecha}?",
+      "publicarDescripcion": "{n, plural, =0 {Todavía no hay nadie asignado. Igual queda publicada.} one {Se le avisa a la persona que tiene turno.} other {Se les avisa a las # personas que tienen turno.}}",
+      "publicarConfirmar": "Sí, publicar",
+      "volver": "Volver",
+      "publicada": "Listo: el {fecha} quedó publicado.",
+      "publicadaAvisa": "Ya está publicada: lo que cambies se le avisa a quien entra y a quien sale.",
+      "borradorAyuda": "En borrador nadie ve estos turnos. Cuando esté lista, publicala.",
+      "sinFechas": "Todavía no hay fechas: el Ministerio necesita días de servicio, que los carga el Admin en el backoffice.",
+      "soloVer": "Ves los turnos sin poder cambiarlos.",
+      "reintentar": "Reintentar",
+      "errorGenerico": "No pudimos guardar el cambio. Probá de nuevo en un momento.",
+      "noPuede": "{nombre} avisó que no puede ir",
+      "motivo": "Motivo: {motivo}"
+    }
   }
 }
