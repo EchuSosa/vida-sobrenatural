@@ -8,12 +8,13 @@ import { ApiError, MENSAJE_RECHAZO_GRUPO_EXTENSION_MAX, apiFetch, erroresPorCamp
 import { Button, ConfirmDestructiveDialog, DialogoTextoOpcional, useEnvio } from '@vida-sobrenatural/ui';
 import { BuscarPersonaGex } from '../buscar-persona';
 
-/** Llama a la API y avisa el resultado; siempre refresca la pantalla (D227). */
+/** Llama a la API y avisa el resultado; siempre refresca la pantalla (D227). Devuelve si salió bien. */
 function useAccionGex() {
   const t = useTranslations('gruposExtension');
   const te = useTranslations('errors');
   const router = useRouter();
-  return async (url: string, apiToken: string, exito: string, cuerpo?: object) => {
+  return async (url: string, apiToken: string, exito: string, cuerpo?: object): Promise<boolean> => {
+    let ok = false;
     try {
       await apiFetch(url, {
         method: 'POST',
@@ -21,11 +22,13 @@ function useAccionGex() {
         body: cuerpo ? JSON.stringify(cuerpo) : undefined,
       });
       toast.success(exito);
+      ok = true;
     } catch (error) {
       if (erroresPorCampo(error)) throw error;
       toast.error(error instanceof ApiError && te.has(error.code) ? te(error.code) : t('errorGenerico'));
     }
     router.refresh();
+    return ok;
   };
 }
 
@@ -33,7 +36,9 @@ function useAccionGex() {
 export function ResolverPedido({ solicitudId, nombre, apiToken, deshabilitarAceptar = false }: { solicitudId: string; nombre: string; apiToken: string; deshabilitarAceptar?: boolean }) {
   const t = useTranslations('gruposExtension.detalle');
   const accion = useAccionGex();
-  const aceptar = useEnvio(() => accion(`/solicitudes-grupo-extension/${solicitudId}/aceptar`, apiToken, t('aceptado', { nombre })));
+  const aceptar = useEnvio(async () => {
+    await accion(`/solicitudes-grupo-extension/${solicitudId}/aceptar`, apiToken, t('aceptado', { nombre }));
+  });
   return (
     <div className="flex flex-wrap gap-2">
       <Button type="button" size="sm" loading={aceptar.enviando} disabled={deshabilitarAceptar} aria-label={t('aceptarAria', { nombre })} onClick={() => void aceptar.ejecutar()}>
@@ -75,7 +80,9 @@ export function ResolverPedido({ solicitudId, nombre, apiToken, deshabilitarAcep
 export function QuitarIntegrante({ grupoId, solicitudId, nombre, apiToken }: { grupoId: string; solicitudId: string; nombre: string; apiToken: string }) {
   const t = useTranslations('gruposExtension.detalle');
   const accion = useAccionGex();
-  const { enviando, ejecutar } = useEnvio(() => accion(`/grupos-extension/${grupoId}/integrantes/${solicitudId}/quitar`, apiToken, t('quitado', { nombre })));
+  const { enviando, ejecutar } = useEnvio(async () => {
+    await accion(`/grupos-extension/${grupoId}/integrantes/${solicitudId}/quitar`, apiToken, t('quitado', { nombre }));
+  });
   return (
     <ConfirmDestructiveDialog
       tono="neutro"
@@ -117,8 +124,12 @@ export function AgregarIntegrante({ grupoId, apiToken, excluir }: { grupoId: str
 export function BotonActivoGrupo({ grupoId, nombre, activo, apiToken }: { grupoId: string; nombre: string; activo: boolean; apiToken: string }) {
   const t = useTranslations('gruposExtension.detalle');
   const accion = useAccionGex();
-  const inactivar = useEnvio(() => accion(`/grupos-extension/${grupoId}/inactivar`, apiToken, t('inactivado')));
-  const reactivar = useEnvio(() => accion(`/grupos-extension/${grupoId}/reactivar`, apiToken, t('reactivado')));
+  const inactivar = useEnvio(async () => {
+    await accion(`/grupos-extension/${grupoId}/inactivar`, apiToken, t('inactivado'));
+  });
+  const reactivar = useEnvio(async () => {
+    await accion(`/grupos-extension/${grupoId}/reactivar`, apiToken, t('reactivado'));
+  });
   if (!activo) {
     return (
       <Button type="button" size="sm" variant="outline" loading={reactivar.enviando} onClick={() => void reactivar.ejecutar()}>

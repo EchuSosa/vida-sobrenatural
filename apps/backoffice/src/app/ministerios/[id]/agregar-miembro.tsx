@@ -24,8 +24,9 @@ export function AgregarMiembro({ ministerioId, ministerio, celulas, apiToken }: 
   const [decidir, setDecidir] = useState<{ persona: PersonaElegibleGex; detalle: DetalleDecisionMembresia } | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  async function agregar(persona: PersonaElegibleGex, decision: { sumar?: boolean; reemplazaId?: string } = {}) {
-    if (enviando) return;
+  /** Devuelve si salió bien (o pide decidir): con `false`, el buscador conserva la búsqueda. */
+  async function agregar(persona: PersonaElegibleGex, decision: { sumar?: boolean; reemplazaId?: string } = {}): Promise<boolean> {
+    if (enviando) return false;
     setEnviando(true);
     try {
       await apiFetch(`/ministerios/${ministerioId}/miembros`, {
@@ -36,13 +37,15 @@ export function AgregarMiembro({ ministerioId, ministerio, celulas, apiToken }: 
       setDecidir(null);
       toast.success(t('agregado', { nombre: `${persona.nombre} ${persona.apellido}`, ministerio }));
       router.refresh();
+      return true;
     } catch (error) {
       if (error instanceof ApiError && error.code === 'POSTULACION_REQUIERE_CONFIRMAR_CAMBIO') {
         setDecidir({ persona, detalle: error.extensiones as unknown as DetalleDecisionMembresia });
-        return;
+        return true;
       }
       const code = error instanceof ApiError ? error.code : null;
       toast.error(code && te.has(code) ? te(code) : t('errorGenerico'));
+      return false;
     } finally {
       setEnviando(false);
     }

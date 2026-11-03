@@ -122,11 +122,12 @@ test('asignar un líder de ministerio: si la API falla, avisa y no queda asignad
   await expect(page.getByText(TEXTO_ERROR_INTERNO)).toBeVisible();
   await expect(lideres.getByRole('button', { name: 'Quitar: Nora E2E Líder' })).toHaveCount(0);
 
+  // Echu, 2026-11-03: si la API falla, el buscador conserva la búsqueda y los resultados, para
+  // reintentar sin volver a buscar (antes los borraba al elegir).
+  await expect(lideres.getByLabel('Buscar por nombre, apellido o email')).toHaveValue('Nora E2E');
+  await expect(asignar).toBeVisible();
+
   await page.unrouteAll({ behavior: 'wait' });
-  // El buscador limpia el texto y los resultados al elegir, aunque la API falle después (hallazgo
-  // menor, anotado en el PR): para reintentar hay que volver a buscar.
-  await lideres.getByLabel('Buscar por nombre, apellido o email').fill('Nora E2E');
-  await lideres.getByRole('button', { name: 'Buscar', exact: true }).click();
   const pedidos = contarPedidos(page, 'POST', /\/ministerios\/[^/]+\/lideres$/);
   try {
     await tresClics(asignar);
