@@ -1,5 +1,6 @@
 import { SignJWT } from 'jose';
 import { normalizarEmail } from './codigo-ingreso.js';
+import { ipDelCliente } from './cabeceras-seguridad.js';
 
 /**
  * H-41 (revisión manual, revisión de código): piezas de `auth.ts` que eran
@@ -82,13 +83,13 @@ interface ProblemaApi {
 }
 
 /**
- * La IP del navegador para `X-Origen-Cliente` (007, 013): la primera de
+ * La IP del navegador para `X-Origen-Cliente` (007, 013): la de `IP_REAL_HEADER` si está, o la primera de
  * `x-forwarded-for`, o `x-real-ip`. La API guarda solo su huella. Una sola
  * versión para las acciones de servidor de las dos apps.
  */
 export function origenDeHeaders(h: { get(nombre: string): string | null }): string {
-  const reenviado = h.get('x-forwarded-for')?.split(',')[0]?.trim();
-  return reenviado || h.get('x-real-ip')?.trim() || 'desconocido';
+  // docs/25, S-06: con `IP_REAL_HEADER` (en Fly.io, `fly-client-ip`) solo vale esa cabecera.
+  return ipDelCliente(h, process.env);
 }
 
 function urlApi(ruta: string): string {

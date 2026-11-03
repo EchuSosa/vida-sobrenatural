@@ -21,8 +21,11 @@ export class LimitePedidosGuard implements CanActivate {
   private readonly pedidos = new Map<string, number[]>();
 
   canActivate(context: ExecutionContext): boolean {
-    const req = context.switchToHttp().getRequest<{ user?: { personaId?: string | null; email?: string }; ip?: string; route?: { path?: string } }>();
-    const quien = req.user?.personaId ?? req.user?.email ?? req.ip ?? 'anonimo';
+    const req = context.switchToHttp().getRequest<{ user?: { personaId?: string | null; email?: string }; ip?: string; route?: { path?: string }; headers?: Record<string, string | string[] | undefined> }>();
+    // docs/25, S-06: sin sesión, la IP del proxy de confianza (`IP_REAL_HEADER`), si está configurada.
+    const cabecera = process.env.IP_REAL_HEADER?.trim().toLowerCase();
+    const ipReal = cabecera ? req.headers?.[cabecera] : undefined;
+    const quien = req.user?.personaId ?? req.user?.email ?? (typeof ipReal === 'string' ? ipReal : undefined) ?? req.ip ?? 'anonimo';
     const clave = `${req.route?.path ?? ''}|${quien}`;
     const ahora = Date.now();
     const recientes = (this.pedidos.get(clave) ?? []).filter((t) => ahora - t < VENTANA_MS);

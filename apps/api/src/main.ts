@@ -10,6 +10,7 @@ import { configurarApp } from './configurar-app.js';
 import { servirArchivosPublicos } from './storage/archivos-publicos.js';
 import { serializarPedido } from './common/logs/serializar-pedido.js';
 import { montarDocumentacionApi } from './common/documentacion-api.js';
+import { configurarSeguridadHttp } from './common/seguridad-http.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -57,10 +58,10 @@ async function bootstrap() {
   // Lote 0 global (D168): las áreas privadas viven bajo `.privado/` dentro de
   // la misma carpeta, y `dotfiles: 'deny'` hace que nunca se sirvan.
   servirArchivosPublicos(app);
-  // Desarrollo local únicamente — apps/web y apps/backoffice corren en otro
-  // puerto. No se usan cookies de sesión hacia esta API (solo Bearer JWT), así
-  // que reflejar el origin es suficiente sin necesitar `credentials: true`.
-  app.enableCors();
+  // docs/25, S-04/S-08: cabeceras de seguridad y CORS. Fuera de producción, CORS acepta cualquier
+  // origen (las apps corren en otro puerto); en producción, solo WEB_URL y BACKOFFICE_URL
+  // (o CORS_ORIGENES). Solo Bearer JWT, sin cookies: no hace falta `credentials`.
+  configurarSeguridadHttp(app);
 
   // docs/25, S-07: Swagger solo fuera de producción.
   if (montarDocumentacionApi()) {

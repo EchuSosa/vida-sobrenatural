@@ -13,6 +13,8 @@ primary_region = "gru" # São Paulo, lo más cerca de La Plata (docs/13)
 
 [env]
   NODE_ENV = "production"
+  # docs/25, S-06: la IP del cliente la pone el proxy de Fly; el navegador no la puede falsear.
+  IP_REAL_HEADER = "fly-client-ip"
   PORT = "8080"
   STORAGE_DIR = "/data/almacenamiento"
   TAREAS_PROGRAMADAS = "true"
