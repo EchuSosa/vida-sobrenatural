@@ -53,9 +53,15 @@
 
 ## Entrega 3 — "No puedo ir" y casos borde (US4)
 
-- [ ] T022 API `POST /turnos/:id/cancelacion` + aviso a líderes (sin motivo) + integración (ya
+- [x] T022 API `POST /turnos/:id/cancelacion` + aviso a líderes (sin motivo) + integración (ya
   empezó 409).
-- [ ] T023 Baja de integrante, regla quitada y Ministerio inactivo: turnos a "Falta cubrir" con aviso
+- [x] T023 Baja de integrante, regla quitada y Ministerio inactivo: turnos a "Falta cubrir" con aviso
   + integración.
-- [ ] T024 Web "No puedo ir" en "Mis turnos" + e2e (feliz + doble toque + API caída).
-- [ ] T025 Checklist de `docs/15` (D114). PROGRESS.md: línea del ítem 5.
+- [x] T024 Web "No puedo ir" en "Mis turnos" + e2e (feliz + doble toque + API caída).
+- [x] T025 Checklist de `docs/15` (D114). PROGRESS.md: línea del ítem 5.
+  - [x] Acción principal con verbo concreto: "No puedo ir"; en el diálogo, "Avisar que no puedo" y "Volver" (tono neutro).
+  - [x] Cuatro estados de Mis turnos: `loading.tsx`, `error.tsx`, vacío y la lista; el botón no aparece el día del turno (ya empezó, D257).
+  - [x] Un solo envío (el diálogo usa `useEnvio`; e2e de tres toques) y la API caída avisa con "Reintentar".
+  - [x] Motivo opcional con contador y error por campo con resumen (H-50); se dice que lo ve solo el líder.
+  - [x] En la grilla, "X avisó que no puede ir" con ícono y texto (D81); el motivo solo para líderes y Admin.
+  - [x] `@celular` y `axe` en claro y oscuro en el e2e del caso feliz.
