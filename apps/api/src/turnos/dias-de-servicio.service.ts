@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CUPO_TURNO_MAXIMO,
   FECHAS_VISIBLES_TURNOS,
+  cumpleRegla,
   cupoTurnoValido,
   erroresDeReglaDiaDeServicio,
   fechasDeServicio,
@@ -103,10 +104,35 @@ export class DiasDeServicioService {
     }
   }
 
-  async quitarRegla(ministerioId: string, reglaId: string): Promise<{ id: string }> {
-    const r = await this.prisma.diaDeServicio.updateMany({ where: { id: reglaId, ministerioId, activo: true }, data: { activo: false } });
-    if (r.count === 0) throw new AppException('NO_ENCONTRADO', 404, 'No existe ese día de servicio en este Ministerio.');
-    return { id: reglaId };
+  /**
+   * Quitar una regla la deja inactiva (Principio III). Casos borde (T023): las fechas futuras ya
+   * publicadas que no salen de ninguna otra regla se suspenden y avisan a quien tenía turno; las que
+   * estaban en borrador simplemente dejan de aparecer.
+   */
+  async quitarRegla(ministerioId: string, reglaId: string, adminId: string, hoy: string = hoyEnArgentina()): Promise<{ id: string; fechasSuspendidas: number }> {
+    const ministerio = await this.prisma.ministerio.findFirst({ where: { id: ministerioId, eliminadoEn: null }, select: { id: true, nombre: true } });
+    if (!ministerio) throw new AppException('NO_ENCONTRADO', 404, 'No existe un Ministerio con ese id.');
+    const fechasSuspendidas = await this.prisma.$transaction(async (tx) => {
+      const r = await tx.diaDeServicio.updateMany({ where: { id: reglaId, ministerioId, activo: true }, data: { activo: false } });
+      if (r.count === 0) throw new AppException('NO_ENCONTRADO', 404, 'No existe ese día de servicio en este Ministerio.');
+      const quedan = await this.reglasActivas(ministerioId, tx);
+      const publicadas = await tx.fechaDeServicio.findMany({
+        where: { ministerioId, estado: 'publicada', dia: { gte: diaComoFecha(hoy) } },
+        select: { id: true, dia: true, turnos: { where: { estado: 'asignado' }, select: { id: true, personaId: true, celula: { select: { nombre: true } } } } },
+      });
+      let n = 0;
+      for (const f of publicadas) {
+        const dia = fechaComoDia(f.dia);
+        if (quedan.some((regla) => cumpleRegla(dia, regla))) continue;
+        await tx.fechaDeServicio.update({ where: { id: f.id }, data: { estado: 'suspendida', suspendidaEn: new Date(), suspendidaPorId: adminId } });
+        for (const t of f.turnos) {
+          await this.notificaciones.emitir(tx, { nombre: 'turno.fecha_suspendida', a: { tipo: 'persona', personaId: t.personaId }, datos: datosAvisoTurno(t.id, ministerio, dia, t.celula?.nombre ?? null) });
+        }
+        n += 1;
+      }
+      return n;
+    });
+    return { id: reglaId, fechasSuspendidas };
   }
 
   async cupoMinisterio(ministerioId: string, cupo: unknown): Promise<{ cupo: number }> {

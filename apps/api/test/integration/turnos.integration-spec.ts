@@ -98,8 +98,8 @@ describe('Turnos de servicio (spec 017, US2 y US3)', () => {
     expect(g.fechas).toHaveLength(8);
     expect(g.fechas[0]).toMatchObject({ dia: d1, estado: 'borrador', enOtroMinisterio: [] });
     expect(g.fechas[0].celdas).toEqual([
-      { areaId: limpiezaId, turnos: [], faltan: 1 },
-      { areaId: seguridadId, turnos: [], faltan: 2 },
+      { areaId: limpiezaId, turnos: [], faltan: 1, noPueden: [] },
+      { areaId: seguridadId, turnos: [], faltan: 2, noPueden: [] },
     ]);
     const veces = Object.fromEntries(g.integrantes.map((i) => [i.persona.nombre, [i.areaId, i.vecesQueSirvio]]));
     expect(veces).toEqual({ ana: [seguridadId, 1], beto: [seguridadId, 0], caro: [null, 0], dani: [limpiezaId, 0] });
@@ -156,6 +156,8 @@ describe('Turnos de servicio (spec 017, US2 y US3)', () => {
     const turnoBeto = (await grilla()).fechas[0].celdas.find((c) => c.areaId === seguridadId)!.turnos.find((t) => t.persona.nombre === 'beto')!;
     expect((await http().delete(`/turnos/${turnoBeto.id}`).set(como('lider'))).status).toBe(200);
     expect(await avisos('turno.quitado', id.beto)).toHaveLength(1);
+    // D260: también por mail.
+    expect(await prisma.entregaNotificacion.count({ where: { personaId: id.beto, canal: 'email', notificacion: { evento: 'turno.quitado' } } })).toBe(1);
     expect((await http().delete(`/turnos/${turnoBeto.id}`).set(como('lider'))).status).toBe(404);
     expect((await asignar('lider', bienvenidaId, d1, { personaId: id.beto, celulaId: seguridadId })).status).toBe(201);
     expect(await avisos('turno.asignado', id.beto)).toHaveLength(2);
@@ -191,6 +193,9 @@ describe('Turnos de servicio (spec 017, US2 y US3)', () => {
     const r = await http().post(`/ministerios/${bienvenidaId}/fechas/${d1}/suspension`).set(como('admin'));
     expect([r.status, r.body.avisados]).toEqual([201, 4]);
     for (const quien of ['ana', 'beto', 'caro', 'dani']) expect(await avisos('turno.fecha_suspendida', id[quien])).toHaveLength(1);
+    // D260: también por mail; el recordatorio, no.
+    expect(await prisma.entregaNotificacion.count({ where: { personaId: id.ana, canal: 'email', notificacion: { evento: 'turno.fecha_suspendida' } } })).toBe(1);
+    expect(await prisma.entregaNotificacion.count({ where: { personaId: id.ana, canal: 'email', notificacion: { evento: 'turno.recordatorio' } } })).toBe(0);
     expect((await grilla()).fechas[0].dia).toBe(d2);
     const tarde = await asignar('lider', bienvenidaId, d1, { personaId: id.caro, celulaId: seguridadId });
     expect([tarde.status, tarde.body.code]).toEqual([409, 'FECHA_SUSPENDIDA']);

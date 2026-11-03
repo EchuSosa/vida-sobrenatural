@@ -35,6 +35,8 @@ async function asignarYPublicar(baseURL: string) {
 async function abrirTurnos(page: Page) {
   await page.goto('/mi-ministerio');
   await page.getByRole('link', { name: 'Armar los turnos' }).click();
+  // En dev, la primera vez la ruta se compila: se espera la navegación, no 5 s de una aserción.
+  await page.waitForURL(/\/mi-ministerio\/[0-9a-f-]+\/turnos$/);
   await expect(page.getByRole('heading', { level: 1, name: `Turnos de ${MINISTERIO_017}` })).toBeVisible();
   return page.getByRole('region', { name: new RegExp(`^${fecha()}`, 'i') });
 }
@@ -140,4 +142,60 @@ test('tres toques en "Sí, publicar" mandan un solo pedido', async ({ page, base
   await tresClics(page.getByRole('alertdialog').getByRole('button', { name: 'Sí, publicar' }));
   await expect(elegida).toContainText('Publicada');
   expect(pedidos.n).toBe(1);
+});
+
+test.describe('"No puedo ir" (US4, D257)', () => {
+  for (const tema of ['claro', 'oscuro'] as const) {
+    test.describe(`modo ${tema}`, () => {
+      test.use({ colorScheme: tema === 'oscuro' ? 'dark' : 'light' });
+
+      test('la persona avisa con un motivo; la líder ve que falta cubrir y el motivo @celular', async ({ page, baseURL }) => {
+        await asignarYPublicar(baseURL!);
+        await entrarConTema(page, baseURL!, EMAILS_017.miembro, tema);
+        await page.goto('/mis-turnos');
+        await page.getByRole('button', { name: `No puedo ir el ${fecha()}` }).click();
+        const dialogo = page.getByRole('alertdialog');
+        await expect(dialogo).toContainText(`¿No podés ir el ${fecha()}?`);
+        await dialogo.getByLabel('Motivo (opcional)').fill('Tengo un viaje');
+        await sinViolaciones(page, tema);
+        await dialogo.getByRole('button', { name: 'Avisar que no puedo' }).click();
+        await expect(page.getByText(`Listo: le avisamos a tu líder que no podés ir el ${fecha()}.`)).toBeVisible();
+        await expect(page.getByText('Todavía no tenés turnos publicados.')).toBeVisible();
+
+        await page.context().clearCookies();
+        await entrarConTema(page, baseURL!, EMAILS_017.lider, tema);
+        const elegida = await abrirTurnos(page);
+        const seguridad = elegida.getByRole('listitem').filter({ has: page.getByRole('heading', { level: 3, name: 'Seguridad' }) });
+        await expect(seguridad).toContainText(`${MIEMBRO_017} avisó que no puede ir`);
+        await expect(seguridad).toContainText('Motivo: Tengo un viaje');
+        await expect(seguridad).toContainText('Falta 1 persona');
+      });
+    });
+  }
+
+  test('tres toques en "Avisar que no puedo" mandan un solo pedido', async ({ page, baseURL }) => {
+    await asignarYPublicar(baseURL!);
+    await entrarConTema(page, baseURL!, EMAILS_017.miembro, 'claro');
+    await page.goto('/mis-turnos');
+    const pedidos = contarPedidos(page, 'POST', /\/cancelacion$/);
+    await page.getByRole('button', { name: `No puedo ir el ${fecha()}` }).click();
+    await tresClics(page.getByRole('alertdialog').getByRole('button', { name: 'Avisar que no puedo' }));
+    await expect(page.getByText('Todavía no tenés turnos publicados.')).toBeVisible();
+    expect(pedidos.n).toBe(1);
+  });
+
+  test('si la API falla, avisa con "Reintentar" y el turno sigue en la lista', async ({ page, baseURL, permitirErrorDeConsola }) => {
+    permitirErrorDeConsola(CONSOLA_500);
+    await asignarYPublicar(baseURL!);
+    await entrarConTema(page, baseURL!, EMAILS_017.miembro, 'claro');
+    await page.goto('/mis-turnos');
+    const caida = await apiCaida(page, 'POST', /\/cancelacion$/);
+    await page.getByRole('button', { name: `No puedo ir el ${fecha()}` }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Avisar que no puedo' }).click();
+    await expect(page.getByText(TEXTO_ERROR_INTERNO)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Reintentar' })).toBeVisible();
+    expect(caida.intentos).toBe(1);
+    await page.reload();
+    await expect(page.getByRole('button', { name: `No puedo ir el ${fecha()}` })).toBeVisible();
+  });
 });

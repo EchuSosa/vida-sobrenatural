@@ -4,7 +4,7 @@ import { JwtNextAuthGuard } from '../auth/jwt-nextauth.guard.js';
 import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
 import { personaDeSesion } from '../discipulado/sesion.js';
 import { TurnosService } from './turnos.service.js';
-import { AsignarTurnoDto } from './dto/turnos.dto.js';
+import { AsignarTurnoDto, CancelarTurnoDto } from './dto/turnos.dto.js';
 
 /**
  * spec 017, US2 y US3. Sin permiso del catálogo en el guard: quién puede lo resuelve el servicio
@@ -22,6 +22,13 @@ export class TurnosController {
   @ApiOkResponse({ description: 'spec 017 (US3): MiTurno[] — los turnos publicados y futuros de la persona de la sesión.' })
   mios(@Req() request: AuthenticatedRequest) {
     return this.turnos.misTurnos(personaDeSesion(request));
+  }
+
+  @Post('turnos/:id/cancelacion')
+  @HttpCode(200)
+  @ApiOkResponse({ description: 'spec 017 (D257): "No puedo ir". 400 MOTIVO_CANCELACION_LARGO (campo motivo); 409 TURNO_YA_EMPEZO; 404 si no es suyo o no está publicado.' })
+  cancelar(@Param('id') id: string, @Body() dto: CancelarTurnoDto, @Req() request: AuthenticatedRequest) {
+    return this.turnos.cancelar(id, personaDeSesion(request), dto.motivo);
   }
 
   @Get('ministerios/:id/turnos')

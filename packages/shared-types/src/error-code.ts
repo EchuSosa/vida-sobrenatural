@@ -147,8 +147,9 @@ export type ErrorCode =
   | 'YA_TIENE_TURNO_ESE_DIA' // D255
   | 'NO_ES_INTEGRANTE' // no tiene Postulación aprobada en el Ministerio (o en esa área)
   | 'SIN_FECHA_ANTERIOR' // "Copiar la fecha anterior" sin una publicada antes
+  | 'TURNO_YA_EMPEZO' // D257: "No puedo ir" después de que empezó la fecha
   // Los de campo (FRECUENCIA_INVALIDA, DIA_SEMANA_INVALIDO, POSICION_EN_MES_INVALIDA,
-  // CUPO_TURNO_INVALIDO, AREA_INVALIDA) van en `errors[]`, no acá.
+  // CUPO_TURNO_INVALIDO, AREA_INVALIDA, MOTIVO_CANCELACION_LARGO) van en `errors[]`, no acá.
   | 'POSTULACION_YA_PENDIENTE' // FR-003
   | 'POSTULACION_NO_PENDIENTE'
   | 'POSTULACION_REQUIERE_CONFIRMAR_CAMBIO' // FR-019, D173

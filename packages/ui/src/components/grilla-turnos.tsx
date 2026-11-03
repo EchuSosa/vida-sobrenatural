@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CalendarCheck, CircleAlert, CircleCheck, Copy, PencilRuler, Plus, Send, TriangleAlert, UserMinus } from 'lucide-react';
+import { CalendarCheck, CircleAlert, CircleCheck, Copy, PencilRuler, Plus, Send, TriangleAlert, UserMinus, UserX } from 'lucide-react';
 import {
   ApiError,
   apiFetch,
@@ -219,7 +219,7 @@ export function GrillaTurnos({ grilla, apiToken, locale, t, te, onCambio }: Gril
 
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {grilla.areas.map((area) => {
-            const celda = fecha.celdas.find((c) => c.areaId === area.id) ?? { areaId: area.id, turnos: [], faltan: area.cupo };
+            const celda = fecha.celdas.find((c) => c.areaId === area.id) ?? { areaId: area.id, turnos: [], faltan: area.cupo, noPueden: [] };
             const clave = `${fecha.dia}:${area.id ?? 'todo'}`;
             const tituloArea = area.nombre ?? t('todoElMinisterio');
             const yaEstan = new Set(fecha.celdas.flatMap((c) => c.turnos.map((x) => x.persona.id)));
@@ -252,6 +252,19 @@ export function GrillaTurnos({ grilla, apiToken, locale, t, te, onCambio }: Gril
                             {t('quitar')}
                           </Button>
                         )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {celda.noPueden.length > 0 && (
+                  <ul className="flex flex-col gap-1">
+                    {celda.noPueden.map((x) => (
+                      <li key={x.id} className="flex flex-col text-sm">
+                        <span className="flex items-center gap-1 font-medium">
+                          <UserX aria-hidden className="size-4 shrink-0" />
+                          {t('noPuede', { nombre: nombreDe(x.persona) })}
+                        </span>
+                        {x.motivo && <span className="text-muted-foreground break-words">{t('motivo', { motivo: x.motivo })}</span>}
                       </li>
                     ))}
                   </ul>

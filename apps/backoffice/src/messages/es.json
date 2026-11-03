@@ -252,7 +252,8 @@
       "CUPO_TURNO_INVALIDO": "Escribí un número de 1 a 20: cuántas personas hacen falta por fecha.",
       "YA_TIENE_TURNO_ESE_DIA": "Ya tiene turno ese día. Elegí a otra persona.",
       "NO_ES_INTEGRANTE": "No es integrante de esta área. Elegí a alguien de la lista.",
-      "AREA_INVALIDA": "Elegí un área del Ministerio."
+      "AREA_INVALIDA": "Elegí un área del Ministerio.",
+      "MOTIVO_CANCELACION_LARGO": "El motivo puede tener hasta 200 caracteres: acortalo un poco."
     },
     "GRUPO_EXTENSION_NO_DISPONIBLE": "Este grupo ya no está disponible. Buscá otro grupo.",
     "GRUPO_EXTENSION_COMPLETO": "El grupo está completo: no quedan lugares. Elegí otro grupo o, si sos del equipo, subí el cupo.",
@@ -279,7 +280,8 @@
     "FECHA_SUSPENDIDA": "Ese día no hay servicio: primero hay que volver a habilitarlo.",
     "YA_TIENE_TURNO_ESE_DIA": "Esa persona ya tiene turno ese día en este Ministerio.",
     "NO_ES_INTEGRANTE": "Esa persona no es integrante de esta área.",
-    "SIN_FECHA_ANTERIOR": "Todavía no hay una fecha publicada antes de esta para copiar."
+    "SIN_FECHA_ANTERIOR": "Todavía no hay una fecha publicada antes de esta para copiar.",
+    "TURNO_YA_EMPEZO": "Ese turno ya empezó: avisale directamente a tu líder."
   },
   "nav": {
     "saltarAlContenido": "Saltar al contenido",
@@ -3180,7 +3182,9 @@
       "sinFechas": "Todavía no hay fechas: el Ministerio necesita días de servicio, que los carga el Admin en el backoffice.",
       "soloVer": "Ves los turnos sin poder cambiarlos.",
       "reintentar": "Reintentar",
-      "errorGenerico": "No pudimos guardar el cambio. Probá de nuevo en un momento."
+      "errorGenerico": "No pudimos guardar el cambio. Probá de nuevo en un momento.",
+      "noPuede": "{nombre} avisó que no puede ir",
+      "motivo": "Motivo: {motivo}"
     }
   }
 }

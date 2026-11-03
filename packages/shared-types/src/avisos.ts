@@ -119,7 +119,9 @@ export type EventoAviso =
   | { nombre: 'turno.asignado'; a: DePersona; datos: DatosAvisoTurno }
   | { nombre: 'turno.quitado'; a: DePersona; datos: DatosAvisoTurno }
   | { nombre: 'turno.fecha_suspendida'; a: DePersona; datos: DatosAvisoTurno }
-  | { nombre: 'turno.recordatorio'; a: DePersona; datos: DatosAvisoTurno };
+  | { nombre: 'turno.recordatorio'; a: DePersona; datos: DatosAvisoTurno }
+  // D257: a cada líder vigente, sin el nombre de la persona ni el motivo (los ve en la grilla).
+  | { nombre: 'turno.no_puede'; a: DePersona; datos: DatosAvisoTurno };
 
 /** spec 017: los datos de cada aviso de un turno. */
 export interface DatosAvisoTurno {
@@ -438,21 +440,26 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
     spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
     entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.asignado:${d.turnoId}`,
   },
-  // 017 (D256): sacada de una fecha ya publicada.
+  // 017 (D256, D260): sacada de una fecha ya publicada — importante (también por mail).
   'turno.quitado': {
-    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
     entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.quitado:${d.turnoId}`,
   },
-  // 017 (US1-3): "Este día no hay" en una fecha publicada, a quien tenía turno. Sin clave: suspender,
-  // habilitar y volver a suspender avisa las dos veces.
+  // 017 (US1-3, D260): "Este día no hay" en una fecha publicada, a quien tenía turno — importante
+  // (también por mail). Sin clave: suspender, habilitar y volver a suspender avisa las dos veces.
   'turno.fecha_suspendida': {
-    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
     entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: sinClave,
   },
   // 017 (D256): `DIAS_RECORDATORIO_TURNO` días antes (tarea diaria).
   'turno.recordatorio': {
     spec: '017', destinatario: 'persona', disparador: 'evento_proximo', prioridad: 'normal',
     entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.recordatorio:${d.turnoId}`,
+  },
+  // 017 (D257): alguien avisó que no puede ir — a cada líder, que reemplaza desde la grilla.
+  'turno.no_puede': {
+    spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'normal',
+    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: (d) => `${MI_MINISTERIO}/${d.ministerioId}/turnos`, clave: (d) => `turno.no_puede:${d.turnoId}`,
   },
 };
 

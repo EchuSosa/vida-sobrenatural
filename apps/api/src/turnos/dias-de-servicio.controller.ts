@@ -34,8 +34,8 @@ export class DiasDeServicioController {
   @HttpCode(200)
   @RequierePermiso('turnos.gestionar')
   @ApiOkResponse({ description: 'spec 017: quita una regla (queda inactiva, Principio III).' })
-  quitar(@Param('id') id: string, @Param('diaId') diaId: string) {
-    return this.dias.quitarRegla(id, diaId);
+  quitar(@Param('id') id: string, @Param('diaId') diaId: string, @Req() request: AuthenticatedRequest) {
+    return this.dias.quitarRegla(id, diaId, personaDeSesion(request));
   }
 
   @Patch('ministerios/:id/cupo-turno')
