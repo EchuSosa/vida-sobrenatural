@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, loguearseComoTest, registrarPersonaDeTest } from './helpers';
+import { test, expect, cambiarDeSesion, registrarPersonaDeTest } from './helpers';
 import { cargarMaterialPorApi, crearEdicionPorApi, inscribirPorApi, registrarVidaNuevaHecha, EMAIL_LIDER_1 } from './helpers-008';
 
 /**
@@ -35,8 +35,7 @@ test.describe('Vida de Servicio en celular', () => {
     expect(await excesoHorizontal(page)).toBeLessThanOrEqual(0);
 
     // Cambiar de persona: sin borrar la sesión de antes, /mis-grupos la llevaba a Mi camino.
-    await page.context().clearCookies();
-    await loguearseComoTest(page, EMAIL_LIDER_1);
+    await cambiarDeSesion(page, EMAIL_LIDER_1);
     await page.goto(`/mis-grupos/${grupoId}/semanas/1`);
     // Con la edición en curso, el líder ve el título en el formulario para editarlo.
     await expect(page.getByRole('textbox', { name: 'Título' })).toHaveValue('T'.repeat(120));

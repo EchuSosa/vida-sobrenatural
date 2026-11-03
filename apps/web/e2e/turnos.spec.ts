@@ -162,6 +162,10 @@ test.describe('"No puedo ir" (US4, D257)', () => {
         await expect(page.getByText(`Listo: le avisamos a tu líder que no podés ir el ${fecha()}.`)).toBeVisible();
         await expect(page.getByText('Todavía no tenés turnos publicados.')).toBeVisible();
 
+        // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
+
+        await page.goto('about:blank');
+
         await page.context().clearCookies();
         await entrarConTema(page, baseURL!, EMAILS_017.lider, tema);
         const elegida = await abrirTurnos(page);

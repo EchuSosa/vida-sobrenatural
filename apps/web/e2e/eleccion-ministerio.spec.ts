@@ -75,6 +75,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page, tema);
 
       // La líder hace la charla.
+      // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
+      await page.goto('about:blank');
       await page.context().clearCookies();
       await entrarConTema(page, baseURL!, EMAILS_015.lider, tema);
       await page.goto('/mis-grupos');
@@ -100,6 +102,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(page.getByRole('link', { name: new RegExp(`${nombre} E2E Elección`) })).toContainText('Charla hecha');
 
       // La persona ve que ya lo charló, sin las notas.
+      // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
+      await page.goto('about:blank');
       await page.context().clearCookies();
       await entrarConTema(page, baseURL!, email, tema);
       await page.goto('/mi-camino/ministerios/elegir');
