@@ -74,12 +74,26 @@ Variable (no secreto): `FLY_HABILITADO = true`, solo cuando se quiera publicar.
 `DATABASE_URL` no va en GitHub: la carga `fly mpg attach` (paso 3). Las URLs públicas y
 `NEXT_PUBLIC_*` no son secretas: están en los `fly.<app>.toml`.
 
+## Seguridad por variable de entorno (docs/25)
+
+Los valores por defecto ya son los de producción (`NODE_ENV=production`); se cambian sin
+reconstruir la imagen, con `[env]` en el `fly.<app>.toml` o con `flyctl secrets set`.
+
+| Variable | Dónde | Por defecto en producción | Para qué |
+|---|---|---|---|
+| `IP_REAL_HEADER` | las tres | `fly-client-ip` (ya en los toml) | La IP del cliente para los límites (S-06). Sin la variable, la primera de `x-forwarded-for`. |
+| `CORS_ORIGENES` | API | `WEB_URL` y `BACKOFFICE_URL` | Orígenes que la API acepta (S-08), separados por coma. |
+| `CSP_MODO` | web, backoffice | `report-only` | `enforce` bloquea, `off` la saca (S-04). |
+| `CSP_CONEXIONES_EXTRA` | web, backoffice | — | Orígenes extra para `connect-src`. |
+| `HSTS` | las tres | un año | `off` o los segundos de `max-age`. |
+| `CABECERAS_SEGURIDAD` | las tres | (prendidas) | `off` las apaga todas, para depurar. |
+
 ## Antes de usarla con personas reales
 
 Publicar con **datos de demo** está bien para mostrarla. Antes de cargar personas reales falta:
 
-- docs/25: S-02 (roles desde la base, PR aparte), S-04 (cabeceras de seguridad y HSTS), S-06 (la IP
-  real detrás del proxy de Fly: `fly-client-ip`), S-08 (CORS con las URLs de arriba).
+- docs/25: S-02, S-04, S-06 y S-08 ya están (#86 y el PR de cabeceras). Después del primer deploy,
+  mirar los avisos de la CSP en la consola del navegador antes de pasarla a `enforce`.
 - `docs/06`: Política de Privacidad, consentimiento de menores, backups y prueba de restauración.
 
 ## Cómo se probó (2026-11-02)

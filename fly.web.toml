@@ -11,6 +11,8 @@ primary_region = "gru"
 
 [env]
   NODE_ENV = "production"
+  # docs/25, S-06: la IP del cliente la pone el proxy de Fly (límite del código de ingreso).
+  IP_REAL_HEADER = "fly-client-ip"
   PORT = "8080"
   NEXTAUTH_URL = "https://vida-sobrenatural-web.fly.dev"
   AUTH_TRUST_HOST = "true" # detrás del proxy de Fly, Auth.js necesita confiar en el host

@@ -78,7 +78,7 @@ crítico. Lo no crítico se arregla en PRs chicos, uno por hallazgo, y se marca 
 - **Recomendación:** `headers()` con `frame-ancestors 'none'`, `Referrer-Policy:
   strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`, `Permissions-Policy`
   mínima; CSP en modo *report-only* primero (Next y Sentry necesitan ajustes); HSTS al publicar.
-- **Estado:** pendiente.
+- **Estado:** **arreglado** (Echu, 2026-11-03). `proxy.ts` en web y backoffice aplica `cabecerasDeSeguridadWeb` (shared-types): `nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY`, `Permissions-Policy` mínima (ubicación solo propia, D224), HSTS de un año en producción y CSP en modo *report-only* en producción. Todo por variable (`CSP_MODO`, `CSP_CONEXIONES_EXTRA`, `HSTS`, `CABECERAS_SEGURIDAD`, ver `docs/26`). La API manda las suyas. Pasar la CSP a `enforce` pide nonce (guía de CSP de Next): queda para después de mirar los avisos en producción.
 
 ### S-05 · Media · Datos personales en los logs por la URL
 
@@ -99,7 +99,7 @@ crítico. Lo no crítico se arregla en PRs chicos, uno por hallazgo, y se marca 
   códigos a muchas direcciones (el tope de 5 por email sigue valiendo).
 - **Recomendación:** tomar la IP que agrega el proxy de confianza (la última de la cadena, o la
   cabecera propia del hosting) y documentarlo en el runbook de publicación.
-- **Estado:** pendiente — depende del hosting (ítem 3).
+- **Estado:** **listo detrás de una variable** (Echu, 2026-11-03): con `IP_REAL_HEADER` solo vale esa cabecera (y si falta, `desconocido`); sin ella, como antes. Los `fly.*.toml` ya la ponen en `fly-client-ip`. También la usa el límite de pedidos de la API cuando no hay sesión.
 
 ### S-07 · Media · Swagger público
 
@@ -115,7 +115,7 @@ crítico. Lo no crítico se arregla en PRs chicos, uno por hallazgo, y se marca 
 - **Qué pasa:** se acepta cualquier origen. El riesgo es bajo (la API no usa cookies, solo
   `Bearer`), pero con la app publicada conviene limitarlo.
 - **Recomendación:** `origin` desde variables de entorno con las URLs de web y backoffice.
-- **Estado:** pendiente.
+- **Estado:** **arreglado** (Echu, 2026-11-03): en producción, CORS acepta solo `WEB_URL` y `BACKOFFICE_URL` (o `CORS_ORIGENES`); fuera de producción, cualquiera, como en desarrollo.
 
 ### S-09 · Baja · El secreto interno se compara con `!==`
 
