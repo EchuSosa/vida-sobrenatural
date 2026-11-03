@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { CircleAlert, RotateCw } from 'lucide-react';
 import { ButtonLink } from '@vida-sobrenatural/ui';
@@ -76,6 +77,10 @@ export default async function PerfilPage() {
           {t('cuenta')}
         </h2>
         <CerrarSesionBoton />
+        {/* spec 018, US1: al final y aparte, para no tocarlo sin querer. */}
+        <Link href="/perfil/baja" className="inline-flex min-h-11 w-fit items-center text-base text-destructive underline underline-offset-4">
+          {t('baja.enlace')}
+        </Link>
       </section>
     </div>
   );

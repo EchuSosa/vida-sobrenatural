@@ -148,6 +148,8 @@ export type ErrorCode =
   | 'NO_ES_INTEGRANTE' // no tiene Postulación aprobada en el Ministerio (o en esa área)
   | 'SIN_FECHA_ANTERIOR' // "Copiar la fecha anterior" sin una publicada antes
   | 'TURNO_YA_EMPEZO' // D257: "No puedo ir" después de que empezó la fecha
+  // spec 018 — baja de la app (CONFIRMACION_BAJA_INVALIDA y MOTIVO_BAJA_LARGO van en `errors[]`)
+  | 'ULTIMO_ADMIN' // FR-006: tiene que haber otro Admin antes
   // Los de campo (FRECUENCIA_INVALIDA, DIA_SEMANA_INVALIDO, POSICION_EN_MES_INVALIDA,
   // CUPO_TURNO_INVALIDO, AREA_INVALIDA, MOTIVO_CANCELACION_LARGO) van en `errors[]`, no acá.
   | 'POSTULACION_YA_PENDIENTE' // FR-003

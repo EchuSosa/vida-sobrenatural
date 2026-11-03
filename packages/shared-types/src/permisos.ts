@@ -106,6 +106,8 @@ export type Permiso =
   | 'cursos.gestionar'
   | 'cursos.papelera.ver'
   | 'personas.editar'
+  // spec 018 (D263): dar de baja de la app en nombre de alguien.
+  | 'personas.baja'
   // spec 014 (D220–D228): Grupos de Extensión. `lider_extension` lo da y lo
   // quita el sistema al asignar líderes (D226); no está en ROLES_DE_CARGO.
   | 'grupos_extension.ver'
@@ -185,6 +187,7 @@ export const CATALOGO_PERMISOS: Record<Permiso, RolDeCargo[]> = {
   'cursos.gestionar': ['admin'],
   'cursos.papelera.ver': ['admin'],
   'personas.editar': ['admin'],
+  'personas.baja': ['admin'],
   // spec 014 — el Pastor ve, no gestiona (D142).
   'grupos_extension.ver': ['admin', 'pastor'],
   'grupos_extension.gestionar': ['admin'],

@@ -176,6 +176,11 @@ model Persona {
   // `false` cuando un pendiente_tutor no se autoriza (FR-014).
   activo                    Boolean               @default(true)
   consentimientoDatos       Boolean               @default(false)
+  // spec 018 (D261, D262): la baja de la app. La fila queda, anonimizada; esto marca cuándo y quién.
+  // `motivoBajaInterno` solo lo carga y lo ve el Admin, nunca va a logs ni a avisos.
+  dadaDeBajaEn              DateTime?
+  dadaDeBajaPorId           String?
+  motivoBajaInterno         String?               @db.VarChar(200)
   // Actualización 2026-09-17 (FR-013): se setean siempre juntos, solo cuando
   // consentimientoDatos=true — 'app' en POST /personas (mayor de edad),
   // 'presencial' en PATCH /personas/:id/activar (consentimiento del tutor).
@@ -1720,4 +1725,15 @@ model Turno {
   @@index([fechaId])
   @@index([personaId])
   @@map("turnos")
+}
+
+// spec 018 (FR-004): un archivo privado de una Persona dada de baja que no se pudo borrar al momento.
+// La tarea diaria lo reintenta; la baja no espera al archivo.
+model ArchivoPendienteDeBorrar {
+  id       String   @id @default(uuid())
+  ruta     String
+  intentos Int      @default(0)
+  creadoEn DateTime @default(now())
+
+  @@map("archivos_pendientes_de_borrar")
 }
