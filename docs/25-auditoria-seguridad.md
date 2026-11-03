@@ -40,7 +40,7 @@ crítico. Lo no crítico se arregla en PRs chicos, uno por hallazgo, y se marca 
   (*IP spoofing*), vía Express.
 - **Recomendación:** subir `next` a `≥ 16.4.1` en las dos apps (y `eslint-config-next` a la par),
   `@sentry/nextjs` a `≥ 10.75.2`, y las dependencias de Express de la API. Correr las tres suites.
-- **Estado:** pendiente — **se consulta con Echu antes de arreglarlo** (es crítico y es un cambio
+- **Estado:** **arreglado** en #84 (Next 16.4.1; Echu lo aprobó el 2026-11-02). Antes decía: pendiente — se consultaba con Echu antes de arreglarlo (es crítico y es un cambio
   de versión menor de Next, 16.3 → 16.4).
 
 ### S-02 · Alta · Los roles de la sesión no se revalidan
@@ -56,7 +56,7 @@ crítico. Lo no crítico se arregla en PRs chicos, uno por hallazgo, y se marca 
 - **Recomendación (a elegir con Echu):** que `JwtNextAuthGuard` resuelva `rol` y `estado` desde la
   base en cada pedido (con caché corta, ej. 60 s), dejando el JWT solo para la identidad; o que el
   callback `jwt` vuelva a consultar la Persona cada pocos minutos.
-- **Estado:** pendiente — **se consulta con Echu** (cambia cómo funciona la sesión).
+- **Estado:** **arreglado** en #86: la API lee `rol` y `estado` de la base en cada pedido, sin caché (opción (a) que eligió Echu el 2026-11-02, D258).
 
 ### S-03 · Alta · Resto de dependencias "high"
 
@@ -66,7 +66,7 @@ crítico. Lo no crítico se arregla en PRs chicos, uno por hallazgo, y se marca 
   `shadcn` → `@modelcontextprotocol/sdk`) que no llegan a producción pero conviene subir.
 - **Recomendación:** subir las de producción en un PR, con las tres suites; las de herramientas en
   otro.
-- **Estado:** pendiente (no crítico; va después de S-01 porque Next arrastra varias).
+- **Estado:** **arreglado** (Echu, 2026-11-03): `pnpm audit --audit-level high` da 0 altas y 0 críticas. Se subieron `prisma`/`@prisma/client` 7.10.1 (`mysql2`, `deepmerge-ts`), `shadcn` 4.23 y `multer` 2.5; lo demás va con `overrides` del parche de la misma versión mayor, comentados en `pnpm-workspace.yaml`. Quedan 12 moderadas y 3 bajas.
 
 ### S-04 · Media · Sin cabeceras de seguridad en web y backoffice
 
