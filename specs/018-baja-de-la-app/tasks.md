@@ -12,8 +12,8 @@ Un PR. Las tres suites en verde antes de unir.
   dadas de baja (FR-007).
 - [x] T005 Archivos: borrado después del commit + tarea diaria de reintento (FR-004).
 - [x] T006 Integración: SC-001 (barrido), SC-003, SC-004, permisos, doble pedido, sesión vieja.
-  El "único Admin" no se prueba en integración: la base de test es compartida y siempre tiene otros
-  Admins; queda cubierto en el e2e del backoffice si hace falta, o con un unit del chequeo.
+  El "único Admin" va en su propio archivo (`baja-unica-admin.integration-spec.ts`), con una base
+  recién creada y migrada que tiene una sola Admin (pedido de Echu, 2026-11-03).
 - [x] T007 Web: Perfil → `/perfil/baja` → `/baja-lista`.
 - [x] T008 Backoffice: "Dar de baja de la app" en el Perfil de Persona.
 - [x] T009 e2e web y backoffice (feliz + error por campo + API caída + doble toque; Pastor; axe).
