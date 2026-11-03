@@ -27,7 +27,7 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
   let prisma: PrismaService;
   let sedeId: string;
   const sufijo = Date.now();
-  const ids: Record<'ana' | 'beto' | 'carla' | 'pastor' | 'disc', string> = { ana: '', beto: '', carla: '', pastor: '', disc: '' };
+  const ids: Record<'ana' | 'beto' | 'carla' | 'pastor' | 'disc' | 'admin', string> = { ana: '', beto: '', carla: '', pastor: '', disc: '', admin: '' };
 
   async function crearPersona(clave: keyof typeof ids, rol: string[]) {
     const persona = await prisma.persona.create({
@@ -73,6 +73,8 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
     await crearPersona('carla', ['miembro_registrado']);
     await crearPersona('pastor', ['miembro_registrado', 'pastor']);
     await crearPersona('disc', ['miembro_registrado', 'discipulador']);
+    // D258: el rol sale de la base; quien propone es una Admin de verdad, no el Pastor con un token trucado.
+    await crearPersona('admin', ['miembro_registrado', 'admin']);
   });
 
   afterAll(async () => {
@@ -177,7 +179,7 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
   });
 
   it('la bandeja lista las abiertas por defecto, y el Pastor ve el detalle sin historial', async () => {
-    const admin = await mintToken({ email: 'x', personaId: ids.pastor, estado: 'activa', rol: ['admin'] });
+    const admin = await tokenDe('admin', ['miembro_registrado', 'admin']);
     // Acotada a las Personas de este archivo (apellido "Integración"): sin `buscar`, otro archivo que
     // corre en paralelo puede resolver una fila entre la página y la hidratación y llega `abierta: false`.
     const bandeja = await request(app.getHttpServer()).get('/solicitudes?take=100&buscar=Integraci').set('Authorization', `Bearer ${admin}`);
@@ -201,7 +203,7 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
   it('proponer, retirar la propuesta y rechazar, por API con un Discipulador disponible (FR-006)', async () => {
     await prisma.franjaAgenda.create({ data: { personaId: ids.disc, ...MARTES } });
     await prisma.persona.update({ where: { id: ids.disc }, data: { disponibleDiscipulado: true } });
-    const admin = await mintToken({ email: 'x', personaId: ids.pastor, estado: 'activa', rol: ['admin'] });
+    const admin = await tokenDe('admin', ['miembro_registrado', 'admin']);
     const solicitud = await prisma.solicitudDiscipulado.findFirstOrThrow({ where: { personaId: ids.beto, estado: 'pendiente' }, select: { id: true } });
     const api = request(app.getHttpServer());
 
@@ -219,7 +221,7 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
     const bandeja = await api.get('/solicitudes?estado=propuesta&orden=espera&take=100').set('Authorization', `Bearer ${admin}`);
     expect(bandeja.body.items.find((s: { id: string }) => s.id === solicitud.id)).toMatchObject({
       estado: 'propuesta',
-      revisadoPor: { id: ids.pastor },
+      revisadoPor: { id: ids.admin },
       // spec 013 (bandeja unificada): lo propio de cada tipo viaja en `extra`.
       extra: { propuestaVigente: { discipulador: { id: ids.disc } } },
     });
@@ -243,7 +245,7 @@ describe('Solicitudes de Discipulado (integración, T018)', () => {
   });
 
   it('proponer a alguien sin la disponibilidad prendida → 409 DISCIPULADOR_NO_DISPONIBLE', async () => {
-    const admin = await mintToken({ email: 'x', personaId: ids.pastor, estado: 'activa', rol: ['admin'] });
+    const admin = await tokenDe('admin', ['miembro_registrado', 'admin']);
     const carla = await request(app.getHttpServer()).post('/discipulado/solicitudes/me').set('Authorization', `Bearer ${await tokenDe('carla')}`).send({ franjas: [MARTES] });
     await prisma.persona.update({ where: { id: ids.disc }, data: { disponibleDiscipulado: false } });
 
