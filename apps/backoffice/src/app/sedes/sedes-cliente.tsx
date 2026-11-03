@@ -88,6 +88,7 @@ export function SedesCliente({
   };
   const tc = useTranslations('comun');
   const tcat = useTranslations('catalogos');
+  const t = useTranslations('sedes');
   const procesandoRef = useRef(new Set<string>());
   const { busqueda, setBusqueda, actualizarParams, limpiar } = useControlesTablaUrl();
   const hayAlgoAplicado = busqueda.trim() !== '' || filtro === 'todas';
@@ -146,13 +147,13 @@ export function SedesCliente({
   const columnas: ColumnaTabla<Sede>[] = [
     {
       id: 'nombre',
-      encabezado: 'Nombre',
+      encabezado: t('columnas.nombre'),
       ordenable: true,
       celda: (sede) => <span className="font-medium">{sede.nombre}</span>,
     },
     {
       id: 'direccion',
-      encabezado: 'Dirección',
+      encabezado: t('columnas.direccion'),
       ordenable: true,
       // H-62/H-69: a 320px solo caben Nombre y Acciones sin scroll horizontal.
       className: 'hidden sm:table-cell',
@@ -160,7 +161,7 @@ export function SedesCliente({
     },
     {
       id: 'horarios',
-      encabezado: 'Horarios',
+      encabezado: t('columnas.horarios'),
       className: 'hidden md:table-cell',
       celda: (sede) => sede.horarios,
     },
@@ -168,7 +169,7 @@ export function SedesCliente({
       ? [
           {
             id: 'estado',
-            encabezado: 'Estado',
+            encabezado: t('columnas.estado'),
             ordenable: true,
             celda: (sede: Sede) => <EstadoActivoBadge activo={sede.activo} />,
           } satisfies ColumnaTabla<Sede>,
@@ -179,9 +180,9 @@ export function SedesCliente({
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-16">
       {/* D213: Sedes vive bajo Catálogos. */}
-      <MigaDePan tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: 'Sedes' }]} LinkComponente={Link} />
+      <MigaDePan tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: t('titulo') }]} LinkComponente={Link} />
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Sedes</h1>
+        <h1 className="text-2xl font-semibold">{t('titulo')}</h1>
         <div className="flex gap-2">
           {/* Un control se condiciona al permiso de LO QUE PROVOCA. "Papelera" es
               navegación, no una acción: va con el permiso de ABRIR esa pantalla
@@ -190,7 +191,7 @@ export function SedesCliente({
               comentario es lo que impide unificarlos cuando se separen (H-129/T071). */}
           {puedeAbrirPapelera && (
             <ButtonLink render={<Link href="/sedes/papelera" />} variant="outline" size="sm">
-              Papelera
+              {t('papelera')}
             </ButtonLink>
           )}
           {puedeGestionar && (
@@ -202,7 +203,7 @@ export function SedesCliente({
                 setModalAbierto(true);
               }}
             >
-              Crear Sede
+              {t('crear')}
             </Button>
           )}
         </div>
@@ -211,23 +212,23 @@ export function SedesCliente({
       <ControlesTabla
         busqueda={busqueda}
         onBuscarChange={setBusqueda}
-        etiquetaBusqueda="Buscar por nombre"
-        placeholderBusqueda="Ej. La Plata"
+        etiquetaBusqueda={t('buscar')}
+        placeholderBusqueda={t('buscarEjemplo')}
         filtros={
-          <div className="flex gap-2" role="group" aria-label="Filtrar por estado">
+          <div className="flex gap-2" role="group" aria-label={t('filtrarPorEstado')}>
             <Button
               variant={filtro === 'activas' ? 'default' : 'outline'}
               size="sm"
               onClick={() => actualizarParams({ estado: null })}
             >
-              Activas
+              {t('activas')}
             </Button>
             <Button
               variant={filtro === 'todas' ? 'default' : 'outline'}
               size="sm"
               onClick={() => actualizarParams({ estado: 'todas' })}
             >
-              Todas
+              {t('todas')}
             </Button>
           </div>
         }
@@ -240,13 +241,13 @@ export function SedesCliente({
         columnas={columnas}
         datos={sedes}
         obtenerId={(sede) => sede.id}
-        etiqueta="Sedes"
+        etiqueta={t('titulo')}
         mensajeVacio={
           busqueda.trim()
-            ? `No encontramos Sedes que coincidan con "${busqueda.trim()}".`
+            ? t('vacioBusqueda', { busqueda: busqueda.trim() })
             : filtro === 'activas'
-              ? 'Todavía no hay Sedes activas.'
-              : 'Todavía no hay Sedes cargadas.'
+              ? t('vacioActivas')
+              : t('vacioTodas')
         }
         orden={orden}
         onOrdenar={(columnaId) =>
@@ -260,7 +261,7 @@ export function SedesCliente({
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="ghost" size="icon-sm" aria-label={`Acciones para ${sede.nombre}`}>
+                  <Button variant="ghost" size="icon-sm" aria-label={t('acciones', { nombre: sede.nombre })}>
                     <MoreVertical className="size-4" />
                   </Button>
                 }
@@ -268,12 +269,12 @@ export function SedesCliente({
               <DropdownMenuContent align="end">
                 {/* "Ver detalle" es navegación (sedes.ver, quien ve el listado ya lo
                     tiene); Inactivar/Reactivar/Eliminar son acciones (sedes.gestionar). */}
-                <DropdownMenuItem render={<Link href={`/sedes/${sede.id}`}>Ver detalle</Link>} />
+                <DropdownMenuItem render={<Link href={`/sedes/${sede.id}`}>{t('verDetalle')}</Link>} />
                 {puedeGestionar &&
                   (sede.activo ? (
-                    <DropdownMenuItem onClick={() => cambiarActivo(sede, false)}>Inactivar</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => cambiarActivo(sede, false)}>{t('inactivar')}</DropdownMenuItem>
                   ) : (
-                    <DropdownMenuItem onClick={() => cambiarActivo(sede, true)}>Reactivar</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => cambiarActivo(sede, true)}>{t('reactivar')}</DropdownMenuItem>
                   ))}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -286,16 +287,16 @@ export function SedesCliente({
         {/* D218: con el campo de WhatsApp el formulario ya no entra en una pantalla baja: el panel scrollea. */}
         <SheetContent side="right" etiquetaCerrar={tc('cerrarPanel')} className="overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Crear Sede</SheetTitle>
-            <SheetDescription>Se agrega activa; podés editarla después desde su detalle.</SheetDescription>
+            <SheetTitle>{t('crear')}</SheetTitle>
+            <SheetDescription>{t('crearDescripcion')}</SheetDescription>
           </SheetHeader>
           <div className="px-4 pb-4">
             <FormularioSede
               valoresIniciales={VALORES_SEDE_VACIOS}
               onGuardar={crearSede}
               enviando={enviando}
-              textoBoton="Crear Sede"
-              textoEnviando="Creando…"
+              textoBoton={t('crear')}
+              textoEnviando={t('creando')}
               error={errorAlta}
               erroresCampo={erroresCampoAlta}
             />
@@ -318,6 +319,7 @@ function AccionEliminarSede({ sede, apiToken }: { sede: Sede; apiToken: string }
   const [open, setOpen] = useState(false);
   const te = useTranslations('errors');
   const ts = useTranslations('sedesAcciones');
+  const t = useTranslations('sedes');
   const mensajeDeError = (e: unknown, generico: string) => {
     const code = e instanceof ApiError ? (e.code as ErrorCode) : null;
     return code && te.has(code) ? te(code) : generico;
@@ -345,7 +347,7 @@ function AccionEliminarSede({ sede, apiToken }: { sede: Sede; apiToken: string }
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Eliminar ${sede.nombre}`}
+            aria-label={t('eliminar', { nombre: sede.nombre })}
             className={bloqueada ? 'text-muted-foreground' : 'text-destructive hover:text-destructive'}
           >
             <Trash2 className="size-4" />
@@ -356,30 +358,23 @@ function AccionEliminarSede({ sede, apiToken }: { sede: Sede; apiToken: string }
         {bloqueada ? (
           <>
             <AlertDialogHeader>
-              <AlertDialogTitle>No se puede eliminar {sede.nombre}</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tiene {sede.personasAsociadas} {sede.personasAsociadas === 1 ? 'Persona asociada' : 'Personas asociadas'} —
-                eliminar una Sede se lleva también su historia (Principio III). Si ya no se usa, inactivala: sigue
-                viéndose en &quot;Todas&quot;, pero desaparece de Visitanos y del registro.
-              </AlertDialogDescription>
+              <AlertDialogTitle>{t('eliminarBloqueadaTitulo', { nombre: sede.nombre })}</AlertDialogTitle>
+              <AlertDialogDescription>{t('eliminarBloqueadaDescripcion', { n: sede.personasAsociadas })}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Entendido</AlertDialogCancel>
+              <AlertDialogCancel>{t('entendido')}</AlertDialogCancel>
             </AlertDialogFooter>
           </>
         ) : (
           <>
             <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar {sede.nombre}?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Es para corregir un error de carga (duplicada, de prueba) — se saca de todas las vistas y queda en la
-                papelera, desde donde se puede restaurar.
-              </AlertDialogDescription>
+              <AlertDialogTitle>{t('eliminarTitulo', { nombre: sede.nombre })}</AlertDialogTitle>
+              <AlertDialogDescription>{t('eliminarDescripcion')}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" loading={enviando} loadingText="Eliminando…" onClick={eliminar}>
-                Sí, eliminar
+              <AlertDialogCancel>{t('cancelar')}</AlertDialogCancel>
+              <AlertDialogAction variant="destructive" loading={enviando} loadingText={t('eliminando')} onClick={eliminar}>
+                {t('siEliminar')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </>

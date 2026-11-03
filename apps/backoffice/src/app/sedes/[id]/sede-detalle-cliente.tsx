@@ -47,6 +47,8 @@ export function SedeDetalleCliente({
   const [avisoUnicaActiva, setAvisoUnicaActiva] = useState(false);
   const te = useTranslations('errors');
   const tcat = useTranslations('catalogos');
+  const ts = useTranslations('sedes');
+  const t = useTranslations('sedes.detalle');
 
   const { enviando, ejecutar: guardar } = useEnvio(async (valores: ValoresSede) => {
     setErrorGuardar(null);
@@ -57,14 +59,14 @@ export function SedeDetalleCliente({
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         body: JSON.stringify(datosSedeParaEnviar(valores)),
       });
-      toast('Cambios guardados.');
+      toast(t('guardados'));
       router.refresh();
     } catch (e) {
       const campos = erroresPorCampo(e);
       if (campos) {
         setErroresCampoGuardar(campos);
       } else {
-        setErrorGuardar(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos guardar los cambios.');
+        setErrorGuardar(e instanceof ApiError ? te(e.code as ErrorCode) : t('errorGuardar'));
       }
     }
   });
@@ -76,14 +78,14 @@ export function SedeDetalleCliente({
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         body: JSON.stringify({ activo: false }),
       });
-      toast('Sede desactivada.');
+      toast(t('desactivada'));
       router.refresh();
     } catch (e) {
       if (e instanceof ApiError && e.code === 'SEDE_UNICA_ACTIVA') {
         setAvisoUnicaActiva(true);
         return;
       }
-      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos desactivar la Sede.');
+      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : t('errorDesactivar'));
     }
   });
 
@@ -94,14 +96,14 @@ export function SedeDetalleCliente({
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         body: JSON.stringify({ activo: true }),
       });
-      toast('Sede reactivada.');
+      toast(t('reactivada'));
       router.refresh();
     } catch (e) {
       if (e instanceof ApiError && e.code === 'SEDE_NOMBRE_DUPLICADO') {
-        toast.error('Ya existe otra Sede activa con este nombre — cambiá el nombre antes de reactivar.');
+        toast.error(t('nombreDuplicado'));
         return;
       }
-      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : 'No pudimos reactivar la Sede.');
+      toast.error(e instanceof ApiError ? te(e.code as ErrorCode) : t('errorReactivar'));
     }
   });
 
@@ -110,7 +112,7 @@ export function SedeDetalleCliente({
       {/* H-103/docs/15-guia-ux-ui.md: la miga de pan es el único sistema de
           ubicación — reemplaza al "← Volver a Sedes" escrito a mano. */}
       <MigaDePan
-        tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: 'Sedes', href: '/sedes' }, { label: sede.nombre }]}
+        tramos={[{ label: tcat('titulo'), href: '/catalogos' }, { label: ts('titulo'), href: '/sedes' }, { label: sede.nombre }]}
         LinkComponente={Link}
       />
 
@@ -127,28 +129,28 @@ export function SedeDetalleCliente({
                 variant="outline"
                 className="text-destructive"
                 loading={desactivando}
-                loadingText="Desactivando…"
+                loadingText={t('desactivando')}
               >
-                Desactivar
+                {t('desactivar')}
               </Button>
             }
-            titulo={`¿Desactivar la Sede ${sede.nombre}?`}
-            descripcion="Deja de mostrarse en Visitanos y en el registro. No se borra nada: las personas asociadas siguen igual y podés volver a activarla cuando quieras."
-            textoConfirmar="Sí, desactivar"
-            textoCancelar="Volver"
+            titulo={t('desactivarTitulo', { nombre: sede.nombre })}
+            descripcion={t('desactivarDescripcion')}
+            textoConfirmar={t('siDesactivar')}
+            textoCancelar={t('volver')}
             onConfirmar={desactivar}
           />
         ) : (
           <ConfirmDestructiveDialog
             trigger={
-              <Button loading={reactivando} loadingText="Reactivando…">
-                Reactivar
+              <Button loading={reactivando} loadingText={t('reactivando')}>
+                {t('reactivar')}
               </Button>
             }
-            titulo={`¿Reactivar la Sede ${sede.nombre}?`}
-            descripcion="Vuelve a mostrarse en Visitanos y en el registro."
-            textoConfirmar="Sí, reactivar"
-            textoCancelar="Volver"
+            titulo={t('reactivarTitulo', { nombre: sede.nombre })}
+            descripcion={t('reactivarDescripcion')}
+            textoConfirmar={t('siReactivar')}
+            textoCancelar={t('volver')}
             onConfirmar={reactivar}
           />
         )}
@@ -159,8 +161,8 @@ export function SedeDetalleCliente({
         valoresIniciales={sedeAValoresFormulario(sede)}
         onGuardar={guardar}
         enviando={enviando}
-        textoBoton="Guardar cambios"
-        textoEnviando="Guardando…"
+        textoBoton={t('guardar')}
+        textoEnviando={t('guardando')}
         error={errorGuardar}
         erroresCampo={erroresCampoGuardar}
         soloLectura={!puedeGestionar}
@@ -169,18 +171,18 @@ export function SedeDetalleCliente({
       <AlertDialog open={avisoUnicaActiva} onOpenChange={setAvisoUnicaActiva}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Necesitás al menos una Sede activa</AlertDialogTitle>
+            <AlertDialogTitle>{t('unicaActivaTitulo')}</AlertDialogTitle>
             <AlertDialogDescription>{te('SEDE_UNICA_ACTIVA')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Volver</AlertDialogCancel>
+            <AlertDialogCancel>{t('volver')}</AlertDialogCancel>
             {/* H-100/H-01: navegación real (un <a> de verdad, packages/ui),
                 no una acción in-place — no un AlertDialogAction.
                 AlertDialogCancel ya cierra el diálogo; acá no hace falta
                 ningún manejo de cierre propio. H-109: "Crear una Sede"
                 nombra un verbo — tiene que ejecutarlo, no dejar a la
                 persona en el listado para que lo busque. */}
-            <ButtonLink render={<Link href="/sedes?crear=1" />}>Crear una Sede</ButtonLink>
+            <ButtonLink render={<Link href="/sedes?crear=1" />}>{t('crearUna')}</ButtonLink>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -35,7 +35,11 @@ export function BuscarPersonaGex({
   apiToken: string;
   textoElegir: string;
   ariaElegir: (nombre: string) => string;
-  onElegir: (persona: PersonaElegibleGex) => void | Promise<void>;
+  /**
+   * Backlog (Echu, 2026-11-03): devolver `false` cuando la acción falló. Así la búsqueda y sus
+   * resultados quedan, para reintentar sin volver a buscar; si no, se limpian.
+   */
+  onElegir: (persona: PersonaElegibleGex) => boolean | void | Promise<boolean | void>;
   excluir?: string[];
   bloquearMenores?: boolean;
   deshabilitado?: boolean;
@@ -108,8 +112,8 @@ export function BuscarPersonaGex({
                     variant="outline"
                     aria-label={ariaElegir(nombre)}
                     disabled={deshabilitado}
-                    onClick={() => {
-                      void onElegir(p);
+                    onClick={async () => {
+                      if ((await onElegir(p)) === false) return;
                       setResultados(null);
                       setQ('');
                     }}
