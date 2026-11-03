@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { formatearDiaDeServicio, type GrillaDeTurnos } from '@vida-sobrenatural/shared-types';
-import { test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
+import { test, expect, auditar, esperarTema, sinScrollHorizontal, salirDeLaPagina } from './helpers';
 import { api, tokenDe } from './helpers-006';
 import { entrarConTema } from './helpers-009';
 import { EMAILS_017, MIEMBRO_017, MINISTERIO_017, primerDomingo, reiniciarTurnos } from './helpers-017';
@@ -164,7 +164,7 @@ test.describe('"No puedo ir" (US4, D257)', () => {
 
         // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
 
-        await page.goto('about:blank');
+        await salirDeLaPagina(page);
 
         await page.context().clearCookies();
         await entrarConTema(page, baseURL!, EMAILS_017.lider, tema);

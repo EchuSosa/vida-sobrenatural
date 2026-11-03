@@ -34,12 +34,21 @@ export async function loguearseComoTest(
 }
 
 /**
+ * Deja la página de la app por una del mismo origen que no corre JS de la app (el JSON de
+ * `/api/auth/csrf`): navegar corta los pedidos en vuelo de la página anterior. No es `about:blank`
+ * porque ahí los `addInitScript` que escriben localStorage (el tema oscuro) tiran excepción.
+ */
+export async function salirDeLaPagina(page: Page) {
+  await page.goto('/api/auth/csrf');
+}
+
+/**
  * Cambiar de persona en medio de un test. Antes de borrar las cookies se sale de la página: si
  * no, un pedido que la página dejó en vuelo (refresco de sesión, prefetch) puede volver con la
  * cookie de la persona anterior después del `clearCookies()` (docs/24).
  */
 export async function cambiarDeSesion(page: Page, email: string) {
-  await page.goto('about:blank');
+  await salirDeLaPagina(page);
   await page.context().clearCookies();
   await loguearseComoTest(page, email);
 }
