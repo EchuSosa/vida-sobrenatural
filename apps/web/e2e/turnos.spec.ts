@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { formatearDiaDeServicio, type GrillaDeTurnos } from '@vida-sobrenatural/shared-types';
-import { test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
+import { test, expect, auditar, esperarTema, sinScrollHorizontal, salirDeLaPagina } from './helpers';
 import { api, tokenDe } from './helpers-006';
 import { entrarConTema } from './helpers-009';
 import { EMAILS_017, MIEMBRO_017, MINISTERIO_017, primerDomingo, reiniciarTurnos } from './helpers-017';
@@ -161,6 +161,10 @@ test.describe('"No puedo ir" (US4, D257)', () => {
         await dialogo.getByRole('button', { name: 'Avisar que no puedo' }).click();
         await expect(page.getByText(`Listo: le avisamos a tu líder que no podés ir el ${fecha()}.`)).toBeVisible();
         await expect(page.getByText('Todavía no tenés turnos publicados.')).toBeVisible();
+
+        // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
+
+        await salirDeLaPagina(page);
 
         await page.context().clearCookies();
         await entrarConTema(page, baseURL!, EMAILS_017.lider, tema);

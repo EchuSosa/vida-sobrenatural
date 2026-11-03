@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
+import { test, expect, auditar, esperarTema, sinScrollHorizontal, salirDeLaPagina } from './helpers';
 import { EMAILS_014, GRUPOS_014, entrarConTema, prepararSinGrupo } from './helpers-014';
 
 /**
@@ -99,6 +99,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page, tema);
 
       // La líder lo ve en "Mi grupo", con WhatsApp, y acepta.
+      // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
+      await salirDeLaPagina(page);
       await page.context().clearCookies();
       await entrarConTema(page, baseURL!, EMAILS_014.lider, tema);
       await page.goto('/mi-grupo-extension');
@@ -113,6 +115,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(page.getByText(/ya forma parte del grupo y le avisamos/)).toBeVisible();
 
       // La persona ve su grupo con la dirección exacta y "Cómo llegar".
+      // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
+      await salirDeLaPagina(page);
       await page.context().clearCookies();
       await entrarConTema(page, baseURL!, email, tema);
       await page.goto('/mi-camino');

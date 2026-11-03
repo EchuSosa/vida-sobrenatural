@@ -26,6 +26,31 @@ export async function loguearseComoTest(
   await page.request.post('/api/auth/callback/test-login', {
     form: { email, csrfToken, ...(opciones?.emailVerified ? { emailVerified: opciones.emailVerified } : {}) },
   });
+  // docs/24 (qa-titulo-largo-celular, 2.ª vez): el ingreso podía fallar callado (MissingCSRF en el
+  // log del servidor) y el test seguía con la sesión de antes. Ahora se comprueba que la sesión
+  // sea la de este email; si no, el test falla acá y no tres pasos después.
+  const sesion = await (await page.request.get('/api/auth/session')).json().catch(() => null);
+  expect(sesion?.user?.email, `el ingreso de prueba como ${email} no dejó su sesión`).toBe(email);
+}
+
+/**
+ * Deja la página de la app por una del mismo origen que no corre JS de la app (el JSON de
+ * `/api/auth/csrf`): navegar corta los pedidos en vuelo de la página anterior. No es `about:blank`
+ * porque ahí los `addInitScript` que escriben localStorage (el tema oscuro) tiran excepción.
+ */
+export async function salirDeLaPagina(page: Page) {
+  await page.goto('/api/auth/csrf');
+}
+
+/**
+ * Cambiar de persona en medio de un test. Antes de borrar las cookies se sale de la página: si
+ * no, un pedido que la página dejó en vuelo (refresco de sesión, prefetch) puede volver con la
+ * cookie de la persona anterior después del `clearCookies()` (docs/24).
+ */
+export async function cambiarDeSesion(page: Page, email: string) {
+  await salirDeLaPagina(page);
+  await page.context().clearCookies();
+  await loguearseComoTest(page, email);
 }
 
 /**

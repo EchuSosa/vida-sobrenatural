@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { abrirEtapa, test, expect, auditar, esperarTema, sinScrollHorizontal } from './helpers';
+import { abrirEtapa, test, expect, auditar, esperarTema, sinScrollHorizontal, salirDeLaPagina } from './helpers';
 import { MINISTERIOS_009 } from './helpers-009';
 import { EDICION_015, EMAILS_015, entrarConTema, reiniciarEleccion, reiniciarYaSirvo } from './helpers-015';
 
@@ -75,6 +75,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await sinViolaciones(page, tema);
 
       // La líder hace la charla.
+      // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
+      await salirDeLaPagina(page);
       await page.context().clearCookies();
       await entrarConTema(page, baseURL!, EMAILS_015.lider, tema);
       await page.goto('/mis-grupos');
@@ -100,6 +102,8 @@ for (const tema of ['claro', 'oscuro'] as const) {
       await expect(page.getByRole('link', { name: new RegExp(`${nombre} E2E Elección`) })).toContainText('Charla hecha');
 
       // La persona ve que ya lo charló, sin las notas.
+      // Salir de la página antes de borrar las cookies (docs/24: pedidos en vuelo).
+      await salirDeLaPagina(page);
       await page.context().clearCookies();
       await entrarConTema(page, baseURL!, email, tema);
       await page.goto('/mi-camino/ministerios/elegir');
