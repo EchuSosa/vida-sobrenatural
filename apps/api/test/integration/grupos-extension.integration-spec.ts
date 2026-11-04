@@ -39,9 +39,7 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
 
   beforeAll(async () => {
     ({ app, prisma } = await levantarApp());
-    // Sin dígitos: el test busca que la respuesta no tenga "820" (el número de la calle de "Cerca") y
-    // el sufijo va en los nombres. Con `Date.now()` lo tuvo durante ~17 minutos el 2026-11-04.
-    const sufijo = `gex${Date.now().toString().replace(/\d/g, (d) => 'abcdefghij'[Number(d)])}`;
+    const sufijo = `gex${Date.now()}`;
     escenario = new Escenario(prisma, sufijo);
     await escenario.preparar();
     // La Sede de "En la iglesia": el geocodificador falso la ubica por "iglesia".
@@ -186,8 +184,7 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
       const encontrados = (porGrupo.body as GrupoExtensionEncontrado[]).filter(delGrupo(grupos));
       expect(encontrados.map((g) => g.id)).toEqual([cercaId]);
       expect(encontrados[0].distanciaKm).toBeNull();
-      // Sin los ids, como en el test de arriba: un UUID al azar puede contener "820".
-      expect(JSON.stringify((porGrupo.body as GrupoExtensionEncontrado[]).map(({ id: _id, ...resto }) => resto))).not.toContain('820');
+      expect(JSON.stringify(porGrupo.body)).not.toContain('820');
       // Por quien lo lidera: los tres grupos de "lideralejos" que son para ella (no el de mayores), por orden alfabético.
       const porLider = ((await buscar(token, { nombre: 'LIDERALEJOS' })).body as GrupoExtensionEncontrado[]).filter(delGrupo(grupos)).map((g) => g.id);
       expect(porLider).toEqual([lejosId, mixtoId, sinUbicarId]);

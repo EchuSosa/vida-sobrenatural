@@ -11,6 +11,10 @@ test('la ficha de la charla habla de la persona en tercera persona', async ({ pa
   await loguearseComoTest(page, EMAILS_015.lider);
   await page.goto('/mis-grupos');
   await page.getByRole('link', { name: EDICION_015 }).click();
+  // Como en eleccion-ministerio.spec: esperar la página del grupo hidratada antes de tocar el enlace.
+  // Sin esto, en la CI el clic llegaba antes de que el router estuviera listo y la URL no cambiaba.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(EDICION_015);
+  await page.waitForLoadState('networkidle');
   await page.getByRole('link', { name: 'Elección de ministerio' }).click();
   await expect(page).toHaveURL(/\/elecciones$/);
   await page.getByRole('link', { name: /E2E Elección/ }).first().click();
