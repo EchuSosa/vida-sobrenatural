@@ -8,7 +8,7 @@ import { EMAIL_LIDER_1, crearEdicionPorApi, crearPersonaApta, inscribirPorApi, i
  */
 type Pendientes = { bajasPropuestas: { cantidad: number } };
 
-test.fail('una baja propuesta en Vida de Servicio no suma a las bajas de discipulado del Inicio', async () => {
+test('una baja propuesta en Vida de Servicio no suma a las bajas de discipulado del Inicio', async () => {
   const sufijo = Date.now();
   const grupoId = await crearEdicionPorApi({ nombre: `e2e-qa-bajas-${sufijo}` });
   const persona = await crearPersonaApta(`e2e-qa-bajas-${sufijo}@example.com`, 'Bea', 'Bajas');

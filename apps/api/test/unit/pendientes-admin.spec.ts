@@ -51,6 +51,13 @@ describe('PendientesAdminService', () => {
     expect(prisma.propuestaDiscipulado.count).toHaveBeenCalledWith({ where: { estado: 'pendiente', propuestaEn: { lt: limite } } });
   });
 
+  it('BUG-14: finalizaciones y bajas cuentan solo discipulados de Vida Nueva (las de Vida de Servicio tienen su línea)', async () => {
+    const { servicio, prisma } = armar();
+    await servicio.pendientes(AHORA);
+    expect(prisma.grupo.count).toHaveBeenCalledWith({ where: { estado: 'en_curso', propuestaFinalizacionEn: { not: null }, curso: { categoria: 'vida_nueva' } } });
+    expect(prisma.inscripcion.count).toHaveBeenCalledWith({ where: { estado: 'activa', bajaPropuestaEn: { not: null }, grupo: { estado: 'en_curso', curso: { categoria: 'vida_nueva' } } } });
+  });
+
   it('declinadas: solo cuenta la ÚLTIMA propuesta de cada Solicitud pendiente', async () => {
     const { servicio, prisma } = armar();
     await servicio.pendientes(AHORA);
