@@ -7,7 +7,7 @@ import { test, expect, apiComo, crearPersona, loguearseComoAdminE2E, EMAIL_ADMIN
  * "ese día no hay servicio" (spec 017, casos borde). El Admin confirma creyendo que el rol queda.
  * Se arma un Ministerio propio para no chocar con los demás e2e de turnos.
  */
-test.fail('quitar un día con una fecha publicada avisa en el diálogo que se suspende y se avisa', async ({ page }) => {
+test('quitar un día con una fecha publicada avisa en el diálogo que se suspende y se avisa', async ({ page }) => {
   test.slow();
   const sufijo = Date.now();
   const { id } = await apiComo<{ id: string }>(EMAIL_ADMIN, 'POST', '/ministerios', { nombre: `e2e-qa-regla-${sufijo}`, descripcion: 'Ministerio de QA' });
