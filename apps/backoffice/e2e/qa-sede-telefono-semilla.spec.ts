@@ -6,7 +6,7 @@ import { test, expect, loguearseComoAdminE2E } from './helpers';
  * Secretaría (CAT-01) no puede guardar: el error cae en un campo que no tocó. Los e2e de Sedes no lo
  * ven porque crean sus propias Sedes.
  */
-test.fail('en la Sede La Plata del seed se puede cargar el WhatsApp sin tocar nada más', async ({ page }) => {
+test('en la Sede La Plata del seed se puede cargar el WhatsApp sin tocar nada más', async ({ page }) => {
   await loguearseComoAdminE2E(page);
   await page.goto('/sedes');
   await page.getByRole('button', { name: 'Acciones para La Plata' }).click();
