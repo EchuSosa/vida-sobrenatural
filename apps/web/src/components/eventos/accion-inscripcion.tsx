@@ -30,6 +30,7 @@ import {
   useValidacionCampos,
   textoDeCampo,
 } from '@vida-sobrenatural/ui';
+import { claveQueSigue } from './que-sigue';
 
 /**
  * spec 011, T052 (research #10) — la isla de la página del Evento que depende
@@ -287,6 +288,7 @@ function EstadoYQueSigue({ inscripcion, cuando }: { inscripcion: MiInscripcionEv
   const t = useTranslations('eventos.inscripcion');
   const { estado, posicionEnLista, estadoPago, evento } = inscripcion;
   const posicion = posicionEnLista ?? 0;
+  const clave = claveQueSigue(inscripcion);
   return (
     <>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base">
@@ -302,7 +304,7 @@ function EstadoYQueSigue({ inscripcion, cuando }: { inscripcion: MiInscripcionEv
           </ButtonLink>
         </>
       ) : (
-        <p className="text-base">{t(`queSigue.${estado}`, { cuando, lugar: evento.lugar, posicion })}</p>
+        <p className="text-base">{t(clave, { cuando, lugar: evento.lugar, posicion, motivo: inscripcion.ultimoRechazoPago ?? '' })}</p>
       )}
       {estado !== 'cancelada' && (
         <Link href="/mis-eventos" className="w-fit text-base font-medium underline underline-offset-4 hover:no-underline">

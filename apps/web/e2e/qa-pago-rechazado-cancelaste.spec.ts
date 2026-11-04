@@ -7,7 +7,7 @@ import { EMAIL_ADMIN_E2E, crearEventoComoAdmin, crearPersonaActiva } from './hel
  * Evento le dice a la persona "Cancelaste tu inscripción", como si lo hubiera hecho ella, sin el
  * motivo. El motivo solo aparece en "Mis eventos".
  */
-test.fail('con el pago rechazado, la página del Evento no dice "Cancelaste" y muestra el motivo', async ({ page, baseURL }) => {
+test('con el pago rechazado, la página del Evento no dice "Cancelaste" y muestra el motivo', async ({ page, baseURL }) => {
   test.setTimeout(120_000);
   const sufijo = Date.now();
   const evento = await crearEventoComoAdmin(baseURL!, { nombre: `e2e-qa-pago-${sufijo}`, requiereInscripcion: true, cupo: 5, costo: '1000', instruccionesPago: 'Alias VIDA.SOBRENATURAL' });

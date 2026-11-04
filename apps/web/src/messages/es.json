@@ -1778,7 +1778,10 @@
         "pendiente": "Recibimos tu inscripción. El equipo la revisa y te avisamos.",
         "lista_espera": "Quedaste en el lugar {posicion} de la lista de espera. Si se libera un lugar, pasás automáticamente y te avisamos.",
         "rechazada": "Esta vez tu inscripción no fue aprobada. Si tenés dudas, hablá con el equipo de la iglesia.",
-        "cancelada": "Cancelaste tu inscripción. Si querés, podés volver a anotarte."
+        "cancelada": "Cancelaste tu inscripción. Si querés, podés volver a anotarte.",
+        "canceladaPorEquipo": "El equipo de la iglesia canceló tu inscripción. Si tenés dudas, hablá con ellos; si querés, podés volver a anotarte.",
+        "canceladaPagoRechazado": "El equipo no pudo verificar tu pago: {motivo}. Por eso se canceló la inscripción y se liberó el lugar. Si querés, podés volver a anotarte.",
+        "canceladaPagoRechazadoSinMotivo": "El equipo no pudo verificar tu pago. Por eso se canceló la inscripción y se liberó el lugar. Si querés, podés volver a anotarte."
       },
       "subirComprobante": "Subir el comprobante",
       "verMisEventos": "Ver mis eventos",
