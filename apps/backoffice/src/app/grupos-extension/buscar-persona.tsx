@@ -3,17 +3,10 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search, UserPlus } from 'lucide-react';
-import { apiFetch } from '@vida-sobrenatural/shared-types';
+import { apiFetch, type PersonaElegibleGex } from '@vida-sobrenatural/shared-types';
 import { Button, Input, useEnvio } from '@vida-sobrenatural/ui';
 
-export interface PersonaElegibleGex {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string | null;
-  genero: 'masculino' | 'femenino';
-  menor: boolean;
-}
+export type { PersonaElegibleGex };
 
 /**
  * spec 014: buscar una Persona activa (por nombre, apellido o email) para
