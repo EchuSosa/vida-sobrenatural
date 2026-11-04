@@ -57,7 +57,7 @@ export default async function CharlaPage({ params }: { params: Promise<{ grupoId
           )}
         </div>
       </div>
-      <DatosConocidosVista datos={datos.conocido} titulo={t('conocidoTitulo')} />
+      <DatosConocidosVista datos={datos.conocido} titulo={t('conocidoTitulo')} enTercera />
       <CharlaEleccion grupoId={datos.grupo.id} personaId={datos.persona.id} datos={datos} />
     </div>
   );

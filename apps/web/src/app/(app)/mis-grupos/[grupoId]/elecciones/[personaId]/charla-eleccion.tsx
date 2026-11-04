@@ -113,6 +113,7 @@ export function CharlaEleccion({ grupoId, personaId, datos }: { grupoId: string;
       <ResumenErrores errores={validacion.resumen} foco={validacion.foco} titulo={t('resumenErrores')} />
       {datos.opcionesEditables ? (
         <SelectorMinisterios
+          enTercera
           catalogo={datos.catalogo}
           seleccion={seleccion}
           onCambio={(s) => {

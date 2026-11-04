@@ -2,8 +2,11 @@ import { useTranslations } from 'next-intl';
 import { House, Phone, UserRound } from 'lucide-react';
 import type { DatosConocidos } from '@vida-sobrenatural/shared-types';
 
-/** spec 015 (D239): "Esto ya lo sabemos" — lo que la app tiene y no se vuelve a preguntar. */
-export function DatosConocidosVista({ datos, titulo }: { datos: DatosConocidos; titulo: string }) {
+/**
+ * spec 015 (D239): "Esto ya lo sabemos" — lo que la app tiene y no se vuelve a preguntar.
+ * `enTercera` (BUG-17): en la charla lo lee la líder, y se habla de la persona ("Todavía no tiene…").
+ */
+export function DatosConocidosVista({ datos, titulo, enTercera = false }: { datos: DatosConocidos; titulo: string; enTercera?: boolean }) {
   const t = useTranslations('eleccion');
   return (
     <section aria-labelledby="conocido-titulo" className="flex flex-col gap-2 rounded-lg border border-border p-4">
@@ -23,7 +26,7 @@ export function DatosConocidosVista({ datos, titulo }: { datos: DatosConocidos; 
           <House aria-hidden className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
           {datos.grupoExtension
             ? t('conocidoGrupo', { grupo: datos.grupoExtension.nombre, lideres: datos.grupoExtension.lideres.join(', ') || t('sinLider') })
-            : t('conocidoSinGrupo')}
+            : t(enTercera ? 'conocidoSinGrupoTercera' : 'conocidoSinGrupo')}
         </li>
       </ul>
     </section>

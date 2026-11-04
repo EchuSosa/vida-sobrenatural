@@ -7,7 +7,7 @@ import { EDICION_015, EMAILS_015 } from './helpers-015';
  * 2 ministerios". El bloque "Lo que ya sabemos" se reusa de la pantalla de la persona sin cambiar
  * la persona gramatical.
  */
-test.fail('la ficha de la charla habla de la persona en tercera persona', async ({ page }) => {
+test('la ficha de la charla habla de la persona en tercera persona', async ({ page }) => {
   await loguearseComoTest(page, EMAILS_015.lider);
   await page.goto('/mis-grupos');
   await page.getByRole('link', { name: EDICION_015 }).click();
