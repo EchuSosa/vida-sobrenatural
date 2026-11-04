@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 import { test, expect, auditar, esperarTema } from './helpers';
 import { crearPersonaActiva } from './helpers-011';
 import { entrarConTema } from './helpers-009';
-import { CONSOLA_500, TEXTO_ERROR_INTERNO, apiCaida, contarPedidos, tresClics } from '../../../scripts/e2e-casos-infelices';
+import { CONSOLA_500, apiCaida, contarPedidos, tresClics } from '../../../scripts/e2e-casos-infelices';
 
 /**
  * spec 018, US1 (D261–D264): la persona se da de baja desde su Perfil. Cada test usa una Persona
@@ -54,7 +54,9 @@ test('si la API falla, lo dice, no se borró nada y sigue en la pantalla', async
   const caida = await apiCaida(page, 'POST', /\/personas\/me\/baja$/);
   await page.getByLabel('Para confirmar, escribí BAJA').fill('BAJA');
   await page.getByRole('button', { name: 'Darme de baja' }).click();
-  await expect(page.getByRole('alert').filter({ hasText: TEXTO_ERROR_INTERNO })).toBeVisible();
+  // BUG-16 (QA ronda 2): antes esperaba el texto genérico de error interno, que no dice si se
+  // borró algo. Spec 018, US1 escenario 4: tiene que decir que no se borró nada.
+  await expect(page.getByRole('alert').filter({ hasText: 'No pudimos darte de baja y no se borró nada.' })).toBeVisible();
   expect(caida.intentos).toBe(1);
   await expect(page).toHaveURL(/\/perfil\/baja$/);
   await page.unrouteAll();

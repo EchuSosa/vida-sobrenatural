@@ -118,13 +118,11 @@ describe('Lote 0 global (integración)', () => {
     });
 
     it('lo que va al Admin no genera avisos (D201)', async () => {
-      // Solo las de este hecho: contar toda la tabla fallaba cuando otro archivo de la integración
-      // (corren en paralelo) creaba o borraba avisos en el medio (docs/24, 2026-11-04).
-      const deEsteHecho = { evento: 'discipulado.finalizacion_propuesta', entidadId: 'l0-grupo' };
+      const antes = await prisma.notificacion.count();
       await prisma.$transaction((tx) =>
         avisos.emitir(tx, { nombre: 'discipulado.finalizacion_propuesta', a: { tipo: 'admin' }, datos: { grupoId: 'l0-grupo' } }),
       );
-      expect(await prisma.notificacion.count({ where: deEsteHecho })).toBe(0);
+      expect(await prisma.notificacion.count()).toBe(antes);
     });
   });
 

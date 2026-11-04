@@ -35,8 +35,10 @@ export class PendientesAdminService {
     const [pendientes, sinRespuesta, finalizaciones, bajas] = await Promise.all([
       this.prisma.solicitudDiscipulado.findMany({ where: { estado: 'pendiente' }, select: { id: true } }),
       this.prisma.propuestaDiscipulado.count({ where: { estado: 'pendiente', propuestaEn: { lt: limiteSinRespuesta } } }),
-      this.prisma.grupo.count({ where: { estado: 'en_curso', propuestaFinalizacionEn: { not: null } } }),
-      this.prisma.inscripcion.count({ where: { estado: 'activa', bajaPropuestaEn: { not: null }, grupo: { estado: 'en_curso' } } }),
+      // BUG-14 (QA ronda 2): solo discipulados de Vida Nueva, como filtran sus enlaces (`/grupos`).
+      // Las finalizaciones y bajas de Vida de Servicio tienen sus propias líneas (`extra`).
+      this.prisma.grupo.count({ where: { estado: 'en_curso', propuestaFinalizacionEn: { not: null }, curso: { categoria: 'vida_nueva' } } }),
+      this.prisma.inscripcion.count({ where: { estado: 'activa', bajaPropuestaEn: { not: null }, grupo: { estado: 'en_curso', curso: { categoria: 'vida_nueva' } } } }),
     ]);
     const declinadas = await this.solicitudesConUltimaDeclinada(pendientes.map((s) => s.id));
     const extra = (await this.registro?.lineas(ahora)) ?? [];

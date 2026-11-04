@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { test, expect, auditar, crearPersonaActiva, loguearseComoAdminE2E, loguearseComoPastorE2E } from './helpers';
-import { CONSOLA_500, TEXTO_ERROR_INTERNO, apiCaida, tresClics, contarPedidos } from '../../../scripts/e2e-casos-infelices';
+import { CONSOLA_500, apiCaida, tresClics, contarPedidos } from '../../../scripts/e2e-casos-infelices';
 
 /**
  * spec 018, US2 (D263): el Admin da de baja a una Persona en su nombre desde su Perfil. Cada test usa
@@ -51,7 +51,8 @@ test('si la API falla, avisa y la persona sigue igual; tres toques dan una sola 
   await seccion.getByRole('button', { name: 'Dar de baja de la app' }).click();
   await page.getByRole('alertdialog').getByLabel('Para confirmar, escribí BAJA').fill('BAJA');
   await page.getByRole('alertdialog').getByRole('button', { name: 'Sí, dar de baja' }).click();
-  await expect(page.getByText(TEXTO_ERROR_INTERNO)).toBeVisible();
+  // BUG-16 (QA ronda 2): con el error interno tiene que decir que no se borró nada (spec 018).
+  await expect(page.getByText('No pudimos dar de baja a la persona y no se borró nada.')).toBeVisible();
   expect(caida.intentos).toBe(1);
 
   await page.unrouteAll();

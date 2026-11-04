@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { UserX } from 'lucide-react';
-import { ApiError, MOTIVO_BAJA_MAX, apiFetch, confirmacionBajaValida, erroresPorCampo } from '@vida-sobrenatural/shared-types';
+import { ApiError, CODIGOS_BAJA_CON_TEXTO_PROPIO, MOTIVO_BAJA_MAX, apiFetch, confirmacionBajaValida, erroresPorCampo } from '@vida-sobrenatural/shared-types';
 import { Button, DialogoTextoOpcional, MensajeErrorCampo, textoDeCampo, type Traductor } from '@vida-sobrenatural/ui';
 
 /**
@@ -53,7 +53,7 @@ export function DarDeBaja({ personaId, nombre, apiToken }: { personaId: string; 
           const campos = erroresPorCampo(error);
           if (campos) return { errores: Object.fromEntries(campos.map(({ campo, code }) => [campo, texto(code)])) };
           const code = error instanceof ApiError ? error.code : null;
-          toast.error(code && te.has(code) ? te(code) : t('errorGenerico'));
+          toast.error(code && CODIGOS_BAJA_CON_TEXTO_PROPIO.includes(code) && te.has(code) ? te(code) : t('errorGenerico'));
           return;
         }
         toast.success(t('listo'));

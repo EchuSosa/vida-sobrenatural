@@ -38,6 +38,7 @@ export function SelectorMinisterios({
   deshabilitado = false,
   invalido = false,
   idError,
+  enTercera = false,
 }: {
   catalogo: MinisterioParaElegir[];
   seleccion: SeleccionMinisterios;
@@ -45,6 +46,8 @@ export function SelectorMinisterios({
   deshabilitado?: boolean;
   invalido?: boolean;
   idError?: string;
+  /** BUG-17: en la charla mira la líder, así que se habla de la persona ("Ya eligió…"), no a ella. */
+  enTercera?: boolean;
 }) {
   const t = useTranslations('eleccion');
   const enParalelo = (celulaId: string) => catalogo.some((m) => m.areas.some((a) => a.id === celulaId && a.enParalelo));
@@ -68,7 +71,9 @@ export function SelectorMinisterios({
   return (
     <div id="campo-opciones" tabIndex={-1} aria-invalid={invalido || undefined} aria-describedby={idError} className="flex flex-col gap-6 outline-none">
       <p role="status" aria-live="polite" className="text-base font-medium">
-        {lleno ? t('contadorLleno', { maximo: MAX_MINISTERIOS_POR_PERSONA }) : t('contador', { cantidad: principales, maximo: MAX_MINISTERIOS_POR_PERSONA })}
+        {lleno
+          ? t(enTercera ? 'contadorLlenoTercera' : 'contadorLleno', { maximo: MAX_MINISTERIOS_POR_PERSONA })
+          : t(enTercera ? 'contadorTercera' : 'contador', { cantidad: principales, maximo: MAX_MINISTERIOS_POR_PERSONA })}
       </p>
       {bloques.map((bloque) => (
         <section key={bloque.clave} aria-labelledby={`bloque-${bloque.clave}`} className="flex flex-col gap-3">

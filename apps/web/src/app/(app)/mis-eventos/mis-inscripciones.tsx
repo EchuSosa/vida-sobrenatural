@@ -9,6 +9,7 @@ import { CalendarDays, MapPin } from 'lucide-react';
 import { apiFetch, formatearInicioEvento, type MiInscripcionEvento } from '@vida-sobrenatural/shared-types';
 import { Button, ConfirmDestructiveDialog, EstadoInscripcionBadge, mensajeDeError, useEnvio } from '@vida-sobrenatural/ui';
 import { DialogoComprobante } from '../../../components/eventos/dialogo-comprobante';
+import { claveQueSigue, motivoYaIncluido } from '../../../components/eventos/que-sigue';
 
 /**
  * spec 011, T058/T064 — las tarjetas de "Mis inscripciones": estado con texto
@@ -95,12 +96,10 @@ function TarjetaInscripcion({ inscripcion, apiToken, onPagar }: { inscripcion: M
         {estado === 'confirmada' && estadoPago !== 'no_aplica' && <EstadoInscripcionBadge estado={estadoPago} texto={ti(`pago.${estadoPago}`)} />}
       </div>
       {inscripcion.promovidaEn && abierta && <p className="text-base font-medium">{t('promovida')}</p>}
-      {inscripcion.ultimoRechazoPago && estadoPago === 'sin_pago' && <p className="text-base">{t('pagoRechazado', { motivo: inscripcion.ultimoRechazoPago })}</p>}
-      <p className="text-base">
-        {estado === 'confirmada' && estadoPago === 'sin_pago'
-          ? ti('queSigue.confirmadaConCosto')
-          : ti(`queSigue.${estado}`, { cuando, lugar: evento.lugar, posicion: posicionEnLista ?? 0 })}
-      </p>
+      {inscripcion.ultimoRechazoPago && estadoPago === 'sin_pago' && !motivoYaIncluido(claveQueSigue(inscripcion)) && (
+        <p className="text-base">{t('pagoRechazado', { motivo: inscripcion.ultimoRechazoPago })}</p>
+      )}
+      <p className="text-base">{ti(claveQueSigue(inscripcion), { cuando, lugar: evento.lugar, posicion: posicionEnLista ?? 0, motivo: inscripcion.ultimoRechazoPago ?? '' })}</p>
       {estado === 'confirmada' && estadoPago === 'sin_pago' && evento.instruccionesPago && (
         <p className="whitespace-pre-line rounded-md bg-secondary p-3 text-base">{evento.instruccionesPago}</p>
       )}
