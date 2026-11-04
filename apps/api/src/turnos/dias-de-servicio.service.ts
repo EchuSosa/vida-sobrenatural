@@ -172,17 +172,32 @@ export class DiasDeServicioService {
     return { dia, estado: 'suspendida', avisados };
   }
 
-  /** Volver a habilitar: vuelve a como estaba (publicada si ya se había publicado; si no, borrador). */
-  async habilitar(ministerioId: string, dia: string, hoy: string = hoyEnArgentina()): Promise<{ dia: string; estado: EstadoFechaDeServicio }> {
+  /**
+   * Volver a habilitar: vuelve a como estaba (publicada si ya se había publicado; si no, borrador).
+   * BUG-09 (D265): si vuelve publicada, quien tenía turno recibe otra vez "tenés turno" (importante,
+   * con mail, D260), en la misma transacción (D197): su último aviso decía que ese día no había.
+   */
+  async habilitar(ministerioId: string, dia: string, hoy: string = hoyEnArgentina()): Promise<{ dia: string; estado: EstadoFechaDeServicio; avisados: number }> {
     await this.validarDiaDeServicio(ministerioId, dia, hoy);
-    const fila = await this.prisma.fechaDeServicio.findUnique({
-      where: { ministerioId_dia: { ministerioId, dia: diaComoFecha(dia) } },
-      select: { id: true, estado: true, publicadaEn: true },
+    const ministerio = await this.prisma.ministerio.findUniqueOrThrow({ where: { id: ministerioId }, select: { id: true, nombre: true } });
+    return this.prisma.$transaction(async (tx) => {
+      const fila = await tx.fechaDeServicio.findUnique({
+        where: { ministerioId_dia: { ministerioId, dia: diaComoFecha(dia) } },
+        select: { id: true, estado: true, publicadaEn: true },
+      });
+      if (!fila || fila.estado !== 'suspendida') return { dia, estado: (fila?.estado ?? 'borrador') as EstadoFechaDeServicio, avisados: 0 };
+      const estado: EstadoFechaDeServicio = fila.publicadaEn ? 'publicada' : 'borrador';
+      // Solo pasa si sigue suspendida: dos "Volver a habilitar" seguidos avisan una sola vez.
+      const r = await tx.fechaDeServicio.updateMany({ where: { id: fila.id, estado: 'suspendida' }, data: { estado, suspendidaEn: null, suspendidaPorId: null } });
+      if (r.count === 0 || estado !== 'publicada') return { dia, estado, avisados: 0 };
+      const turnos = await tx.turno.findMany({ where: { fechaId: fila.id, estado: 'asignado' }, select: { id: true, personaId: true, celula: { select: { nombre: true } } } });
+      const habilitadaEn = new Date().toISOString();
+      for (const t of turnos) {
+        const datos = { ...datosAvisoTurno(t.id, ministerio, dia, t.celula?.nombre ?? null), habilitadaEn };
+        await this.notificaciones.emitir(tx, { nombre: 'turno.asignado', a: { tipo: 'persona', personaId: t.personaId }, datos });
+      }
+      return { dia, estado, avisados: turnos.length };
     });
-    if (!fila || fila.estado !== 'suspendida') return { dia, estado: (fila?.estado ?? 'borrador') as EstadoFechaDeServicio };
-    const estado: EstadoFechaDeServicio = fila.publicadaEn ? 'publicada' : 'borrador';
-    await this.prisma.fechaDeServicio.update({ where: { id: fila.id }, data: { estado, suspendidaEn: null, suspendidaPorId: null } });
-    return { dia, estado };
   }
 
   private cupoOFallar(cupo: unknown): number {
