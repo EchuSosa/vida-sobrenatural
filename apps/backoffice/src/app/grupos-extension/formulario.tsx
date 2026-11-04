@@ -25,6 +25,8 @@ export interface LiderElegido {
   nombre: string;
   apellido: string;
   genero: 'masculino' | 'femenino';
+  /** Su Sede, cuando se la eligió recién (BUG-13): la propone para "En la iglesia". */
+  sedeId?: string;
 }
 
 export interface InicialGrupo {
@@ -60,7 +62,11 @@ export function FormularioGrupoExtension({ inicial, sedes, apiToken }: { inicial
   const te = useTranslations('errors');
   const router = useRouter();
   const validacion = useValidacionCampos();
-  const [v, setV] = useState<InicialGrupo>({ ...inicial, sedeId: inicial.sedeId ?? sedes[0]?.id ?? null });
+  const [v, setV] = useState<InicialGrupo>(inicial);
+  // BUG-13 (D266): mientras nadie eligió la Sede a mano, "En la iglesia" propone la de quien lo
+  // lidera (el primer líder con Sede activa) y, si no hay, la primera de la lista.
+  const sedeDeLideres = v.lideres.map((l) => l.sedeId).find((id) => id && sedes.some((s) => s.id === id));
+  const sedeId = v.sedeId ?? sedeDeLideres ?? sedes[0]?.id ?? null;
   const editando = !!inicial.id;
 
   function poner<K extends keyof InicialGrupo>(campo: K, valor: InicialGrupo[K]) {
@@ -80,7 +86,7 @@ export function FormularioGrupoExtension({ inicial, sedes, apiToken }: { inicial
       edadMinima: v.edadMinima,
       edadMaxima: v.edadMaxima,
       enLaIglesia: v.enLaIglesia,
-      sedeId: v.enLaIglesia ? v.sedeId : null,
+      sedeId: v.enLaIglesia ? sedeId : null,
       calle: v.enLaIglesia ? null : v.calle,
       numero: v.enLaIglesia ? null : v.numero,
       entreCalle1: v.enLaIglesia ? null : v.entreCalle1,
@@ -218,7 +224,7 @@ export function FormularioGrupoExtension({ inicial, sedes, apiToken }: { inicial
           excluir={v.lideres.map((l) => l.id)}
           bloquearMenores
           deshabilitado={enviando}
-          onElegir={(p) => poner('lideres', [...v.lideres, { id: p.id, nombre: p.nombre, apellido: p.apellido, genero: p.genero }])}
+          onElegir={(p) => poner('lideres', [...v.lideres, { id: p.id, nombre: p.nombre, apellido: p.apellido, genero: p.genero, sedeId: p.sedeId }])}
         />
         <MensajeErrorCampo id="lideres-error" mensaje={err.lideres} />
       </fieldset>
@@ -299,7 +305,7 @@ export function FormularioGrupoExtension({ inicial, sedes, apiToken }: { inicial
             </label>
             <select
               id="campo-sedeId"
-              value={v.sedeId ?? ''}
+              value={sedeId ?? ''}
               onChange={(e) => poner('sedeId', e.target.value || null)}
               disabled={enviando}
               aria-invalid={err.sedeId ? true : undefined}

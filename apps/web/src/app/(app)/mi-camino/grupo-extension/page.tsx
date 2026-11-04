@@ -10,6 +10,7 @@ import {
 } from '@vida-sobrenatural/shared-types';
 import { AvisoEstado, ButtonLink, textoHorario, textoNombres } from '@vida-sobrenatural/ui';
 import { auth } from '../../../../auth';
+import { nombreDeQuienMira } from '../../nombre-de-quien-mira';
 import { BuscadorGrupos } from './buscador';
 import { RetirarPedidoGex } from './retirar-pedido';
 
@@ -32,7 +33,7 @@ export default async function GrupoExtensionPage() {
     cache: 'no-store',
   });
   const fecha = (iso: string) => formatearDiaEnArgentina(iso, locale);
-  const yo = session?.user.givenName ?? session?.user.name ?? '';
+  const yo = await nombreDeQuienMira(session?.apiToken);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
@@ -105,7 +106,7 @@ export default async function GrupoExtensionPage() {
                   )}
                   {l.whatsapp && (
                     <a
-                      href={`${enlaceWhatsapp(l.whatsapp)}?text=${encodeURIComponent(tg('integrante.saludoWhatsapp', { nombre: l.nombre, yo, grupo: estado.grupo.nombre }))}`}
+                      href={`${enlaceWhatsapp(l.whatsapp)}?text=${encodeURIComponent(yo ? tg('integrante.saludoWhatsapp', { nombre: l.nombre, yo, grupo: estado.grupo.nombre }) : tg('integrante.saludoWhatsappSinNombre', { nombre: l.nombre, grupo: estado.grupo.nombre }))}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={ENLACE}

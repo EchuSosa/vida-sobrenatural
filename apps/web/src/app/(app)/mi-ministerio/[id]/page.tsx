@@ -5,6 +5,7 @@ import { CalendarDays, Crown, Layers, Mail, Phone, UsersRound } from 'lucide-rea
 import { ApiError, apiFetch, formatearDiaEnArgentina, type IntegranteMinisterio, type MinisterioLideradoDetalle } from '@vida-sobrenatural/shared-types';
 import { AvatarPersona } from '@vida-sobrenatural/ui';
 import { auth } from '../../../../auth';
+import { nombreDeQuienMira } from '../../nombre-de-quien-mira';
 import { SelectorMiCamino } from '../../mi-camino/selector-mi-camino';
 import { EnlaceWhatsappIntegrante } from './enlace-whatsapp';
 
@@ -29,7 +30,7 @@ function Integrante({ i, ctx: { t, locale, yo, ministerio } }: { i: IntegranteMi
         ) : (
           <span className="text-muted-foreground">{t('sinTelefono')}</span>
         )}
-        {i.persona.whatsapp && <EnlaceWhatsappIntegrante whatsapp={i.persona.whatsapp} nombre={i.persona.nombre} texto={t('saludoWhatsapp', { nombre: i.persona.nombre, yo, ministerio })} />}
+        {i.persona.whatsapp && <EnlaceWhatsappIntegrante whatsapp={i.persona.whatsapp} nombre={i.persona.nombre} texto={yo ? t('saludoWhatsapp', { nombre: i.persona.nombre, yo, ministerio }) : t('saludoWhatsappSinNombre', { nombre: i.persona.nombre, ministerio })} />}
         {i.persona.email && (
           <a href={`mailto:${i.persona.email}`} className={ENLACE}>
             <Mail aria-hidden className="size-4 shrink-0" />
@@ -81,7 +82,7 @@ export default async function MiMinisterioDetallePage({ params }: { params: Prom
     if (e instanceof ApiError && e.code === 'NO_ENCONTRADO') notFound();
     throw e;
   }
-  const ctx: Contexto = { t, locale, yo: session?.user.givenName ?? session?.user.name ?? '', ministerio: m.nombre };
+  const ctx: Contexto = { t, locale, yo: await nombreDeQuienMira(session?.apiToken), ministerio: m.nombre };
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
