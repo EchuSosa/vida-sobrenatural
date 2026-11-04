@@ -1,6 +1,7 @@
 import type { BusquedaPersona } from '@vida-sobrenatural/shared-types';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { calcularEdad } from './calcular-edad.js';
+import { filtroDeBusqueda } from './busqueda-texto.js';
 
 /**
  * spec 006, Pregunta 5 (respondida: se adopta la recomendación, D153–D213):
@@ -18,10 +19,7 @@ export async function buscarPersonasSinAcceso(prisma: PrismaService, q: string):
       activo: true,
       estado: 'activa',
       email: null,
-      OR: [
-        { nombre: { contains: termino, mode: 'insensitive' } },
-        { apellido: { contains: termino, mode: 'insensitive' } },
-      ],
+      ...(await filtroDeBusqueda(prisma, termino, ['nombre', 'apellido'])),
     },
     select: { id: true, nombre: true, apellido: true, fechaNacimiento: true },
     orderBy: [{ nombre: 'asc' }, { apellido: 'asc' }],

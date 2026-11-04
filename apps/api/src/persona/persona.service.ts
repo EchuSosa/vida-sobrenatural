@@ -29,6 +29,7 @@ import {
 import type { RegistroPersonaDto } from './dto/registro-persona.dto.js';
 import type { ActivarPersonaDto } from './dto/activar-persona.dto.js';
 import type { ActualizarPerfilDto } from './dto/actualizar-perfil.dto.js';
+import { filtroDeBusqueda } from './busqueda-texto.js';
 
 const EDAD_MINIMA = 18;
 
@@ -331,15 +332,7 @@ export class PersonaService {
     const where = {
       estado: EstadoPersona.pendiente_tutor,
       activo: true,
-      ...(termino
-        ? {
-            OR: [
-              { nombre: { contains: termino, mode: 'insensitive' as const } },
-              { apellido: { contains: termino, mode: 'insensitive' as const } },
-              { telefono: { contains: termino, mode: 'insensitive' as const } },
-            ],
-          }
-        : {}),
+      ...(await filtroDeBusqueda(this.prisma, termino, ['nombre', 'apellido', 'telefono'])),
     };
     const [items, total] = await Promise.all([
       this.prisma.persona.findMany({
@@ -397,16 +390,7 @@ export class PersonaService {
             },
           }
         : {}),
-      ...(termino
-        ? {
-            OR: [
-              { nombre: { contains: termino, mode: 'insensitive' as const } },
-              { apellido: { contains: termino, mode: 'insensitive' as const } },
-              { email: { contains: termino, mode: 'insensitive' as const } },
-              { telefono: { contains: termino, mode: 'insensitive' as const } },
-            ],
-          }
-        : {}),
+      ...(await filtroDeBusqueda(this.prisma, termino, ['nombre', 'apellido', 'email', 'telefono'])),
     };
     // Desempate por el otro campo del nombre y por id: sin un orden total,
     // Postgres puede repetir o saltear filas entre una página y la siguiente.
@@ -472,18 +456,13 @@ export class PersonaService {
    * D133 movería en silencio quién puede ser tutor (la forma de H-128). La
    * mayoría de edad del tutor la garantiza `activar`, con su propia regla.
    */
-  buscarPersonas(q: string) {
+  async buscarPersonas(q: string) {
     const termino = q.trim();
     if (termino.length < 2) return [];
     return this.prisma.persona.findMany({
       where: {
         activo: true,
-        OR: [
-          { nombre: { contains: termino, mode: 'insensitive' } },
-          { apellido: { contains: termino, mode: 'insensitive' } },
-          { email: { contains: termino, mode: 'insensitive' } },
-          { telefono: { contains: termino, mode: 'insensitive' } },
-        ],
+        ...(await filtroDeBusqueda(this.prisma, termino, ['nombre', 'apellido', 'email', 'telefono'])),
       },
       select: BUSQUEDA_PERSONA_SELECT,
       orderBy: { nombre: 'asc' },

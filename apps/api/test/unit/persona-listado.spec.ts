@@ -16,7 +16,10 @@ async function crearServicio() {
   // specs/004, T056 (D137): discipulados activos y propuestas pendientes de la página.
   const liderazgos = jest.fn().mockResolvedValue([]);
   const propuestas = jest.fn().mockResolvedValue([]);
+  // BUG-11 (D267): el texto se busca en SQL (por palabras y sin tildes) y vuelve como ids.
+  const queryRaw = jest.fn().mockResolvedValue([{ id: 'coincide-1' }]);
   const prisma = {
+    $queryRaw: queryRaw,
     persona: { findMany, count },
     liderazgo: { findMany: liderazgos },
     propuestaDiscipulado: { findMany: propuestas },
@@ -24,7 +27,7 @@ async function crearServicio() {
   const moduleRef = await Test.createTestingModule({
     providers: [PersonaService, { provide: PrismaService, useValue: prisma }, proveedorRolesDeEstado(), proveedorNotificaciones()],
   }).compile();
-  return { service: moduleRef.get(PersonaService), findMany, count, liderazgos, propuestas };
+  return { service: moduleRef.get(PersonaService), findMany, count, liderazgos, propuestas, queryRaw };
 }
 
 describe('nacidosAntesDeParaEdad — la regla de calcularEdad expresada como fecha', () => {
@@ -74,17 +77,18 @@ describe('PersonaService.listarPersonas (GET /personas)', () => {
   });
 
   it('busca por nombre, apellido, email o teléfono y ordena en la base con desempate estable', async () => {
-    const { service, findMany } = await crearServicio();
+    const { service, findMany, queryRaw } = await crearServicio();
 
     await service.listarPersonas(40, 20, '  garcía ', 'nombre', 'desc');
 
+    // D267 (b): antes el `where` llevaba un OR de `contains` por campo; ahora la coincidencia por
+    // palabras y sin tildes la resuelve el SQL (lo prueba busqueda-personas.integration-spec) y
+    // el `where` filtra por esos ids. Se sigue exigiendo que mire los cuatro campos.
+    const sql = queryRaw.mock.calls[0][0] as { sql: string; values: unknown[] };
+    for (const campo of ['"nombre"', '"apellido"', '"email"', '"telefono"']) expect(sql.sql).toContain(campo);
+    expect(sql.values).toContain('%garcia%');
     const argumentos = findMany.mock.calls[0][0];
-    expect(argumentos.where.OR).toEqual([
-      { nombre: { contains: 'garcía', mode: 'insensitive' } },
-      { apellido: { contains: 'garcía', mode: 'insensitive' } },
-      { email: { contains: 'garcía', mode: 'insensitive' } },
-      { telefono: { contains: 'garcía', mode: 'insensitive' } },
-    ]);
+    expect(argumentos.where.id).toEqual({ in: ['coincide-1'] });
     expect(argumentos.orderBy).toEqual([{ nombre: 'desc' }, { apellido: 'desc' }, { id: 'asc' }]);
     expect(argumentos).toMatchObject({ skip: 40, take: 20 });
     expect(argumentos.select).toMatchObject({ rol: true });

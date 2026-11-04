@@ -1455,7 +1455,7 @@
       },
       "quitar": "Quitar",
       "quitarTitulo": "¿Quitar «{regla}»?",
-      "quitarDescripcion": "Dejan de salir esas fechas. Lo que ya se publicó no se borra.",
+      "quitarDescripcion": "Dejan de salir esas fechas. Las que ya se publicaron se suspenden, y a quien tenía turno le llega un aviso y un mail de que ese día no hay servicio.",
       "quitarConfirmar": "Sí, quitar",
       "volver": "Volver",
       "quitada": "Listo: se quitó «{regla}».",
