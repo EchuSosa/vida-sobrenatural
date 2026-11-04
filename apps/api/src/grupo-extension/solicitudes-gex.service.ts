@@ -157,6 +157,7 @@ export class SolicitudesGexService {
         horaInicio: g.horaInicio,
         zona: g.enLaIglesia ? null : g.zona,
         enLaIglesia: g.enLaIglesia,
+        sede: g.enLaIglesia ? (g.sede?.nombre ?? null) : null,
         distanciaKm: origen && g.latitud !== null && g.longitud !== null ? distanciaKm(origen, { latitud: g.latitud, longitud: g.longitud }) : null,
         completo: g.cupo !== null && (integrantes.get(g.id) ?? 0) >= g.cupo,
       }));

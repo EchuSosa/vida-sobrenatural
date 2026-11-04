@@ -102,7 +102,7 @@ describe('Días de servicio y cupos (spec 017, US1)', () => {
     let vista = (await http().get(`/ministerios/${ministerioId}/dias-de-servicio`).set(como(admin))).body as DiasDeServicioDelMinisterio;
     expect(vista.proximas[0]).toMatchObject({ dia: primera, estado: 'suspendida' });
 
-    expect((await http().delete(`/ministerios/${ministerioId}/fechas/${primera}/suspension`).set(como(admin))).body).toEqual({ dia: primera, estado: 'borrador' });
+    expect((await http().delete(`/ministerios/${ministerioId}/fechas/${primera}/suspension`).set(como(admin))).body).toEqual({ dia: primera, estado: 'borrador', avisados: 0 });
     vista = (await http().get(`/ministerios/${ministerioId}/dias-de-servicio`).set(como(admin))).body as DiasDeServicioDelMinisterio;
     expect(vista.proximas[0]).toMatchObject({ dia: primera, estado: 'borrador' });
   });
