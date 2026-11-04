@@ -48,6 +48,10 @@ const DIRECCION_REAL = 'Calle 23 N°1665 e/ 66 y 67, La Plata, Buenos Aires';
 // Lote 3) da información de más acá; la transmisión online va en
 // Seguinos/YouTube (todavía sin sección propia — depende de D93, spec 003).
 const HORARIOS_REAL = 'Domingos 10:30 hs';
+// BUG-12 (QA ronda 2): tiene que pasar la misma validación que la API (`TELEFONO_REGEX`): con el
+// "+54 9 221 000-0000" de antes (el guion no pasa), la Sede no se podía guardar sin tocarlo.
+const TELEFONO_CONTACTO_DEMO = '+54 9 221 555 0000';
+const TELEFONO_CONTACTO_VIEJO = '+54 9 221 000-0000';
 
 async function crearSedeDemo() {
   const existente = await prisma.sede.findFirst({ where: { activo: true } });
@@ -58,6 +62,10 @@ async function crearSedeDemo() {
       'Domingos 10 y 18 hs',
       'Domingos 10:30 hs (presencial y online, por YouTube)',
     ];
+    if (existente.contactoTelefono === TELEFONO_CONTACTO_VIEJO) {
+      await prisma.sede.update({ where: { id: existente.id }, data: { contactoTelefono: TELEFONO_CONTACTO_DEMO } });
+      console.log(`Teléfono de contacto de ${existente.nombre} corregido (BUG-12).`);
+    }
     if (existente.direccion.includes('a confirmar') || horariosViejos.includes(existente.horarios)) {
       const corregida = await prisma.sede.update({
         where: { id: existente.id },
@@ -74,7 +82,7 @@ async function crearSedeDemo() {
     data: {
       nombre: 'La Plata',
       direccion: DIRECCION_REAL,
-      contactoTelefono: '+54 9 221 000-0000',
+      contactoTelefono: TELEFONO_CONTACTO_DEMO,
       horarios: HORARIOS_REAL,
       descripcionBienvenida:
         'Bienvenido/a a Vida Sobrenatural La Plata. Nos alegra que te hayas acercado.',
@@ -111,7 +119,7 @@ async function crearPersonasDemo(sedeId: string) {
       apellido: 'Ejemplo',
       genero: 'femenino',
       fechaNacimiento: new Date('1990-05-20'),
-      telefono: '+54 9 221 100-0001',
+      telefono: '+54 9 221 100 0001',
       estado: 'activa',
       activo: true,
       consentimientoDatos: true,
@@ -124,7 +132,7 @@ async function crearPersonasDemo(sedeId: string) {
       apellido: 'Demo',
       genero: 'masculino',
       fechaNacimiento: new Date('2012-03-10'),
-      telefono: '+54 9 221 100-0002',
+      telefono: '+54 9 221 100 0002',
       estado: 'pendiente_tutor',
       activo: true,
       consentimientoDatos: false,
@@ -137,7 +145,7 @@ async function crearPersonasDemo(sedeId: string) {
       apellido: 'Prueba',
       genero: 'femenino',
       fechaNacimiento: new Date('2011-08-15'),
-      telefono: '+54 9 221 100-0003',
+      telefono: '+54 9 221 100 0003',
       estado: 'pendiente_tutor',
       // Caso no autorizado por el tutor — FR-014/T091 (Historia 8, Acceptance
       // Scenario 2: cubre también el estado "inactiva").
@@ -207,7 +215,7 @@ async function promoverAdminDemo(sedeId: string) {
       apellido: 'Demo',
       genero: 'femenino',
       fechaNacimiento: new Date('1990-01-01'),
-      telefono: '+54 9 221 100-0000',
+      telefono: '+54 9 221 100 0000',
       direccion: 'Calle 50 y 15, La Plata',
       sedeId,
       estadoCivil: 'soltero_a',

@@ -128,7 +128,7 @@ async function crearSedesDemo() {
       data: {
         nombre: 'Buenos Aires',
         direccion: 'Av. Corrientes 1234, CABA',
-        contactoTelefono: '+54 9 11 4000-0001',
+        contactoTelefono: '+54 9 11 4000 0001',
         horarios: 'Domingos 11 hs',
         descripcionBienvenida: 'Bienvenido/a a Vida Sobrenatural Buenos Aires.',
         activo: true,
@@ -144,7 +144,7 @@ async function crearSedesDemo() {
       data: {
         nombre: 'Rosario (demo, inactiva)',
         direccion: 'San Martín 567, Rosario, Santa Fe',
-        contactoTelefono: '+54 9 341 500-0002',
+        contactoTelefono: '+54 9 341 500 0002',
         horarios: 'Domingos 10 hs',
         descripcionBienvenida: 'Bienvenido/a a Vida Sobrenatural Rosario.',
         activo: false,
@@ -160,12 +160,22 @@ async function crearSedesDemo() {
       data: {
         nombre: 'Córdoba (demo, papelera)',
         direccion: 'Av. Colón 890, Córdoba',
-        contactoTelefono: '+54 9 351 600-0003',
+        contactoTelefono: '+54 9 351 600 0003',
         horarios: 'Domingos 10:30 hs',
         activo: true,
         eliminadoEn: hace(10),
       },
     }));
+
+  // BUG-12 (QA ronda 2): las bases sembradas antes tienen los teléfonos con guion, que la API no
+  // acepta (`TELEFONO_REGEX`); se corrigen sin pisar uno que un Admin ya haya cambiado.
+  for (const [id, viejo, nuevo] of [
+    [buenosAires.id, '+54 9 11 4000-0001', '+54 9 11 4000 0001'],
+    [rosario.id, '+54 9 341 500-0002', '+54 9 341 500 0002'],
+    [cordoba.id, '+54 9 351 600-0003', '+54 9 351 600 0003'],
+  ] as const) {
+    await prisma.sede.updateMany({ where: { id, contactoTelefono: viejo }, data: { contactoTelefono: nuevo } });
+  }
 
   console.log(`Sedes demo listas: ${laPlata.nombre}, ${buenosAires.nombre}, ${rosario.nombre}, ${cordoba.nombre} (eliminada).`);
   return { laPlata, buenosAires, rosario, cordoba };
@@ -254,7 +264,7 @@ async function crearEscenarioTutores(sedeId: string) {
         apellido: 'Zabala Quintero',
         genero: 'femenino',
         fechaNacimiento: fechaNacimientoConEdad(42, 0),
-        telefono: '+54 9 221 700-0001',
+        telefono: '+54 9 221 700 0001',
         direccion: 'Calle 47 N°650, La Plata',
         sedeId,
         estadoCivil: 'casado_a',
@@ -278,7 +288,7 @@ async function crearEscenarioTutores(sedeId: string) {
         apellido: 'Zabala Quintero',
         genero: 'masculino',
         fechaNacimiento: fechaNacimientoConEdad(15, 0),
-        telefono: '+54 9 221 700-0002',
+        telefono: '+54 9 221 700 0002',
         direccion: 'Calle 47 N°650, La Plata',
         sedeId,
         estadoCivil: 'soltero_a',
@@ -302,7 +312,7 @@ async function crearEscenarioTutores(sedeId: string) {
         apellido: 'Yagüe Cardozo',
         genero: 'femenino',
         fechaNacimiento: fechaNacimientoConEdad(16, 0),
-        telefono: '+54 9 221 700-0003',
+        telefono: '+54 9 221 700 0003',
         direccion: 'Calle 8 N°1200, La Plata',
         sedeId,
         estadoCivil: 'soltero_a',
@@ -351,7 +361,7 @@ async function crearPersonasHostiles(sedeId: string) {
         // y combinaciones así (con "de los"/"del") son reales.
         nombre: 'María de los Ángeles del Rosario',
         apellido: 'Fernández',
-        telefono: '+54 9 221 800-0001',
+        telefono: '+54 9 221 800 0001',
         direccion: 'Calle 1 y 50, La Plata',
       },
     },
@@ -361,7 +371,7 @@ async function crearPersonasHostiles(sedeId: string) {
         ...datosComunes,
         nombre: 'Juan',
         apellido: 'Rodríguez Pérez de la Fuente',
-        telefono: '+54 9 221 800-0002',
+        telefono: '+54 9 221 800 0002',
         direccion: 'Calle 3 y 44, La Plata',
         genero: 'masculino',
       },
@@ -372,7 +382,7 @@ async function crearPersonasHostiles(sedeId: string) {
         ...datosComunes,
         nombre: 'Ñoño José María',
         apellido: 'Muñoz Peña Núñez',
-        telefono: '+54 9 221 800-0003',
+        telefono: '+54 9 221 800 0003',
         direccion: 'Diagonal 74 N°233, entre 2 y 3, La Plata',
       },
     },
@@ -395,7 +405,7 @@ async function crearPersonasHostiles(sedeId: string) {
         ...datosComunes,
         nombre: 'Beatriz',
         apellido: 'Coronel',
-        telefono: '+54 9 221 800-0005',
+        telefono: '+54 9 221 800 0005',
         direccion: 'Calle 13 N°855, 3er piso depto "B"\nEntre Diagonal 80 y calle 71, La Plata',
       },
     },
@@ -405,7 +415,7 @@ async function crearPersonasHostiles(sedeId: string) {
         ...datosComunes,
         nombre: 'Esteban',
         apellido: 'Bustos',
-        telefono: '+54 9 221 800-0006',
+        telefono: '+54 9 221 800 0006',
         direccion: 'Calle 45 N°777, La Plata',
         genero: 'masculino',
         // Sin límite definido en el código — texto largo real (no relleno
