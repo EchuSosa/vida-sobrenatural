@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { TriangleAlert } from 'lucide-react';
-import { ApiError, apiFetch, confirmacionBajaValida, erroresPorCampo } from '@vida-sobrenatural/shared-types';
+import { ApiError, CODIGOS_BAJA_CON_TEXTO_PROPIO, apiFetch, confirmacionBajaValida, erroresPorCampo } from '@vida-sobrenatural/shared-types';
 import { Button, MensajeErrorCampo, ResumenErrores, textoDeCampo, useEnvio, useValidacionCampos, type Traductor } from '@vida-sobrenatural/ui';
 
 /**
@@ -38,7 +38,7 @@ export function FormularioBaja({ apiToken }: { apiToken: string }) {
         return;
       }
       const code = error instanceof ApiError ? error.code : null;
-      setErrorGeneral(code && te.has(code) ? te(code) : t('errorGenerico'));
+      setErrorGeneral(code && CODIGOS_BAJA_CON_TEXTO_PROPIO.includes(code) && te.has(code) ? te(code) : t('errorGenerico'));
       return;
     }
     await signOut({ callbackUrl: '/baja-lista' });

@@ -33,3 +33,11 @@ export interface ResultadoBaja {
     pedidos: number;
   };
 }
+
+/**
+ * BUG-16 (QA ronda 2): los únicos códigos de error de la baja que se muestran con su propio texto,
+ * porque dicen qué hacer (la única Admin, la persona ya no existe). Cualquier otro (error interno,
+ * red caída, sesión vencida) muestra "No pudimos darte de baja y no se borró nada…": la baja es una
+ * transacción (spec 018, US1 escenario 4) y la persona tiene que saber que no perdió nada.
+ */
+export const CODIGOS_BAJA_CON_TEXTO_PROPIO: readonly string[] = ['ULTIMO_ADMIN', 'NO_ENCONTRADO'];

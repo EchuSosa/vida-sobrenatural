@@ -8,7 +8,7 @@ import { CONSOLA_500, apiCaida } from '../../../scripts/e2e-casos-infelices';
  * pero nunca se ve: el código de error interno tiene traducción propia y gana siempre. Para una
  * acción que no se deshace, la persona se queda sin saber si perdió sus datos.
  */
-test.fail('con la API caída, la baja dice que no se borró nada', async ({ page, baseURL, permitirErrorDeConsola }) => {
+test('con la API caída, la baja dice que no se borró nada', async ({ page, baseURL, permitirErrorDeConsola }) => {
   permitirErrorDeConsola(CONSOLA_500);
   const email = `e2e-qa-baja-error-${Date.now()}@example.com`;
   await crearPersonaActiva(baseURL!, email, 'Baja');
