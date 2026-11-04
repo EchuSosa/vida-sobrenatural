@@ -185,6 +185,8 @@ export interface GrupoExtensionEncontrado {
   horaInicio: string;
   zona: string | null;
   enLaIglesia: boolean;
+  /** El nombre de la Sede si es "En la iglesia" (BUG-13): con varias Sedes, "En la iglesia" solo no alcanza. */
+  sede: string | null;
   distanciaKm: number | null;
   completo: boolean;
 }
@@ -365,4 +367,19 @@ export function validarDatosGrupo(d: DatosGrupoExtension): ErrorCampoGex[] {
 export interface GrupoExtensionDePersona {
   nombre: string;
   lideres: string[];
+}
+
+/**
+ * spec 014: una Persona activa que el backoffice puede elegir como líder o sumar a un Grupo (o a un
+ * Ministerio), con la marca de menor (D133). `sedeId`: su Sede, para que un grupo "En la iglesia"
+ * proponga la de quien lo lidera (BUG-13, D266).
+ */
+export interface PersonaElegibleGex {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string | null;
+  genero: 'masculino' | 'femenino';
+  menor: boolean;
+  sedeId: string;
 }

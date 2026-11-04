@@ -301,7 +301,7 @@ function TarjetaResultado({ grupo }: { grupo: GrupoExtensionEncontrado }) {
           </li>
           <li className="flex gap-2">
             {grupo.enLaIglesia ? <Church aria-hidden className="mt-0.5 size-4 shrink-0" /> : <MapPin aria-hidden className="mt-0.5 size-4 shrink-0" />}
-            {grupo.enLaIglesia ? t('enLaIglesia') : t('zona', { zona: grupo.zona ?? '' })}
+            {grupo.enLaIglesia ? (grupo.sede ? t('enLaIglesiaSede', { sede: grupo.sede }) : t('enLaIglesia')) : t('zona', { zona: grupo.zona ?? '' })}
           </li>
         </ul>
         {grupo.completo ? (

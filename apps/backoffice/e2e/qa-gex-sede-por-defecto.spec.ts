@@ -8,7 +8,7 @@ import { test, expect, apiComo, crearPersona, loguearseComoAdminE2E, EMAIL_ADMIN
  */
 type Sede = { id: string; nombre: string };
 
-test.fail('"En la iglesia" propone la Sede de quien lidera el grupo', async ({ page }) => {
+test('"En la iglesia" propone la Sede de quien lidera el grupo', async ({ page }) => {
   test.slow();
   const sufijo = Date.now();
   const sedes = await apiComo<Sede[]>(EMAIL_ADMIN, 'GET', '/sedes');
