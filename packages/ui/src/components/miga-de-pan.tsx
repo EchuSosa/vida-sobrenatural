@@ -59,7 +59,9 @@ export function MigaDePan({ tramos, etiqueta = 'Ruta', LinkComponente }: MigaDeP
                   {tramo.label}
                 </span>
               ) : (
-                <Enlace href={tramo.href} className="underline underline-offset-4 hover:text-foreground">
+                // BUG-18 (QA ronda 2, spec 017 SC-004): en el celular, lo que se toca mide al menos
+                // 44 px de alto (la miga sola medía 20); desde `sm`, el alto del texto.
+                <Enlace href={tramo.href} className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-foreground sm:min-h-0">
                   {tramo.label}
                 </Enlace>
               )}

@@ -8,7 +8,7 @@ import { EMAILS_017 } from './helpers-017';
  */
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
-test.fail('en celular, los enlaces de la miga de la grilla de turnos miden 44 px', async ({ page }) => {
+test('en celular, los enlaces de la miga de la grilla de turnos miden 44 px', async ({ page }) => {
   await loguearseComoTest(page, EMAILS_017.liderCelular);
   await page.goto('/mi-ministerio');
   await page.getByRole('link', { name: 'Armar los turnos' }).click();
