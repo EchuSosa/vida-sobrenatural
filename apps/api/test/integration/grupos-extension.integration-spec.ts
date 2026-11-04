@@ -110,6 +110,13 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
       expect(await prisma.cambioDeRol.count({ where: { personaId: lideraId, rol: 'lider_extension', accion: 'otorgado' } })).toBe(1);
     });
 
+    it('BUG-13 (D266): personas-elegibles trae la Sede de cada Persona, para proponerla en "En la iglesia"', async () => {
+      const lider = await prisma.persona.findUniqueOrThrow({ where: { id: lideraId }, select: { apellido: true, sedeId: true } });
+      const r = await http().get(`/grupos-extension/personas-elegibles?q=${encodeURIComponent(lider.apellido)}`).set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(r.status).toBe(200);
+      expect((r.body as Array<{ id: string; sedeId: string }>).find((p) => p.id === lideraId)).toMatchObject({ sedeId: lider.sedeId });
+    });
+
     it('valida por campo y nunca acepta a un menor como líder (D133)', async () => {
       const menor = await escenario.persona('menorlider', { fechaNacimiento: new Date('2012-01-01') });
       const r = await http()
@@ -144,6 +151,9 @@ describe('Grupos de Extensión (spec 014, integración)', () => {
       expect(encontrados.map((g) => g.id)).toEqual([mixtoId, cercaId, lejosId, sinUbicarId]);
       expect(encontrados[0].distanciaKm).toBeLessThan(encontrados[1].distanciaKm!);
       expect(encontrados[3].distanciaKm).toBeNull();
+      // BUG-13: "En la iglesia" dice cuál; uno con dirección, no.
+      const sede = await prisma.sede.findUniqueOrThrow({ where: { id: escenario.sedeId }, select: { nombre: true } });
+      expect([encontrados[0].sede, encontrados[1].sede]).toEqual([sede.nombre, null]);
       // Sin los ids: un UUID al azar puede contener "820" (pasó el 2026-11-02) y no es la dirección.
       const texto = JSON.stringify((r.body as GrupoExtensionEncontrado[]).map(({ id: _id, ...resto }) => resto));
       expect(texto).not.toContain('820');

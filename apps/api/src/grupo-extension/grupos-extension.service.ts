@@ -8,6 +8,7 @@ import {
   type DatosGrupoExtension,
   type GrupoExtensionDetalle,
   type GrupoExtensionResumen,
+  type PersonaElegibleGex,
   type ResultadoGuardarGrupo,
 } from '@vida-sobrenatural/shared-types';
 import type { Prisma } from '../generated/prisma/client.js';
@@ -26,15 +27,6 @@ import {
   grupoNoEncontrado,
   pendientesEIntegrantes,
 } from './consultas.js';
-
-export interface PersonaElegibleGex {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string | null;
-  genero: 'masculino' | 'femenino';
-  menor: boolean;
-}
 
 /**
  * spec 014, D221–D223, D226: los Grupos de Extensión desde el backoffice.
@@ -188,7 +180,7 @@ export class GruposExtensionService {
           ],
         })),
       },
-      select: { id: true, nombre: true, apellido: true, email: true, genero: true, fechaNacimiento: true },
+      select: { id: true, nombre: true, apellido: true, email: true, genero: true, fechaNacimiento: true, sedeId: true },
       orderBy: [{ apellido: 'asc' }, { nombre: 'asc' }],
       take: 10,
     });
@@ -200,6 +192,7 @@ export class GruposExtensionService {
       email: p.email,
       genero: p.genero,
       menor: esMenorDeEdad(p.fechaNacimiento.toISOString(), hoy),
+      sedeId: p.sedeId,
     }));
   }
 

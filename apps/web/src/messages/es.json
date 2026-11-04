@@ -2016,6 +2016,7 @@
       "distancia": "A {km} km",
       "sinDistancia": "Distancia sin calcular",
       "enLaIglesia": "En la iglesia",
+      "enLaIglesiaSede": "En la iglesia ({sede})",
       "zona": "Zona: {zona}",
       "lidera": "Lo lidera {lideres}",
       "mixto": "Para todos",
