@@ -24,6 +24,7 @@ import { esViolacionDeUnico } from './inscripcion-propia.service.js';
 import { destinatariosDe } from './representacion.js';
 import { loQueLaAppSabe } from './datos-persona-inscripta.js';
 import { guardarRespuestas, respuestasDeInscripciones, resumenDePreguntas, validarRespuestasDelEvento } from './preguntas-evento.js';
+import { filtroDeBusqueda } from '../persona/busqueda-texto.js';
 
 const DIA_MS = 86_400_000;
 
@@ -72,7 +73,7 @@ export class InscriptosService {
     const where: Prisma.InscripcionEventoWhereInput = { eventoId, ...(f.estado ? { estado: f.estado } : {}) };
     const buscar = f.buscar?.trim();
     if (buscar) {
-      where.persona = { OR: [{ nombre: { contains: buscar, mode: 'insensitive' } }, { apellido: { contains: buscar, mode: 'insensitive' } }] };
+      where.persona = await filtroDeBusqueda(this.prisma, buscar, ['nombre', 'apellido']);
     }
     const orderBy: Prisma.InscripcionEventoOrderByWithRelationInput[] =
       f.estado === 'lista_espera' ? [{ enListaDesde: 'asc' }, { id: 'asc' }] : [{ createdAt: 'asc' }, { id: 'asc' }];

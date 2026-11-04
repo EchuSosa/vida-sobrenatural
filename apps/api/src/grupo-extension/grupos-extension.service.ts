@@ -26,6 +26,7 @@ import {
   grupoNoEncontrado,
   pendientesEIntegrantes,
 } from './consultas.js';
+import { filtroDeBusqueda } from '../persona/busqueda-texto.js';
 
 export interface PersonaElegibleGex {
   id: string;
@@ -175,18 +176,11 @@ export class GruposExtensionService {
   async personasElegibles(q: string): Promise<PersonaElegibleGex[]> {
     const texto = q.trim();
     if (texto.length < 2) return [];
-    const palabras = texto.split(/\s+/).slice(0, 4);
     const personas = await this.prisma.persona.findMany({
       where: {
         activo: true,
         estado: 'activa',
-        AND: palabras.map((p) => ({
-          OR: [
-            { nombre: { contains: p, mode: 'insensitive' as const } },
-            { apellido: { contains: p, mode: 'insensitive' as const } },
-            { email: { contains: p, mode: 'insensitive' as const } },
-          ],
-        })),
+        ...(await filtroDeBusqueda(this.prisma, texto, ['nombre', 'apellido', 'email'])),
       },
       select: { id: true, nombre: true, apellido: true, email: true, genero: true, fechaNacimiento: true },
       orderBy: [{ apellido: 'asc' }, { nombre: 'asc' }],
