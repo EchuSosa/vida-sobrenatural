@@ -3,6 +3,7 @@ import { CalendarClock, Clock, Mail, MapPin, Phone, UsersRound } from 'lucide-re
 import { apiFetch, formatearDiaEnArgentina, type GrupoLiderado } from '@vida-sobrenatural/shared-types';
 import { EstadoVacio, textoHorario } from '@vida-sobrenatural/ui';
 import { auth } from '../../../auth';
+import { nombreDeQuienMira } from '../nombre-de-quien-mira';
 import { SelectorMiCamino } from '../mi-camino/selector-mi-camino';
 import { AccionesPedidoGex, EnlaceWhatsappPedido } from './acciones-pedido';
 
@@ -22,7 +23,7 @@ export default async function MiGrupoExtensionPage() {
     cache: 'no-store',
   });
   const fecha = (iso: string) => formatearDiaEnArgentina(iso, locale);
-  const yo = session?.user.givenName ?? session?.user.name ?? '';
+  const yo = await nombreDeQuienMira(session?.apiToken);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-16">
@@ -87,7 +88,7 @@ export default async function MiGrupoExtensionPage() {
                         <EnlaceWhatsappPedido
                           whatsapp={p.persona.whatsapp}
                           nombre={p.persona.nombre}
-                          texto={t('saludoWhatsapp', { nombre: p.persona.nombre, yo, grupo: g.nombre })}
+                          texto={yo ? t('saludoWhatsapp', { nombre: p.persona.nombre, yo, grupo: g.nombre }) : t('saludoWhatsappSinNombre', { nombre: p.persona.nombre, grupo: g.nombre })}
                         />
                       )}
                       <AccionesPedidoGex solicitudId={p.id} nombre={nombre} />

@@ -2058,7 +2058,8 @@
       "lideres": "Quién lo lidera",
       "llamar": "Llamar a {nombre}",
       "whatsapp": "Escribir por WhatsApp a {nombre}",
-      "saludoWhatsapp": "Hola {nombre}, soy {yo}, del grupo {grupo}."
+      "saludoWhatsapp": "Hola {nombre}, soy {yo}, del grupo {grupo}.",
+      "saludoWhatsappSinNombre": "Hola {nombre}, te escribo del grupo {grupo}."
     },
     "ultima": {
       "rechazadaTitulo": "Tu pedido para {grupo} no siguió adelante",
@@ -2086,6 +2087,7 @@
     "whatsapp": "Escribir por WhatsApp",
     "whatsappAria": "Escribir por WhatsApp a {nombre}",
     "saludoWhatsapp": "Hola {nombre}, soy {yo}, de {ministerio} en Vida Sobrenatural.",
+    "saludoWhatsappSinNombre": "Hola {nombre}, te escribo de {ministerio} en Vida Sobrenatural.",
     "sinTelefono": "No dejó teléfono",
     "errorCargaTitulo": "No pudimos cargar tu ministerio",
     "errorCarga": "Probá de nuevo en un momento. Si sigue pasando, contale al equipo este código:",
@@ -2124,6 +2126,7 @@
     "whatsapp": "Escribir por WhatsApp",
     "whatsappAria": "Escribir por WhatsApp a {nombre}",
     "saludoWhatsapp": "Hola {nombre}, soy {yo}, del grupo de extensión {grupo} de Vida Sobrenatural. Vi que querés sumarte, ¡qué bueno!",
+    "saludoWhatsappSinNombre": "Hola {nombre}, te escribo del grupo de extensión {grupo} de Vida Sobrenatural. Vi que querés sumarte, ¡qué bueno!",
     "sinTelefono": "No dejó teléfono",
     "aceptar": "Aceptar",
     "aceptarAria": "Aceptar a {nombre}",

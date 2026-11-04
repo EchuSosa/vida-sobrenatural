@@ -7,7 +7,7 @@ import { EMAILS_017 } from './helpers-017';
  * producción) la sesión no tiene nombre y el mensaje sale "Hola Sofía, soy , del grupo…". En los e2e
  * el test-login pone "Visitante de Test", así que el mensaje tampoco dice el nombre de la líder.
  */
-test.fail('el WhatsApp que arma la líder dice su nombre', async ({ page }) => {
+test('el WhatsApp que arma la líder dice su nombre', async ({ page }) => {
   await loguearseComoTest(page, EMAILS_017.lider);
   await page.goto('/mi-ministerio');
   const enlace = page.getByRole('link', { name: /^Escribir por WhatsApp/ }).first();
