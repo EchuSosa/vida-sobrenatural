@@ -8,7 +8,7 @@ import { test, expect, apiComo, crearPersona, loguearseComoAdminE2E, EMAIL_ADMIN
  */
 type Aviso = { evento: string; fecha: string };
 
-test.fail('volver a habilitar una fecha publicada le avisa a quien tenía turno', async ({ page }) => {
+test('volver a habilitar una fecha publicada le avisa a quien tenía turno', async ({ page }) => {
   test.slow();
   const sufijo = Date.now();
   const { id } = await apiComo<{ id: string }>(EMAIL_ADMIN, 'POST', '/ministerios', { nombre: `e2e-qa-habilitar-${sufijo}`, descripcion: 'Ministerio de QA' });

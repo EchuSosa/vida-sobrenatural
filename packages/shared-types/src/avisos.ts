@@ -130,6 +130,12 @@ export interface DatosAvisoTurno {
   dia: string;
   fecha: string;
   lugar: string;
+  /**
+   * BUG-09 (D265): cuándo se volvió a habilitar la fecha, si el aviso sale de eso. Entra en la clave
+   * de `turno.asignado` para que el "tenés turno" de la rehabilitación no se pierda contra el de la
+   * publicación (misma persona, mismo turno).
+   */
+  habilitadaEn?: string;
 }
 
 export type NombreEventoAviso = EventoAviso['nombre'];
@@ -435,10 +441,12 @@ export const CATALOGO_AVISOS: { [N in NombreEventoAviso]: EntradaCatalogo<N> } =
     spec: '014', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
     entidad: { tipo: 'solicitud_grupo_extension', id: (d) => d.solicitudId }, destino: () => MI_GRUPO_EXTENSION, clave: sinClave,
   },
-  // 017 (D256): al publicar la fecha, o al sumarla a una fecha ya publicada — importante (también por mail).
+  // 017 (D256): al publicar la fecha, al sumarla a una fecha ya publicada o (D265) al volver a
+  // habilitar una fecha publicada que se había suspendido — importante (también por mail).
   'turno.asignado': {
     spec: '017', destinatario: 'persona', disparador: 'proceso_actualizado', prioridad: 'importante',
-    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS, clave: (d) => `turno.asignado:${d.turnoId}`,
+    entidad: { tipo: 'turno', id: (d) => d.turnoId }, destino: () => MIS_TURNOS,
+    clave: (d) => (d.habilitadaEn ? `turno.asignado:${d.turnoId}:habilitada:${d.habilitadaEn}` : `turno.asignado:${d.turnoId}`),
   },
   // 017 (D256, D260): sacada de una fecha ya publicada — importante (también por mail).
   'turno.quitado': {

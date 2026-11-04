@@ -202,6 +202,22 @@ describe('Turnos de servicio (spec 017, US2 y US3)', () => {
     expect((await http().get('/turnos/me').set(como('ana'))).body).toEqual([]);
   });
 
+  it('BUG-09 (D265): volver a habilitar la fecha publicada le avisa otra vez "tenés turno" a quien lo tenía, con mail, una sola vez', async () => {
+    const emailsAntes = await prisma.entregaNotificacion.count({ where: { personaId: id.ana, canal: 'email', notificacion: { evento: 'turno.asignado' } } });
+    const r = await http().delete(`/ministerios/${bienvenidaId}/fechas/${d1}/suspension`).set(como('admin'));
+    expect([r.status, r.body]).toEqual([200, { dia: d1, estado: 'publicada', avisados: 4 }]);
+    // Un "tenés turno" nuevo de la rehabilitación por persona, además de los de antes.
+    const deLaRehabilitacion = async (personaId: string) =>
+      (await avisos('turno.asignado', personaId)).filter((a) => (a.notificacion.params as { habilitadaEn?: string; dia: string }).habilitadaEn && (a.notificacion.params as { dia: string }).dia === d1);
+    for (const quien of ['ana', 'beto', 'caro', 'dani']) expect(await deLaRehabilitacion(id[quien])).toHaveLength(1);
+    expect(await prisma.entregaNotificacion.count({ where: { personaId: id.ana, canal: 'email', notificacion: { evento: 'turno.asignado' } } })).toBe(emailsAntes + 1);
+    // Un segundo "Volver a habilitar" no vuelve a avisar.
+    const otra = await http().delete(`/ministerios/${bienvenidaId}/fechas/${d1}/suspension`).set(como('admin'));
+    expect(otra.body).toEqual({ dia: d1, estado: 'publicada', avisados: 0 });
+    expect(await deLaRehabilitacion(id.ana)).toHaveLength(1);
+    expect(((await http().get('/turnos/me').set(como('ana'))).body as MiTurno[]).map((t) => t.dia)).toEqual([d1]);
+  });
+
   it('permisos (D253): el Admin edita, el Pastor solo ve, alguien que no lidera no entra; sin sesión 401', async () => {
     expect((await grilla('admin')).puedeEditar).toBe(true);
     expect((await grilla('pastor')).puedeEditar).toBe(false);
