@@ -432,6 +432,12 @@
     "cargando": "Cargando…",
     "tituloNoAutenticado": "Registrarme",
     "textoNoAutenticado": "Para registrarte, primero autorizá el acceso con tu cuenta de Google.",
+    "sesion": {
+      "errorTitulo": "No pudimos confirmar que ingresaste",
+      "errorTexto": "Puede ser la conexión. Tocá \"Reintentar\"; si sigue igual, volvé a ingresar.",
+      "reintentar": "Reintentar",
+      "volverAIngresar": "Volver a ingresar"
+    },
     "paso": "Paso {actual} de {total}",
     "tituloPaso1": "Datos personales",
     "tituloPaso2": "Contacto",

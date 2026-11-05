@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { type Sede } from '@vida-sobrenatural/shared-types';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, CircleAlert, RotateCw } from 'lucide-react';
 import { Button, PasoIndicador, ResumenErrores } from '@vida-sobrenatural/ui';
 import { useFormularioRegistro } from '../../../hooks/use-formulario-registro';
 import { TOTAL_PASOS } from './tipos';
@@ -40,10 +41,10 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
   }
 
   // spec 007 (T024): sin sesión, el ingreso (Google o código) está en un solo
-  // lugar, /ingresar — page.tsx ya redirige en el servidor; esto cubre la
-  // sesión que se pierde con la pantalla abierta.
+  // lugar, /ingresar — layout.tsx ya redirige en el servidor; esto cubre la
+  // sesión que se pierde con la pantalla abierta, sin redirigir a ciegas.
   if (status === 'unauthenticated') {
-    return <RedirigirAIngresar texto={t('cargando')} />;
+    return <VerificarSesion texto={t('cargando')} update={form.update} />;
   }
 
   const { paso, error, validacion, enviando, handleSubmit, siguiente, atras, navegacionPausada, tituloPaso, encabezadoRef } = form;
@@ -127,12 +128,77 @@ export function FormularioRegistro({ sedesIniciales, errorSedes }: { sedesInicia
   );
 }
 
-function RedirigirAIngresar({ texto }: { texto: string }) {
+type Verificacion = 'verificando' | 'error';
+
+/**
+ * El cliente dice "sin sesión" (`useSession` → `unauthenticated`), pero el servidor la vio: si no,
+ * `layout.tsx` no habría dejado llegar acá. `useSession` responde `unauthenticated` tanto cuando NO
+ * hay sesión como cuando el pedido a `/api/auth/session` FALLA (red cortada, `next dev` compilando).
+ *
+ * Antes se iba directo a /ingresar. Si el pedido había fallado, el servidor veía la sesión y volvía a
+ * /registro, y eso se repetía sin fin (docs/24: el "bucle de recargas" de los e2e en local, 2026-11-04).
+ * Ahora se le pregunta al servidor una vez:
+ * - sin sesión → /ingresar, con carga completa (la sesión se perdió con la pantalla abierta);
+ * - con sesión → se actualiza la del cliente;
+ * - si falla → se dice, con "Reintentar". Nunca redirige a ciegas.
+ */
+/** Lo que el servidor dice de la sesión, sin tocar el estado de React. */
+async function consultarSesion(update: () => Promise<unknown>): Promise<'sin_sesion' | 'lista' | 'error'> {
+  try {
+    const respuesta = await fetch('/api/auth/session', { cache: 'no-store' });
+    if (!respuesta.ok) return 'error';
+    const sesion = (await respuesta.json()) as { user?: unknown } | null;
+    if (!sesion?.user) return 'sin_sesion';
+    // Con sesión: se pone al día la del cliente. Si ni así la trae, es un error (no queda "Cargando…").
+    return (await update()) ? 'lista' : 'error';
+  } catch {
+    return 'error';
+  }
+}
+
+function VerificarSesion({ texto, update }: { texto: string; update: () => Promise<unknown> }) {
+  const t = useTranslations('registro.sesion');
+  const [estado, setEstado] = useState<Verificacion>('verificando');
+  const verificar = useCallback(
+    () =>
+      consultarSesion(update).then((resultado) => {
+        if (resultado === 'sin_sesion') window.location.replace('/ingresar');
+        else if (resultado === 'error') setEstado('error');
+        // 'lista': `useSession` pasa a `authenticated` y este componente deja de mostrarse.
+      }),
+    [update],
+  );
+
   useEffect(() => {
-    // Carga completa a propósito (no `router.replace`): si el servidor sí ve
-    // una sesión que el `SessionProvider` todavía no tiene, /ingresar vuelve
-    // a /registro y una navegación del cliente entraría en un ciclo.
-    window.location.replace('/ingresar');
-  }, []);
-  return <div className="mx-auto max-w-xl px-4 py-16">{texto}</div>;
+    void verificar();
+  }, [verificar]);
+
+  if (estado === 'verificando') return <div className="mx-auto max-w-xl px-4 py-16">{texto}</div>;
+  return (
+    <div className="mx-auto flex max-w-xl flex-col gap-4 px-4 py-16">
+      <div role="alert" className="flex gap-2 rounded-md border border-destructive p-4 text-base">
+        <CircleAlert aria-hidden className="mt-0.5 size-5 shrink-0 text-destructive" />
+        <div className="flex flex-col gap-1">
+          <p className="font-semibold">{t('errorTitulo')}</p>
+          <p>{t('errorTexto')}</p>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <Button
+          type="button"
+          size="xl"
+          onClick={() => {
+            setEstado('verificando');
+            void verificar();
+          }}
+        >
+          <RotateCw aria-hidden />
+          {t('reintentar')}
+        </Button>
+        <a href="/ingresar" className="inline-flex min-h-11 items-center text-base underline underline-offset-4 hover:no-underline">
+          {t('volverAIngresar')}
+        </a>
+      </div>
+    </div>
+  );
 }
