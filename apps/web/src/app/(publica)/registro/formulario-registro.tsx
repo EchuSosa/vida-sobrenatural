@@ -142,25 +142,32 @@ type Verificacion = 'verificando' | 'error';
  * - con sesión → se actualiza la del cliente;
  * - si falla → se dice, con "Reintentar". Nunca redirige a ciegas.
  */
+/** Lo que el servidor dice de la sesión, sin tocar el estado de React. */
+async function consultarSesion(update: () => Promise<unknown>): Promise<'sin_sesion' | 'lista' | 'error'> {
+  try {
+    const respuesta = await fetch('/api/auth/session', { cache: 'no-store' });
+    if (!respuesta.ok) return 'error';
+    const sesion = (await respuesta.json()) as { user?: unknown } | null;
+    if (!sesion?.user) return 'sin_sesion';
+    // Con sesión: se pone al día la del cliente. Si ni así la trae, es un error (no queda "Cargando…").
+    return (await update()) ? 'lista' : 'error';
+  } catch {
+    return 'error';
+  }
+}
+
 function VerificarSesion({ texto, update }: { texto: string; update: () => Promise<unknown> }) {
   const t = useTranslations('registro.sesion');
   const [estado, setEstado] = useState<Verificacion>('verificando');
-  const verificar = useCallback(async () => {
-    setEstado('verificando');
-    try {
-      const respuesta = await fetch('/api/auth/session', { cache: 'no-store' });
-      if (!respuesta.ok) throw new Error(`GET /api/auth/session respondió ${respuesta.status}`);
-      const sesion = (await respuesta.json()) as { user?: unknown } | null;
-      if (!sesion?.user) {
-        window.location.replace('/ingresar');
-        return;
-      }
-      // Con sesión: se pone al día la del cliente. Si ni así la trae, se dice (no queda "Cargando…").
-      if (!(await update())) setEstado('error');
-    } catch {
-      setEstado('error');
-    }
-  }, [update]);
+  const verificar = useCallback(
+    () =>
+      consultarSesion(update).then((resultado) => {
+        if (resultado === 'sin_sesion') window.location.replace('/ingresar');
+        else if (resultado === 'error') setEstado('error');
+        // 'lista': `useSession` pasa a `authenticated` y este componente deja de mostrarse.
+      }),
+    [update],
+  );
 
   useEffect(() => {
     void verificar();
@@ -177,7 +184,14 @@ function VerificarSesion({ texto, update }: { texto: string; update: () => Promi
         </div>
       </div>
       <div className="flex flex-wrap gap-3">
-        <Button type="button" size="xl" onClick={() => void verificar()}>
+        <Button
+          type="button"
+          size="xl"
+          onClick={() => {
+            setEstado('verificando');
+            void verificar();
+          }}
+        >
           <RotateCw aria-hidden />
           {t('reintentar')}
         </Button>
