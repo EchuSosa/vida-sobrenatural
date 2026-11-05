@@ -369,6 +369,8 @@ export function useFormularioRegistro(sedesIniciales: Sede[], errorSedes: boolea
   return {
     session,
     status,
+    // Para que /registro confirme con el servidor antes de mandar a /ingresar (docs/24, bucle).
+    update,
     t,
     locale,
     opciones,
