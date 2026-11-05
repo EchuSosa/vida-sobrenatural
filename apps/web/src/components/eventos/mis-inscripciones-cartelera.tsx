@@ -20,7 +20,9 @@ const QUE_SE_MUESTRAN: readonly EstadoInscripcionEvento[] = ['confirmada', 'pend
 
 export function ProveedorMisInscripciones({ children }: { children: ReactNode }) {
   const { data: session } = useSession();
-  const token = session?.apiToken;
+  // Con sesión pero sin registro (sin Persona) no hay inscripciones que pedir: la API responde 403 y
+  // el navegador lo marca como error en la consola (app-privada-sin-registro.spec, 2026-11-05).
+  const token = session?.user.personaId ? session.apiToken : undefined;
   const [estados, setEstados] = useState<Estados | null>(null);
   useEffect(() => {
     if (!token) return;
